@@ -6,10 +6,15 @@ def getstrform(pathobj):
     return str(pathobj.absolute())
 
 
-gitroot = Path(
-    subprocess.run(
-        ["git", "rev-parse", "--show-toplevel"], check=True, capture_output=True
+def get_gitroot():
+    gitroot = Path(
+        subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            check=True,
+            capture_output=True,
+            cwd=Path.cwd(),
+        )
+        .stdout.decode("utf-8")
+        .strip()
     )
-    .stdout.decode("utf-8")
-    .strip()
-)
+    return gitroot
