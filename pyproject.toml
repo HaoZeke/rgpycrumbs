@@ -1,0 +1,195 @@
+[build-system]
+build-backend = "hatchling.build"
+requires      = [ "hatch-vcs", "hatchling" ]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "_version.py"
+
+[tool.hatch.build]
+include = [ "pycrumbs/**/*.py", "pycrumbs/*.py", "/tests" ]
+
+
+[tool.pdm.dev-dependencies]
+lint        = [ "ruff>=0.1.6" ]
+test        = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "coverage[toml]>=7.3.2",
+    "pytest-datadir>=1.5.0",
+]
+nbdoc       = [ "jupyterlab>=4.0.9", "jupytext>=1.15.2", "ase>=3.22.1" ]
+release_aid = [ "tbump>=6.11.0", "towncrier>=23.11.0" ]
+
+[tool.pdm.scripts]
+check_ruff  = "ruff ."
+ruff_fix    = "ruff --fix --unsafe-fixes ."
+ruff_format = "ruff format ."
+lint        = { composite = [ "ruff_fix", "ruff_format" ] }
+test        = "pytest --cov=pycrumbs tests"
+
+[project]
+name = "pycrumbs"
+description = "Input file generators for computational chemistry"
+readme = "readme.md"
+keywords = [ "plots", "parsers" ]
+license = { text = "MIT" }
+authors = [ { name = "Rohit Goswami", email = "rog32@hi.is" } ]
+requires-python = ">=3.11"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = [ "version" ]
+dependencies = [
+  "numpy>=1.26.2",
+  "pint>=0.22",
+  "tomli>=2.0.1",
+  "jinja2>=3.1.2",
+]
+[project.optional-dependencies]
+doc = [
+  "mdit-py-plugins>=0.3.4",
+  "myst-nb>=1",
+  "myst-parser>=2",
+  "sphinx>=7.2.6",
+  "sphinx-autodoc2>=0.5",
+  "sphinx-copybutton>=0.5.2",
+  "sphinx-library>=1.1.2",
+  "sphinx-sitemap>=2.5.1",
+  "sphinx-togglebutton>=0.3.2",
+  "sphinxcontrib-apidoc>=0.4",
+]
+"cli" = [
+    "click>=8.1.7",
+]
+[project.urls]
+Documentation = "https://github.com/HaoZeke/pycrumbs#readme"
+Issues        = "https://github.com/HaoZeke/pycrumbs/issues"
+Source        = "https://github.com/HaoZeke/pycrumbs"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 90
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Implicitly concatenated string literals on one line
+  "ISC001",
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105",
+  "S106",
+  "S107",
+  # Ignore complexity
+  "C901",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLR0915",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.isort]
+known-first-party = [ "pycrumbs" ]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = [ "PLR2004", "S101", "TID252" ]
+# __init__.py can import without use
+"__init__.py" = [ "F401" ]
+
+[tool.coverage.run]
+source_pkgs = [ "pycrumbs" ]
+branch      = true
+parallel    = true
+omit        = [ "_version.py" ]
+
+[tool.coverage.paths]
+pycrumbs = [ "pycrumbs" ]
+tests  = [ "tests" ]
+
+[tool.coverage.report]
+exclude_lines = [ "no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:" ]
+
+[tool.towncrier]
+start_string = "<!-- towncrier release notes start -->\n"
+underlines   = [ "", "", "" ]
+single_file  = true
+filename     = "CHANGELOG.md"
+directory    = "doc/release/upcoming_changes/"
+issue_format = "[#{issue}](https://github.com/HaoZeke/pycrumbs/issues/{issue})"
+title_format = "## [{version}](https://github.com/HaoZeke/pycrumbs/tree/{version}) - {project_date}"
+all_bullets  = false
+
+[[tool.towncrier.type]]
+directory   = "removed"
+name        = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory   = "deprecated"
+name        = "Deprecated"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory   = "added"
+name        = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory   = "changed"
+name        = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory   = "fixed"
+name        = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory   = "misc"
+name        = "Miscellaneous"
+showcontent = true

@@ -1,0 +1,18 @@
+#+OPTIONS: num:nil
+
+* About
+[[file:branding/logo/pycrumbs_logo.webp]]
+#+begin_export markdown
+[![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
+#+end_export
+A *pure-python* module of helpful scripts / CLIs I have written mostly for quick
+and dirty parsing / plotting of optimization methods. Loosely grouped. Not
+optimal at all.
+* License
+MIT. However, this is an academic resource, so *please cite* as much as possible
+via:
+- The Zenodo DOI for general use.
+- The ~wailord~ paper for ORCA usage
+
+# ** Logo
+# The logo was generated via DALL-E accessed through ChatGPT-4 using a prompt.
