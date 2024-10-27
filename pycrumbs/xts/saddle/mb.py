@@ -20,22 +20,12 @@ X, Y = np.meshgrid(x, y)
 Z = muller_brown([X, Y])
 
 
-def plot_band(_index, _band, _k, _method="xts", _opt="SD", _ci="False"):
-    plot_last = _band
-    cuh2slab.contour_plot(
-        true_e_dat.pltpts,
-        scatter_points=prepare_scatter_points(plot_last, cuh2_min),
-        title=f"({_opt}, CI: {_ci}, {_k})\n Band {_index} ({_method})",
-    )
-    oname = f"{_method}_{_opt}_{_ci}"
-    plt.savefig(f"neb_path_{oname}_{_index:04d}.png")
-    plt.close()
-
-
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Script to plot output.txt for CuH2")
+    parser = argparse.ArgumentParser(
+        description="Script to plot output.txt for the Muller-Brown"
+    )
     parser.add_argument(
         "--nimgs",
         help="Number of images",
@@ -92,11 +82,3 @@ if __name__ == "__main__":
     )
     plt.grid(True)
     plt.show()
-    # Ham handed approach
-    # n_bands = int(path_arr.shape[0] / path_arr.shape[1])
-    # n_imgs = int(args.nimgs)
-    # for idx in range(n_bands):
-    #     _start = idx * n_imgs
-    #     _end = _start + n_imgs
-    #     band = path_arr[_start:_end]
-    #     plot_band(idx, band, 5.2, "xts", "SD", "False")
