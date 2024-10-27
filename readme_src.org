@@ -8,6 +8,9 @@
 A *pure-python* module of helpful scripts / CLIs I have written mostly for quick
 and dirty parsing / plotting of optimization methods. Loosely grouped. Not
 optimal at all.
+
+Most of these rely heavily on optional dependencies, with the exception of the
+~_aux~ helpers (pure Python).
 * License
 MIT. However, this is an academic resource, so *please cite* as much as possible
 via:
