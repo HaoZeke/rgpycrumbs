@@ -1,4 +1,5 @@
 from pathlib import Path
+import contextlib
 import subprocess
 
 
@@ -18,3 +19,13 @@ def get_gitroot():
         .strip()
     )
     return gitroot
+
+
+@contextlib.contextmanager
+def switchdir(path):
+    curpath = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(curpath)
