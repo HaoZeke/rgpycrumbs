@@ -1,6 +1,7 @@
 from pathlib import Path
 import contextlib
 import subprocess
+import os
 
 
 def getstrform(pathobj):
