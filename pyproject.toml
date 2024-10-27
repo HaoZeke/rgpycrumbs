@@ -68,6 +68,10 @@ doc = [
 "cli" = [
     "click>=8.1.7",
 ]
+plotter = [
+    "matplotlib>=3.9.2",
+    "cmcrameri>=1.9",
+]
 [project.urls]
 Documentation = "https://github.com/HaoZeke/pycrumbs#readme"
 Issues        = "https://github.com/HaoZeke/pycrumbs/issues"
