@@ -6,7 +6,7 @@ requires      = [ "hatch-vcs", "hatchling" ]
 version-file = "_version.py"
 
 [tool.hatch.build]
-include = [ "pycrumbs/**/*.py", "pycrumbs/*.py", "/tests" ]
+include = [ "rgpycrumbs/**/*.py", "rgpycrumbs/*.py", "/tests" ]
 
 
 [tool.pdm.dev-dependencies]
@@ -25,10 +25,10 @@ check_ruff  = "ruff ."
 ruff_fix    = "ruff --fix --unsafe-fixes ."
 ruff_format = "ruff format ."
 lint        = { composite = [ "ruff_fix", "ruff_format" ] }
-test        = "pytest --cov=pycrumbs tests"
+test        = "pytest --cov=rgpycrumbs tests"
 
 [project]
-name = "pycrumbs"
+name = "rgpycrumbs"
 description = "Input file generators for computational chemistry"
 readme = "readme.md"
 keywords = [ "plots", "parsers" ]
@@ -68,9 +68,9 @@ doc = [
 "cli" = [ "click>=8.1.7" ]
 plotter = [ "matplotlib>=3.9.2", "cmcrameri>=1.9" ]
 [project.urls]
-Documentation = "https://github.com/HaoZeke/pycrumbs#readme"
-Issues        = "https://github.com/HaoZeke/pycrumbs/issues"
-Source        = "https://github.com/HaoZeke/pycrumbs"
+Documentation = "https://github.com/HaoZeke/rgpycrumbs#readme"
+Issues        = "https://github.com/HaoZeke/rgpycrumbs/issues"
+Source        = "https://github.com/HaoZeke/rgpycrumbs"
 
 [tool.hatch.version]
 source = "vcs"
@@ -129,7 +129,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = [ "pycrumbs" ]
+known-first-party = [ "rgpycrumbs" ]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -141,13 +141,13 @@ ban-relative-imports = "all"
 "__init__.py" = [ "F401" ]
 
 [tool.coverage.run]
-source_pkgs = [ "pycrumbs" ]
+source_pkgs = [ "rgpycrumbs" ]
 branch      = true
 parallel    = true
 omit        = [ "_version.py" ]
 
 [tool.coverage.paths]
-pycrumbs = [ "pycrumbs" ]
+rgpycrumbs = [ "rgpycrumbs" ]
 tests    = [ "tests" ]
 
 [tool.coverage.report]
@@ -159,8 +159,8 @@ underlines   = [ "", "", "" ]
 single_file  = true
 filename     = "CHANGELOG.md"
 directory    = "doc/release/upcoming_changes/"
-issue_format = "[#{issue}](https://github.com/HaoZeke/pycrumbs/issues/{issue})"
-title_format = "## [{version}](https://github.com/HaoZeke/pycrumbs/tree/{version}) - {project_date}"
+issue_format = "[#{issue}](https://github.com/HaoZeke/rgpycrumbs/issues/{issue})"
+title_format = "## [{version}](https://github.com/HaoZeke/rgpycrumbs/tree/{version}) - {project_date}"
 all_bullets  = false
 
 [[tool.towncrier.type]]
