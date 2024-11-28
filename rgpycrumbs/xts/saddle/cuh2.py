@@ -11,8 +11,8 @@ import numpy as np
 from pypotlib.systems import cu_slab_h2 as cuh2slab
 from pyprotochemgp.systems.cuh2slab import prepare_scatter_points
 
-from pycrumbs._aux import get_gitroot, getstrform
-from pycrumbs.xts.cuh2.datgen import get_from_gitroot_con
+from rgpycrumbs._aux import get_gitroot, getstrform
+from rgpycrumbs.xts.cuh2.datgen import get_from_gitroot_con
 
 TRUE_E_DAT = get_from_gitroot_con(
     fname="cuh2.con",
