@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import cmcrameri.cm as cmc
 
-from pycrumbs.func.muller_brown import muller_brown, muller_brown_gradient
+from rgpycrumbs.func.muller_brown import muller_brown, muller_brown_gradient
 
 x = np.linspace(-1.5, 1.2, 400)
 y = np.linspace(-0.2, 2.0, 400)
