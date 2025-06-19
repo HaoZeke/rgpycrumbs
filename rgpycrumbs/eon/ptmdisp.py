@@ -13,7 +13,7 @@
 """
 Identifies atoms in a structure file that do not match a specified crystal
 structure (e.g., FCC) and prints their 0-based indices to standard output.
-All informational messages are printed to standard error.
+By default, the script is quiet. Use --verbose for progress messages.
 """
 
 # 1. WARNING SUPPRESSION (before other imports)
@@ -40,9 +40,9 @@ from ovito.pipeline import Pipeline, StaticSource
 from rich.logging import RichHandler
 
 # 3. CONSTANTS and ENUMERATIONS
-# Set up logging to stderr using Rich for pretty, informative output.
+# Set up logging to stderr using Rich.
 logging.basicConfig(
-    level="INFO",
+    level="WARNING",
     format="%(message)s",
     datefmt="[%X]",
     handlers=[RichHandler(rich_tracebacks=True, show_path=False)],
@@ -127,12 +127,22 @@ def find_mismatch_indices(
     show_default=True,
     help="The crystal structure to identify and exclude.",
 )
-def main(filename: str, structure: CrystalStructure):
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    default=False,
+    help="Enable verbose informational output to stderr.",
+)
+def main(filename: str, structure: CrystalStructure, verbose: bool):
     """
     Analyzes FILENAME to find all atoms that are NOT the specified
     crystal structure type and prints their 0-based indices as a
     comma-separated list, suitable for use in other programs.
     """
+    if verbose:
+        log.setLevel(logging.INFO)
+
     indices = find_mismatch_indices(filename, structure)
 
     # Final, clean output is printed to stdout.
