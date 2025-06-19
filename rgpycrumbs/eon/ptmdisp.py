@@ -80,6 +80,8 @@ def find_mismatch_indices(
     try:
         log.info(f"Reading structure from '{filename}'...")
         atoms = aseio.read(filename)
+        # XXX(rg): con readers in ase somehow lose this information, seems like an ase bug
+        atoms.set_pbc([True]*3)
     except FileNotFoundError:
         log.critical(f"Error: The file '{filename}' was not found.")
         sys.exit(1)
