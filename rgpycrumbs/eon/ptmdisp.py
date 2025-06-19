@@ -1,60 +1,145 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# -----------------------------------------------------------------------------
-# WARNING SUPPRESSION
-# -----------------------------------------------------------------------------
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "ase",
+#   "click",
+#   "numpy",
+#   "ovito",
+#   "rich",
+# ]
+# ///
+"""
+Identifies atoms in a structure file that do not match a specified crystal
+structure (e.g., FCC) and prints their 0-based indices to standard output.
+All informational messages are printed to standard error.
+"""
+
+# 1. WARNING SUPPRESSION (before other imports)
 import warnings
 
-# Suppress the "OVITO...PyPI" UserWarning about installation environment.
 warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
-
-# Suppress the "Please use atoms.calc" FutureWarning coming from ovito's ase import.
 warnings.filterwarnings(
     "ignore", category=FutureWarning, message=".*Please use atoms.calc.*"
 )
-# -----------------------------------------------------------------------------
 
-import argparse
-import numpy as np
+# 2. IMPORTS (grouped by type)
+# Standard Library
+import logging
+import sys
+from enum import StrEnum
+
+# Third-Party
 import ase.io as aseio
-from ovito.io import import_file
+import click
+import numpy as np
 from ovito.io.ase import ase_to_ovito
 from ovito.modifiers import PolyhedralTemplateMatchingModifier, SelectTypeModifier
+from ovito.pipeline import Pipeline, StaticSource
+from rich.logging import RichHandler
 
-from ovito.io import import_file, export_file
-from ovito.pipeline import StaticSource, Pipeline
-from ovito.modifiers import (
-    SelectTypeModifier,
-    PolyhedralTemplateMatchingModifier,
+# 3. CONSTANTS and ENUMERATIONS
+# Set up logging to stderr using Rich for pretty, informative output.
+logging.basicConfig(
+    level="INFO",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True, show_path=False)],
 )
+log = logging.getLogger(__name__)
 
 
-def get_disp_from(fname):
-    atms = aseio.read(fname)
-    atmdatc = ase_to_ovito(atms)
-    pipeline = Pipeline(source=StaticSource(data=atmdatc))
+# Use StrEnum for type-safe, readable choices for the crystal structure.
+class CrystalStructure(StrEnum):
+    OTHER = "Other"
+    FCC = "FCC"
+    HCP = "HCP"
+    BCC = "BCC"
+    ICO = "Icosahedral"
+
+
+# Map the string choice to the actual OVITO library constant.
+STRUCTURE_TYPE_MAP = {
+    CrystalStructure.FCC: PolyhedralTemplateMatchingModifier.Type.FCC,
+    CrystalStructure.HCP: PolyhedralTemplateMatchingModifier.Type.HCP,
+    CrystalStructure.BCC: PolyhedralTemplateMatchingModifier.Type.BCC,
+    CrystalStructure.ICO: PolyhedralTemplateMatchingModifier.Type.ICO,
+    CrystalStructure.OTHER: PolyhedralTemplateMatchingModifier.Type.OTHER,
+}
+STRUCTURE_PROPERTY_NAME = "Structure Type"
+
+
+def find_mismatch_indices(
+    filename: str, target_structure: CrystalStructure
+) -> np.ndarray:
+    """
+    Analyzes a structure file with PTM and returns indices of atoms that
+    do NOT match the target crystal structure.
+    """
+    try:
+        log.info(f"Reading structure from '{filename}'...")
+        atoms = aseio.read(filename)
+    except FileNotFoundError:
+        log.critical(f"Error: The file '{filename}' was not found.")
+        sys.exit(1)
+    except Exception as e:
+        log.critical(f"Failed to read or parse file '{filename}'. Error: {e}")
+        sys.exit(1)
+
+    # Set up the OVITO pipeline
+    pipeline = Pipeline(source=StaticSource(data=ase_to_ovito(atoms)))
+
     ptm = PolyhedralTemplateMatchingModifier()
     pipeline.modifiers.append(ptm)
-    select_fcc = SelectTypeModifier(
+
+    # Select atoms that DO match the target structure
+    ovito_type = STRUCTURE_TYPE_MAP[target_structure]
+    select_modifier = SelectTypeModifier(
         operate_on="particles",
-        property="Structure Type",
-        types={PolyhedralTemplateMatchingModifier.Type.FCC},
+        property=STRUCTURE_PROPERTY_NAME,
+        types={ovito_type},
     )
-    pipeline.modifiers.append(select_fcc)
+    pipeline.modifiers.append(select_modifier)
+
+    log.info(f"Running PTM analysis to find non-{target_structure.value} atoms...")
     data = pipeline.compute()
-    # The selection array marks selected (FCC) atoms with 1 and others with 0.
-    non_fcc_indices = np.where(data.particles.selection.array == 0)[0]
-    # 0-based indices into a single comma-separated string.
-    # Example: [10, 23, 45] -> "10,23,45"
-    return ",".join(map(str, non_fcc_indices))
+
+    # The 'selection' array is 1 for selected atoms and 0 for others.
+    # Find indices where the selection is 0 (i.e., the non-matching atoms).
+    mismatch_indices = np.where(data.particles.selection.array == 0)[0]
+    log.info(f"Found {len(mismatch_indices)} non-{target_structure.value} atoms.")
+    return mismatch_indices
 
 
+# 4. MAIN SCRIPT LOGIC (with Click for CLI)
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.argument(
+    "filename",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+)
+@click.option(
+    "-s",
+    "--structure-type",
+    "structure",
+    type=click.Choice(CrystalStructure),
+    default=CrystalStructure.FCC,
+    show_default=True,
+    help="The crystal structure to identify and exclude.",
+)
+def main(filename: str, structure: CrystalStructure):
+    """
+    Analyzes FILENAME to find all atoms that are NOT the specified
+    crystal structure type and prints their 0-based indices as a
+    comma-separated list, suitable for use in other programs.
+    """
+    indices = find_mismatch_indices(filename, structure)
+
+    # Final, clean output is printed to stdout.
+    # All logs, errors, and status messages go to stderr.
+    print(",".join(map(str, indices)))
+
+
+# 5. SCRIPT ENTRY POINT
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog="PTM FCC flipper",
-        description="Selects non FCC atoms for use with EON",
-    )
-    parser.add_argument("filename")
-    args = parser.parse_args()
-    displace_list_str = get_disp_from(args.filename)
-    print(displace_list_str)
+    main()
