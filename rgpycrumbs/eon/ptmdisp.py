@@ -147,7 +147,7 @@ def main(filename: str, structure: CrystalStructure, verbose: bool):
 
     # Final, clean output is printed to stdout.
     # All logs, errors, and status messages go to stderr.
-    print(",".join(map(str, indices)))
+    print(", ".join(map(str, indices)))
 
 
 # 5. SCRIPT ENTRY POINT
