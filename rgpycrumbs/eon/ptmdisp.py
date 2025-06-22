@@ -35,7 +35,12 @@ import ase.io as aseio
 import click
 import numpy as np
 from ovito.io.ase import ase_to_ovito
-from ovito.modifiers import PolyhedralTemplateMatchingModifier, SelectTypeModifier
+from ovito.modifiers import (
+    PolyhedralTemplateMatchingModifier,
+    SelectTypeModifier,
+    CentroSymmetryModifier,
+    DeleteSelectedModifier,
+)
 from ovito.pipeline import Pipeline, StaticSource
 from rich.logging import RichHandler
 
@@ -71,7 +76,7 @@ STRUCTURE_PROPERTY_NAME = "Structure Type"
 
 
 def find_mismatch_indices(
-    filename: str, target_structure: CrystalStructure
+    filename: str, target_structure: CrystalStructure, remove_fcc_vacancy: bool = False
 ) -> np.ndarray:
     """
     Analyzes a structure file with PTM and returns indices of atoms that
@@ -81,7 +86,7 @@ def find_mismatch_indices(
         log.info(f"Reading structure from '{filename}'...")
         atoms = aseio.read(filename)
         # XXX(rg): con readers in ase somehow lose this information, seems like an ase bug
-        atoms.set_pbc([True]*3)
+        atoms.set_pbc([True] * 3)
     except FileNotFoundError:
         log.critical(f"Error: The file '{filename}' was not found.")
         sys.exit(1)
@@ -105,10 +110,15 @@ def find_mismatch_indices(
     pipeline.modifiers.append(select_modifier)
 
     log.info(f"Running PTM analysis to find non-{target_structure.value} atoms...")
+    if remove_fcc_vacancy:
+        # pipeline.modifiers.append(DeleteSelectedModifier())
+        csym = CentroSymmetryModifier()  # Default is conventional with 12 for FCC
+        pipeline.modifiers.append(csym)
     data = pipeline.compute()
 
     # The 'selection' array is 1 for selected atoms and 0 for others.
     # Find indices where the selection is 0 (i.e., the non-matching atoms).
+    breakpoint()
     mismatch_indices = np.where(data.particles.selection.array == 0)[0]
     log.info(f"Found {len(mismatch_indices)} non-{target_structure.value} atoms.")
     return mismatch_indices
@@ -136,7 +146,15 @@ def find_mismatch_indices(
     default=False,
     help="Enable verbose informational output to stderr.",
 )
-def main(filename: str, structure: CrystalStructure, verbose: bool):
+@click.option(
+    "--no-fcc-vacancy",
+    "no_fcc_vacancy",
+    default=False,
+    help="Enable verbose informational output to stderr.",
+)
+def main(
+    filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacancy: bool
+):
     """
     Analyzes FILENAME to find all atoms that are NOT the specified
     crystal structure type and prints their 0-based indices as a
@@ -145,7 +163,7 @@ def main(filename: str, structure: CrystalStructure, verbose: bool):
     if verbose:
         log.setLevel(logging.INFO)
 
-    indices = find_mismatch_indices(filename, structure)
+    indices = find_mismatch_indices(filename, structure, no_fcc_vacancy)
 
     # Final, clean output is printed to stdout.
     # All logs, errors, and status messages go to stderr.
