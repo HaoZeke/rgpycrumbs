@@ -40,6 +40,8 @@ from ovito.modifiers import (
     SelectTypeModifier,
     CentroSymmetryModifier,
     DeleteSelectedModifier,
+    ExpressionSelectionModifier,
+    InvertSelectionModifier,
 )
 from ovito.pipeline import Pipeline, StaticSource
 from rich.logging import RichHandler
@@ -72,11 +74,13 @@ STRUCTURE_TYPE_MAP = {
     CrystalStructure.ICO: PolyhedralTemplateMatchingModifier.Type.ICO,
     CrystalStructure.OTHER: PolyhedralTemplateMatchingModifier.Type.OTHER,
 }
-STRUCTURE_PROPERTY_NAME = "Structure Type"
 
 
 def find_mismatch_indices(
-    filename: str, target_structure: CrystalStructure, remove_fcc_vacancy: bool = False
+    filename: str,
+    target_structure: CrystalStructure,
+    remove_fcc_vacancy: bool = False,
+    view_selection: bool = True,
 ) -> np.ndarray:
     """
     Analyzes a structure file with PTM and returns indices of atoms that
@@ -95,6 +99,7 @@ def find_mismatch_indices(
         sys.exit(1)
 
     # Set up the OVITO pipeline
+    # NOTE(rg): Can't call delete anywhere else because it'll lose the index information
     pipeline = Pipeline(source=StaticSource(data=ase_to_ovito(atoms)))
 
     ptm = PolyhedralTemplateMatchingModifier()
@@ -104,24 +109,48 @@ def find_mismatch_indices(
     ovito_type = STRUCTURE_TYPE_MAP[target_structure]
     select_modifier = SelectTypeModifier(
         operate_on="particles",
-        property=STRUCTURE_PROPERTY_NAME,
+        property="Structure Type",
         types={ovito_type},
     )
     pipeline.modifiers.append(select_modifier)
-
-    log.info(f"Running PTM analysis to find non-{target_structure.value} atoms...")
-    if remove_fcc_vacancy:
-        # pipeline.modifiers.append(DeleteSelectedModifier())
-        csym = CentroSymmetryModifier()  # Default is conventional with 12 for FCC
-        pipeline.modifiers.append(csym)
-    data = pipeline.compute()
-
+    non_fcc = pipeline.compute()
     # The 'selection' array is 1 for selected atoms and 0 for others.
     # Find indices where the selection is 0 (i.e., the non-matching atoms).
-    breakpoint()
-    mismatch_indices = np.where(data.particles.selection.array == 0)[0]
-    log.info(f"Found {len(mismatch_indices)} non-{target_structure.value} atoms.")
-    return mismatch_indices
+    mismatch_indices = np.where(non_fcc.particles.selection.array == 0)[0]
+    log.info(f"Running PTM analysis to find non-{target_structure.value} atoms...")
+    if remove_fcc_vacancy:
+        pipeline.modifiers.append(InvertSelectionModifier())
+        csym = CentroSymmetryModifier(
+            only_selected=True,
+        )  # Default is conventional with 12 for FCC
+        pipeline.modifiers.append(csym)
+        pipeline.modifiers.append(
+            ExpressionSelectionModifier(
+                operate_on="particles",
+                expression="Centrosymmetry < 70 || Centrosymmetry > 95",
+            )
+        )
+    data = pipeline.compute()
+
+    # The 'selection' is now the vacancy
+    vacancy = np.where(data.particles.selection.array == 0)[0]
+    interstitial = np.setdiff1d(mismatch_indices, vacancy)
+    log.info(
+        f"Found {len(mismatch_indices)} non-{target_structure.value}, returning {len(interstitial)} frenkel pair atoms."
+    )
+    if view_selection:
+        # Just to see what's being selected..
+        pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[interstitial])))
+        pviz.add_to_scene()
+        from ovito.vis import Viewport
+
+        vp = Viewport()
+        vp.type = Viewport.Type.Ortho
+        vp.zoom_all()
+        vp.render_image(
+            size=(800, 600), filename="interstitial.png", background=(0, 0, 0), frame=0
+        )
+    return interstitial
 
 
 # 4. MAIN SCRIPT LOGIC (with Click for CLI)
