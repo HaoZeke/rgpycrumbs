@@ -81,6 +81,7 @@ def find_mismatch_indices(
     target_structure: CrystalStructure,
     remove_fcc_vacancy: bool = False,
     view_selection: bool = True,
+    cylinder_radius: float = 5,
 ) -> np.ndarray:
     """
     Analyzes a structure file with PTM and returns indices of atoms that
@@ -138,12 +139,20 @@ def find_mismatch_indices(
     positions = data.particles.positions
     center_vacancy = np.mean(positions[vacancy], axis=0)
     center_interstitial = np.mean(positions[interstitial], axis=0)
-    # cylinder_radius = 3
-    # cylinder_radius_sq = cylinder_radius**2
-    radius_sq = np.linalg.norm(center_interstitial - center_vacancy)**2 / 2
-    dist_sq_to_interstitial = np.sum((positions - center_interstitial)**2, axis=1)
-    dist_sq_to_vacancy = np.sum((positions - center_vacancy)**2, axis=1)
-    selection_mask = (dist_sq_to_interstitial < radius_sq) & (dist_sq_to_vacancy < radius_sq)
+    cylinder_radius_sq = cylinder_radius**2
+    axis_vec = center_vacancy - center_interstitial
+    axis_len_sq = np.sum(axis_vec**2)
+    vec_from_p1 = positions - center_interstitial
+    proj_len = np.einsum("ij,j->i", vec_from_p1, axis_vec)
+    is_within_length = (proj_len >= 0) & (proj_len <= axis_len_sq)
+    # 2. Check if the atom is within the cylinder's radius
+    # The squared perpendicular distance is d² = |v|² - (projection)² / |axis|²
+    perp_dist_sq = np.sum(vec_from_p1**2, axis=1) - (proj_len**2 / axis_len_sq)
+    is_within_radius = perp_dist_sq < cylinder_radius_sq
+    # The final selection requires both conditions to be true
+    selection_mask = is_within_length & is_within_radius
+    cylinder_bw_vfrenk = np.where(selection_mask)[0]
+    cylinder_bw_vfrenk = np.setdiff1d(cylinder_bw_vfrenk, mismatch_indices)
     breakpoint()
 
     log.info(
@@ -151,7 +160,10 @@ def find_mismatch_indices(
     )
     if view_selection:
         # Just to see what's being selected..
-        pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[selection_mask])))
+        all_selections = np.unique(np.hstack([cylinder_bw_vfrenk, vacancy, interstitial]))
+        pviz = Pipeline(
+            source=StaticSource(data=ase_to_ovito(atoms[cylinder_bw_vfrenk]))
+        )
         pviz.add_to_scene()
         from ovito.vis import Viewport
 
