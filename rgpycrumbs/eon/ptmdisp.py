@@ -140,19 +140,38 @@ def find_mismatch_indices(
     center_vacancy = np.mean(positions[vacancy], axis=0)
     center_interstitial = np.mean(positions[interstitial], axis=0)
     cylinder_radius_sq = cylinder_radius**2
-    axis_vec = center_vacancy - center_interstitial
+
+    p1 = center_vacancy
+    p2 = center_interstitial
+
+    axis_vec = p2 - p1 # Vector points from vacancy TOWARDS interstitial
     axis_len_sq = np.sum(axis_vec**2)
-    vec_from_p1 = positions - center_interstitial
-    proj_len = np.einsum("ij,j->i", vec_from_p1, axis_vec)
-    is_within_length = (proj_len >= 0) & (proj_len <= axis_len_sq)
-    # 2. Check if the atom is within the cylinder's radius
-    # The squared perpendicular distance is d² = |v|² - (projection)² / |axis|²
-    perp_dist_sq = np.sum(vec_from_p1**2, axis=1) - (proj_len**2 / axis_len_sq)
-    is_within_radius = perp_dist_sq < cylinder_radius_sq
-    # The final selection requires both conditions to be true
-    selection_mask = is_within_length & is_within_radius
-    cylinder_bw_vfrenk = np.where(selection_mask)[0]
-    cylinder_bw_vfrenk = np.setdiff1d(cylinder_bw_vfrenk, mismatch_indices)
+
+    # Check for zero-length axis to avoid division by zero
+    if axis_len_sq == 0:
+        # Handle case where centers are identical
+        between_indices = np.array([], dtype=int)
+    else:
+        # 4. Perform the cylinder selection math
+        vec_from_p1 = positions - p1
+        proj_len_sq = np.einsum("ij,j->i", vec_from_p1, axis_vec)**2
+
+        # is_within_length: projection squared must be between 0 and axis_len_sq^2
+        # We can't do this check on the squared projection easily. Let's use the non-squared version.
+        proj_len = np.einsum("ij,j->i", vec_from_p1, axis_vec)
+        is_within_length = (proj_len >= 0) & (proj_len <= axis_len_sq)
+
+        # perp_dist_sq: |v|^2 - (projection)^2 / |axis|^2
+        perp_dist_sq = np.sum(vec_from_p1**2, axis=1) - proj_len**2 / axis_len_sq
+        is_within_radius = perp_dist_sq < cylinder_radius_sq
+
+        # Final selection mask
+        selection_mask = is_within_length & is_within_radius
+        between_indices_all = np.where(selection_mask)[0]
+
+        # 5. Exclude atoms that are part of the original defect clusters
+        between_indices = np.setdiff1d(between_indices_all, mismatch_indices)
+
     breakpoint()
 
     log.info(
@@ -160,9 +179,9 @@ def find_mismatch_indices(
     )
     if view_selection:
         # Just to see what's being selected..
-        all_selections = np.unique(np.hstack([cylinder_bw_vfrenk, vacancy, interstitial]))
+        all_selections = np.unique(np.hstack([between_indices, vacancy, interstitial]))
         pviz = Pipeline(
-            source=StaticSource(data=ase_to_ovito(atoms[cylinder_bw_vfrenk]))
+            source=StaticSource(data=ase_to_ovito(atoms[all_selections]))
         )
         pviz.add_to_scene()
         from ovito.vis import Viewport
