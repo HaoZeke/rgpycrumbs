@@ -135,12 +135,23 @@ def find_mismatch_indices(
     # The 'selection' is now the vacancy
     vacancy = np.where(data.particles.selection.array == 0)[0]
     interstitial = np.setdiff1d(mismatch_indices, vacancy)
+    positions = data.particles.positions
+    center_vacancy = np.mean(positions[vacancy], axis=0)
+    center_interstitial = np.mean(positions[interstitial], axis=0)
+    # cylinder_radius = 3
+    # cylinder_radius_sq = cylinder_radius**2
+    radius_sq = np.linalg.norm(center_interstitial - center_vacancy)**2 / 2
+    dist_sq_to_interstitial = np.sum((positions - center_interstitial)**2, axis=1)
+    dist_sq_to_vacancy = np.sum((positions - center_vacancy)**2, axis=1)
+    selection_mask = (dist_sq_to_interstitial < radius_sq) & (dist_sq_to_vacancy < radius_sq)
+    breakpoint()
+
     log.info(
         f"Found {len(mismatch_indices)} non-{target_structure.value}, returning {len(interstitial)} frenkel pair atoms."
     )
     if view_selection:
         # Just to see what's being selected..
-        pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[interstitial])))
+        pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[selection_mask])))
         pviz.add_to_scene()
         from ovito.vis import Viewport
 
