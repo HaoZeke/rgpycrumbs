@@ -161,7 +161,7 @@ def find_mismatch_indices(
         vp.type = Viewport.Type.Ortho
         vp.zoom_all()
         vp.render_image(
-            size=(800, 600), filename="interstitial.png", background=(0, 0, 0), frame=0
+            size=(800, 600), filename="selection.png", background=(0, 0, 0), frame=0
         )
     return final_active_indices
 
