@@ -81,11 +81,12 @@ def find_mismatch_indices(
     target_structure: CrystalStructure,
     remove_fcc_vacancy: bool = False,
     view_selection: bool = True,
-    cylinder_radius: float = 5,
+    selection_radius: float = 5,
 ) -> np.ndarray:
     """
-    Analyzes a structure file with PTM and returns indices of atoms that
-    do NOT match the target crystal structure.
+    Analyzes a structure file with PTM, identifies the interstitial defect,
+    and returns the indices of the interstitial atoms plus all atoms
+    within a sphere of radius `selection_radius`.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -139,49 +140,19 @@ def find_mismatch_indices(
     positions = data.particles.positions
     center_vacancy = np.mean(positions[vacancy], axis=0)
     center_interstitial = np.mean(positions[interstitial], axis=0)
-    cylinder_radius_sq = cylinder_radius**2
+    selection_radius_sq = selection_radius**2
 
-    p1 = center_vacancy
-    p2 = center_interstitial
-
-    axis_vec = p2 - p1 # Vector points from vacancy TOWARDS interstitial
-    axis_len_sq = np.sum(axis_vec**2)
-
-    # Check for zero-length axis to avoid division by zero
-    if axis_len_sq == 0:
-        # Handle case where centers are identical
-        between_indices = np.array([], dtype=int)
-    else:
-        # 4. Perform the cylinder selection math
-        vec_from_p1 = positions - p1
-        proj_len_sq = np.einsum("ij,j->i", vec_from_p1, axis_vec)**2
-
-        # is_within_length: projection squared must be between 0 and axis_len_sq^2
-        # We can't do this check on the squared projection easily. Let's use the non-squared version.
-        proj_len = np.einsum("ij,j->i", vec_from_p1, axis_vec)
-        is_within_length = (proj_len >= 0) & (proj_len <= axis_len_sq)
-
-        # perp_dist_sq: |v|^2 - (projection)^2 / |axis|^2
-        perp_dist_sq = np.sum(vec_from_p1**2, axis=1) - proj_len**2 / axis_len_sq
-        is_within_radius = perp_dist_sq < cylinder_radius_sq
-
-        # Final selection mask
-        selection_mask = is_within_length & is_within_radius
-        between_indices_all = np.where(selection_mask)[0]
-
-        # 5. Exclude atoms that are part of the original defect clusters
-        between_indices = np.setdiff1d(between_indices_all, mismatch_indices)
-
-    breakpoint()
+    dist_sq_from_center = np.sum((positions - center_interstitial)**2, axis=1)
+    sphere_indices = np.where(dist_sq_from_center < selection_radius_sq)[0]
+    final_active_indices = np.unique(np.hstack([sphere_indices, interstitial]))
 
     log.info(
         f"Found {len(mismatch_indices)} non-{target_structure.value}, returning {len(interstitial)} frenkel pair atoms."
     )
     if view_selection:
         # Just to see what's being selected..
-        all_selections = np.unique(np.hstack([between_indices, vacancy, interstitial]))
         pviz = Pipeline(
-            source=StaticSource(data=ase_to_ovito(atoms[all_selections]))
+            source=StaticSource(data=ase_to_ovito(atoms[sphere_indices]))
         )
         pviz.add_to_scene()
         from ovito.vis import Viewport
@@ -192,7 +163,7 @@ def find_mismatch_indices(
         vp.render_image(
             size=(800, 600), filename="interstitial.png", background=(0, 0, 0), frame=0
         )
-    return interstitial
+    return final_active_indices
 
 
 # 4. MAIN SCRIPT LOGIC (with Click for CLI)
