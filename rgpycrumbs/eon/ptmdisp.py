@@ -210,7 +210,7 @@ def main(
     if verbose:
         log.setLevel(logging.INFO)
 
-    indices = find_mismatch_indices(filename, structure, no_fcc_vacancy)
+    indices = find_mismatch_indices(filename, structure, remove_fcc_vacancy)
 
     # Final, clean output is printed to stdout.
     # All logs, errors, and status messages go to stderr.
