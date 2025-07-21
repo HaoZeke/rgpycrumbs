@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "click",
+#   "matplotlib",
+#   "numpy",
+#   "scipy",
+#   "cmcrameri",
+#   "rich",
+# ]
+# ///
+
+import glob
+import logging
+from pathlib import Path
+import sys
+
+import click
+import matplotlib.pyplot as plt
+import numpy as np
+from cmcrameri import cm
+from rich.logging import RichHandler
+from scipy.interpolate import splrep, splev
+
+# --- Constants & Setup ---
+# Set up logging for clear feedback
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(show_path=False)],
+)
+
+DEFAULT_INPUT_PATTERN = "neb_*.dat"
+DEFAULT_OUTPUT_FILE = "neb_energy_path.pdf"
+DEFAULT_CMAP = "batlow"
+
+
+def load_paths(file_pattern: str) -> list[Path]:
+    """Finds and sorts files matching a glob pattern."""
+    logging.info(f"Searching for files with pattern: '{file_pattern}'")
+    file_paths = sorted(Path(p) for p in glob.glob(file_pattern))
+    if not file_paths:
+        logging.error(f"No files found matching '{file_pattern}'. Exiting.")
+        sys.exit(1)
+    logging.info(f"Found {len(file_paths)} files to plot.")
+    return file_paths
+
+
+def plot_single_path(ax, path_data, color, alpha, zorder):
+    """Plots a single interpolated energy path and its data points."""
+    energy = path_data[2]
+    rc = path_data[1]
+
+    # Cubic spline interpolation for a smooth curve
+    rc_fine = np.linspace(rc.min(), rc.max(), num=300)
+    spline_representation = splrep(rc, energy, k=3)
+    spline_y = splev(rc_fine, spline_representation)
+
+    # Plot the smooth curve and the original data points
+    ax.plot(rc_fine, spline_y, color=color, alpha=alpha, zorder=zorder)
+    ax.plot(
+        rc,
+        energy,
+        linestyle="",
+        marker="o",
+        markersize=4,
+        color=color,
+        alpha=alpha,
+        zorder=zorder,
+    )
+
+
+def setup_plot_aesthetics(ax, title, xlabel, ylabel):
+    """Applies labels, limits, and other plot aesthetics."""
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.minorticks_on()
+    ax.set_facecolor("gray")
+
+    # Ensure axes start at 0 but extend to fit data
+    ax.set_ylim(bottom=0)
+    ax.set_xlim(left=0)
+
+    # Use a tight layout to minimize whitespace
+    plt.tight_layout(pad=0.5)
+
+
+@click.command()
+@click.option(
+    "--input-pattern",
+    default=DEFAULT_INPUT_PATTERN,
+    help=f"Glob pattern for input data files. Default: '{DEFAULT_INPUT_PATTERN}'",
+)
+@click.option(
+    "-o",
+    "--output-file",
+    type=click.Path(path_type=Path),
+    default=Path(DEFAULT_OUTPUT_FILE),
+    help=f"Output file name. Default: '{DEFAULT_OUTPUT_FILE}'",
+)
+@click.option("--title", default="NEB Path Optimization", help="Plot title.")
+@click.option("--xlabel", default=r"Reaction Coordinate ($\AA$)", help="X-axis label.")
+@click.option("--ylabel", default="Relative Energy (eV)", help="Y-axis label.")
+@click.option(
+    "--cmap",
+    default=DEFAULT_CMAP,
+    help=f"Colormap for paths (from cmcrameri). Default: '{DEFAULT_CMAP}'",
+)
+@click.option(
+    "--highlight-last/--no-highlight-last",
+    is_flag=True,
+    default=True,
+    help="Highlight the final path in red.",
+)
+def main(
+    input_pattern: str,
+    output_file: Path,
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    cmap: str,
+    highlight_last: bool,
+):
+    """
+    Plots a series of NEB energy paths from .dat files.
+
+    This script reads all files matching the INPUT_PATTERN, plots each as a
+    line on a single graph, and colors them according to their sequence.
+    The final plot is saved to the specified OUTPUT_FILE.
+    """
+    plt.style.use("bmh")
+    fig, ax = plt.subplots(figsize=(6, 5), dpi=200)
+
+    file_paths = load_paths(input_pattern)
+    num_files = len(file_paths)
+    colormap = getattr(cm, cmap)
+
+    # --- Plotting Loop ---
+    for idx, file_path in enumerate(file_paths):
+        path_data = np.loadtxt(file_path).T
+
+        is_last_file = idx == num_files - 1
+        is_first_file = idx == 0
+
+        # Determine plot properties based on position in sequence
+        if highlight_last and is_last_file:
+            color, alpha, zorder = "red", 1.0, 20
+        else:
+            # Normalize index to get a color from the colormap
+            color = colormap(idx / (num_files - 1))
+            alpha = 1.0 if is_first_file else 0.5
+            zorder = 10 if is_first_file else 5
+
+        plot_single_path(ax, path_data, color, alpha, zorder)
+
+    # --- Final Touches ---
+    setup_plot_aesthetics(ax, title, xlabel, ylabel)
+
+    # Add a colorbar to show the progression
+    sm = plt.cm.ScalarMappable(
+        cmap=colormap, norm=plt.Normalize(vmin=0, vmax=num_files - 1)
+    )
+    cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
+
+    # Save the final figure
+    logging.info(f"Saving plot to [green]{output_file}[/green]")
+    plt.savefig(output_file, transparent=False)
+    # plt.show() # Uncomment to display the plot interactively
+
+
+if __name__ == "__main__":
+    main()
