@@ -192,7 +192,7 @@ def find_mismatch_indices(
     "--no-fcc-vacancy",
     "no_fcc_vacancy",
     default=False,
-    help="Enable verbose informational output to stderr.",
+    help="Disable FCC vacancy processing.",
 )
 def main(
     filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacancy: bool
