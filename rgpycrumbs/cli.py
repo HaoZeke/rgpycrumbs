@@ -40,6 +40,7 @@ def eon(subcommand_name: str, script_args: tuple):
     # Build the full command to be executed by the shell
     command = ["uv", "run", str(script_path)] + list(script_args)
 
+    # TODO(rg): Consider adding verbosity
     click.echo(f"--> Dispatching to: {' '.join(command)}", err=True)
 
     try:
