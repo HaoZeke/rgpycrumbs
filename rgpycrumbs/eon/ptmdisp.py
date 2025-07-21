@@ -134,7 +134,12 @@ def find_mismatch_indices(
         )
     data = pipeline.compute()
 
-    # The 'selection' is now the vacancy
+    # After applying the pipeline modifiers:
+    # 1. InvertSelectionModifier: Inverts the selection, so previously unselected atoms (e.g., FCC atoms) are now selected.
+    # 2. CentroSymmetryModifier: Computes the centrosymmetry parameter for the selected atoms, which helps identify atoms in distorted environments.
+    # 3. ExpressionSelectionModifier: Selects atoms based on the centrosymmetry parameter, using the condition "Centrosymmetry < 70 || Centrosymmetry > 95".
+    #    This step identifies atoms that are likely to be vacancies or interstitials.
+    # At this point, the 'selection' array represents vacancy atoms (selection == 0).
     vacancy = np.where(data.particles.selection.array == 0)[0]
     interstitial = np.setdiff1d(mismatch_indices, vacancy)
     positions = data.particles.positions
