@@ -22,6 +22,7 @@ import io
 import click
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.patches import ArrowStyle
 import numpy as np
 from cmcrameri import cm
 from rich.logging import RichHandler
@@ -92,16 +93,39 @@ def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
         buf.close()
 
         # Place the image on the plot
-        imagebox = OffsetImage(img_data, zoom=0.4)  # Increased zoom for larger images
+        # Increased zoom for larger images
+        imagebox = OffsetImage(img_data, zoom=0.4)
+        if images_to_plot == "all":
+            if i % 2 == 0:
+                y_offset = 60.0  # Even images go up
+                rad = 0.1
+            else:
+                y_offset = -60.0 # Odd images go down
+                rad = -0.1
+            xybox = (15.0, y_offset)
+            connectionstyle = f"arc3,rad={rad}"
+        else: # For 'crit_points', a single offset is fine
+            xybox = (15.0, 60.0)
+            connectionstyle = "arc3,rad=0.1"
         # Create the annotation box for the image
         ab = AnnotationBbox(
             imagebox,
             (rc_points[i], energy_points[i]),
-            xybox=(15.0, 60.0),  # Offset farther up and slightly to the side
+            # Offset farther up and slightly to the side
+            xybox=xybox,
             frameon=False,
             xycoords="data",
             boxcoords="offset points",
             pad=0.1,
+            arrowprops=dict(
+                arrowstyle=ArrowStyle.Fancy(
+                    head_length=0.4, head_width=0.4, tail_width=0.1
+                ),  # No arrowhead is -
+                connectionstyle=connectionstyle,
+                linestyle="--",
+                color="black",
+                linewidth=0.8,
+            ),
         )
         # Add the artist and set a high zorder to ensure it's on top
         ax.add_artist(ab)
