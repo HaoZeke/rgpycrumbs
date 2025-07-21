@@ -34,7 +34,6 @@ logging.basicConfig(
 )
 
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
-DEFAULT_OUTPUT_FILE = "neb_energy_path.pdf"
 DEFAULT_CMAP = "batlow"
 
 
@@ -98,8 +97,8 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     "-o",
     "--output-file",
     type=click.Path(path_type=Path),
-    default=Path(DEFAULT_OUTPUT_FILE),
-    help=f"Output file name. Default: '{DEFAULT_OUTPUT_FILE}'",
+    default=None,
+    help="Output file name. If not provided, plot is shown interactively.",
 )
 @click.option(
     "--start",
@@ -129,7 +128,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 )
 def main(
     input_pattern: str,
-    output_file: Path,
+    output_file: Path | None,
     start: int | None,
     end: int | None,
     title: str,
@@ -203,10 +202,13 @@ def main(
     )
     cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
 
-    # Save the final figure
-    logging.info(f"Saving plot to [green]{output_file}[/green]")
-    plt.savefig(output_file, transparent=False)
-    # plt.show() # Uncomment to display the plot interactively
+    # Save or show the final figure
+    if output_file:
+        logging.info(f"Saving plot to [green]{output_file}[/green]")
+        plt.savefig(output_file, transparent=False)
+    else:
+        logging.info("Displaying plot interactively...")
+        plt.show()
 
 
 if __name__ == "__main__":
