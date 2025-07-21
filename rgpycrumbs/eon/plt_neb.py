@@ -112,6 +112,12 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     default=None,
     help="Ending file index to plot (exclusive).",
 )
+@click.option(
+    "--normalize-rc",
+    is_flag=True,
+    default=False,
+    help="Normalize the reaction coordinate to a 0-1 scale.",
+)
 @click.option("--title", default="NEB Path Optimization", help="Plot title.")
 @click.option("--xlabel", default=r"Reaction Coordinate ($\AA$)", help="X-axis label.")
 @click.option("--ylabel", default="Relative Energy (eV)", help="Y-axis label.")
@@ -132,6 +138,7 @@ def main(
     output_file: Path | None,
     start: int | None,
     end: int | None,
+    normalize_rc: bool,
     title: str,
     xlabel: str,
     ylabel: str,
@@ -181,6 +188,14 @@ def main(
             )
             continue
 
+        if normalize_rc:
+            rc = path_data[1]
+            rc_max = rc.max()
+            if rc_max > 0:
+                path_data[1] = rc / rc_max
+            # Update the x-axis label for the final plot
+            xlabel = "Normalized Reaction Coordinate"
+
         is_last_file = idx == num_files - 1
         is_first_file = idx == 0
 
@@ -197,14 +212,14 @@ def main(
 
     # --- Final Touches ---
     setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor)
+    if normalize_rc:
+        ax.set_xlim(0, 1) # Set x-axis limits for normalized plot
 
-    # Add a colorbar to show the progression
     sm = plt.cm.ScalarMappable(
         cmap=colormap, norm=plt.Normalize(vmin=0, vmax=num_files - 1)
     )
     cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
 
-    # Save or show the final figure
     if output_file:
         logging.info(f"Saving plot to [green]{output_file}[/green]")
         plt.savefig(output_file, transparent=False)
