@@ -72,13 +72,13 @@ def plot_single_path(ax, path_data, color, alpha, zorder):
     )
 
 
-def setup_plot_aesthetics(ax, title, xlabel, ylabel):
+def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     """Applies labels, limits, and other plot aesthetics."""
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     ax.minorticks_on()
-    ax.set_facecolor("gray")
+    ax.set_facecolor(facecolor)
 
     # Ensure axes start at 0 but extend to fit data
     ax.set_xlim(left=0)
@@ -115,6 +115,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option("--title", default="NEB Path Optimization", help="Plot title.")
 @click.option("--xlabel", default=r"Reaction Coordinate ($\AA$)", help="X-axis label.")
 @click.option("--ylabel", default="Relative Energy (eV)", help="Y-axis label.")
+@click.option("--facecolor", default="gray", help="Background color")
 @click.option(
     "--cmap",
     default=DEFAULT_CMAP,
@@ -136,6 +137,7 @@ def main(
     ylabel: str,
     cmap: str,
     highlight_last: bool,
+    facecolor: str,
 ):
     """
     Plots a series of NEB energy paths from .dat files.
@@ -194,7 +196,7 @@ def main(
         plot_single_path(ax, path_data, color, alpha, zorder)
 
     # --- Final Touches ---
-    setup_plot_aesthetics(ax, title, xlabel, ylabel)
+    setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor)
 
     # Add a colorbar to show the progression
     sm = plt.cm.ScalarMappable(
