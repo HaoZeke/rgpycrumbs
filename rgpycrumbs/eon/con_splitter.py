@@ -29,6 +29,7 @@ logging.basicConfig(
     handlers=[RichHandler(console=CONSOLE, rich_tracebacks=True, show_path=False)],
 )
 
+
 @click.command()
 @click.argument(
     "neb_trajectory_file",
@@ -74,7 +75,9 @@ def con_splitter(
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        logging.critical(f"Error creating output directory [red]{output_dir}[/red]: {e}")
+        logging.critical(
+            f"Error creating output directory [red]{output_dir}[/red]: {e}"
+        )
         sys.exit(1)
 
     CONSOLE.rule(
@@ -84,7 +87,9 @@ def con_splitter(
 
     # --- 2. Read all frames from the trajectory ---
     try:
-        logging.info(f"Reading all frames from [yellow]{neb_trajectory_file}[/yellow]...")
+        logging.info(
+            f"Reading all frames from [yellow]{neb_trajectory_file}[/yellow]..."
+        )
         # The index=':' syntax tells ASE to read all images from the file
         all_frames = aseread(neb_trajectory_file, index=":")
         if not all_frames:
@@ -101,7 +106,9 @@ def con_splitter(
 
     try:
         with open(path_list_filepath, "w") as path_file:
-            CONSOLE.log(f"Writing individual .con files and creating [magenta]{path_list_filename}[/magenta]...")
+            CONSOLE.log(
+                f"Writing individual .con files and creating [magenta]{path_list_filename}[/magenta]..."
+            )
             for i, atoms_frame in enumerate(all_frames):
                 # Define the output filename for the current frame
                 output_con_filename = f"ipath_{i:03d}.con"
@@ -117,7 +124,9 @@ def con_splitter(
 
             # Write all the collected absolute paths to the list file
             path_file.write("\n".join(created_paths) + "\n")
-            logging.info(f"Successfully wrote {len(created_paths)} paths to [magenta]{path_list_filepath.resolve()}[/magenta]")
+            logging.info(
+                f"Successfully wrote {len(created_paths)} paths to [magenta]{path_list_filepath.resolve()}[/magenta]"
+            )
 
     except Exception as e:
         logging.critical(f"An error occurred during file writing: {e}")
