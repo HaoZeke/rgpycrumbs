@@ -82,7 +82,6 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     ax.set_facecolor("gray")
 
     # Ensure axes start at 0 but extend to fit data
-    ax.set_ylim(bottom=0)
     ax.set_xlim(left=0)
 
     # Use a tight layout to minimize whitespace
@@ -102,6 +101,18 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     default=Path(DEFAULT_OUTPUT_FILE),
     help=f"Output file name. Default: '{DEFAULT_OUTPUT_FILE}'",
 )
+@click.option(
+    "--start",
+    type=int,
+    default=None,
+    help="Starting file index to plot (inclusive).",
+)
+@click.option(
+    "--end",
+    type=int,
+    default=None,
+    help="Ending file index to plot (exclusive).",
+)
 @click.option("--title", default="NEB Path Optimization", help="Plot title.")
 @click.option("--xlabel", default=r"Reaction Coordinate ($\AA$)", help="X-axis label.")
 @click.option("--ylabel", default="Relative Energy (eV)", help="Y-axis label.")
@@ -119,6 +130,8 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 def main(
     input_pattern: str,
     output_file: Path,
+    start: int | None,
+    end: int | None,
     title: str,
     xlabel: str,
     ylabel: str,
@@ -135,13 +148,37 @@ def main(
     plt.style.use("bmh")
     fig, ax = plt.subplots(figsize=(6, 5), dpi=200)
 
-    file_paths = load_paths(input_pattern)
-    num_files = len(file_paths)
+    all_file_paths = load_paths(input_pattern)
+    original_num_files = len(all_file_paths)
+
+    # Apply slicing for sub-range plotting
+    file_paths_to_plot = all_file_paths[start:end]
+    if len(file_paths_to_plot) < original_num_files:
+        logging.info(
+            f"Plotting sub-range: {len(file_paths_to_plot)} of {original_num_files} total files."
+        )
+
+    num_files = len(file_paths_to_plot)
+    if num_files == 0:
+        logging.error("The specified start/end range resulted in zero files. Exiting.")
+        sys.exit(1)
+
     colormap = getattr(cm, cmap)
+    # Prevent division by zero if only one file is plotted
+    color_divisor = (num_files - 1) if num_files > 1 else 1.0
 
     # --- Plotting Loop ---
-    for idx, file_path in enumerate(file_paths):
-        path_data = np.loadtxt(file_path).T
+    for idx, file_path in enumerate(file_paths_to_plot):
+        try:
+            path_data = np.loadtxt(file_path).T
+            # Explicitly check if the loaded array is empty, which causes the IndexError
+            if path_data.size == 0:
+                raise ValueError("contains no data")
+        except (ValueError, IndexError) as e:
+            logging.warning(
+                f"Skipping invalid or empty file [yellow]{file_path.name}[/yellow]: {e}"
+            )
+            continue
 
         is_last_file = idx == num_files - 1
         is_first_file = idx == 0
@@ -151,7 +188,7 @@ def main(
             color, alpha, zorder = "red", 1.0, 20
         else:
             # Normalize index to get a color from the colormap
-            color = colormap(idx / (num_files - 1))
+            color = colormap(idx / color_divisor)
             alpha = 1.0 if is_first_file else 0.5
             zorder = 10 if is_first_file else 5
 
