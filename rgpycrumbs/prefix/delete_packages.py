@@ -5,7 +5,7 @@
 # /// script
 # requires-python = ">=3.8"
 # dependencies = [
-#   "click==8.1.7",
+#   "click==8.1.6",
 #   "requests==2.31.0",
 #   "rich==13.7.1",
 # ]
@@ -75,6 +75,7 @@ def get_packages_to_delete(channel, package_name):
 
                 found_count = 0
                 import re
+
                 package_pattern = re.compile(rf"^{re.escape(package_name)}-\d+(\.\d+)*")
                 for filename in all_packages.keys():
                     if package_pattern.match(filename):
