@@ -72,8 +72,10 @@ def get_packages_to_delete(channel, package_name):
                 }
 
                 found_count = 0
+                import re
+                package_pattern = re.compile(rf"^{re.escape(package_name)}-\d+(\.\d+)*")
                 for filename in all_packages.keys():
-                    if filename.startswith(f"{package_name}-"):
+                    if package_pattern.match(filename):
                         packages_to_delete.append((platform, filename))
                         found_count += 1
 
