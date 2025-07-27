@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # This script follows the guidelines laid out here:
 # https://realpython.com/python-script-structure/
+#
+# Needed since there's no API upstream
+# https://github.com/prefix-dev/prefix-dev/issues/29
 
 # /// script
 # requires-python = ">=3.8"
