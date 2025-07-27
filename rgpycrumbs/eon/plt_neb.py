@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# This script follows the guidelines laid out here:
+# https://realpython.com/python-script-structure/
 
 # /// script
 # requires-python = ">=3.11"
