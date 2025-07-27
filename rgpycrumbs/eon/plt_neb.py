@@ -55,7 +55,29 @@ def load_paths(file_pattern: str) -> list[Path]:
 
 
 def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
-    """Renders and plots selected atomic structures as insets on the graph."""
+    """
+    Renders and plots selected atomic structures as insets on the graph.
+
+    Parameters:
+        ax (matplotlib.axes.Axes): The matplotlib Axes object to plot on.
+        atoms_list (list): A list of atomic structures (e.g., ASE Atoms objects) to render.
+        path_data (tuple): A tuple containing reaction coordinate points, energy points, 
+            and other path-related data. Expected format: (x_points, rc_points, energy_points).
+        images_to_plot (str): Determines which structures to plot. Options are:
+            - "all": Plot all structures.
+            - "crit_points": Plot only critical points (start, saddle, and end).
+
+    Returns:
+        None
+
+    Raises:
+        IndexError: If indices in `plot_indices` are out of range for `atoms_list`.
+        TypeError: If `path_data` is not a tuple or does not contain the expected elements.
+
+    Notes:
+        - If the number of structures in `atoms_list` does not match the number of reaction
+          coordinate points in `path_data`, a warning is logged, and no structures are plotted.
+    """
     rc_points = path_data[1]
     energy_points = path_data[2]
 
