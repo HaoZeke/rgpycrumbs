@@ -25,6 +25,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.patches import ArrowStyle
 import numpy as np
 from cmcrameri import cm
+from rich.console import Console
 from rich.logging import RichHandler
 from scipy.interpolate import splrep, splev
 from ase.io import read as ase_read
@@ -36,8 +37,16 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(message)s",
     datefmt="[%X]",
-    handlers=[RichHandler(show_path=False)],
+    handlers=[
+        RichHandler(
+            console=Console(stderr=True),
+            rich_tracebacks=True,
+            show_path=False,
+            markup=True,
+        )
+    ],
 )
+log = logging.getLogger("rich")
 
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_CMAP = "batlow"
@@ -45,12 +54,12 @@ DEFAULT_CMAP = "batlow"
 
 def load_paths(file_pattern: str) -> list[Path]:
     """Finds and sorts files matching a glob pattern."""
-    logging.info(f"Searching for files with pattern: '{file_pattern}'")
+    log.info(f"Searching for files with pattern: '{file_pattern}'")
     file_paths = sorted(Path(p) for p in glob.glob(file_pattern))
     if not file_paths:
-        logging.error(f"No files found matching '{file_pattern}'. Exiting.")
+        log.error(f"No files found matching '{file_pattern}'. Exiting.")
         sys.exit(1)
-    logging.info(f"Found {len(file_paths)} files to plot.")
+    log.info(f"Found {len(file_paths)} files to plot.")
     return file_paths
 
 
@@ -60,7 +69,7 @@ def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
     energy_points = path_data[2]
 
     if len(atoms_list) != len(rc_points):
-        logging.warning(
+        log.warning(
             f"Mismatch between number of structures ({len(atoms_list)}) and "
             f"data points ({len(rc_points)}). Skipping structure plotting."
         )
@@ -100,11 +109,11 @@ def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
                 y_offset = 60.0  # Even images go up
                 rad = 0.1
             else:
-                y_offset = -60.0 # Odd images go down
+                y_offset = -60.0  # Odd images go down
                 rad = -0.1
             xybox = (15.0, y_offset)
             connectionstyle = f"arc3,rad={rad}"
-        else: # For 'crit_points', a single offset is fine
+        else:  # For 'crit_points', a single offset is fine
             xybox = (15.0, 60.0)
             connectionstyle = "arc3,rad=0.1"
         # Create the annotation box for the image
@@ -238,7 +247,7 @@ def main(
     Plots a series of NEB energy paths from .dat files.
     """
     if plot_structures != "none" and not con_file:
-        logging.error("--plot-structures requires a --con-file to be provided.")
+        log.error("--plot-structures requires a --con-file to be provided.")
         sys.exit(1)
 
     plt.style.use("bmh")
@@ -248,10 +257,10 @@ def main(
     atoms_list = None
     if con_file:
         try:
-            logging.info(f"Reading structures from [cyan]{con_file}[/cyan]")
+            log.info(f"Reading structures from [cyan]{con_file}[/cyan]")
             atoms_list = ase_read(con_file, index=":")
         except Exception as e:
-            logging.error(f"Failed to read .con file: {e}")
+            log.error(f"Failed to read .con file: {e}")
             atoms_list = None
 
     all_file_paths = load_paths(input_pattern)
@@ -259,14 +268,14 @@ def main(
     # Apply slicing for sub-range plotting
     file_paths_to_plot = all_file_paths[start:end]
     if len(file_paths_to_plot) < original_num_files:
-        logging.info(
+        log.info(
             f"Plotting sub-range: {len(file_paths_to_plot)} of {original_num_files} total files."
         )
 
     num_files = len(file_paths_to_plot)
 
     if num_files == 0:
-        logging.error("The specified start/end range resulted in zero files. Exiting.")
+        log.error("The specified start/end range resulted in zero files. Exiting.")
         sys.exit(1)
 
     colormap = getattr(cm, cmap)
@@ -279,7 +288,7 @@ def main(
             if path_data.size == 0:
                 raise ValueError("contains no data")
         except (ValueError, IndexError) as e:
-            logging.warning(
+            log.warning(
                 f"Skipping invalid or empty file [yellow]{file_path.name}[/yellow]: {e}"
             )
             continue
@@ -316,10 +325,10 @@ def main(
     cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
 
     if output_file:
-        logging.info(f"Saving plot to [green]{output_file}[/green]")
+        log.info(f"Saving plot to [green]{output_file}[/green]")
         plt.savefig(output_file, transparent=False)
     else:
-        logging.info("Displaying plot interactively...")
+        log.info("Displaying plot interactively...")
         plt.show()
 
 
