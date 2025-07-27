@@ -166,7 +166,8 @@ def main(channel, package_name, api_key, dry_run):
         return
 
     session = requests.Session()
-    session.headers.update({"Authorization": f"Bearer {api_key}"})
+    if not dry_run and api_key:
+        session.headers.update({"Authorization": f"Bearer {api_key}"})
 
     success_count = 0
     failure_count = 0
