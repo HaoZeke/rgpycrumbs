@@ -74,8 +74,10 @@ def get_packages_to_delete(channel, package_name):
                 }
 
                 found_count = 0
+                import re
+                package_pattern = re.compile(rf"^{re.escape(package_name)}-\d+(\.\d+)*")
                 for filename in all_packages.keys():
-                    if filename.startswith(f"{package_name}-"):
+                    if package_pattern.match(filename):
                         packages_to_delete.append((platform, filename))
                         found_count += 1
 
@@ -147,11 +149,9 @@ def main(channel, package_name, api_key, dry_run):
     """
     if not api_key and not dry_run:
         api_key = click.prompt("Please enter your prefix.dev API key", hide_input=True)
-
-    if not api_key and not dry_run:
-        log.error("API key is required for deletion. Exiting.")
-        sys.exit(1)
-
+        if not api_key:  # Ensure the API key is set after prompting
+            log.error("API key is required for deletion. Exiting.")
+            sys.exit(1)
     packages = get_packages_to_delete(channel, package_name)
 
     if not packages:
@@ -168,7 +168,8 @@ def main(channel, package_name, api_key, dry_run):
         return
 
     session = requests.Session()
-    session.headers.update({"Authorization": f"Bearer {api_key}"})
+    if not dry_run and api_key:
+        session.headers.update({"Authorization": f"Bearer {api_key}"})
 
     success_count = 0
     failure_count = 0
