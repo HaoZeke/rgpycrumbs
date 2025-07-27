@@ -70,7 +70,7 @@ def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
     Parameters:
         ax (matplotlib.axes.Axes): The matplotlib Axes object to plot on.
         atoms_list (list): A list of atomic structures (e.g., ASE Atoms objects) to render.
-        path_data (tuple): A tuple containing reaction coordinate points, energy points, 
+        path_data (tuple): A tuple containing reaction coordinate points, energy points,
             and other path-related data. Expected format: (x_points, rc_points, energy_points).
         images_to_plot (str): Determines which structures to plot. Options are:
             - "all": Plot all structures.
