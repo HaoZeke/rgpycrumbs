@@ -308,7 +308,7 @@ def main(
     # --- Plotting Loop ---
     for idx, file_path in enumerate(file_paths_to_plot):
         try:
-            path_data = np.loadtxt(file_path).T
+            path_data = np.loadtxt(file_path, skiprows=1).T
             if path_data.shape[0] < y_data_column + 1:
                 raise ValueError(f"file requires at least {y_data_column + 1} columns.")
         except (ValueError, IndexError) as e:
