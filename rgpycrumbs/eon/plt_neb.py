@@ -99,6 +99,7 @@ def plot_structure_insets(
             format="png",
             rotation=("-75x, -30y, 0z"),
             show_unit_cell=0,
+            scale=35,
         )
         buf.seek(0)
         img_data = plt.imread(buf)
