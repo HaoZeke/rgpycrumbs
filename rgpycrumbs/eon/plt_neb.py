@@ -65,33 +65,42 @@ def load_paths(file_pattern: str) -> list[Path]:
     return file_paths
 
 
-def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
+def plot_structure_insets(
+    ax, atoms_list, rc_points, y_points, images_to_plot="all", plot_mode="energy"
+):
     """
-    Renders and plots selected atomic structures as insets on the graph.
+    Renders and plots selected atomic structures as insets on the provided matplotlib axis.
 
-    Parameters:
-        ax (matplotlib.axes.Axes): The matplotlib Axes object to plot on.
-        atoms_list (list): A list of atomic structures (e.g., ASE Atoms objects) to render.
-        path_data (tuple): A tuple containing reaction coordinate points, energy points,
-            and other path-related data. Expected format: (x_points, rc_points, energy_points).
-        images_to_plot (str): Determines which structures to plot. Options are:
-            - "all": Plot all structures.
-            - "crit_points": Plot only critical points (start, saddle, and end).
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axis on which to plot the structure insets.
+    atoms_list : list
+        List of ASE Atoms objects representing the structures to plot.
+    rc_points : list or array-like
+        List of reaction coordinate values corresponding to each structure.
+    y_points : list or array-like
+        List of y-axis values (e.g., energy or eigenvalue) for each structure.
+    images_to_plot : str, optional
+        Determines which structures to plot as insets. Options:
+            - "all": plot all structures.
+            - "crit_points": plot only the initial, saddle, and final structures.
+    plot_mode : str, optional
+        Determines how the saddle point is selected. Options:
+            - "energy": saddle is the structure with maximum y value.
+            - "eigenvalue": saddle is the structure with minimum y value.
 
-    Returns:
-        None
+    Behavior
+    --------
+    If the number of structures does not match the number of reaction coordinate points,
+    a warning is logged and no structures are plotted.
+    The function does not return a value; it modifies the provided axis in-place.
 
-    Raises:
-        IndexError: If indices in `plot_indices` are out of range for `atoms_list`.
-        TypeError: If `path_data` is not a tuple or does not contain the expected elements.
-
-    Notes:
-        - If the number of structures in `atoms_list` does not match the number of reaction
-          coordinate points in `path_data`, a warning is logged, and no structures are plotted.
+    Usage Notes
+    ----------
+    - This function is intended to be used as part of a NEB (Nudged Elastic Band) path plotting routine.
+    - The appearance and placement of insets may depend on the axis limits and figure size.
     """
-    rc_points = path_data[1]
-    energy_points = path_data[2]
-
     if len(atoms_list) != len(rc_points):
         log.warning(
             f"Mismatch between number of structures ({len(atoms_list)}) and "
@@ -104,47 +113,42 @@ def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
     if images_to_plot == "all":
         plot_indices = range(len(atoms_list))
     elif images_to_plot == "crit_points":
-        # Find the index of the highest energy point (saddle)
-        saddle_index = np.argmax(energy_points)
-        # Use a set to automatically handle cases where the saddle is an endpoint
+        # Find the index of the "saddle" point based on the plot mode
+        if plot_mode == "energy":
+            saddle_index = np.argmax(y_points)  # Highest point for energy
+        else:  # plot_mode == "eigenvalue"
+            saddle_index = np.argmin(y_points)  # Lowest point for eigenvalue
+
         crit_indices = {0, saddle_index, len(atoms_list) - 1}
         plot_indices = sorted(list(crit_indices))
 
     for i in plot_indices:
         atoms = atoms_list[i]
-        # Render atoms object to an in-memory PNG with better aesthetics
         buf = io.BytesIO()
         ase_write(
             buf,
             atoms,
             format="png",
             rotation=("-75x, -30y, 0z"),
-            show_unit_cell=0,  # Do not render the simulation cell box
+            show_unit_cell=0,
+            scale=35,
         )
         buf.seek(0)
         img_data = plt.imread(buf)
         buf.close()
 
-        # Place the image on the plot
-        # Increased zoom for larger images
         imagebox = OffsetImage(img_data, zoom=0.4)
         if images_to_plot == "all":
-            if i % 2 == 0:
-                y_offset = 60.0  # Even images go up
-                rad = 0.1
-            else:
-                y_offset = -60.0  # Odd images go down
-                rad = -0.1
+            y_offset, rad = (60.0, 0.1) if i % 2 == 0 else (-60.0, -0.1)
             xybox = (15.0, y_offset)
             connectionstyle = f"arc3,rad={rad}"
-        else:  # For 'crit_points', a single offset is fine
+        else:
             xybox = (15.0, 60.0)
             connectionstyle = "arc3,rad=0.1"
-        # Create the annotation box for the image
+
         ab = AnnotationBbox(
             imagebox,
-            (rc_points[i], energy_points[i]),
-            # Offset farther up and slightly to the side
+            (rc_points[i], y_points[i]),  # Use the correct y-data for positioning
             xybox=xybox,
             frameon=False,
             xycoords="data",
@@ -153,29 +157,26 @@ def plot_structure_insets(ax, atoms_list, path_data, images_to_plot="all"):
             arrowprops=dict(
                 arrowstyle=ArrowStyle.Fancy(
                     head_length=0.4, head_width=0.4, tail_width=0.1
-                ),  # No arrowhead is -
+                ),
                 connectionstyle=connectionstyle,
                 linestyle="--",
                 color="black",
                 linewidth=0.8,
             ),
         )
-        # Add the artist and set a high zorder to ensure it's on top
         ax.add_artist(ab)
         ab.set_zorder(100)
 
 
-def plot_single_path(ax, path_data, color, alpha, zorder):
+def plot_energy_path(ax, path_data, color, alpha, zorder):
     """Plots a single interpolated energy path and its data points."""
-    energy = path_data[2]
     rc = path_data[1]
+    energy = path_data[2]
 
-    # Cubic spline interpolation for a smooth curve
     rc_fine = np.linspace(rc.min(), rc.max(), num=300)
     spline_representation = splrep(rc, energy, k=3)
     spline_y = splev(rc_fine, spline_representation)
 
-    # Plot the smooth curve and the original data points
     ax.plot(rc_fine, spline_y, color=color, alpha=alpha, zorder=zorder)
     ax.plot(
         rc,
@@ -187,6 +188,56 @@ def plot_single_path(ax, path_data, color, alpha, zorder):
         alpha=alpha,
         zorder=zorder,
     )
+
+
+def plot_eigenvalue_path(ax, path_data, color, alpha, zorder):
+    """
+    Plots a single interpolated eigenvalue path and its data points.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The matplotlib axes object on which to plot.
+    path_data : list
+        List containing path data. The second element (index 1) should be the reaction coordinate array,
+        and the fifth element (index 4) should be the eigenvalue array.
+    color : str or tuple
+        Color specification for the plot line and markers.
+    alpha : float
+        Transparency level for the plot line and markers (0.0 transparent through 1.0 opaque).
+    zorder : int
+        Drawing order for the plot elements.
+
+    Returns
+    -------
+    None
+        This function modifies the provided axes object in place and does not return a value.
+
+    Usage
+    -----
+    Call this function to plot an eigenvalue path on a matplotlib axes object, typically as part of a
+    NEB (Nudged Elastic Band) analysis visualization. The function will plot both the interpolated
+    spline and the original data points, and draw a horizontal reference line at y=0.
+    """
+    rc = path_data[1]
+    eigenvalue = path_data[4]
+
+    rc_fine = np.linspace(rc.min(), rc.max(), num=300)
+    spline_representation = splrep(rc, eigenvalue, k=3)
+    spline_y = splev(rc_fine, spline_representation)
+
+    ax.plot(rc_fine, spline_y, color=color, alpha=alpha, zorder=zorder)
+    ax.plot(
+        rc,
+        eigenvalue,
+        linestyle="",
+        marker="o",
+        markersize=4,
+        color=color,
+        alpha=alpha,
+        zorder=zorder,
+    )
+    ax.axhline(0, color="white", linestyle=":", linewidth=1.5, alpha=0.8, zorder=1)
 
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
@@ -217,6 +268,12 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     type=click.Choice(["none", "all", "crit_points"], case_sensitive=False),
     default="none",
     help="Which structures to render on the final path. Requires --con-file.",
+)
+@click.option(
+    "--plot-mode",
+    type=click.Choice(["energy", "eigenvalue"], case_sensitive=False),
+    default="energy",
+    help="The primary quantity to plot on the Y-axis.",
 )
 @click.option(
     "-o",
@@ -256,6 +313,7 @@ def main(
     input_pattern: str,
     con_file: Path | None,
     plot_structures: str,
+    plot_mode: str,
     output_file: Path | None,
     start: int | None,
     end: int | None,
@@ -268,7 +326,7 @@ def main(
     facecolor: str,
 ):
     """
-    Plots a series of NEB energy paths from .dat files.
+    Plots a series of NEB paths from .dat files.
     """
     if plot_structures != "none" and not con_file:
         log.error("--plot-structures requires a --con-file to be provided.")
@@ -277,7 +335,6 @@ def main(
     plt.style.use("bmh")
     fig, ax = plt.subplots(figsize=(10, 7), dpi=200)
 
-    # Load atom structures if a con file is provided
     atoms_list = None
     if con_file:
         try:
@@ -288,14 +345,7 @@ def main(
             atoms_list = None
 
     all_file_paths = load_paths(input_pattern)
-    original_num_files = len(all_file_paths)
-    # Apply slicing for sub-range plotting
     file_paths_to_plot = all_file_paths[start:end]
-    if len(file_paths_to_plot) < original_num_files:
-        log.info(
-            f"Plotting sub-range: {len(file_paths_to_plot)} of {original_num_files} total files."
-        )
-
     num_files = len(file_paths_to_plot)
 
     if num_files == 0:
@@ -305,12 +355,22 @@ def main(
     colormap = getattr(cm, cmap)
     color_divisor = (num_files - 1) if num_files > 1 else 1.0
 
+    # --- Set plot function and labels based on mode BEFORE the loop ---
+    if plot_mode == "energy":
+        plot_function = plot_energy_path
+        y_data_column = 2  # Energy is the 3rd column
+    else:  # plot_mode == "eigenvalue"
+        plot_function = plot_eigenvalue_path
+        y_data_column = 4  # Eigenvalue is the 5th column
+        # Override default ylabel if in eigenvalue mode
+        ylabel = r"Lowest Eigenvalue (eV/$\AA^2$)"
+
     # --- Plotting Loop ---
     for idx, file_path in enumerate(file_paths_to_plot):
         try:
-            path_data = np.loadtxt(file_path).T
-            if path_data.size == 0:
-                raise ValueError("contains no data")
+            path_data = np.loadtxt(file_path, skiprows=1).T
+            if path_data.shape[0] < y_data_column + 1:
+                raise ValueError(f"file requires at least {y_data_column + 1} columns.")
         except (ValueError, IndexError) as e:
             log.warning(
                 f"Skipping invalid or empty file [yellow]{file_path.name}[/yellow]: {e}"
@@ -328,15 +388,22 @@ def main(
 
         if highlight_last and is_last_file:
             color, alpha, zorder = "red", 1.0, 20
+            plot_function(ax, path_data, color, alpha, zorder)
             # If we have structures, plot them
             if atoms_list and plot_structures != "none":
-                plot_structure_insets(ax, atoms_list, path_data, plot_structures)
+                plot_structure_insets(
+                    ax,
+                    atoms_list,
+                    path_data[1],
+                    path_data[y_data_column],
+                    plot_structures,
+                    plot_mode,
+                )
         else:
             color = colormap(idx / color_divisor)
             alpha = 1.0 if is_first_file else 0.5
             zorder = 10 if is_first_file else 5
-
-        plot_single_path(ax, path_data, color, alpha, zorder)
+            plot_function(ax, path_data, color, alpha, zorder)
 
     # --- Final Touches ---
     setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor)
@@ -344,7 +411,7 @@ def main(
         ax.set_xlim(0, 1)
 
     sm = plt.cm.ScalarMappable(
-        cmap=colormap, norm=plt.Normalize(vmin=0, vmax=num_files - 1)
+        cmap=colormap, norm=plt.Normalize(vmin=0, vmax=max(1, num_files - 1))
     )
     cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
 
