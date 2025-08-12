@@ -191,7 +191,34 @@ def plot_energy_path(ax, path_data, color, alpha, zorder):
 
 
 def plot_eigenvalue_path(ax, path_data, color, alpha, zorder):
-    """Plots a single interpolated eigenvalue path and its data points."""
+    """
+    Plots a single interpolated eigenvalue path and its data points.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The matplotlib axes object on which to plot.
+    path_data : list
+        List containing path data. The second element (index 1) should be the reaction coordinate array,
+        and the fifth element (index 4) should be the eigenvalue array.
+    color : str or tuple
+        Color specification for the plot line and markers.
+    alpha : float
+        Transparency level for the plot line and markers (0.0 transparent through 1.0 opaque).
+    zorder : int
+        Drawing order for the plot elements.
+
+    Returns
+    -------
+    None
+        This function modifies the provided axes object in place and does not return a value.
+
+    Usage
+    -----
+    Call this function to plot an eigenvalue path on a matplotlib axes object, typically as part of a
+    NEB (Nudged Elastic Band) analysis visualization. The function will plot both the interpolated
+    spline and the original data points, and draw a horizontal reference line at y=0.
+    """
     rc = path_data[1]
     eigenvalue = path_data[4]
 
