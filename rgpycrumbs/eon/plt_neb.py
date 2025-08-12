@@ -68,7 +68,39 @@ def load_paths(file_pattern: str) -> list[Path]:
 def plot_structure_insets(
     ax, atoms_list, rc_points, y_points, images_to_plot="all", plot_mode="energy"
 ):
-    """Renders and plots selected atomic structures as insets on the graph."""
+    """
+    Renders and plots selected atomic structures as insets on the provided matplotlib axis.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axis on which to plot the structure insets.
+    atoms_list : list
+        List of ASE Atoms objects representing the structures to plot.
+    rc_points : list or array-like
+        List of reaction coordinate values corresponding to each structure.
+    y_points : list or array-like
+        List of y-axis values (e.g., energy or eigenvalue) for each structure.
+    images_to_plot : str, optional
+        Determines which structures to plot as insets. Options:
+            - "all": plot all structures.
+            - "crit_points": plot only the initial, saddle, and final structures.
+    plot_mode : str, optional
+        Determines how the saddle point is selected. Options:
+            - "energy": saddle is the structure with maximum y value.
+            - "eigenvalue": saddle is the structure with minimum y value.
+
+    Behavior
+    --------
+    If the number of structures does not match the number of reaction coordinate points,
+    a warning is logged and no structures are plotted.
+    The function does not return a value; it modifies the provided axis in-place.
+
+    Usage Notes
+    ----------
+    - This function is intended to be used as part of a NEB (Nudged Elastic Band) path plotting routine.
+    - The appearance and placement of insets may depend on the axis limits and figure size.
+    """
     if len(atoms_list) != len(rc_points):
         log.warning(
             f"Mismatch between number of structures ({len(atoms_list)}) and "
