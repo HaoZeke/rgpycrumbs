@@ -62,7 +62,9 @@ def generate_nwchem_input(
     logging.info(f"Reading atom types from: [cyan]{pos_path}[/cyan]")
     try:
         atoms = ase_read(pos_path)
-        assert len(atoms) > 0, "Input geometry file contains no atoms."
+        if len(atoms) == 0:
+            logging.critical(f"Input geometry file '{pos_path}' contains no atoms.")
+            sys.exit(1)
     except FileNotFoundError:
         logging.critical(f"Geometry file not found at '{pos_path}'")
         sys.exit(1)
