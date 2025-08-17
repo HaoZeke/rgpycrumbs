@@ -249,6 +249,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     ax.set_facecolor(facecolor)
     ax.set_xlim(left=0)
     plt.tight_layout(pad=0.5)
+    plt.grid(False)
 
 
 @click.command()
