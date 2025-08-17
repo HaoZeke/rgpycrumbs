@@ -3,9 +3,9 @@
 
 [metadata]
 groups = ["default", "plotter"]
-strategy = ["inherit_metadata"]
+strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:63e0ecc4125f5abba96110e39141b1e7e215f4e2b7fdd534faf76f0252788a4a"
+content_hash = "sha256:b32d9a79748e4bb90571a65b8084844b4435c54d744030f02f29adb59851994a"
 
 [[metadata.targets]]
 requires_python = ">=3.10"
@@ -13,19 +13,28 @@ requires_python = ">=3.10"
 [[package]]
 name = "appdirs"
 version = "1.4.4"
-summary = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-groups = ["default"]
+summary = ""
 files = [
     {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
     {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
 ]
 
 [[package]]
+name = "click"
+version = "8.2.1"
+summary = ""
+dependencies = [
+    "colorama; sys_platform == \"win32\"",
+]
+files = [
+    {file = "click-8.2.1-py3-none-any.whl", hash = "sha256:61a3265b914e850b85317d0b3109c7f8cd35a670f963866005d6ef1d5175a12b"},
+    {file = "click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202"},
+]
+
+[[package]]
 name = "cmcrameri"
 version = "1.9"
-requires_python = ">=3.6"
-summary = "Perceptually uniform colormaps by Fabio Crameri"
-groups = ["plotter"]
+summary = ""
 dependencies = [
     "matplotlib",
     "numpy",
@@ -37,13 +46,20 @@ files = [
 ]
 
 [[package]]
+name = "colorama"
+version = "0.4.6"
+summary = ""
+files = [
+    {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
+    {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
+]
+
+[[package]]
 name = "contourpy"
 version = "1.3.0"
-requires_python = ">=3.9"
-summary = "Python library for calculating contours of 2D quadrilateral grids"
-groups = ["plotter"]
+summary = ""
 dependencies = [
-    "numpy>=1.23",
+    "numpy",
 ]
 files = [
     {file = "contourpy-1.3.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:880ea32e5c774634f9fcd46504bf9f080a41ad855f4fef54f5380f5133d343c7"},
@@ -103,9 +119,7 @@ files = [
 [[package]]
 name = "cycler"
 version = "0.12.1"
-requires_python = ">=3.8"
-summary = "Composable style cycles"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"},
     {file = "cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c"},
@@ -114,9 +128,7 @@ files = [
 [[package]]
 name = "flexcache"
 version = "0.3"
-requires_python = ">=3.9"
-summary = "Saves and loads to the cache a transformed versions of a source object."
-groups = ["default"]
+summary = ""
 dependencies = [
     "typing-extensions",
 ]
@@ -128,9 +140,7 @@ files = [
 [[package]]
 name = "flexparser"
 version = "0.3.1"
-requires_python = ">=3.9"
-summary = "Parsing made fun ... using typing."
-groups = ["default"]
+summary = ""
 dependencies = [
     "typing-extensions",
 ]
@@ -142,9 +152,7 @@ files = [
 [[package]]
 name = "fonttools"
 version = "4.54.1"
-requires_python = ">=3.8"
-summary = "Tools to manipulate font files"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "fonttools-4.54.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:7ed7ee041ff7b34cc62f07545e55e1468808691dddfd315d51dd82a6b37ddef2"},
     {file = "fonttools-4.54.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:41bb0b250c8132b2fcac148e2e9198e62ff06f3cc472065dff839327945c5882"},
@@ -183,11 +191,9 @@ files = [
 [[package]]
 name = "jinja2"
 version = "3.1.4"
-requires_python = ">=3.7"
-summary = "A very fast and expressive template engine."
-groups = ["default"]
+summary = ""
 dependencies = [
-    "MarkupSafe>=2.0",
+    "markupsafe",
 ]
 files = [
     {file = "jinja2-3.1.4-py3-none-any.whl", hash = "sha256:bc5dd2abb727a5319567b7a813e6a2e7318c39f4f487cfe6c89c6f9c7d25197d"},
@@ -197,9 +203,7 @@ files = [
 [[package]]
 name = "kiwisolver"
 version = "1.4.7"
-requires_python = ">=3.8"
-summary = "A fast implementation of the Cassowary constraint solver"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "kiwisolver-1.4.7-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:8a9c83f75223d5e48b0bc9cb1bf2776cf01563e00ade8775ffe13b0b6e1af3a6"},
     {file = "kiwisolver-1.4.7-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:58370b1ffbd35407444d57057b57da5d6549d2d854fa30249771775c63b5fe17"},
@@ -277,9 +281,7 @@ files = [
 [[package]]
 name = "markupsafe"
 version = "3.0.2"
-requires_python = ">=3.9"
-summary = "Safely add untrusted strings to HTML/XML markup."
-groups = ["default"]
+summary = ""
 files = [
     {file = "MarkupSafe-3.0.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:7e94c425039cde14257288fd61dcfb01963e658efbc0ff54f5306b06054700f8"},
     {file = "MarkupSafe-3.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:9e2d922824181480953426608b81967de705c3cef4d1af983af849d7bd619158"},
@@ -337,20 +339,17 @@ files = [
 [[package]]
 name = "matplotlib"
 version = "3.9.2"
-requires_python = ">=3.9"
-summary = "Python plotting package"
-groups = ["plotter"]
+summary = ""
 dependencies = [
-    "contourpy>=1.0.1",
-    "cycler>=0.10",
-    "fonttools>=4.22.0",
-    "importlib-resources>=3.2.0; python_version < \"3.10\"",
-    "kiwisolver>=1.3.1",
-    "numpy>=1.23",
-    "packaging>=20.0",
-    "pillow>=8",
-    "pyparsing>=2.3.1",
-    "python-dateutil>=2.7",
+    "contourpy",
+    "cycler",
+    "fonttools",
+    "kiwisolver",
+    "numpy",
+    "packaging",
+    "pillow",
+    "pyparsing",
+    "python-dateutil",
 ]
 files = [
     {file = "matplotlib-3.9.2-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:9d78bbc0cbc891ad55b4f39a48c22182e9bdaea7fc0e5dbd364f49f729ca1bbb"},
@@ -388,9 +387,7 @@ files = [
 [[package]]
 name = "numpy"
 version = "2.1.2"
-requires_python = ">=3.10"
-summary = "Fundamental package for array computing in Python"
-groups = ["default", "plotter"]
+summary = ""
 files = [
     {file = "numpy-2.1.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:30d53720b726ec36a7f88dc873f0eec8447fbc93d93a8f079dfac2629598d6ee"},
     {file = "numpy-2.1.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e8d3ca0a72dd8846eb6f7dfe8f19088060fcb76931ed592d29128e0219652884"},
@@ -450,9 +447,7 @@ files = [
 [[package]]
 name = "packaging"
 version = "24.1"
-requires_python = ">=3.8"
-summary = "Core utilities for Python packages"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "packaging-24.1-py3-none-any.whl", hash = "sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124"},
     {file = "packaging-24.1.tar.gz", hash = "sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002"},
@@ -461,9 +456,7 @@ files = [
 [[package]]
 name = "pillow"
 version = "11.0.0"
-requires_python = ">=3.9"
-summary = "Python Imaging Library (Fork)"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "pillow-11.0.0-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:6619654954dc4936fcff82db8eb6401d3159ec6be81e33c6000dfd76ae189947"},
     {file = "pillow-11.0.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:b3c5ac4bed7519088103d9450a1107f76308ecf91d6dabc8a33a2fcfb18d0fba"},
@@ -530,13 +523,11 @@ files = [
 [[package]]
 name = "pint"
 version = "0.24.3"
-requires_python = ">=3.9"
-summary = "Physical quantities module"
-groups = ["default"]
+summary = ""
 dependencies = [
-    "appdirs>=1.4.4",
-    "flexcache>=0.3",
-    "flexparser>=0.3",
+    "appdirs",
+    "flexcache",
+    "flexparser",
     "typing-extensions",
 ]
 files = [
@@ -547,9 +538,7 @@ files = [
 [[package]]
 name = "pyparsing"
 version = "3.2.0"
-requires_python = ">=3.9"
-summary = "pyparsing module - Classes and methods to define and execute parsing grammars"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "pyparsing-3.2.0-py3-none-any.whl", hash = "sha256:93d9577b88da0bbea8cc8334ee8b918ed014968fd2ec383e868fb8afb1ccef84"},
     {file = "pyparsing-3.2.0.tar.gz", hash = "sha256:cbf74e27246d595d9a74b186b810f6fbb86726dbf3b9532efb343f6d7294fe9c"},
@@ -558,11 +547,9 @@ files = [
 [[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
-requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-summary = "Extensions to the standard Python datetime module"
-groups = ["plotter"]
+summary = ""
 dependencies = [
-    "six>=1.5",
+    "six",
 ]
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
@@ -572,9 +559,7 @@ files = [
 [[package]]
 name = "six"
 version = "1.16.0"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-summary = "Python 2 and 3 compatibility utilities"
-groups = ["plotter"]
+summary = ""
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
@@ -583,9 +568,7 @@ files = [
 [[package]]
 name = "tomli"
 version = "2.0.2"
-requires_python = ">=3.8"
-summary = "A lil' TOML parser"
-groups = ["default"]
+summary = ""
 files = [
     {file = "tomli-2.0.2-py3-none-any.whl", hash = "sha256:2ebe24485c53d303f690b0ec092806a085f07af5a5aa1464f3931eec36caaa38"},
     {file = "tomli-2.0.2.tar.gz", hash = "sha256:d46d457a85337051c36524bc5349dd91b1877838e2979ac5ced3e710ed8a60ed"},
@@ -594,9 +577,7 @@ files = [
 [[package]]
 name = "typing-extensions"
 version = "4.12.2"
-requires_python = ">=3.8"
-summary = "Backported and Experimental Type Hints for Python 3.8+"
-groups = ["default"]
+summary = ""
 files = [
     {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
     {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
