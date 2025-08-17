@@ -82,6 +82,9 @@ def generate_nwchem_input(
 
             f.write(f"memory {mem_in_gb} gb\n\n")
 
+            # This geometry block is only a template for memory allocation.  The
+            # atom types and count are what matter. Rather than confuse people
+            # with possible unit related shenanigans, just dummy positions here.
             f.write("geometry units bohr noautosym nocenter noautoz\n")
             for i, atom in enumerate(atoms):
                 f.write(
@@ -169,7 +172,7 @@ def main(pos_file: Path, config: Path, output: Path):
 
     except (configparser.NoSectionError, FileNotFoundError) as e:
         logging.critical(
-            f"Could not read settings from '{config}'. Please ensure the file exists and contains a [socket_nwchem_options] section. Error: {e}"
+            f"Could not read settings from '{config}'. Please ensure the file exists and contains a [SocketNWChemPot] section. Error: {e}"
         )
         sys.exit(1)
 
