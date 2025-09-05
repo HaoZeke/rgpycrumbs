@@ -18,6 +18,7 @@
 import glob
 import logging
 from pathlib import Path
+from collections import namedtuple
 import sys
 import io
 
@@ -53,6 +54,9 @@ log = logging.getLogger("rich")
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_CMAP = "batlow"
 
+# Datastructures
+InsetImagePos = namedtuple("InsetImagePos", "x y rad")
+
 
 def load_paths(file_pattern: str) -> list[Path]:
     """Finds and sorts files matching a glob pattern."""
@@ -66,7 +70,16 @@ def load_paths(file_pattern: str) -> list[Path]:
 
 
 def plot_structure_insets(
-    ax, atoms_list, rc_points, y_points, images_to_plot="all", plot_mode="energy"
+    ax,
+    atoms_list,
+    rc_points,
+    y_points,
+    images_to_plot="all",
+    plot_mode="energy",
+    zoom_ratio=0.4,
+    draw_reactant=InsetImagePos(15, 60, 0.1),
+    draw_saddle=InsetImagePos(15, 60, 0.1),
+    draw_product=InsetImagePos(15, 60, 0.1),
 ):
     """
     Renders and plots selected atomic structures as insets on the provided matplotlib axis.
@@ -89,6 +102,8 @@ def plot_structure_insets(
         Determines how the saddle point is selected. Options:
             - "energy": saddle is the structure with maximum y value.
             - "eigenvalue": saddle is the structure with minimum y value.
+    zoom_ratio : float, optional
+        Determines the size of inset
 
     Behavior
     --------
@@ -120,7 +135,7 @@ def plot_structure_insets(
             saddle_index = np.argmin(y_points)  # Lowest point for eigenvalue
 
         crit_indices = {0, saddle_index, len(atoms_list) - 1}
-        plot_indices = sorted(list(crit_indices))
+        plot_indices = sorted(crit_indices)
 
     for i in plot_indices:
         atoms = atoms_list[i]
@@ -137,14 +152,23 @@ def plot_structure_insets(
         img_data = plt.imread(buf)
         buf.close()
 
-        imagebox = OffsetImage(img_data, zoom=0.4)
+        imagebox = OffsetImage(img_data, zoom=zoom_ratio)
         if images_to_plot == "all":
             y_offset, rad = (60.0, 0.1) if i % 2 == 0 else (-60.0, -0.1)
             xybox = (15.0, y_offset)
             connectionstyle = f"arc3,rad={rad}"
         else:
-            xybox = (15.0, 60.0)
-            connectionstyle = "arc3,rad=0.1"
+            # TODO(rg): Cleanup
+            if i == 0:
+                xybox = (draw_reactant.x, draw_reactant.y)
+                rad = draw_reactant.rad
+            elif i == saddle_index:
+                xybox = (draw_saddle.x, draw_saddle.y)
+                rad = draw_saddle.rad
+            else:
+                xybox = (draw_product.x, draw_product.y)
+                rad = draw_product.rad
+            connectionstyle = f"arc3,rad={rad}"
 
         ab = AnnotationBbox(
             imagebox,
@@ -156,7 +180,7 @@ def plot_structure_insets(
             pad=0.1,
             arrowprops=dict(
                 arrowstyle=ArrowStyle.Fancy(
-                    head_length=0.4, head_width=0.4, tail_width=0.1
+                    head_length=zoom_ratio, head_width=zoom_ratio, tail_width=0.1
                 ),
                 connectionstyle=connectionstyle,
                 linestyle="--",
@@ -245,11 +269,11 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    ax.minorticks_on()
+    ax.minorticks_off()
     ax.set_facecolor(facecolor)
     ax.set_xlim(left=0)
-    plt.tight_layout(pad=0.5)
     plt.grid(False)
+    plt.tight_layout(pad=0.5)
 
 
 @click.command()
@@ -310,6 +334,59 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     default=True,
     help="Highlight the final path in red.",
 )
+@click.option(
+    "--figsize",
+    nargs=2,
+    type=(float, float),
+    default=(10, 7),
+    show_default=True,
+    help="Figure width, height in inches.",
+)
+@click.option(
+    "--dpi",
+    type=int,
+    default=200,
+    show_default=True,
+    help="Resolution in Dots Per Inch.",
+)
+@click.option(
+    "--zoom-ratio",
+    type=float,
+    default=0.4,
+    show_default=True,
+    help="Scale the inset image",
+)
+@click.option(
+    "--fontsize-base",
+    type=int,
+    default=12,
+    show_default=True,
+    help="Base font size for text.",
+)
+@click.option(
+    "--draw-reactant",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Positioning for the reactant inset (x, y, rad).",
+)
+@click.option(
+    "--draw-saddle",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Positioning for the saddle inset (x, y, rad).",
+)
+@click.option(
+    "--draw-product",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Positioning for the product inset (x, y, rad).",
+)
 def main(
     input_pattern: str,
     con_file: Path | None,
@@ -318,13 +395,22 @@ def main(
     output_file: Path | None,
     start: int | None,
     end: int | None,
+    *,
     normalize_rc: bool,
+    zoom_ratio: float,
     title: str,
     xlabel: str,
     ylabel: str,
     cmap: str,
     highlight_last: bool,
     facecolor: str,
+    figsize: tuple,
+    dpi: int,
+    fontsize_base: int,
+    # XXX(rg): These can probably be validated better
+    draw_reactant: tuple,
+    draw_saddle: tuple,
+    draw_product: tuple,
 ):
     """
     Plots a series of NEB paths from .dat files.
@@ -333,8 +419,10 @@ def main(
         log.error("--plot-structures requires a --con-file to be provided.")
         sys.exit(1)
 
-    plt.style.use("bmh")
-    fig, ax = plt.subplots(figsize=(10, 7), dpi=200)
+    # plt.style.use("bmh")
+    plt.rcParams.update({"font.size": fontsize_base})
+    plt.rcParams.update({"font.family": "serif"})
+    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
 
     atoms_list = None
     if con_file:
@@ -399,6 +487,16 @@ def main(
                     path_data[y_data_column],
                     plot_structures,
                     plot_mode,
+                    zoom_ratio,
+                    draw_reactant=InsetImagePos(
+                        x=draw_reactant[0], y=draw_reactant[1], rad=draw_reactant[2]
+                    ),
+                    draw_saddle=InsetImagePos(
+                        x=draw_saddle[0], y=draw_saddle[1], rad=draw_saddle[2]
+                    ),
+                    draw_product=InsetImagePos(
+                        x=draw_product[0], y=draw_product[1], rad=draw_product[2]
+                    ),
                 )
         else:
             color = colormap(idx / color_divisor)
