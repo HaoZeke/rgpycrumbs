@@ -15,7 +15,7 @@
 # ///
 
 import logging
-import os
+import re
 import sys
 
 import click
@@ -47,13 +47,21 @@ PLATFORMS = ["linux-64", "osx-64", "osx-arm64", "win-64", "linux-aarch64", "noar
 # --- Core Logic ---
 
 
-def get_packages_to_delete(channel, package_name):
+def get_packages_to_delete(channel, package_name, version_regex):
     """
-    Fetches repodata.json for all platforms and finds packages matching the name.
+    Fetches repodata.json for all platforms and finds packages matching the name and version.
     Returns a list of tuples: (platform, filename).
     """
     packages_to_delete = []
     log.info(f"Fetching package lists for channel [bold cyan]{channel}[/bold cyan]...")
+
+    # Compile the regex for matching the full filename
+    if version_regex:
+        # If a regex is provided, use it to match the version part
+        full_pattern = re.compile(rf"^{re.escape(package_name)}-({version_regex})-.*$")
+    else:
+        # If no regex, match any version of the package
+        full_pattern = re.compile(rf"^{re.escape(package_name)}-[0-9].*$")
 
     with Progress() as progress:
         task = progress.add_task("[green]Checking platforms...", total=len(PLATFORMS))
@@ -77,11 +85,8 @@ def get_packages_to_delete(channel, package_name):
                 }
 
                 found_count = 0
-                import re
-
-                package_pattern = re.compile(rf"^{re.escape(package_name)}-\d+(\.\d+)*")
                 for filename in all_packages.keys():
-                    if package_pattern.match(filename):
+                    if full_pattern.match(filename):
                         packages_to_delete.append((platform, filename))
                         found_count += 1
 
@@ -143,11 +148,16 @@ def delete_package(session, channel, platform, filename, dry_run=False):
     help="Your prefix.dev API key. Can also be set via the PREFIX_API_KEY environment variable.",
 )
 @click.option(
+    "--version-regex",
+    default=None,
+    help=r"A regex to match specific versions to delete (e.g., '^1\.2\.3$'). If not provided, all versions will be targeted.",
+)
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Show which packages would be deleted without actually deleting them.",
 )
-def main(channel, package_name, api_key, dry_run):
+def main(channel, package_name, api_key, version_regex, dry_run):
     """
     Finds and deletes all versions of a package from a prefix.dev channel.
     """
@@ -156,12 +166,16 @@ def main(channel, package_name, api_key, dry_run):
         if not api_key:  # Ensure the API key is set after prompting
             log.error("API key is required for deletion. Exiting.")
             sys.exit(1)
-    packages = get_packages_to_delete(channel, package_name)
+
+    packages = get_packages_to_delete(channel, package_name, version_regex)
 
     if not packages:
         log.info(
-            f"No packages matching '{package_name}*' found in channel '{channel}'. Nothing to do."
+            f"No packages matching '{package_name}*' found in channel '{channel}'."
         )
+        if version_regex:
+            log.info(f"Using version regex: '{version_regex}'")
+        log.info("Nothing to do.")
         return
 
     log.info(
