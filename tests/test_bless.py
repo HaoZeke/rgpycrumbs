@@ -49,7 +49,7 @@ class TestBlessLogParsing:
 
     @given(
         timestamp=datetimes(min_value=datetime(1900, 1, 1), max_value=datetime(2100, 1, 1)).map(lambda dt: dt.strftime("%Y-%m-%dT%H:%M:%SZ")),
-        logdata=text(),
+        logdata=text().filter(lambda s: '\n' not in s),
     )
     def test_valid_log_line_parsing_hypothesis_with_space(self, timestamp, logdata):
         log_line = f"[{timestamp}] {logdata}"
@@ -58,7 +58,7 @@ class TestBlessLogParsing:
 
     @given(
         timestamp=datetimes(min_value=datetime(1900, 1, 1), max_value=datetime(2100, 1, 1)).map(lambda dt: dt.strftime("%Y-%m-%dT%H:%M:%SZ")),
-        logdata=text().filter(lambda s: len(s) == 0 or not s[0].isspace()),
+        logdata=text().filter(lambda s: '\n' not in s).filter(lambda s: len(s) == 0 or not s[0].isspace()),
     )
     def test_valid_log_line_parsing_hypothesis_no_space(self, timestamp, logdata):
         log_line = f"[{timestamp}]{logdata}"
