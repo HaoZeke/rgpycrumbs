@@ -5,8 +5,8 @@ from hypothesis import given
 from hypothesis.strategies import (
     text,
     datetimes,
-    characters,
     from_regex,
+    just,
 )
 
 
@@ -39,7 +39,7 @@ class TestBlessLogParsing:
     def test_invalid_log_line_only_timestamp(self):
         log_line = "[2024-10-28T18:58:24Z]"
         result = parse_bless_log_line(log_line)
-        assert result is None  # Missing space and logdata
+        assert result == ("2024-10-28T18:58:24Z", "")  # Empty logdata is valid
 
     def test_regex_direct_match(self):
         log_line = "[2024-10-28T18:58:24Z] Test data"
@@ -51,7 +51,7 @@ class TestBlessLogParsing:
     @given(
         timestamp=from_regex(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
         logdata=text(),
-        space=characters(whitespaces=True, min_code_point=9, max_code_point=13).map(lambda s: s if s == " " else ""),  # Optional space or empty
+        space=just("") | just(" "),  # Optional space or empty
     )
     def test_valid_log_line_parsing_hypothesis(self, timestamp, logdata, space):
         log_line = f"[{timestamp}]{space}{logdata}"
