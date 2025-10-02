@@ -5,7 +5,7 @@ from typing import Match, Tuple
 BLESS_LOG = re.compile(
     r"""
 \[(?P<timestamp>.*?)\]  # Capture timestamp in a named group
-\s                      # Match a whitespace character
+\s?                     # Optionally match a whitespace character
 (?P<logdata>.*)         # Capture the rest of the log data in a named group
 """,
     re.X,

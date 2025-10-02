@@ -1,6 +1,13 @@
 import pytest
 from datetime import datetime, timedelta
 from rgpycrumbs.parsers.bless import BLESS_LOG, parse_bless_time, parse_bless_log_line
+from hypothesis import given
+from hypothesis.strategies import (
+    text,
+    datetimes,
+    characters,
+    from_regex,
+)
 
 
 class TestBlessLogParsing:
@@ -41,6 +48,16 @@ class TestBlessLogParsing:
         assert match.group("timestamp") == "2024-10-28T18:58:24Z"
         assert match.group("logdata") == "Test data"
 
+    @given(
+        timestamp=from_regex(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
+        logdata=text(),
+        space=characters(whitespaces=True, min_code_point=9, max_code_point=13).map(lambda s: s if s == " " else ""),  # Optional space or empty
+    )
+    def test_valid_log_line_parsing_hypothesis(self, timestamp, logdata, space):
+        log_line = f"[{timestamp}]{space}{logdata}"
+        result = parse_bless_log_line(log_line)
+        assert result == (timestamp, logdata)
+
 
 class TestBlessTimeParsing:
     def test_valid_timestamp_parsing(self):
@@ -77,3 +94,14 @@ class TestBlessTimeParsing:
         timestamp_str = "28/10/2024 18:58:24"
         with pytest.raises(ValueError):
             parse_bless_time(timestamp_str)
+
+    @given(datetimes(min_value=datetime(1900, 1, 1), max_value=datetime(2100, 1, 1)))
+    def test_valid_timestamp_parsing_hypothesis(self, dt):
+        timestamp_str = dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        result = parse_bless_time(timestamp_str)
+        assert result.year == dt.year
+        assert result.month == dt.month
+        assert result.day == dt.day
+        assert result.hour == dt.hour
+        assert result.minute == dt.minute
+        assert result.second == dt.second
