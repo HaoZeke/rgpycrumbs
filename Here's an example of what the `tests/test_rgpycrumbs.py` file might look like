@@ -1,0 +1,8 @@
+import pytest
+from rgpycrumbs.parsers import bless
+
+def test_parse_timestamp():
+    # Test that the parse_timestamp function can correctly parse a timestamp string
+    timestamp = "2024-10-28T18:58:24Z"
+    parsed_timestamp = bless.parse_timestamp(timestamp)
+    assert parsed_timestamp == datetime.datetime(2024, 10, 28, 18, 58, 24)
