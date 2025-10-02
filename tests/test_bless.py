@@ -5,7 +5,6 @@ from hypothesis import given
 from hypothesis.strategies import (
     text,
     datetimes,
-    from_regex,
     just,
 )
 
@@ -49,7 +48,7 @@ class TestBlessLogParsing:
         assert match.group("logdata") == "Test data"
 
     @given(
-        timestamp=from_regex(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
+        timestamp=datetimes(min_value=datetime(1900, 1, 1), max_value=datetime(2100, 1, 1)).map(lambda dt: dt.strftime("%Y-%m-%dT%H:%M:%SZ")),
         logdata=text(),
         space=just("") | just(" "),  # Optional space or empty
     )
