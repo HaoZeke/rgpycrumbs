@@ -107,9 +107,9 @@ build_cmap(
 build_cmap(
     [
         RUHI_COLORS["teal"],
-        RUHI_COLORS["sky"],      # Low
+        RUHI_COLORS["sky"],  # Low
         RUHI_COLORS["magenta"],  # Mid
-        RUHI_COLORS["coral"],    # High
+        RUHI_COLORS["coral"],  # High
         RUHI_COLORS["sunshine"],
     ],
     name="ruhi_diverging",
@@ -807,6 +807,18 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Figure width, height in inches.",
 )
 @click.option(
+    "--fig-height",
+    type=float,
+    default=None,
+    help="Figure height in inches. Must be used *with* --aspect-ratio.",
+)
+@click.option(
+    "--aspect-ratio",
+    type=float,
+    default=None,
+    help="Figure aspect ratio (width/height). Must be used *with* --fig-height.",
+)
+@click.option(
     "--dpi",
     type=int,
     default=200,
@@ -892,6 +904,8 @@ def main(
     facecolor,
     fontsize_base,
     figsize,
+    fig_height,
+    aspect_ratio,
     dpi,
     zoom_ratio,
     highlight_last,
@@ -983,7 +997,33 @@ def main(
             additional_atoms = None
 
     # --- Setup Plot ---
-    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+    # --- Figure Size Logic ---
+    final_figsize = None
+    if fig_height is not None and aspect_ratio is not None:
+        # New method: height and aspect ratio
+        width_in = fig_height * aspect_ratio
+        final_figsize = (width_in, fig_height)
+        log.info(
+            f'Using aspect ratio: height=[bold cyan]{fig_height:.2f}"[/bold cyan], '
+            f"aspect=[bold cyan]{aspect_ratio:.2f}[/bold cyan] "
+            f'-> width=[bold cyan]{width_in:.2f}"[/bold cyan]'
+        )
+    elif fig_height is not None or aspect_ratio is not None:
+        # Error: Only one was provided
+        log.error(
+            "[bold red]Error:[/bold red] --fig-height and --aspect-ratio must be used together."
+        )
+        log.error(f"Falling back to default figsize: {figsize}")
+        final_figsize = figsize
+    else:
+        # Old method: --figsize
+        final_figsize = figsize
+        log.info(
+            f'Using figsize: width=[bold cyan]{figsize[0]:.2f}"[/bold cyan], '
+            f'height=[bold cyan]{figsize[1]:.2f}"[/bold cyan]'
+        )
+
+    fig, ax = plt.subplots(figsize=final_figsize, dpi=dpi)
     apply_plot_theme(ax, selected_theme)
 
     # --- LANDSCAPE PLOT ---
