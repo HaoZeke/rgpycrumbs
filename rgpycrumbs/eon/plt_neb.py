@@ -16,24 +16,23 @@
 # ///
 
 import glob
-import logging
-from pathlib import Path
-from collections import namedtuple
-import sys
 import io
+import logging
+import sys
+from collections import namedtuple
+from pathlib import Path
 
 import click
 import matplotlib.pyplot as plt
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-from matplotlib.patches import ArrowStyle
 import numpy as np
-from cmcrameri import cm
-from rich.console import Console
-from rich.logging import RichHandler
-from scipy.interpolate import splrep, splev
 from ase.io import read as ase_read
 from ase.io import write as ase_write
-
+from cmcrameri import cm
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
+from matplotlib.patches import ArrowStyle
+from rich.console import Console
+from rich.logging import RichHandler
+from scipy.interpolate import splev, splrep
 
 # --- Constants & Setup ---
 logging.basicConfig(
