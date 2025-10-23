@@ -215,23 +215,66 @@ InsetImagePos = namedtuple("InsetImagePos", "x y rad")
 # --- Utility Functions ---
 
 
-def apply_plot_theme(ax: plt.Axes, theme: PlotTheme):
-    """Applies a PlotTheme to a matplotlib axis."""
-    log.info(f"Applying [bold cyan]{theme.name}[/bold cyan] theme")
+def setup_global_theme(theme: PlotTheme):
+    """Sets global plt.rcParams based on the theme *before* plot creation."""
+    log.info(f"Setting global rcParams for [bold cyan]{theme.name}[/bold cyan] theme")
+
+    font_family_to_use = theme.font_family
+    try:
+        # Check if the font is available to matplotlib
+        mpl.font_manager.findfont(theme.font_family, fallback_to_default=False)
+        log.info(f"Font '{theme.font_family}' found by matplotlib.")
+    except Exception:
+        log.warning(
+            f"[bold red]Font '{theme.font_family}' not found.[/bold red] "
+            f"Falling back to 'sans-serif'."
+        )
+        log.warning(
+            "For custom fonts to work, they must be installed on your system "
+            "and recognized by matplotlib."
+        )
+        log.warning(
+            f"You may need to clear the matplotlib cache: [cyan]{mpl.get_cachedir()}[/cyan]"
+        )
+        font_family_to_use = "sans-serif"
+
     plt.rcParams.update(
         {
             "font.size": theme.font_size,
-            "font.family": theme.font_family,
+            "font.family": font_family_to_use,
             "text.color": theme.textcolor,
             "axes.labelcolor": theme.textcolor,
             "xtick.color": theme.textcolor,
             "ytick.color": theme.textcolor,
             "axes.edgecolor": theme.edgecolor,
+            "axes.titlecolor": theme.textcolor,
+            "figure.facecolor": theme.facecolor,  # Set global figure facecolor
+            "axes.titlesize": theme.font_size * 1.1,  # Make title a bit larger
+            "axes.labelsize": theme.font_size,
+            "xtick.labelsize": theme.font_size,
+            "ytick.labelsize": theme.font_size,
+            "legend.fontsize": theme.font_size,
+            "savefig.facecolor": theme.facecolor,  # Ensure saved figs also have bg
+            "savefig.transparent": False,
         }
     )
+
+
+def apply_plot_theme(ax: plt.Axes, theme: PlotTheme):
+    """Applies theme properties *specific* to an axis instance."""
+    log.info(f"Applying axis-specific theme for [bold cyan]{theme.name}[/bold cyan]")
+
+    # Set axis-specific properties
     ax.set_facecolor(theme.facecolor)
     for spine in ax.spines.values():
         spine.set_edgecolor(theme.edgecolor)
+
+    # These are now mostly redundant if rcParams worked, but serve as a final failsafe
+    ax.tick_params(axis="x", colors=theme.textcolor)
+    ax.tick_params(axis="y", colors=theme.textcolor)
+    ax.yaxis.label.set_color(theme.textcolor)
+    ax.xaxis.label.set_color(theme.textcolor)
+    ax.title.set_color(theme.textcolor)
 
 
 def load_paths(file_pattern: str) -> list[Path]:
@@ -940,6 +983,7 @@ def main(
             f"Overriding theme facecolor with [bold magenta]{facecolor}[/bold magenta]"
         )
     # ---
+    setup_global_theme(selected_theme)
 
     # --- Dependency Checks ---
     if ira_mod is None and (
