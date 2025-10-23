@@ -38,6 +38,7 @@ import glob
 import io
 import logging
 import sys
+from collections import namedtuple
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -108,6 +109,10 @@ class SmoothingParams:
 
     window_length: int = 5
     polyorder: int = 2
+
+
+# Datastructure for inset positioning
+InsetImagePos = namedtuple("InsetImagePos", "x y rad")
 
 
 # --- Utility Functions ---
@@ -204,7 +209,9 @@ def calculate_landscape_coords(atoms_list: list, ira_instance):
 
 
 # --- Plotting Functions ---
-def plot_single_inset(ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0)):
+def plot_single_inset(
+    ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0), rad=0.0
+):  # <-- Added rad
     """
     Renders a single ASE Atoms object and plots it as an inset.
 
@@ -220,6 +227,8 @@ def plot_single_inset(ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0)):
         The y-data coordinate to anchor the arrow to.
     xybox : tuple, optional
         The (x, y) offset in points for placing the image box.
+    rad : float, optional
+        The connection style 'rad' parameter for the arrow.
     """
     buf = io.BytesIO()
     ase_write(
@@ -238,22 +247,31 @@ def plot_single_inset(ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0)):
         xycoords="data",
         boxcoords="offset points",
         pad=0.1,
-        arrowprops=dict(
-            arrowstyle=ArrowStyle.Fancy(
+        arrowprops={
+            "arrowstyle": ArrowStyle.Fancy(
                 head_length=0.4, head_width=0.4, tail_width=0.1
             ),
-            connectionstyle="arc3,rad=0.0",
-            linestyle="-",
-            color="black",
-            linewidth=1.5,
-        ),
+            "connectionstyle": f"arc3,rad={rad}",
+            "linestyle": "-",
+            "color": "black",
+            "linewidth": 1.5,
+        },
     )
     ax.add_artist(ab)
     ab.set_zorder(100)  # Ensure inset is drawn on top
 
 
 def plot_structure_insets(
-    ax, atoms_list, x_coords, y_coords, saddle_data, images_to_plot, plot_mode
+    ax,
+    atoms_list,
+    x_coords,
+    y_coords,
+    saddle_data,
+    images_to_plot,
+    plot_mode,
+    draw_reactant: InsetImagePos | None = None,
+    draw_saddle: InsetImagePos | None = None,
+    draw_product: InsetImagePos | None = None,
 ):
     """
     Plots insets for critical points (reactant, saddle, product) or all images.
@@ -275,7 +293,19 @@ def plot_structure_insets(
         Which images to plot: "all" or "crit_points".
     plot_mode : str
         "energy" or "eigenvalue", used to determine saddle point logic.
+    draw_reactant : InsetImagePos
+        Positioning info for the reactant inset.
+    draw_saddle : InsetImagePos
+        Positioning info for the saddle inset.
+    draw_product : InsetImagePos
+        Positioning info for the product inset.
     """
+    if draw_reactant is None:
+        draw_reactant = InsetImagePos(15, 60, 0.1)
+    if draw_saddle is None:
+        draw_saddle = InsetImagePos(15, 60, 0.1)
+    if draw_product is None:
+        draw_product = InsetImagePos(15, 60, 0.1)
     if len(atoms_list) != len(x_coords) or len(atoms_list) != len(y_coords):
         log.warning(
             f"Mismatch between number of structures ({len(atoms_list)}) and data points ({len(x_coords)}). Skipping structure plotting."
@@ -283,6 +313,7 @@ def plot_structure_insets(
         return
 
     plot_indices = []
+    saddle_index = -1  # Initialize
     if images_to_plot == "all":
         plot_indices = range(len(atoms_list))
     elif images_to_plot == "crit_points":
@@ -298,14 +329,23 @@ def plot_structure_insets(
 
     # Plot the selected structures
     for i in plot_indices:
-        # Alternate vertical placement for 'all' mode to reduce overlap
         if images_to_plot == "all":
             y_offset = 60.0 if i % 2 == 0 else -60.0
             xybox = (15.0, y_offset)
-        else:
-            xybox = (15.0, 60.0)  # Default for critical points
+            rad = 0.1 if i % 2 == 0 else -0.1
+        elif i == 0:
+            xybox = (draw_reactant.x, draw_reactant.y)
+            rad = draw_reactant.rad
+        elif i == saddle_index:
+            xybox = (draw_saddle.x, draw_saddle.y)
+            rad = draw_saddle.rad
+        else:  # Product
+            xybox = (draw_product.x, draw_product.y)
+            rad = draw_product.rad
 
-        plot_single_inset(ax, atoms_list[i], x_coords[i], y_coords[i], xybox=xybox)
+        plot_single_inset(
+            ax, atoms_list[i], x_coords[i], y_coords[i], xybox=xybox, rad=rad
+        )
 
 
 def plot_energy_path(
@@ -395,7 +435,6 @@ def plot_energy_path(
         markersize=6,
         alpha=alpha,
         zorder=zorder + 1,
-        markeredgecolor="black",
         markerfacecolor=color,
         markeredgewidth=0.5,
     )
@@ -449,7 +488,6 @@ def plot_eigenvalue_path(ax, path_data, color, alpha, zorder):
         markersize=6,
         alpha=alpha,
         zorder=zorder + 1,
-        markeredgecolor="black",
         markerfacecolor=color,
         markeredgewidth=0.5,
     )
@@ -584,7 +622,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     "--rc-mode",
     type=click.Choice([e.value for e in RCMode]),
     default=RCMode.PATH.value,
-    help="Reaction coordinate for profile plot: 'path' (file's RC) or 'rmsd' (RMSD from reactant).",
+    help="Reaction coordinate for profile plot: 'path' (RC) or 'rmsd' (from reactant).",
 )
 @click.option(
     "--plot-structures",
@@ -596,7 +634,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     "--plot-mode",
     type=click.Choice([e.value for e in PlotMode]),
     default=PlotMode.ENERGY.value,
-    help="Quantity to plot on y-axis (profile) or color (landscape): 'energy' or 'eigenvalue'.",
+    help="Quantity to plot on y-axis (profile) or color (landscape)",
 )
 @click.option(
     "-o",
@@ -641,6 +679,30 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor="gray"):
     default=2,
     help="Savitzky-Golay filter polynomial order (for Hermite spline).",
 )
+@click.option(
+    "--draw-reactant",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Positioning for the reactant inset (x, y, rad).",
+)
+@click.option(
+    "--draw-saddle",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Positioning for the saddle inset (x, y, rad).",
+)
+@click.option(
+    "--draw-product",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Positioning for the product inset (x, y, rad).",
+)
 def main(
     input_pattern,
     con_file,
@@ -663,15 +725,16 @@ def main(
     spline_method,
     savgol_window,
     savgol_order,
+    draw_reactant,
+    draw_saddle,
+    draw_product,
 ):
     """Main entry point for NEB plot script."""
     # Check for IRA dependency
     if ira_mod is None and (
         plot_type == "landscape" or rc_mode == "rmsd" or additional_con
     ):
-        log.critical(
-            "The 'ira_mod' library is required for landscape, rmsd, or additional-con features."
-        )
+        log.critical("Needs 'ira_mod' library for landscape, rmsd, or additional-con.")
         log.critical("Please install it to use these options. Exiting.")
         sys.exit(1)
 
@@ -682,6 +745,11 @@ def main(
     smoothing_params = SmoothingParams(
         window_length=savgol_window, polyorder=savgol_order
     )
+
+    # --- Instantiate Inset Position objects ---
+    image_pos_reactant = InsetImagePos(*draw_reactant)
+    image_pos_saddle = InsetImagePos(*draw_saddle)
+    image_pos_product = InsetImagePos(*draw_product)
 
     # --- Load Structures ---
     atoms_list = None
@@ -739,7 +807,10 @@ def main(
             y_data_column = 2 if plot_mode == PlotMode.ENERGY.value else 4
             z_data = path_data[y_data_column]
             if len(z_data) != len(atoms_list):
-                errmsg = f"Structure count ({len(atoms_list)}) != data point count ({len(z_data)}) in {final_dat_file.name}"
+                errmsg = (
+                    f"Structure count ({len(atoms_list)})"
+                    f" != data point count ({len(z_data)}) in {final_dat_file.name}"
+                )
                 raise ValueError(errmsg)
         except Exception as e:
             log.error(f"Failed to load or parse {final_dat_file.name}: {e}")
@@ -763,7 +834,16 @@ def main(
 
         if atoms_list and plot_structures != "none":
             plot_structure_insets(
-                ax, atoms_list, rmsd_r, rmsd_p, z_data, plot_structures, plot_mode
+                ax,
+                atoms_list,
+                rmsd_r,
+                rmsd_p,
+                z_data,
+                plot_structures,
+                plot_mode,
+                draw_reactant=image_pos_reactant,
+                draw_saddle=image_pos_saddle,
+                draw_product=image_pos_product,
             )
 
         if additional_atoms:
@@ -773,12 +853,19 @@ def main(
                 marker="*",
                 markersize=20,
                 color="white",
-                markeredgecolor="black",
                 zorder=98,
                 label="Additional Structure",
             )
             if plot_structures != "none":
-                plot_single_inset(ax, additional_atoms, add_rmsd_r, add_rmsd_p)
+                # Use saddle position by default for the "additional" atom
+                plot_single_inset(
+                    ax,
+                    additional_atoms,
+                    add_rmsd_r,
+                    add_rmsd_p,
+                    xybox=(image_pos_saddle.x, image_pos_saddle.y),
+                    rad=image_pos_saddle.rad,
+                )
 
         setup_plot_aesthetics(ax, title, xlabel, ylabel, facecolor)
 
@@ -866,6 +953,9 @@ def main(
                         y_for_insets,  # Saddle data is Y-data
                         plot_structures,
                         plot_mode,
+                        draw_reactant=image_pos_reactant,
+                        draw_saddle=image_pos_saddle,
+                        draw_product=image_pos_product,
                     )
             else:
                 color = colormap(idx / color_divisor)
@@ -887,7 +977,15 @@ def main(
                 # Place inset near the top of the plot
                 y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
                 y_pos = ax.get_ylim()[0] + 0.9 * y_span
-                plot_single_inset(ax, additional_atoms, add_rmsd_r, y_pos)
+                # Use saddle position by default
+                plot_single_inset(
+                    ax,
+                    additional_atoms,
+                    add_rmsd_r,
+                    y_pos,
+                    xybox=(image_pos_saddle.x, image_pos_saddle.y),
+                    rad=image_pos_saddle.rad,
+                )
 
         # Add colorbar for optimization steps
         sm = plt.cm.ScalarMappable(
