@@ -107,10 +107,10 @@ build_cmap(
 build_cmap(
     [
         RUHI_COLORS["teal"],
-        RUHI_COLORS["sky"],  # Low
-        RUHI_COLORS["sunshine"],  # Mid
-        RUHI_COLORS["coral"],  # High
-        RUHI_COLORS["magenta"],
+        RUHI_COLORS["sky"],      # Low
+        RUHI_COLORS["magenta"],  # Mid
+        RUHI_COLORS["coral"],    # High
+        RUHI_COLORS["sunshine"],
     ],
     name="ruhi_diverging",
 )
