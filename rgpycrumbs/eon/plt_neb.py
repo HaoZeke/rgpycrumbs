@@ -378,6 +378,7 @@ def plot_single_inset(
     xybox=(15.0, 60.0),
     rad=0.0,
     zoom=0.4,
+    ase_rotation="0x, 90y, 0z",
     arrow_head_length=0.4,
     arrow_head_width=0.4,
     arrow_tail_width=0.1,
@@ -402,7 +403,7 @@ def plot_single_inset(
     """
     buf = io.BytesIO()
     ase_write(
-        buf, atoms, format="png", rotation=("0x, 90y, 0z"), show_unit_cell=0, scale=35
+        buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=35
     )
     buf.seek(0)
     img_data = plt.imread(buf)
@@ -445,6 +446,7 @@ def plot_structure_insets(
     draw_saddle: InsetImagePos | None = None,
     draw_product: InsetImagePos | None = None,
     zoom_ratio: float = 0.4,
+    ase_rotation: str = "0x, 90y, 0z",
     arrow_head_length: float = 0.4,
     arrow_head_width: float = 0.4,
     arrow_tail_width: float = 0.1,
@@ -528,6 +530,7 @@ def plot_structure_insets(
             xybox=xybox,
             rad=rad,
             zoom=zoom_ratio,
+            ase_rotation=ase_rotation,
             arrow_head_length=arrow_head_length,
             arrow_head_width=arrow_head_width,
             arrow_tail_width=arrow_tail_width,
@@ -893,6 +896,13 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Scale the inset image.",
 )
 @click.option(
+    "--ase-rotation",
+    type=str,
+    default="0x, 90y, 0z",
+    show_default=True,
+    help="ASE rotation string for structure insets (e.g., '45x,30y,0z').",
+)
+@click.option(
     "--arrow-head-length",
     type=float,
     default=0.4,
@@ -989,6 +999,7 @@ def main(
     aspect_ratio,
     dpi,
     zoom_ratio,
+    ase_rotation,
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
@@ -1164,6 +1175,7 @@ def main(
                 draw_saddle=image_pos_saddle,
                 draw_product=image_pos_product,
                 zoom_ratio=zoom_ratio,
+                ase_rotation=ase_rotation,
                 arrow_head_length=arrow_head_length,
                 arrow_head_width=arrow_head_width,
                 arrow_tail_width=arrow_tail_width,
@@ -1188,6 +1200,7 @@ def main(
                     xybox=(image_pos_saddle.x, image_pos_saddle.y),
                     rad=image_pos_saddle.rad,
                     zoom=zoom_ratio,
+                    ase_rotation=ase_rotation,
                     arrow_head_length=arrow_head_length,
                     arrow_head_width=arrow_head_width,
                     arrow_tail_width=arrow_tail_width,
@@ -1293,6 +1306,7 @@ def main(
                         draw_saddle=image_pos_saddle,
                         draw_product=image_pos_product,
                         zoom_ratio=zoom_ratio,
+                        ase_rotation=ase_rotation,
                         arrow_head_length=arrow_head_length,
                         arrow_head_width=arrow_head_width,
                         arrow_tail_width=arrow_tail_width,
@@ -1329,6 +1343,7 @@ def main(
                     xybox=(image_pos_saddle.x, image_pos_saddle.y),
                     rad=image_pos_saddle.rad,
                     zoom=zoom_ratio,
+                    ase_rotation=ase_rotation,
                     arrow_head_length=arrow_head_length,
                     arrow_head_width=arrow_head_width,
                     arrow_tail_width=arrow_tail_width,
