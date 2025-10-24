@@ -371,7 +371,16 @@ def calculate_landscape_coords(atoms_list: list, ira_instance):
 
 # --- Plotting Functions ---
 def plot_single_inset(
-    ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0), rad=0.0, zoom=0.4
+    ax,
+    atoms,
+    x_coord,
+    y_coord,
+    xybox=(15.0, 60.0),
+    rad=0.0,
+    zoom=0.4,
+    arrow_head_length=0.4,
+    arrow_head_width=0.4,
+    arrow_tail_width=0.1,
 ):
     """
     Renders a single ASE Atoms object and plots it as an inset.
@@ -410,7 +419,9 @@ def plot_single_inset(
         pad=0.1,
         arrowprops={
             "arrowstyle": ArrowStyle.Fancy(
-                head_length=zoom, head_width=zoom, tail_width=0.1
+                head_length=arrow_head_length,
+                head_width=arrow_head_width,
+                tail_width=arrow_tail_width,
             ),
             "connectionstyle": f"arc3,rad={rad}",
             "linestyle": "-",
@@ -434,6 +445,9 @@ def plot_structure_insets(
     draw_saddle: InsetImagePos | None = None,
     draw_product: InsetImagePos | None = None,
     zoom_ratio: float = 0.4,
+    arrow_head_length: float = 0.4,
+    arrow_head_width: float = 0.4,
+    arrow_tail_width: float = 0.1,
 ):
     """
     Plots insets for critical points (reactant, saddle, product) or all images.
@@ -514,6 +528,9 @@ def plot_structure_insets(
             xybox=xybox,
             rad=rad,
             zoom=zoom_ratio,
+            arrow_head_length=arrow_head_length,
+            arrow_head_width=arrow_head_width,
+            arrow_tail_width=arrow_tail_width,
         )
 
 
@@ -875,6 +892,27 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     show_default=True,
     help="Scale the inset image.",
 )
+@click.option(
+    "--arrow-head-length",
+    type=float,
+    default=0.4,
+    show_default=True,
+    help="Arrow head length for insets (points).",
+)
+@click.option(
+    "--arrow-head-width",
+    type=float,
+    default=0.4,
+    show_default=True,
+    help="Arrow head width for insets (points).",
+)
+@click.option(
+    "--arrow-tail-width",
+    type=float,
+    default=0.1,
+    show_default=True,
+    help="Arrow tail width for insets (points).",
+)
 # --- Path/Spline Options ---
 @click.option(
     "--highlight-last/--no-highlight-last",
@@ -951,6 +989,9 @@ def main(
     aspect_ratio,
     dpi,
     zoom_ratio,
+    arrow_head_length,
+    arrow_head_width,
+    arrow_tail_width,
     highlight_last,
     spline_method,
     savgol_window,
@@ -1123,6 +1164,9 @@ def main(
                 draw_saddle=image_pos_saddle,
                 draw_product=image_pos_product,
                 zoom_ratio=zoom_ratio,
+                arrow_head_length=arrow_head_length,
+                arrow_head_width=arrow_head_width,
+                arrow_tail_width=arrow_tail_width,
             )
 
         if additional_atoms:
@@ -1144,6 +1188,9 @@ def main(
                     xybox=(image_pos_saddle.x, image_pos_saddle.y),
                     rad=image_pos_saddle.rad,
                     zoom=zoom_ratio,
+                    arrow_head_length=arrow_head_length,
+                    arrow_head_width=arrow_head_width,
+                    arrow_tail_width=arrow_tail_width,
                 )
 
         setup_plot_aesthetics(ax, title, xlabel, ylabel)
@@ -1246,6 +1293,9 @@ def main(
                         draw_saddle=image_pos_saddle,
                         draw_product=image_pos_product,
                         zoom_ratio=zoom_ratio,
+                        arrow_head_length=arrow_head_length,
+                        arrow_head_width=arrow_head_width,
+                        arrow_tail_width=arrow_tail_width,
                     )
             else:
                 color = colormap(idx / color_divisor)
@@ -1279,6 +1329,9 @@ def main(
                     xybox=(image_pos_saddle.x, image_pos_saddle.y),
                     rad=image_pos_saddle.rad,
                     zoom=zoom_ratio,
+                    arrow_head_length=arrow_head_length,
+                    arrow_head_width=arrow_head_width,
+                    arrow_tail_width=arrow_tail_width,
                 )
 
         sm = plt.cm.ScalarMappable(
