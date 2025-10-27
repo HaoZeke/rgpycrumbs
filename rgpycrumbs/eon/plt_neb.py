@@ -755,8 +755,8 @@ def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     """Applies labels, limits, and other plot aesthetics."""
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel, weight="bold")
+    ax.set_ylabel(ylabel, weight="bold")
     ax.set_title(title)
     ax.minorticks_on()
     if xlabel != r"RMSD from Reactant ($\AA$)":
