@@ -31,6 +31,7 @@ https://realpython.com/python-script-structure/
 #   "cmcrameri",
 #   "rich",
 #   "ase",
+#   "polars",
 # ]
 # ///
 
@@ -48,6 +49,7 @@ import cmcrameri.cm  # noqa: F401
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
@@ -1320,10 +1322,40 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
     rmsd_p_agg = np.concatenate(all_rmsd_p)
     z_data_agg = np.concatenate(all_z_data)
 
+    pts = np.column_stack([rmsd_r_agg, rmsd_p_agg])
+    unique_exact = np.unique(pts, axis=0)
+    log.info(f"Unique exact (r,p) pairs: {len(unique_exact)}")
+    rounded = np.round(pts, 3)
+    uniq_rounded, counts = np.unique(rounded, axis=0, return_counts=True)
+    multi = (counts > 1).sum()
+    log.info(
+        f"Near-duplicate bins (rounded to 1e-8) with more than one sample: {multi}"
+    )
+
     log.info(
         f"Aggregated {len(z_data_agg)} total data points from {len(all_dat_paths)} paths."
     )
-    return rmsd_r_agg, rmsd_p_agg, z_data_agg
+
+    log.info("Filtering aggregated data for near-duplicates (rounded to 1e-3)...")
+
+    df = pl.DataFrame({"r": rmsd_r_agg, "p": rmsd_p_agg, "z": z_data_agg})
+    df_with_bins = df.with_columns(
+        pl.col("r").round(8).alias("r_rnd"), pl.col("p").round(8).alias("p_rnd")
+    )
+    df_filtered = df_with_bins.sort("z").unique(subset=["r_rnd", "p_rnd"], keep="first")
+    original_count = len(df)
+    filtered_count = len(df_filtered)
+    duplicates_removed = original_count - filtered_count
+    log.info(
+        f"Removed {duplicates_removed} duplicate points"
+        "(keeping lowest energy in each 1e-8 bin)."
+    )
+    log.info(f"Data points reduced from {original_count} to {filtered_count}.")
+    return (
+        df_filtered["r"].to_numpy(),
+        df_filtered["p"].to_numpy(),
+        df_filtered["z"].to_numpy(),
+    )
 
 
 # --- Main Plotting Functions ---
