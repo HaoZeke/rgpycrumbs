@@ -723,7 +723,7 @@ def plot_landscape_path(ax, rmsd_r, rmsd_p, z_data, cmap, z_label):
     fig.colorbar(sm, ax=ax, label=z_label)
 
 
-def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
+def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
     """
     Generates and plots an interpolated 2D surface (contour plot).
 
@@ -743,9 +743,9 @@ def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
     log.info("Generating interpolated 2D surface...")
     xi = np.linspace(rmsd_r.min(), rmsd_r.max(), 100)
     yi = np.linspace(rmsd_p.min(), rmsd_p.max(), 100)
-    X, Y = np.meshgrid(xi, yi)
+    x, y = np.meshgrid(xi, yi)
 
-    Z = griddata((rmsd_r, rmsd_p), z_data, (X, Y), method="cubic")
+    z = griddata((rmsd_r, rmsd_p), z_data, (x, y), method="cubic")
 
     try:
         colormap = mpl.colormaps.get_cmap(cmap)
@@ -753,7 +753,9 @@ def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
         log.warning(f"Colormap '{cmap}' not in registry. Falling back to 'batlow'.")
         colormap = mpl.colormaps.get_cmap("cmc.batlow")
 
-    ax.contourf(X, Y, Z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    ax.contourf(x, y, z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    if show_pts:
+        ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
 
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel):
@@ -821,6 +823,12 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     type=click.Choice(["none", "all", "crit_points"]),
     default="none",
     help="Structures to render on the path. Requires --con-file.",
+)
+@click.option(
+    "--show-pts",
+    type=bool,
+    default=True,
+    help="Show all paths from the optimization on the RMSD 2D plot.",
 )
 @click.option(
     "--plot-mode",
@@ -999,6 +1007,7 @@ def main(
     landscape_path,
     rc_mode,
     plot_structures,
+    show_pts,
     plot_mode,
     # --- Output & Slicing ---
     output_file,
@@ -1078,6 +1087,7 @@ def main(
             landscape_mode=landscape_mode,
             plot_mode=plot_mode,
             plot_structures=plot_structures,
+            show_pts=show_pts,
             selected_theme=selected_theme,
             draw_reactant=draw_reactant,
             draw_saddle=draw_saddle,
@@ -1371,6 +1381,7 @@ def _plot_landscape(
     landscape_mode,
     plot_mode,
     plot_structures,
+    show_pts,
     selected_theme,
     # Inset args
     draw_reactant,
@@ -1430,7 +1441,7 @@ def _plot_landscape(
 
     if landscape_mode == "surface":
         plot_interpolated_landscape(
-            ax, rmsd_r, rmsd_p, z_data, selected_theme.cmap_landscape
+            ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
         )
 
     try:
