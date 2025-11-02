@@ -1291,8 +1291,11 @@ def _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list):
 
 
 def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instance):
-    """Loads and aggregates data from all .dat and .con files for 2D surface."""
-    all_rmsd_r, all_rmsd_p, all_z_data = [], [], []
+    """
+    Loads and aggregates data from all .dat and .con files for 2D surface
+    using Polars and averaging points within each bin.
+    """
+    all_dfs = []
 
     if len(all_dat_paths) != len(all_con_paths):
         log.warning(
@@ -1316,55 +1319,56 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
                 atoms_list_step, ira_instance
             )
 
-            all_rmsd_r.append(rmsd_r_step)
-            all_rmsd_p.append(rmsd_p_step)
-            all_z_data.append(z_data_step)
+            # Create a small DataFrame for this step's data
+            df_step = pl.DataFrame(
+                {"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step}
+            )
+            all_dfs.append(df_step)
 
         except Exception as e:
             log.warning(f"Failed to process {dat_file.name}: {e}")
             continue
 
-    if not all_z_data:
+    if not all_dfs:
         log.critical("Failed to aggregate any data for landscape plot. Exiting.")
         sys.exit(1)
 
-    rmsd_r_agg = np.concatenate(all_rmsd_r)
-    rmsd_p_agg = np.concatenate(all_rmsd_p)
-    z_data_agg = np.concatenate(all_z_data)
+    # --- Polars Aggregation ---
 
-    pts = np.column_stack([rmsd_r_agg, rmsd_p_agg])
-    unique_exact = np.unique(pts, axis=0)
-    log.info(f"Unique exact (r,p) pairs: {len(unique_exact)}")
-    rounded = np.round(pts, 3)
-    uniq_rounded, counts = np.unique(rounded, axis=0, return_counts=True)
-    multi = (counts > 1).sum()
+    # Concatenate all the small DataFrames into one large one
+    df_agg = pl.concat(all_dfs)
+    original_count = len(df_agg)
     log.info(
-        f"Near-duplicate bins (rounded to 1e-8) with more than one sample: {multi}"
+        f"Aggregated {original_count} total data points from {len(all_dat_paths)} paths."
     )
 
+    # --- Averaging Logic (Polars-native) ---
     log.info(
-        f"Aggregated {len(z_data_agg)} total data points from {len(all_dat_paths)} paths."
+        "Averaging aggregated data within near-duplicate bins (rounded to 1e-3)..."
     )
 
-    log.info("Filtering aggregated data for near-duplicates (rounded to 1e-3)...")
+    # This chain does the same as your pandas code:
+    # 1. Creates 'r_rnd' and 'p_rnd' columns
+    # 2. Groups by those binned columns
+    # 3. Calculates the mean of 'z' for each group
+    df_averaged = (
+        df_agg.with_columns(
+            pl.col("r").round(3).alias("r_rnd"), pl.col("p").round(3).alias("p_rnd")
+        )
+        .group_by(["r_rnd", "p_rnd"])  # Group by the rounded bins
+        .agg(pl.col("z").mean())  # Calculate the mean 'z' for each bin
+    )
 
-    df = pl.DataFrame({"r": rmsd_r_agg, "p": rmsd_p_agg, "z": z_data_agg})
-    df_with_bins = df.with_columns(
-        pl.col("r").round(8).alias("r_rnd"), pl.col("p").round(8).alias("p_rnd")
-    )
-    df_filtered = df_with_bins.sort("z").unique(subset=["r_rnd", "p_rnd"], keep="first")
-    original_count = len(df)
-    filtered_count = len(df_filtered)
-    duplicates_removed = original_count - filtered_count
-    log.info(
-        f"Removed {duplicates_removed} duplicate points"
-        "(keeping lowest energy in each 1e-8 bin)."
-    )
-    log.info(f"Data points reduced from {original_count} to {filtered_count}.")
+    # --- Final Logging & Return ---
+    filtered_count = len(df_averaged)
+
+    log.info(f"Averaged {original_count} points down to {filtered_count} unique bins.")
+
+    # Return the bin-centered coordinates and the averaged energy
     return (
-        df_filtered["r"].to_numpy(),
-        df_filtered["p"].to_numpy(),
-        df_filtered["z"].to_numpy(),
+        df_averaged["r_rnd"].to_numpy(),
+        df_averaged["p_rnd"].to_numpy(),
+        df_averaged["z"].to_numpy(),
     )
 
 
