@@ -1359,6 +1359,9 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
     """
     Loads and aggregates data from all .dat and .con files for 2D surface
     using Polars and averaging points within each bin.
+
+    This version returns the actual mean coordinates for each bin (r_mean, p_mean)
+    rather than the rounded bin keys.
     """
     all_dfs = []
 
@@ -1384,7 +1387,7 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
                 atoms_list_step, ira_instance
             )
 
-            # Create a small DataFrame for this step's data
+            # Create a small Polars DataFrame for this step's data
             df_step = pl.DataFrame(
                 {"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step}
             )
@@ -1398,44 +1401,41 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
         log.critical("Failed to aggregate any data for landscape plot. Exiting.")
         sys.exit(1)
 
-    # --- Polars Aggregation ---
-
     # Concatenate all the small DataFrames into one large one
     df_agg = pl.concat(all_dfs)
-    original_count = len(df_agg)
+    original_count = df_agg.height
     log.info(
         f"Aggregated {original_count} total data points from {len(all_dat_paths)} paths."
     )
 
-    # --- Averaging Logic (Polars-native) ---
-    log.info(
-        "Averaging aggregated data within"
-        "near-duplicate bins (rounded to 1e-ROUNDING_DF)..."
+    # Create rounded bin columns (use ROUNDING_DF decimal places)
+    df_binned = df_agg.with_columns(
+        pl.col("r").round(ROUNDING_DF).alias("r_rnd"),
+        pl.col("p").round(ROUNDING_DF).alias("p_rnd"),
     )
 
-    # This chain does the same as your pandas code:
-    # 1. Creates 'r_rnd' and 'p_rnd' columns
-    # 2. Groups by those binned columns
-    # ROUNDING_DF. Calculates the mean of 'z' for each group
-    df_averaged = (
-        df_agg.with_columns(
-            pl.col("r").round(ROUNDING_DF).alias("r_rnd"),
-            pl.col("p").round(ROUNDING_DF).alias("p_rnd"),
+    # Group by rounded bins, compute mean coords and statistics
+    df_grouped = (
+        df_binned.group_by(["r_rnd", "p_rnd"])
+        .agg(
+            pl.col("r").mean().alias("r_mean"),
+            pl.col("p").mean().alias("p_mean"),
+            pl.col("z").mean().alias("z_mean"),
+            pl.col("z").std().alias("z_std"),
+            pl.col("z").count().alias("count"),
         )
-        .group_by(["r_rnd", "p_rnd"])  # Group by the rounded bins
-        .agg(pl.col("z").mean())  # Calculate the mean 'z' for each bin
+        .sort(["r_mean", "p_mean"])
     )
 
-    # --- Final Logging & Return ---
-    filtered_count = len(df_averaged)
+    filtered_count = df_grouped.height
+    log.info(
+        f"Averaged {original_count} points down to {filtered_count} unique bins (rounded to {ROUNDING_DF} decimals)."
+    )
 
-    log.info(f"Averaged {original_count} points down to {filtered_count} unique bins.")
-
-    # Return the bin-centered coordinates and the averaged energy
     return (
-        df_averaged["r_rnd"].to_numpy(),
-        df_averaged["p_rnd"].to_numpy(),
-        df_averaged["z"].to_numpy(),
+        df_grouped["r_mean"].to_numpy(),
+        df_grouped["p_mean"].to_numpy(),
+        df_grouped["z_mean"].to_numpy(),
     )
 
 
