@@ -57,7 +57,13 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.patches import ArrowStyle
 from rich.logging import RichHandler
-from scipy.interpolate import CubicHermiteSpline, Rbf, griddata, splev, splrep
+from scipy.interpolate import (
+    CubicHermiteSpline,
+    RBFInterpolator,
+    griddata,
+    splev,
+    splrep,
+)
 from scipy.signal import savgol_filter
 
 try:
@@ -201,6 +207,8 @@ class SplineMethod(Enum):
 
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
+ROUNDING_DF = 3
+RBF_SMOOTHING = 1e-2
 
 
 @dataclass
@@ -723,7 +731,7 @@ def plot_landscape_path(ax, rmsd_r, rmsd_p, z_data, cmap, z_label):
     fig.colorbar(sm, ax=ax, label=z_label)
 
 
-def plot_interpolated_spline(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
+def plot_interpolated_grid(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
     """
     Generates and plots an interpolated 2D surface (contour plot) with splines.
 
@@ -779,22 +787,33 @@ def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
     cmap : str
         Name of the colormap to use.
     """
-    log.info("Generating interpolated 2D surface...")
-    rbf = Rbf(rmsd_r, rmsd_p, z_data, smooth=0.01)
-    xg = np.linspace(rmsd_r.min(), rmsd_r.max(), 150)
-    yg = np.linspace(rmsd_p.min(), rmsd_p.max(), 150)
+    log.info("Generating interpolated RBF 2D surface...")
+    # Prepare input points for the interpolator: shape (n_samples, 2)
+    pts = np.column_stack([np.asarray(rmsd_r).ravel(), np.asarray(rmsd_p).ravel()])
+    vals = np.asarray(z_data).ravel()
+    rbf = RBFInterpolator(
+        pts, vals, kernel="thin_plate_spline", smoothing=RBF_SMOOTHING
+    )
+    nx, ny = 150, 150
+    xg = np.linspace(rmsd_r.min(), rmsd_r.max(), nx)
+    yg = np.linspace(rmsd_p.min(), rmsd_p.max(), ny)
     xg, yg = np.meshgrid(xg, yg)
-    zrbf = rbf(xg, yg)
+
+    query_pts = np.column_stack([xg.ravel(), yg.ravel()])
+    zflat = rbf(query_pts)  # returns shape (nx*ny,)
+    zg = zflat.reshape(xg.shape)
+
     try:
         colormap = mpl.colormaps.get_cmap(cmap)
     except ValueError:
         log.warning(f"Colormap '{cmap}' not in registry. Falling back to 'batlow'.")
         colormap = mpl.colormaps.get_cmap("cmc.batlow")
 
-    ax.contourf(xg, yg, zrbf, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    ax.contourf(xg, yg, zg, levels=20, cmap=colormap, alpha=0.75, zorder=10)
 
     if show_pts:
         ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
+
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     """Applies labels, limits, and other plot aesthetics."""
@@ -864,7 +883,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 )
 @click.option(
     "--surface-type",
-    type=click.Choice(["spline", "rbf"]),
+    type=click.Choice(["grid", "rbf"]),
     default="rbf",
     help="Interpolation method for the 2D surface.",
 )
@@ -1390,16 +1409,18 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
 
     # --- Averaging Logic (Polars-native) ---
     log.info(
-        "Averaging aggregated data within near-duplicate bins (rounded to 1e-3)..."
+        "Averaging aggregated data within"
+        "near-duplicate bins (rounded to 1e-ROUNDING_DF)..."
     )
 
     # This chain does the same as your pandas code:
     # 1. Creates 'r_rnd' and 'p_rnd' columns
     # 2. Groups by those binned columns
-    # 3. Calculates the mean of 'z' for each group
+    # ROUNDING_DF. Calculates the mean of 'z' for each group
     df_averaged = (
         df_agg.with_columns(
-            pl.col("r").round(3).alias("r_rnd"), pl.col("p").round(3).alias("p_rnd")
+            pl.col("r").round(ROUNDING_DF).alias("r_rnd"),
+            pl.col("p").round(ROUNDING_DF).alias("p_rnd"),
         )
         .group_by(["r_rnd", "p_rnd"])  # Group by the rounded bins
         .agg(pl.col("z").mean())  # Calculate the mean 'z' for each bin
@@ -1491,11 +1512,11 @@ def _plot_landscape(
         sys.exit(1)
 
     if landscape_mode == "surface":
-        if surface_type == "spline":
-            plot_interpolated_spline(
+        if surface_type == "grid":
+            plot_interpolated_grid(
                 ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
             )
-        else: # "rbf"
+        else:  # "rbf"
             plot_interpolated_rbf(
                 ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
             )
