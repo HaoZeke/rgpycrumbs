@@ -57,7 +57,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.patches import ArrowStyle
 from rich.logging import RichHandler
-from scipy.interpolate import CubicHermiteSpline, griddata, splev, splrep
+from scipy.interpolate import CubicHermiteSpline, Rbf, griddata, splev, splrep
 from scipy.signal import savgol_filter
 
 try:
@@ -723,7 +723,46 @@ def plot_landscape_path(ax, rmsd_r, rmsd_p, z_data, cmap, z_label):
     fig.colorbar(sm, ax=ax, label=z_label)
 
 
-def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
+def plot_interpolated_spline(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
+    """
+    Generates and plots an interpolated 2D surface (contour plot) with splines.
+
+    This may have artifacts where samples are not present, debug with show_pts
+    or use with "last".
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axis to plot on.
+    rmsd_r : np.ndarray
+        RMSD from reactant (x-axis).
+    rmsd_p : np.ndarray
+        RMSD from product (y-axis).
+    z_data : np.ndarray
+        Data for coloring the path (z-axis).
+    cmap : str
+        Name of the colormap to use.
+    """
+    log.info("Generating interpolated 2D surface...")
+    log.info("Visualised best with 'last'")
+    xi = np.linspace(rmsd_r.min(), rmsd_r.max(), 100)
+    yi = np.linspace(rmsd_p.min(), rmsd_p.max(), 100)
+    x, y = np.meshgrid(xi, yi)
+
+    z = griddata((rmsd_r, rmsd_p), z_data, (x, y), method="cubic")
+
+    try:
+        colormap = mpl.colormaps.get_cmap(cmap)
+    except ValueError:
+        log.warning(f"Colormap '{cmap}' not in registry. Falling back to 'batlow'.")
+        colormap = mpl.colormaps.get_cmap("cmc.batlow")
+
+    ax.contourf(x, y, z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    if show_pts:
+        ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
+
+
+def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
     """
     Generates and plots an interpolated 2D surface (contour plot).
 
@@ -741,22 +780,21 @@ def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
         Name of the colormap to use.
     """
     log.info("Generating interpolated 2D surface...")
-    xi = np.linspace(rmsd_r.min(), rmsd_r.max(), 100)
-    yi = np.linspace(rmsd_p.min(), rmsd_p.max(), 100)
-    x, y = np.meshgrid(xi, yi)
-
-    z = griddata((rmsd_r, rmsd_p), z_data, (x, y), method="cubic")
-
+    rbf = Rbf(rmsd_r, rmsd_p, z_data, smooth=0.01)
+    xg = np.linspace(rmsd_r.min(), rmsd_r.max(), 150)
+    yg = np.linspace(rmsd_p.min(), rmsd_p.max(), 150)
+    xg, yg = np.meshgrid(xg, yg)
+    zrbf = rbf(xg, yg)
     try:
         colormap = mpl.colormaps.get_cmap(cmap)
     except ValueError:
         log.warning(f"Colormap '{cmap}' not in registry. Falling back to 'batlow'.")
         colormap = mpl.colormaps.get_cmap("cmc.batlow")
 
-    ax.contourf(x, y, z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    ax.contourf(xg, yg, zrbf, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+
     if show_pts:
         ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
-
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     """Applies labels, limits, and other plot aesthetics."""
@@ -823,6 +861,12 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     type=click.Choice(["none", "all", "crit_points"]),
     default="none",
     help="Structures to render on the path. Requires --con-file.",
+)
+@click.option(
+    "--surface-type",
+    type=click.Choice(["spline", "rbf"]),
+    default="rbf",
+    help="Interpolation method for the 2D surface.",
 )
 @click.option(
     "--show-pts",
@@ -1009,6 +1053,7 @@ def main(
     plot_structures,
     show_pts,
     plot_mode,
+    surface_type,
     # --- Output & Slicing ---
     output_file,
     start,
@@ -1086,6 +1131,7 @@ def main(
             landscape_path=landscape_path,
             landscape_mode=landscape_mode,
             plot_mode=plot_mode,
+            surface_type=surface_type,
             plot_structures=plot_structures,
             show_pts=show_pts,
             selected_theme=selected_theme,
@@ -1384,6 +1430,7 @@ def _plot_landscape(
     landscape_path,
     landscape_mode,
     plot_mode,
+    surface_type,
     plot_structures,
     show_pts,
     selected_theme,
@@ -1444,9 +1491,14 @@ def _plot_landscape(
         sys.exit(1)
 
     if landscape_mode == "surface":
-        plot_interpolated_landscape(
-            ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
-        )
+        if surface_type == "spline":
+            plot_interpolated_spline(
+                ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
+            )
+        else: # "rbf"
+            plot_interpolated_rbf(
+                ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
+            )
 
     try:
         log.info(f"Loading final path for overlay: {final_con_path.name}")
