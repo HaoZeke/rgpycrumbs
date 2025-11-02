@@ -38,6 +38,7 @@ https://realpython.com/python-script-structure/
 import glob
 import io
 import logging
+import re
 import sys
 from collections import namedtuple
 from dataclasses import dataclass, replace
@@ -1373,7 +1374,9 @@ def _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list):
     return final_xlabel, final_ylabel
 
 
-def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding=ROUNDING_DF):
+def _aggregate_all_paths(
+    all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding=ROUNDING_DF
+):
     """
     Loads and aggregates data from all .dat and .con files for 2D surface
     using Polars and averaging points within each bin.
@@ -1486,11 +1489,119 @@ def _plot_landscape(
 ):
     """Handles all logic for drawing 2D landscape plots."""
     ira_instance = ira_mod.IRA()
-    all_dat_paths = load_paths(input_dat_pattern)
-
+    # --- Efficient index-based pairing & truncation (fast; no Path.resolve) ---
+    # 1) discover .dat and .con step files
+    all_dat_paths = sorted(
+        Path(p) for p in glob.glob(input_dat_pattern)
+    )  # e.g. neb_*.dat
     con_dir = con_file.parent
-    con_pattern = str(con_dir / input_path_pattern)
+    con_pattern = str(con_dir / input_path_pattern)  # e.g. neb_path_*.con
     all_con_paths = sorted(Path(p) for p in glob.glob(con_pattern))
+
+    if not all_dat_paths:
+        log.critical(
+            f"No .dat files found matching pattern: {input_dat_pattern}. Exiting."
+        )
+        sys.exit(1)
+
+    if not all_con_paths:
+        log.warning(
+            f"No .con files found matching pattern: {con_pattern}. Falling back to single --con-file: {con_file.name}"
+        )
+        all_con_paths = [con_file]
+
+    # fast helper: extract numeric index from filename (returns None if none found)
+    _num_re = re.compile(r"(\d{1,6})")
+
+    def _index_from_name(p: Path) -> int | None:
+        m = _num_re.search(p.name)
+        if not m:
+            return None
+        # preserve numeric value (leading zeros ignored)
+        return int(m.group(1))
+
+    # build dicts index -> path for dat and con (only keep entries with numeric indices)
+    dat_index_map = {}
+    for p in all_dat_paths:
+        idx = _index_from_name(p)
+        if idx is not None:
+            dat_index_map[idx] = p
+
+    con_index_map = {}
+    for p in all_con_paths:
+        idx = _index_from_name(p)
+        if idx is not None:
+            con_index_map[idx] = p
+
+    # 4) If both maps have numeric indices, build sorted matched index list
+    common_indices = sorted(set(dat_index_map.keys()) & set(con_index_map.keys()))
+    if common_indices:
+        log.info(
+            f"Found {len(common_indices)} numerically-matched dat/con step indices."
+        )
+        # If user supplied a specific --con-file and it has a numeric index, truncate at that index
+        supplied_idx = (
+            _index_from_name(Path(con_file)) if con_file is not None else None
+        )
+        if supplied_idx is not None:
+            # find the last index <= supplied_idx that exists in the common set
+            # (if supplied index not present, use the largest common index < supplied_idx)
+            allowed = [i for i in common_indices if i <= supplied_idx]
+            if not allowed:
+                log.warning(
+                    f"Supplied --con-file index {supplied_idx} not found"
+                    "among step files. Using full range of available indices."
+                )
+                use_indices = common_indices
+            else:
+                max_allowed = max(allowed)
+                use_indices = [i for i in common_indices if i <= max_allowed]
+                log.info(
+                    f"Truncating to indices <= {max_allowed} (user requested {supplied_idx})."
+                    f"Using {len(use_indices)} steps."
+                )
+        else:
+            # no numeric index in supplied con_file or not provided: use all common indices
+            use_indices = common_indices
+
+        # Build ordered lists of matched dat and con paths by index
+        all_dat_paths = [dat_index_map[i] for i in use_indices]
+        all_con_paths = [con_index_map[i] for i in use_indices]
+
+    else:
+        # No numeric indices found (filenames don't contain numbers) -> fallback to positional/truncation
+        log.debug(
+            "No numeric indices found in filenames, falling back to positional truncation behavior."
+        )
+        # If supplied con_file appears among discovered step files, truncate by name match (cheap)
+        if con_file is not None:
+            supplied_name = Path(con_file).name
+            names = [p.name for p in all_con_paths]
+            if supplied_name in names:
+                idx = names.index(supplied_name)
+                log.info(
+                    f"Truncating step .con list to user-provided file: {all_con_paths[idx].name} (index {idx})"
+                )
+                all_con_paths = all_con_paths[: idx + 1]
+            else:
+                log.debug(
+                    "Provided --con-file not found among discovered step .con files by name;"
+                    " proceeding with discovered step files."
+                )
+        # Finally truncate to min length to pair dat/con by order
+        if len(all_dat_paths) != len(all_con_paths):
+            min_len = min(len(all_dat_paths), len(all_con_paths))
+            if min_len == 0:
+                log.critical(
+                    "No matching .dat or .con files available after fallback truncation. Exiting."
+                )
+                sys.exit(1)
+            log.info(
+                f"Truncating lists to common length {min_len}: "
+                f"{len(all_dat_paths)} .dat files and {len(all_con_paths)} .con files."
+            )
+            all_dat_paths = all_dat_paths[:min_len]
+            all_con_paths = all_con_paths[:min_len]
 
     if not all_dat_paths:
         log.critical(
@@ -1517,7 +1628,7 @@ def _plot_landscape(
         if landscape_path == "all":
             log.info("Aggregating all paths for landscape surface...")
             df_grouped = _aggregate_all_paths(
-                all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding 
+                all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding
             )
             df_multi = df_grouped.filter(pl.col("count") > 1)
             df_single = df_grouped.filter(pl.col("count") == 1)
@@ -1578,7 +1689,13 @@ def _plot_landscape(
             )
         else:  # "rbf"
             plot_interpolated_rbf(
-                ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, selected_theme.cmap_landscape
+                ax,
+                rmsd_r,
+                rmsd_p,
+                z_data,
+                show_pts,
+                rbf_smoothing,
+                selected_theme.cmap_landscape,
             )
 
     try:
