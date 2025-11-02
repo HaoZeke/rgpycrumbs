@@ -770,7 +770,7 @@ def plot_interpolated_grid(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
         ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
 
 
-def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
+def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, cmap):
     """
     Generates and plots an interpolated 2D surface (contour plot).
 
@@ -792,7 +792,7 @@ def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
     pts = np.column_stack([np.asarray(rmsd_r).ravel(), np.asarray(rmsd_p).ravel()])
     vals = np.asarray(z_data).ravel()
     rbf = RBFInterpolator(
-        pts, vals, kernel="thin_plate_spline", smoothing=RBF_SMOOTHING
+        pts, vals, kernel="thin_plate_spline", smoothing=rbf_smoothing
     )
     nx, ny = 150, 150
     xg = np.linspace(rmsd_r.min(), rmsd_r.max(), nx)
@@ -856,6 +856,20 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     type=click.Choice([e.value for e in PlotType]),
     default=PlotType.PROFILE.value,
     help="Type of plot to generate: 'profile' (1D path) or 'landscape' (2D RMSD plot).",
+)
+@click.option(
+    "--rbf-smoothing",
+    type=float,
+    default=RBF_SMOOTHING,
+    show_default=True,
+    help="Smoothing term for 2D RBF.",
+)
+@click.option(
+    "--rounding",
+    type=int,
+    default=ROUNDING_DF,
+    show_default=True,
+    help="Data rounding term for 2D plots.",
 )
 @click.option(
     "--landscape-mode",
@@ -1070,6 +1084,8 @@ def main(
     landscape_path,
     rc_mode,
     plot_structures,
+    rbf_smoothing,
+    rounding,
     show_pts,
     plot_mode,
     surface_type,
@@ -1152,6 +1168,8 @@ def main(
             plot_mode=plot_mode,
             surface_type=surface_type,
             plot_structures=plot_structures,
+            rbf_smoothing=rbf_smoothing,
+            rounding=rounding,
             show_pts=show_pts,
             selected_theme=selected_theme,
             draw_reactant=draw_reactant,
@@ -1355,7 +1373,7 @@ def _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list):
     return final_xlabel, final_ylabel
 
 
-def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instance):
+def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding=ROUNDING_DF):
     """
     Loads and aggregates data from all .dat and .con files for 2D surface
     using Polars and averaging points within each bin.
@@ -1410,10 +1428,10 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
         f"Aggregated {original_count} total data points from {len(all_dat_paths)} paths."
     )
 
-    # Round to bins (ROUNDING_DF decimals)
+    # Round to bins (rounding decimals)
     df_binned = df_agg.with_columns(
-        pl.col("r").round(ROUNDING_DF).alias("r_rnd"),
-        pl.col("p").round(ROUNDING_DF).alias("p_rnd"),
+        pl.col("r").round(rounding).alias("r_rnd"),
+        pl.col("p").round(rounding).alias("p_rnd"),
     )
 
     # Group and compute means AND bin-level stats
@@ -1432,7 +1450,7 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
     filtered_count = df_grouped.height
     log.info(
         f"Averaged {original_count} points down to {filtered_count} unique bins "
-        f"(rounded to {ROUNDING_DF} decimal places)."
+        f"(rounded to {rounding} decimal places)."
     )
 
     return df_grouped
@@ -1453,6 +1471,8 @@ def _plot_landscape(
     surface_type,
     plot_structures,
     show_pts,
+    rbf_smoothing,
+    rounding,
     selected_theme,
     # Inset args
     draw_reactant,
@@ -1497,7 +1517,7 @@ def _plot_landscape(
         if landscape_path == "all":
             log.info("Aggregating all paths for landscape surface...")
             df_grouped = _aggregate_all_paths(
-                all_dat_paths, all_con_paths, y_data_column, ira_instance
+                all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding 
             )
             df_multi = df_grouped.filter(pl.col("count") > 1)
             df_single = df_grouped.filter(pl.col("count") == 1)
@@ -1558,7 +1578,7 @@ def _plot_landscape(
             )
         else:  # "rbf"
             plot_interpolated_rbf(
-                ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
+                ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, selected_theme.cmap_landscape
             )
 
     try:
