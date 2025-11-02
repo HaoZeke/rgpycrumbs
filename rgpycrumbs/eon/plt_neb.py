@@ -1360,17 +1360,18 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
     Loads and aggregates data from all .dat and .con files for 2D surface
     using Polars and averaging points within each bin.
 
-    This version returns the actual mean coordinates for each bin (r_mean, p_mean)
-    rather than the rounded bin keys.
+    Returns:
+      df_grouped
+    where df_grouped is a Polars DataFrame with columns:
+      r_rnd, p_rnd, r_mean, p_mean, z_mean, z_std, count
     """
     all_dfs = []
 
     if len(all_dat_paths) != len(all_con_paths):
         log.warning(
-            f"Mismatch: Found {len(all_dat_paths)} .dat "
-            f"files but {len(all_con_paths)} .con files."
+            f"Mismatch: Found {len(all_dat_paths)} "
+            f".dat files but {len(all_con_paths)} .con files."
         )
-        log.warning("Attempting to match by index, but this may fail.")
         min_len = min(len(all_dat_paths), len(all_con_paths))
         all_dat_paths = all_dat_paths[:min_len]
         all_con_paths = all_con_paths[:min_len]
@@ -1378,16 +1379,17 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
     for dat_file, con_file_step in zip(all_dat_paths, all_con_paths, strict=True):
         try:
             path_data = np.loadtxt(dat_file, skiprows=1).T
+            # energy/eigenvalue already selected by caller via y_data_column
             z_data_step = path_data[y_data_column]
-            atoms_list_step = ase_read(con_file_step, index=":")
 
+            atoms_list_step = ase_read(con_file_step, index=":")
             _validate_data_atoms_match(z_data_step, atoms_list_step, dat_file.name)
 
             rmsd_r_step, rmsd_p_step = calculate_landscape_coords(
                 atoms_list_step, ira_instance
             )
 
-            # Create a small Polars DataFrame for this step's data
+            # Polars DataFrame for this step
             df_step = pl.DataFrame(
                 {"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step}
             )
@@ -1401,20 +1403,20 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
         log.critical("Failed to aggregate any data for landscape plot. Exiting.")
         sys.exit(1)
 
-    # Concatenate all the small DataFrames into one large one
+    # Concatenate
     df_agg = pl.concat(all_dfs)
     original_count = df_agg.height
     log.info(
         f"Aggregated {original_count} total data points from {len(all_dat_paths)} paths."
     )
 
-    # Create rounded bin columns (use ROUNDING_DF decimal places)
+    # Round to bins (ROUNDING_DF decimals)
     df_binned = df_agg.with_columns(
         pl.col("r").round(ROUNDING_DF).alias("r_rnd"),
         pl.col("p").round(ROUNDING_DF).alias("p_rnd"),
     )
 
-    # Group by rounded bins, compute mean coords and statistics
+    # Group and compute means AND bin-level stats
     df_grouped = (
         df_binned.group_by(["r_rnd", "p_rnd"])
         .agg(
@@ -1429,14 +1431,11 @@ def _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instan
 
     filtered_count = df_grouped.height
     log.info(
-        f"Averaged {original_count} points down to {filtered_count} unique bins (rounded to {ROUNDING_DF} decimals)."
+        f"Averaged {original_count} points down to {filtered_count} unique bins "
+        f"(rounded to {ROUNDING_DF} decimal places)."
     )
 
-    return (
-        df_grouped["r_mean"].to_numpy(),
-        df_grouped["p_mean"].to_numpy(),
-        df_grouped["z_mean"].to_numpy(),
-    )
+    return df_grouped
 
 
 # --- Main Plotting Functions ---
@@ -1497,8 +1496,49 @@ def _plot_landscape(
     try:
         if landscape_path == "all":
             log.info("Aggregating all paths for landscape surface...")
-            rmsd_r, rmsd_p, z_data = _aggregate_all_paths(
+            df_grouped = _aggregate_all_paths(
                 all_dat_paths, all_con_paths, y_data_column, ira_instance
+            )
+            df_multi = df_grouped.filter(pl.col("count") > 1)
+            df_single = df_grouped.filter(pl.col("count") == 1)
+
+            # Extract numpy arrays from Polars series (fast, zero-copy where possible)
+            if df_multi.height > 0:
+                r_multi = df_multi["r_mean"].to_numpy()
+                p_multi = df_multi["p_mean"].to_numpy()
+                z_multi = df_multi["z_mean"].to_numpy()
+            else:
+                r_multi = np.array([])
+                p_multi = np.array([])
+                z_multi = np.array([])
+
+            if df_single.height > 0:
+                # For singletons the grouped mean equals the raw sample; use r_mean/p_mean/z_mean
+                r_single = df_single["r_mean"].to_numpy()
+                p_single = df_single["p_mean"].to_numpy()
+                z_single = df_single["z_mean"].to_numpy()
+            else:
+                r_single = np.array([])
+                p_single = np.array([])
+                z_single = np.array([])
+
+            # Combine multi (averaged bins) and singletons (raw-equivalent)
+            if r_single.size:
+                rmsd_r = (
+                    np.concatenate([r_multi, r_single]) if r_multi.size else r_single
+                )
+                rmsd_p = (
+                    np.concatenate([p_multi, p_single]) if p_multi.size else p_single
+                )
+                z_data = (
+                    np.concatenate([z_multi, z_single]) if z_multi.size else z_single
+                )
+            else:
+                rmsd_r = r_multi
+                rmsd_p = p_multi
+                z_data = z_multi
+            log.info(
+                f"Hybrid cleaned points: total={len(rmsd_r)} (multi={len(r_multi)}, single={len(r_single)})"
             )
         else:  # "last"
             log.info(f"Using last path for landscape data: {final_dat_path.name}")
