@@ -1160,6 +1160,7 @@ def main(
 
         _plot_landscape(
             ax=ax,
+            atoms_list=atoms_list,
             input_dat_pattern=input_dat_pattern,
             input_path_pattern=input_path_pattern,
             con_file=con_file,
@@ -1464,6 +1465,7 @@ def _aggregate_all_paths(
 
 def _plot_landscape(
     ax,
+    atoms_list,
     input_dat_pattern,
     input_path_pattern,
     con_file,
@@ -1699,15 +1701,35 @@ def _plot_landscape(
             )
 
     try:
-        log.info(f"Loading final path for overlay: {final_con_path.name}")
-        final_atoms_list = ase_read(final_con_path, index=":")
+        # Use the atoms_list passed from main (loaded from --con-file)
+        # The dependency check in main() ensures atoms_list is not None
+        final_atoms_list = atoms_list
+        log.info(f"Using atoms from [cyan]{con_file.name}[/cyan] for path overlay.")
+
+        # Try to find the matching .dat file by replacing the suffix
+        dat_file_for_overlay = con_file.with_suffix(".dat")
+        if not dat_file_for_overlay.exists():
+            log.warning(
+                f"Could not find matching [yellow]{dat_file_for_overlay.name}[/yellow]"
+            )
+            log.warning(
+                f"Falling back to last globbed file: [yellow]{final_dat_path_glob.name}[/yellow]"
+            )
+            dat_file_for_overlay = final_dat_path_glob
+
+        log.info(f"Loading overlay data from: [cyan]{dat_file_for_overlay.name}[/cyan]")
         final_rmsd_r, final_rmsd_p = calculate_landscape_coords(
             final_atoms_list, ira_instance
         )
-        final_z_data = np.loadtxt(final_dat_path, skiprows=1).T[y_data_column]
-        _validate_data_atoms_match(final_z_data, final_atoms_list, final_dat_path.name)
+        final_z_data = np.loadtxt(dat_file_for_overlay, skiprows=1).T[y_data_column]
+        _validate_data_atoms_match(
+            final_z_data, final_atoms_list, dat_file_for_overlay.name
+        )
+
     except Exception as e:
-        log.critical(f"Failed to load final path data for overlay: {e}. Exiting.")
+        log.critical(
+            f"Failed to load final path data for overlay from {con_file.name}: {e}"
+        )
         sys.exit(1)
 
     plot_landscape_path(
