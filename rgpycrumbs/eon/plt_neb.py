@@ -31,12 +31,14 @@ https://realpython.com/python-script-structure/
 #   "cmcrameri",
 #   "rich",
 #   "ase",
+#   "polars",
 # ]
 # ///
 
 import glob
 import io
 import logging
+import re
 import sys
 from collections import namedtuple
 from dataclasses import dataclass, replace
@@ -48,6 +50,7 @@ import cmcrameri.cm  # noqa: F401
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import polars as pl
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
@@ -55,7 +58,13 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.patches import ArrowStyle
 from rich.logging import RichHandler
-from scipy.interpolate import CubicHermiteSpline, griddata, splev, splrep
+from scipy.interpolate import (
+    CubicHermiteSpline,
+    RBFInterpolator,
+    griddata,
+    splev,
+    splrep,
+)
 from scipy.signal import savgol_filter
 
 try:
@@ -198,6 +207,9 @@ class SplineMethod(Enum):
 
 
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
+DEFAULT_PATH_PATTERN = "neb_path_*.con"
+ROUNDING_DF = 3
+RBF_SMOOTHING = 1e-2
 
 
 @dataclass
@@ -720,7 +732,46 @@ def plot_landscape_path(ax, rmsd_r, rmsd_p, z_data, cmap, z_label):
     fig.colorbar(sm, ax=ax, label=z_label)
 
 
-def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
+def plot_interpolated_grid(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
+    """
+    Generates and plots an interpolated 2D surface (contour plot) with splines.
+
+    This may have artifacts where samples are not present, debug with show_pts
+    or use with "last".
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axis to plot on.
+    rmsd_r : np.ndarray
+        RMSD from reactant (x-axis).
+    rmsd_p : np.ndarray
+        RMSD from product (y-axis).
+    z_data : np.ndarray
+        Data for coloring the path (z-axis).
+    cmap : str
+        Name of the colormap to use.
+    """
+    log.info("Generating interpolated 2D surface...")
+    log.info("Visualised best with 'last'")
+    xi = np.linspace(rmsd_r.min(), rmsd_r.max(), 100)
+    yi = np.linspace(rmsd_p.min(), rmsd_p.max(), 100)
+    x, y = np.meshgrid(xi, yi)
+
+    z = griddata((rmsd_r, rmsd_p), z_data, (x, y), method="cubic")
+
+    try:
+        colormap = mpl.colormaps.get_cmap(cmap)
+    except ValueError:
+        log.warning(f"Colormap '{cmap}' not in registry. Falling back to 'batlow'.")
+        colormap = mpl.colormaps.get_cmap("cmc.batlow")
+
+    ax.contourf(x, y, z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    if show_pts:
+        ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
+
+
+def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, cmap):
     """
     Generates and plots an interpolated 2D surface (contour plot).
 
@@ -737,12 +788,21 @@ def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
     cmap : str
         Name of the colormap to use.
     """
-    log.info("Generating interpolated 2D surface...")
-    xi = np.linspace(rmsd_r.min(), rmsd_r.max(), 100)
-    yi = np.linspace(rmsd_p.min(), rmsd_p.max(), 100)
-    X, Y = np.meshgrid(xi, yi)
+    log.info("Generating interpolated RBF 2D surface...")
+    # Prepare input points for the interpolator: shape (n_samples, 2)
+    pts = np.column_stack([np.asarray(rmsd_r).ravel(), np.asarray(rmsd_p).ravel()])
+    vals = np.asarray(z_data).ravel()
+    rbf = RBFInterpolator(
+        pts, vals, kernel="thin_plate_spline", smoothing=rbf_smoothing
+    )
+    nx, ny = 150, 150
+    xg = np.linspace(rmsd_r.min(), rmsd_r.max(), nx)
+    yg = np.linspace(rmsd_p.min(), rmsd_p.max(), ny)
+    xg, yg = np.meshgrid(xg, yg)
 
-    Z = griddata((rmsd_r, rmsd_p), z_data, (X, Y), method="cubic")
+    query_pts = np.column_stack([xg.ravel(), yg.ravel()])
+    zflat = rbf(query_pts)  # returns shape (nx*ny,)
+    zg = zflat.reshape(xg.shape)
 
     try:
         colormap = mpl.colormaps.get_cmap(cmap)
@@ -750,7 +810,10 @@ def plot_interpolated_landscape(ax, rmsd_r, rmsd_p, z_data, cmap):
         log.warning(f"Colormap '{cmap}' not in registry. Falling back to 'batlow'.")
         colormap = mpl.colormaps.get_cmap("cmc.batlow")
 
-    ax.contourf(X, Y, Z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+    ax.contourf(xg, yg, zg, levels=20, cmap=colormap, alpha=0.75, zorder=10)
+
+    if show_pts:
+        ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
 
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel):
@@ -768,9 +831,14 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 # --- CLI ---
 @click.command()
 @click.option(
-    "--input-pattern",
+    "--input-dat-pattern",
     default=DEFAULT_INPUT_PATTERN,
     help="Glob pattern for input data files.",
+)
+@click.option(
+    "--input-path-pattern",
+    default=DEFAULT_PATH_PATTERN,
+    help="Glob pattern for input path files.",
 )
 @click.option(
     "--con-file",
@@ -791,10 +859,30 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Type of plot to generate: 'profile' (1D path) or 'landscape' (2D RMSD plot).",
 )
 @click.option(
+    "--rbf-smoothing",
+    type=float,
+    default=RBF_SMOOTHING,
+    show_default=True,
+    help="Smoothing term for 2D RBF.",
+)
+@click.option(
+    "--rounding",
+    type=int,
+    default=ROUNDING_DF,
+    show_default=True,
+    help="Data rounding term for 2D plots.",
+)
+@click.option(
     "--landscape-mode",
     type=click.Choice(["path", "surface"]),
     default="surface",
     help="For landscape plot: 'path' (only 1D path) or 'surface' (interpolated 2D surface).",
+)
+@click.option(
+    "--landscape-path",
+    type=click.Choice(["last", "all"]),
+    default="last",
+    help="Last uses an interpolation only on the last path, otherwise use all points.",
 )
 @click.option(
     "--rc-mode",
@@ -807,6 +895,18 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     type=click.Choice(["none", "all", "crit_points"]),
     default="none",
     help="Structures to render on the path. Requires --con-file.",
+)
+@click.option(
+    "--surface-type",
+    type=click.Choice(["grid", "rbf"]),
+    default="rbf",
+    help="Interpolation method for the 2D surface.",
+)
+@click.option(
+    "--show-pts",
+    type=bool,
+    default=True,
+    help="Show all paths from the optimization on the RMSD 2D plot.",
 )
 @click.option(
     "--plot-mode",
@@ -974,26 +1074,39 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Positioning for the product inset (x, y, rad).",
 )
 def main(
-    input_pattern,
+    # --- Input Files ---
+    input_dat_pattern,
+    input_path_pattern,
     con_file,
     additional_con,
+    # --- Plot Behavior ---
     plot_type,
     landscape_mode,
+    landscape_path,
     rc_mode,
     plot_structures,
+    rbf_smoothing,
+    rounding,
+    show_pts,
     plot_mode,
+    surface_type,
+    # --- Output & Slicing ---
     output_file,
     start,
     end,
+    # --- Plot Aesthetics ---
     normalize_rc,
     title,
     xlabel,
     ylabel,
+    highlight_last,
+    # --- Theme ---
     theme,
     cmap_profile,
     cmap_landscape,
     facecolor,
     fontsize_base,
+    # --- Figure & Inset ---
     figsize,
     fig_height,
     aspect_ratio,
@@ -1003,16 +1116,130 @@ def main(
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
-    highlight_last,
+    # --- Spline ---
     spline_method,
     savgol_window,
     savgol_order,
+    # --- Inset Positions ---
     draw_reactant,
     draw_saddle,
     draw_product,
 ):
     """Main entry point for NEB plot script."""
-    # --- Theme Selection & Overrides ---
+
+    # --- 1. Setup Theme ---
+    selected_theme = _setup_theme(
+        theme, cmap_profile, cmap_landscape, fontsize_base, facecolor
+    )
+    setup_global_theme(selected_theme)
+
+    # --- 2. Dependency Checks ---
+    _run_dependency_checks(
+        plot_type,
+        rc_mode,
+        additional_con,
+        plot_structures,
+        con_file,
+    )
+
+    # --- 3. Setup Figure ---
+    final_figsize = _determine_figsize(figsize, fig_height, aspect_ratio)
+    fig, ax = plt.subplots(figsize=final_figsize, dpi=dpi)
+    apply_plot_theme(ax, selected_theme)
+
+    # --- 4. Load Structures ---
+    atoms_list, additional_atoms_data = _load_structures(
+        con_file, additional_con, plot_type, rc_mode
+    )
+
+    # --- 5. Delegate to Plotting Function ---
+    if plot_type == PlotType.LANDSCAPE.value:
+        final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
+        final_ylabel = ylabel or r"RMSD from Product ($\AA$)"
+        final_title = "NEB Landscape" if title == "NEB Path" else title
+
+        _plot_landscape(
+            ax=ax,
+            atoms_list=atoms_list,
+            input_dat_pattern=input_dat_pattern,
+            input_path_pattern=input_path_pattern,
+            con_file=con_file,
+            additional_atoms_data=additional_atoms_data,
+            landscape_path=landscape_path,
+            landscape_mode=landscape_mode,
+            plot_mode=plot_mode,
+            surface_type=surface_type,
+            plot_structures=plot_structures,
+            rbf_smoothing=rbf_smoothing,
+            rounding=rounding,
+            show_pts=show_pts,
+            selected_theme=selected_theme,
+            draw_reactant=draw_reactant,
+            draw_saddle=draw_saddle,
+            draw_product=draw_product,
+            zoom_ratio=zoom_ratio,
+            ase_rotation=ase_rotation,
+            arrow_head_length=arrow_head_length,
+            arrow_head_width=arrow_head_width,
+            arrow_tail_width=arrow_tail_width,
+        )
+        setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
+
+    else:  # Profile Plot
+        final_title = title
+        final_xlabel, final_ylabel = _get_profile_labels(
+            rc_mode, plot_mode, xlabel, ylabel, atoms_list
+        )
+
+        _plot_profile(
+            ax=ax,
+            fig=fig,
+            input_dat_pattern=input_dat_pattern,
+            atoms_list=atoms_list,
+            additional_atoms_data=additional_atoms_data,
+            rc_mode=rc_mode,
+            plot_mode=plot_mode,
+            plot_structures=plot_structures,
+            start=start,
+            end=end,
+            normalize_rc=normalize_rc,
+            highlight_last=highlight_last,
+            selected_theme=selected_theme,
+            spline_method=spline_method,
+            savgol_window=savgol_window,
+            savgol_order=savgol_order,
+            draw_reactant=draw_reactant,
+            draw_saddle=draw_saddle,
+            draw_product=draw_product,
+            zoom_ratio=zoom_ratio,
+            ase_rotation=ase_rotation,
+            arrow_head_length=arrow_head_length,
+            arrow_head_width=arrow_head_width,
+            arrow_tail_width=arrow_tail_width,
+        )
+        setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
+        if rc_mode == RCMode.PATH.value and normalize_rc:
+            ax.set_xlim(0, 1)
+
+    # --- 6. Finalize ---
+    if output_file:
+        log.info(f"Saving plot to [green]{output_file}[/green]")
+        plt.savefig(
+            output_file,
+            transparent=False,
+            bbox_inches="tight",
+            dpi=dpi,
+        )
+    else:
+        log.info("Displaying plot interactively.")
+        plt.show()
+
+
+# --- Helper Functions ---
+
+
+def _setup_theme(theme, cmap_profile, cmap_landscape, fontsize_base, facecolor):
+    """Loads the selected theme and applies any user overrides."""
     selected_theme = THEMES[theme]
     if cmap_profile is not None:
         selected_theme = replace(selected_theme, cmap_profile=cmap_profile)
@@ -1034,10 +1261,17 @@ def main(
         log.info(
             f"Overriding theme facecolor with [bold magenta]{facecolor}[/bold magenta]"
         )
-    # ---
-    setup_global_theme(selected_theme)
+    return selected_theme
 
-    # --- Dependency Checks ---
+
+def _run_dependency_checks(
+    plot_type,
+    rc_mode,
+    additional_con,
+    plot_structures,
+    con_file,
+):
+    """Validates dependencies and option combinations."""
     if ira_mod is None and (
         plot_type == "landscape" or rc_mode == "rmsd" or additional_con
     ):
@@ -1051,15 +1285,34 @@ def main(
         log.error("--plot-structures requires a --con-file to be provided. Exiting.")
         sys.exit(1)
 
-    # --- Parameter Setup ---
-    smoothing_params = SmoothingParams(
-        window_length=savgol_window, polyorder=savgol_order
-    )
-    image_pos_reactant = InsetImagePos(*draw_reactant)
-    image_pos_saddle = InsetImagePos(*draw_saddle)
-    image_pos_product = InsetImagePos(*draw_product)
 
-    # --- Load Structures ---
+def _determine_figsize(figsize, fig_height, aspect_ratio):
+    """Determines the final figure size based on user inputs."""
+    if fig_height is not None and aspect_ratio is not None:
+        width_in = fig_height * aspect_ratio
+        final_figsize = (width_in, fig_height)
+        log.info(
+            f'Using aspect ratio: height=[bold cyan]{fig_height:.2f}"[/bold cyan], '
+            f"aspect=[bold cyan]{aspect_ratio:.2f}[/bold cyan] "
+            f'-> width=[bold cyan]{width_in:.2f}"[/bold cyan]'
+        )
+    elif fig_height is not None or aspect_ratio is not None:
+        log.error(
+            "[bold red]Error:[/bold red] --fig-height and --aspect-ratio must be used together."
+        )
+        log.error(f"Falling back to default figsize: {figsize}")
+        final_figsize = figsize
+    else:
+        final_figsize = figsize
+        log.info(
+            f'Using figsize: width=[bold cyan]{figsize[0]:.2f}"[/bold cyan], '
+            f'height=[bold cyan]{figsize[1]:.2f}"[/bold cyan]'
+        )
+    return final_figsize
+
+
+def _load_structures(con_file, additional_con, plot_type, rc_mode):
+    """Loads atoms from .con files and calcs RMSD for additional structure."""
     atoms_list = None
     if con_file:
         try:
@@ -1069,13 +1322,11 @@ def main(
         except Exception as e:
             log.error(f"Failed to read .con file: {e}")
             atoms_list = None
-            if plot_type == "landscape" or rc_mode == "rmsd" or additional_con:
+            if plot_type == "landscape" or rc_mode == "rmsd":
                 log.critical("Cannot proceed without structures. Exiting.")
                 sys.exit(1)
 
-    additional_atoms = None
-    add_rmsd_r = None
-    add_rmsd_p = None
+    additional_atoms_data = None
     if additional_con and atoms_list is not None:
         try:
             log.info(f"Reading additional structure from [cyan]{additional_con}[/cyan]")
@@ -1088,286 +1339,623 @@ def main(
                 [additional_atoms], ira_instance, ref_atom=atoms_list[-1]
             )[0]
             log.info(f"... RMSD_R = {add_rmsd_r:.3f} Å, RMSD_P = {add_rmsd_p:.3f} Å")
+            additional_atoms_data = (additional_atoms, add_rmsd_r, add_rmsd_p)
         except Exception as e:
             log.error(f"Failed to read or process --additional-con: {e}")
-            additional_atoms = None
 
-    # --- Setup Plot ---
-    # --- Figure Size Logic ---
-    final_figsize = None
-    if fig_height is not None and aspect_ratio is not None:
-        # New method: height and aspect ratio
-        width_in = fig_height * aspect_ratio
-        final_figsize = (width_in, fig_height)
-        log.info(
-            f'Using aspect ratio: height=[bold cyan]{fig_height:.2f}"[/bold cyan], '
-            f"aspect=[bold cyan]{aspect_ratio:.2f}[/bold cyan] "
-            f'-> width=[bold cyan]{width_in:.2f}"[/bold cyan]'
-        )
-    elif fig_height is not None or aspect_ratio is not None:
-        # Error: Only one was provided
-        log.error(
-            "[bold red]Error:[/bold red] --fig-height and --aspect-ratio must be used together."
-        )
-        log.error(f"Falling back to default figsize: {figsize}")
-        final_figsize = figsize
-    else:
-        # Old method: --figsize
-        final_figsize = figsize
-        log.info(
-            f'Using figsize: width=[bold cyan]{figsize[0]:.2f}"[/bold cyan], '
-            f'height=[bold cyan]{figsize[1]:.2f}"[/bold cyan]'
-        )
+    return atoms_list, additional_atoms_data
 
-    fig, ax = plt.subplots(figsize=final_figsize, dpi=dpi)
-    apply_plot_theme(ax, selected_theme)
 
-    # --- LANDSCAPE PLOT ---
-    if plot_type == PlotType.LANDSCAPE.value:
-        ira_instance = ira_mod.IRA()
-        rmsd_r, rmsd_p = calculate_landscape_coords(atoms_list, ira_instance)
-
-        all_file_paths = load_paths(input_pattern)
-        final_dat_file = all_file_paths[-1]
-        log.info(
-            f"Loading data from final path: [yellow]{final_dat_file.name}[/yellow]"
+def _validate_data_atoms_match(z_data, atoms, dat_file_name):
+    """Checks if data points count matches structure count, exits on mismatch."""
+    if len(z_data) != len(atoms):
+        errmsg = (
+            f"Structure count ({len(atoms)}) != data point count "
+            f"({len(z_data)}) in {dat_file_name}"
         )
+        log.error(errmsg)
+        raise ValueError(errmsg)
+
+
+def _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list):
+    """Determines default labels for profile plots."""
+    default_xlabel = r"Reaction Coordinate ($\AA$)"
+    if rc_mode == RCMode.RMSD.value and atoms_list is not None:
+        default_xlabel = r"RMSD from Reactant ($\AA$)"
+
+    final_xlabel = xlabel or default_xlabel
+
+    default_ylabel = (
+        "Relative Energy (eV)"
+        if plot_mode == PlotMode.ENERGY.value
+        else r"Lowest EigenValue (eV/$\AA^2$)"
+    )
+    final_ylabel = ylabel or default_ylabel
+
+    return final_xlabel, final_ylabel
+
+
+def _aggregate_all_paths(
+    all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding=ROUNDING_DF
+):
+    """
+    Loads and aggregates data from all .dat and .con files for 2D surface
+    using Polars and averaging points within each bin.
+
+    Returns:
+      df_grouped
+    where df_grouped is a Polars DataFrame with columns:
+      r_rnd, p_rnd, r_mean, p_mean, z_mean, z_std, count
+    """
+    all_dfs = []
+
+    if len(all_dat_paths) != len(all_con_paths):
+        log.warning(
+            f"Mismatch: Found {len(all_dat_paths)} "
+            f".dat files but {len(all_con_paths)} .con files."
+        )
+        min_len = min(len(all_dat_paths), len(all_con_paths))
+        all_dat_paths = all_dat_paths[:min_len]
+        all_con_paths = all_con_paths[:min_len]
+
+    for dat_file, con_file_step in zip(all_dat_paths, all_con_paths, strict=True):
         try:
-            path_data = np.loadtxt(final_dat_file, skiprows=1).T
-            y_data_column = 2 if plot_mode == PlotMode.ENERGY.value else 4
-            z_data = path_data[y_data_column]
-            if len(z_data) != len(atoms_list):
-                errmsg = f"Structure count ({len(atoms_list)}) != data point count ({len(z_data)}) in {final_dat_file.name}"
-                raise ValueError(errmsg)
-        except Exception as e:
-            log.error(f"Failed to load or parse {final_dat_file.name}: {e}")
-            sys.exit(1)
+            path_data = np.loadtxt(dat_file, skiprows=1).T
+            # energy/eigenvalue already selected by caller via y_data_column
+            z_data_step = path_data[y_data_column]
 
-        xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
-        ylabel = ylabel or r"RMSD from Product ($\AA$)"
-        z_label = (
-            "Relative Energy (eV)"
-            if plot_mode == PlotMode.ENERGY.value
-            else r"Lowest Eigenvalue (eV/$\AA^2$)"
-        )
-        if title == "NEB Path":
-            title = "NEB Landscape"
+            atoms_list_step = ase_read(con_file_step, index=":")
+            _validate_data_atoms_match(z_data_step, atoms_list_step, dat_file.name)
 
-        if landscape_mode == "surface":
-            plot_interpolated_landscape(
-                ax, rmsd_r, rmsd_p, z_data, selected_theme.cmap_landscape
+            rmsd_r_step, rmsd_p_step = calculate_landscape_coords(
+                atoms_list_step, ira_instance
             )
 
-        plot_landscape_path(
-            ax, rmsd_r, rmsd_p, z_data, selected_theme.cmap_landscape, z_label
-        )
+            # Polars DataFrame for this step
+            df_step = pl.DataFrame(
+                {"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step}
+            )
+            all_dfs.append(df_step)
 
-        if atoms_list and plot_structures != "none":
-            plot_structure_insets(
+        except Exception as e:
+            log.warning(f"Failed to process {dat_file.name}: {e}")
+            continue
+
+    if not all_dfs:
+        log.critical("Failed to aggregate any data for landscape plot. Exiting.")
+        sys.exit(1)
+
+    # Concatenate
+    df_agg = pl.concat(all_dfs)
+    original_count = df_agg.height
+    log.info(
+        f"Aggregated {original_count} total data points from {len(all_dat_paths)} paths."
+    )
+
+    # Round to bins (rounding decimals)
+    df_binned = df_agg.with_columns(
+        pl.col("r").round(rounding).alias("r_rnd"),
+        pl.col("p").round(rounding).alias("p_rnd"),
+    )
+
+    # Group and compute means AND bin-level stats
+    df_grouped = (
+        df_binned.group_by(["r_rnd", "p_rnd"])
+        .agg(
+            pl.col("r").mean().alias("r_mean"),
+            pl.col("p").mean().alias("p_mean"),
+            pl.col("z").mean().alias("z_mean"),
+            pl.col("z").std().alias("z_std"),
+            pl.col("z").count().alias("count"),
+        )
+        .sort(["r_mean", "p_mean"])
+    )
+
+    filtered_count = df_grouped.height
+    log.info(
+        f"Averaged {original_count} points down to {filtered_count} unique bins "
+        f"(rounded to {rounding} decimal places)."
+    )
+
+    return df_grouped
+
+
+# --- Main Plotting Functions ---
+
+
+def _plot_landscape(
+    ax,
+    atoms_list,
+    input_dat_pattern,
+    input_path_pattern,
+    con_file,
+    additional_atoms_data,
+    landscape_path,
+    landscape_mode,
+    plot_mode,
+    surface_type,
+    plot_structures,
+    show_pts,
+    rbf_smoothing,
+    rounding,
+    selected_theme,
+    # Inset args
+    draw_reactant,
+    draw_saddle,
+    draw_product,
+    zoom_ratio,
+    ase_rotation,
+    arrow_head_length,
+    arrow_head_width,
+    arrow_tail_width,
+):
+    """Handles all logic for drawing 2D landscape plots."""
+    ira_instance = ira_mod.IRA()
+    # --- Efficient index-based pairing & truncation (fast; no Path.resolve) ---
+    # 1) discover .dat and .con step files
+    all_dat_paths = sorted(
+        Path(p) for p in glob.glob(input_dat_pattern)
+    )  # e.g. neb_*.dat
+    con_dir = con_file.parent
+    con_pattern = str(con_dir / input_path_pattern)  # e.g. neb_path_*.con
+    all_con_paths = sorted(Path(p) for p in glob.glob(con_pattern))
+
+    if not all_dat_paths:
+        log.critical(
+            f"No .dat files found matching pattern: {input_dat_pattern}. Exiting."
+        )
+        sys.exit(1)
+
+    if not all_con_paths:
+        log.warning(
+            f"No .con files found matching pattern: {con_pattern}. Falling back to single --con-file: {con_file.name}"
+        )
+        all_con_paths = [con_file]
+
+    # fast helper: extract numeric index from filename (returns None if none found)
+    _num_re = re.compile(r"(\d{1,6})")
+
+    def _index_from_name(p: Path) -> int | None:
+        m = _num_re.search(p.name)
+        if not m:
+            return None
+        # preserve numeric value (leading zeros ignored)
+        return int(m.group(1))
+
+    # build dicts index -> path for dat and con (only keep entries with numeric indices)
+    dat_index_map = {}
+    for p in all_dat_paths:
+        idx = _index_from_name(p)
+        if idx is not None:
+            dat_index_map[idx] = p
+
+    con_index_map = {}
+    for p in all_con_paths:
+        idx = _index_from_name(p)
+        if idx is not None:
+            con_index_map[idx] = p
+
+    # 4) If both maps have numeric indices, build sorted matched index list
+    common_indices = sorted(set(dat_index_map.keys()) & set(con_index_map.keys()))
+    if common_indices:
+        log.info(
+            f"Found {len(common_indices)} numerically-matched dat/con step indices."
+        )
+        # If user supplied a specific --con-file and it has a numeric index, truncate at that index
+        supplied_idx = (
+            _index_from_name(Path(con_file)) if con_file is not None else None
+        )
+        if supplied_idx is not None:
+            # find the last index <= supplied_idx that exists in the common set
+            # (if supplied index not present, use the largest common index < supplied_idx)
+            allowed = [i for i in common_indices if i <= supplied_idx]
+            if not allowed:
+                log.warning(
+                    f"Supplied --con-file index {supplied_idx} not found"
+                    "among step files. Using full range of available indices."
+                )
+                use_indices = common_indices
+            else:
+                max_allowed = max(allowed)
+                use_indices = [i for i in common_indices if i <= max_allowed]
+                log.info(
+                    f"Truncating to indices <= {max_allowed} (user requested {supplied_idx})."
+                    f"Using {len(use_indices)} steps."
+                )
+        else:
+            # no numeric index in supplied con_file or not provided: use all common indices
+            use_indices = common_indices
+
+        # Build ordered lists of matched dat and con paths by index
+        all_dat_paths = [dat_index_map[i] for i in use_indices]
+        all_con_paths = [con_index_map[i] for i in use_indices]
+
+    else:
+        # No numeric indices found (filenames don't contain numbers) -> fallback to positional/truncation
+        log.debug(
+            "No numeric indices found in filenames, falling back to positional truncation behavior."
+        )
+        # If supplied con_file appears among discovered step files, truncate by name match (cheap)
+        if con_file is not None:
+            supplied_name = Path(con_file).name
+            names = [p.name for p in all_con_paths]
+            if supplied_name in names:
+                idx = names.index(supplied_name)
+                log.info(
+                    f"Truncating step .con list to user-provided file: {all_con_paths[idx].name} (index {idx})"
+                )
+                all_con_paths = all_con_paths[: idx + 1]
+            else:
+                log.debug(
+                    "Provided --con-file not found among discovered step .con files by name;"
+                    " proceeding with discovered step files."
+                )
+        # Finally truncate to min length to pair dat/con by order
+        if len(all_dat_paths) != len(all_con_paths):
+            min_len = min(len(all_dat_paths), len(all_con_paths))
+            if min_len == 0:
+                log.critical(
+                    "No matching .dat or .con files available after fallback truncation. Exiting."
+                )
+                sys.exit(1)
+            log.info(
+                f"Truncating lists to common length {min_len}: "
+                f"{len(all_dat_paths)} .dat files and {len(all_con_paths)} .con files."
+            )
+            all_dat_paths = all_dat_paths[:min_len]
+            all_con_paths = all_con_paths[:min_len]
+
+    if not all_dat_paths:
+        log.critical(
+            f"No .dat files found matching pattern: {input_dat_pattern}. Exiting."
+        )
+        sys.exit(1)
+    if not all_con_paths:
+        log.warning(f"No .con files found matching pattern: {con_pattern}.")
+        log.warning(f"Falling back to single --con-file: {con_file.name}")
+        all_con_paths = [con_file]
+
+    final_dat_path = all_dat_paths[-1]
+    final_con_path = all_con_paths[-1]
+
+    y_data_column = 2 if plot_mode == PlotMode.ENERGY.value else 4
+    z_label = (
+        "Relative Energy (eV)"
+        if plot_mode == PlotMode.ENERGY.value
+        else r"Lowest Eigenvalue (eV/$\AA^2$)"
+    )
+
+    # Get data for the surface (either 'all' or 'last')
+    try:
+        if landscape_path == "all":
+            log.info("Aggregating all paths for landscape surface...")
+            df_grouped = _aggregate_all_paths(
+                all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding
+            )
+            df_multi = df_grouped.filter(pl.col("count") > 1)
+            df_single = df_grouped.filter(pl.col("count") == 1)
+
+            # Extract numpy arrays from Polars series (fast, zero-copy where possible)
+            if df_multi.height > 0:
+                r_multi = df_multi["r_mean"].to_numpy()
+                p_multi = df_multi["p_mean"].to_numpy()
+                z_multi = df_multi["z_mean"].to_numpy()
+            else:
+                r_multi = np.array([])
+                p_multi = np.array([])
+                z_multi = np.array([])
+
+            if df_single.height > 0:
+                # For singletons the grouped mean equals the raw sample; use r_mean/p_mean/z_mean
+                r_single = df_single["r_mean"].to_numpy()
+                p_single = df_single["p_mean"].to_numpy()
+                z_single = df_single["z_mean"].to_numpy()
+            else:
+                r_single = np.array([])
+                p_single = np.array([])
+                z_single = np.array([])
+
+            # Combine multi (averaged bins) and singletons (raw-equivalent)
+            if r_single.size:
+                rmsd_r = (
+                    np.concatenate([r_multi, r_single]) if r_multi.size else r_single
+                )
+                rmsd_p = (
+                    np.concatenate([p_multi, p_single]) if p_multi.size else p_single
+                )
+                z_data = (
+                    np.concatenate([z_multi, z_single]) if z_multi.size else z_single
+                )
+            else:
+                rmsd_r = r_multi
+                rmsd_p = p_multi
+                z_data = z_multi
+            log.info(
+                f"Hybrid cleaned points: total={len(rmsd_r)} (multi={len(r_multi)}, single={len(r_single)})"
+            )
+        else:  # "last"
+            log.info(f"Using last path for landscape data: {final_dat_path.name}")
+            atoms_last = ase_read(final_con_path, index=":")
+            rmsd_r, rmsd_p = calculate_landscape_coords(atoms_last, ira_instance)
+            z_data = np.loadtxt(final_dat_path, skiprows=1).T[y_data_column]
+            _validate_data_atoms_match(z_data, atoms_last, final_dat_path.name)
+
+    except Exception as e:
+        log.critical(f"Failed to load data for landscape surface: {e}. Exiting.")
+        sys.exit(1)
+
+    if landscape_mode == "surface":
+        if surface_type == "grid":
+            plot_interpolated_grid(
+                ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
+            )
+        else:  # "rbf"
+            plot_interpolated_rbf(
                 ax,
-                atoms_list,
                 rmsd_r,
                 rmsd_p,
                 z_data,
-                plot_structures,
-                plot_mode,
-                draw_reactant=image_pos_reactant,
-                draw_saddle=image_pos_saddle,
-                draw_product=image_pos_product,
-                zoom_ratio=zoom_ratio,
+                show_pts,
+                rbf_smoothing,
+                selected_theme.cmap_landscape,
+            )
+
+    try:
+        # Use the atoms_list passed from main (loaded from --con-file)
+        # The dependency check in main() ensures atoms_list is not None
+        final_atoms_list = atoms_list
+        log.info(f"Using atoms from [cyan]{con_file.name}[/cyan] for path overlay.")
+
+        # Try to find the matching .dat file by replacing the suffix
+        dat_file_for_overlay = con_file.with_suffix(".dat")
+        if not dat_file_for_overlay.exists():
+            log.warning(
+                f"Could not find matching [yellow]{dat_file_for_overlay.name}[/yellow]"
+            )
+            log.warning(
+                f"Falling back to last globbed file: [yellow]{final_dat_path_glob.name}[/yellow]"
+            )
+            dat_file_for_overlay = final_dat_path_glob
+
+        log.info(f"Loading overlay data from: [cyan]{dat_file_for_overlay.name}[/cyan]")
+        final_rmsd_r, final_rmsd_p = calculate_landscape_coords(
+            final_atoms_list, ira_instance
+        )
+        final_z_data = np.loadtxt(dat_file_for_overlay, skiprows=1).T[y_data_column]
+        _validate_data_atoms_match(
+            final_z_data, final_atoms_list, dat_file_for_overlay.name
+        )
+
+    except Exception as e:
+        log.critical(
+            f"Failed to load final path data for overlay from {con_file.name}: {e}"
+        )
+        sys.exit(1)
+
+    plot_landscape_path(
+        ax,
+        final_rmsd_r,
+        final_rmsd_p,
+        final_z_data,
+        selected_theme.cmap_landscape,
+        z_label,
+    )
+
+    image_pos_reactant = InsetImagePos(*draw_reactant)
+    image_pos_saddle = InsetImagePos(*draw_saddle)
+    image_pos_product = InsetImagePos(*draw_product)
+
+    if plot_structures != "none":
+        plot_structure_insets(
+            ax,
+            final_atoms_list,
+            final_rmsd_r,
+            final_rmsd_p,
+            final_z_data,
+            plot_structures,
+            plot_mode,
+            draw_reactant=image_pos_reactant,
+            draw_saddle=image_pos_saddle,
+            draw_product=image_pos_product,
+            zoom_ratio=zoom_ratio,
+            ase_rotation=ase_rotation,
+            arrow_head_length=arrow_head_length,
+            arrow_head_width=arrow_head_width,
+            arrow_tail_width=arrow_tail_width,
+        )
+
+    if additional_atoms_data:
+        additional_atoms, add_rmsd_r, add_rmsd_p = additional_atoms_data
+        ax.plot(
+            add_rmsd_r,
+            add_rmsd_p,
+            marker="*",
+            markersize=20,
+            color="white",
+            zorder=98,
+            label="Additional Structure",
+        )
+        if plot_structures != "none":
+            plot_single_inset(
+                ax,
+                additional_atoms,
+                add_rmsd_r,
+                add_rmsd_p,
+                xybox=(image_pos_saddle.x, image_pos_saddle.y),
+                rad=image_pos_saddle.rad,
+                zoom=zoom_ratio,
                 ase_rotation=ase_rotation,
                 arrow_head_length=arrow_head_length,
                 arrow_head_width=arrow_head_width,
                 arrow_tail_width=arrow_tail_width,
             )
 
-        if additional_atoms:
-            ax.plot(
-                add_rmsd_r,
-                add_rmsd_p,
-                marker="*",
-                markersize=20,
-                color="white",
-                zorder=98,
-                label="Additional Structure",
-            )
-            if plot_structures != "none":
-                plot_single_inset(
-                    ax,
-                    additional_atoms,
-                    add_rmsd_r,
-                    add_rmsd_p,
-                    xybox=(image_pos_saddle.x, image_pos_saddle.y),
-                    rad=image_pos_saddle.rad,
-                    zoom=zoom_ratio,
-                    ase_rotation=ase_rotation,
-                    arrow_head_length=arrow_head_length,
-                    arrow_head_width=arrow_head_width,
-                    arrow_tail_width=arrow_tail_width,
-                )
 
-        setup_plot_aesthetics(ax, title, xlabel, ylabel)
-
-    # --- PROFILE PLOT ---
-    else:
-        rmsd_rc = None
-        default_xlabel = r"Reaction Coordinate ($\AA$)"
-        if rc_mode == RCMode.RMSD.value and atoms_list is not None:
-            ira_instance = ira_mod.IRA()
-            rmsd_rc = calculate_rmsd_from_ref(
-                atoms_list, ira_instance, ref_atom=atoms_list[0]
-            )
-            default_xlabel = r"RMSD from Reactant ($\AA$)"
-            normalize_rc = False
-
-        xlabel = xlabel or default_xlabel
-        ylabel = ylabel or (
-            "Relative Energy (eV)"
-            if plot_mode == PlotMode.ENERGY.value
-            else r"Lowest EigenValue (eV/$\AA^2$)"
+def _plot_profile(
+    ax,
+    fig,
+    input_dat_pattern,
+    atoms_list,
+    additional_atoms_data,
+    rc_mode,
+    plot_mode,
+    plot_structures,
+    start,
+    end,
+    normalize_rc,
+    highlight_last,
+    selected_theme,
+    # Spline args
+    spline_method,
+    savgol_window,
+    savgol_order,
+    # Inset args
+    draw_reactant,
+    draw_saddle,
+    draw_product,
+    zoom_ratio,
+    ase_rotation,
+    arrow_head_length,
+    arrow_head_width,
+    arrow_tail_width,
+):
+    """Handles all logic for drawing 1D profile plots."""
+    rmsd_rc = None
+    if rc_mode == RCMode.RMSD.value and atoms_list is not None:
+        ira_instance = ira_mod.IRA()
+        rmsd_rc = calculate_rmsd_from_ref(
+            atoms_list, ira_instance, ref_atom=atoms_list[0]
         )
+        normalize_rc = False  # RMSD is an absolute coordinate
 
-        all_file_paths = load_paths(input_pattern)
-        file_paths_to_plot = all_file_paths[start:end]
-        num_files = len(file_paths_to_plot)
-        if num_files == 0:
-            log.error("The specified start/end range resulted in zero files. Exiting.")
-            sys.exit(1)
+    all_file_paths = load_paths(input_dat_pattern)
+    file_paths_to_plot = all_file_paths[start:end]
+    num_files = len(file_paths_to_plot)
+    if num_files == 0:
+        log.error("The specified start/end range resulted in zero files. Exiting.")
+        sys.exit(1)
 
+    try:
+        colormap = mpl.colormaps.get_cmap(selected_theme.cmap_profile)
+    except ValueError:
+        log.warning(
+            f"Colormap '{selected_theme.cmap_profile}' not in registry."
+            " Falling back to 'batlow'."
+        )
+        colormap = mpl.colormaps.get_cmap("cmc.batlow")
+
+    color_divisor = (num_files - 1) if num_files > 1 else 1.0
+
+    smoothing_params = SmoothingParams(
+        window_length=savgol_window, polyorder=savgol_order
+    )
+
+    plot_function = (
+        lambda ax, pd, c, a, z: plot_energy_path(
+            ax, pd, c, a, z, method=spline_method, smoothing=smoothing_params
+        )
+        if plot_mode == PlotMode.ENERGY.value
+        else lambda ax, pd, c, a, z: plot_eigenvalue_path(
+            ax, pd, c, a, z, grid_color=selected_theme.gridcolor
+        )
+    )
+    y_data_column = 2 if plot_mode == PlotMode.ENERGY.value else 4
+
+    image_pos_reactant = InsetImagePos(*draw_reactant)
+    image_pos_saddle = InsetImagePos(*draw_saddle)
+    image_pos_product = InsetImagePos(*draw_product)
+
+    # --- Plotting Loop ---
+    for idx, file_path in enumerate(file_paths_to_plot):
         try:
-            colormap = mpl.colormaps.get_cmap(selected_theme.cmap_profile)
-        except ValueError:
+            path_data = np.loadtxt(file_path, skiprows=1).T
+        except (ValueError, IndexError) as e:
             log.warning(
-                f"Colormap '{selected_theme.cmap_profile}' not in registry. Falling back to 'batlow'."
+                f"Skipping invalid or empty file [yellow]{file_path.name}[/yellow]: {e}"
             )
-            colormap = mpl.colormaps.get_cmap("cmc.batlow")
+            continue
 
-        color_divisor = (num_files - 1) if num_files > 1 else 1.0
-
-        plot_function = (
-            lambda ax, pd, c, a, z: plot_energy_path(
-                ax, pd, c, a, z, method=spline_method, smoothing=smoothing_params
-            )
-            if plot_mode == PlotMode.ENERGY.value
-            else lambda ax, pd, c, a, z: plot_eigenvalue_path(
-                ax,
-                pd,
-                c,
-                a,
-                z,
-                grid_color=selected_theme.gridcolor,
-            )
-        )
-        y_data_column = 2 if plot_mode == PlotMode.ENERGY.value else 4
-
-        # --- Plotting Loop (Profile) ---
-        for idx, file_path in enumerate(file_paths_to_plot):
-            try:
-                path_data = np.loadtxt(file_path, skiprows=1).T
-            except (ValueError, IndexError) as e:
+        if rc_mode == RCMode.RMSD.value and rmsd_rc is not None:
+            if rmsd_rc.shape[0] != path_data.shape[1]:
                 log.warning(
-                    f"Skipping invalid or empty file [yellow]{file_path.name}[/yellow]: {e}"
+                    f"Skipping [yellow]{file_path.name}[/yellow]: Mismatch in image count "
+                    f"between .con ({rmsd_rc.shape[0]}) and .dat ({path_data.shape[1]})."
                 )
                 continue
+            path_data[1] = rmsd_rc
+        elif normalize_rc:
+            rc = path_data[1]
+            if rc.max() > 0:
+                path_data[1] = rc / rc.max()
 
-            if rc_mode == RCMode.RMSD.value and rmsd_rc is not None:
-                if rmsd_rc.shape[0] != path_data.shape[1]:
-                    log.warning(
-                        f"Skipping [yellow]{file_path.name}[/yellow]: Mismatch in image count between .con ({rmsd_rc.shape[0]}) and .dat ({path_data.shape[1]})."
-                    )
-                    continue
-                path_data[1] = rmsd_rc
-            elif normalize_rc:
-                rc = path_data[1]
-                if rc.max() > 0:
-                    path_data[1] = rc / rc.max()
-                if not xlabel:
-                    xlabel = "Normalized Reaction Coordinate"
+        rc_for_insets = path_data[1]
+        y_for_insets = path_data[y_data_column]
 
-            rc_for_insets = path_data[1]
-            y_for_insets = path_data[y_data_column]
+        is_last_file = idx == num_files - 1
+        is_first_file = idx == 0
 
-            is_last_file = idx == num_files - 1
-            is_first_file = idx == 0
-
-            if highlight_last and is_last_file:
-                color, alpha, zorder = selected_theme.highlight_color, 1.0, 20
-                plot_function(ax, path_data, color, alpha, zorder)
-                if atoms_list and plot_structures != "none":
-                    plot_structure_insets(
-                        ax,
-                        atoms_list,
-                        rc_for_insets,
-                        y_for_insets,
-                        y_for_insets,
-                        plot_structures,
-                        plot_mode,
-                        draw_reactant=image_pos_reactant,
-                        draw_saddle=image_pos_saddle,
-                        draw_product=image_pos_product,
-                        zoom_ratio=zoom_ratio,
-                        ase_rotation=ase_rotation,
-                        arrow_head_length=arrow_head_length,
-                        arrow_head_width=arrow_head_width,
-                        arrow_tail_width=arrow_tail_width,
-                    )
-            else:
-                color = colormap(idx / color_divisor)
-                alpha = 1.0 if is_first_file else 0.5
-                zorder = 10 if is_first_file else 5
-                plot_function(ax, path_data, color, alpha, zorder)
-
-        setup_plot_aesthetics(ax, title, xlabel, ylabel)
-        if rc_mode == RCMode.PATH.value and normalize_rc:
-            ax.set_xlim(0, 1)
-
-        if additional_atoms and rc_mode == RCMode.RMSD.value:
-            log.info(
-                f"Highlighting additional structure at RMSD_R = {add_rmsd_r:.3f} Å"
-            )
-            ax.axvline(
-                add_rmsd_r,
-                color=selected_theme.gridcolor,  # Use grid color
-                linestyle=":",
-                linewidth=2,
-                zorder=90,
-            )
-            if plot_structures != "none":
-                y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
-                y_pos = ax.get_ylim()[0] + 0.9 * y_span
-                plot_single_inset(
+        if highlight_last and is_last_file:
+            color, alpha, zorder = selected_theme.highlight_color, 1.0, 20
+            plot_function(ax, path_data, color, alpha, zorder)
+            if atoms_list and plot_structures != "none":
+                plot_structure_insets(
                     ax,
-                    additional_atoms,
-                    add_rmsd_r,
-                    y_pos,
-                    xybox=(image_pos_saddle.x, image_pos_saddle.y),
-                    rad=image_pos_saddle.rad,
-                    zoom=zoom_ratio,
+                    atoms_list,
+                    rc_for_insets,
+                    y_for_insets,
+                    y_for_insets,
+                    plot_structures,
+                    plot_mode,
+                    draw_reactant=image_pos_reactant,
+                    draw_saddle=image_pos_saddle,
+                    draw_product=image_pos_product,
+                    zoom_ratio=zoom_ratio,
                     ase_rotation=ase_rotation,
                     arrow_head_length=arrow_head_length,
                     arrow_head_width=arrow_head_width,
                     arrow_tail_width=arrow_tail_width,
                 )
+        else:
+            color = colormap(idx / color_divisor)
+            alpha = 1.0 if is_first_file else 0.5
+            zorder = 10 if is_first_file else 5
+            plot_function(ax, path_data, color, alpha, zorder)
 
-        sm = plt.cm.ScalarMappable(
-            cmap=colormap, norm=plt.Normalize(vmin=0, vmax=max(1, num_files - 1))
-        )
-        cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
-        cbar.ax.yaxis.set_tick_params(color=selected_theme.textcolor)
-        cbar.outline.set_edgecolor(selected_theme.edgecolor)
+    # --- Add Colorbar ---
+    sm = plt.cm.ScalarMappable(
+        cmap=colormap, norm=plt.Normalize(vmin=0, vmax=max(1, num_files - 1))
+    )
+    cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
+    cbar.ax.yaxis.set_tick_params(color=selected_theme.textcolor)
+    cbar.outline.set_edgecolor(selected_theme.edgecolor)
 
-    # --- Finalize ---
-    if output_file:
-        log.info(f"Saving plot to [green]{output_file}[/green]")
-        plt.savefig(
-            output_file,
-            transparent=False,
-            bbox_inches="tight",
-            dpi=dpi,
+    # --- Add Additional Structure ---
+    if additional_atoms_data and rc_mode == RCMode.RMSD.value:
+        additional_atoms, add_rmsd_r, _ = additional_atoms_data
+        log.info(f"Highlighting additional structure at RMSD_R = {add_rmsd_r:.3f} Å")
+        ax.axvline(
+            add_rmsd_r,
+            color=selected_theme.gridcolor,
+            linestyle=":",
+            linewidth=2,
+            zorder=90,
         )
-    else:
-        log.info("Displaying plot interactively.")
-        plt.show()
+        if plot_structures != "none":
+            y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
+            y_pos = ax.get_ylim()[0] + 0.9 * y_span
+            plot_single_inset(
+                ax,
+                additional_atoms,
+                add_rmsd_r,
+                y_pos,
+                xybox=(image_pos_saddle.x, image_pos_saddle.y),
+                rad=image_pos_saddle.rad,
+                zoom=zoom_ratio,
+                ase_rotation=ase_rotation,
+                arrow_head_length=arrow_head_length,
+                arrow_head_width=arrow_head_width,
+                arrow_tail_width=arrow_tail_width,
+            )
 
 
 if __name__ == "__main__":
