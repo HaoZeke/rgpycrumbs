@@ -1713,9 +1713,9 @@ def _plot_landscape(
                 f"Could not find matching [yellow]{dat_file_for_overlay.name}[/yellow]"
             )
             log.warning(
-                f"Falling back to last globbed file: [yellow]{final_dat_path_glob.name}[/yellow]"
+                f"Falling back to last globbed file: [yellow]{final_dat_path.name}[/yellow]"
             )
-            dat_file_for_overlay = final_dat_path_glob
+            dat_file_for_overlay = final_dat_path
 
         log.info(f"Loading overlay data from: [cyan]{dat_file_for_overlay.name}[/cyan]")
         final_rmsd_r, final_rmsd_p = calculate_landscape_coords(
