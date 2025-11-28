@@ -39,15 +39,18 @@ def prefix(subcommand_name: str, script_args: tuple):
     # Build the full command to be executed by the shell
     command = ["uv", "run", str(script_path)] + list(script_args)
 
+    # Pass parent site-packages as an env var for fallback imports
+    env = os.environ.copy()
+    parent_paths = os.pathsep.join(site.getsitepackages() + [site.getusersitepackages()])
+    env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] = parent_paths
+
     click.echo(f"--> Dispatching to: {' '.join(command)}", err=True)
 
     try:
         subprocess.run(command, check=True)
     except FileNotFoundError:
         click.echo("Error: 'uv' command not found.", err=True)
-        click.echo(
-            "Please ensure 'uv' is installed and in your system's PATH.", err=True
-        )
+        click.echo("Please ensure 'uv' is installed and in your system's PATH.", err=True)
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
