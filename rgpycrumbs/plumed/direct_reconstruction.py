@@ -104,9 +104,7 @@ def _calculate_fes_1d(hills_data, x, per, npoints):
     return -fes
 
 
-def calculate_fes_from_hills(
-    hills, imin=1, imax=None, xlim=None, ylim=None, npoints=256
-):
+def calculate_fes_from_hills(hills, imin=1, imax=None, xlim=None, ylim=None, npoints=256):
     """
     Calculates a 1D or 2D Free Energy Surface (FES) from a metadynamics hills file.
 
@@ -405,9 +403,7 @@ def find_fes_minima(fes_result, nbins=8):
     labels = list(string.ascii_uppercase)
     if len(minima_df) > 26:
         extra_labels = [
-            f"{c1}{c2}"
-            for c1 in string.ascii_uppercase
-            for c2 in string.ascii_uppercase
+            f"{c1}{c2}" for c1 in string.ascii_uppercase for c2 in string.ascii_uppercase
         ]
         labels.extend(extra_labels)
     minima_df.insert(0, "letter", labels[: len(minima_df)])

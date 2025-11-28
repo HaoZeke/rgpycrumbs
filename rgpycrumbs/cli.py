@@ -1,6 +1,9 @@
-import sys
+import os
+import site
 import subprocess
+import sys
 from pathlib import Path
+
 import click
 
 # This gets the path to the directory where this cli.py file lives.

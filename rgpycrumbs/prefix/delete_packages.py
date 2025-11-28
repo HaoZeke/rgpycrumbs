@@ -91,9 +91,7 @@ def get_packages_to_delete(channel, package_name, version_regex):
                         found_count += 1
 
                 if found_count > 0:
-                    log.info(
-                        f"Found {found_count} package(s) on [cyan]{platform}[/cyan]"
-                    )
+                    log.info(f"Found {found_count} package(s) on [cyan]{platform}[/cyan]")
 
             except requests.RequestException as e:
                 log.error(f"Failed to fetch repodata for {platform}: {e}")
@@ -170,9 +168,7 @@ def main(channel, package_name, api_key, version_regex, dry_run):
     packages = get_packages_to_delete(channel, package_name, version_regex)
 
     if not packages:
-        log.info(
-            f"No packages matching '{package_name}*' found in channel '{channel}'."
-        )
+        log.info(f"No packages matching '{package_name}*' found in channel '{channel}'.")
         if version_regex:
             log.info(f"Using version regex: '{version_regex}'")
         log.info("Nothing to do.")

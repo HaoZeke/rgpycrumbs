@@ -7,7 +7,6 @@ import ase
 import ase.io
 import matplotlib.pyplot as plt
 import numpy as np
-
 from pypotlib.systems import cu_slab_h2 as cuh2slab
 from pyprotochemgp.systems.cuh2slab import prepare_scatter_points
 

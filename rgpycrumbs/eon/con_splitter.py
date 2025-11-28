@@ -103,9 +103,7 @@ def con_splitter(
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        logging.critical(
-            f"Error creating output directory [red]{output_dir}[/red]: {e}"
-        )
+        logging.critical(f"Error creating output directory [red]{output_dir}[/red]: {e}")
         sys.exit(1)
 
     if images_per_path <= 0:

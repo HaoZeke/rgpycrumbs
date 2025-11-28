@@ -414,9 +414,7 @@ def plot_single_inset(
         The connection style 'rad' parameter for the arrow.
     """
     buf = io.BytesIO()
-    ase_write(
-        buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=35
-    )
+    ase_write(buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=35)
     buf.seek(0)
     img_data = plt.imread(buf)
     buf.close()
@@ -792,9 +790,7 @@ def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, c
     # Prepare input points for the interpolator: shape (n_samples, 2)
     pts = np.column_stack([np.asarray(rmsd_r).ravel(), np.asarray(rmsd_p).ravel()])
     vals = np.asarray(z_data).ravel()
-    rbf = RBFInterpolator(
-        pts, vals, kernel="thin_plate_spline", smoothing=rbf_smoothing
-    )
+    rbf = RBFInterpolator(pts, vals, kernel="thin_plate_spline", smoothing=rbf_smoothing)
     nx, ny = 150, 150
     xg = np.linspace(rmsd_r.min(), rmsd_r.max(), nx)
     yg = np.linspace(rmsd_p.min(), rmsd_p.max(), ny)
@@ -1412,9 +1408,7 @@ def _aggregate_all_paths(
             )
 
             # Polars DataFrame for this step
-            df_step = pl.DataFrame(
-                {"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step}
-            )
+            df_step = pl.DataFrame({"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step})
             all_dfs.append(df_step)
 
         except Exception as e:
@@ -1538,13 +1532,9 @@ def _plot_landscape(
     # 4) If both maps have numeric indices, build sorted matched index list
     common_indices = sorted(set(dat_index_map.keys()) & set(con_index_map.keys()))
     if common_indices:
-        log.info(
-            f"Found {len(common_indices)} numerically-matched dat/con step indices."
-        )
+        log.info(f"Found {len(common_indices)} numerically-matched dat/con step indices.")
         # If user supplied a specific --con-file and it has a numeric index, truncate at that index
-        supplied_idx = (
-            _index_from_name(Path(con_file)) if con_file is not None else None
-        )
+        supplied_idx = _index_from_name(Path(con_file)) if con_file is not None else None
         if supplied_idx is not None:
             # find the last index <= supplied_idx that exists in the common set
             # (if supplied index not present, use the largest common index < supplied_idx)
@@ -1657,15 +1647,9 @@ def _plot_landscape(
 
             # Combine multi (averaged bins) and singletons (raw-equivalent)
             if r_single.size:
-                rmsd_r = (
-                    np.concatenate([r_multi, r_single]) if r_multi.size else r_single
-                )
-                rmsd_p = (
-                    np.concatenate([p_multi, p_single]) if p_multi.size else p_single
-                )
-                z_data = (
-                    np.concatenate([z_multi, z_single]) if z_multi.size else z_single
-                )
+                rmsd_r = np.concatenate([r_multi, r_single]) if r_multi.size else r_single
+                rmsd_p = np.concatenate([p_multi, p_single]) if p_multi.size else p_single
+                z_data = np.concatenate([z_multi, z_single]) if z_multi.size else z_single
             else:
                 rmsd_r = r_multi
                 rmsd_p = p_multi

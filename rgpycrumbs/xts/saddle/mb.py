@@ -4,13 +4,11 @@ import subprocess
 import warnings
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import numpy as np
 import ase
 import ase.io
+import cmcrameri.cm as cmc
 import matplotlib.pyplot as plt
 import numpy as np
-import cmcrameri.cm as cmc
 
 from rgpycrumbs.func.muller_brown import muller_brown, muller_brown_gradient
 

@@ -1,11 +1,11 @@
-import pytest
-from click.testing import CliRunner
-from ase.build import bulk
-from ase.neighborlist import NeighborList
-from ase.io import write
 import numpy as np
+import pytest
+from ase.build import bulk
+from ase.io import write
+from ase.neighborlist import NeighborList
+from click.testing import CliRunner
 
-from rgpycrumbs.eon.ptmdisp import main, find_mismatch_indices, CrystalStructure
+from rgpycrumbs.eon.ptmdisp import CrystalStructure, find_mismatch_indices, main
 
 
 @pytest.fixture
@@ -46,9 +46,7 @@ def defect_fcc_cu_file(tmp_path):
     # The expected "defective" indices are the neighbors of the original atom.
     # Note: Indices of atoms after the deleted one will shift down by 1.
     # We must account for this shift in our expected indices set.
-    final_expected_indices = {
-        i if i < vacancy_index else i - 1 for i in neighbor_indices
-    }
+    final_expected_indices = {i if i < vacancy_index else i - 1 for i in neighbor_indices}
 
     return filepath, final_expected_indices
 
@@ -81,9 +79,9 @@ def test_find_indices_on_fcc_with_defect(defect_fcc_cu_file):
     filepath, expected_defect_indices = defect_fcc_cu_file
     indices = find_mismatch_indices(filepath, CrystalStructure.FCC)
 
-    assert (
-        set(indices) == expected_defect_indices
-    ), "Should identify all neighbors of the vacancy"
+    assert set(indices) == expected_defect_indices, (
+        "Should identify all neighbors of the vacancy"
+    )
 
 
 def test_find_indices_on_perfect_bcc(perfect_bcc_fe_file):
@@ -91,9 +89,7 @@ def test_find_indices_on_perfect_bcc(perfect_bcc_fe_file):
     On a perfect bulk BCC crystal, searching for non-BCC atoms should return an empty list.
     """
     indices = find_mismatch_indices(perfect_bcc_fe_file, CrystalStructure.BCC)
-    assert (
-        len(indices) == 0
-    ), "Should find no non-BCC atoms in a perfect bulk BCC crystal"
+    assert len(indices) == 0, "Should find no non-BCC atoms in a perfect bulk BCC crystal"
 
 
 ### Integration Tests for the Command-Line Interface (CLI) ###
@@ -112,9 +108,9 @@ def test_cli_quiet_output_for_defect(defect_fcc_cu_file):
     # Convert the string output to a set of integers for comparison.
     output_indices = set(map(int, result.stdout.strip().split(",")))
 
-    assert (
-        output_indices == expected_defect_indices
-    ), "stdout should contain all neighbor indices"
+    assert output_indices == expected_defect_indices, (
+        "stdout should contain all neighbor indices"
+    )
 
 
 def test_cli_structure_type_option(perfect_bcc_fe_file):
