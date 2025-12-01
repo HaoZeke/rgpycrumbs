@@ -66,11 +66,10 @@ from scipy.interpolate import (
     splrep,
 )
 from scipy.signal import savgol_filter
+from rgpycrumbs._aux import _import_from_parent_env
 
-try:
-    import ira_mod  # type: ignore
-except ImportError:
-    ira_mod = None  # IRA is optional. Handle gracefully.
+# IRA is optional, use None if not present
+ira_mod = _import_from_parent_env("ira_mod")
 
 # --- Logging Setup ---
 logging.basicConfig(
