@@ -3,6 +3,7 @@ import site
 import subprocess
 import sys
 from pathlib import Path
+
 import click
 
 # The directory where cli.py is located
@@ -35,20 +36,28 @@ def _dispatch_to_script(folder_name: str, script_name: str, script_args: tuple):
             )
         sys.exit(1)
 
-    # Build command
     command = ["uv", "run", str(script_path)] + list(script_args)
 
-    # Setup Environment (Parent path fallback)
+    # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
+
+    # 1. Fallback imports logic
     parent_paths = os.pathsep.join(
         site.getsitepackages() + [site.getusersitepackages()]
     )
     env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] = parent_paths
 
+    # Add the parent directory of rgpycrumbs to PYTHONPATH
+    # This allows the script to do `from rgpycrumbs._aux import ...`
+    project_root = str(PACKAGE_ROOT.parent)
+    current_pythonpath = env.get("PYTHONPATH", "")
+
+    # Prepend our project root to ensure we find our local package first
+    env["PYTHONPATH"] = f"{project_root}{os.pathsep}{current_pythonpath}"
+
     click.echo(f"--> Dispatching to: {' '.join(command)}", err=True)
 
     try:
-        # Crucial: pass env=env so the subprocess sees the site-packages variable
         subprocess.run(command, check=True, env=env)
     except FileNotFoundError:
         click.echo("Error: 'uv' command not found. Is it installed?", err=True)
