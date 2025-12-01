@@ -66,6 +66,7 @@ from scipy.interpolate import (
     splrep,
 )
 from scipy.signal import savgol_filter
+
 from rgpycrumbs._aux import _import_from_parent_env
 
 # IRA is optional, use None if not present
