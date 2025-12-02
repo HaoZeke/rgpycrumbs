@@ -36,12 +36,12 @@ import click
 import numpy as np
 from ovito.io.ase import ase_to_ovito
 from ovito.modifiers import (
-    PolyhedralTemplateMatchingModifier,
-    SelectTypeModifier,
     CentroSymmetryModifier,
     DeleteSelectedModifier,
     ExpressionSelectionModifier,
     InvertSelectionModifier,
+    PolyhedralTemplateMatchingModifier,
+    SelectTypeModifier,
 )
 from ovito.pipeline import Pipeline, StaticSource
 from rich.logging import RichHandler
@@ -147,7 +147,7 @@ def find_mismatch_indices(
     center_interstitial = np.mean(positions[interstitial], axis=0)
     selection_radius_sq = selection_radius**2
 
-    dist_sq_from_center = np.sum((positions - center_interstitial)**2, axis=1)
+    dist_sq_from_center = np.sum((positions - center_interstitial) ** 2, axis=1)
     sphere_indices = np.where(dist_sq_from_center < selection_radius_sq)[0]
     final_active_indices = np.unique(np.hstack([sphere_indices, interstitial]))
 
@@ -156,9 +156,7 @@ def find_mismatch_indices(
     )
     if view_selection:
         # Just to see what's being selected..
-        pviz = Pipeline(
-            source=StaticSource(data=ase_to_ovito(atoms[sphere_indices]))
-        )
+        pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[sphere_indices])))
         pviz.add_to_scene()
         from ovito.vis import Viewport
 
@@ -199,9 +197,7 @@ def find_mismatch_indices(
     default=False,
     help="Disable FCC vacancy processing.",
 )
-def main(
-    filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacancy: bool
-):
+def main(filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacancy: bool):
     """
     Analyzes FILENAME to find all atoms that are NOT the specified
     crystal structure type and prints their 0-based indices as a

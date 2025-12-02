@@ -15,10 +15,10 @@ def tail(filename, n):
                 f.seek(-n * 1024, os.SEEK_END)
                 lines = f.readlines()[-n:]
                 return [line.decode("utf-8").rstrip("\n") for line in lines]
-            except EOFError as e:
+            except EOFError:
                 return ""
     else:
-        with open(file_path, "rt") as f:
+        with open(file_path) as f:
             f.seek(-n * 1024, os.SEEK_END)
             lines = f.readlines()[-n:]
             return lines
@@ -42,13 +42,13 @@ def head_search(filename: Path, sstr: str, n=60):
         with (
             gzip.open(filename, "rt")
             if filename.suffix == ".gz"
-            else open(filename, "rt")
+            else open(filename)
         ) as f:
             for _ in range(n):
                 line = next(f).strip()
                 if sstr in line:
                     return True
             return False
-    except (IOError, EOFError) as e:
+    except (OSError, EOFError) as e:
         print(f"Error reading file: {e}")
         return False

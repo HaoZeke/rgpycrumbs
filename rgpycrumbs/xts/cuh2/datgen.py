@@ -1,5 +1,4 @@
 import ase.io
-
 from pypotlib.systems import cu_slab_h2 as cuh2slab
 
 from rgpycrumbs._aux import get_gitroot, getstrform

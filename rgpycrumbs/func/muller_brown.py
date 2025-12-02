@@ -6,6 +6,7 @@ import numpy as np
 # X, Y = np.meshgrid(x, y)
 # Z = muller_brown([X, Y])
 
+
 def muller_brown(x):
     A = [-200, -100, -170, 15]
     a = [-1, -1, -6.5, 0.7]
