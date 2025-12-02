@@ -1,17 +1,18 @@
 
 # Table of Contents
 
--   [About](#org78edd98)
-    -   [CLI Design Philosophy](#orgef213ce)
--   [Usage](#orgbdc64ce)
-    -   [CLI Tools](#org86529f6)
-        -   [EON](#org5ab1cb7)
--   [Contributing](#orgac70168)
--   [License](#org7a5cb11)
+-   [About](#org8effee7)
+    -   [CLI Design Philosophy](#org4c246d2)
+-   [Usage](#orgd8fdcc4)
+    -   [CLI Tools](#org60653e4)
+        -   [EON](#orgdade692)
+-   [Contributing](#org6721135)
+    -   [Release notes](#org4881a24)
+-   [License](#org2609829)
 
 
 
-<a id="org78edd98"></a>
+<a id="org8effee7"></a>
 
 # About
 
@@ -27,7 +28,7 @@ Most of these rely heavily on optional dependencies, with the exception of the
 `_aux` helpers (pure Python).
 
 
-<a id="orgef213ce"></a>
+<a id="org4c246d2"></a>
 
 ## CLI Design Philosophy
 
@@ -60,12 +61,12 @@ The library is designed with the following principles in mind:
     easily extensible.
 
 
-<a id="orgbdc64ce"></a>
+<a id="orgd8fdcc4"></a>
 
 # Usage
 
 
-<a id="org86529f6"></a>
+<a id="org60653e4"></a>
 
 ## CLI Tools
 
@@ -87,7 +88,7 @@ You can see the list of available command groups:
       eon  Dispatches to a script within the 'eon' submodule.
 
 
-<a id="org5ab1cb7"></a>
+<a id="orgdade692"></a>
 
 ### EON
 
@@ -132,7 +133,7 @@ You can see the list of available command groups:
     `ipath_001.con`, etc., along with an `ipath.dat` file listing their paths.
 
 
-<a id="orgac70168"></a>
+<a id="org6721135"></a>
 
 # Contributing
 
@@ -140,7 +141,19 @@ All contributions are welcome, but for the CLI tools please follow [established
 best practices](https://realpython.com/python-script-structure/).
 
 
-<a id="org7a5cb11"></a>
+<a id="org4881a24"></a>
+
+## Release notes
+
+Generally this is a `hatch` project, so:
+
+    uvx hatch test
+    uvx towncrier build --version "v0.0.4"
+    git tag -a v0.0.4 -m "Version 0.0.4 release"
+    uvx hatch build
+
+
+<a id="org2609829"></a>
 
 # License
 

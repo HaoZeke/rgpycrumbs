@@ -108,6 +108,14 @@ This will create a directory named ~initial_images~ containing ~ipath_000.con~,
 * Contributing
 All contributions are welcome, but for the CLI tools please follow [[https://realpython.com/python-script-structure/][established
 best practices]].
+** Release notes
+Generally this is a ~hatch~ project, so:
+#+begin_src bash
+uvx hatch test
+uvx towncrier build --version "v0.0.4"
+git tag -a v0.0.4 -m "Version 0.0.4 release"
+uvx hatch build
+#+end_src
 * License
 MIT. However, this is an academic resource, so *please cite* as much as possible
 via:
