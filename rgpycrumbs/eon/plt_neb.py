@@ -882,7 +882,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option(
     "--landscape-path",
     type=click.Choice(["last", "all"]),
-    default="last",
+    default="all",
     help="Last uses an interpolation only on the last path, otherwise use all points.",
 )
 @click.option(
