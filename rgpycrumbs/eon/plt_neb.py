@@ -414,7 +414,9 @@ def plot_single_inset(
         The connection style 'rad' parameter for the arrow.
     """
     buf = io.BytesIO()
-    ase_write(buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=35)
+    ase_write(
+        buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=35
+    )
     buf.seek(0)
     img_data = plt.imread(buf)
     buf.close()
@@ -592,9 +594,9 @@ def plot_energy_path(
         rc_min, rc_max = rc_sorted.min(), rc_sorted.max()
         path_length = rc_max - rc_min
         if path_length > 1e-6:
-             rc_norm_sorted = (rc_sorted - rc_min) / path_length
+            rc_norm_sorted = (rc_sorted - rc_min) / path_length
         else:
-             rc_norm_sorted = rc_sorted
+            rc_norm_sorted = rc_sorted
         rc_fine_norm = np.linspace(0, 1, num=300)
 
         if method == "hermite":
@@ -735,7 +737,9 @@ def plot_landscape_path(ax, rmsd_r, rmsd_p, z_data, cmap, z_label):
     fig.colorbar(sm, ax=ax, label=z_label)
 
 
-def plot_interpolated_grid(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
+def plot_interpolated_grid(
+    ax, rmsd_r, rmsd_p, z_data, show_pts, cmap, scatter_r=None, scatter_p=None
+):
     """
     Generates and plots an interpolated 2D surface (contour plot) with splines.
 
@@ -771,10 +775,22 @@ def plot_interpolated_grid(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap):
 
     ax.contourf(x, y, z, levels=20, cmap=colormap, alpha=0.75, zorder=10)
     if show_pts:
-        ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
+        pts_r = scatter_r if scatter_r is not None else rmsd_r
+        pts_p = scatter_p if scatter_p is not None else rmsd_p
+        ax.scatter(pts_r, pts_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
 
 
-def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, cmap):
+def plot_interpolated_rbf(
+    ax,
+    rmsd_r,
+    rmsd_p,
+    z_data,
+    show_pts,
+    rbf_smoothing,
+    cmap,
+    scatter_r=None,
+    scatter_p=None,
+):
     """
     Generates and plots an interpolated 2D surface (contour plot).
 
@@ -795,7 +811,9 @@ def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, c
     # Prepare input points for the interpolator: shape (n_samples, 2)
     pts = np.column_stack([np.asarray(rmsd_r).ravel(), np.asarray(rmsd_p).ravel()])
     vals = np.asarray(z_data).ravel()
-    rbf = RBFInterpolator(pts, vals, kernel="thin_plate_spline", smoothing=rbf_smoothing)
+    rbf = RBFInterpolator(
+        pts, vals, kernel="thin_plate_spline", smoothing=rbf_smoothing
+    )
     nx, ny = 150, 150
     xg = np.linspace(rmsd_r.min(), rmsd_r.max(), nx)
     yg = np.linspace(rmsd_p.min(), rmsd_p.max(), ny)
@@ -814,7 +832,9 @@ def plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, c
     ax.contourf(xg, yg, zg, levels=20, cmap=colormap, alpha=0.75, zorder=10)
 
     if show_pts:
-        ax.scatter(rmsd_r, rmsd_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
+        pts_r = scatter_r if scatter_r is not None else rmsd_r
+        pts_p = scatter_p if scatter_p is not None else rmsd_p
+        ax.scatter(pts_r, pts_p, c="k", s=12, marker=".", alpha=0.6, zorder=40)
 
 
 def setup_plot_aesthetics(ax, title, xlabel, ylabel):
@@ -904,8 +924,7 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Interpolation method for the 2D surface.",
 )
 @click.option(
-    "--show-pts",
-    type=bool,
+    "--show-pts/--no-show-pts",
     default=True,
     help="Show all paths from the optimization on the RMSD 2D plot.",
 )
@@ -1074,6 +1093,18 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     show_default=True,
     help="Positioning for the product inset (x, y, rad).",
 )
+@click.option(
+    "--cache-file",
+    type=click.Path(path_type=Path),
+    default=Path(".neb_landscape.parquet"),
+    help="Parquet file to cache RMSD calculations (speeds up re-runs).",
+)
+@click.option(
+    "--force-recompute",
+    is_flag=True,
+    default=False,
+    help="Ignore cache and force re-calculation of RMSD.",
+)
 def main(
     # --- Input Files ---
     input_dat_pattern,
@@ -1125,6 +1156,9 @@ def main(
     draw_reactant,
     draw_saddle,
     draw_product,
+    # Caching
+    cache_file,
+    force_recompute,
 ):
     """Main entry point for NEB plot script."""
 
@@ -1183,6 +1217,8 @@ def main(
             arrow_head_length=arrow_head_length,
             arrow_head_width=arrow_head_width,
             arrow_tail_width=arrow_tail_width,
+            cache_file=cache_file,
+            force_recompute=force_recompute,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
 
@@ -1377,19 +1413,35 @@ def _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list):
 
 
 def _aggregate_all_paths(
-    all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding=ROUNDING_DF
+    all_dat_paths,
+    all_con_paths,
+    y_data_column,
+    ira_instance,
+    cache_file: Path | None = None,
+    force_recompute: bool = False,
 ):
     """
-    Loads and aggregates data from all .dat and .con files for 2D surface
-    using Polars and averaging points within each bin.
+    Loads and aggregates data from all .dat and .con files for 2D surface using
+    Polars and averaging points within each bin. Optionally, a cache file is
+    used.
 
     Returns:
-      df_grouped
-    where df_grouped is a Polars DataFrame with columns:
-      r_rnd, p_rnd, r_mean, p_mean, z_mean, z_std, count
+      df_raw
+    where df_raw is a Polars DataFrame with columns: [r, p, z, step]
     """
+    if cache_file and cache_file.exists() and not force_recompute:
+        log.info(f"Loading cached landscape data from [green]{cache_file}[/green]...")
+        try:
+            df_raw = pl.read_parquet(cache_file)
+            log.info(f"Loaded {df_raw.height} rows from cache.")
+            return df_raw
+        except Exception as e:
+            log.warning(f"Failed to read cache: {e}. Recomputing...")
+
+    log.info("Computing RMSD landscape (this may take time)...")
     all_dfs = []
 
+    # Synchronization check
     if len(all_dat_paths) != len(all_con_paths):
         log.warning(
             f"Mismatch: Found {len(all_dat_paths)} "
@@ -1399,64 +1451,47 @@ def _aggregate_all_paths(
         all_dat_paths = all_dat_paths[:min_len]
         all_con_paths = all_con_paths[:min_len]
 
-    for dat_file, con_file_step in zip(all_dat_paths, all_con_paths, strict=True):
+    for step_idx, (dat_file, con_file_step) in enumerate(
+        zip(all_dat_paths, all_con_paths, strict=True)
+    ):
         try:
             path_data = np.loadtxt(dat_file, skiprows=1).T
             # energy/eigenvalue already selected by caller via y_data_column
             z_data_step = path_data[y_data_column]
-
             atoms_list_step = ase_read(con_file_step, index=":")
             _validate_data_atoms_match(z_data_step, atoms_list_step, dat_file.name)
 
+            # Expensive RMSD calculation
             rmsd_r_step, rmsd_p_step = calculate_landscape_coords(
                 atoms_list_step, ira_instance
             )
 
-            # Polars DataFrame for this step
-            df_step = pl.DataFrame({"r": rmsd_r_step, "p": rmsd_p_step, "z": z_data_step})
+            # Keep 'step' so we can extract initial/final paths later
+            df_step = pl.DataFrame(
+                {
+                    "r": rmsd_r_step,
+                    "p": rmsd_p_step,
+                    "z": z_data_step,
+                    "step": int(step_idx),
+                }
+            )
             all_dfs.append(df_step)
 
         except Exception as e:
-            log.warning(f"Failed to process {dat_file.name}: {e}")
+            log.warning(f"Failed to process step {step_idx} ({dat_file.name}): {e}")
             continue
 
     if not all_dfs:
-        log.critical("Failed to aggregate any data for landscape plot. Exiting.")
+        log.critical("Failed to aggregate data. Exiting.")
         sys.exit(1)
 
-    # Concatenate
-    df_agg = pl.concat(all_dfs)
-    original_count = df_agg.height
-    log.info(
-        f"Aggregated {original_count} total data points from {len(all_dat_paths)} paths."
-    )
+    df_raw = pl.concat(all_dfs)
 
-    # Round to bins (rounding decimals)
-    df_binned = df_agg.with_columns(
-        pl.col("r").round(rounding).alias("r_rnd"),
-        pl.col("p").round(rounding).alias("p_rnd"),
-    )
+    if cache_file:
+        log.info(f"Saving cache to [green]{cache_file}[/green]...")
+        df_raw.write_parquet(cache_file)
 
-    # Group and compute means AND bin-level stats
-    df_grouped = (
-        df_binned.group_by(["r_rnd", "p_rnd"])
-        .agg(
-            pl.col("r").mean().alias("r_mean"),
-            pl.col("p").mean().alias("p_mean"),
-            pl.col("z").mean().alias("z_mean"),
-            pl.col("z").std().alias("z_std"),
-            pl.col("z").count().alias("count"),
-        )
-        .sort(["r_mean", "p_mean"])
-    )
-
-    filtered_count = df_grouped.height
-    log.info(
-        f"Averaged {original_count} points down to {filtered_count} unique bins "
-        f"(rounded to {rounding} decimal places)."
-    )
-
-    return df_grouped
+    return df_raw
 
 
 # --- Main Plotting Functions ---
@@ -1478,6 +1513,8 @@ def _plot_landscape(
     rbf_smoothing,
     rounding,
     selected_theme,
+    cache_file,
+    force_recompute,
     # Inset args
     draw_reactant,
     draw_saddle,
@@ -1536,9 +1573,14 @@ def _plot_landscape(
     # 4) If both maps have numeric indices, build sorted matched index list
     common_indices = sorted(set(dat_index_map.keys()) & set(con_index_map.keys()))
     if common_indices:
-        log.info(f"Found {len(common_indices)} numerically-matched dat/con step indices.")
-        # If user supplied a specific --con-file and it has a numeric index, truncate at that index
-        supplied_idx = _index_from_name(Path(con_file)) if con_file is not None else None
+        log.info(
+            f"Found {len(common_indices)} numerically-matched dat/con step indices."
+        )
+        # If user supplied a specific --con-file and it has a numeric index,
+        # truncate at that index
+        supplied_idx = (
+            _index_from_name(Path(con_file)) if con_file is not None else None
+        )
         if supplied_idx is not None:
             # find the last index <= supplied_idx that exists in the common set
             # (if supplied index not present, use the largest common index < supplied_idx)
@@ -1609,9 +1651,6 @@ def _plot_landscape(
         log.warning(f"Falling back to single --con-file: {con_file.name}")
         all_con_paths = [con_file]
 
-    final_dat_path = all_dat_paths[-1]
-    final_con_path = all_con_paths[-1]
-
     y_data_column = 2 if plot_mode == PlotMode.ENERGY.value else 4
     z_label = (
         "Relative Energy (eV)"
@@ -1619,63 +1658,60 @@ def _plot_landscape(
         else r"Lowest Eigenvalue (eV/$\AA^2$)"
     )
 
-    # Get data for the surface (either 'all' or 'last')
-    try:
-        if landscape_path == "all":
-            log.info("Aggregating all paths for landscape surface...")
-            df_grouped = _aggregate_all_paths(
-                all_dat_paths, all_con_paths, y_data_column, ira_instance, rounding
-            )
-            df_multi = df_grouped.filter(pl.col("count") > 1)
-            df_single = df_grouped.filter(pl.col("count") == 1)
+    # --- Load Data (With Cache) ---
+    # We now get a RAW dataframe with a 'step' column
+    df_raw = _aggregate_all_paths(
+        all_dat_paths,
+        all_con_paths,
+        y_data_column,
+        ira_instance,
+        cache_file=cache_file,
+        force_recompute=force_recompute,
+    )
 
-            # Extract numpy arrays from Polars series (fast, zero-copy where possible)
-            if df_multi.height > 0:
-                r_multi = df_multi["r_mean"].to_numpy()
-                p_multi = df_multi["p_mean"].to_numpy()
-                z_multi = df_multi["z_mean"].to_numpy()
-            else:
-                r_multi = np.array([])
-                p_multi = np.array([])
-                z_multi = np.array([])
+    # --- Prepare Data for Surface Interpolation ---
+    # We group and mean-aggregate for the surface generation to handle dense spots
+    if landscape_path == "last":
+        # Only use the final step for the surface
+        max_step = df_raw["step"].max()
+        df_surface_source = df_raw.filter(pl.col("step") == max_step)
+    else:
+        # Use all steps
+        df_surface_source = df_raw
 
-            if df_single.height > 0:
-                # For singletons the grouped mean equals the raw sample; use r_mean/p_mean/z_mean
-                r_single = df_single["r_mean"].to_numpy()
-                p_single = df_single["p_mean"].to_numpy()
-                z_single = df_single["z_mean"].to_numpy()
-            else:
-                r_single = np.array([])
-                p_single = np.array([])
-                z_single = np.array([])
+    # Rounding and Grouping for Surface Grid
+    df_binned = df_surface_source.with_columns(
+        pl.col("r").round(rounding).alias("r_rnd"),
+        pl.col("p").round(rounding).alias("p_rnd"),
+    )
+    df_grouped = (
+        df_binned.group_by(["r_rnd", "p_rnd"])
+        .agg(
+            pl.col("r").mean().alias("r_mean"),
+            pl.col("p").mean().alias("p_mean"),
+            pl.col("z").mean().alias("z_mean"),
+        )
+        .sort(["r_mean", "p_mean"])
+    )
 
-            # Combine multi (averaged bins) and singletons (raw-equivalent)
-            if r_single.size:
-                rmsd_r = np.concatenate([r_multi, r_single]) if r_multi.size else r_single
-                rmsd_p = np.concatenate([p_multi, p_single]) if p_multi.size else p_single
-                z_data = np.concatenate([z_multi, z_single]) if z_multi.size else z_single
-            else:
-                rmsd_r = r_multi
-                rmsd_p = p_multi
-                z_data = z_multi
-            log.info(
-                f"Hybrid cleaned points: total={len(rmsd_r)} (multi={len(r_multi)}, single={len(r_single)})"
-            )
-        else:  # "last"
-            log.info(f"Using last path for landscape data: {final_dat_path.name}")
-            atoms_last = ase_read(final_con_path, index=":")
-            rmsd_r, rmsd_p = calculate_landscape_coords(atoms_last, ira_instance)
-            z_data = np.loadtxt(final_dat_path, skiprows=1).T[y_data_column]
-            _validate_data_atoms_match(z_data, atoms_last, final_dat_path.name)
+    rmsd_r = df_grouped["r_mean"].to_numpy()
+    rmsd_p = df_grouped["p_mean"].to_numpy()
+    z_data = df_grouped["z_mean"].to_numpy()
+    all_pts_r = df_raw["r"].to_numpy()
+    all_pts_p = df_raw["p"].to_numpy()
 
-    except Exception as e:
-        log.critical(f"Failed to load data for landscape surface: {e}. Exiting.")
-        sys.exit(1)
-
+    # --- Plot Surface ---
     if landscape_mode == "surface":
         if surface_type == "grid":
             plot_interpolated_grid(
-                ax, rmsd_r, rmsd_p, z_data, show_pts, selected_theme.cmap_landscape
+                ax,
+                rmsd_r,
+                rmsd_p,
+                z_data,
+                show_pts,
+                selected_theme.cmap_landscape,
+                scatter_r=all_pts_r,
+                scatter_p=all_pts_p,
             )
         else:  # "rbf"
             plot_interpolated_rbf(
@@ -1686,39 +1722,17 @@ def _plot_landscape(
                 show_pts,
                 rbf_smoothing,
                 selected_theme.cmap_landscape,
+                scatter_r=all_pts_r,
+                scatter_p=all_pts_p,
             )
 
-    try:
-        # Use the atoms_list passed from main (loaded from --con-file)
-        # The dependency check in main() ensures atoms_list is not None
-        final_atoms_list = atoms_list
-        log.info(f"Using atoms from [cyan]{con_file.name}[/cyan] for path overlay.")
-
-        # Try to find the matching .dat file by replacing the suffix
-        dat_file_for_overlay = con_file.with_suffix(".dat")
-        if not dat_file_for_overlay.exists():
-            log.warning(
-                f"Could not find matching [yellow]{dat_file_for_overlay.name}[/yellow]"
-            )
-            log.warning(
-                f"Falling back to last globbed file: [yellow]{final_dat_path.name}[/yellow]"
-            )
-            dat_file_for_overlay = final_dat_path
-
-        log.info(f"Loading overlay data from: [cyan]{dat_file_for_overlay.name}[/cyan]")
-        final_rmsd_r, final_rmsd_p = calculate_landscape_coords(
-            final_atoms_list, ira_instance
-        )
-        final_z_data = np.loadtxt(dat_file_for_overlay, skiprows=1).T[y_data_column]
-        _validate_data_atoms_match(
-            final_z_data, final_atoms_list, dat_file_for_overlay.name
-        )
-
-    except Exception as e:
-        log.critical(
-            f"Failed to load final path data for overlay from {con_file.name}: {e}"
-        )
-        sys.exit(1)
+    # --- Plot Final Path Overlay ---
+    # We can get this from the DF or the final file. Using the DF guarantees consistency.
+    max_step = df_raw["step"].max()
+    df_final = df_raw.filter(pl.col("step") == max_step)
+    final_rmsd_r = df_final["r"].to_numpy()
+    final_rmsd_p = df_final["p"].to_numpy()
+    final_z_data = df_final["z"].to_numpy()
 
     plot_landscape_path(
         ax,
@@ -1729,14 +1743,18 @@ def _plot_landscape(
         z_label,
     )
 
+    # --- Plot Structures (Insets) ---
     image_pos_reactant = InsetImagePos(*draw_reactant)
     image_pos_saddle = InsetImagePos(*draw_saddle)
     image_pos_product = InsetImagePos(*draw_product)
 
     if plot_structures != "none":
+        # Need atoms list for insets.
+        # Ensure we use the atoms from the *final* path to match the overlay.
+        # (Assuming 'atoms_list' passed in main corresponds to the final CON file)
         plot_structure_insets(
             ax,
-            final_atoms_list,
+            atoms_list,
             final_rmsd_r,
             final_rmsd_p,
             final_z_data,
@@ -1752,6 +1770,7 @@ def _plot_landscape(
             arrow_tail_width=arrow_tail_width,
         )
 
+    # --- Additional Structure ---
     if additional_atoms_data:
         additional_atoms, add_rmsd_r, add_rmsd_p = additional_atoms_data
         ax.plot(
