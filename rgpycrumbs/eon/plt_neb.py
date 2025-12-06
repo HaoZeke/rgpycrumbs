@@ -41,6 +41,7 @@ import logging
 import re
 import sys
 from collections import namedtuple
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from enum import Enum
 from pathlib import Path
@@ -91,6 +92,8 @@ RUHI_COLORS = {
     "sky": "#1E88E5",
     "magenta": "#D81B60",
 }
+
+MIN_PATH_LENGTH = 1e-6
 
 
 # --- Custom Colormap Generation ---
@@ -381,6 +384,64 @@ def calculate_landscape_coords(atoms_list: list, ira_instance):
     return rmsd_r, rmsd_p
 
 
+def _load_or_compute_data(
+    cache_file: Path | None,
+    force_recompute: bool,
+    validation_check: Callable[[pl.DataFrame], None],
+    computation_callback: Callable[[], pl.DataFrame],
+    context_name: str,
+) -> pl.DataFrame:
+    """
+    Retrieves data from a parquet cache or triggers a computation callback.
+
+    Parameters
+    ----------
+    cache_file : Path | None
+        The path to the cache file.
+    force_recompute : bool
+        If True, skips loading and forces computation.
+    validation_check : Callable
+        A function that receives the loaded DataFrame and raises ValueError
+        if the schema appears incorrect (e.g., missing columns).
+    computation_callback : Callable
+        A function that performs the heavy calculation and returns a DataFrame
+        if the cache remains unavailable or invalid.
+    context_name : str
+        Label for logging (e.g., "Profile" or "Landscape").
+
+    Returns
+    -------
+    pl.DataFrame
+        The requested data.
+    """
+    # 1. Attempt to load from cache
+    if cache_file and cache_file.exists() and not force_recompute:
+        log.info(
+            f"Loading cached {context_name} data from [green]{cache_file}[/green]..."
+        )
+        try:
+            df = pl.read_parquet(cache_file)
+            validation_check(df)  # Will raise ValueError if invalid
+            log.info(f"Loaded {df.height} rows from cache.")
+            return df
+        except Exception as e:
+            log.warning(f"Cache load failed or invalid: {e}. Recomputing...")
+
+    # 2. Compute if cache failed, didn't exist, or recompute requested
+    log.info(f"Computing {context_name} data...")
+    df = computation_callback()
+
+    # 3. Save to cache
+    if cache_file:
+        log.info(f"Saving {context_name} cache to [green]{cache_file}[/green]...")
+        try:
+            df.write_parquet(cache_file)
+        except Exception as e:
+            log.error(f"Failed to write cache file: {e}")
+
+    return df
+
+
 # --- Plotting Functions ---
 def plot_single_inset(
     ax,
@@ -593,7 +654,7 @@ def plot_energy_path(
         # Normalize RC to [0, 1] for stable spline fitting
         rc_min, rc_max = rc_sorted.min(), rc_sorted.max()
         path_length = rc_max - rc_min
-        if path_length > 1e-6:
+        if path_length > MIN_PATH_LENGTH:
             rc_norm_sorted = (rc_sorted - rc_min) / path_length
         else:
             rc_norm_sorted = rc_sorted
@@ -1253,6 +1314,8 @@ def main(
             arrow_head_length=arrow_head_length,
             arrow_head_width=arrow_head_width,
             arrow_tail_width=arrow_tail_width,
+            cache_file=cache_file,
+            force_recompute=force_recompute,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
         if rc_mode == RCMode.PATH.value and normalize_rc:
@@ -1429,69 +1492,65 @@ def _aggregate_all_paths(
       df_raw
     where df_raw is a Polars DataFrame with columns: [r, p, z, step]
     """
-    if cache_file and cache_file.exists() and not force_recompute:
-        log.info(f"Loading cached landscape data from [green]{cache_file}[/green]...")
-        try:
-            df_raw = pl.read_parquet(cache_file)
-            log.info(f"Loaded {df_raw.height} rows from cache.")
-            return df_raw
-        except Exception as e:
-            log.warning(f"Failed to read cache: {e}. Recomputing...")
 
-    log.info("Computing RMSD landscape (this may take time)...")
-    all_dfs = []
+    def validate_landscape_cache(df: pl.DataFrame):
+        if "p" not in df.columns:
+            verr = "Cache missing 'p' column (looks like profile data)."
+            raise ValueError(verr)
 
-    # Synchronization check
-    if len(all_dat_paths) != len(all_con_paths):
-        log.warning(
-            f"Mismatch: Found {len(all_dat_paths)} "
-            f".dat files but {len(all_con_paths)} .con files."
-        )
-        min_len = min(len(all_dat_paths), len(all_con_paths))
-        all_dat_paths = all_dat_paths[:min_len]
-        all_con_paths = all_con_paths[:min_len]
+    def compute_landscape_data() -> pl.DataFrame:
+        all_dfs = []
 
-    for step_idx, (dat_file, con_file_step) in enumerate(
-        zip(all_dat_paths, all_con_paths, strict=True)
-    ):
-        try:
-            path_data = np.loadtxt(dat_file, skiprows=1).T
-            # energy/eigenvalue already selected by caller via y_data_column
-            z_data_step = path_data[y_data_column]
-            atoms_list_step = ase_read(con_file_step, index=":")
-            _validate_data_atoms_match(z_data_step, atoms_list_step, dat_file.name)
+        # Synchronization check
+        paths_dat = all_dat_paths
+        paths_con = all_con_paths
+        if len(paths_dat) != len(paths_con):
+            log.warning(f"Mismatch: {len(paths_dat)} dat vs {len(paths_con)} con.")
+            min_len = min(len(paths_dat), len(paths_con))
+            paths_dat = paths_dat[:min_len]
+            paths_con = paths_con[:min_len]
 
-            # Expensive RMSD calculation
-            rmsd_r_step, rmsd_p_step = calculate_landscape_coords(
-                atoms_list_step, ira_instance
-            )
+        for step_idx, (dat_file, con_file_step) in enumerate(
+            zip(paths_dat, paths_con, strict=True)
+        ):
+            try:
+                path_data = np.loadtxt(dat_file, skiprows=1).T
+                z_data_step = path_data[y_data_column]
+                atoms_list_step = ase_read(con_file_step, index=":")
+                _validate_data_atoms_match(z_data_step, atoms_list_step, dat_file.name)
 
-            # Keep 'step' so we can extract initial/final paths later
-            df_step = pl.DataFrame(
-                {
-                    "r": rmsd_r_step,
-                    "p": rmsd_p_step,
-                    "z": z_data_step,
-                    "step": int(step_idx),
-                }
-            )
-            all_dfs.append(df_step)
+                rmsd_r, rmsd_p = calculate_landscape_coords(
+                    atoms_list_step, ira_instance
+                )
 
-        except Exception as e:
-            log.warning(f"Failed to process step {step_idx} ({dat_file.name}): {e}")
-            continue
+                all_dfs.append(
+                    pl.DataFrame(
+                        {
+                            "r": rmsd_r,
+                            "p": rmsd_p,
+                            "z": z_data_step,
+                            "step": int(step_idx),
+                        }
+                    )
+                )
+            except Exception as e:
+                log.warning(f"Failed to process step {step_idx} ({dat_file.name}): {e}")
+                continue
 
-    if not all_dfs:
-        log.critical("Failed to aggregate data. Exiting.")
-        sys.exit(1)
+        if not all_dfs:
+            rerr = "No data could be aggregated from files."
+            raise RuntimeError(rerr)
 
-    df_raw = pl.concat(all_dfs)
+        return pl.concat(all_dfs)
 
-    if cache_file:
-        log.info(f"Saving cache to [green]{cache_file}[/green]...")
-        df_raw.write_parquet(cache_file)
-
-    return df_raw
+    # Execute via Handler
+    return _load_or_compute_data(
+        cache_file=cache_file,
+        force_recompute=force_recompute,
+        validation_check=validate_landscape_cache,
+        computation_callback=compute_landscape_data,
+        context_name="Landscape",
+    )
 
 
 # --- Main Plotting Functions ---
@@ -1825,15 +1884,42 @@ def _plot_profile(
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
+    cache_file=None,
+    force_recompute=False,
 ):
     """Handles all logic for drawing 1D profile plots."""
     rmsd_rc = None
     if rc_mode == RCMode.RMSD.value and atoms_list is not None:
-        ira_instance = ira_mod.IRA()
-        rmsd_rc = calculate_rmsd_from_ref(
-            atoms_list, ira_instance, ref_atom=atoms_list[0]
-        )
-        normalize_rc = False  # RMSD is an absolute coordinate
+
+        def validate_profile_cache(df: pl.DataFrame):
+            if "p" in df.columns:
+                verr = "Cache contains 'p' column (looks like landscape data)."
+                raise ValueError(verr)
+            if df.height != len(atoms_list):
+                verr = f"Size mismatch: {df.height} vs {len(atoms_list)} structures."
+                raise ValueError(verr)
+
+        def compute_profile_data() -> pl.DataFrame:
+            ira_instance = ira_mod.IRA()
+            r_vals = calculate_rmsd_from_ref(
+                atoms_list, ira_instance, ref_atom=atoms_list[0]
+            )
+            return pl.DataFrame({"r": r_vals})
+
+        try:
+            df_rmsd = _load_or_compute_data(
+                cache_file=cache_file,
+                force_recompute=force_recompute,
+                validation_check=validate_profile_cache,
+                computation_callback=compute_profile_data,
+                context_name="Profile RMSD",
+            )
+            rmsd_rc = df_rmsd["r"].to_numpy()
+            normalize_rc = False  # Disable normalization if using RMSD
+        except Exception as e:
+            log.error(f"Could not secure RMSD data: {e}")
+            # Fallback or exit depending on strictness; here we proceed without RMSD
+            rmsd_rc = None
 
     all_file_paths = load_paths(input_dat_pattern)
     file_paths_to_plot = all_file_paths[start:end]
