@@ -590,7 +590,11 @@ def plot_energy_path(
 
         # Normalize RC to [0, 1] for stable spline fitting
         rc_min, rc_max = rc_sorted.min(), rc_sorted.max()
-        rc_norm_sorted = (rc_sorted - rc_min) / (rc_max - rc_min)
+        path_length = rc_max - rc_min
+        if path_length > 1e-6:
+             rc_norm_sorted = (rc_sorted - rc_min) / path_length
+        else:
+             rc_norm_sorted = rc_sorted
         rc_fine_norm = np.linspace(0, 1, num=300)
 
         if method == "hermite":
@@ -601,10 +605,11 @@ def plot_energy_path(
                 polyorder=smoothing.polyorder,
             )
             deriv_smooth_sorted = deriv_smooth[sort_indices]
+            deriv_scaled = deriv_smooth_sorted * path_length
 
             # Use Hermite spline which respects both values and derivatives
             hermite_spline = CubicHermiteSpline(
-                rc_norm_sorted, energy_sorted, deriv_smooth_sorted
+                rc_norm_sorted, energy_sorted, deriv_scaled
             )
             spline_y = hermite_spline(rc_fine_norm)
         else:
@@ -613,7 +618,7 @@ def plot_energy_path(
             spline_y = splev(rc_fine_norm, spline_representation)
 
         # Rescale fine RC back to original units for plotting
-        rc_plot_fine = rc_fine_norm * (rc_max - rc_min) + rc_min
+        rc_plot_fine = rc_fine_norm * path_length + rc_min
 
     except Exception as e:
         log.warning(f"Interpolation failed ({e}), falling back to standard spline.")
