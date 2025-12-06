@@ -1495,8 +1495,7 @@ def _plot_landscape(
     all_dat_paths = sorted(
         Path(p) for p in glob.glob(input_dat_pattern)
     )  # e.g. neb_*.dat
-    con_dir = con_file.parent
-    con_pattern = str(con_dir / input_path_pattern)  # e.g. neb_path_*.con
+    con_pattern = str(input_path_pattern)  # e.g. neb_path_*.con
     all_con_paths = sorted(Path(p) for p in glob.glob(con_pattern))
 
     if not all_dat_paths:
