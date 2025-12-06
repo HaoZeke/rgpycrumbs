@@ -1939,6 +1939,15 @@ def _plot_profile(
 
     color_divisor = (num_files - 1) if num_files > 1 else 1.0
 
+    if rc_mode == RCMode.RMSD.value:
+        if spline_method == SplineMethod.HERMITE.value:
+            log.warning("Hermite spline requires derivatives w.r.t X-axis.")
+            log.warning(
+                "Forces are w.r.t Path Length, not RMSD."
+                " Switching to standard cubic spline."
+            )
+            spline_method = SplineMethod.SPLINE.value
+
     smoothing_params = SmoothingParams(
         window_length=savgol_window, polyorder=savgol_order
     )
