@@ -1323,6 +1323,10 @@ def main(
 
     # --- 6. Finalize ---
     if output_file:
+        if not output_file.parent.exists():
+            log.info(f"Creating output directory: [cyan]{output_file.parent}[/cyan]")
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+
         log.info(f"Saving plot to [green]{output_file}[/green]")
         plt.savefig(
             output_file,
