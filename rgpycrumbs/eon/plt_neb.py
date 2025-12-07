@@ -193,6 +193,7 @@ class RCMode(Enum):
 
     PATH = "path"  # Default path distance
     RMSD = "rmsd"  # RMSD from reactant
+    INDEX = "index"  # Image number (0, 1, 2...)
 
 
 class PlotMode(Enum):
@@ -1464,8 +1465,11 @@ def _validate_data_atoms_match(z_data, atoms, dat_file_name):
 def _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list):
     """Determines default labels for profile plots."""
     default_xlabel = r"Reaction Coordinate ($\AA$)"
+
     if rc_mode == RCMode.RMSD.value and atoms_list is not None:
         default_xlabel = r"RMSD from Reactant ($\AA$)"
+    elif rc_mode == RCMode.INDEX.value:
+        default_xlabel = "Image Index"
 
     final_xlabel = xlabel or default_xlabel
 
@@ -1943,12 +1947,13 @@ def _plot_profile(
 
     color_divisor = (num_files - 1) if num_files > 1 else 1.0
 
-    if rc_mode == RCMode.RMSD.value:
+    # Hermite spline requires dE/dx. The files contain dE/ds (force w.r.t path).
+    # If x is RMSD or Index, dE/dx != dE/ds, so Hermite construction fails.
+    if rc_mode in [RCMode.RMSD.value, RCMode.INDEX.value]:
         if spline_method == SplineMethod.HERMITE.value:
-            log.warning("Hermite spline requires derivatives w.r.t X-axis.")
             log.warning(
-                "Forces are w.r.t Path Length, not RMSD."
-                " Switching to standard cubic spline."
+                f"Hermite spline invalid for rc-mode='{rc_mode}' "
+                "(forces are w.r.t path length). Switching to standard cubic spline."
             )
             spline_method = SplineMethod.SPLINE.value
 
@@ -1982,14 +1987,18 @@ def _plot_profile(
             continue
 
         if rc_mode == RCMode.RMSD.value and rmsd_rc is not None:
-            if rmsd_rc.shape[0] != path_data.shape[1]:
-                log.warning(
-                    f"Skipping [yellow]{file_path.name}[/yellow]: Mismatch in image count "
-                    f"between .con ({rmsd_rc.shape[0]}) and .dat ({path_data.shape[1]})."
-                )
+            # Check dimensions first
+            if len(rmsd_rc) != path_data.shape[1]:
+                log.warning(f"Skipping {file_path.name}: Dimension mismatch.")
                 continue
             path_data[1] = rmsd_rc
-        elif normalize_rc:
+
+        elif rc_mode == RCMode.INDEX.value:
+            # Replace X with integer indices: 0, 1, 2...
+            num_images = path_data.shape[1]
+            path_data[1] = np.arange(num_images)
+
+        elif normalize_rc and rc_mode != RCMode.INDEX.value:
             rc = path_data[1]
             if rc.max() > 0:
                 path_data[1] = rc / rc.max()
@@ -2034,6 +2043,10 @@ def _plot_profile(
     cbar = fig.colorbar(sm, ax=ax, label="Optimization Step")
     cbar.ax.yaxis.set_tick_params(color=selected_theme.textcolor)
     cbar.outline.set_edgecolor(selected_theme.edgecolor)
+    if rc_mode == RCMode.INDEX.value:
+        # Force a major tick for every single image
+        ax.set_xticks(np.arange(num_images))
+        ax.tick_params(axis="x", which="minor", bottom=False, top=False)
 
     # --- Add Additional Structure ---
     if additional_atoms_data and rc_mode == RCMode.RMSD.value:
