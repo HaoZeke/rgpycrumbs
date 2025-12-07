@@ -1,6 +1,6 @@
 [project]
 name = "pycrumbs"
-version = "0.0.4.dev"
+version = "0.0.6.dev"
 description = "Random scripts"
 authors = ["Rohit Goswami <rgoswami[at]ieee[dot]org>"]
 channels = ["conda-forge"]
