@@ -1,3 +1,20 @@
+## [v0.0.5](https://github.com/theochemui/eongit/tree/v0.0.5) - 2025-12-06
+
+### Added
+
+- feat(pltneb): Add 'index' rc-mode to plot against image number
+
+### Changed
+
+- Use white as a default background for plots
+- feat(cache1D): Add disk caching for 1D profiles with rmsd using Parquet
+- feat(cache2D): Add disk caching for 2D landscape plots using Parquet
+
+### Fixed
+
+- fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts
+
+
 ## [v0.0.4](https://github.com/theochemui/eongit/tree/v0.0.4) - 2025-12-01
 
 ### Added
