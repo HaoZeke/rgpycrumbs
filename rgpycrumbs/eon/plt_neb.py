@@ -9,6 +9,7 @@ generated from NEB calculations. It can plot:
     lowest eigenvalue along the reaction coordinate. It can overlay multiple
     paths (e.g., from different optimization steps) and use a
     physically-motivated Hermite spline interpolation using force data.
+
 2.  **2D Reaction Landscapes:** Plots the path on a 2D coordinate system
     defined by the Root Mean Square Deviation (RMSD) from the reactant
     and product structures. This requires the 'ira_mod' library.
@@ -314,19 +315,16 @@ def calculate_rmsd_from_ref(
     Uses the Iterative Reordering and Alignment (IRA) algorithm to find the
     optimal alignment and permutation before calculating RMSD.
 
-    Parameters
-    ----------
-    atoms_list : list
-        A list of ASE Atoms objects.
-    ira_instance : ira_mod.IRA
-        An instantiated IRA object.
-    ref_atom : ase.Atoms
-        The reference Atoms object to align against.
-
-    Returns
-    -------
-    np.ndarray
-        An array of RMSD values, one for each structure in `atoms_list`.
+    :param atoms_list: A list of ASE Atoms objects.
+    :type atoms_list: list
+    :param ira_instance: An instantiated IRA object.
+    :type ira_instance: ira_mod.IRA
+    :param ref_atom: The reference Atoms object to align against.
+    :type ref_atom: ase.Atoms
+    :param ira_kmax: kmax factor for IRA.
+    :type ira_kmax: float
+    :return: An array of RMSD values, one for each structure in `atoms_list`.
+    :rtype: np.ndarray
     """
     nat_ref = len(ref_atom)
     typ_ref = ref_atom.get_atomic_numbers()
@@ -366,18 +364,14 @@ def calculate_landscape_coords(
     """
     Calculates 2D landscape coordinates (RMSD-R, RMSD-P) for a path.
 
-    Parameters
-    ----------
-    atoms_list : list
-        List of ASE Atoms objects representing the path.
-    ira_instance : ira_mod.IRA
-        An instantiated IRA object.
-
-    Returns
-    -------
-    tuple[np.ndarray, np.ndarray]
-        - rmsd_r: Array of RMSD values relative to the reactant (first image).
-        - rmsd_p: Array of RMSD values relative to the product (last image).
+    :param atoms_list: List of ASE Atoms objects representing the path.
+    :type atoms_list: list
+    :param ira_instance: An instantiated IRA object.
+    :type ira_instance: ira_mod.IRA
+    :param ira_kmax: kmax factor for IRA.
+    :type ira_kmax: float
+    :return: A tuple of (rmsd_r, rmsd_p) arrays relative to reactant and product.
+    :rtype: tuple[np.ndarray, np.ndarray]
     """
     log.info(
         "Calculating landscape coordinates using [bold magenta]ira.match[/bold magenta]..."
@@ -402,25 +396,20 @@ def _load_or_compute_data(
     """
     Retrieves data from a parquet cache or triggers a computation callback.
 
-    Parameters
-    ----------
-    cache_file : Path | None
-        The path to the cache file.
-    force_recompute : bool
-        If True, skips loading and forces computation.
-    validation_check : Callable
-        A function that receives the loaded DataFrame and raises ValueError
-        if the schema appears incorrect (e.g., missing columns).
-    computation_callback : Callable
-        A function that performs the heavy calculation and returns a DataFrame
-        if the cache remains unavailable or invalid.
-    context_name : str
-        Label for logging (e.g., "Profile" or "Landscape").
-
-    Returns
-    -------
-    pl.DataFrame
-        The requested data.
+    :param cache_file: The path to the cache file.
+    :type cache_file: Path | None
+    :param force_recompute: If True, skips loading and forces computation.
+    :type force_recompute: bool
+    :param validation_check: A function that receives the loaded DataFrame and raises ValueError
+                             if the schema appears incorrect (e.g., missing columns).
+    :type validation_check: Callable
+    :param computation_callback: A function that performs the heavy calculation and returns a DataFrame
+                                 if the cache remains unavailable or invalid.
+    :type computation_callback: Callable
+    :param context_name: Label for logging (e.g., "Profile" or "Landscape").
+    :type context_name: str
+    :return: The requested data.
+    :rtype: pl.DataFrame
     """
     # 1. Attempt to load from cache
     if cache_file and cache_file.exists() and not force_recompute:
@@ -467,20 +456,28 @@ def plot_single_inset(
     """
     Renders a single ASE Atoms object and plots it as an inset.
 
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axis to plot on.
-    atoms : ase.Atoms
-        The atomic structure to render.
-    x_coord : float
-        The x-data coordinate to anchor the arrow to.
-    y_coord : float
-        The y-data coordinate to anchor the arrow to.
-    xybox : tuple, optional
-        The (x, y) offset in points for placing the image box.
-    rad : float, optional
-        The connection style 'rad' parameter for the arrow.
+    :param ax: The axis to plot on.
+    :type ax: matplotlib.axes.Axes
+    :param atoms: The atomic structure to render.
+    :type atoms: ase.Atoms
+    :param x_coord: The x-data coordinate to anchor the arrow to.
+    :type x_coord: float
+    :param y_coord: The y-data coordinate to anchor the arrow to.
+    :type y_coord: float
+    :param xybox: The (x, y) offset in points for placing the image box.
+    :type xybox: tuple, optional
+    :param rad: The connection style 'rad' parameter for the arrow.
+    :type rad: float, optional
+    :param zoom: Scale the inset image.
+    :type zoom: float
+    :param ase_rotation: ASE rotation string for structure insets.
+    :type ase_rotation: str
+    :param arrow_head_length: Arrow head length for insets.
+    :type arrow_head_length: float
+    :param arrow_head_width: Arrow head width for insets.
+    :type arrow_head_width: float
+    :param arrow_tail_width: Arrow tail width for insets.
+    :type arrow_tail_width: float
     """
     buf = io.BytesIO()
     ase_write(
@@ -535,29 +532,37 @@ def plot_structure_insets(
     """
     Plots insets for critical points (reactant, saddle, product) or all images.
 
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axis to plot on.
-    atoms_list : list
-        List of all ASE Atoms objects for the path.
-    x_coords : np.ndarray
-        Array of x-coordinates (RC or RMSD-R) for each image.
-    y_coords : np.ndarray
-        Array of y-coordinates (Energy, Eigenvalue, or RMSD-P) for each image.
-    saddle_data : np.ndarray
-        Data used to find the saddle point. For energy mode, this is the
-        energy array. For eigenvalue mode, this is the eigenvalue array.
-    images_to_plot : str
-        Which images to plot: "all" or "crit_points".
-    plot_mode : str
-        "energy" or "eigenvalue", used to determine saddle point logic.
-    draw_reactant : InsetImagePos
-        Positioning info for the reactant inset.
-    draw_saddle : InsetImagePos
-        Positioning info for the saddle inset.
-    draw_product : InsetImagePos
-        Positioning info for the product inset.
+    :param ax: The axis to plot on.
+    :type ax: matplotlib.axes.Axes
+    :param atoms_list: List of all ASE Atoms objects for the path.
+    :type atoms_list: list
+    :param x_coords: Array of x-coordinates (RC or RMSD-R) for each image.
+    :type x_coords: np.ndarray
+    :param y_coords: Array of y-coordinates (Energy, Eigenvalue, or RMSD-P) for each image.
+    :type y_coords: np.ndarray
+    :param saddle_data: Data used to find the saddle point. For energy mode, this is the
+                        energy array. For eigenvalue mode, this is the eigenvalue array.
+    :type saddle_data: np.ndarray
+    :param images_to_plot: Which images to plot: "all" or "crit_points".
+    :type images_to_plot: str
+    :param plot_mode: "energy" or "eigenvalue", used to determine saddle point logic.
+    :type plot_mode: str
+    :param draw_reactant: Positioning info for the reactant inset.
+    :type draw_reactant: InsetImagePos
+    :param draw_saddle: Positioning info for the saddle inset.
+    :type draw_saddle: InsetImagePos
+    :param draw_product: Positioning info for the product inset.
+    :type draw_product: InsetImagePos
+    :param zoom_ratio: Scale the inset image.
+    :type zoom_ratio: float
+    :param ase_rotation: ASE rotation string for structure insets.
+    :type ase_rotation: str
+    :param arrow_head_length: Arrow head length for insets.
+    :type arrow_head_length: float
+    :param arrow_head_width: Arrow head width for insets.
+    :type arrow_head_width: float
+    :param arrow_tail_width: Arrow tail width for insets.
+    :type arrow_tail_width: float
     """
     if draw_reactant is None:
         draw_reactant = InsetImagePos(15, 60, 0.1)
@@ -625,28 +630,27 @@ def plot_energy_path(
     Plots a single interpolated energy path and its data points.
 
     Supports two interpolation methods:
-    - 'hermite': Cubic Hermite spline. Uses energy values and their
+
+    * 'hermite': Cubic Hermite spline. Uses energy values and their
       derivatives (taken from the parallel force `f_para`). This is
       often a more physically accurate interpolation for NEB paths.
-    - 'spline': Standard cubic spline. Ignores derivative information.
+    * 'spline': Standard cubic spline. Ignores derivative information.
 
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axis to plot on.
-    path_data : np.ndarray
-        2D array of data (from neb_*.dat), transposed.
-        Expected: path_data[1] = rc, path_data[2] = energy, path_data[3] = f_para
-    color : str or tuple
-        Color for the plot.
-    alpha : float
-        Transparency for the plot.
-    zorder : int
-        Plotting layer order.
-    method : str, optional
-        Interpolation method: "hermite" or "spline".
-    smoothing : SmoothingParams, optional
-        Parameters for Savitzky-Golay filter if using Hermite spline.
+    :param ax: The axis to plot on.
+    :type ax: matplotlib.axes.Axes
+    :param path_data: 2D array of data (from neb_*.dat), transposed.
+                      Expected: path_data[1] = rc, path_data[2] = energy, path_data[3] = f_para
+    :type path_data: np.ndarray
+    :param color: Color for the plot.
+    :type color: str or tuple
+    :param alpha: Transparency for the plot.
+    :type alpha: float
+    :param zorder: Plotting layer order.
+    :type zorder: int
+    :param method: Interpolation method: "hermite" or "spline".
+    :type method: str, optional
+    :param smoothing: Parameters for Savitzky-Golay filter if using Hermite spline.
+    :type smoothing: SmoothingParams, optional
     """
     rc = path_data[1]
     energy = path_data[2]
@@ -719,19 +723,19 @@ def plot_eigenvalue_path(ax, path_data, color, alpha, zorder, grid_color="white"
     """
     Plots a single interpolated eigenvalue path and its data points.
 
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The matplotlib axes object on which to plot.
-    path_data : np.ndarray
-        2D array of data (from neb_*.dat), transposed.
-        Expected: path_data[1] = rc, path_data[4] = eigenvalue
-    color : str or tuple
-        Color specification for the plot line and markers.
-    alpha : float
-        Transparency level for the plot line and markers.
-    zorder : int
-        Drawing order for the plot elements.
+    :param ax: The matplotlib axes object on which to plot.
+    :type ax: matplotlib.axes.Axes
+    :param path_data: 2D array of data (from neb_*.dat), transposed.
+                      Expected: path_data[1] = rc, path_data[4] = eigenvalue
+    :type path_data: np.ndarray
+    :param color: Color specification for the plot line and markers.
+    :type color: str or tuple
+    :param alpha: Transparency level for the plot line and markers.
+    :type alpha: float
+    :param zorder: Drawing order for the plot elements.
+    :type zorder: int
+    :param grid_color: Color for the horizontal zero line.
+    :type grid_color: str, optional
     """
     rc = path_data[1]
     eigenvalue = path_data[4]
@@ -815,18 +819,22 @@ def plot_interpolated_grid(
     This may have artifacts where samples are not present, debug with show_pts
     or use with "last".
 
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axis to plot on.
-    rmsd_r : np.ndarray
-        RMSD from reactant (x-axis).
-    rmsd_p : np.ndarray
-        RMSD from product (y-axis).
-    z_data : np.ndarray
-        Data for coloring the path (z-axis).
-    cmap : str
-        Name of the colormap to use.
+    :param ax: The axis to plot on.
+    :type ax: matplotlib.axes.Axes
+    :param rmsd_r: RMSD from reactant (x-axis).
+    :type rmsd_r: np.ndarray
+    :param rmsd_p: RMSD from product (y-axis).
+    :type rmsd_p: np.ndarray
+    :param z_data: Data for coloring the path (z-axis).
+    :type z_data: np.ndarray
+    :param show_pts: Whether to show scatter points.
+    :type show_pts: bool
+    :param cmap: Name of the colormap to use.
+    :type cmap: str
+    :param scatter_r: Optional separate x-coords for scatter points.
+    :type scatter_r: np.ndarray, optional
+    :param scatter_p: Optional separate y-coords for scatter points.
+    :type scatter_p: np.ndarray, optional
     """
     log.info("Generating interpolated 2D surface...")
     log.info("Visualised best with 'last'")
@@ -863,18 +871,24 @@ def plot_interpolated_rbf(
     """
     Generates and plots an interpolated 2D surface (contour plot).
 
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        The axis to plot on.
-    rmsd_r : np.ndarray
-        RMSD from reactant (x-axis).
-    rmsd_p : np.ndarray
-        RMSD from product (y-axis).
-    z_data : np.ndarray
-        Data for coloring the path (z-axis).
-    cmap : str
-        Name of the colormap to use.
+    :param ax: The axis to plot on.
+    :type ax: matplotlib.axes.Axes
+    :param rmsd_r: RMSD from reactant (x-axis).
+    :type rmsd_r: np.ndarray
+    :param rmsd_p: RMSD from product (y-axis).
+    :type rmsd_p: np.ndarray
+    :param z_data: Data for coloring the path (z-axis).
+    :type z_data: np.ndarray
+    :param show_pts: Whether to show scatter points.
+    :type show_pts: bool
+    :param rbf_smoothing: Smoothing parameter for RBF interpolation.
+    :type rbf_smoothing: float
+    :param cmap: Name of the colormap to use.
+    :type cmap: str
+    :param scatter_r: Optional separate x-coords for scatter points.
+    :type scatter_r: np.ndarray, optional
+    :param scatter_p: Optional separate y-coords for scatter points.
+    :type scatter_p: np.ndarray, optional
     """
     log.info("Generating interpolated RBF 2D surface...")
     # Prepare input points for the interpolator: shape (n_samples, 2)
