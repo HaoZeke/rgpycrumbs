@@ -11,6 +11,12 @@ rgpycrumbs Documentation
 
 Welcome to ``rgpycrumbs``. The ultimate dispatch workflow.
 
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
 2 Workflow Manager
 ------------------
 
