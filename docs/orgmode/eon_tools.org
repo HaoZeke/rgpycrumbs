@@ -1,0 +1,35 @@
+#+TITLE: EON Tools
+
+* Overview
+  These tools handle [[https://eondocs.org][EON output files]].
+
+* Plotting NEB Paths
+  The ~plt_neb~ tool visualizes energy landscapes. It supports:
+  - RMSD-RMSD 2D projections
+  - Force-corrected Hermite splines
+
+  #+BEGIN_EXPORT rst
+  .. click:: rgpycrumbs.eon.plt_neb:main
+     :prog: rgpycrumbs eon plt_neb
+     :nested: full
+  #+END_EXPORT
+
+* Trajectory Splitting
+This script takes a multi-image trajectory file (e.g., from a finished NEB
+calculation) and splits it into individual frame files, creating an input file
+for a new calculation.
+
+To split a trajectory file:
+#+BEGIN_SRC shell
+rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
+#+END_SRC
+
+This will create a directory named ~initial_images~ containing ~ipath_000.con~,
+~ipath_001.con~, etc., along with an ~ipath.dat~ file listing their paths.
+
+** CLI options
+  #+BEGIN_EXPORT rst
+  .. click:: rgpycrumbs.eon.con_splitter:con_splitter
+     :prog: rgpycrumbs eon con-splitter
+     :nested: full
+  #+END_EXPORT
