@@ -214,6 +214,7 @@ DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 ROUNDING_DF = 3
 RBF_SMOOTHING = 1e-2
+IRA_KMAX_DEFAULT = 1.8
 
 
 @dataclass
@@ -305,7 +306,7 @@ def load_paths(file_pattern: str) -> list[Path]:
 
 
 def calculate_rmsd_from_ref(
-    atoms_list: list, ira_instance, ref_atom: "ase.Atoms"
+    atoms_list: list, ira_instance, ref_atom: "ase.Atoms", ira_kmax: float
 ) -> np.ndarray:
     """
     Calculates the RMSD of each structure in a list relative to a reference.
@@ -330,7 +331,7 @@ def calculate_rmsd_from_ref(
     nat_ref = len(ref_atom)
     typ_ref = ref_atom.get_atomic_numbers()
     coords_ref = ref_atom.get_positions()
-    kmax_factor = 1.8  # IRA parameter
+    kmax_factor = ira_kmax
     rmsd_values = np.zeros(len(atoms_list))
 
     for i, atom_i in enumerate(atoms_list):
@@ -359,7 +360,9 @@ def calculate_rmsd_from_ref(
     return rmsd_values
 
 
-def calculate_landscape_coords(atoms_list: list, ira_instance):
+def calculate_landscape_coords(
+    atoms_list: list, ira_instance: "ira_mod.IRA", ira_kmax: float
+):
     """
     Calculates 2D landscape coordinates (RMSD-R, RMSD-P) for a path.
 
@@ -379,8 +382,12 @@ def calculate_landscape_coords(atoms_list: list, ira_instance):
     log.info(
         "Calculating landscape coordinates using [bold magenta]ira.match[/bold magenta]..."
     )
-    rmsd_r = calculate_rmsd_from_ref(atoms_list, ira_instance, ref_atom=atoms_list[0])
-    rmsd_p = calculate_rmsd_from_ref(atoms_list, ira_instance, ref_atom=atoms_list[-1])
+    rmsd_r = calculate_rmsd_from_ref(
+        atoms_list, ira_instance, ref_atom=atoms_list[0], ira_kmax=ira_kmax
+    )
+    rmsd_p = calculate_rmsd_from_ref(
+        atoms_list, ira_instance, ref_atom=atoms_list[-1], ira_kmax=ira_kmax
+    )
     log.info("Landscape coordinate calculation complete.")
     return rmsd_r, rmsd_p
 
@@ -1167,6 +1174,11 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     default=False,
     help="Ignore cache and force re-calculation of RMSD.",
 )
+@click.option(
+    "--ira-kmax",
+    default=IRA_KMAX_DEFAULT,
+    help="kmax factor for IRA.",
+)
 def main(
     # --- Input Files ---
     input_dat_pattern,
@@ -1221,6 +1233,7 @@ def main(
     # Caching
     cache_file,
     force_recompute,
+    ira_kmax,
 ):
     """Main entry point for NEB plot script."""
 
@@ -1281,6 +1294,7 @@ def main(
             arrow_tail_width=arrow_tail_width,
             cache_file=cache_file,
             force_recompute=force_recompute,
+            ira_kmax=ira_kmax,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
 
@@ -1490,6 +1504,7 @@ def _aggregate_all_paths(
     ira_instance,
     cache_file: Path | None = None,
     force_recompute: bool = False,
+    ira_kmax: float = IRA_KMAX_DEFAULT,
 ):
     """
     Loads and aggregates data from all .dat and .con files for 2D surface using
@@ -1528,7 +1543,7 @@ def _aggregate_all_paths(
                 _validate_data_atoms_match(z_data_step, atoms_list_step, dat_file.name)
 
                 rmsd_r, rmsd_p = calculate_landscape_coords(
-                    atoms_list_step, ira_instance
+                    atoms_list_step, ira_instance, ira_kmax
                 )
 
                 all_dfs.append(
@@ -1582,6 +1597,7 @@ def _plot_landscape(
     selected_theme,
     cache_file,
     force_recompute,
+    ira_kmax,
     # Inset args
     draw_reactant,
     draw_saddle,
@@ -1734,6 +1750,7 @@ def _plot_landscape(
         ira_instance,
         cache_file=cache_file,
         force_recompute=force_recompute,
+        ira_kmax=ira_kmax,
     )
 
     # --- Prepare Data for Surface Interpolation ---
