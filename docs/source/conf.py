@@ -2,7 +2,7 @@ import os
 import sys
 
 # -- Path setup --------------------------------------------------------------
-sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../../rgpycrumbs"))
 
 # -- Project information -----------------------------------------------------
 project = "rgpycrumbs"
@@ -11,11 +11,12 @@ author = "Rohit Goswami"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    "sphinx_click",
-    "autodoc2",
+    "sphinx_click",                # Generates the CLI reference (Options/Args)
+    "sphinxcontrib.programoutput", # Runs 'uv run ...' for dynamic examples
+    "autodoc2",                    # Generates API docs + Source links
     # Include autodoc since sphinx-click relies on its mocking machinery.
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
+    "sphinx.ext.autodoc",          # Needed for mocking machinery
+    "sphinx.ext.viewcode",         # Adds '[source]' links
     "sphinx.ext.intersphinx",
 ]
 
@@ -60,7 +61,5 @@ html_theme_options = {
 autodoc2_packages = [
     {
         "path": "../../rgpycrumbs",
-        # Exclude files handled by click..? (TBD)
-        "exclude_files": ["rgpycrumbs/eon/plt_neb.py"],
     },
 ]
