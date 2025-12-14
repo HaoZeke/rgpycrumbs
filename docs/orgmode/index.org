@@ -3,13 +3,13 @@
 * Introduction
   Welcome to ~rgpycrumbs~. The ultimate dispatch workflow.
 
-* Sub-Commands
-  #+BEGIN_EXPORT rst
+* Tools
+#+BEGIN_EXPORT rst
   .. toctree::
      :maxdepth: 2
      :caption: Tools
 
-     eon_tools
+     tools/eon/index
   #+END_EXPORT
 
 * API Documentation

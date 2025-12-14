@@ -1,0 +1,20 @@
+#+TITLE: Splitting ~con~ files
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Trajectory Splitting
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.con_splitter:con_splitter
+   :prog: rgpycrumbs eon con-splitter
+   :nested: full
+#+END_EXPORT
+
+** Usage
+# TODO(rg): Actually use real exampes here instead
+#+BEGIN_EXPORT rst
+.. command-output:: python -m rgpycrumbs.cli eon con-splitter --help
+   :cwd: ../../
+#+END_EXPORT
+
+** API Reference
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.eon.con_splitter`@@.

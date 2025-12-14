@@ -1,0 +1,24 @@
+#+TITLE: Polyhedral Template Matcher
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* PTM Displacement
+Identifies atoms in a structure file that do not match a specified crystal
+structure (e.g., FCC) using Polyhedral Template Matching (PTM). It outputs the
+0-based indices of these defect atoms (e.g., interstitials), which is useful for
+filtering or setting up atom lists for the displacements used for EON calculations.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.ptmdisp:main
+   :prog: rgpycrumbs eon ptmdisp
+   :nested: full
+#+END_EXPORT
+
+** Usage
+# TODO(rg): Actually use real exampes here instead
+#+BEGIN_EXPORT rst
+.. command-output:: python -m rgpycrumbs.cli eon ptmdisp --help
+   :cwd: ../../
+#+END_EXPORT
+
+** API Reference
+For developer details and source code see @@rst::mod:`rgpycrumbs.eon.ptmdisp`@@.

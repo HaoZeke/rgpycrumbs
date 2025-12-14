@@ -1,0 +1,21 @@
+#+TITLE: Generators for NWChem
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* NWChem Input Generator
+  This tool generates a complete NWChem input file (~.nwi~) compatible with EON's ~SocketNWChemPot~. It merges atom types from a geometry file (e.g., ~.con~) with settings defined in an ~eonclient~ configuration file.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.generate_nwchem_input:main
+   :prog: rgpycrumbs eon generate-nwchem-input
+   :nested: full
+#+END_EXPORT
+
+** Usage
+#+BEGIN_EXPORT rst
+.. command-output:: python -m rgpycrumbs.cli eon generate-nwchem-input --help
+   :cwd: ../../
+#+END_EXPORT
+
+** API Reference
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.eon.generate_nwchem_input`@@.
