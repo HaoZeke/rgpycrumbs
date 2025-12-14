@@ -15,11 +15,5 @@
      ptmdisp
   #+END_EXPORT
 
-Relevant API documentation involves[fn:: Also linked in each section.]:
-#+begin_export rst
-  .. toctree::
-     :maxdepth: 2
-     :caption: Reference
-
-     ../../autoapi/rgpycrumbs/eon/index
-#+end_export
+* API Reference
+  For developer details, see the :doc:`EON Helper Reference <../../autoapi/rgpycrumbs/eon/index>`[fn:: Also linked in each section.].

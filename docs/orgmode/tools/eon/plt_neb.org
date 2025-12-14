@@ -9,11 +9,17 @@
 #+END_EXPORT
 
 ** Usage
-# TODO(rg): Actually use real exampes here instead
-#+BEGIN_EXPORT rst
-.. command-output:: python -m rgpycrumbs.cli eon plt-neb --help
-   :cwd: ../../
-#+END_EXPORT
+To plot a specific range of ~neb_*.dat~ files and save the output:
+# #+BEGIN_EXPORT rst
+# .. command-output:: python -m rgpycrumbs.cli eon plt-neb --start 10 --end 15 -o final_path.pdf
+#    :cwd: ../../
+# #+END_EXPORT
+
+To show the plot interactively without saving:
+#+BEGIN_SRC shell
+python -m rgpycrumbs.cli eon plt-neb --start 280
+#+END_SRC
+
 
 ** API Reference
 

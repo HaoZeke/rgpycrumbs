@@ -14,7 +14,7 @@ documentation forms a new environment in the ~pixi.toml~ file.
 * Dependency management
 - Library :: go in ~pyproject.toml~.
 - Doc/Dev :: go in ~pixi.toml~.
-- Script :: handled on-the-fly via the ~uv~ dispatching mechanism and PEP 751 detailed in my [[https://realpython.com/python-script-structure/][RealPython best practices post]].
+- Script :: handled on-the-fly via the ~uv~ dispatching mechanism and [[https://peps.python.org/pep-0723/][PEP 723]] detailed in my [[https://realpython.com/python-script-structure/][RealPython best practices post]].
 * Core Architecture: The Dispatcher
   :PROPERTIES:
   :ID:       cli-dispatch
