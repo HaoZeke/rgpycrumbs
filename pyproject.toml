@@ -29,9 +29,9 @@ test        = "pytest --cov=rgpycrumbs tests"
 
 [project]
 name = "rgpycrumbs"
-description = "Input file generators for computational chemistry"
+description = "Helper functions and CLI dispatchers for computational chemistry"
 readme = "README.md"
-keywords = [ "plots", "parsers" ]
+keywords = [ "plots", "parsers", "analysis" ]
 license = { text = "MIT" }
 authors = [ { name = "Rohit Goswami", email = "rog32@hi.is" } ]
 requires-python = ">=3.10"
