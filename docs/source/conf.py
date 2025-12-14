@@ -18,10 +18,18 @@ extensions = [
     "sphinx.ext.viewcode",         # Adds '[source]' links
     "sphinx.ext.intersphinx",
     "autoapi.extension",
+    "sphinxcontrib.autodoc_pydantic",
+    "sphinx_sitemap",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "eon": ("https://eondocs.org", None),
+}
 
 # -- Mocking Dependencies ----------------------------------------------------
 # Necessary for the dispatch architecture.
@@ -57,4 +65,4 @@ html_theme_options = {
     ],
 }
 
-autoapi_dirs = "../../rgpycrumbs"
+autoapi_dirs = ["../../rgpycrumbs"]
