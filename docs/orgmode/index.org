@@ -1,6 +1,17 @@
 #+TITLE: ~rgpycrumbs~
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
-#+OPTIONS: toc:nil todo:nil num:nil author:t
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+
+# Metadata first, including the heading
+#+begin_export rst
+:cover: https://github.com/HaoZeke/rgpycrumbs/blob/main/branding/logo/pycrumbs_logo.webp
+
+==============
+``rgpycrumbs``
+==============
+
+:Author: `Rohit Goswami <https://rgoswami.me>`_
+#+end_export
 
 # Copied over by sphinx-build
 file:../../branding/logo/pycrumbs_logo.webp
@@ -20,10 +31,9 @@ individually. This architecture ensures:
 - Strict Reproducibility :: Every script explicitly declares its necessary
   environment, preventing "works on my machine" errors.
 
-* Domains
 Broadly speaking, the tooling here assists with computational methods to find
 reaction pathways, along with packaging helpers.
-** Advanced NEB Visualization
+* Advanced NEB Visualization
 The @@rst::doc:`plt-neb tool <tools/eon/plt_neb>`@@ offers novel visualization
 capabilities for Nudged Elastic Band calculations:
 - Force-Corrected Interpolation :: Uses Hermite splines incorporating force
@@ -32,8 +42,8 @@ capabilities for Nudged Elastic Band calculations:
   coordinates to reveal path complexity often hidden in 1D profiles.
 - Structural Context :: Automatically renders and embeds atomic structure insets
   for critical points or all images directly onto the plots.
-** Simulation Setup & Analysis
-*** EON
+* Simulation Setup & Analysis
+** EON
 - NEB initial path generation :: @@rst::doc:`con-splitter <tools/eon/con_splitter>`@@
   simplifies the generation of initial paths enabling for instance ~IDPP~
   initialization through ~ase~ by processing multi-image trajectories into
@@ -44,10 +54,10 @@ capabilities for Nudged Elastic Band calculations:
 - ~NWChem~ Input Generation :: @@rst::doc:`generate-nwchem-input <tools/eon/generate_nwchem_input>`@@
   generates complete input files compatible with EON's ~SocketNWChemPot~,
   merging geometry data with calculation settings.
-*** PLUMED
+** PLUMED
 - Free Energy Reconstruction :: Pure-python implementations for reconstructing
   bias potentials from PLUMED hills files.
-** Infrastructure & Maintenance
+* Infrastructure & Maintenance
 - Prefix.dev Management :: ~delete_packages~ helps maintain  custom Conda/Pixi
   channels by automating the cleanup of old or specific package versions on
   [[https://prefix.dev][prefix.dev]].
