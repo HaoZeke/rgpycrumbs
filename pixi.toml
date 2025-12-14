@@ -21,8 +21,22 @@ emacs = ">=30.2,<31"
 shibuya = ">=2025.12.13, <2026"
 sphinx-click = ">=6.2.0, <7"
 sphinx = ">=9.0.4, <10"
-sphinx-autodoc2 = ">=0.5.0, <0.6"
 sphinxcontrib-programoutput = ">=0.18, <0.19"
+sphinx-autoapi = ">=3.6.0, <4"
 
 [environments]
 docs = {features = ["docs"]}
+
+[feature.docs.tasks.docbld]
+depends-on = [
+{ task = "mkrst", environment = "docs" },
+]
+cmd = """
+sphinx-build docs/source/ docs/build
+"""
+
+[feature.docs.tasks.mkrst]
+cwd = "docs"
+cmd = """
+emacs --batch --load export.el
+"""

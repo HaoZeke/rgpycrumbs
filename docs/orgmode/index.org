@@ -4,8 +4,6 @@
   Welcome to ~rgpycrumbs~. The ultimate dispatch workflow.
 
 * Sub-Commands
-  Here are the tools available in the suite.
-
   #+BEGIN_EXPORT rst
   .. toctree::
      :maxdepth: 2
@@ -20,5 +18,5 @@
      :maxdepth: 2
      :caption: API
 
-     apidocs/index
+     autoapi/index
 #+end_export

@@ -13,11 +13,11 @@ author = "Rohit Goswami"
 extensions = [
     "sphinx_click",                # Generates the CLI reference (Options/Args)
     "sphinxcontrib.programoutput", # Runs 'uv run ...' for dynamic examples
-    "autodoc2",                    # Generates API docs + Source links
     # Include autodoc since sphinx-click relies on its mocking machinery.
     "sphinx.ext.autodoc",          # Needed for mocking machinery
     "sphinx.ext.viewcode",         # Adds '[source]' links
     "sphinx.ext.intersphinx",
+    "autoapi.extension",
 ]
 
 templates_path = ["_templates"]
@@ -57,9 +57,4 @@ html_theme_options = {
     ],
 }
 
-# -- Autodoc2 Configuration
-autodoc2_packages = [
-    {
-        "path": "../../rgpycrumbs",
-    },
-]
+autoapi_dirs = "../../rgpycrumbs"
