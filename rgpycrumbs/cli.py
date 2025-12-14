@@ -1,109 +1,127 @@
+import argparse
+import logging
 import os
 import site
 import subprocess
 import sys
 from pathlib import Path
 
-import click
+logging.basicConfig(level=logging.INFO)
 
 # The directory where cli.py is located
 PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 
-def _dispatch_to_script(folder_name: str, script_name: str, script_args: tuple):
+def _get_scripts_in_folder(folder_name: str) -> list[str]:
+    """Returns a sorted list of script names (without extension) in a folder."""
+    folder_path = PACKAGE_ROOT / folder_name
+    if not folder_path.is_dir():
+        return []
+    return sorted(
+        f.stem for f in folder_path.glob("*.py") if not f.name.startswith("_")
+    )
+
+
+def _dispatch(group: str, script_name: str, script_args: list):
     """
-    Generic dispatcher:
-    1. Looks for {folder_name}/{script_name}.py
-    2. Sets up environment (fallback to parent site-packages).
-    3. Runs via 'uv run'.
+    Sets up the environment and runs the target script via 'uv run'.
     """
-    # Convert script-name to script_name.py (e.g., plt-neb -> plt_neb.py)
+    # Convert script-name to filename (e.g., plt-neb -> plt_neb.py)
     filename = f"{script_name.replace('-', '_')}.py"
-    script_path = PACKAGE_ROOT / folder_name / filename
+    script_path = PACKAGE_ROOT / group / filename
 
     if not script_path.is_file():
-        click.echo(f"Error: Script not found at '{script_path}'", err=True)
-        # List available scripts in that folder to be helpful
-        available = [
-            f.stem
-            for f in (PACKAGE_ROOT / folder_name).glob("*.py")
-            if not f.name.startswith("_")
-        ]
-        if available:
-            click.echo(
-                f"Available scripts in '{folder_name}': {', '.join(available)}",
-                err=True,
-            )
+        # Shouldn't happen thanks to argparse choices, but serves as a final
+        # sanity check.
+        rerr = f"Error: Script not found at '{script_path}'"
+        raise (RuntimeError(rerr))
         sys.exit(1)
 
-    command = ["uv", "run", str(script_path)] + list(script_args)
+    command = ["uv", "run", str(script_path), *script_args]
 
     # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
 
-    # 1. Fallback imports logic
-    parent_paths = os.pathsep.join(
-        site.getsitepackages() + [site.getusersitepackages()]
-    )
-    env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] = parent_paths
+    # Fallback imports
+    try:
+        site_packages = [*site.getsitepackages(), *site.getusersitepackages()]
+        env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] = os.pathsep.join(site_packages)
+    except (AttributeError, ImportError):
+        pass
 
-    # Add the parent directory of rgpycrumbs to PYTHONPATH
-    # This allows the script to do `from rgpycrumbs._aux import ...`
+    # Add parent dir to PYTHONPATH for internal imports (e.g. rgpycrumbs._aux)
     project_root = str(PACKAGE_ROOT.parent)
     current_pythonpath = env.get("PYTHONPATH", "")
-
-    # Prepend our project root to ensure we find our local package first
     env["PYTHONPATH"] = f"{project_root}{os.pathsep}{current_pythonpath}"
 
-    click.echo(f"--> Dispatching to: {' '.join(command)}", err=True)
+    logging.info(f"--> Dispatching to: {' '.join(command)}", file=sys.stderr)
 
     try:
-        subprocess.run(command, check=True, env=env)
+        # Use subprocess.run to block until completion
+        subprocess.run(command, check=True, env=env)  # noqa: S603
     except FileNotFoundError:
-        click.echo("Error: 'uv' command not found. Is it installed?", err=True)
+        logging.info("Error: 'uv' command not found. Is it installed?", file=sys.stderr)
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
+    except KeyboardInterrupt:
+        sys.exit(130)
 
 
-def make_command_function(module_name):
-    """
-    Factory function to create the click command function.
-    We need this factory to avoid Python closure issues (variable binding).
-    """
-
-    @click.command(
-        name=module_name,
-        context_settings=dict(ignore_unknown_options=True),
-        add_help_option=False,
-        help=f"Dispatch to scripts in the '{module_name}' directory.",
+def main():
+    parser = argparse.ArgumentParser(
+        prog="rgpycrumbs",
+        description="A dispatcher that runs self-contained scripts using 'uv'.",
     )
-    @click.argument("subcommand_name")
-    @click.argument("script_args", nargs=-1, type=click.UNPROCESSED)
-    def command_wrapper(subcommand_name, script_args):
-        _dispatch_to_script(module_name, subcommand_name, script_args)
 
-    return command_wrapper
+    # Create subparsers for the groups (e.g., 'eon', 'prefix')
+    subparsers = parser.add_subparsers(
+        title="Command Groups", dest="group", required=True, metavar="GROUP"
+    )
 
+    # --- DYNAMIC DISCOVERY ---
+    # Scan the package directory for subfolders (groups)
+    valid_groups = sorted(
+        d.name
+        for d in PACKAGE_ROOT.iterdir()
+        if d.is_dir() and not d.name.startswith(("_", "."))
+    )
 
-@click.group()
-def cli():
-    """A dispatcher that runs self-contained scripts using 'uv'."""
-    pass
+    for group in valid_groups:
+        available_scripts = _get_scripts_in_folder(group)
+        if not available_scripts:
+            continue
 
+        # Create a subparser for this group (e.g., 'rgpycrumbs eon ...')
+        group_parser = subparsers.add_parser(
+            group,
+            help=f"Tools in the '{group}' category.",
+            description=f"Available scripts in '{group}': {', '.join(available_scripts)}",
+        )
 
-# --- DYNAMIC REGISTRATION ---
+        # The script name is a positional argument, restricted to valid scripts
+        group_parser.add_argument(
+            "script", choices=available_scripts, help="The specific script to run."
+        )
 
-# 1. Get all directories in the package root
-# 2. Filter out __pycache__, dot-files, or files
-for item in PACKAGE_ROOT.iterdir():
-    if item.is_dir() and not item.name.startswith(("_", ".")):
-        # 3. Create the function dynamically
-        dynamic_cmd = make_command_function(item.name)
+        # REMAINDER captures everything after the script name (flags, args, etc.)
+        # and passes it raw to the target script.
+        group_parser.add_argument(
+            "script_args",
+            nargs=argparse.REMAINDER,
+            help="Arguments passed to the script.",
+        )
 
-        # 4. Register it to the CLI group
-        cli.add_command(dynamic_cmd)
+    # Parse
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    args = parser.parse_args()
+
+    # Dispatch
+    _dispatch(args.group, args.script, args.script_args)
 
 
 if __name__ == "__main__":
-    cli()
+    main()
