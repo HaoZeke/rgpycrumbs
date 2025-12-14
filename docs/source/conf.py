@@ -61,9 +61,9 @@ html_static_path = ["_static"]
 # Shibuya theme specific options
 html_theme_options = {
     "github_url": "https://github.com/Haozeke/rgpycrumbs",
-    "nav_links": [
-        {"title": "EON Tools", "url": "eon_tools"},
-    ],
+    # "nav_links": [
+    #     {"title": "EON Tools", "url": "eon_tools"},
+    # ],
 }
 
 autoapi_dirs = ["../../rgpycrumbs"]
