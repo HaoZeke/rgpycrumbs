@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath("../../rgpycrumbs"))
 project = "rgpycrumbs"
 copyright = "2025, Rohit Goswami"
 author = "Rohit Goswami"
+html_logo = "../../branding/logo/pycrumbs_notext.svg"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
