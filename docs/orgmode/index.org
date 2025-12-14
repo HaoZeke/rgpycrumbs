@@ -1,9 +1,11 @@
-#+TITLE: rgpycrumbs Documentation
+#+TITLE: ~rgpycrumbs~
+#+AUTHOR: Rohit Goswami
+#+OPTIONS: toc:nil todo:nil num:nil author:t
 
 * Introduction
   Welcome to ~rgpycrumbs~. The ultimate dispatch workflow.
 
-* Tools
+* Command-Line Helpers
 #+BEGIN_EXPORT rst
   .. toctree::
      :maxdepth: 2
@@ -16,7 +18,7 @@
 #+begin_export rst
   .. toctree::
      :maxdepth: 2
-     :caption: API
+     :caption: Reference
 
      autoapi/index
 #+end_export

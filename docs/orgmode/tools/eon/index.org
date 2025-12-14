@@ -15,7 +15,7 @@
      ptmdisp
   #+END_EXPORT
 
-* API
+Relevant API documentation involves[fn:: Also linked in each section.]:
 #+begin_export rst
   .. toctree::
      :maxdepth: 2
