@@ -1,0 +1,17 @@
+#+TITLE: Prefix Tools
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* Prefix Helpers
+  Tools for managing [[https://prefix.dev][prefix.dev]] channels and packages.
+
+#+BEGIN_EXPORT rst
+  .. toctree::
+     :maxdepth: 2
+     :caption: Tools
+
+     delete_packages
+#+END_EXPORT
+
+** API Reference
+For developer details, see the :doc:`Prefix Helper Reference
+<../../autoapi/rgpycrumbs/prefix/index>`[fn:: Also linked in each section.].
