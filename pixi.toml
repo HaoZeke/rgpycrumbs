@@ -25,6 +25,8 @@ sphinxcontrib-programoutput = ">=0.18, <0.19"
 sphinx-autoapi = ">=3.6.0, <4"
 sphobjinv = ">=2.3.1.3, <3"
 autodoc-pydantic = ">=2.2.0, <3"
+sphinx-sitemap = ">=2.9.0, <3"
+pycmark = ">=0.9.6, <0.10"
 
 [environments]
 docs = {features = ["docs"]}

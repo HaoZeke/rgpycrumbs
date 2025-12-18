@@ -83,6 +83,7 @@ notebooks.
      :maxdepth: 2
      :caption: Reference
 
+     changelog
      devnotes
      autoapi/index
 #+end_export

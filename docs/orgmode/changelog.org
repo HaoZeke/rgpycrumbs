@@ -1,0 +1,9 @@
+#+TITLE: Changelog
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
+
+#+begin_export rst
+.. include:: ../../CHANGELOG.md
+   :parser: commonmark
+#+end_export
