@@ -67,3 +67,4 @@ html_theme_options = {
 }
 
 autoapi_dirs = ["../../rgpycrumbs"]
+html_baseurl = "rgpycrumbs.rgoswami.me"
