@@ -46,10 +46,6 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
 ]
 dynamic = [ "version" ]
-dependencies = [
-  "click>=8.2.1",
-]
-[project.optional-dependencies]
 [project.urls]
 Documentation = "https://github.com/HaoZeke/rgpycrumbs#readme"
 Issues        = "https://github.com/HaoZeke/rgpycrumbs/issues"
@@ -136,43 +132,3 @@ tests    = [ "tests" ]
 
 [tool.coverage.report]
 exclude_lines = [ "no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:" ]
-
-[tool.towncrier]
-start_string = "<!-- towncrier release notes start -->\n"
-underlines   = [ "", "", "" ]
-single_file  = true
-filename     = "CHANGELOG.md"
-directory    = "doc/release/upcoming_changes/"
-issue_format = "[#{issue}](https://github.com/HaoZeke/rgpycrumbs/issues/{issue})"
-title_format = "## [{version}](https://github.com/HaoZeke/rgpycrumbs/tree/{version}) - {project_date}"
-all_bullets  = false
-
-[[tool.towncrier.type]]
-directory   = "removed"
-name        = "Removed"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory   = "deprecated"
-name        = "Deprecated"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory   = "added"
-name        = "Added"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory   = "changed"
-name        = "Changed"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory   = "fixed"
-name        = "Fixed"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory   = "misc"
-name        = "Miscellaneous"
-showcontent = true
