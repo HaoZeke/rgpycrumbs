@@ -1,0 +1,29 @@
+==================
+Plotting NEB paths
+==================
+
+
+
+Visualizing path trajectories
+-----------------------------
+
+.. click:: rgpycrumbs.eon.plt_neb:main
+   :prog: rgpycrumbs eon plt-neb
+   :nested: full
+
+Usage
+~~~~~
+
+To plot a specific range of ``neb_*.dat`` files and save the output:
+
+To show the plot interactively without saving:
+
+.. code:: shell
+
+    python -m rgpycrumbs.cli eon plt-neb --start 280
+
+API Reference
+~~~~~~~~~~~~~
+
+For developer details and source code see
+:mod:`rgpycrumbs.eon.plt_neb`.

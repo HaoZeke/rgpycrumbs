@@ -1,0 +1,15 @@
+rgpycrumbs.xts.cuh2
+===================
+
+.. py:module:: rgpycrumbs.xts.cuh2
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/xts/cuh2/datgen/index
+
+

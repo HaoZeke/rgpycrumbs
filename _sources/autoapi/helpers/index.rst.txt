@@ -1,0 +1,19 @@
+helpers
+=======
+
+.. py:module:: helpers
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   helpers.one_day_tdelta
+
+
+Module Contents
+---------------
+
+.. py:function:: one_day_tdelta(etime: str, stime: str, format_time: str = '%H:%M:%S')
+

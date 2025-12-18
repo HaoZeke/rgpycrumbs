@@ -1,0 +1,41 @@
+rgpycrumbs.cli
+==============
+
+.. py:module:: rgpycrumbs.cli
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.cli.PACKAGE_ROOT
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.cli._get_scripts_in_folder
+   rgpycrumbs.cli._dispatch
+   rgpycrumbs.cli.main
+
+
+Module Contents
+---------------
+
+.. py:data:: PACKAGE_ROOT
+
+.. py:function:: _get_scripts_in_folder(folder_name: str) -> list[str]
+
+   Returns a sorted list of script names (without extension) in a folder.
+
+
+.. py:function:: _dispatch(group: str, script_name: str, script_args: list)
+
+   Sets up the environment and runs the target script via 'uv run'.
+
+
+.. py:function:: main()
+

@@ -1,0 +1,15 @@
+rgpycrumbs.prefix
+=================
+
+.. py:module:: rgpycrumbs.prefix
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/prefix/delete_packages/index
+
+

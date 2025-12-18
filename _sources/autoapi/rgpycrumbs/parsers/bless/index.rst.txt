@@ -1,0 +1,22 @@
+rgpycrumbs.parsers.bless
+========================
+
+.. py:module:: rgpycrumbs.parsers.bless
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.parsers.bless.BLESS_LOG
+   rgpycrumbs.parsers.bless.BLESS_TIME
+
+
+Module Contents
+---------------
+
+.. py:data:: BLESS_LOG
+
+.. py:data:: BLESS_TIME
+

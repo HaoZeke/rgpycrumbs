@@ -1,0 +1,120 @@
+
+:cover: https://github.com/HaoZeke/rgpycrumbs/blob/main/branding/logo/pycrumbs_logo.webp
+
+==============
+``rgpycrumbs``
+==============
+
+:Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. image:: ../../branding/logo/pycrumbs_logo.webp
+
+Overview
+--------
+
+``rgpycrumbs`` functions as a unified dispatcher for research scripts and
+computational utilities, tailored for computational chemistry.
+
+``rgpycrumbs`` employs `PEP 723 <https://peps.python.org/pep-0723/>`_ metadata to isolate dependencies for each tool
+individually. This architecture ensures:
+
+Conflict-Free Execution
+    Scripts with incompatible requirements like 
+    different ``numpy`` versions run side-by-side without issue.
+
+On-Demand Retrieval
+    The core package remains lightweight. The system
+    fetches heavy libraries (like ``ase`` or ``matplotlib``) via ``uv`` only when
+    executing a script that requires them.
+
+Strict Reproducibility
+    Every script explicitly declares its necessary
+    environment, preventing "works on my machine" errors.
+
+Broadly speaking, the tooling here assists with computational methods to find
+reaction pathways, along with packaging helpers.
+
+Advanced NEB Visualization
+--------------------------
+
+The :doc:`plt-neb tool <tools/eon/plt_neb>` offers novel visualization
+capabilities for Nudged Elastic Band calculations:
+
+Force-Corrected Interpolation
+    Uses Hermite splines incorporating force
+    projections to produce physically consistent energy profiles.
+
+2D Energy Landscapes
+    Projects reaction paths onto Reactant/Product RMSD
+    coordinates to reveal path complexity often hidden in 1D profiles.
+
+Structural Context
+    Automatically renders and embeds atomic structure insets
+    for critical points or all images directly onto the plots.
+
+Simulation Setup & Analysis
+---------------------------
+
+EON
+~~~
+
+NEB initial path generation
+    :doc:`con-splitter <tools/eon/con_splitter>`
+    simplifies the generation of initial paths enabling for instance ``IDPP``
+    initialization through ``ase`` by processing multi-image trajectories into
+    EON-compatible input lists.
+
+Defect Identification
+    :doc:`ptmdisp <tools/eon/ptmdisp>`
+    employs Polyhedral Template Matching via ``OVITO`` to algorithmically identify
+    and index interstitial defects in crystalline systems.
+
+``NWChem`` Input Generation
+    :doc:`generate-nwchem-input <tools/eon/generate_nwchem_input>`
+    generates complete input files compatible with EON's ``SocketNWChemPot``,
+    merging geometry data with calculation settings.
+
+PLUMED
+~~~~~~
+
+Free Energy Reconstruction
+    Pure-python implementations for reconstructing
+    bias potentials from PLUMED hills files.
+
+Infrastructure & Maintenance
+----------------------------
+
+Prefix.dev Management
+    ``delete_packages`` helps maintain  custom Conda/Pixi
+    channels by automating the cleanup of old or specific package versions on
+    `prefix.dev <https://prefix.dev>`_.
+
+Utility Functions
+-----------------
+
+Beyond the command line tools, the package includes **pure-python** helpers for
+parsing logs like those from `bless <https://crates.io/crates/bless>`_ and managing data structures in Jupyter
+notebooks.
+
+Tool Categories
+---------------
+
+  .. toctree::
+     :maxdepth: 2
+     :caption: Tools
+
+     tools/eon/index
+     tools/prefix/index
+
+Developer Reference
+-------------------
+
+For details on the dispatcher architecture or internal API:
+
+  .. toctree::
+     :maxdepth: 2
+     :caption: Reference
+
+     changelog
+     devnotes
+     autoapi/index

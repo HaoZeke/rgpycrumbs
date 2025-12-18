@@ -1,0 +1,45 @@
+rgpycrumbs.eon.con_splitter
+===========================
+
+.. py:module:: rgpycrumbs.eon.con_splitter
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.con_splitter.CONSOLE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.con_splitter.con_splitter
+
+
+Module Contents
+---------------
+
+.. py:data:: CONSOLE
+
+.. py:function:: con_splitter(neb_trajectory_file: pathlib.Path, output_dir: pathlib.Path | None, images_per_path: int, path_index: int, path_list_filename: str)
+
+   Splits a multi-step NEB trajectory file (.traj, .con, etc.) into
+   individual .con files for a *single* specified path.
+
+   This script reads a trajectory file, which may contain multiple NEB
+   optimization steps (paths), and extracts only the frames corresponding
+   to a single specified path.
+
+   It writes each frame of that path into a separate .con file
+   (e.g., ipath_000.con, ipath_001.con, ...).
+
+   It also generates a text file (default: 'ipath.dat') that lists the
+   absolute paths of all created .con files.
+
+   NEB_TRAJECTORY_FILE: Path to the input multi-image/multi-path trajectory.
+
+

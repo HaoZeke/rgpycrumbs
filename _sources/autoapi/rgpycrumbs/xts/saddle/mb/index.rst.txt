@@ -1,0 +1,28 @@
+rgpycrumbs.xts.saddle.mb
+========================
+
+.. py:module:: rgpycrumbs.xts.saddle.mb
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.xts.saddle.mb.x
+   rgpycrumbs.xts.saddle.mb.y
+   rgpycrumbs.xts.saddle.mb.Z
+   rgpycrumbs.xts.saddle.mb.parser
+
+
+Module Contents
+---------------
+
+.. py:data:: x
+
+.. py:data:: y
+
+.. py:data:: Z
+
+.. py:data:: parser
+

@@ -1,0 +1,15 @@
+rgpycrumbs.plumed
+=================
+
+.. py:module:: rgpycrumbs.plumed
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/plumed/direct_reconstruction/index
+
+

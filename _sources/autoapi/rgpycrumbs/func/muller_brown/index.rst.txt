@@ -1,0 +1,22 @@
+rgpycrumbs.func.muller_brown
+============================
+
+.. py:module:: rgpycrumbs.func.muller_brown
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.func.muller_brown.muller_brown
+   rgpycrumbs.func.muller_brown.muller_brown_gradient
+
+
+Module Contents
+---------------
+
+.. py:function:: muller_brown(x)
+
+.. py:function:: muller_brown_gradient(x)
+

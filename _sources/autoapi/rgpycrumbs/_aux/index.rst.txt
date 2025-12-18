@@ -1,0 +1,34 @@
+rgpycrumbs._aux
+===============
+
+.. py:module:: rgpycrumbs._aux
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs._aux.getstrform
+   rgpycrumbs._aux.get_gitroot
+   rgpycrumbs._aux.switchdir
+   rgpycrumbs._aux._import_from_parent_env
+
+
+Module Contents
+---------------
+
+.. py:function:: getstrform(pathobj)
+
+.. py:function:: get_gitroot()
+
+.. py:function:: switchdir(path)
+
+.. py:function:: _import_from_parent_env(module_name: str)
+
+   Import a module from parent interpreter's site-packages as a fallback.
+
+   Temporarily appends parent paths to sys.path, imports, then restores.
+   This ensures uv dependencies take precedence.
+
+

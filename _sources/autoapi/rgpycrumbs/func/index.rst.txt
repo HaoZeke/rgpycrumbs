@@ -1,0 +1,15 @@
+rgpycrumbs.func
+===============
+
+.. py:module:: rgpycrumbs.func
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/func/muller_brown/index
+
+

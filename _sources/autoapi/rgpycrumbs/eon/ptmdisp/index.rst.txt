@@ -1,0 +1,93 @@
+rgpycrumbs.eon.ptmdisp
+======================
+
+.. py:module:: rgpycrumbs.eon.ptmdisp
+
+.. autoapi-nested-parse::
+
+   Identifies atoms in a structure file that do not match a specified crystal
+   structure (e.g., FCC) and prints their 0-based indices to standard output.
+   By default, the script is quiet. Use --verbose for progress messages.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.ptmdisp.log
+   rgpycrumbs.eon.ptmdisp.STRUCTURE_TYPE_MAP
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.ptmdisp.CrystalStructure
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.ptmdisp.find_mismatch_indices
+   rgpycrumbs.eon.ptmdisp.main
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:class:: CrystalStructure
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Enum where members are also (and must be) strings
+
+
+   .. py:attribute:: OTHER
+      :value: 'Other'
+
+
+
+   .. py:attribute:: FCC
+      :value: 'FCC'
+
+
+
+   .. py:attribute:: HCP
+      :value: 'HCP'
+
+
+
+   .. py:attribute:: BCC
+      :value: 'BCC'
+
+
+
+   .. py:attribute:: ICO
+      :value: 'Icosahedral'
+
+
+
+.. py:data:: STRUCTURE_TYPE_MAP
+
+.. py:function:: find_mismatch_indices(filename: str, target_structure: CrystalStructure, remove_fcc_vacancy: bool = False, view_selection: bool = True, selection_radius: float = 5) -> numpy.ndarray
+
+   Analyzes a structure file with PTM, identifies the interstitial defect,
+   and returns the indices of the interstitial atoms plus all atoms
+   within a sphere of radius `selection_radius`.
+
+
+.. py:function:: main(filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacancy: bool)
+
+   Analyzes FILENAME to find all atoms that are NOT the specified
+   crystal structure type and prints their 0-based indices as a
+   comma-separated list, suitable for use in other programs.
+
+

@@ -1,0 +1,588 @@
+rgpycrumbs.eon.plt_neb
+======================
+
+.. py:module:: rgpycrumbs.eon.plt_neb
+
+.. autoapi-nested-parse::
+
+   Plots Nudged Elastic Band (NEB) reaction paths and landscapes.
+
+   This script provides a command-line interface (CLI) to visualize data
+   generated from NEB calculations. It can plot:
+
+   1.  **Energy/Eigenvalue Profiles:** Shows the evolution of the energy or
+       lowest eigenvalue along the reaction coordinate. It can overlay multiple
+       paths (e.g., from different optimization steps) and use a
+       physically-motivated Hermite spline interpolation using force data.
+
+   2.  **2D Reaction Landscapes:** Plots the path on a 2D coordinate system
+       defined by the Root Mean Square Deviation (RMSD) from the reactant
+       and product structures. This requires the 'ira_mod' library.
+       It can also interpolate and display the 2D energy/eigenvalue surface.
+
+   The script can also render atomic structures from a .con file as insets
+   on the plots for key points (reactant, saddle, product).
+
+   This script follows the guidelines laid out here:
+   https://realpython.com/python-script-structure/
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.plt_neb.ira_mod
+   rgpycrumbs.eon.plt_neb.log
+   rgpycrumbs.eon.plt_neb.RUHI_COLORS
+   rgpycrumbs.eon.plt_neb.MIN_PATH_LENGTH
+   rgpycrumbs.eon.plt_neb.BATLOW_THEME
+   rgpycrumbs.eon.plt_neb.RUHI_THEME
+   rgpycrumbs.eon.plt_neb.THEMES
+   rgpycrumbs.eon.plt_neb.DEFAULT_INPUT_PATTERN
+   rgpycrumbs.eon.plt_neb.DEFAULT_PATH_PATTERN
+   rgpycrumbs.eon.plt_neb.ROUNDING_DF
+   rgpycrumbs.eon.plt_neb.RBF_SMOOTHING
+   rgpycrumbs.eon.plt_neb.IRA_KMAX_DEFAULT
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.plt_neb.PlotTheme
+   rgpycrumbs.eon.plt_neb.PlotType
+   rgpycrumbs.eon.plt_neb.RCMode
+   rgpycrumbs.eon.plt_neb.PlotMode
+   rgpycrumbs.eon.plt_neb.SplineMethod
+   rgpycrumbs.eon.plt_neb.SmoothingParams
+   rgpycrumbs.eon.plt_neb.InsetImagePos
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.plt_neb.build_cmap
+   rgpycrumbs.eon.plt_neb.setup_global_theme
+   rgpycrumbs.eon.plt_neb.apply_plot_theme
+   rgpycrumbs.eon.plt_neb.load_paths
+   rgpycrumbs.eon.plt_neb.calculate_rmsd_from_ref
+   rgpycrumbs.eon.plt_neb.calculate_landscape_coords
+   rgpycrumbs.eon.plt_neb._load_or_compute_data
+   rgpycrumbs.eon.plt_neb.plot_single_inset
+   rgpycrumbs.eon.plt_neb.plot_structure_insets
+   rgpycrumbs.eon.plt_neb.plot_energy_path
+   rgpycrumbs.eon.plt_neb.plot_eigenvalue_path
+   rgpycrumbs.eon.plt_neb.plot_landscape_path
+   rgpycrumbs.eon.plt_neb.plot_interpolated_grid
+   rgpycrumbs.eon.plt_neb.plot_interpolated_rbf
+   rgpycrumbs.eon.plt_neb.setup_plot_aesthetics
+   rgpycrumbs.eon.plt_neb.main
+   rgpycrumbs.eon.plt_neb._setup_theme
+   rgpycrumbs.eon.plt_neb._run_dependency_checks
+   rgpycrumbs.eon.plt_neb._determine_figsize
+   rgpycrumbs.eon.plt_neb._load_structures
+   rgpycrumbs.eon.plt_neb._validate_data_atoms_match
+   rgpycrumbs.eon.plt_neb._get_profile_labels
+   rgpycrumbs.eon.plt_neb._aggregate_all_paths
+   rgpycrumbs.eon.plt_neb._plot_landscape
+   rgpycrumbs.eon.plt_neb._plot_profile
+
+
+Module Contents
+---------------
+
+.. py:data:: ira_mod
+
+.. py:data:: log
+
+.. py:data:: RUHI_COLORS
+
+.. py:data:: MIN_PATH_LENGTH
+   :value: 1e-06
+
+
+.. py:function:: build_cmap(hex_list, name)
+
+   Build and register a LinearSegmentedColormap from a list of hex colors.
+
+
+.. py:class:: PlotTheme
+
+   Holds all aesthetic parameters for a matplotlib theme.
+
+
+   .. py:attribute:: name
+      :type:  str
+
+
+   .. py:attribute:: font_family
+      :type:  str
+
+
+   .. py:attribute:: font_size
+      :type:  int
+
+
+   .. py:attribute:: facecolor
+      :type:  str
+
+
+   .. py:attribute:: textcolor
+      :type:  str
+
+
+   .. py:attribute:: edgecolor
+      :type:  str
+
+
+   .. py:attribute:: gridcolor
+      :type:  str
+
+
+   .. py:attribute:: cmap_profile
+      :type:  str
+
+
+   .. py:attribute:: cmap_landscape
+      :type:  str
+
+
+   .. py:attribute:: highlight_color
+      :type:  str
+
+
+.. py:data:: BATLOW_THEME
+
+.. py:data:: RUHI_THEME
+
+.. py:data:: THEMES
+
+.. py:class:: PlotType(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Defines the overall plot type.
+
+
+   .. py:attribute:: PROFILE
+      :value: 'profile'
+
+
+
+   .. py:attribute:: LANDSCAPE
+      :value: 'landscape'
+
+
+
+.. py:class:: RCMode(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Defines the reaction coordinate for profile plots.
+
+
+   .. py:attribute:: PATH
+      :value: 'path'
+
+
+
+   .. py:attribute:: RMSD
+      :value: 'rmsd'
+
+
+
+   .. py:attribute:: INDEX
+      :value: 'index'
+
+
+
+.. py:class:: PlotMode(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Defines the primary data to be plotted (Y-axis or color).
+
+
+   .. py:attribute:: ENERGY
+      :value: 'energy'
+
+
+
+   .. py:attribute:: EIGENVALUE
+      :value: 'eigenvalue'
+
+
+
+.. py:class:: SplineMethod(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Defines the interpolation method for profile plots.
+
+
+   .. py:attribute:: HERMITE
+      :value: 'hermite'
+
+
+
+   .. py:attribute:: SPLINE
+      :value: 'spline'
+
+
+
+.. py:data:: DEFAULT_INPUT_PATTERN
+   :value: 'neb_*.dat'
+
+
+.. py:data:: DEFAULT_PATH_PATTERN
+   :value: 'neb_path_*.con'
+
+
+.. py:data:: ROUNDING_DF
+   :value: 3
+
+
+.. py:data:: RBF_SMOOTHING
+   :value: 0.01
+
+
+.. py:data:: IRA_KMAX_DEFAULT
+   :value: 1.8
+
+
+.. py:class:: SmoothingParams
+
+   Parameters for Savitzky-Golay smoothing of force data.
+
+
+   .. py:attribute:: window_length
+      :type:  int
+      :value: 5
+
+
+
+   .. py:attribute:: polyorder
+      :type:  int
+      :value: 2
+
+
+
+.. py:class:: InsetImagePos
+
+   Bases: :py:obj:`tuple`
+
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y
+
+
+   .. py:attribute:: rad
+
+
+.. py:function:: setup_global_theme(theme: PlotTheme)
+
+   Sets global plt.rcParams based on the theme *before* plot creation.
+
+
+.. py:function:: apply_plot_theme(ax: matplotlib.pyplot.Axes, theme: PlotTheme)
+
+   Applies theme properties *specific* to an axis instance.
+
+
+.. py:function:: load_paths(file_pattern: str) -> list[pathlib.Path]
+
+   Finds and sorts files matching a glob pattern.
+
+
+.. py:function:: calculate_rmsd_from_ref(atoms_list: list, ira_instance, ref_atom: ase.Atoms, ira_kmax: float) -> numpy.ndarray
+
+   Calculates the RMSD of each structure in a list relative to a reference.
+
+   Uses the Iterative Reordering and Alignment (IRA) algorithm to find the
+   optimal alignment and permutation before calculating RMSD.
+
+   :param atoms_list: A list of ASE Atoms objects.
+   :type atoms_list: list
+   :param ira_instance: An instantiated IRA object.
+   :type ira_instance: ira_mod.IRA
+   :param ref_atom: The reference Atoms object to align against.
+   :type ref_atom: ase.Atoms
+   :param ira_kmax: kmax factor for IRA.
+   :type ira_kmax: float
+   :return: An array of RMSD values, one for each structure in `atoms_list`.
+   :rtype: np.ndarray
+
+
+.. py:function:: calculate_landscape_coords(atoms_list: list, ira_instance: ira_mod, ira_kmax: float)
+
+   Calculates 2D landscape coordinates (RMSD-R, RMSD-P) for a path.
+
+   :param atoms_list: List of ASE Atoms objects representing the path.
+   :type atoms_list: list
+   :param ira_instance: An instantiated IRA object.
+   :type ira_instance: ira_mod.IRA
+   :param ira_kmax: kmax factor for IRA.
+   :type ira_kmax: float
+   :return: A tuple of (rmsd_r, rmsd_p) arrays relative to reactant and product.
+   :rtype: tuple[np.ndarray, np.ndarray]
+
+
+.. py:function:: _load_or_compute_data(cache_file: pathlib.Path | None, force_recompute: bool, validation_check: collections.abc.Callable[[polars.DataFrame], None], computation_callback: collections.abc.Callable[[], polars.DataFrame], context_name: str) -> polars.DataFrame
+
+   Retrieves data from a parquet cache or triggers a computation callback.
+
+   :param cache_file: The path to the cache file.
+   :type cache_file: Path | None
+   :param force_recompute: If True, skips loading and forces computation.
+   :type force_recompute: bool
+   :param validation_check: A function that receives the loaded DataFrame and raises ValueError
+                            if the schema appears incorrect (e.g., missing columns).
+   :type validation_check: Callable
+   :param computation_callback: A function that performs the heavy calculation and returns a DataFrame
+                                if the cache remains unavailable or invalid.
+   :type computation_callback: Callable
+   :param context_name: Label for logging (e.g., "Profile" or "Landscape").
+   :type context_name: str
+   :return: The requested data.
+   :rtype: pl.DataFrame
+
+
+.. py:function:: plot_single_inset(ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0), rad=0.0, zoom=0.4, ase_rotation='0x, 90y, 0z', arrow_head_length=0.4, arrow_head_width=0.4, arrow_tail_width=0.1)
+
+   Renders a single ASE Atoms object and plots it as an inset.
+
+   :param ax: The axis to plot on.
+   :type ax: matplotlib.axes.Axes
+   :param atoms: The atomic structure to render.
+   :type atoms: ase.Atoms
+   :param x_coord: The x-data coordinate to anchor the arrow to.
+   :type x_coord: float
+   :param y_coord: The y-data coordinate to anchor the arrow to.
+   :type y_coord: float
+   :param xybox: The (x, y) offset in points for placing the image box.
+   :type xybox: tuple, optional
+   :param rad: The connection style 'rad' parameter for the arrow.
+   :type rad: float, optional
+   :param zoom: Scale the inset image.
+   :type zoom: float
+   :param ase_rotation: ASE rotation string for structure insets.
+   :type ase_rotation: str
+   :param arrow_head_length: Arrow head length for insets.
+   :type arrow_head_length: float
+   :param arrow_head_width: Arrow head width for insets.
+   :type arrow_head_width: float
+   :param arrow_tail_width: Arrow tail width for insets.
+   :type arrow_tail_width: float
+
+
+.. py:function:: plot_structure_insets(ax, atoms_list, x_coords, y_coords, saddle_data, images_to_plot, plot_mode, draw_reactant: InsetImagePos | None = None, draw_saddle: InsetImagePos | None = None, draw_product: InsetImagePos | None = None, zoom_ratio: float = 0.4, ase_rotation: str = '0x, 90y, 0z', arrow_head_length: float = 0.4, arrow_head_width: float = 0.4, arrow_tail_width: float = 0.1)
+
+   Plots insets for critical points (reactant, saddle, product) or all images.
+
+   :param ax: The axis to plot on.
+   :type ax: matplotlib.axes.Axes
+   :param atoms_list: List of all ASE Atoms objects for the path.
+   :type atoms_list: list
+   :param x_coords: Array of x-coordinates (RC or RMSD-R) for each image.
+   :type x_coords: np.ndarray
+   :param y_coords: Array of y-coordinates (Energy, Eigenvalue, or RMSD-P) for each image.
+   :type y_coords: np.ndarray
+   :param saddle_data: Data used to find the saddle point. For energy mode, this is the
+                       energy array. For eigenvalue mode, this is the eigenvalue array.
+   :type saddle_data: np.ndarray
+   :param images_to_plot: Which images to plot: "all" or "crit_points".
+   :type images_to_plot: str
+   :param plot_mode: "energy" or "eigenvalue", used to determine saddle point logic.
+   :type plot_mode: str
+   :param draw_reactant: Positioning info for the reactant inset.
+   :type draw_reactant: InsetImagePos
+   :param draw_saddle: Positioning info for the saddle inset.
+   :type draw_saddle: InsetImagePos
+   :param draw_product: Positioning info for the product inset.
+   :type draw_product: InsetImagePos
+   :param zoom_ratio: Scale the inset image.
+   :type zoom_ratio: float
+   :param ase_rotation: ASE rotation string for structure insets.
+   :type ase_rotation: str
+   :param arrow_head_length: Arrow head length for insets.
+   :type arrow_head_length: float
+   :param arrow_head_width: Arrow head width for insets.
+   :type arrow_head_width: float
+   :param arrow_tail_width: Arrow tail width for insets.
+   :type arrow_tail_width: float
+
+
+.. py:function:: plot_energy_path(ax, path_data, color, alpha, zorder, method='hermite', smoothing=SmoothingParams())
+
+   Plots a single interpolated energy path and its data points.
+
+   Supports two interpolation methods:
+
+   * 'hermite': Cubic Hermite spline. Uses energy values and their
+     derivatives (taken from the parallel force `f_para`). This is
+     often a more physically accurate interpolation for NEB paths.
+   * 'spline': Standard cubic spline. Ignores derivative information.
+
+   :param ax: The axis to plot on.
+   :type ax: matplotlib.axes.Axes
+   :param path_data: 2D array of data (from neb_*.dat), transposed.
+                     Expected: path_data[1] = rc, path_data[2] = energy, path_data[3] = f_para
+   :type path_data: np.ndarray
+   :param color: Color for the plot.
+   :type color: str or tuple
+   :param alpha: Transparency for the plot.
+   :type alpha: float
+   :param zorder: Plotting layer order.
+   :type zorder: int
+   :param method: Interpolation method: "hermite" or "spline".
+   :type method: str, optional
+   :param smoothing: Parameters for Savitzky-Golay filter if using Hermite spline.
+   :type smoothing: SmoothingParams, optional
+
+
+.. py:function:: plot_eigenvalue_path(ax, path_data, color, alpha, zorder, grid_color='white')
+
+   Plots a single interpolated eigenvalue path and its data points.
+
+   :param ax: The matplotlib axes object on which to plot.
+   :type ax: matplotlib.axes.Axes
+   :param path_data: 2D array of data (from neb_*.dat), transposed.
+                     Expected: path_data[1] = rc, path_data[4] = eigenvalue
+   :type path_data: np.ndarray
+   :param color: Color specification for the plot line and markers.
+   :type color: str or tuple
+   :param alpha: Transparency level for the plot line and markers.
+   :type alpha: float
+   :param zorder: Drawing order for the plot elements.
+   :type zorder: int
+   :param grid_color: Color for the horizontal zero line.
+   :type grid_color: str, optional
+
+
+.. py:function:: plot_landscape_path(ax, rmsd_r, rmsd_p, z_data, cmap, z_label)
+
+   Plots the 1D path on the 2D RMSD landscape, colored by z_data.
+   ...
+
+
+.. py:function:: plot_interpolated_grid(ax, rmsd_r, rmsd_p, z_data, show_pts, cmap, scatter_r=None, scatter_p=None)
+
+   Generates and plots an interpolated 2D surface (contour plot) with splines.
+
+   This may have artifacts where samples are not present, debug with show_pts
+   or use with "last".
+
+   :param ax: The axis to plot on.
+   :type ax: matplotlib.axes.Axes
+   :param rmsd_r: RMSD from reactant (x-axis).
+   :type rmsd_r: np.ndarray
+   :param rmsd_p: RMSD from product (y-axis).
+   :type rmsd_p: np.ndarray
+   :param z_data: Data for coloring the path (z-axis).
+   :type z_data: np.ndarray
+   :param show_pts: Whether to show scatter points.
+   :type show_pts: bool
+   :param cmap: Name of the colormap to use.
+   :type cmap: str
+   :param scatter_r: Optional separate x-coords for scatter points.
+   :type scatter_r: np.ndarray, optional
+   :param scatter_p: Optional separate y-coords for scatter points.
+   :type scatter_p: np.ndarray, optional
+
+
+.. py:function:: plot_interpolated_rbf(ax, rmsd_r, rmsd_p, z_data, show_pts, rbf_smoothing, cmap, scatter_r=None, scatter_p=None)
+
+   Generates and plots an interpolated 2D surface (contour plot).
+
+   :param ax: The axis to plot on.
+   :type ax: matplotlib.axes.Axes
+   :param rmsd_r: RMSD from reactant (x-axis).
+   :type rmsd_r: np.ndarray
+   :param rmsd_p: RMSD from product (y-axis).
+   :type rmsd_p: np.ndarray
+   :param z_data: Data for coloring the path (z-axis).
+   :type z_data: np.ndarray
+   :param show_pts: Whether to show scatter points.
+   :type show_pts: bool
+   :param rbf_smoothing: Smoothing parameter for RBF interpolation.
+   :type rbf_smoothing: float
+   :param cmap: Name of the colormap to use.
+   :type cmap: str
+   :param scatter_r: Optional separate x-coords for scatter points.
+   :type scatter_r: np.ndarray, optional
+   :param scatter_p: Optional separate y-coords for scatter points.
+   :type scatter_p: np.ndarray, optional
+
+
+.. py:function:: setup_plot_aesthetics(ax, title, xlabel, ylabel)
+
+   Applies labels, limits, and other plot aesthetics.
+
+
+.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, plot_type, landscape_mode, landscape_path, rc_mode, plot_structures, rbf_smoothing, rounding, show_pts, plot_mode, surface_type, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, cache_file, force_recompute, ira_kmax)
+
+   Main entry point for NEB plot script.
+
+
+.. py:function:: _setup_theme(theme, cmap_profile, cmap_landscape, fontsize_base, facecolor)
+
+   Loads the selected theme and applies any user overrides.
+
+
+.. py:function:: _run_dependency_checks(plot_type, rc_mode, additional_con, plot_structures, con_file)
+
+   Validates dependencies and option combinations.
+
+
+.. py:function:: _determine_figsize(figsize, fig_height, aspect_ratio)
+
+   Determines the final figure size based on user inputs.
+
+
+.. py:function:: _load_structures(con_file, additional_con, plot_type, rc_mode)
+
+   Loads atoms from .con files and calcs RMSD for additional structure.
+
+
+.. py:function:: _validate_data_atoms_match(z_data, atoms, dat_file_name)
+
+   Checks if data points count matches structure count, exits on mismatch.
+
+
+.. py:function:: _get_profile_labels(rc_mode, plot_mode, xlabel, ylabel, atoms_list)
+
+   Determines default labels for profile plots.
+
+
+.. py:function:: _aggregate_all_paths(all_dat_paths, all_con_paths, y_data_column, ira_instance, cache_file: pathlib.Path | None = None, force_recompute: bool = False, ira_kmax: float = IRA_KMAX_DEFAULT)
+
+   Loads and aggregates data from all .dat and .con files for 2D surface using
+   Polars and averaging points within each bin. Optionally, a cache file is
+   used.
+
+   Returns:
+     df_raw
+   where df_raw is a Polars DataFrame with columns: [r, p, z, step]
+
+
+.. py:function:: _plot_landscape(ax, atoms_list, input_dat_pattern, input_path_pattern, con_file, additional_atoms_data, landscape_path, landscape_mode, plot_mode, surface_type, plot_structures, show_pts, rbf_smoothing, rounding, selected_theme, cache_file, force_recompute, ira_kmax, draw_reactant, draw_saddle, draw_product, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width)
+
+   Handles all logic for drawing 2D landscape plots.
+
+
+.. py:function:: _plot_profile(ax, fig, input_dat_pattern, atoms_list, additional_atoms_data, rc_mode, plot_mode, plot_structures, start, end, normalize_rc, highlight_last, selected_theme, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, cache_file=None, force_recompute=False)
+
+   Handles all logic for drawing 1D profile plots.
+
+

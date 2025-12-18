@@ -1,0 +1,35 @@
+rgpycrumbs.xts.saddle.cuh2
+==========================
+
+.. py:module:: rgpycrumbs.xts.saddle.cuh2
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.xts.saddle.cuh2.TRUE_E_DAT
+   rgpycrumbs.xts.saddle.cuh2.CUH2_MIN
+   rgpycrumbs.xts.saddle.cuh2.parser
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.xts.saddle.cuh2.plot_band
+
+
+Module Contents
+---------------
+
+.. py:data:: TRUE_E_DAT
+
+.. py:data:: CUH2_MIN
+
+.. py:function:: plot_band(_index, _band, _k, _method='xts', _opt='SD', _ci='False')
+
+.. py:data:: parser
+
