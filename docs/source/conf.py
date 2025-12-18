@@ -12,11 +12,11 @@ html_logo = "../../branding/logo/pycrumbs_notext.svg"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    "sphinx_click",                # Generates the CLI reference (Options/Args)
-    "sphinxcontrib.programoutput", # Runs 'uv run ...' for dynamic examples
+    "sphinx_click",  # Generates the CLI reference (Options/Args)
+    "sphinxcontrib.programoutput",  # Runs 'uv run ...' for dynamic examples
     # Include autodoc since sphinx-click relies on its mocking machinery.
-    "sphinx.ext.autodoc",          # Needed for mocking machinery
-    "sphinx.ext.viewcode",         # Adds '[source]' links
+    "sphinx.ext.autodoc",  # Needed for mocking machinery
+    "sphinx.ext.viewcode",  # Adds '[source]' links
     "sphinx.ext.intersphinx",
     "autoapi.extension",
     "sphinxcontrib.autodoc_pydantic",
