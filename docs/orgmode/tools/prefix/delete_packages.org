@@ -1,0 +1,19 @@
+#+TITLE: Prefix Channel Package Deletion
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Removing packages from custom ~prefix.dev~ channels
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.prefix.delete_packages:main
+   :prog: rgpycrumbs prefix delete-packages
+   :nested: full
+#+END_EXPORT
+
+** Usage
+# TODO(rg): actual usage examples
+#+BEGIN_EXPORT rst
+.. command-output:: python -m rgpycrumbs.cli prefix delete-packages --help
+   :cwd: ../../
+#+END_EXPORT
+
+** API Reference
+For developer details and source code see @@rst::mod:`rgpycrumbs.prefix.delete_packages`@@.

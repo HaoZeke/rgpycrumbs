@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "pycrumbs"
 version = "0.0.6.dev"
 description = "Random scripts"
@@ -13,3 +13,34 @@ python = ">=3.10"
 pip = "23.3.1.*"
 pdm = "2.10.4.*"
 pytest = ">=8.4.2,<9"
+
+[feature.docs.dependencies]
+emacs = ">=30.2,<31"
+
+[feature.docs.pypi-dependencies]
+shibuya = ">=2025.12.13, <2026"
+sphinx-click = ">=6.2.0, <7"
+sphinx = ">=9.0.4, <10"
+sphinxcontrib-programoutput = ">=0.18, <0.19"
+sphinx-autoapi = ">=3.6.0, <4"
+sphobjinv = ">=2.3.1.3, <3"
+autodoc-pydantic = ">=2.2.0, <3"
+sphinx-sitemap = ">=2.9.0, <3"
+pycmark = ">=0.9.6, <0.10"
+
+[environments]
+docs = {features = ["docs"]}
+
+[feature.docs.tasks.docbld]
+depends-on = [
+{ task = "mkrst", environment = "docs" },
+]
+cmd = """
+sphinx-build docs/source/ docs/build
+"""
+
+[feature.docs.tasks.mkrst]
+cwd = "docs"
+cmd = """
+emacs --batch --load export.el
+"""

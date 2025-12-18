@@ -1,0 +1,20 @@
+#+TITLE: EON Tools
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* EON Helpers
+  These tools work with [[https://eondocs.org][EON output files]].
+
+#+BEGIN_EXPORT rst
+.. toctree::
+   :maxdepth: 2
+   :caption: CLI Tools
+
+   con_splitter
+   generate_nwchem_input
+   plt_neb
+   ptmdisp
+#+END_EXPORT
+
+** API Reference
+For developer details, see the :doc:`EON Helper Reference
+<../../autoapi/rgpycrumbs/eon/index>`[fn:: Also linked in each section.].

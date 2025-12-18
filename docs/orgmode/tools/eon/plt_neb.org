@@ -1,0 +1,27 @@
+#+TITLE: Plotting NEB paths
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Visualizing path trajectories
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.plt_neb:main
+   :prog: rgpycrumbs eon plt-neb
+   :nested: full
+#+END_EXPORT
+
+** Usage
+To plot a specific range of ~neb_*.dat~ files and save the output:
+# #+BEGIN_EXPORT rst
+# .. command-output:: python -m rgpycrumbs.cli eon plt-neb --start 10 --end 15 -o final_path.pdf
+#    :cwd: ../../
+# #+END_EXPORT
+
+To show the plot interactively without saving:
+#+BEGIN_SRC shell
+python -m rgpycrumbs.cli eon plt-neb --start 280
+#+END_SRC
+
+
+** API Reference
+
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.eon.plt_neb`@@.

@@ -1,0 +1,67 @@
+#+TITLE: ~rgpycrumbs~ Design & Architecture Notes
+#+STARTUP: overview
+
+* Documentation Pipeline
+  :PROPERTIES:
+  :ID:       docs-architecture
+  :END:
+
+We craft documents in ~orgmode~, though downstream processing uses ~sphinx~.
+Partially because of this, since ~ox-rst~ needs ~emacs~, and because the
+documentation rarely needs to be built outside of the development workflow,
+instead of staying within the ~pyproject~ file as an optional dependency the
+documentation forms a new environment in the ~pixi.toml~ file.
+* Dependency management
+- Library :: go in ~pyproject.toml~.
+- Doc/Dev :: go in ~pixi.toml~.
+- Script :: handled on-the-fly via the ~uv~ dispatching mechanism and [[https://peps.python.org/pep-0723/][PEP 723]] detailed in my [[https://realpython.com/python-script-structure/][RealPython best practices post]].
+* Core Architecture: The Dispatcher
+  :PROPERTIES:
+  :ID:       cli-dispatch
+  :END:
+
+** The Problem
+Research pipelines require conflicting environments and a monolithic CLI
+(e.g., standard ~Typer~ app) fails because importing the top-level module
+crashes due to conflicting dependencies in sub-modules.
+
+** The Solution: Dynamic Subprocess Dispatch
+   Instead of directly importing modules, ~rgpycrumbs/cli.py~ controls execution flow:
+   - It scans directory structure at runtime.
+   - It invokes scripts via ~uv run~.
+   - This leads to complete isolation for each script.
+
+   #+BEGIN_SRC python
+   # Logic captured in rgpycrumbs/cli.py
+   subprocess.run(["uv", "run", script_path] + args)
+   #+END_SRC
+
+** Philosophy
+
+The library is designed with the following principles in mind:
+
+- Dispatcher-Based Architecture :: The top-level ~rgpycrumbs.cli~ command acts as a
+  lightweight dispatcher. It does not contain the core logic of the tools
+  itself. Instead, it parses user commands to identify the target script and
+  then invokes it in an isolated subprocess using the ~uv~ runner. This provides
+  a unified command-line interface while keeping the tools decoupled.
+
+- Isolated & Reproducible Execution :: Each script is a self-contained unit that
+  declares its own dependencies via [[https://peps.python.org/pep-0723/][PEP 723]] metadata. The ~uv~ runner uses this
+  information to resolve and install the exact required packages into a
+  temporary, cached environment on-demand. This design guarantees
+  reproducibility and completely eliminates the risk of dependency conflicts
+  between different tools in the collection.
+
+- Lightweight Core, On-Demand Dependencies :: The installable ~rgpycrumbs~
+  package is minimal, with its only dependency being the ~click~ library for the
+  CLI dispatcher. Heavy scientific libraries like ~matplotlib~  are not part of
+  the base installation. They are fetched by ~uv~ only when a script that needs
+  them is executed, ensuring the user's base Python environment remains clean
+  and lightweight.
+
+- Modular & Extensible Tooling :: Each utility is an independent script. This
+  modularity simplifies development, testing, and maintenance, as changes to one
+  tool cannot inadvertently affect another. New tools can be added to the
+  collection without modifying the core dispatcher logic, making the system
+  easily extensible.
