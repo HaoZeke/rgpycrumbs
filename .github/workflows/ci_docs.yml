@@ -11,7 +11,7 @@ on:
   pull_request:
     # Check all PR
   schedule:
-    - cron: '0 8 * * 1' # run every Monday at 8am UTC
+    - cron: "0 8 * * 1" # run every Monday at 8am UTC
 
 jobs:
   build_docs:

@@ -3,7 +3,7 @@ name: Comment on pull request
 
 on:
   workflow_run:
-    workflows: ['Build and Deploy Documentation']
+    workflows: ["Build and Deploy Documentation"]
     types: [completed]
 
 jobs:
@@ -84,7 +84,7 @@ jobs:
 
                 let body = `### 🧪 Documentation Preview\n\n`;
                 body += `Download the built documentation here: [documentation.zip](${link})\n\n`;
-                body += `To view these results (such as physical chemistry simulation reports or molecular visualizations), unzip the file and open \`index.html\` in your browser.`;
+                body += `To view, unzip the file and open \`index.html\` in your browser.`;
 
                 await insertUpdateComment(owner, repo, pullRequestNumber, "link-to-docs", body);
             } else {

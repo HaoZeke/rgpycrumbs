@@ -16,6 +16,7 @@ pytest = ">=8.4.2,<9"
 
 [feature.docs.dependencies]
 emacs = ">=30.2,<31"
+nodejs = ">=25.2.1,<25.3"
 
 [feature.docs.pypi-dependencies]
 shibuya = ">=2025.12.13, <2026"
@@ -31,7 +32,27 @@ pycmark = ">=0.9.6, <0.10"
 [environments]
 docs = {features = ["docs"]}
 
+[feature.docs.tasks.minify]
+cmd = """
+npx html-minifier-terser \
+  --input-dir docs/build \
+  --output-dir docs/build \
+  --file-ext html \
+  --collapse-whitespace \
+  --remove-comments \
+  --minify-js true \
+  --minify-css true
+"""
+
+
 [feature.docs.tasks.docbld]
+depends-on = [
+"mkrst",
+"sphinxbld",
+"minify",
+]
+
+[feature.docs.tasks.sphinxbld]
 depends-on = [
 { task = "mkrst", environment = "docs" },
 ]
