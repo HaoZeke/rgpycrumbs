@@ -115,27 +115,39 @@ def find_fragments_geometric(
 
 
 def find_fragments_bond_order(
-    atoms: Atoms, threshold: float, charge: int, multiplicity: int
+    atoms: Atoms,
+    threshold: float,
+    charge: int,
+    multiplicity: int,
+    method: str = "GFN2-xTB",
 ) -> tuple[int, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Analyzes connectivity via the Wiberg Bond Order (WBO) matrix.
-    Calculates electronic structure at the GFN2-xTB level.
+    Analyze connectivity via the Wiberg Bond Order (WBO) matrix.
+    Calculate electronic structure using the specified xTB level.
     """
     num_atoms = len(atoms)
     if num_atoms == 0:
         return 0, np.array([]), np.array([]), np.array([])
 
-    logging.info(f"Running GFN2-xTB for {atoms.get_chemical_formula(mode='hill')}...")
+    logging.info(f"Running {method} for {atoms.get_chemical_formula(mode='hill')}...")
+
+    # Initialize the calculator with the chosen xTB method
     calc = tbliteinterface.Calculator(
-        method="GFN2-xTB",
+        method=method,
         numbers=atoms.get_atomic_numbers(),
         positions=atoms.get_positions() / Bohr,
-        charge=charge,
-        uhf=multiplicity - 1,
+        charge=float(charge),
+        uhf=int(multiplicity - 1),
     )
+
     results = calc.singlepoint()
     bond_order_matrix = results.get("bond-orders")
 
+    if bond_order_matrix is None:
+        rerr = f"The method {method} did not return bond orders."
+        raise ValueError(rerr)
+
+    # WBO matrix analysis
     # k=1 excludes the diagonal (self-interactions/valency)
     indices = np.argwhere(np.triu(bond_order_matrix, k=1) > threshold)
     row_indices, col_indices = indices[:, 0], indices[:, 1]
@@ -396,19 +408,28 @@ def geometric(filename, multiplier, min_dist, visualize):
 
 @main.command()
 @click.argument("filename", type=click.Path(exists=True))
+@click.option(
+    "--method",
+    # why isn't IPEA-xTB and the rest present
+    type=click.Choice(["GFN2-xTB", "GFN1-xTB", "IPEA-xTB"]),
+    default="GFN2-xTB",
+    help="The xTB Hamiltonian level for calculation.",
+)
 @click.option("--threshold", default=DEFAULT_BOND_ORDER_THRESHOLD, type=float)
 @click.option("--charge", default=0, type=int)
 @click.option("--multiplicity", default=1, type=int)
 @click.option("--min-dist", default=0.0, type=float)
 @click.option("--visualize", is_flag=True)
-def bond_order(filename, threshold, charge, multiplicity, min_dist, visualize):
-    """Executes WBO-based fragment detection."""
+def bond_order(filename, method, threshold, charge, multiplicity, min_dist, visualize):
+    """Execute fragment detection using quantum mechanical bond orders."""
     atoms = read(filename)
     n, labels, _, matrix = find_fragments_bond_order(
-        atoms, threshold, charge, multiplicity
+        atoms, threshold, charge, multiplicity, method=method
     )
+
     if min_dist > 0:
         n, labels = merge_fragments_by_distance(atoms, n, labels, min_dist)
+
     print_results(Console(), atoms, n, labels)
 
     if visualize:
