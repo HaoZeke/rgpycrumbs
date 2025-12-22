@@ -23,7 +23,6 @@ uv run python detect_fragments.py batch ./your_folder/ --method geometric --min-
 #     "numpy~=1.26",
 #     "rich~=13.7",
 #     "scipy~=1.14",
-#     "tblite[ase]~=0.3.0",
 #     "pyvista~=0.43",
 #     "matplotlib~=3.9",
 # ]
@@ -46,7 +45,10 @@ from rich.logging import RichHandler
 from rich.table import Table
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
-from tblite.interface import Calculator
+
+from rgpycrumbs._aux import _import_from_parent_env
+
+tbl = _import_from_parent_env("tblite.interface")
 
 # --- Setup ---
 logging.basicConfig(
@@ -110,7 +112,7 @@ def find_fragments_bond_order(
         return 0, np.array([]), np.array([]), np.array([])
 
     logging.info(f"Running GFN2-xTB for {atoms.get_chemical_formula(mode='hill')}...")
-    calc = Calculator(
+    calc = tbl.Calculator(
         method="GFN2-xTB",
         numbers=atoms.get_atomic_numbers(),
         positions=atoms.get_positions() / Bohr,
