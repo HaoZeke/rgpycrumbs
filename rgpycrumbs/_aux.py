@@ -1,4 +1,5 @@
 import contextlib
+import importlib
 import os
 import subprocess
 import sys
@@ -32,34 +33,40 @@ def switchdir(path):
     finally:
         os.chdir(curpath)
 
+
 def _import_from_parent_env(module_name: str):
     """
     Import a module from parent interpreter's site-packages as a fallback.
-
-    Temporarily appends parent paths to sys.path, imports, then restores.
-    This ensures uv dependencies take precedence.
+    Uses importlib to correctly handle nested modules (e.g. 'tblite.interface').
     """
+    # 1. Try current environment
     try:
-        return __import__(module_name)
+        return importlib.import_module(module_name)
     except ImportError:
         pass
 
-    parent_paths = os. environ.get("RGPYCRUMBS_PARENT_SITE_PACKAGES", "")
+    # 2. Check parent environment
+    parent_paths = os.environ.get("RGPYCRUMBS_PARENT_SITE_PACKAGES", "")
     if not parent_paths:
         return None
 
-    # Temporarily extend sys.path
-    paths_to_add = [p for p in parent_paths.split(os.pathsep) if p and p not in sys.path]
+    # 3. Temporarily extend sys.path
+    # Filter out empty strings and paths already in sys.path
+    paths_to_add = [
+        p for p in parent_paths.split(os.pathsep) if p and p not in sys.path
+    ]
     sys.path.extend(paths_to_add)
 
     try:
-        return __import__(module_name)
+        # importlib.import_module returns the actual leaf module (interface)
+        # __import__ would have returned the top-level package (tblite)
+        return importlib.import_module(module_name)
     except ImportError:
         return None
     finally:
-        # Clean up - remove only what we added
+        # Clean up sys.path
         for p in paths_to_add:
             try:
-                sys. path.remove(p)
+                sys.path.remove(p)
             except ValueError:
                 pass
