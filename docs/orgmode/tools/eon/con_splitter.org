@@ -11,7 +11,7 @@
 ** Usage
 To split a trajectory file:
 #+BEGIN_SRC shell
-rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
+python -m rgpycrumbs.cli eon con-splitter neb_final_path.con -o initial_images
 #+END_SRC
 
 This creates a directory named ~initial_images~ containing ~ipath_000.con~,
