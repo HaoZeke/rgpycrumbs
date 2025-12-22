@@ -159,19 +159,33 @@ def find_fragments_bond_order(
 
 
 def build_graph_and_find_components(
-    num_atoms: int, row_indices: list[int], col_indices: list[int]
+    num_atoms: int,
+    row_indices: np.ndarray | list[int],
+    col_indices: np.ndarray | list[int],
 ) -> tuple[int, np.ndarray]:
-    """Finds connected components via sparse adjacency matrix representation."""
-    if not row_indices:
+    """
+    Identify connected components using direct CSR sparse matrix construction.
+
+    This function avoids Python list overhead by passing interaction indices
+    directly to the SciPy sparse engine.
+    """
+    # Convert inputs to numpy arrays to ensure efficient slicing and memory access
+    rows = np.asarray(row_indices)
+    cols = np.asarray(col_indices)
+
+    if rows.size == 0:
         return num_atoms, np.arange(num_atoms)
 
-    data = np.ones(len(row_indices))
-    full_rows = np.concatenate([row_indices, col_indices])
-    full_cols = np.concatenate([col_indices, row_indices])
-    full_data = np.concatenate([data, data])
+    # Define bond weights as a simple integer array
+    # Using int8 saves memory for large systems
+    data = np.ones(rows.size, dtype=np.int8)
 
-    adj = csr_matrix((full_data, (full_rows, full_cols)), shape=(num_atoms, num_atoms))
-    return connected_components(adj, directed=False, return_labels=True)
+    # Construct the Compressed Sparse Row matrix
+    # SciPy handles the undirected nature when directed=False
+    adj = csr_matrix((data, (rows, cols)), shape=(num_atoms, num_atoms))
+
+    # Calculate connected components using the Laplacian-based graph traversal
+    return connected_components(csgraph=adj, directed=False, return_labels=True)
 
 
 def merge_fragments_by_distance(
