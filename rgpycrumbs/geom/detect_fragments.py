@@ -75,26 +75,25 @@ def find_fragments_geometric(
 ) -> tuple[int, np.ndarray]:
     """
     Identifies fragments using a distance-based cutoff.
-    A bond exists if the distance satisfies: $d_{ij} < k(r_i + r_j)$.
+    Ensures local covalent bonds stay connected.
     """
     num_atoms = len(atoms)
     if num_atoms == 0:
         return 0, np.array([])
 
-    candidate_nl = build_neighbor_list(
-        atoms, cutoffs=natural_cutoffs(atoms, mult=2.0), self_interaction=False
-    )
-    radii = covalent_radii[atoms.get_atomic_numbers()]
+    # Generate cutoffs based on covalent radii
+    cutoffs = natural_cutoffs(atoms, mult=bond_multiplier)
+
+    # build_neighbor_list needs the list of cutoffs
+    nl = build_neighbor_list(atoms, cutoffs=cutoffs, self_interaction=False)
 
     row_indices, col_indices = [], []
     for i in range(num_atoms):
-        neighbors, _ = candidate_nl.get_neighbors(i)
-        for j in neighbors:
+        indices, _ = nl.get_neighbors(i)
+        for j in indices:
             if i < j:
-                max_dist = bond_multiplier * (radii[i] + radii[j])
-                if atoms.get_distance(i, j) < max_dist:
-                    row_indices.append(i)
-                    col_indices.append(j)
+                row_indices.append(i)
+                col_indices.append(j)
 
     return build_graph_and_find_components(num_atoms, row_indices, col_indices)
 
