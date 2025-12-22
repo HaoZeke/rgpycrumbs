@@ -1,22 +1,22 @@
 
 # Table of Contents
 
--   [About](#org8effee7)
-    -   [CLI Design Philosophy](#org4c246d2)
--   [Usage](#orgd8fdcc4)
-    -   [CLI Tools](#org60653e4)
-        -   [EON](#orgdade692)
--   [Contributing](#org6721135)
-    -   [Release notes](#org4881a24)
--   [License](#org2609829)
+-   [About](#about)
+    -   [CLI Design Philosophy](#cli-how)
+-   [Usage](#usage)
+    -   [CLI Tools](#cli-tools)
+        -   [EON](#cli-eon)
+-   [Contributing](#contributing)
+    -   [Release notes](#release-notes)
+-   [License](#license)
 
 
 
-<a id="org8effee7"></a>
+<a id="about"></a>
 
 # About
 
-![img](branding/logo/pycrumbs_logo.webp)
+![img](https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/refs/heads/main/branding/logo/pycrumbs_logo.webp)
 
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
@@ -28,7 +28,7 @@ Most of these rely heavily on optional dependencies, with the exception of the
 `_aux` helpers (pure Python).
 
 
-<a id="org4c246d2"></a>
+<a id="cli-how"></a>
 
 ## CLI Design Philosophy
 
@@ -61,12 +61,12 @@ The library is designed with the following principles in mind:
     easily extensible.
 
 
-<a id="orgd8fdcc4"></a>
+<a id="usage"></a>
 
 # Usage
 
 
-<a id="org60653e4"></a>
+<a id="cli-tools"></a>
 
 ## CLI Tools
 
@@ -88,7 +88,7 @@ You can see the list of available command groups:
       eon  Dispatches to a script within the 'eon' submodule.
 
 
-<a id="orgdade692"></a>
+<a id="cli-eon"></a>
 
 ### EON
 
@@ -133,7 +133,7 @@ You can see the list of available command groups:
     `ipath_001.con`, etc., along with an `ipath.dat` file listing their paths.
 
 
-<a id="org6721135"></a>
+<a id="contributing"></a>
 
 # Contributing
 
@@ -141,7 +141,7 @@ All contributions are welcome, but for the CLI tools please follow [established
 best practices](https://realpython.com/python-script-structure/).
 
 
-<a id="org4881a24"></a>
+<a id="release-notes"></a>
 
 ## Release notes
 
@@ -153,7 +153,7 @@ Generally this is a `hatch` project, so:
     uvx hatch build
 
 
-<a id="org2609829"></a>
+<a id="license"></a>
 
 # License
 

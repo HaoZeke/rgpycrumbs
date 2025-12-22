@@ -1,7 +1,10 @@
 #+OPTIONS: num:nil
 
 * About
-[[file:branding/logo/pycrumbs_logo.webp]]
+:PROPERTIES:
+:CUSTOM_ID: about
+:END:
+[[https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/refs/heads/main/branding/logo/pycrumbs_logo.webp]]
 #+begin_export markdown
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 #+end_export
@@ -13,6 +16,9 @@ Most of these rely heavily on optional dependencies, with the exception of the
 ~_aux~ helpers (pure Python).
 
 ** CLI Design Philosophy
+:PROPERTIES:
+:CUSTOM_ID: cli-how
+:END:
 
 The library is designed with the following principles in mind:
 
@@ -42,7 +48,13 @@ The library is designed with the following principles in mind:
   collection without modifying the core dispatcher logic, making the system
   easily extensible.
 * Usage
+:PROPERTIES:
+:CUSTOM_ID: usage
+:END:
 ** CLI Tools
+:PROPERTIES:
+:CUSTOM_ID: cli-tools
+:END:
 The general command structure is:
 
 #+BEGIN_EXAMPLE
@@ -63,7 +75,13 @@ Commands:
   eon  Dispatches to a script within the 'eon' submodule.
 #+END_SRC
 *** EON
+:PROPERTIES:
+:CUSTOM_ID: cli-eon
+:END:
 **** Plotting NEB Paths (~plt-neb~)
+:PROPERTIES:
+:CUSTOM_ID: cli-eon-neb
+:END:
 This script visualizes the energy profile of Nudged Elastic Band (NEB) calculations over optimization steps.
 
 To see the help text for this specific script:
@@ -93,6 +111,9 @@ python -m rgpycrumbs eon plt-neb --start 280
 #+END_SRC
 
 **** Splitting CON files (~con-splitter~)
+:PROPERTIES:
+:CUSTOM_ID: cli-eon-con-split
+:END:
 This script takes a multi-image trajectory file (e.g., from a finished NEB
 calculation) and splits it into individual frame files, creating an input file
 for a new calculation.
@@ -106,9 +127,15 @@ This will create a directory named ~initial_images~ containing ~ipath_000.con~,
 ~ipath_001.con~, etc., along with an ~ipath.dat~ file listing their paths.
 
 * Contributing
+:PROPERTIES:
+:CUSTOM_ID: contributing
+:END:
 All contributions are welcome, but for the CLI tools please follow [[https://realpython.com/python-script-structure/][established
 best practices]].
 ** Release notes
+:PROPERTIES:
+:CUSTOM_ID: release-notes
+:END:
 Generally this is a ~hatch~ project, so:
 #+begin_src bash
 uvx hatch test
@@ -117,6 +144,9 @@ git tag -a v0.0.4 -m "Version 0.0.4 release"
 uvx hatch build
 #+end_src
 * License
+:PROPERTIES:
+:CUSTOM_ID: license
+:END:
 MIT. However, this is an academic resource, so *please cite* as much as possible
 via:
 - The Zenodo DOI for general use.
