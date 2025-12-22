@@ -17,7 +17,6 @@ pytest = ">=8.4.2,<9"
 [feature.docs.dependencies]
 emacs = ">=30.2,<31"
 nodejs = ">=25.2.1,<25.3"
-sphinx-favicon = ">=1.0.1,<2"
 
 [feature.docs.pypi-dependencies]
 shibuya = ">=2025.12.13, <2026"
