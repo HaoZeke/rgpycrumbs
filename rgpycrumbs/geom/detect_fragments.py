@@ -94,13 +94,22 @@ MIN_DIST_ATM = 1e-4
 
 
 def find_fragments_geometric(
-    atoms: Atoms, bond_multiplier: float
+    atoms: Atoms, bond_multiplier: float, radius_type: str = "natural"
 ) -> tuple[int, np.ndarray]:
     num_atoms = len(atoms)
     if num_atoms == 0:
         return 0, np.array([])
 
-    cutoffs = natural_cutoffs(atoms, mult=bond_multiplier)
+    # Selection of radii generation strategy
+    if radius_type == "covalent":
+        # Direct usage of ASE standard covalent radii
+        # We apply the multiplier directly to these radii
+        cutoffs = covalent_radii[atoms.get_atomic_numbers()] * bond_multiplier
+    else:
+        # Default to ASE 'natural' cutoffs (Cordero parameters)
+        # natural_cutoffs handles the multiplier internally
+        cutoffs = natural_cutoffs(atoms, mult=bond_multiplier)
+
     nl = build_neighbor_list(atoms, cutoffs=cutoffs, self_interaction=False)
 
     row_indices, col_indices = [], []
@@ -238,6 +247,7 @@ def visualize_with_pyvista(
     bond_data: float | np.ndarray,
     nonbond_cutoff: float = 0.05,
     bond_threshold: float = 0.8,
+    radius_type: str = "natural",
 ) -> None:
     """Renders the molecular system with scalar-coded bond orders."""
     plotter = pv.Plotter(window_size=[1200, 900])
@@ -277,7 +287,10 @@ def visualize_with_pyvista(
     # Render Bonds based on Method
     if method == DetectionMethod.GEOMETRIC:
         multiplier = float(bond_data)
-        cutoffs = natural_cutoffs(atoms, mult=multiplier)
+        if radius_type == "covalent":
+            cutoffs = covalent_radii[atoms.get_atomic_numbers()] * multiplier
+        else:
+            cutoffs = natural_cutoffs(atoms, mult=multiplier)
         nl = build_neighbor_list(atoms, cutoffs=cutoffs, self_interaction=False)
 
         for i in range(len(atoms)):
@@ -405,19 +418,34 @@ def main():
 @click.argument("filename", type=click.Path(exists=True))
 @click.option("--multiplier", default=DEFAULT_BOND_MULTIPLIER, type=float)
 @click.option(
+    "--radius-type",
+    type=click.Choice(["natural", "covalent"]),
+    default="natural",
+    help="Choose 'natural' for Cordero radii or 'covalent' for standard ASE radii.",
+)
+@click.option(
     "--min-dist", default=0.0, type=float, help="Merge threshold in Angstroms."
 )
 @click.option("--visualize", is_flag=True)
-def geometric(filename, multiplier, min_dist, visualize):
+def geometric(filename, multiplier, radius_type, min_dist, visualize):
     """Executes geometric fragment detection."""
     atoms = read(filename)
-    n, labels = find_fragments_geometric(atoms, multiplier)
+
+    # Pass the new radius_type argument
+    n, labels = find_fragments_geometric(atoms, multiplier, radius_type=radius_type)
+
     if min_dist > 0:
         n, labels = merge_fragments_by_distance(atoms, n, labels, min_dist)
     print_results(Console(), atoms, n, labels)
 
     if visualize:
-        visualize_with_pyvista(atoms, DetectionMethod.GEOMETRIC, multiplier)
+        # Pass radius_type to visualization to ensure the drawn bonds match the logic
+        visualize_with_pyvista(
+            atoms,
+            DetectionMethod.GEOMETRIC,
+            multiplier,
+            radius_type=radius_type,
+        )
 
 
 @main.command()
