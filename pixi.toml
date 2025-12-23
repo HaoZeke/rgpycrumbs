@@ -31,7 +31,9 @@ pycmark = ">=0.9.6, <0.10"
 
 [environments]
 docs = {features = ["docs"]}
+test = { features = ["test"] }
 fragments = { features = ["fragments", "test"] }
+ptm = { features = ["ptm", "test"] }
 
 [feature.fragments.pypi-dependencies]
 ase = "~=3.23"
@@ -44,9 +46,16 @@ matplotlib = ">=3.10.8,<4"
 tblite-python = ">=0.5.0,<0.6"
 
 [feature.test.pypi-dependencies]
-click = ">=8.3.1, <9"
 rgpycrumbs = { path = ".", editable=true }
-cmcrameri = ">=1.9, <2"
+pytest = "*"
+click = ">=8.3.1, <9"
+
+[feature.ptm.dependencies]
+ovito = "*"
+
+[feature.ptm.pypi-dependencies]
+ase = ">=3.26.0, <4"
+ovito = ">=3.14.1, <4"
 
 [feature.docs.tasks.minify]
 cmd = """
