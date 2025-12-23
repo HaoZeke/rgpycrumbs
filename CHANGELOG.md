@@ -1,3 +1,16 @@
+## [v0.0.6](https://github.com/theochemui/eongit/tree/v0.0.6) - 2025-12-23
+
+### Added
+
+- Added a new fragment detection tool () supporting both Geometric (covalent radii) and Bond Order (GFN2-xTB) methodologies.
+- feat(cli): drop dependency on click
+- feat(pltneb): Add 'ira-kmax' to tweak settings for IRA
+
+### Fixed
+
+- Refactored internal import helper to use , fixing support for nested module imports (e.g., ).
+
+
 ## [v0.0.5](https://github.com/theochemui/eongit/tree/v0.0.5) - 2025-12-06
 
 ### Added
