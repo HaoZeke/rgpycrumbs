@@ -10,7 +10,6 @@
 # ///
 
 import logging
-import sys
 from pathlib import Path
 
 import click
@@ -18,6 +17,14 @@ from ase.io import read as aseread
 from ase.io import write as asewrite
 from rich.console import Console
 from rich.logging import RichHandler
+
+# Optional IRA import logic
+try:
+    from rgpycrumbs._aux import _import_from_parent_env
+
+    ira_mod = _import_from_parent_env("ira_mod")
+except ImportError:
+    ira_mod = None
 
 CONSOLE = Console()
 
@@ -38,6 +45,65 @@ logging.basicConfig(
 )
 
 
+def align_structures(frames, use_ira=False, kmax=1.8):
+    """
+    Aligns all frames in the path to the first frame (reactant).
+
+    This procedure removes global rotation and translation. If use_ira equals
+    True, the function also accounts for atom index permutations.
+    """
+    if len(frames) < 2:
+        return frames
+
+    ref = frames[0]
+    ref_pos = ref.get_positions()
+    ref_types = ref.get_atomic_numbers()
+    ref_natoms = len(ref)
+
+    aligned_frames = [ref.copy()]
+
+    # Initialize IRA if requested
+    ira_instance = None
+    if use_ira and ira_mod:
+        ira_instance = ira_mod.IRA()
+        logging.info(
+            "Using [bold magenta]IRA[/bold magenta] for optimal alignment and reordering."
+        )
+
+    for i in range(1, len(frames)):
+        current = frames[i].copy()
+
+        if ira_instance:
+            # Perform IRA match
+            r, t, p, _ = ira_instance.match(
+                ref_natoms,
+                ref_types,
+                ref_pos,
+                len(current),
+                current.get_atomic_numbers(),
+                current.get_positions(),
+                kmax,
+            )
+            # Apply rotation, translation, and permutation
+            new_pos = (current.get_positions() @ r.T) + t
+            current.set_positions(new_pos[p])
+            # Reorder atomic numbers to match reference after permutation
+            current.set_atomic_numbers(current.get_atomic_numbers()[p])
+        else:
+            # Standard ASE alignment (Procrustes)
+            current.euler_rotate(
+                0, 0, 0
+            )  # Placeholder for more complex ASE alignment if needed
+            # For basic NEB, many users prefer simple RMSD alignment:
+            from ase.build import minimize_rotation_and_translation
+
+            minimize_rotation_and_translation(ref, current)
+
+        aligned_frames.append(current)
+
+    return aligned_frames
+
+
 @click.command()
 @click.argument(
     "neb_trajectory_file",
@@ -47,173 +113,126 @@ logging.basicConfig(
     "--output-dir",
     type=click.Path(file_okay=False, writable=True, path_type=Path),
     default=None,
-    help=(
-        "Directory to save the output files. "
-        "Defaults to a new directory named after the input file (e.g., 'neb_path_001/')."
-    ),
+    help="Directory to save the output files.",
 )
 @click.option(
     "--images-per-path",
     type=int,
     required=True,
-    help="Number of images in a single NEB path (e.g., 7). [REQUIRED]",
+    help="Number of images in a single NEB path.",
 )
 @click.option(
     "--path-index",
     type=int,
-    default=0,
+    default=-1,
     show_default=True,
-    help=(
-        "Index of the NEB path to extract (0-based). "
-        "Use -1 to extract the *last* available path."
-    ),
+    help="Index of the NEB path to extract. Use -1 for the last path.",
+)
+@click.option(
+    "--center",
+    is_flag=True,
+    help="Center the atoms in each frame around the origin.",
+)
+@click.option(
+    "--box-diagonal",
+    nargs=3,
+    type=(float, float, float),
+    default=(25, 25, 25),
+    show_default=True,
+    help="Override box while centering.",
+)
+@click.option(
+    "--align",
+    is_flag=True,
+    help="Align all frames to the first image of the path.",
+)
+@click.option(
+    "--use-ira",
+    is_flag=True,
+    help="Use Iterative Reordering and Alignment (requires ira_mod).",
+)
+@click.option(
+    "--ira-kmax",
+    type=float,
+    default=1.8,
+    help="kmax factor for the IRA algorithm.",
 )
 @click.option(
     "--path-list-filename",
     default="ipath.dat",
-    help="Name of the file that will list the paths to the generated .con files.",
+    help="File listing the absolute paths of generated .con files.",
 )
 def con_splitter(
     neb_trajectory_file: Path,
     output_dir: Path | None,
     images_per_path: int,
     path_index: int,
+    center: bool,
+    box_diagonal: (float, float, float),
+    align: bool,
+    use_ira: bool,
+    ira_kmax: float,
     path_list_filename: str,
 ):
     """
-    Splits a multi-step NEB trajectory file (.traj, .con, etc.) into
-    individual .con files for a *single* specified path.
+    Splits multi-step NEB trajectories into individual .con files.
 
-    This script reads a trajectory file, which may contain multiple NEB
-    optimization steps (paths), and extracts only the frames corresponding
-    to a single specified path.
-
-    It writes each frame of that path into a separate .con file
-    (e.g., ipath_000.con, ipath_001.con, ...).
-
-    It also generates a text file (default: 'ipath.dat') that lists the
-    absolute paths of all created .con files.
-
-    NEB_TRAJECTORY_FILE: Path to the input multi-image/multi-path trajectory.
+    This tool extracts a specific optimization step and applies optional
+    physical chemistry refinements like centering and structural alignment.
     """
-    # --- 1. Setup and Validation ---
     if output_dir is None:
         output_dir = Path(neb_trajectory_file.stem)
 
-    try:
-        output_dir.mkdir(parents=True, exist_ok=True)
-    except OSError as e:
-        logging.critical(f"Error creating output directory [red]{output_dir}[/red]: {e}")
-        sys.exit(1)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    if images_per_path <= 0:
-        logging.critical("--images-per-path must be a positive number.")
-        sys.exit(1)
+    CONSOLE.rule(f"[bold green]Processing {neb_trajectory_file.name}[/bold green]")
 
-    CONSOLE.rule(
-        f"[bold green]Splitting {neb_trajectory_file.name} into .con files[/bold green]"
-    )
-    logging.info(f"Output directory: [cyan]{output_dir.resolve()}[/cyan]")
-    logging.info(f"Images per path: [magenta]{images_per_path}[/magenta]")
-
-    # --- 2. Read all frames using ASE ---
-    try:
-        logging.info(
-            f"Reading all frames from [yellow]{neb_trajectory_file}[/yellow] "
-            f"using [bold]ASE[/bold]..."
-        )
-        all_frames = aseread(neb_trajectory_file, index=":")
-
-        total_frames = len(all_frames)
-        if not all_frames:
-            logging.warning("No frames found in the input file. Exiting.")
-            sys.exit(0)
-
-        logging.info(f"Found {total_frames} total frames in file.")
-
-    except Exception as e:
-        logging.critical(f"Failed to read trajectory file: {e}")
-        sys.exit(1)
-
-    # --- 3. Validate paths and select frames ---
-    if total_frames < images_per_path:
-        logging.critical(
-            f"Error: Trajectory contains {total_frames} frames, "
-            f"but {images_per_path} images per path were requested."
-        )
-        sys.exit(1)
-
+    all_frames = aseread(neb_trajectory_file, index=":")
+    total_frames = len(all_frames)
     num_paths = total_frames // images_per_path
-    if total_frames % images_per_path != 0:
-        logging.warning(
-            f"Total frames ({total_frames}) is not a clean multiple of "
-            f"images per path ({images_per_path}). "
-            f"Trajectory may be from an incomplete calculation. "
-            f"Found {num_paths} complete path(s)."
-        )
-    else:
-        logging.info(
-            f"Found {num_paths} complete path(s) ({total_frames} / {images_per_path})."
-        )
 
-    target_path_index: int
     if path_index == -1:
-        target_path_index = num_paths - 1
-        logging.info(
-            f"Using sentinel -1: extracting last complete path (index {target_path_index})."
-        )
-    else:
-        target_path_index = path_index
+        path_index = num_paths - 1
 
-    if not (0 <= target_path_index < num_paths):
-        logging.critical(
-            f"Error: Path index {target_path_index} is out of bounds. "
-            f"Valid indices for this file are 0 to {num_paths - 1}."
-        )
-        sys.exit(1)
-
-    start_frame = target_path_index * images_per_path
-    end_frame = start_frame + images_per_path
-    frames_to_process = all_frames[start_frame:end_frame]
+    start_idx = path_index * images_per_path
+    end_idx = start_idx + images_per_path
+    frames_to_process = all_frames[start_idx:end_idx]
 
     logging.info(
-        f"Extracting path {target_path_index} "
-        f"(frames [bold]{start_frame}..{end_frame - 1}[/bold]) "
-        f"-> {len(frames_to_process)} images."
+        f"Extracted [cyan]Path {path_index}[/cyan] ({len(frames_to_process)} images)."
     )
 
-    # --- 4. Write individual .con files and create the path list ---
+    for atoms in frames_to_process:
+        if center:
+            logging.info("Centering structures...")
+            atoms.center()
+        if box_diagonal:
+            logging.info("Overriding box...")
+            atoms.set_cell(box_diagonal)
+
+    if align:
+        logging.info("Aligning frames to reactant...")
+        frames_to_process = align_structures(
+            frames_to_process, use_ira=use_ira, kmax=ira_kmax
+        )
+
     path_list_filepath = output_dir / path_list_filename
     created_paths = []
 
-    try:
-        logging.info(
-            f"Writing {len(frames_to_process)} individual .con files "
-            f"and creating [magenta]{path_list_filename}[/magenta]..."
-        )
-        with open(path_list_filepath, "w") as path_file:
-            for i, atoms_frame in enumerate(frames_to_process):
-                output_con_filename = f"ipath_{i:03d}.con"
-                output_con_filepath = output_dir / output_con_filename
+    with open(path_list_filepath, "w") as path_file:
+        for i, atoms in enumerate(frames_to_process):
+            out_name = f"ipath_{i:03d}.con"
+            out_path = output_dir / out_name
+            asewrite(out_path, atoms)
 
-                asewrite(output_con_filepath, atoms_frame)
+            abs_path = out_path.resolve()
+            created_paths.append(str(abs_path))
+            logging.info(f"  - Saved [green]{out_name}[/green]")
 
-                logging.info(f"  - Created [green]{output_con_filepath.name}[/green]")
+        path_file.write("\n".join(created_paths) + "\n")
 
-                absolute_path = output_con_filepath.resolve()
-                created_paths.append(str(absolute_path))
-
-            path_file.write("\n".join(created_paths) + "\n")
-
-        logging.info(
-            f"Successfully wrote {len(created_paths)} paths to [magenta]{path_list_filepath.resolve()}[/magenta]"
-        )
-
-    except Exception as e:
-        logging.critical(f"An error occurred during file writing: {e}")
-        sys.exit(1)
-
-    CONSOLE.rule("[bold green]Processing Complete[/bold green]")
+    logging.info(f"Path list saved to [magenta]{path_list_filepath}[/magenta]")
+    CONSOLE.rule("[bold green]Complete[/bold green]")
 
 
 if __name__ == "__main__":
