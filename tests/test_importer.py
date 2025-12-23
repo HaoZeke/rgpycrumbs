@@ -2,7 +2,11 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from rgpycrumbs._aux import _import_from_parent_env
+
+pytestmark = pytest.mark.pure
 
 
 class TestImportFromParentEnv:

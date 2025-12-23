@@ -141,6 +141,8 @@ testpaths = [
 ]
 [tool.pytest.ini_options]
 markers = [
-    "fragments: mark a test as needing the fragments environment (run with '-m webtest').",
+    "fragments: mark a test as needing the fragments environment (run with '-m fragments').",
+    "pure: mark a test as needing only the test environment (run with '-m pure').",
+    "ptm: mark a test as needing only the test environment (run with '-m ptm').",
     "slow: mark tests as slow (deselect with '-m \"not slow\"').",
 ]
