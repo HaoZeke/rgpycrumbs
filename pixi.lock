@@ -5116,8 +5116,8 @@ packages:
   timestamp: 1760802465911
 - pypi: ./
   name: rgpycrumbs
-  version: 0.0.6.dev82+g146eafa8a.d20251223
-  sha256: a2ecb9943870c97bba3d95aaa898de68491cb17fe5a4303eb99bf22a9dbc7705
+  version: 0.0.6.dev88+ge48ff257f.d20251223
+  sha256: 5a72fc43c8d021d2cbc9c24f0c70d27d6d338c8a1a97e28bdfe15adbd826a2d8
   requires_python: '>=3.10'
 - conda: https://conda.anaconda.org/conda-forge/noarch/rich-14.2.0-pyhcf101f3_0.conda
   sha256: edfb44d0b6468a8dfced728534c755101f06f1a9870a7ad329ec51389f16b086

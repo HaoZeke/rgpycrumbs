@@ -1,7 +1,7 @@
 [workspace]
 name = "pycrumbs"
-version = "0.0.6.dev"
-description = "Random scripts"
+version = "0.0.7.dev"
+description = "A dispatcher-based analytical and visualization suite for chemical physics"
 authors = ["Rohit Goswami <rgoswami[at]ieee[dot]org>"]
 channels = ["conda-forge"]
 platforms = ["linux-64"]
