@@ -1,0 +1,36 @@
+#+TITLE: Finding fragmetns
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Fragment detection
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.geom.detect_fragments:detect_fragments
+   :prog: rgpycrumbs geom detect-fragments
+   :nested: full
+#+END_EXPORT
+
+** Usage
+To analyze the number of fragments:
+#+BEGIN_SRC shell
+rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
+#+END_SRC
+
+This creates a directory named ~initial_images~ containing ~ipath_000.con~,
+~ipath_001.con~, etc., along with an ~ipath.dat~ file listing their paths which
+feeds into EON via[fn:: More [[https://eondocs.org/user_guide/neb#eon.schema.NudgedElasticBandConfig][NEB options upstream]]]:
+
+#+begin_src ini
+[Nudged Elastic Band]
+initial_path_in = ipath.dat
+minimize_endpoints_for_ipath = False
+#+end_src
+
+# See:
+# python -m sphinx.ext.intersphinx https://eondocs.org/objects.inv | ag nudgedelastic
+# for the names
+# or better
+# ❯ sphobjinv suggest -t 90 -u https://eondocs.org/objects/inv "NudgedElasticBand"
+# For all EON NEB options, see the @@rst::external:py:pydantic_model:`eon:eon.schema.NudgedElasticBandConfig`@@ schema.
+
+** API Reference
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.eon.con_splitter`@@.
