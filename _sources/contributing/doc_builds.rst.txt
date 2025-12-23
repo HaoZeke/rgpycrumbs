@@ -112,3 +112,46 @@ For a clean rebuild:
 .. code:: bash
 
     pixi run r docdel
+
+Release notes and changelog
+---------------------------
+
+The changelog entries stem from newsfragments handled by
+``towncrier``.
+
+News fragments
+~~~~~~~~~~~~~~
+
+Every Pull Request must include a news fragment. These small text files in
+``markdown`` format, within ``docs/newsfragments/`` describe the changes for the
+final user.
+
+Creating a Fragment
+~~~~~~~~~~~~~~~~~~~
+
+We recommend ``uvx`` to generate a fragment. This ensures the use of the correct
+tool version without polluting the local environment.
+
+.. code:: shell
+
+    uvx towncrier create -c "Refactored internal import helper to use importlib." +core.fixed
+
+Fragment Categories
+~~~~~~~~~~~~~~~~~~~
+
+The system recognizes specific keywords to organize the changelog:
+
+``+added``
+    New features or tools.
+
+``+fixed``
+    Bug resolutions.
+
+``+changed``
+    Modifications to existing logic.
+
+``+dev``
+    Internal developer-facing updates.
+
+``+security``, ``+removed``, ``+deprecated``
+    Specific lifecycle updates.

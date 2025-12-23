@@ -50,3 +50,4 @@ For details on the dispatcher architecture or internal API:
      doc_builds
      test_requirements
      ../code_of_conduct
+     release

@@ -109,6 +109,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Documentation Standards &amp; Authoring</a></li>
 <li class="toctree-l2"><a class="reference internal" href="test_requirements.html">Testing &amp; Environment Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release.html">Release Management</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a><ul>
@@ -174,6 +175,12 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#verifying-changes">Verifying Changes</a><ul>
 <li><a class="reference internal" href="#pull-request-previews">Pull Request Previews</a></li>
 <li><a class="reference internal" href="#local-build">Local Build</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#release-notes-and-changelog">Release notes and changelog</a><ul>
+<li><a class="reference internal" href="#news-fragments">News fragments</a></li>
+<li><a class="reference internal" href="#creating-a-fragment">Creating a Fragment</a></li>
+<li><a class="reference internal" href="#fragment-categories">Fragment Categories</a></li>
 </ul>
 </li>
 </ul>
@@ -337,6 +344,41 @@ Pay close attention to cross-references and table rendering.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>run<span class="w"> </span>r<span class="w"> </span>docdel
 </span></pre></div>
 </div>
+</section>
+</section>
+<section id="release-notes-and-changelog">
+<h2>Release notes and changelog<a class="headerlink" href="#release-notes-and-changelog" title="Link to this heading">¶</a></h2>
+<p>The changelog entries stem from newsfragments handled by
+<code class="docutils literal notranslate"><span class="pre">towncrier</span></code>.</p>
+<section id="news-fragments">
+<h3>News fragments<a class="headerlink" href="#news-fragments" title="Link to this heading">¶</a></h3>
+<p>Every Pull Request must include a news fragment. These small text files in
+<code class="docutils literal notranslate"><span class="pre">markdown</span></code> format, within <code class="docutils literal notranslate"><span class="pre">docs/newsfragments/</span></code> describe the changes for the
+final user.</p>
+</section>
+<section id="creating-a-fragment">
+<h3>Creating a Fragment<a class="headerlink" href="#creating-a-fragment" title="Link to this heading">¶</a></h3>
+<p>We recommend <code class="docutils literal notranslate"><span class="pre">uvx</span></code> to generate a fragment. This ensures the use of the correct
+tool version without polluting the local environment.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">uvx<span class="w"> </span>towncrier<span class="w"> </span>create<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;Refactored internal import helper to use importlib.&quot;</span><span class="w"> </span>+core.fixed
+</span></pre></div>
+</div>
+</section>
+<section id="fragment-categories">
+<h3>Fragment Categories<a class="headerlink" href="#fragment-categories" title="Link to this heading">¶</a></h3>
+<p>The system recognizes specific keywords to organize the changelog:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">+added</span></code></dt><dd><p>New features or tools.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">+fixed</span></code></dt><dd><p>Bug resolutions.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">+changed</span></code></dt><dd><p>Modifications to existing logic.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">+dev</span></code></dt><dd><p>Internal developer-facing updates.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">+security</span></code>, <code class="docutils literal notranslate"><span class="pre">+removed</span></code>, <code class="docutils literal notranslate"><span class="pre">+deprecated</span></code></dt><dd><p>Specific lifecycle updates.</p>
+</dd>
+</dl>
 </section>
 </section>
 </section>

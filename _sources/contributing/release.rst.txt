@@ -1,0 +1,61 @@
+==================
+Release Management
+==================
+
+
+
+Overview
+--------
+
+We use ``towncrier`` to manage release notes, ensuring that  every
+modification receives proper categorization without merge conflicts.
+
+The `documentation page <doc_builds.rst>`_ describes generating ``newsfragments``.
+
+The Release Workflow
+--------------------
+
+We avoid automated CI-driven releases to PyPI. A maintainer must perform  final
+checks locally before public distribution.
+
+Building the Changelog
+~~~~~~~~~~~~~~~~~~~~~~
+
+The final build aggregates all fragments into ``CHANGELOG.md``. This command
+identifies the version and date.
+
+.. code:: shell
+
+    uvx towncrier build --version "v0.0.5"
+
+Checklist
+^^^^^^^^^
+
+- Update the version for the upcoming release in ``pixi``
+
+  - e.g. for ``0.0.5``, ``pixi.toml`` must have ``0.0.6.dev`` as the version.
+
+- Regenerate the lock file, ``pixi lock``
+
+Atomic Commits and Tagging
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The build process generates a single commit. This commit includes the  updated
+changelog and the deletion of the processed fragments. Following  this atomic
+commit, the maintainer applies a Git tag.
+
+.. code:: shell
+
+    git tag -a v0.0.5 -m "Release v0.0.5"
+    git push origin main --tags
+
+Distribution
+~~~~~~~~~~~~
+
+After tagging, the maintainer builds the distribution packages and uploads  them
+to PyPI using ``twine`` via ``uvx``.
+
+.. code:: shell
+
+    uv build
+    uvx twine upload dist/*
