@@ -4,10 +4,9 @@ from ase.io import write
 from ase.neighborlist import NeighborList
 from click.testing import CliRunner
 
-from tests.conftest import require_module
+from tests.conftest import skip_if_not_env
 
-require_module("ase")
-require_module("ovito")
+skip_if_not_env("ptm")
 
 from rgpycrumbs.eon.ptmdisp import (  # noqa: E402
     CrystalStructure,

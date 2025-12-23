@@ -2,18 +2,29 @@ import importlib.util
 
 import pytest
 
+# Define the requirements for each suite/marker
+ENVIRONMENT_REQUIREMENTS = {
+    "fragments": ["ase", "tblite"],
+    "ptm": ["ase", "ovito"],
+    "eon": ["ase", "eon"],
+}
 
-def require_module(module_name):
+
+def check_missing_modules(marker_name):
     """
-    Checks if a module exists. If not, skips the test or module.
+    Returns a list of missing modules for a given marker.
     """
-    spec = importlib.util.find_spec(module_name)
-    if spec is None:
-        pytest.skip(
-            f"Module '{module_name}' not found. Skipping.", allow_module_level=True
-        )
-
-
-def get_missing_modules(*modules):
-    """Returns a list of modules not currently installed."""
+    modules = ENVIRONMENT_REQUIREMENTS.get(marker_name, [])
     return [mod for mod in modules if importlib.util.find_spec(mod) is None]
+
+
+def skip_if_not_env(marker_name):
+    """
+    Skips the entire module if dependencies for the marker remain uninstalled.
+    """
+    missing = check_missing_modules(marker_name)
+    if missing:
+        pytest.skip(
+            f"Missing dependencies for '{marker_name}': {', '.join(missing)}",
+            allow_module_level=True,
+        )
