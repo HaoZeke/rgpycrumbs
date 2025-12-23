@@ -1,0 +1,20 @@
+
+
+Geometry Helpers
+----------------
+
+These tools provide visualization and bonding analysis.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Geometry Tools
+
+   detect_fragments
+
+API Reference
+~~~~~~~~~~~~~
+
+For developer details, see the :doc:`Geometry Helper Reference <../../autoapi/rgpycrumbs/geom/index>` [1]_ .
+
+
+.. [1]  Also linked in each section.

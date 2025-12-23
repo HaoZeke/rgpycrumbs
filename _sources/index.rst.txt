@@ -104,6 +104,7 @@ Tool Categories
      :caption: Tools
 
      tools/eon/index
+     tools/geom/index
      tools/prefix/index
 
 Developer Reference
@@ -117,4 +118,5 @@ For details on the dispatcher architecture or internal API:
 
      changelog
      devnotes
+     contributing/index
      autoapi/index

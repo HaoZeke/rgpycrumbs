@@ -22,7 +22,7 @@ To split a trajectory file:
 
 This creates a directory named ``initial_images`` containing ``ipath_000.con``,
 ``ipath_001.con``, etc., along with an ``ipath.dat`` file listing their paths which
-feeds into EON via [1]_ :
+feeds into EON via:
 
 .. code:: ini
 
@@ -35,6 +35,3 @@ API Reference
 
 For developer details and source code see
 :mod:`rgpycrumbs.eon.con_splitter`.
-
-
-.. [1]  More `NEB options upstream <https://eondocs.org/user_guide/neb#eon.schema.NudgedElasticBandConfig>`_

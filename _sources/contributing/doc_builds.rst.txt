@@ -1,0 +1,114 @@
+===================================
+Documentation Standards & Authoring
+===================================
+
+
+
+Authoring with Org-mode
+-----------------------
+
+We use ``orgmode`` as our primary authoring format. It provides a structured 
+environment for capturing technical notes, code snippets, and mathematical 
+notation.
+
+Syntax Reference
+    If you are new to Org-mode, consult the 
+    `Org Mode Manual <https://orgmode.org/manual/index.html>`_ for basic syntax.
+
+Definition Lists \:\: Use the format: ~- Term
+    Definition~.
+
+Source Blocks
+    Use ``#+BEGIN_SRC`` blocks for code samples.
+
+Documentation Framework
+-----------------------
+
+While the `Diátaxis framework <https://diataxis.fr/>`_ informs the content categories, 
+we organize the physical files as follows:
+
+Root
+    High-level project state like ``index.org``, ``changelog.org``, ``devnotes.org``.
+
+Contributing
+    Logistical guides for developers like ``contributing/index.org``, ``test_requirements.org``.
+
+Tools
+    Practical tool documentation organized by submodule like ``tools/eon/``, ``tools/geom/``.
+
+Writing Style
+~~~~~~~~~~~~~
+
+To ensure the build pipeline handles your contribution correctly, follow  these
+authoring rules:
+
+Command Line Reference
+    Use the ``.. click::`` directive inside a 
+    ``#+BEGIN_EXPORT rst`` block to automatically generate CLI documentation.
+
+External References
+    Use the ``@@rst::...@@`` syntax for specific 
+    intersphinx links (e.g., pointing to the EON schema).
+
+Source Code Links
+    Link to the internal API reference using 
+    ``@@rst::mod:`rgpycrumbs.path.to.module`@@``.
+
+Content Structure Template for Tools
+------------------------------------
+
+Every new tool documentation should follow this approximate structure:
+
+Title
+    A clear heading for the tool.
+
+CLI Export
+    The ``click`` directive for automated help output.
+
+Usage
+    A ``#+BEGIN_SRC shell`` block showing a real-world example.
+
+Integration
+    Context on how the tool interacts with external  software
+    (e.g., EON config snippets).
+
+API Reference
+    A link to the developer source documentation.
+
+Verifying Changes
+-----------------
+
+While the build happens automatically, you should verify the rendered output 
+to ensure your Org-mode syntax translates correctly to Sphinx.
+
+Pull Request Previews
+~~~~~~~~~~~~~~~~~~~~~
+
+Every Pull Request triggers an automated build. Once completed, a bot posts  a
+comment with a link to a ****live preview****. 
+
+Review checklist
+    You must check this preview before requesting a  review.
+    Pay close attention to cross-references and table rendering.
+
+Local Build
+~~~~~~~~~~~
+
+If you need to verify changes locally before pushing:
+
+.. code:: shell
+
+    pixi run r docbld
+
+Outputs to ``docs/build/``, served with:
+
+.. code:: bash
+
+    python -m http.server -d docs/build
+    # visit localhost:8000 in the browser
+
+For a clean rebuild:
+
+.. code:: bash
+
+    pixi run r docdel

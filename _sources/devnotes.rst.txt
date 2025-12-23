@@ -3,13 +3,11 @@
 ==========================================
 
 
-.. contents::
-
 
 .. _docs-architecture:
 
-1 Documentation Pipeline
-------------------------
+Documentation Pipeline
+----------------------
 
 We craft documents in ``orgmode``, though downstream processing uses ``sphinx``.
 Partially because of this, since ``ox-rst`` needs ``emacs``, and because the
@@ -17,8 +15,8 @@ documentation rarely needs to be built outside of the development workflow,
 instead of staying within the ``pyproject`` file as an optional dependency the
 documentation forms a new environment in the ``pixi.toml`` file.
 
-2 Dependency management
------------------------
+Dependency management
+---------------------
 
 Library
     go in ``pyproject.toml``.
@@ -31,18 +29,18 @@ Script
 
 .. _cli-dispatch:
 
-3 Core Architecture: The Dispatcher
------------------------------------
+Core Architecture: The Dispatcher
+---------------------------------
 
-3.1 The Problem
-~~~~~~~~~~~~~~~
+The Problem
+~~~~~~~~~~~
 
 Research pipelines require conflicting environments and a monolithic CLI
 (e.g., standard ``Typer`` app) fails because importing the top-level module
 crashes due to conflicting dependencies in sub-modules.
 
-3.2 The Solution: Dynamic Subprocess Dispatch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Solution: Dynamic Subprocess Dispatch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Instead of directly importing modules, ``rgpycrumbs/cli.py`` controls execution flow:
 
@@ -57,8 +55,8 @@ Instead of directly importing modules, ``rgpycrumbs/cli.py`` controls execution 
     # Logic captured in rgpycrumbs/cli.py
     subprocess.run(["uv", "run", script_path] + args)
 
-3.3 Philosophy
-~~~~~~~~~~~~~~
+Philosophy
+~~~~~~~~~~
 
 The library is designed with the following principles in mind:
 

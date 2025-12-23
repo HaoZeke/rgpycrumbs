@@ -92,6 +92,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
 </ul>
@@ -101,6 +105,12 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
@@ -115,6 +125,10 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/func/index.html">rgpycrumbs.func</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/func/muller_brown/index.html">rgpycrumbs.func.muller_brown</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/index.html">rgpycrumbs.parsers</a><ul>
@@ -237,7 +251,7 @@ data-aria-dark="Switch to auto color mode">
 </div>
 <p>This creates a directory named <code class="docutils literal notranslate"><span class="pre">initial_images</span></code> containing <code class="docutils literal notranslate"><span class="pre">ipath_000.con</span></code>,
 <code class="docutils literal notranslate"><span class="pre">ipath_001.con</span></code>, etc., along with an <code class="docutils literal notranslate"><span class="pre">ipath.dat</span></code> file listing their paths which
-feeds into EON via <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> :</p>
+feeds into EON via:</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">[Nudged Elastic Band]</span>
 </span><span data-line="2"><span class="na">initial_path_in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">ipath.dat</span>
 </span><span data-line="3"><span class="na">minimize_endpoints_for_ipath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
@@ -248,12 +262,6 @@ feeds into EON via <a class="footnote-reference brackets" href="#id2" id="id1" r
 <h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h3>
 <p>For developer details and source code see
 <a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html#module-rgpycrumbs.eon.con_splitter" title="rgpycrumbs.eon.con_splitter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rgpycrumbs.eon.con_splitter</span></code></a>.</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id2" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
-<p>More <a class="reference external" href="https://eondocs.org/user_guide/neb#eon.schema.NudgedElasticBandConfig">NEB options upstream</a></p>
-</aside>
-</aside>
 </section>
 </section>
 </section>

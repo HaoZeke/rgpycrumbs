@@ -27,8 +27,6 @@ Module Contents
 .. py:function:: _import_from_parent_env(module_name: str)
 
    Import a module from parent interpreter's site-packages as a fallback.
-
-   Temporarily appends parent paths to sys.path, imports, then restores.
-   This ensures uv dependencies take precedence.
+   Uses importlib to correctly handle nested modules (e.g. 'tblite.interface').
 
 

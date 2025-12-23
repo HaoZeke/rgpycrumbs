@@ -1,0 +1,153 @@
+rgpycrumbs.geom.detect_fragments
+================================
+
+.. py:module:: rgpycrumbs.geom.detect_fragments
+
+.. autoapi-nested-parse::
+
+   Detects molecular fragments in coordinate files using two distinct methodologies:
+   1. Geometric: Utilizes scaled covalent radii.
+   2. Bond Order: Employs GFN2-xTB semi-empirical calculations.
+
+   The tool supports fragment merging based on centroid proximity and batch
+   processing for high-throughput computational chemistry workflows.
+
+   Usage for a single file:
+   uv run python detect_fragments.py geometric your_file.xyz --multiplier 1.1
+   uv run python detect_fragments.py bond-order your_file.xyz --threshold 0.7 --min-dist 4.0
+
+   Usage for a directory (batch mode):
+   uv run python detect_fragments.py batch ./your_folder/ --method geometric --min-dist 3.5
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.detect_fragments.cmap_name
+   rgpycrumbs.geom.detect_fragments.tbliteinterface
+   rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_MULTIPLIER
+   rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_ORDER_THRESHOLD
+   rgpycrumbs.geom.detect_fragments.SCALAR_BAR_ARGS
+   rgpycrumbs.geom.detect_fragments.MIN_DIST_ATM
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.detect_fragments.DetectionMethod
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.detect_fragments.find_fragments_geometric
+   rgpycrumbs.geom.detect_fragments.find_fragments_bond_order
+   rgpycrumbs.geom.detect_fragments.build_graph_and_find_components
+   rgpycrumbs.geom.detect_fragments.merge_fragments_by_distance
+   rgpycrumbs.geom.detect_fragments.visualize_with_pyvista
+   rgpycrumbs.geom.detect_fragments.print_results
+   rgpycrumbs.geom.detect_fragments.main
+   rgpycrumbs.geom.detect_fragments.geometric
+   rgpycrumbs.geom.detect_fragments.bond_order
+   rgpycrumbs.geom.detect_fragments.batch
+
+
+Module Contents
+---------------
+
+.. py:data:: cmap_name
+   :value: 'batlow'
+
+
+.. py:data:: tbliteinterface
+
+.. py:class:: DetectionMethod
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Available detection methodologies.
+
+
+   .. py:attribute:: GEOMETRIC
+      :value: 'geometric'
+
+
+
+   .. py:attribute:: BOND_ORDER
+      :value: 'bond-order'
+
+
+
+.. py:data:: DEFAULT_BOND_MULTIPLIER
+   :value: 1.2
+
+
+.. py:data:: DEFAULT_BOND_ORDER_THRESHOLD
+   :value: 0.8
+
+
+.. py:data:: SCALAR_BAR_ARGS
+
+.. py:data:: MIN_DIST_ATM
+   :value: 0.0001
+
+
+.. py:function:: find_fragments_geometric(atoms: ase.atoms.Atoms, bond_multiplier: float, radius_type: str = 'natural') -> tuple[int, numpy.ndarray]
+
+.. py:function:: find_fragments_bond_order(atoms: ase.atoms.Atoms, threshold: float, charge: int, multiplicity: int, method: str = 'GFN2-xTB') -> tuple[int, numpy.ndarray, numpy.ndarray, numpy.ndarray]
+
+   Analyze connectivity via the Wiberg Bond Order (WBO) matrix.
+   Calculate electronic structure using the specified xTB level.
+
+
+.. py:function:: build_graph_and_find_components(num_atoms: int, row_indices: numpy.ndarray | list[int], col_indices: numpy.ndarray | list[int]) -> tuple[int, numpy.ndarray]
+
+   Identify connected components using direct CSR sparse matrix construction.
+
+   This function avoids Python list overhead by passing interaction indices
+   directly to the SciPy sparse engine.
+
+
+.. py:function:: merge_fragments_by_distance(atoms: ase.atoms.Atoms, n_components: int, labels: numpy.ndarray, min_dist: float) -> tuple[int, numpy.ndarray]
+
+   Merges fragments with geometric centers closer than the specified distance.
+
+
+.. py:function:: visualize_with_pyvista(atoms: ase.atoms.Atoms, method: DetectionMethod, bond_data: float | numpy.ndarray, nonbond_cutoff: float = 0.05, bond_threshold: float = 0.8, radius_type: str = 'natural') -> None
+
+   Renders the molecular system with scalar-coded bond orders.
+
+
+.. py:function:: print_results(console: rich.console.Console, atoms: ase.atoms.Atoms, n_components: int, labels: numpy.ndarray) -> None
+
+   Displays analysis results in a structured table.
+
+
+.. py:function:: main()
+
+   Fragment detection suite for physical chemistry simulations.
+
+
+.. py:function:: geometric(filename, multiplier, radius_type, min_dist, visualize)
+
+   Executes geometric fragment detection.
+
+
+.. py:function:: bond_order(filename, method, threshold, charge, multiplicity, min_dist, visualize)
+
+   Execute fragment detection using quantum mechanical bond orders.
+
+
+.. py:function:: batch(directory, method, pattern, output, min_dist)
+
+   Processes directories and outputs CSV summaries.
+
+

@@ -1,0 +1,15 @@
+rgpycrumbs.geom
+===============
+
+.. py:module:: rgpycrumbs.geom
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/geom/detect_fragments/index
+
+
