@@ -86,5 +86,6 @@ notebooks.
 
      changelog
      devnotes
+     contributing/index
      autoapi/index
 #+end_export
