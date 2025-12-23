@@ -1,21 +1,20 @@
 import importlib.util
 
 import pytest
-
-ase_spec = importlib.util.find_spec("ase")
-
-if ase_spec is None:
-    pytest.skip(
-        "'ase' not found, skipping",
-        allow_module_level=True,
-    )
-
 from ase.build import bulk
 from ase.io import write
 from ase.neighborlist import NeighborList
 from click.testing import CliRunner
 
 from rgpycrumbs.eon.ptmdisp import CrystalStructure, find_mismatch_indices, main
+
+ase_found = importlib.util.find_spec("ase") is not None
+ovito_found = importlib.util.find_spec("ovito") is not None
+
+if not (ase_found and ovito_found):
+    pytest.skip(
+        "Missing 'ase' or 'ovito', skipping module collection", allow_module_level=True
+    )
 
 
 @pytest.fixture
