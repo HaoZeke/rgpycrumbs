@@ -1273,7 +1273,7 @@ def main(
 
     # --- 4. Load Structures ---
     atoms_list, additional_atoms_data = _load_structures(
-        con_file, additional_con, plot_type, rc_mode
+        con_file, additional_con, plot_type, rc_mode, ira_kmax
     )
 
     # --- 5. Delegate to Plotting Function ---
@@ -1444,7 +1444,7 @@ def _determine_figsize(figsize, fig_height, aspect_ratio):
     return final_figsize
 
 
-def _load_structures(con_file, additional_con, plot_type, rc_mode):
+def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
     """Loads atoms from .con files and calcs RMSD for additional structure."""
     atoms_list = None
     if con_file:
@@ -1466,10 +1466,10 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode):
             additional_atoms = ase_read(additional_con)
             ira_instance = ira_mod.IRA()
             add_rmsd_r = calculate_rmsd_from_ref(
-                [additional_atoms], ira_instance, ref_atom=atoms_list[0]
+                [additional_atoms], ira_instance, ref_atom=atoms_list[0], ira_kmax=ira_kmax
             )[0]
             add_rmsd_p = calculate_rmsd_from_ref(
-                [additional_atoms], ira_instance, ref_atom=atoms_list[-1]
+                [additional_atoms], ira_instance, ref_atom=atoms_list[-1], ira_kmax=ira_kmax
             )[0]
             log.info(f"... RMSD_R = {add_rmsd_r:.3f} Å, RMSD_P = {add_rmsd_p:.3f} Å")
             additional_atoms_data = (additional_atoms, add_rmsd_r, add_rmsd_p)
