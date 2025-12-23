@@ -270,7 +270,7 @@ def visualize_with_pyvista(
 
     pos = atoms.get_positions()
     nums = atoms.get_atomic_numbers()
-    radii = covalent_radii[nums] * 0.65
+    radii = covalent_radii[nums] * 0.45
 
     # Render Atoms
     for i, (p, n) in enumerate(zip(pos, nums)):
@@ -341,7 +341,7 @@ def visualize_with_pyvista(
             if wbo >= bond_threshold:
                 # Normalize radius: stronger bonds appear thicker
                 norm_bo = np.clip((wbo - min_bo) / bo_range, 0.0, 1.0)
-                radius = 0.08 + (0.12 * norm_bo)
+                radius = 0.08 + (0.01 * norm_bo)
 
                 cyl = pv.Cylinder(
                     center=(p1 + p2) / 2,
