@@ -37,4 +37,5 @@ may be directed also to the [[https://matsci.org/c/eon/72][EON materials science
      doc_builds
      test_requirements
      ../code_of_conduct
+     release
 #+end_export
