@@ -1,4 +1,5 @@
 #+TITLE: Contributing to ~rgpycrumbs~
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 #+STARTUP: content
 
 We welcome all contributions and contributors to ~rgpycrumbs~. Whether you

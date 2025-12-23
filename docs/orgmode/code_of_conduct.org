@@ -4,6 +4,6 @@
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 
 #+begin_export rst
-.. include:: ../../../CODE_OF_CONDUCT.md
+.. include:: ../../CODE_OF_CONDUCT.md
    :parser: commonmark
 #+end_export

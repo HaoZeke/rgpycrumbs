@@ -1,4 +1,5 @@
 #+TITLE: ~rgpycrumbs~ Design & Architecture Notes
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 #+STARTUP: overview
 
 * Documentation Pipeline

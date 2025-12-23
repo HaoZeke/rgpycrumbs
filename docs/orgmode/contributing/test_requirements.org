@@ -1,4 +1,5 @@
 #+TITLE: Testing & Environment Requirements
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 #+STARTUP: content
 
 * Development Environment
