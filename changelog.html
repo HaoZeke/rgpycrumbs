@@ -166,25 +166,30 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#id1">v0.0.5 - 2025-12-06</a><ul>
+<li><a class="reference internal" href="#id1">v0.0.6 - 2025-12-23</a><ul>
 <li><a class="reference internal" href="#id2">Added</a><ul>
-<li><a class="reference internal" href="#id3">Changed</a></li>
-<li><a class="reference internal" href="#id4">Fixed</a></li>
+<li><a class="reference internal" href="#id3">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id5">v0.0.4 - 2025-12-01</a><ul>
-<li><a class="reference internal" href="#id6">Added</a></li>
-<li><a class="reference internal" href="#id7">Changed</a></li>
-<li><a class="reference internal" href="#id8">Fixed</a></li>
+<li><a class="reference internal" href="#id4">v0.0.5 - 2025-12-06</a><ul>
+<li><a class="reference internal" href="#id5">Added</a></li>
+<li><a class="reference internal" href="#id6">Changed</a></li>
+<li><a class="reference internal" href="#id7">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id9">v0.0.3 - 2025-10-27</a><ul>
-<li><a class="reference internal" href="#id10">Added</a></li>
-<li><a class="reference internal" href="#id11">Changed</a></li>
+<li><a class="reference internal" href="#id8">v0.0.4 - 2025-12-01</a><ul>
+<li><a class="reference internal" href="#id9">Added</a></li>
+<li><a class="reference internal" href="#id10">Changed</a></li>
+<li><a class="reference internal" href="#id11">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id12">v0.0.2 - 2025-09-06</a><ul>
+<li><a class="reference internal" href="#id12">v0.0.3 - 2025-10-27</a><ul>
 <li><a class="reference internal" href="#id13">Added</a></li>
+<li><a class="reference internal" href="#id14">Changed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id15">v0.0.2 - 2025-09-06</a><ul>
+<li><a class="reference internal" href="#id16">Added</a></li>
 </ul>
 </li>
 </ul>
@@ -264,56 +269,73 @@ data-aria-dark="Switch to auto color mode">
 </dl>
 </div></blockquote>
 <section id="id1">
-<h2><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.5">v0.0.5</a> - 2025-12-06<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<h2><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.6">v0.0.6</a> - 2025-12-23<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <section id="id2">
 <h3>Added<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li>feat(pltneb): Add 'index' rc-mode to plot against image number</li>
+<li>Added a new fragment detection tool () supporting both Geometric (covalent radii) and Bond Order (GFN2-xTB) methodologies.</li>
+<li>feat(cli): drop dependency on click</li>
+<li>feat(pltneb): Add 'ira-kmax' to tweak settings for IRA</li>
 </ul>
 <section id="id3">
-<h4>Changed<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<h4>Fixed<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li>Refactored internal import helper to use , fixing support for nested module imports (e.g., ).</li>
+</ul>
+</section>
+</section>
+<section id="id4">
+<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.5">v0.0.5</a> - 2025-12-06<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h4>Added<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li>feat(pltneb): Add 'index' rc-mode to plot against image number</li>
+</ul>
+</section>
+<section id="id6">
+<h4>Changed<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li>Use white as a default background for plots</li>
 <li>feat(cache1D): Add disk caching for 1D profiles with rmsd using Parquet</li>
 <li>feat(cache2D): Add disk caching for 2D landscape plots using Parquet</li>
 </ul>
 </section>
-<section id="id4">
-<h4>Fixed<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<section id="id7">
+<h4>Fixed<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li>fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts</li>
 </ul>
 </section>
 </section>
-<section id="id5">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.4">v0.0.4</a> - 2025-12-01<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
-<section id="id6">
-<h4>Added<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<section id="id8">
+<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.4">v0.0.4</a> - 2025-12-01<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h4>Added<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
 <ul>
 <li>Added <code class="docutils literal notranslate"><span class="pre">_import_from_parent_env</span></code> helper to enable fallback imports from the parent python environment.</li>
 <li>Updated <code class="docutils literal notranslate"><span class="pre">con_splitter</span></code> to handle multi-path trajectories via <code class="docutils literal notranslate"><span class="pre">--images-per-path</span></code> and <code class="docutils literal notranslate"><span class="pre">--path-index</span></code> arguments.</li>
 </ul>
 </section>
-<section id="id7">
-<h4>Changed<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<section id="id10">
+<h4>Changed<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
 <ul>
 <li>Migrated linting configuration to <code class="docutils literal notranslate"><span class="pre">tool.ruff.lint</span></code> and applied global formatting fixes.</li>
 <li>Refactored CLI architecture to support dynamic command dispatch and environment propagation for isolated scripts.</li>
 <li>Updated <code class="docutils literal notranslate"><span class="pre">plt_neb</span></code> to use the new import helper for optional <code class="docutils literal notranslate"><span class="pre">ira_mod</span></code> loading.</li>
 </ul>
 </section>
-<section id="id8">
-<h4>Fixed<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
+<section id="id11">
+<h4>Fixed<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
 <ul>
 <li>Added conditional skipping for <code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code> tests when <code class="docutils literal notranslate"><span class="pre">ase</span></code> is not present in the environment.</li>
 <li>Fixed variable name typo in <code class="docutils literal notranslate"><span class="pre">plt_neb</span></code> when falling back to globbed overlay data.</li>
 </ul>
 </section>
 </section>
-<section id="id9">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.3">v0.0.3</a> - 2025-10-27<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
-<section id="id10">
-<h4>Added<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<section id="id12">
+<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.3">v0.0.3</a> - 2025-10-27<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<section id="id13">
+<h4>Added<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li>Add a FES direct reconstruction helper</li>
 <li>Add a version picker for the prefix package deleter</li>
@@ -323,17 +345,17 @@ data-aria-dark="Switch to auto color mode">
 <li>Add the ruhi colorscheme</li>
 </ul>
 </section>
-<section id="id11">
-<h4>Changed<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<section id="id14">
+<h4>Changed<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li>Use hermite interpolation for NEB plots</li>
 </ul>
 </section>
 </section>
-<section id="id12">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.2">v0.0.2</a> - 2025-09-06<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
-<section id="id13">
-<h4>Added<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<section id="id15">
+<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.2">v0.0.2</a> - 2025-09-06<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<section id="id16">
+<h4>Added<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li>Helper to delete prefix packages</li>
 <li>Helper to generate initial paths for EON's NEB</li>
