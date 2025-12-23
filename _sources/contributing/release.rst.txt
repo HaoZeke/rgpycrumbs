@@ -59,3 +59,9 @@ to PyPI using ``twine`` via ``uvx``.
 
     uv build
     uvx twine upload dist/*
+
+GitHub releases
+~~~~~~~~~~~~~~~
+
+Finally draft a release on the `web interface <https://github.com/HaoZeke/rgpycrumbs/releases>`_, automated changelog here works
+fine, with a title like ``project vVersion``.
