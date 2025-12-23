@@ -10,9 +10,12 @@
 # ///
 
 import logging
+import sys
+from enum import Enum
 from pathlib import Path
 
 import click
+from ase.build import minimize_rotation_and_translation
 from ase.io import read as aseread
 from ase.io import write as asewrite
 from rich.console import Console
@@ -45,63 +48,59 @@ logging.basicConfig(
 )
 
 
-def align_structures(frames, use_ira=False, kmax=1.8):
-    """
-    Aligns all frames in the path to the first frame (reactant).
+class AlignMode(Enum):
+    """Defines structural alignment strategies."""
 
-    This procedure removes global rotation and translation. If use_ira equals
-    True, the function also accounts for atom index permutations.
-    """
-    if len(frames) < 2:
+    NONE = "none"
+    ALL = "all"  # Align every frame to the reactant
+    ENDPOINTS = "endpoints"  # Align only reactant and product to each other
+
+
+def perform_alignment(ref, target, use_ira=False, kmax=1.8):
+    """Performs the actual rotation/translation match between two structures."""
+    if use_ira and ira_mod:
+        ira_instance = ira_mod.IRA()
+        r, t, p, _ = ira_instance.match(
+            len(ref),
+            ref.get_atomic_numbers(),
+            ref.get_positions(),
+            len(target),
+            target.get_atomic_numbers(),
+            target.get_positions(),
+            kmax,
+        )
+        new_pos = (target.get_positions() @ r.T) + t
+        target.set_positions(new_pos[p])
+        target.set_atomic_numbers(target.get_atomic_numbers()[p])
+    else:
+        minimize_rotation_and_translation(ref, target)
+    return target
+
+
+def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
+    """Applies the selected alignment strategy to the image sequence."""
+    if mode == AlignMode.NONE or len(frames) < 2:
         return frames
 
     ref = frames[0]
-    ref_pos = ref.get_positions()
-    ref_types = ref.get_atomic_numbers()
-    ref_natoms = len(ref)
 
-    aligned_frames = [ref.copy()]
+    if mode == AlignMode.ALL:
+        logging.info("Aligning [bold]all[/bold] images to reactant.")
+        return [ref.copy()] + [
+            perform_alignment(ref, f.copy(), use_ira, kmax) for f in frames[1:]
+        ]
 
-    # Initialize IRA if requested
-    ira_instance = None
-    if use_ira and ira_mod:
-        ira_instance = ira_mod.IRA()
-        logging.info(
-            "Using [bold magenta]IRA[/bold magenta] for optimal alignment and reordering."
-        )
+    if mode == AlignMode.ENDPOINTS:
+        logging.info("Aligning [bold]endpoints[/bold] (reactant and product) only.")
+        # Only the product (last frame) undergoes alignment relative to the reactant
+        aligned_product = perform_alignment(ref, frames[-1].copy(), use_ira, kmax)
+        # Intermediate frames remain unchanged in this specific mode logic,
+        # Usually, endpoint alignment implies ensuring the BCs match.
+        new_frames = [f.copy() for f in frames]
+        new_frames[-1] = aligned_product
+        return new_frames
 
-    for i in range(1, len(frames)):
-        current = frames[i].copy()
-
-        if ira_instance:
-            # Perform IRA match
-            r, t, p, _ = ira_instance.match(
-                ref_natoms,
-                ref_types,
-                ref_pos,
-                len(current),
-                current.get_atomic_numbers(),
-                current.get_positions(),
-                kmax,
-            )
-            # Apply rotation, translation, and permutation
-            new_pos = (current.get_positions() @ r.T) + t
-            current.set_positions(new_pos[p])
-            # Reorder atomic numbers to match reference after permutation
-            current.set_atomic_numbers(current.get_atomic_numbers()[p])
-        else:
-            # Standard ASE alignment (Procrustes)
-            current.euler_rotate(
-                0, 0, 0
-            )  # Placeholder for more complex ASE alignment if needed
-            # For basic NEB, many users prefer simple RMSD alignment:
-            from ase.build import minimize_rotation_and_translation
-
-            minimize_rotation_and_translation(ref, current)
-
-        aligned_frames.append(current)
-
-    return aligned_frames
+    return frames
 
 
 @click.command()
@@ -129,38 +128,39 @@ def align_structures(frames, use_ira=False, kmax=1.8):
     help="Index of the NEB path to extract. Use -1 for the last path.",
 )
 @click.option(
-    "--center",
-    is_flag=True,
+    "--center/--no-center",
+    default=False,
     help="Center the atoms in each frame around the origin.",
 )
 @click.option(
     "--box-diagonal",
     nargs=3,
     type=(float, float, float),
-    default=(25, 25, 25),
+    default=(25.0, 25.0, 25.0),
     show_default=True,
-    help="Override box while centering.",
+    help="Override the unit cell dimensions during processing.",
 )
 @click.option(
-    "--align",
-    is_flag=True,
-    help="Align all frames to the first image of the path.",
+    "--align-type",
+    type=click.Choice([m.value for m in AlignMode]),
+    default=AlignMode.NONE.value,
+    help="Alignment strategy: 'all' (every image), 'endpoints' (reactant/product), or 'none'.",
 )
 @click.option(
     "--use-ira",
     is_flag=True,
-    help="Use Iterative Reordering and Alignment (requires ira_mod).",
+    help="Enable Iterative Reordering and Alignment (requires ira_mod).",
 )
 @click.option(
     "--ira-kmax",
     type=float,
     default=1.8,
-    help="kmax factor for the IRA algorithm.",
+    help="kmax factor for the IRA matching algorithm.",
 )
 @click.option(
     "--path-list-filename",
     default="ipath.dat",
-    help="File listing the absolute paths of generated .con files.",
+    help="Name of the file containing the list of output .con paths.",
 )
 def con_splitter(
     neb_trajectory_file: Path,
@@ -168,8 +168,8 @@ def con_splitter(
     images_per_path: int,
     path_index: int,
     center: bool,
-    box_diagonal: (float, float, float),
-    align: bool,
+    box_diagonal: tuple[float, float, float],
+    align_type: str,
     use_ira: bool,
     ira_kmax: float,
     path_list_filename: str,
@@ -177,32 +177,29 @@ def con_splitter(
     """
     Splits multi-step NEB trajectories into individual .con files.
 
-    This tool extracts a specific optimization step and applies optional
-    physical chemistry refinements like centering and structural alignment.
+    This utility extracts optimization steps and applies physical
+    chemistry refinements to the structural coordinates.
     """
     if output_dir is None:
         output_dir = Path(neb_trajectory_file.stem)
 
     output_dir.mkdir(parents=True, exist_ok=True)
-
     CONSOLE.rule(f"[bold green]Processing {neb_trajectory_file.name}[/bold green]")
 
-    all_frames = aseread(neb_trajectory_file, index=":")
-    total_frames = len(all_frames)
-    num_paths = total_frames // images_per_path
+    try:
+        all_frames = aseread(neb_trajectory_file, index=":")
+    except Exception as e:
+        logging.critical(f"Failed to read trajectory: {e}")
+        sys.exit(1)
 
-    if path_index == -1:
-        path_index = num_paths - 1
+    num_paths = len(all_frames) // images_per_path
+    target_idx = num_paths - 1 if path_index == -1 else path_index
 
-    start_idx = path_index * images_per_path
-    end_idx = start_idx + images_per_path
-    frames_to_process = all_frames[start_idx:end_idx]
+    start, end = target_idx * images_per_path, (target_idx + 1) * images_per_path
+    frames = all_frames[start:end]
+    logging.info(f"Extracted [cyan]Path {target_idx}[/cyan] with {len(frames)} images.")
 
-    logging.info(
-        f"Extracted [cyan]Path {path_index}[/cyan] ({len(frames_to_process)} images)."
-    )
-
-    for atoms in frames_to_process:
+    for atoms in frames:
         if center:
             logging.info("Centering structures...")
             atoms.center()
@@ -210,28 +207,22 @@ def con_splitter(
             logging.info("Overriding box...")
             atoms.set_cell(box_diagonal)
 
-    if align:
-        logging.info("Aligning frames to reactant...")
-        frames_to_process = align_structures(
-            frames_to_process, use_ira=use_ira, kmax=ira_kmax
-        )
+    mode = AlignMode(align_type)
+    if mode != AlignMode.NONE:
+        frames = align_path(frames, mode, use_ira=use_ira, kmax=ira_kmax)
 
-    path_list_filepath = output_dir / path_list_filename
     created_paths = []
+    for i, atoms in enumerate(frames):
+        name = f"ipath_{i:03d}.con"
+        dest = output_dir / name
+        asewrite(dest, atoms)
+        created_paths.append(str(dest.resolve()))
+        logging.info(f"  - Saved [green]{name}[/green]")
 
-    with open(path_list_filepath, "w") as path_file:
-        for i, atoms in enumerate(frames_to_process):
-            out_name = f"ipath_{i:03d}.con"
-            out_path = output_dir / out_name
-            asewrite(out_path, atoms)
+    with open(output_dir / path_list_filename, "w") as f:
+        f.write("\n".join(created_paths) + "\n")
 
-            abs_path = out_path.resolve()
-            created_paths.append(str(abs_path))
-            logging.info(f"  - Saved [green]{out_name}[/green]")
-
-        path_file.write("\n".join(created_paths) + "\n")
-
-    logging.info(f"Path list saved to [magenta]{path_list_filepath}[/magenta]")
+    logging.info(f"Path list saved to [magenta]{path_list_filename}[/magenta]")
     CONSOLE.rule("[bold green]Complete[/bold green]")
 
 
