@@ -9,7 +9,12 @@ from rgpycrumbs._aux import _import_from_parent_env
 eon_config = _import_from_parent_env("eon.config")
 
 
-def log_config_ini(conf_ini: Path = Path("config.ini"), *, w_artifact: bool = True):
+def log_config_ini(
+    conf_ini: Path = Path("config.ini"),
+    *,
+    w_artifact: bool = True,
+    track_overrides: bool = False,
+):
     """
     Logs the hydrated EON configuration and highlights user-provided overrides.
 
@@ -58,15 +63,17 @@ def log_config_ini(conf_ini: Path = Path("config.ini"), *, w_artifact: bool = Tr
                 val = getter(section_name, key_name)
                 mlflow.log_param(full_key, val)
 
-                # Focused logging: If the user explicitly provided this in the INI
-                if user_parser.has_option(section_name, key_name):
-                    mlflow.log_param(f"Overrides/{full_key}", val)
+                if track_overrides:
+                    # Focused logging: If the user explicitly provided this in the INI
+                    if user_parser.has_option(section_name, key_name):
+                        mlflow.log_param(f"Overrides/{full_key}", val)
 
             except (ValueError, configparser.Error):
                 raw_val = hydrated_parser.get(section_name, key_name)
                 mlflow.log_param(full_key, raw_val)
-                if user_parser.has_option(section_name, key_name):
-                    mlflow.log_param(f"Overrides/{full_key}", raw_val)
+                if track_overrides:
+                    if user_parser.has_option(section_name, key_name):
+                        mlflow.log_param(f"Overrides/{full_key}", raw_val)
 
     # Tag the run for easy filtering of specific overrides
     if conf_ini.exists():
