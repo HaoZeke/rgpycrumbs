@@ -8,6 +8,7 @@ from rgpycrumbs.geom.detect_fragments import (
     merge_fragments_by_distance,
 )
 
+pytestmark = pytest.mark.fragments
 
 @pytest.fixture
 def nitrogen_molecule():
