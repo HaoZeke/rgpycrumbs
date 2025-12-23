@@ -29,11 +29,11 @@ test        = "pytest --cov=rgpycrumbs tests"
 
 [project]
 name = "rgpycrumbs"
-description = "Helper functions and CLI dispatchers for computational chemistry"
+description = "A dispatcher-based analytical and visualization suite for chemical physics"
 readme = "README.md"
 keywords = [ "plots", "parsers", "analysis" ]
 license = { text = "MIT" }
-authors = [ { name = "Rohit Goswami", email = "rog32@hi.is" } ]
+authors = [ { name = "Rohit Goswami", email = "rgoswami@ieee.org" } ]
 requires-python = ">=3.10"
 classifiers = [
   "Development Status :: 4 - Beta",

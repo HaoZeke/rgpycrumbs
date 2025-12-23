@@ -20,6 +20,9 @@ identifies the version and date.
 uvx towncrier build --version "v0.0.5"
 #+END_SRC
 
+Remember to update the version for the upcoming release, e.g. for ~0.0.5~,
+~pixi.toml~ must have ~0.0.6.dev~ as the version.
+
 ** Atomic Commits and Tagging
 The build process generates a single commit. This commit includes the  updated
 changelog and the deletion of the processed fragments. Following  this atomic
