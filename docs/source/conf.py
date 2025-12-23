@@ -46,6 +46,7 @@ autodoc_mock_imports = [
     "rich",
     "ovito",
     "chemfiles",
+    "pyvista",
     "featomic",
     "sklearn",
     "skmatter",

@@ -72,6 +72,7 @@ notebooks.
      :caption: Tools
 
      tools/eon/index
+     tools/geom/index
      tools/prefix/index
 #+END_EXPORT
 

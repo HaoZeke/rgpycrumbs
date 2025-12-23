@@ -1,0 +1,60 @@
+#+TITLE: Fragment Detection
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Fragment Detection
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.geom.detect_fragments:main
+   :prog: rgpycrumbs geom detect-fragments
+   :nested: full
+#+END_EXPORT
+
+** Usage
+To analyze molecular fragments using the geometric method, useful for standard organic molecules, the way ~ase~ visualizations work:
+
+#+BEGIN_SRC shell
+# Single file analysis
+python -m rgpycrumbs.cli geom detect-fragments geometric molecule.xyz --multiplier 1.2
+
+# Batch processing a directory
+python -m rgpycrumbs.cli geom detect-fragments batch ./structures/ --output summary.csv
+#+END_SRC
+
+For systems with ambiguous bonding, like transition states or loosely bound
+complexes, use the Wiberg Bond Order method which requires ~tblite~, [[https://arxiv.org/abs/2510.21368][described
+here]]:
+
+#+BEGIN_SRC shell
+python -m rgpycrumbs.cli geom detect-fragments bond-order complex.xyz --threshold 0.6
+#+END_SRC
+
+** Python Example
+You can also use the detection logic directly within Python scripts. This example demonstrates creating a water dimer in ASE and verifying it separates into two fragments.
+
+#+BEGIN_SRC python
+from ase import Atoms
+from ase.build import molecule
+from rgpycrumbs.geom.detect_fragments import find_fragments_geometric
+
+# 1. Construct a water dimer
+# One water at the origin, another separated by 3.5 Angstroms
+water_a = molecule("H2O")
+water_b = molecule("H2O")
+water_b.translate([3.5, 0, 0])
+
+dimer = water_a + water_b
+
+# 2. Detect fragments using geometric criteria (Cordero radii)
+# A standard covalent bond check would treat these as separate.
+n_frags, labels = find_fragments_geometric(dimer, bond_multiplier=1.2)
+
+print(f"System contains {n_frags} fragments.")
+print(f"Atom labels: {labels}")
+
+# Expected Output:
+# System contains 2 fragments.
+# Atom labels: [0 0 0 1 1 1]
+#+END_SRC
+
+** API Reference
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.geom.detect_fragments`@@.
