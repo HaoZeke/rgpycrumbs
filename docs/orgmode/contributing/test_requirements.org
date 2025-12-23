@@ -1,0 +1,51 @@
+#+TITLE: Testing & Environment Requirements
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
+#+STARTUP: content
+
+* Development Environment
+This project manages conflicting binary dependencies through isolated ~pixi~
+environments. We avoid a monolithic environment to prevent version resolution
+failures and import-time crashes.
+
+** Initial Setup
+#+BEGIN_SRC shell
+pixi install
+#+END_SRC
+
+* Testing Guidelines
+The test suite utilizes custom markers to scope tests to specific environments. 
+This prevents ~ModuleNotFoundError~ during the ~pytest~ collection phase.
+
+** Adding New Tests
+When creating a new test file, you must protect the collection phase:
+
+- Define requirements :: Add any required external modules to the 
+  ~ENVIRONMENT_REQUIREMENTS~ dictionary in ~tests/conftest.py~.
+- Guard imports :: Call ~skip_if_not_env("marker_name")~ at the top of your test 
+  file. This must occur before you import any package modules that depend on 
+  external binaries.
+- Mark your tests :: Assign the corresponding marker to the file or functions.
+
+** Example Test Structure
+#+BEGIN_SRC python
+import pytest
+from tests.conftest import skip_if_not_env
+
+# Guard collection: prevents imports from executing if dependencies are missing
+skip_if_not_env("my_marker")
+
+# Imports are now safe to execute
+from rgpycrumbs.submodule.logic import core_feature
+
+def test_feature_execution():
+    assert core_feature() is True
+#+END_SRC
+
+** Running Tests
+Execute tests within the specific environment that provides the necessary 
+dependencies:
+
+#+BEGIN_SRC shell
+# Run tests for a specific suite
+pixi run -e <env_name> pytest -m <marker_name>
+#+END_SRC

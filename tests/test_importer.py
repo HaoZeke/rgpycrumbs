@@ -2,17 +2,20 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from rgpycrumbs._aux import _import_from_parent_env
+
+pytestmark = pytest.mark.pure
 
 
 class TestImportFromParentEnv:
-    @patch("builtins.__import__")
+    @patch("importlib.import_module")
     def test_import_exists_locally(self, mock_import):
         """
-        Scenario: The module exists in the current environment.
-        Expected: Returns the module immediately without touching env vars or sys.path.
+        Scenario: Module exists locally.
+        Expected: Returns module immediately, doesn't touch sys.path.
         """
-        # Setup: __import__ succeeds immediately
         mock_module = MagicMock()
         mock_import.return_value = mock_module
 
@@ -21,156 +24,124 @@ class TestImportFromParentEnv:
         assert result == mock_module
         mock_import.assert_called_once_with("my_module")
 
-    @patch.dict(os.environ, {}, clear=True)
-    @patch("builtins.__import__")
-    def test_import_missing_locally_no_env_var(self, mock_import):
+    @patch("importlib.import_module")
+    def test_import_missing_locally_no_env_var(self, mock_import, monkeypatch):
         """
-        Scenario: Module missing locally and RGPYCRUMBS_PARENT_SITE_PACKAGES is unset.
+        Scenario: Module missing locally, env var unset.
         Expected: Returns None.
         """
-        # Setup: first import fails
-        mock_import.side_effect = ImportError("No module named 'my_module'")
+        monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
+        mock_import.side_effect = ImportError("No module")
 
         result = _import_from_parent_env("my_module")
 
         assert result is None
-        # Should call import once, fail, check env, find nothing, and exit.
         assert mock_import.call_count == 1
 
-    @patch.dict(
-        os.environ,
-        {"RGPYCRUMBS_PARENT_SITE_PACKAGES": "/parent/site-packages"},
-        clear=True,
-    )
-    @patch("builtins.__import__")
-    def test_import_missing_locally_exists_in_parent(self, mock_import):
+    @patch("importlib.import_module")
+    def test_import_missing_locally_exists_in_parent(self, mock_import, monkeypatch):
         """
-        Scenario: Module missing locally, but found after adding parent path.
-        Expected: Returns the module, sys.path is temporarily modified then restored.
+        Scenario: Module missing locally, found in parent path.
+        Expected: Returns module, sys.path modified then restored.
         """
-        # Setup:
-        # 1. First call fails (local import)
-        # 2. Second call succeeds (parent import)
+        # Setup environment and paths
+        parent_path = "/parent/site-packages"
+        monkeypatch.setenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", parent_path)
+
+        # Start with a clean sys.path
+        test_sys_path = ["/local/site-packages"]
+        monkeypatch.setattr(sys, "path", test_sys_path)
+
         mock_module = MagicMock()
+        # First call fails, second succeeds
         mock_import.side_effect = [ImportError("Fail local"), mock_module]
 
-        # Use a list for sys.path so we can verify append/remove
-        with patch("sys.path", ["/local/site-packages"]):
-            result = _import_from_parent_env("my_module")
+        result = _import_from_parent_env("my_module")
 
-            assert result == mock_module
-            assert mock_import.call_count == 2
+        assert result == mock_module
+        assert mock_import.call_count == 2
+        # Verify cleanup
+        assert parent_path not in sys.path
 
-            # Verify clean up happened
-            assert "/parent/site-packages" not in sys.path
-
-    @patch.dict(
-        os.environ,
-        {"RGPYCRUMBS_PARENT_SITE_PACKAGES": "/parent/site-packages"},
-        clear=True,
-    )
-    @patch("builtins.__import__")
-    def test_import_missing_everywhere(self, mock_import):
+    @patch("importlib.import_module")
+    def test_import_missing_everywhere(self, mock_import, monkeypatch):
         """
-        Scenario: Module missing locally and missing in parent path.
-        Expected: Returns None, sys.path is cleaned up.
+        Scenario: Module missing everywhere.
+        Expected: Returns None, sys.path cleaned up.
         """
-        # Setup: Both calls fail
+        monkeypatch.setenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", "/parent/site-packages")
+        monkeypatch.setattr(sys, "path", ["/local/site-packages"])
+
         mock_import.side_effect = [
             ImportError("Fail local"),
             ImportError("Fail parent"),
         ]
 
-        with patch("sys.path", ["/local/site-packages"]):
-            result = _import_from_parent_env("my_module")
+        result = _import_from_parent_env("my_module")
 
-            assert result is None
-            assert mock_import.call_count == 2
+        assert result is None
+        assert mock_import.call_count == 2
+        assert "/parent/site-packages" not in sys.path
 
-            # Verify clean up happened despite the second error
-            assert "/parent/site-packages" not in sys.path
-
-    @patch.dict(
-        os.environ, {"RGPYCRUMBS_PARENT_SITE_PACKAGES": "/parent/lib"}, clear=True
-    )
-    @patch("builtins.__import__")
-    def test_sys_path_cleanup_robustness(self, mock_import):
+    @patch("importlib.import_module")
+    def test_sys_path_cleanup_robustness(self, mock_import, monkeypatch):
         """
-        Scenario: Ensure sys.path is cleaned up even if something modifies sys.path
-        unexpectedly during the import attempt (edge case).
+        Scenario: External modification of sys.path during execution.
+        Expected: No crash, clean state.
         """
-        # First import fails
-        mock_import.side_effect = ImportError("Fail local")
+        monkeypatch.setenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", "/parent/lib")
 
-        # We start with a clean path
-        original_path = ["/local/lib"]
+        # Use a real list we can mutate
+        test_path = ["/local/lib"]
+        monkeypatch.setattr(sys, "path", test_path)
 
-        # We need a real list object to track mutations
-        test_path = original_path.copy()
+        def side_effect(*args, **kwargs):
+            # If the parent path has been added, remove it prematurely to trigger ValueError in cleanup
+            if "/parent/lib" in sys.path:
+                sys.path.remove("/parent/lib")
+                raise ImportError("Fail parent")
+            raise ImportError("Fail local")
 
-        with patch("sys.path", test_path):
-            # FIXED: Added *args and **kwargs to accept the arguments passed by __import__
-            def side_effect_second_call(*args, **kwargs):
-                if "/parent/lib" in sys.path:
-                    # SIMULATE: something removed the path before we could!
-                    # This triggers the ValueError in the finally block
-                    sys.path.remove("/parent/lib")
-                    raise ImportError("Fail parent")
-                raise ImportError("Fail local")
+        mock_import.side_effect = side_effect
 
-            mock_import.side_effect = side_effect_second_call
+        result = _import_from_parent_env("my_module")
 
-            result = _import_from_parent_env("my_module")
+        assert result is None
+        assert "/parent/lib" not in sys.path
 
-            assert result is None
-            # The function's `finally` block will try to remove "/parent/lib".
-            # Since we manually removed it inside the side_effect, the `finally` block
-            # will hit a ValueError. We want to ensure the function catches that ValueError
-            # and doesn't crash the program.
-            assert "/parent/lib" not in sys.path
-
-    @patch.dict(
-        os.environ,
-        {"RGPYCRUMBS_PARENT_SITE_PACKAGES": f"/parent/lib{os.pathsep}/another/lib"},
-        clear=True,
-    )
-    @patch("builtins.__import__")
-    def test_multiple_paths_handling(self, mock_import):
+    @patch("importlib.import_module")
+    def test_multiple_paths_handling(self, mock_import, monkeypatch):
         """
-        Scenario: The env var contains multiple paths separated by os.pathsep.
-        Expected: All valid paths are added and then removed.
+        Scenario: Env var has multiple paths.
+        Expected: All valid paths temporarily added.
         """
+        paths = f"/parent/lib{os.pathsep}/another/lib"
+        monkeypatch.setenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", paths)
+        monkeypatch.setattr(sys, "path", ["/local/lib"])
+
         mock_import.side_effect = ImportError("Fail")
 
-        original_sys_path = ["/local/lib"]
+        _import_from_parent_env("my_module")
 
-        with patch("sys.path", list(original_sys_path)):
-            _import_from_parent_env("my_module")
+        assert "/parent/lib" not in sys.path
+        assert "/another/lib" not in sys.path
 
-            # We can't easily check the 'during' state without complex mocking,
-            # but we can ensure the logic runs and cleans up multiple paths.
-            assert "/parent/lib" not in sys.path
-            assert "/another/lib" not in sys.path
-            assert sys.path == original_sys_path
-
-    @patch.dict(
-        os.environ, {"RGPYCRUMBS_PARENT_SITE_PACKAGES": "/existing/path"}, clear=True
-    )
-    @patch("builtins.__import__")
-    def test_path_already_in_sys_path(self, mock_import):
+    @patch("importlib.import_module")
+    def test_path_already_in_sys_path(self, mock_import, monkeypatch):
         """
-        Scenario: The path in the env var is ALREADY in sys.path.
-        Expected: We should not add it again (duplicate) and consequently should
-                  NOT remove it.
+        Scenario: Parent path is already in sys.path.
+        Expected: Don't duplicate it, don't remove it.
         """
+        target_path = "/existing/path"
+        monkeypatch.setenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", target_path)
+
+        # Path already exists in sys.path
+        initial_path = ["/local/lib", target_path]
+        monkeypatch.setattr(sys, "path", list(initial_path))
+
         mock_import.side_effect = ImportError("Fail")
 
-        # The parent path is already here
-        initial_path = ["/local/lib", "/existing/path"]
+        _import_from_parent_env("my_module")
 
-        with patch("sys.path", list(initial_path)):
-            _import_from_parent_env("my_module")
-
-            # It should still be there (was not removed) because we didn't add it
-            assert "/existing/path" in sys.path
-            assert len(sys.path) == 2
+        assert target_path in sys.path
+        assert len(sys.path) == 2

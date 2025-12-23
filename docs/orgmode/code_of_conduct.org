@@ -1,0 +1,9 @@
+#+TITLE: Code of Conduct
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
+
+#+begin_export rst
+.. include:: ../../CODE_OF_CONDUCT.md
+   :parser: commonmark
+#+end_export

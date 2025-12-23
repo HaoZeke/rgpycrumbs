@@ -1,0 +1,16 @@
+#+TITLE: Geometry processing
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* Geometry Helpers
+  These tools provide visualization and bonding analysis.
+
+#+BEGIN_EXPORT rst
+.. toctree::
+   :maxdepth: 2
+   :caption: Geometry Tools
+
+   detect_fragments
+#+END_EXPORT
+
+** API Reference
+For developer details, see the @@rst::doc:`Geometry Helper Reference <../../autoapi/rgpycrumbs/geom/index>`@@[fn:: Also linked in each section.].

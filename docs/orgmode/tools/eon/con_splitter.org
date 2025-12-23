@@ -16,7 +16,7 @@ rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
 
 This creates a directory named ~initial_images~ containing ~ipath_000.con~,
 ~ipath_001.con~, etc., along with an ~ipath.dat~ file listing their paths which
-feeds into EON via[fn:: More [[https://eondocs.org/user_guide/neb#eon.schema.NudgedElasticBandConfig][NEB options upstream]]]:
+feeds into EON via:
 
 #+begin_src ini
 [Nudged Elastic Band]

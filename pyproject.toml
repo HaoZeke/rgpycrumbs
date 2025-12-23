@@ -132,3 +132,17 @@ tests    = [ "tests" ]
 
 [tool.coverage.report]
 exclude_lines = [ "no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:" ]
+
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "-q"]
+testpaths = [
+    "tests",
+]
+[tool.pytest.ini_options]
+markers = [
+    "fragments: mark a test as needing the fragments environment (run with '-m fragments').",
+    "pure: mark a test as needing only the test environment (run with '-m pure').",
+    "ptm: mark a test as needing only the test environment (run with '-m ptm').",
+    "slow: mark tests as slow (deselect with '-m \"not slow\"').",
+]
