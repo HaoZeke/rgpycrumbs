@@ -53,6 +53,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
+from ase.build import minimize_rotation_and_translation
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
@@ -312,8 +313,9 @@ def calculate_rmsd_from_ref(
     """
     Calculates the RMSD of each structure in a list relative to a reference.
 
-    Uses the Iterative Reordering and Alignment (IRA) algorithm to find the
-    optimal alignment and permutation before calculating RMSD.
+    The function first attempts the IRA algorithm to handle atom permutations.
+    If IRA fails or lacks the necessary library, the code falls back to
+    standard ASE Procrustes alignment (minimize_rotation_and_translation).
 
     :param atoms_list: A list of ASE Atoms objects.
     :type atoms_list: list
@@ -329,29 +331,44 @@ def calculate_rmsd_from_ref(
     nat_ref = len(ref_atom)
     typ_ref = ref_atom.get_atomic_numbers()
     coords_ref = ref_atom.get_positions()
-    kmax_factor = ira_kmax
     rmsd_values = np.zeros(len(atoms_list))
 
     for i, atom_i in enumerate(atoms_list):
-        nat_i = len(atom_i)
-        typ_i = atom_i.get_atomic_numbers()
-        coords_i = atom_i.get_positions()
-
         if atom_i is ref_atom:
             rmsd_values[i] = 0.0
             continue
 
-        # Perform IRA match
-        r, t, p, hd = ira_instance.match(
-            nat_ref, typ_ref, coords_ref, nat_i, typ_i, coords_i, kmax_factor
-        )
+        atom_to_align = atom_i.copy()
+        aligned_positions = None
 
-        # Apply alignment and permutation
-        coords_i_aligned = (coords_i @ r.T) + t
-        coords_i_aligned_permuted = coords_i_aligned[p]
+        # Attempt IRA matching
+        if ira_instance:
+            try:
+                r, t, p, _ = ira_instance.match(
+                    nat_ref,
+                    typ_ref,
+                    coords_ref,
+                    len(atom_i),
+                    atom_i.get_atomic_numbers(),
+                    atom_i.get_positions(),
+                    ira_kmax,
+                )
+                # Apply rotation and translation
+                coords_aligned = (atom_i.get_positions() @ r.T) + t
+                # Apply permutation
+                aligned_positions = coords_aligned[p]
+            except Exception as e:
+                log.warning(
+                    f"IRA match failed for image {i}: {e}. Falling back to ASE."
+                )
 
-        # Calculate RMSD
-        diff_sq = (coords_ref - coords_i_aligned_permuted) ** 2
+        # Fallback to ASE Procrustes alignment if IRA failed or remained None
+        if aligned_positions is None:
+            minimize_rotation_and_translation(ref_atom, atom_to_align)
+            aligned_positions = atom_to_align.get_positions()
+
+        # Calculate final RMSD: sqrt( mean( sum( (R_ref - R_aligned)^2 ) ) )
+        diff_sq = (coords_ref - aligned_positions) ** 2
         rmsd = np.sqrt(np.mean(np.sum(diff_sq, axis=1)))
         rmsd_values[i] = rmsd
 
@@ -1466,10 +1483,16 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
             additional_atoms = ase_read(additional_con)
             ira_instance = ira_mod.IRA()
             add_rmsd_r = calculate_rmsd_from_ref(
-                [additional_atoms], ira_instance, ref_atom=atoms_list[0], ira_kmax=ira_kmax
+                [additional_atoms],
+                ira_instance,
+                ref_atom=atoms_list[0],
+                ira_kmax=ira_kmax,
             )[0]
             add_rmsd_p = calculate_rmsd_from_ref(
-                [additional_atoms], ira_instance, ref_atom=atoms_list[-1], ira_kmax=ira_kmax
+                [additional_atoms],
+                ira_instance,
+                ref_atom=atoms_list[-1],
+                ira_kmax=ira_kmax,
             )[0]
             log.info(f"... RMSD_R = {add_rmsd_r:.3f} Å, RMSD_P = {add_rmsd_p:.3f} Å")
             additional_atoms_data = (additional_atoms, add_rmsd_r, add_rmsd_p)
