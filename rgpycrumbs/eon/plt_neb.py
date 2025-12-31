@@ -1110,14 +1110,14 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option(
     "--arrow-head-length",
     type=float,
-    default=0.4,
+    default=0.2,
     show_default=True,
     help="Arrow head length for insets (points).",
 )
 @click.option(
     "--arrow-head-width",
     type=float,
-    default=0.4,
+    default=0.3,
     show_default=True,
     help="Arrow head width for insets (points).",
 )
@@ -1282,7 +1282,7 @@ def main(
     if plot_type == PlotType.LANDSCAPE.value:
         final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
         final_ylabel = ylabel or r"RMSD from Product ($\AA$)"
-        final_title = "NEB Landscape" if title == "NEB Path" else title
+        final_title = "RMSD(R,P) projection" if title == "NEB Path" else title
 
         _plot_landscape(
             ax=ax,
