@@ -139,10 +139,11 @@ addopts = ["-ra", "-q"]
 testpaths = [
     "tests",
 ]
-[tool.pytest.ini_options]
 markers = [
     "fragments: mark a test as needing the fragments environment (run with '-m fragments').",
     "pure: mark a test as needing only the test environment (run with '-m pure').",
-    "ptm: mark a test as needing only the test environment (run with '-m ptm').",
+    "ptm: mark a test as needing only the ptm environment (run with '-m ptm').",
+    "eon: mark a test as needing only the eon environment (run with '-m eon').",
+    "align: mark a test as needing only the align environment (run with '-m align').",
     "slow: mark tests as slow (deselect with '-m \"not slow\"').",
 ]
