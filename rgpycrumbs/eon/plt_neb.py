@@ -1963,6 +1963,8 @@ def _plot_landscape(
         for i, (add_atoms, add_r, add_p, add_label) in enumerate(additional_atoms_data):
             # Cycle colors based on index
             color = marker_cmap(i % 10)
+            # Even indices go down, odd indices flip up
+            flip = -1 if i % len(additional_atoms_data) == 0 else 1
 
             ax.plot(
                 add_r,
@@ -1978,13 +1980,12 @@ def _plot_landscape(
             )
 
             if plot_structures != "none":
-                # Offset insets slightly if multiple to minimize overlap (heuristic)
-                offset_x = image_pos_saddle.x + (i * 20)
-                offset_y = (
-                    image_pos_saddle.y + (i * 20)
-                    if i % 2 == 0
-                    else image_pos_saddle.y - (i * 20)
-                )
+                # Apply the flip to the y-offset and the arrow radius
+                # We also add a small x-stagger to prevent perfectly vertical overlap
+                stagger_x = i * 15
+                offset_x = image_pos_saddle.x + stagger_x
+                offset_y = image_pos_saddle.y * flip
+                current_rad = image_pos_saddle.rad * flip
 
                 plot_single_inset(
                     ax,
@@ -1992,7 +1993,7 @@ def _plot_landscape(
                     add_r,
                     add_p,
                     xybox=(offset_x, offset_y),
-                    rad=image_pos_saddle.rad,
+                    rad=current_rad,
                     zoom=zoom_ratio,
                     ase_rotation=ase_rotation,
                     arrow_head_length=arrow_head_length,
