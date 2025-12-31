@@ -950,10 +950,13 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 )
 @click.option(
     "--additional-con",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    type=(
+        click.Path(exists=True, dir_okay=False, path_type=Path),
+        str,
+    ),  # Takes (Path, Label)
     multiple=True,
     default=None,
-    help="Path(s) to additional .con file(s) to highlight (requires IRA).",
+    help="Path(s) to additional .con file(s) and the label to highlight.",
 )
 @click.option(
     "--plot-type",
@@ -1462,12 +1465,13 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
     if additional_con and atoms_list is not None:
         try:
             ira_instance = ira_mod.IRA()
-            for add_file in additional_con:
-                log.info(f"Reading additional structure from [cyan]{add_file}[/cyan]")
-                additional_atoms = ase_read(add_file)
+            for add_file, add_label in additional_con:
+                log.info(
+                    f"Reading additional structure from [cyan]{add_file}[/cyan]"
+                    f" with label '[yellow]{add_label}[/yellow]'"
+                )
 
-                # Use filename (without extension) as label
-                label = add_file.stem
+                additional_atoms = ase_read(add_file)
 
                 add_rmsd_r = calculate_rmsd_from_ref(
                     [additional_atoms],
@@ -1483,12 +1487,12 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
                 )[0]
 
                 log.info(
-                    f"  -> {label}: RMSD_R={add_rmsd_r:.3f}, RMSD_P={add_rmsd_p:.3f}"
+                    f"  -> {add_label}: RMSD_R={add_rmsd_r:.3f}, RMSD_P={add_rmsd_p:.3f}"
                 )
 
                 # Store tuple: (Atoms, RMSD_R, RMSD_P, Label)
                 additional_atoms_data.append(
-                    (additional_atoms, add_rmsd_r, add_rmsd_p, label)
+                    (additional_atoms, add_rmsd_r, add_rmsd_p, add_label)
                 )
 
         except Exception as e:
@@ -1899,7 +1903,7 @@ def _plot_landscape(
                 add_r,
                 add_p,
                 marker="*",
-                markersize=18,
+                markersize=int(selected_theme.font_size * 1.2),
                 color=color,
                 markeredgecolor="white",
                 markeredgewidth=1.0,
@@ -1931,8 +1935,16 @@ def _plot_landscape(
                     arrow_tail_width=arrow_tail_width,
                 )
 
-        # Ensure legend is displayed
-        ax.legend(loc="best", frameon=True, framealpha=0.8)
+        legend = ax.legend(
+            loc="best",
+            borderaxespad=0.5,  # Slightly more padding from edge
+            frameon=True,
+            framealpha=1.0,  # Fully opaque
+            facecolor="white",  # Explicit white background
+            edgecolor="black",  # Border color
+            fontsize=int(selected_theme.font_size * 0.8),
+        )
+        legend.set_zorder(101)  # Ensure it sits on top of everything
 
 
 def _plot_profile(
