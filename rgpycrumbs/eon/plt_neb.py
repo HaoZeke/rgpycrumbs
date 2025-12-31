@@ -1896,13 +1896,13 @@ def _plot_landscape(
     ax.scatter(
         final_rmsd_r[saddle_idx],
         final_rmsd_p[saddle_idx],
-        marker="*",  # Star shape
-        s=int(selected_theme.font_size * 12),
+        marker="o",
+        s=int(selected_theme.font_size * 2),
         c="white",  # White fill
         edgecolors="black",  # Black outline
         linewidths=1.5,
         zorder=100,  # On top of everything
-        label="~Saddle",  # Add to legend
+        label="SP",  # Add to legend
     )
 
     # --- Plot Structures (Insets) ---
@@ -1979,7 +1979,7 @@ def _plot_landscape(
 
         if show_legend:
             legend = ax.legend(
-                loc="best",
+                loc="lower left",  # nothing should be near the product / reactant
                 borderaxespad=0.5,  # Slightly more padding from edge
                 frameon=True,
                 framealpha=1.0,  # Fully opaque
