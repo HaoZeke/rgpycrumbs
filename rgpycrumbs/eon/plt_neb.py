@@ -1863,6 +1863,26 @@ def _plot_landscape(
         z_label,
     )
 
+    # Consistent logic with insets: Max energy (excluding endpoints) or Min eigenvalue
+    if plot_mode == "energy":
+        # argmax of the interior points, then shift index by +1 to account for slicing
+        saddle_idx = np.argmax(final_z_data[1:-1]) + 1
+    else:
+        saddle_idx = np.argmin(final_z_data)
+
+    # Plot the Saddle Point with a distinct style (White Star)
+    ax.scatter(
+        final_rmsd_r[saddle_idx],
+        final_rmsd_p[saddle_idx],
+        marker="*",  # Star shape
+        s=int(selected_theme.font_size * 12),
+        c="white",  # White fill
+        edgecolors="black",  # Black outline
+        linewidths=1.5,
+        zorder=100,  # On top of everything
+        label="~Saddle",  # Add to legend
+    )
+
     # --- Plot Structures (Insets) ---
     image_pos_reactant = InsetImagePos(*draw_reactant)
     image_pos_saddle = InsetImagePos(*draw_saddle)
