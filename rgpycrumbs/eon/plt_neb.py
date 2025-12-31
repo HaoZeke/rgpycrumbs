@@ -1478,7 +1478,7 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
                     label = add_label
                 log.info(
                     f"Reading additional structure from [cyan]{add_file}[/cyan]"
-                    f" with label '[yellow]{add_label}[/yellow]'"
+                    f" with label '[yellow]{label}[/yellow]'"
                 )
 
                 additional_atoms = ase_read(add_file)
@@ -1497,12 +1497,12 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
                 )[0]
 
                 log.info(
-                    f"  -> {add_label}: RMSD_R={add_rmsd_r:.3f}, RMSD_P={add_rmsd_p:.3f}"
+                    f"  -> {label}: RMSD_R={add_rmsd_r:.3f}, RMSD_P={add_rmsd_p:.3f}"
                 )
 
                 # Store tuple: (Atoms, RMSD_R, RMSD_P, Label)
                 additional_atoms_data.append(
-                    (additional_atoms, add_rmsd_r, add_rmsd_p, add_label)
+                    (additional_atoms, add_rmsd_r, add_rmsd_p, label)
                 )
 
         except Exception as e:
