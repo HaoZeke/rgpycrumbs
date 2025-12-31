@@ -100,3 +100,44 @@ class TestStructuralAlignment:
         assert np.allclose(
             rotated_water.get_positions(), water_molecule.get_positions(), atol=1e-5
         )
+
+    @requires_ira
+    def test_ase_fails_on_permutation_but_ira_succeeds(self, water_molecule):
+        # Create a permuted water molecule
+        indices = [0, 2, 1]
+        permuted_water = Atoms(
+            symbols=[water_molecule.get_chemical_symbols()[i] for i in indices],
+            positions=water_molecule.get_positions()[indices],
+        )
+
+        # Break the C2v symmetry by slightly nudging one hydrogen atom.
+        # This prevents a pure 180-degree rotation from achieving zero RMSD.
+        permuted_water.positions[1] += [0.05, 0.05, 0.0]
+
+        # 3. Force ASE to handle the permuted/distorted water (IRA disabled)
+        config_ase = IRAConfig(enabled=False)
+        result_ase = align_structure_robust(
+            water_molecule, permuted_water.copy(), config_ase
+        )
+
+        # ASE will minimize the error via rotation but cannot fix the local distortion
+        # and the index mismatch simultaneously.
+        ase_dist = np.linalg.norm(result_ase.atoms.positions - water_molecule.positions)
+
+        # Let IRA handle the permuted water
+        config_ira = IRAConfig(enabled=True)
+        result_ira = align_structure_robust(
+            water_molecule, permuted_water.copy(), config_ira
+        )
+
+        # IRA will first fix the permutation, then the subsequent alignment
+        # will only see the small 0.05 displacement.
+        ira_dist = np.linalg.norm(result_ira.atoms.positions - water_molecule.positions)
+
+        # Assertions
+        assert result_ase.method == AlignmentMethod.ASE_PROCRUSTES
+        assert result_ira.method == AlignmentMethod.IRA_PERMUTATION
+
+        # IRA should still produce a lower error because it correctly identifies
+        # which hydrogen corresponds to the reference positions.
+        assert ira_dist < ase_dist
