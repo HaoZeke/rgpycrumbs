@@ -36,7 +36,7 @@ fragments = { features = ["fragments", "test"] }
 ptm = { features = ["ptm", "test"] }
 eonmlflow = { features = ["eonmlflow", "test"] }
 
-[feature.eonmlflow.pypi-options]
+[pypi-options]
 # TODO(rg): only if the CPU version is needed
 # set these on the command line instead
 # export UV_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
