@@ -1192,6 +1192,12 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Ignore cache and force re-calculation of RMSD.",
 )
 @click.option(
+    "--show-legend",
+    is_flag=True,
+    default=False,
+    help="Show the legends for additional con.",
+)
+@click.option(
     "--ira-kmax",
     default=IRA_KMAX_DEFAULT,
     help="kmax factor for IRA.",
@@ -1247,6 +1253,7 @@ def main(
     draw_reactant,
     draw_saddle,
     draw_product,
+    show_legend,
     # Caching
     cache_file,
     force_recompute,
@@ -1312,6 +1319,7 @@ def main(
             cache_file=cache_file,
             force_recompute=force_recompute,
             ira_kmax=ira_kmax,
+            show_legend=show_legend,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
 
@@ -1653,6 +1661,7 @@ def _plot_landscape(
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
+    show_legend,
 ):
     """Handles all logic for drawing 2D landscape plots."""
     ira_instance = ira_mod.IRA()
@@ -1968,16 +1977,17 @@ def _plot_landscape(
                     arrow_tail_width=arrow_tail_width,
                 )
 
-        legend = ax.legend(
-            loc="best",
-            borderaxespad=0.5,  # Slightly more padding from edge
-            frameon=True,
-            framealpha=1.0,  # Fully opaque
-            facecolor="white",  # Explicit white background
-            edgecolor="black",  # Border color
-            fontsize=int(selected_theme.font_size * 0.8),
-        )
-        legend.set_zorder(101)  # Ensure it sits on top of everything
+        if show_legend:
+            legend = ax.legend(
+                loc="best",
+                borderaxespad=0.5,  # Slightly more padding from edge
+                frameon=True,
+                framealpha=1.0,  # Fully opaque
+                facecolor="white",  # Explicit white background
+                edgecolor="black",  # Border color
+                fontsize=int(selected_theme.font_size * 0.8),
+            )
+            legend.set_zorder(101)  # Ensure it sits on top of everything
 
 
 def _plot_profile(
