@@ -215,7 +215,6 @@ class SplineMethod(Enum):
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 ROUNDING_DF = 3
-RBF_SMOOTHING = 1e-2
 IRA_KMAX_DEFAULT = 1.8
 
 
@@ -968,9 +967,9 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option(
     "--rbf-smoothing",
     type=float,
-    default=RBF_SMOOTHING,
+    default=None,
     show_default=True,
-    help="Smoothing term for 2D RBF.",
+    help="Smoothing term for 2D RBF, defaults to 10% of the minimum RMSD range.",
 )
 @click.option(
     "--rounding",
@@ -1856,6 +1855,22 @@ def _plot_landscape(
                 scatter_p=all_pts_p,
             )
         else:  # "rbf"
+            if rbf_smoothing is None:
+                # Determine the characteristic length scale from the final path
+                max_step = df_raw["step"].max()
+                df_final = df_raw.filter(pl.col("step") == max_step)
+                f_r = df_final["r"].to_numpy()
+                f_p = df_final["p"].to_numpy()
+
+                # Calculate the average Euclidean distance between adjacent images
+                # This represents the resolution limit the NEB calculation
+                step_distances = np.sqrt(np.diff(f_r) ** 2 + np.diff(f_p) ** 2)
+                # Use half the median step size as the smoothing factor
+                rbf_smoothing = 0.1 * np.median(step_distances)
+                log.info(
+                    "Path-resolution smoothing"
+                    f" applied: [bold cyan]{rbf_smoothing:.4f}[/bold cyan]"
+                )
             plot_interpolated_rbf(
                 ax,
                 rmsd_r,
