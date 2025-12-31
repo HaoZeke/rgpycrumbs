@@ -2,15 +2,22 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-from ase import Atoms
-from ase.build import molecule
 
-from rgpycrumbs.geom.api.alignment import (
+from tests.conftest import skip_if_not_env
+
+skip_if_not_env("align")
+
+from ase import Atoms  # noqa: E402
+from ase.build import molecule  # noqa: E402
+
+from rgpycrumbs.geom.api.alignment import (  # noqa: E402
     AlignmentMethod,
     IRAConfig,
     align_structure_robust,
     ira_mod,
 )
+
+pytestmark = pytest.mark.align
 
 requires_ira = pytest.mark.skipif(
     ira_mod is None, reason="IRA module not found in the current environment"
