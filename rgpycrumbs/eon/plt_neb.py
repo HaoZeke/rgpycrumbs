@@ -1724,11 +1724,13 @@ def _plot_landscape(
                 max_allowed = max(allowed)
                 use_indices = [i for i in common_indices if i <= max_allowed]
                 log.info(
-                    f"Truncating to indices <= {max_allowed} (user requested {supplied_idx})."
+                    f"Truncating to indices <= {max_allowed}"
+                    f" (user requested {supplied_idx})."
                     f"Using {len(use_indices)} steps."
                 )
         else:
-            # no numeric index in supplied con_file or not provided: use all common indices
+            # no numeric index in supplied con_file or not provided: use all
+            # common indices
             use_indices = common_indices
 
         # Build ordered lists of matched dat and con paths by index
@@ -1736,31 +1738,32 @@ def _plot_landscape(
         all_con_paths = [con_index_map[i] for i in use_indices]
 
     else:
-        # No numeric indices found (filenames don't contain numbers) -> fallback to positional/truncation
         log.debug(
-            "No numeric indices found in filenames, falling back to positional truncation behavior."
+            "No numeric indices found in filenames,"
+            " falling back to positional truncation behavior."
         )
-        # If supplied con_file appears among discovered step files, truncate by name match (cheap)
         if con_file is not None:
             supplied_name = Path(con_file).name
             names = [p.name for p in all_con_paths]
             if supplied_name in names:
                 idx = names.index(supplied_name)
                 log.info(
-                    f"Truncating step .con list to user-provided file: {all_con_paths[idx].name} (index {idx})"
+                    "Truncating step .con list to"
+                    f" user-provided file: {all_con_paths[idx].name} (index {idx})"
                 )
                 all_con_paths = all_con_paths[: idx + 1]
             else:
                 log.debug(
-                    "Provided --con-file not found among discovered step .con files by name;"
-                    " proceeding with discovered step files."
+                    "Provided --con-file not found among discovered step .con files by"
+                    " name; proceeding with discovered step files."
                 )
         # Finally truncate to min length to pair dat/con by order
         if len(all_dat_paths) != len(all_con_paths):
             min_len = min(len(all_dat_paths), len(all_con_paths))
             if min_len == 0:
                 log.critical(
-                    "No matching .dat or .con files available after fallback truncation. Exiting."
+                    "No matching .dat or .con files"
+                    " available after fallback truncation. Exiting."
                 )
                 sys.exit(1)
             log.info(
