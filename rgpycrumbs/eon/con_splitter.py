@@ -53,11 +53,18 @@ class AlignMode(Enum):
     """Defines structural alignment strategies."""
 
     NONE = "none"
-    ALL = "all"  # Align every frame to the reactant
-    ENDPOINTS = "endpoints"  # Align only reactant and product to each other
+    ALL = "all"
+    ENDPOINTS = "endpoints"
 
 
-def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
+class SplitMode(Enum):
+    """Defines trajectory validation strictness."""
+
+    NEB = "neb"  # Strict: must be a clean multiple of images_per_path
+    FLEX = "flex"  # Flexible: allows partial paths or simple slicing
+
+
+def align_path(frames, mode: AlignMode, iraconf: IRAConfig):
     """Applies the selected alignment strategy to the image sequence."""
     if mode == AlignMode.NONE or len(frames) < 2:
         return frames
@@ -65,18 +72,15 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     ref = frames[0]
 
     if mode == AlignMode.ALL:
-        logging.info("Aligning [bold]all[/bold] images to reactant.")
+        logging.info("Aligning [bold]all[/bold] images to reactant reference.")
         return [ref.copy()] + [
             align_structure_robust(ref, f.copy(), IRAConfig(use_ira, kmax)).atoms
             for f in frames[1:]
         ]
 
     if mode == AlignMode.ENDPOINTS:
-        logging.info("Aligning [bold]endpoints[/bold] (reactant and product) only.")
-        # Only the product (last frame) undergoes alignment relative to the reactant
-        aligned_product = align_structure_robust(
-            ref, frames[-1].copy(), IRAConfig(use_ira, kmax)
-        ).atoms
+        logging.info("Aligning [bold]endpoints[/bold] (product to reactant) only.")
+        aligned_product = align_structure_robust(ref, frames[-1].copy(), iraconf).atoms
         # Intermediate frames remain unchanged in this specific mode logic,
         # Usually, endpoint alignment implies ensuring the BCs match.
         new_frames = [f.copy() for f in frames]
@@ -92,28 +96,34 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path),
 )
 @click.option(
+    "--mode",
+    type=click.Choice([m.value for m in SplitMode]),
+    default=SplitMode.FLEX.value,
+    help="Validation mode: 'neb' (strict multiples) or 'normal' (flexible).",
+)
+@click.option(
     "--output-dir",
     type=click.Path(file_okay=False, writable=True, path_type=Path),
     default=None,
-    help="Directory to save the output files.",
+    help="Directory to save output files. Defaults to the input filename stem.",
 )
 @click.option(
     "--images-per-path",
     type=int,
     required=True,
-    help="Number of images in a single NEB path.",
+    help="Number of images in a single NEB path (e.g., 7). [REQUIRED]",
 )
 @click.option(
     "--path-index",
     type=int,
     default=-1,
     show_default=True,
-    help="Index of the NEB path to extract. Use -1 for the last path.",
+    help="Index of the NEB path to extract (0-based). Use -1 for the last path.",
 )
 @click.option(
     "--center/--no-center",
     default=False,
-    help="Center the atoms in each frame around the origin.",
+    help="Center the atomic coordinates around the origin.",
 )
 @click.option(
     "--box-diagonal",
@@ -121,13 +131,13 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     type=(float, float, float),
     default=(25.0, 25.0, 25.0),
     show_default=True,
-    help="Override the unit cell dimensions during processing.",
+    help="Override the unit cell dimensions (Å) during processing.",
 )
 @click.option(
     "--align-type",
     type=click.Choice([m.value for m in AlignMode]),
     default=AlignMode.NONE.value,
-    help="Alignment strategy: 'all' (every image), 'endpoints' (reactant/product), or 'none'.",
+    help="Alignment: 'all' (every image), 'endpoints' (reactant/product), or 'none'.",
 )
 @click.option(
     "--use-ira",
@@ -143,10 +153,11 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
 @click.option(
     "--path-list-filename",
     default="ipath.dat",
-    help="Name of the file containing the list of output .con paths.",
+    help="Name of the file listing the generated .con absolute paths.",
 )
 def con_splitter(
     neb_trajectory_file: Path,
+    mode: str,
     output_dir: Path | None,
     images_per_path: int,
     path_index: int,
@@ -158,10 +169,22 @@ def con_splitter(
     path_list_filename: str,
 ):
     """
-    Splits multi-step NEB trajectories into individual .con files.
+    Splits a multi-step trajectory file (.traj, .con, etc.) into
+    individual .con files for a *single* specified path.
 
-    This utility extracts optimization steps and applies physical
-    chemistry refinements to the structural coordinates.
+    This script reads a trajectory file, which may contain multiple NEB
+    optimization steps (paths), and extracts only the frames corresponding
+    to a single specified path.
+
+    It writes each frame of that path into a separate .con file
+    (e.g., ipath_000.con, ipath_001.con, ...).
+
+    It also generates a text file (default: 'ipath.dat') that lists the
+    absolute paths of all created .con files.
+
+    This utility extracts specific optimization steps and applies physical
+    chemistry refinements such as centering, cell overrides, and structural
+    alignment (RMSD minimization).
     """
     if output_dir is None:
         output_dir = Path(neb_trajectory_file.stem)
@@ -169,30 +192,64 @@ def con_splitter(
     output_dir.mkdir(parents=True, exist_ok=True)
     CONSOLE.rule(f"[bold green]Processing {neb_trajectory_file.name}[/bold green]")
 
+    if images_per_path <= 0:
+        logging.critical("--images-per-path must be a positive integer.")
+        sys.exit(1)
+
     try:
         all_frames = aseread(neb_trajectory_file, index=":")
+        if not all_frames:
+            logging.error("No frames found in input file.")
+            sys.exit(1)
     except Exception as e:
         logging.critical(f"Failed to read trajectory: {e}")
         sys.exit(1)
 
-    num_paths = len(all_frames) // images_per_path
+    total_frames = len(all_frames)
+    num_paths = total_frames // images_per_path
+    remainder = total_frames % images_per_path
+
+    # Validation Logic based on Mode
+    if mode == SplitMode.NEB.value and remainder != 0:
+        logging.warning(
+            f"Trajectory has {total_frames} frames,"
+            f" which is not a multiple of {images_per_path}. "
+            f"This often indicates an interrupted NEB calculation."
+        )
+
+    if total_frames < images_per_path:
+        logging.critical(
+            f"Total frames ({total_frames})"
+            f" is less than images per path ({images_per_path})."
+        )
+        sys.exit(1)
+
     target_idx = num_paths - 1 if path_index == -1 else path_index
+    if not (0 <= target_idx < num_paths):
+        logging.critical(
+            f"Path index {target_idx} is out of bounds (0 to {num_paths - 1})."
+        )
+        sys.exit(1)
 
     start, end = target_idx * images_per_path, (target_idx + 1) * images_per_path
     frames = all_frames[start:end]
     logging.info(f"Extracted [cyan]Path {target_idx}[/cyan] with {len(frames)} images.")
 
+    if center:
+        logging.info("Centering structures...")
+    if box_diagonal:
+        logging.info("Overriding box...")
     for atoms in frames:
         if center:
-            logging.info("Centering structures...")
             atoms.center()
         if box_diagonal:
-            logging.info("Overriding box...")
             atoms.set_cell(box_diagonal)
 
-    mode = AlignMode(align_type)
-    if mode != AlignMode.NONE:
-        frames = align_path(frames, mode, use_ira=use_ira, kmax=ira_kmax)
+    align_strategy = AlignMode(align_type)
+    if align_strategy != AlignMode.NONE:
+        frames = align_path(
+            frames, align_strategy, IRAConfig(enabled=use_ira, kmax=ira_kmax)
+        )
 
     created_paths = []
     for i, atoms in enumerate(frames):
