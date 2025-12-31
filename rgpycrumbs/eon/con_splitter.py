@@ -20,7 +20,7 @@ from ase.io import write as asewrite
 from rich.console import Console
 from rich.logging import RichHandler
 
-from rgpycrumbs.geom.api.alignment import align_structure_robust
+from rgpycrumbs.geom.api.alignment import IRAConfig, align_structure_robust
 
 # Optional IRA import logic
 try:
@@ -67,13 +67,16 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     if mode == AlignMode.ALL:
         logging.info("Aligning [bold]all[/bold] images to reactant.")
         return [ref.copy()] + [
-            align_structure_robust(ref, f.copy(), use_ira, kmax).atoms for f in frames[1:]
+            align_structure_robust(ref, f.copy(), IRAConfig(use_ira, kmax)).atoms
+            for f in frames[1:]
         ]
 
     if mode == AlignMode.ENDPOINTS:
         logging.info("Aligning [bold]endpoints[/bold] (reactant and product) only.")
         # Only the product (last frame) undergoes alignment relative to the reactant
-        aligned_product = align_structure_robust(ref, frames[-1].copy(), use_ira, kmax).atoms
+        aligned_product = align_structure_robust(
+            ref, frames[-1].copy(), IRAConfig(use_ira, kmax)
+        ).atoms
         # Intermediate frames remain unchanged in this specific mode logic,
         # Usually, endpoint alignment implies ensuring the BCs match.
         new_frames = [f.copy() for f in frames]

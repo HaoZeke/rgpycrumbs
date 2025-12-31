@@ -70,7 +70,7 @@ from scipy.interpolate import (
 from scipy.signal import savgol_filter
 
 from rgpycrumbs._aux import _import_from_parent_env
-from rgpycrumbs.geom.api.alignment import align_structure_robust
+from rgpycrumbs.geom.api.alignment import IRAConfig, align_structure_robust
 
 # IRA is optional, use None if not present
 ira_mod = _import_from_parent_env("ira_mod")
@@ -342,7 +342,9 @@ def calculate_rmsd_from_ref(
 
         # Delegate alignment to the robust library function
         align_structure_robust(
-            ref_atom, mobile_copy, use_ira=(ira_instance is not None), ira_kmax=ira_kmax
+            ref_atom,
+            mobile_copy,
+            IRAConfig(enabled=(ira_instance is not None), kmax=ira_kmax),
         )
 
         # Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$

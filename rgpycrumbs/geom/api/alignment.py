@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum, auto
 
+import numpy as np
 from ase import Atoms
 from ase.build import minimize_rotation_and_translation
 
@@ -12,6 +13,37 @@ try:
     ira_mod = _import_from_parent_env("ira_mod")
 except ImportError:
     ira_mod = None
+
+
+@dataclass(frozen=True)
+class IRAMatchInputs:
+    """Encapsulates the raw arrays required for an IRA graph match."""
+
+    ref_count: int
+    ref_numbers: np.ndarray
+    ref_positions: np.ndarray
+    mobile_count: int
+    mobile_numbers: np.ndarray
+    mobile_positions: np.ndarray
+    kmax: float
+
+
+@dataclass(frozen=True)
+class IRAMatchResults:
+    """Encapsulates the transformation outputs from the IRA algorithm."""
+
+    rotation: np.ndarray  # $R$ matrix
+    translation: np.ndarray  # $t$ vector
+    permutation: np.ndarray  # $P$ index mapping
+    hausdorff_dist: float  # $hd$ metric
+
+
+@dataclass(frozen=True)
+class IRAConfig:
+    """Configuration parameters for the Isomorphic Robust Alignment."""
+
+    enabled: bool = False
+    kmax: float = 1.8
 
 
 class AlignmentMethod(Enum):
@@ -40,11 +72,55 @@ class AlignmentResult:
         return self.method == AlignmentMethod.IRA_PERMUTATION
 
 
+def _apply_ira_alignment(
+    ref_atoms: Atoms, mobile_atoms: Atoms, config: IRAConfig
+) -> bool:
+    """
+    Performs the low-level IRA isomorphism and affine transformation.
+
+    This function modifies mobile_atoms in-place. It returns True if the
+    alignment succeeds, or False if an error occurs or IRA remains unavailable.
+    """
+    if not (config.enabled and ira_mod):
+        return False
+
+    ira_instance = ira_mod.IRA()
+
+    inputs = IRAMatchInputs(
+        ref_count=len(ref_atoms),
+        ref_numbers=ref_atoms.get_atomic_numbers(),
+        ref_positions=ref_atoms.get_positions(),
+        mobile_count=len(mobile_atoms),
+        mobile_numbers=mobile_atoms.get_atomic_numbers(),
+        mobile_positions=mobile_atoms.get_positions(),
+        kmax=config.kmax,
+    )
+
+    raw_output = ira_instance.match(
+        inputs.ref_count,
+        inputs.ref_numbers,
+        inputs.ref_positions,
+        inputs.mobile_count,
+        inputs.mobile_numbers,
+        inputs.mobile_positions,
+        inputs.kmax,
+    )
+    res = IRAMatchResults(*raw_output)
+
+    # Apply transformation: $x' = xR^T + t$
+    transformed_pos = (mobile_atoms.get_positions() @ res.rotation.T) + res.translation
+
+    # Reorder positions and identities based on the permutation vector $P$
+    mobile_atoms.set_positions(transformed_pos[res.permutation])
+    mobile_atoms.set_atomic_numbers(mobile_atoms.get_atomic_numbers()[res.permutation])
+
+    return True
+
+
 def align_structure_robust(
     ref_atoms: Atoms,
     mobile_atoms: Atoms,
-    use_ira: bool = False,
-    ira_kmax: float = 1.8,
+    ira_config: IRAConfig,
 ) -> AlignmentResult:
     """
     Aligns a mobile structure to a reference using IRA with an ASE fallback.
@@ -56,43 +132,18 @@ def align_structure_robust(
 
     :param ref_atoms: The fixed reference configuration.
     :param mobile_atoms: The configuration to align (modified in-place).
-    :param use_ira: Boolean flag to enable permutation invariance.
-    :param ira_kmax: The adjacency cutoff distance for IRA graph matching.
+    :param ira_config: Configuration object with state of IRA and the adjacency
+                       cutoff distance for IRA graph matching.
     :return: An AlignmentResult.
     """
-    current_method = AlignmentMethod.ASE_PROCRUSTES
-
-    if use_ira and ira_mod:
-        try:
-            ira_instance = ira_mod.IRA()
-
-            # IRA returns rotation ($R$), translation ($t$), and permutation
-            # ($P$), along with the Hausdorff distance (hd) (unused here)
-            r_mat, t_vec, p_vec, _ = ira_instance.match(
-                len(ref_atoms),
-                ref_atoms.get_atomic_numbers(),
-                ref_atoms.get_positions(),
-                len(mobile_atoms),
-                mobile_atoms.get_atomic_numbers(),
-                mobile_atoms.get_positions(),
-                ira_kmax,
+    try:
+        if _apply_ira_alignment(ref_atoms, mobile_atoms, ira_config):
+            return AlignmentResult(
+                atoms=mobile_atoms, method=AlignmentMethod.IRA_PERMUTATION
             )
 
-            # Apply the affine transformation: $x' = xR^T + t$
-            new_pos = (mobile_atoms.get_positions() @ r_mat.T) + t_vec
-
-            # Apply the permutation vector $P$ to reorder indices
-            mobile_atoms.set_positions(new_pos[p_vec])
-            mobile_atoms.set_atomic_numbers(mobile_atoms.get_atomic_numbers()[p_vec])
-
-            current_method = AlignmentMethod.IRA_PERMUTATION
-
-        except Exception as e:
-            logging.debug(f"IRA alignment failed: {e}. Proceeding to fallback.")
-
-    # If we didn't successfully use IRA, we fall back to ASE
-    if current_method != AlignmentMethod.IRA_PERMUTATION:
-        minimize_rotation_and_translation(ref_atoms, mobile_atoms)
-        current_method = AlignmentMethod.ASE_PROCRUSTES
-
-    return AlignmentResult(atoms=mobile_atoms, method=current_method)
+    except Exception as e:
+        logging.debug(f"IRA alignment failed: {e}. Proceeding to fallback.")
+    # Fallback to standard rigid superimposition
+    minimize_rotation_and_translation(ref_atoms, mobile_atoms)
+    return AlignmentResult(atoms=mobile_atoms, method=AlignmentMethod.ASE_PROCRUSTES)
