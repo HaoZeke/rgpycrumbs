@@ -53,7 +53,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
-from ase.build import minimize_rotation_and_translation
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
@@ -71,6 +70,7 @@ from scipy.interpolate import (
 from scipy.signal import savgol_filter
 
 from rgpycrumbs._aux import _import_from_parent_env
+from rgpycrumbs.geom.api.alignment import align_structure_robust
 
 # IRA is optional, use None if not present
 ira_mod = _import_from_parent_env("ira_mod")
@@ -328,47 +328,26 @@ def calculate_rmsd_from_ref(
     :return: An array of RMSD values, one for each structure in `atoms_list`.
     :rtype: np.ndarray
     """
-    nat_ref = len(ref_atom)
-    typ_ref = ref_atom.get_atomic_numbers()
-    coords_ref = ref_atom.get_positions()
     rmsd_values = np.zeros(len(atoms_list))
+    coords_ref = ref_atom.get_positions()
 
     for i, atom_i in enumerate(atoms_list):
         if atom_i is ref_atom:
             rmsd_values[i] = 0.0
             continue
 
-        atom_to_align = atom_i.copy()
-        aligned_positions = None
+        # Create a working copy to avoid mutating the original trajectory
+        # during the plotting/analysis phase
+        mobile_copy = atom_i.copy()
 
-        # Attempt IRA matching
-        if ira_instance:
-            try:
-                r, t, p, _ = ira_instance.match(
-                    nat_ref,
-                    typ_ref,
-                    coords_ref,
-                    len(atom_i),
-                    atom_i.get_atomic_numbers(),
-                    atom_i.get_positions(),
-                    ira_kmax,
-                )
-                # Apply rotation and translation
-                coords_aligned = (atom_i.get_positions() @ r.T) + t
-                # Apply permutation
-                aligned_positions = coords_aligned[p]
-            except Exception as e:
-                log.warning(
-                    f"IRA match failed for image {i}: {e}. Falling back to ASE."
-                )
+        # Delegate alignment to the robust library function
+        align_structure_robust(
+            ref_atom, mobile_copy, use_ira=(ira_instance is not None), ira_kmax=ira_kmax
+        )
 
-        # Fallback to ASE Procrustes alignment if IRA failed or remained None
-        if aligned_positions is None:
-            minimize_rotation_and_translation(ref_atom, atom_to_align)
-            aligned_positions = atom_to_align.get_positions()
-
-        # Calculate final RMSD: sqrt( mean( sum( (R_ref - R_aligned)^2 ) ) )
-        diff_sq = (coords_ref - aligned_positions) ** 2
+        # Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$
+        coords_aligned = mobile_copy.get_positions()
+        diff_sq = (coords_ref - coords_aligned) ** 2
         rmsd = np.sqrt(np.mean(np.sum(diff_sq, axis=1)))
         rmsd_values[i] = rmsd
 

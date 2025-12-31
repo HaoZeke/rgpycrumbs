@@ -15,11 +15,12 @@ from enum import Enum
 from pathlib import Path
 
 import click
-from ase.build import minimize_rotation_and_translation
 from ase.io import read as aseread
 from ase.io import write as asewrite
 from rich.console import Console
 from rich.logging import RichHandler
+
+from rgpycrumbs.geom.api.alignment import align_structure_robust
 
 # Optional IRA import logic
 try:
@@ -56,48 +57,6 @@ class AlignMode(Enum):
     ENDPOINTS = "endpoints"  # Align only reactant and product to each other
 
 
-def perform_alignment(ref, target, use_ira=False, kmax=1.8):
-    """
-    Performs the rotation/translation match between structures.
-
-    Attempts IRA-based reordering if requested. If the IRA library remains
-    unavailable or the matching process fails, the function falls back to
-    standard ASE rotation and translation minimization.
-    """
-
-    aligned_successfully = False
-
-    if use_ira and ira_mod:
-        try:
-            ira_instance = ira_mod.IRA()
-            r, t, p, _ = ira_instance.match(
-                len(ref),
-                ref.get_atomic_numbers(),
-                ref.get_positions(),
-                len(target),
-                target.get_atomic_numbers(),
-                target.get_positions(),
-                kmax,
-            )
-            # Apply transformation
-            new_pos = (target.get_positions() @ r.T) + t
-            target.set_positions(new_pos[p])
-            target.set_atomic_numbers(target.get_atomic_numbers()[p])
-            aligned_successfully = True
-            logging.info("IRA alignment and reordering complete.")
-        except Exception as e:
-            logging.warning(
-                f"IRA matching failed: {e}. Falling back to ASE Procrustes alignment."
-            )
-
-    if not aligned_successfully:
-        # Standard Procrustes alignment (no reordering)
-        minimize_rotation_and_translation(ref, target)
-        logging.info("ASE rotation/translation minimization complete.")
-
-    return target
-
-
 def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     """Applies the selected alignment strategy to the image sequence."""
     if mode == AlignMode.NONE or len(frames) < 2:
@@ -108,13 +67,13 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     if mode == AlignMode.ALL:
         logging.info("Aligning [bold]all[/bold] images to reactant.")
         return [ref.copy()] + [
-            perform_alignment(ref, f.copy(), use_ira, kmax) for f in frames[1:]
+            align_structure_robust(ref, f.copy(), use_ira, kmax)[0] for f in frames[1:]
         ]
 
     if mode == AlignMode.ENDPOINTS:
         logging.info("Aligning [bold]endpoints[/bold] (reactant and product) only.")
         # Only the product (last frame) undergoes alignment relative to the reactant
-        aligned_product = perform_alignment(ref, frames[-1].copy(), use_ira, kmax)
+        aligned_product = align_structure_robust(ref, frames[-1].copy(), use_ira, kmax)[0]
         # Intermediate frames remain unchanged in this specific mode logic,
         # Usually, endpoint alignment implies ensuring the BCs match.
         new_frames = [f.copy() for f in frames]
