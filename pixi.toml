@@ -34,6 +34,18 @@ docs = {features = ["docs"]}
 test = { features = ["test"] }
 fragments = { features = ["fragments", "test"] }
 ptm = { features = ["ptm", "test"] }
+eonmlflow = { features = ["eonmlflow", "test"] }
+
+[feature.eonmlflow.pypi-options]
+# TODO(rg): only if the CPU version is needed
+# set these on the command line instead
+# export UV_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
+# export PIP_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
+extra-index-urls = ["https://download.pytorch.org/whl/cpu"]
+
+[feature.eonmlflow.dependencies]
+eon = ">=2.8.2,<3"
+mlflow = ">=3.8.0,<4"
 
 [feature.fragments.pypi-dependencies]
 ase = "~=3.23"
