@@ -7,7 +7,8 @@ ENVIRONMENT_REQUIREMENTS = {
     "fragments": ["ase", "tblite"],
     "ptm": ["ase", "ovito"],
     "eon": ["ase", "eon"],
-    "align": ["ase"],
+    "align": ["ase", "numpy"],
+    "pure": ["numpy"],
 }
 
 
