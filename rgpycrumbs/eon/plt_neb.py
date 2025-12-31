@@ -501,12 +501,13 @@ def plot_single_inset(
             ),
             "connectionstyle": f"arc3,rad={rad}",
             "linestyle": "-",
+            "alpha": 0.8,
             "color": "black",  # NOTE: This is hardcoded, could be themed
-            "linewidth": 1.5,
+            "linewidth": 1.2,
         },
     )
     ax.add_artist(ab)
-    ab.set_zorder(100)  # Ensure inset is drawn on top
+    ab.set_zorder(80)
 
 
 def plot_structure_insets(
@@ -758,7 +759,7 @@ def plot_eigenvalue_path(ax, path_data, color, alpha, zorder, grid_color="white"
     ax.plot(
         rc,
         eigenvalue,
-        marker="o",
+        marker="s",
         linestyle="None",
         color=color,
         markersize=6,
@@ -1915,11 +1916,11 @@ def _plot_landscape(
     else:
         saddle_idx = np.argmin(final_z_data)
 
-    # Plot the Saddle Point with a distinct style (White Star)
+    # Plot the Saddle Point with a distinct style (White square)
     ax.scatter(
         final_rmsd_r[saddle_idx],
         final_rmsd_p[saddle_idx],
-        marker="o",
+        marker="s",
         s=int(selected_theme.font_size * 2),
         c="white",  # White fill
         edgecolors="black",  # Black outline
