@@ -67,13 +67,13 @@ def align_path(frames, mode: AlignMode, use_ira=False, kmax=1.8):
     if mode == AlignMode.ALL:
         logging.info("Aligning [bold]all[/bold] images to reactant.")
         return [ref.copy()] + [
-            align_structure_robust(ref, f.copy(), use_ira, kmax)[0] for f in frames[1:]
+            align_structure_robust(ref, f.copy(), use_ira, kmax).atoms for f in frames[1:]
         ]
 
     if mode == AlignMode.ENDPOINTS:
         logging.info("Aligning [bold]endpoints[/bold] (reactant and product) only.")
         # Only the product (last frame) undergoes alignment relative to the reactant
-        aligned_product = align_structure_robust(ref, frames[-1].copy(), use_ira, kmax)[0]
+        aligned_product = align_structure_robust(ref, frames[-1].copy(), use_ira, kmax).atoms
         # Intermediate frames remain unchanged in this specific mode logic,
         # Usually, endpoint alignment implies ensuring the BCs match.
         new_frames = [f.copy() for f in frames]

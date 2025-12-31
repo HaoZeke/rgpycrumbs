@@ -1,4 +1,6 @@
 import logging
+from dataclasses import dataclass
+from enum import Enum, auto
 
 from ase import Atoms
 from ase.build import minimize_rotation_and_translation
@@ -12,12 +14,38 @@ except ImportError:
     ira_mod = None
 
 
+class AlignmentMethod(Enum):
+    """Tracks which algorithm was successfully applied."""
+
+    ASE_PROCRUSTES = auto()  # Standard rigid rotation/translation
+    IRA_PERMUTATION = auto()  # Isomorphic mapping + alignment
+    NONE = auto()  # No operation performed
+
+
+@dataclass
+class AlignmentResult:
+    """
+    Container for alignment outputs.
+
+    :param atoms: The aligned structure (modified in-place, but returned for chaining).
+    :param method: The specific algorithm that was used.
+    """
+
+    atoms: Atoms
+    method: AlignmentMethod
+
+    @property
+    def used_ira(self) -> bool:
+        """Helper to maintain backward compatibility with boolean checks."""
+        return self.method == AlignmentMethod.IRA_PERMUTATION
+
+
 def align_structure_robust(
     ref_atoms: Atoms,
     mobile_atoms: Atoms,
     use_ira: bool = False,
     ira_kmax: float = 1.8,
-) -> tuple[Atoms, bool]:
+) -> AlignmentResult:
     """
     Aligns a mobile structure to a reference using IRA with an ASE fallback.
 
@@ -30,13 +58,9 @@ def align_structure_robust(
     :param mobile_atoms: The configuration to align (modified in-place).
     :param use_ira: Boolean flag to enable permutation invariance.
     :param ira_kmax: The adjacency cutoff distance for IRA graph matching.
-    :return: A tuple containing the modified mobile_atoms and a boolean
-             indicating if IRA successfully handled the alignment.
+    :return: An AlignmentResult.
     """
-    # Create a copy if specific preservation is required,
-    # but ASE standardizes on in-place modification.
-
-    aligned_successfully_with_ira = False
+    current_method = AlignmentMethod.ASE_PROCRUSTES
 
     if use_ira and ira_mod:
         try:
@@ -61,13 +85,14 @@ def align_structure_robust(
             mobile_atoms.set_positions(new_pos[p_vec])
             mobile_atoms.set_atomic_numbers(mobile_atoms.get_atomic_numbers()[p_vec])
 
-            aligned_successfully_with_ira = True
+            current_method = AlignmentMethod.IRA_PERMUTATION
 
         except Exception as e:
             logging.debug(f"IRA alignment failed: {e}. Proceeding to fallback.")
 
-    if not aligned_successfully_with_ira:
-        # Fallback: Rigid body alignment via SVD (Procrustes) without reordering
+    # If we didn't successfully use IRA, we fall back to ASE
+    if current_method != AlignmentMethod.IRA_PERMUTATION:
         minimize_rotation_and_translation(ref_atoms, mobile_atoms)
+        current_method = AlignmentMethod.ASE_PROCRUSTES
 
-    return mobile_atoms, aligned_successfully_with_ira
+    return AlignmentResult(atoms=mobile_atoms, method=current_method)
