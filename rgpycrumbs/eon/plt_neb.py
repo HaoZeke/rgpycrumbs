@@ -951,8 +951,9 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option(
     "--additional-con",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    multiple=True,
     default=None,
-    help="Path to additional .con file to highlight (requires IRA).",
+    help="Path(s) to additional .con file(s) to highlight (requires IRA).",
 )
 @click.option(
     "--plot-type",
@@ -1457,28 +1458,41 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
                 log.critical("Cannot proceed without structures. Exiting.")
                 sys.exit(1)
 
-    additional_atoms_data = None
+    additional_atoms_data = []
     if additional_con and atoms_list is not None:
         try:
-            log.info(f"Reading additional structure from [cyan]{additional_con}[/cyan]")
-            additional_atoms = ase_read(additional_con)
             ira_instance = ira_mod.IRA()
-            add_rmsd_r = calculate_rmsd_from_ref(
-                [additional_atoms],
-                ira_instance,
-                ref_atom=atoms_list[0],
-                ira_kmax=ira_kmax,
-            )[0]
-            add_rmsd_p = calculate_rmsd_from_ref(
-                [additional_atoms],
-                ira_instance,
-                ref_atom=atoms_list[-1],
-                ira_kmax=ira_kmax,
-            )[0]
-            log.info(f"... RMSD_R = {add_rmsd_r:.3f} Å, RMSD_P = {add_rmsd_p:.3f} Å")
-            additional_atoms_data = (additional_atoms, add_rmsd_r, add_rmsd_p)
+            for add_file in additional_con:
+                log.info(f"Reading additional structure from [cyan]{add_file}[/cyan]")
+                additional_atoms = ase_read(add_file)
+
+                # Use filename (without extension) as label
+                label = add_file.stem
+
+                add_rmsd_r = calculate_rmsd_from_ref(
+                    [additional_atoms],
+                    ira_instance,
+                    ref_atom=atoms_list[0],
+                    ira_kmax=ira_kmax,
+                )[0]
+                add_rmsd_p = calculate_rmsd_from_ref(
+                    [additional_atoms],
+                    ira_instance,
+                    ref_atom=atoms_list[-1],
+                    ira_kmax=ira_kmax,
+                )[0]
+
+                log.info(
+                    f"  -> {label}: RMSD_R={add_rmsd_r:.3f}, RMSD_P={add_rmsd_p:.3f}"
+                )
+
+                # Store tuple: (Atoms, RMSD_R, RMSD_P, Label)
+                additional_atoms_data.append(
+                    (additional_atoms, add_rmsd_r, add_rmsd_p, label)
+                )
+
         except Exception as e:
-            log.error(f"Failed to read or process --additional-con: {e}")
+            log.error(f"Failed to read or process additional structures: {e}")
 
     return atoms_list, additional_atoms_data
 
@@ -1874,30 +1888,51 @@ def _plot_landscape(
 
     # --- Additional Structure ---
     if additional_atoms_data:
-        additional_atoms, add_rmsd_r, add_rmsd_p = additional_atoms_data
-        ax.plot(
-            add_rmsd_r,
-            add_rmsd_p,
-            marker="*",
-            markersize=20,
-            color="white",
-            zorder=98,
-            label="Additional Structure",
-        )
-        if plot_structures != "none":
-            plot_single_inset(
-                ax,
-                additional_atoms,
-                add_rmsd_r,
-                add_rmsd_p,
-                xybox=(image_pos_saddle.x, image_pos_saddle.y),
-                rad=image_pos_saddle.rad,
-                zoom=zoom_ratio,
-                ase_rotation=ase_rotation,
-                arrow_head_length=arrow_head_length,
-                arrow_head_width=arrow_head_width,
-                arrow_tail_width=arrow_tail_width,
+        # Use a qualitative colormap for discrete points
+        marker_cmap = mpl.colormaps.get_cmap("tab10")
+
+        for i, (add_atoms, add_r, add_p, add_label) in enumerate(additional_atoms_data):
+            # Cycle colors based on index
+            color = marker_cmap(i % 10)
+
+            ax.plot(
+                add_r,
+                add_p,
+                marker="*",
+                markersize=18,
+                color=color,
+                markeredgecolor="white",
+                markeredgewidth=1.0,
+                linestyle="None",
+                zorder=98,
+                label=add_label,
             )
+
+            if plot_structures != "none":
+                # Offset insets slightly if multiple to minimize overlap (heuristic)
+                offset_x = image_pos_saddle.x + (i * 20)
+                offset_y = (
+                    image_pos_saddle.y + (i * 20)
+                    if i % 2 == 0
+                    else image_pos_saddle.y - (i * 20)
+                )
+
+                plot_single_inset(
+                    ax,
+                    add_atoms,
+                    add_r,
+                    add_p,
+                    xybox=(offset_x, offset_y),
+                    rad=image_pos_saddle.rad,
+                    zoom=zoom_ratio,
+                    ase_rotation=ase_rotation,
+                    arrow_head_length=arrow_head_length,
+                    arrow_head_width=arrow_head_width,
+                    arrow_tail_width=arrow_tail_width,
+                )
+
+        # Ensure legend is displayed
+        ax.legend(loc="best", frameon=True, framealpha=0.8)
 
 
 def _plot_profile(
