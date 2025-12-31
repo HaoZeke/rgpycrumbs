@@ -956,7 +956,8 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     ),  # Takes (Path, Label)
     multiple=True,
     default=None,
-    help="Path(s) to additional .con file(s) and the label to highlight.",
+    help="Path(s) to additional .con file(s) and the "
+    "label to highlight, use an empty string to default to the file name.",
 )
 @click.option(
     "--plot-type",
@@ -1466,6 +1467,15 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
         try:
             ira_instance = ira_mod.IRA()
             for add_file, add_label in additional_con:
+                # LOGIC: If user passed "" string, use filename stem
+                if not add_label or add_label.strip() == "":
+                    label = add_file.stem
+                    log.info(
+                        f"Label empty for {add_file.name},"
+                        f" defaulting to: [yellow]{label}[/yellow]"
+                    )
+                else:
+                    label = add_label
                 log.info(
                     f"Reading additional structure from [cyan]{add_file}[/cyan]"
                     f" with label '[yellow]{add_label}[/yellow]'"
