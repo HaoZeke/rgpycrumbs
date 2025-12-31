@@ -1856,20 +1856,28 @@ def _plot_landscape(
             )
         else:  # "rbf"
             if rbf_smoothing is None:
-                # Determine the characteristic length scale from the final path
-                max_step = df_raw["step"].max()
-                df_final = df_raw.filter(pl.col("step") == max_step)
-                f_r = df_final["r"].to_numpy()
-                f_p = df_final["p"].to_numpy()
+                # Shift and subtract to calculate distances between sequential
+                # images within each step grouping by 'step' to ensure we only
+                # calculate distances between images in the same path
+                df_dist = (
+                    df_raw.sort(["step", "r"])
+                    .with_columns(
+                        dr=pl.col("r").diff().over("step"),
+                        dp=pl.col("p").diff().over("step"),
+                    )
+                    .with_columns(dist=(pl.col("dr") ** 2 + pl.col("dp") ** 2).sqrt())
+                    .drop_nulls()
+                )
 
-                # Calculate the average Euclidean distance between adjacent images
-                # This represents the resolution limit the NEB calculation
-                step_distances = np.sqrt(np.diff(f_r) ** 2 + np.diff(f_p) ** 2)
-                # Use half the median step size as the smoothing factor
-                rbf_smoothing = 0.1 * np.median(step_distances)
+                # Aggregate all distances across the entire optimization history
+                global_median_step = df_dist["dist"].median()
+
+                # Apply the 0.1 multiplier to the global median for a tighter ridge
+                rbf_smoothing = 0.1 * global_median_step
+
                 log.info(
-                    "Path-resolution smoothing"
-                    f" applied: [bold cyan]{rbf_smoothing:.4f}[/bold cyan]"
+                    "Global path-resolution smoothing applied "
+                    f"(median of all steps): [bold cyan]{rbf_smoothing:.4f}[/bold cyan]"
                 )
             plot_interpolated_rbf(
                 ax,
