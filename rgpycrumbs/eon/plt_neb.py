@@ -1356,6 +1356,7 @@ def main(
             arrow_tail_width=arrow_tail_width,
             cache_file=cache_file,
             force_recompute=force_recompute,
+            ira_kmax=ira_kmax,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
         if rc_mode == RCMode.PATH.value and normalize_rc:
@@ -2044,6 +2045,7 @@ def _plot_profile(
     arrow_tail_width,
     cache_file=None,
     force_recompute=False,
+    ira_kmax=IRA_KMAX_DEFAULT,
 ):
     """Handles all logic for drawing 1D profile plots."""
     rmsd_rc = None
@@ -2060,7 +2062,7 @@ def _plot_profile(
         def compute_profile_data() -> pl.DataFrame:
             ira_instance = ira_mod.IRA()
             r_vals = calculate_rmsd_from_ref(
-                atoms_list, ira_instance, ref_atom=atoms_list[0]
+                atoms_list, ira_instance, ref_atom=atoms_list[0], ira_kmax=ira_kmax
             )
             return pl.DataFrame({"r": r_vals})
 
