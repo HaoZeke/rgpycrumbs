@@ -70,6 +70,7 @@ from scipy.interpolate import (
 from scipy.signal import savgol_filter
 
 from rgpycrumbs._aux import _import_from_parent_env
+from rgpycrumbs.geom.api.alignment import IRAConfig, align_structure_robust
 
 # IRA is optional, use None if not present
 ira_mod = _import_from_parent_env("ira_mod")
@@ -214,7 +215,6 @@ class SplineMethod(Enum):
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 ROUNDING_DF = 3
-RBF_SMOOTHING = 1e-2
 IRA_KMAX_DEFAULT = 1.8
 
 
@@ -312,8 +312,9 @@ def calculate_rmsd_from_ref(
     """
     Calculates the RMSD of each structure in a list relative to a reference.
 
-    Uses the Iterative Reordering and Alignment (IRA) algorithm to find the
-    optimal alignment and permutation before calculating RMSD.
+    The function first attempts the IRA algorithm to handle atom permutations.
+    If IRA fails or lacks the necessary library, the code falls back to
+    standard ASE Procrustes alignment (minimize_rotation_and_translation).
 
     :param atoms_list: A list of ASE Atoms objects.
     :type atoms_list: list
@@ -326,32 +327,28 @@ def calculate_rmsd_from_ref(
     :return: An array of RMSD values, one for each structure in `atoms_list`.
     :rtype: np.ndarray
     """
-    nat_ref = len(ref_atom)
-    typ_ref = ref_atom.get_atomic_numbers()
-    coords_ref = ref_atom.get_positions()
-    kmax_factor = ira_kmax
     rmsd_values = np.zeros(len(atoms_list))
+    coords_ref = ref_atom.get_positions()
 
     for i, atom_i in enumerate(atoms_list):
-        nat_i = len(atom_i)
-        typ_i = atom_i.get_atomic_numbers()
-        coords_i = atom_i.get_positions()
-
         if atom_i is ref_atom:
             rmsd_values[i] = 0.0
             continue
 
-        # Perform IRA match
-        r, t, p, hd = ira_instance.match(
-            nat_ref, typ_ref, coords_ref, nat_i, typ_i, coords_i, kmax_factor
+        # Create a working copy to avoid mutating the original trajectory
+        # during the plotting/analysis phase
+        mobile_copy = atom_i.copy()
+
+        # Delegate alignment to the robust library function
+        align_structure_robust(
+            ref_atom,
+            mobile_copy,
+            IRAConfig(enabled=(ira_instance is not None), kmax=ira_kmax),
         )
 
-        # Apply alignment and permutation
-        coords_i_aligned = (coords_i @ r.T) + t
-        coords_i_aligned_permuted = coords_i_aligned[p]
-
-        # Calculate RMSD
-        diff_sq = (coords_ref - coords_i_aligned_permuted) ** 2
+        # Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$
+        coords_aligned = mobile_copy.get_positions()
+        diff_sq = (coords_ref - coords_aligned) ** 2
         rmsd = np.sqrt(np.mean(np.sum(diff_sq, axis=1)))
         rmsd_values[i] = rmsd
 
@@ -504,12 +501,13 @@ def plot_single_inset(
             ),
             "connectionstyle": f"arc3,rad={rad}",
             "linestyle": "-",
+            "alpha": 0.8,
             "color": "black",  # NOTE: This is hardcoded, could be themed
-            "linewidth": 1.5,
+            "linewidth": 1.2,
         },
     )
     ax.add_artist(ab)
-    ab.set_zorder(100)  # Ensure inset is drawn on top
+    ab.set_zorder(80)
 
 
 def plot_structure_insets(
@@ -761,7 +759,7 @@ def plot_eigenvalue_path(ax, path_data, color, alpha, zorder, grid_color="white"
     ax.plot(
         rc,
         eigenvalue,
-        marker="o",
+        marker="s",
         linestyle="None",
         color=color,
         markersize=6,
@@ -952,9 +950,14 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 )
 @click.option(
     "--additional-con",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    type=(
+        click.Path(exists=True, dir_okay=False, path_type=Path),
+        str,
+    ),  # Takes (Path, Label)
+    multiple=True,
     default=None,
-    help="Path to additional .con file to highlight (requires IRA).",
+    help="Path(s) to additional .con file(s) and the "
+    "label to highlight, use an empty string to default to the file name.",
 )
 @click.option(
     "--plot-type",
@@ -965,9 +968,9 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option(
     "--rbf-smoothing",
     type=float,
-    default=RBF_SMOOTHING,
+    default=None,
     show_default=True,
-    help="Smoothing term for 2D RBF.",
+    help="Smoothing term for 2D RBF, defaults to 10% of the minimum RMSD range.",
 )
 @click.option(
     "--rounding",
@@ -1108,14 +1111,14 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
 @click.option(
     "--arrow-head-length",
     type=float,
-    default=0.4,
+    default=0.2,
     show_default=True,
     help="Arrow head length for insets (points).",
 )
 @click.option(
     "--arrow-head-width",
     type=float,
-    default=0.4,
+    default=0.3,
     show_default=True,
     help="Arrow head width for insets (points).",
 )
@@ -1189,6 +1192,12 @@ def setup_plot_aesthetics(ax, title, xlabel, ylabel):
     help="Ignore cache and force re-calculation of RMSD.",
 )
 @click.option(
+    "--show-legend",
+    is_flag=True,
+    default=False,
+    help="Show the legends for additional con.",
+)
+@click.option(
     "--ira-kmax",
     default=IRA_KMAX_DEFAULT,
     help="kmax factor for IRA.",
@@ -1244,6 +1253,7 @@ def main(
     draw_reactant,
     draw_saddle,
     draw_product,
+    show_legend,
     # Caching
     cache_file,
     force_recompute,
@@ -1273,14 +1283,14 @@ def main(
 
     # --- 4. Load Structures ---
     atoms_list, additional_atoms_data = _load_structures(
-        con_file, additional_con, plot_type, rc_mode
+        con_file, additional_con, plot_type, rc_mode, ira_kmax
     )
 
     # --- 5. Delegate to Plotting Function ---
     if plot_type == PlotType.LANDSCAPE.value:
         final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
         final_ylabel = ylabel or r"RMSD from Product ($\AA$)"
-        final_title = "NEB Landscape" if title == "NEB Path" else title
+        final_title = "RMSD(R,P) projection" if title == "NEB Path" else title
 
         _plot_landscape(
             ax=ax,
@@ -1309,6 +1319,7 @@ def main(
             cache_file=cache_file,
             force_recompute=force_recompute,
             ira_kmax=ira_kmax,
+            show_legend=show_legend,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
 
@@ -1345,6 +1356,7 @@ def main(
             arrow_tail_width=arrow_tail_width,
             cache_file=cache_file,
             force_recompute=force_recompute,
+            ira_kmax=ira_kmax,
         )
         setup_plot_aesthetics(ax, final_title, final_xlabel, final_ylabel)
         if rc_mode == RCMode.PATH.value and normalize_rc:
@@ -1444,7 +1456,7 @@ def _determine_figsize(figsize, fig_height, aspect_ratio):
     return final_figsize
 
 
-def _load_structures(con_file, additional_con, plot_type, rc_mode):
+def _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax):
     """Loads atoms from .con files and calcs RMSD for additional structure."""
     atoms_list = None
     if con_file:
@@ -1459,22 +1471,51 @@ def _load_structures(con_file, additional_con, plot_type, rc_mode):
                 log.critical("Cannot proceed without structures. Exiting.")
                 sys.exit(1)
 
-    additional_atoms_data = None
+    additional_atoms_data = []
     if additional_con and atoms_list is not None:
         try:
-            log.info(f"Reading additional structure from [cyan]{additional_con}[/cyan]")
-            additional_atoms = ase_read(additional_con)
             ira_instance = ira_mod.IRA()
-            add_rmsd_r = calculate_rmsd_from_ref(
-                [additional_atoms], ira_instance, ref_atom=atoms_list[0]
-            )[0]
-            add_rmsd_p = calculate_rmsd_from_ref(
-                [additional_atoms], ira_instance, ref_atom=atoms_list[-1]
-            )[0]
-            log.info(f"... RMSD_R = {add_rmsd_r:.3f} Å, RMSD_P = {add_rmsd_p:.3f} Å")
-            additional_atoms_data = (additional_atoms, add_rmsd_r, add_rmsd_p)
+            for add_file, add_label in additional_con:
+                # LOGIC: If user passed "" string, use filename stem
+                if not add_label or add_label.strip() == "":
+                    label = add_file.stem
+                    log.info(
+                        f"Label empty for {add_file.name},"
+                        f" defaulting to: [yellow]{label}[/yellow]"
+                    )
+                else:
+                    label = add_label
+                log.info(
+                    f"Reading additional structure from [cyan]{add_file}[/cyan]"
+                    f" with label '[yellow]{label}[/yellow]'"
+                )
+
+                additional_atoms = ase_read(add_file)
+
+                add_rmsd_r = calculate_rmsd_from_ref(
+                    [additional_atoms],
+                    ira_instance,
+                    ref_atom=atoms_list[0],
+                    ira_kmax=ira_kmax,
+                )[0]
+                add_rmsd_p = calculate_rmsd_from_ref(
+                    [additional_atoms],
+                    ira_instance,
+                    ref_atom=atoms_list[-1],
+                    ira_kmax=ira_kmax,
+                )[0]
+
+                log.info(
+                    f"  -> {label}: RMSD_R={add_rmsd_r:.3f}, RMSD_P={add_rmsd_p:.3f}"
+                )
+
+                # Store tuple: (Atoms, RMSD_R, RMSD_P, Label)
+                additional_atoms_data.append(
+                    (additional_atoms, add_rmsd_r, add_rmsd_p, label)
+                )
+
         except Exception as e:
-            log.error(f"Failed to read or process --additional-con: {e}")
+            log.error(f"Failed to read or process additional structures: {e}")
 
     return atoms_list, additional_atoms_data
 
@@ -1621,6 +1662,7 @@ def _plot_landscape(
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
+    show_legend,
 ):
     """Handles all logic for drawing 2D landscape plots."""
     ira_instance = ira_mod.IRA()
@@ -1692,11 +1734,13 @@ def _plot_landscape(
                 max_allowed = max(allowed)
                 use_indices = [i for i in common_indices if i <= max_allowed]
                 log.info(
-                    f"Truncating to indices <= {max_allowed} (user requested {supplied_idx})."
+                    f"Truncating to indices <= {max_allowed}"
+                    f" (user requested {supplied_idx})."
                     f"Using {len(use_indices)} steps."
                 )
         else:
-            # no numeric index in supplied con_file or not provided: use all common indices
+            # no numeric index in supplied con_file or not provided: use all
+            # common indices
             use_indices = common_indices
 
         # Build ordered lists of matched dat and con paths by index
@@ -1704,31 +1748,32 @@ def _plot_landscape(
         all_con_paths = [con_index_map[i] for i in use_indices]
 
     else:
-        # No numeric indices found (filenames don't contain numbers) -> fallback to positional/truncation
         log.debug(
-            "No numeric indices found in filenames, falling back to positional truncation behavior."
+            "No numeric indices found in filenames,"
+            " falling back to positional truncation behavior."
         )
-        # If supplied con_file appears among discovered step files, truncate by name match (cheap)
         if con_file is not None:
             supplied_name = Path(con_file).name
             names = [p.name for p in all_con_paths]
             if supplied_name in names:
                 idx = names.index(supplied_name)
                 log.info(
-                    f"Truncating step .con list to user-provided file: {all_con_paths[idx].name} (index {idx})"
+                    "Truncating step .con list to"
+                    f" user-provided file: {all_con_paths[idx].name} (index {idx})"
                 )
                 all_con_paths = all_con_paths[: idx + 1]
             else:
                 log.debug(
-                    "Provided --con-file not found among discovered step .con files by name;"
-                    " proceeding with discovered step files."
+                    "Provided --con-file not found among discovered step .con files by"
+                    " name; proceeding with discovered step files."
                 )
         # Finally truncate to min length to pair dat/con by order
         if len(all_dat_paths) != len(all_con_paths):
             min_len = min(len(all_dat_paths), len(all_con_paths))
             if min_len == 0:
                 log.critical(
-                    "No matching .dat or .con files available after fallback truncation. Exiting."
+                    "No matching .dat or .con files"
+                    " available after fallback truncation. Exiting."
                 )
                 sys.exit(1)
             log.info(
@@ -1812,6 +1857,30 @@ def _plot_landscape(
                 scatter_p=all_pts_p,
             )
         else:  # "rbf"
+            if rbf_smoothing is None:
+                # Shift and subtract to calculate distances between sequential
+                # images within each step grouping by 'step' to ensure we only
+                # calculate distances between images in the same path
+                df_dist = (
+                    df_raw.sort(["step", "r"])
+                    .with_columns(
+                        dr=pl.col("r").diff().over("step"),
+                        dp=pl.col("p").diff().over("step"),
+                    )
+                    .with_columns(dist=(pl.col("dr") ** 2 + pl.col("dp") ** 2).sqrt())
+                    .drop_nulls()
+                )
+
+                # Aggregate all distances across the entire optimization history
+                global_median_step = df_dist["dist"].median()
+
+                # Apply the 0.1 multiplier to the global median for a tighter ridge
+                rbf_smoothing = 0.1 * global_median_step
+
+                log.info(
+                    "Global path-resolution smoothing applied "
+                    f"(median of all steps): [bold cyan]{rbf_smoothing:.4f}[/bold cyan]"
+                )
             plot_interpolated_rbf(
                 ax,
                 rmsd_r,
@@ -1839,6 +1908,26 @@ def _plot_landscape(
         final_z_data,
         selected_theme.cmap_landscape,
         z_label,
+    )
+
+    # Consistent logic with insets: Max energy (excluding endpoints) or Min eigenvalue
+    if plot_mode == "energy":
+        # argmax of the interior points, then shift index by +1 to account for slicing
+        saddle_idx = np.argmax(final_z_data[1:-1]) + 1
+    else:
+        saddle_idx = np.argmin(final_z_data)
+
+    # Plot the Saddle Point with a distinct style (White square)
+    ax.scatter(
+        final_rmsd_r[saddle_idx],
+        final_rmsd_p[saddle_idx],
+        marker="s",
+        s=int(selected_theme.font_size * 2),
+        c="white",  # White fill
+        edgecolors="black",  # Black outline
+        linewidths=1.5,
+        zorder=100,  # On top of everything
+        label="SP",  # Add to legend
     )
 
     # --- Plot Structures (Insets) ---
@@ -1870,30 +1959,61 @@ def _plot_landscape(
 
     # --- Additional Structure ---
     if additional_atoms_data:
-        additional_atoms, add_rmsd_r, add_rmsd_p = additional_atoms_data
-        ax.plot(
-            add_rmsd_r,
-            add_rmsd_p,
-            marker="*",
-            markersize=20,
-            color="white",
-            zorder=98,
-            label="Additional Structure",
-        )
-        if plot_structures != "none":
-            plot_single_inset(
-                ax,
-                additional_atoms,
-                add_rmsd_r,
-                add_rmsd_p,
-                xybox=(image_pos_saddle.x, image_pos_saddle.y),
-                rad=image_pos_saddle.rad,
-                zoom=zoom_ratio,
-                ase_rotation=ase_rotation,
-                arrow_head_length=arrow_head_length,
-                arrow_head_width=arrow_head_width,
-                arrow_tail_width=arrow_tail_width,
+        # Use a qualitative colormap for discrete points
+        marker_cmap = mpl.colormaps.get_cmap("tab10")
+
+        for i, (add_atoms, add_r, add_p, add_label) in enumerate(additional_atoms_data):
+            # Cycle colors based on index
+            color = marker_cmap(i % 10)
+            # Even indices go down, odd indices flip up
+            flip = -1 if i % len(additional_atoms_data) == 0 else 1
+
+            ax.plot(
+                add_r,
+                add_p,
+                marker="*",
+                markersize=int(selected_theme.font_size * 1.2),
+                color=color,
+                markeredgecolor="white",
+                markeredgewidth=1.0,
+                linestyle="None",
+                zorder=98,
+                label=add_label,
             )
+
+            if plot_structures != "none":
+                # Apply the flip to the y-offset and the arrow radius
+                # We also add a small x-stagger to prevent perfectly vertical overlap
+                stagger_x = i * 15
+                offset_x = image_pos_saddle.x + stagger_x
+                offset_y = image_pos_saddle.y * flip
+                current_rad = image_pos_saddle.rad * flip
+
+                plot_single_inset(
+                    ax,
+                    add_atoms,
+                    add_r,
+                    add_p,
+                    xybox=(offset_x, offset_y),
+                    rad=current_rad,
+                    zoom=zoom_ratio,
+                    ase_rotation=ase_rotation,
+                    arrow_head_length=arrow_head_length,
+                    arrow_head_width=arrow_head_width,
+                    arrow_tail_width=arrow_tail_width,
+                )
+
+        if show_legend:
+            legend = ax.legend(
+                loc="lower left",  # nothing should be near the product / reactant
+                borderaxespad=0.5,  # Slightly more padding from edge
+                frameon=True,
+                framealpha=1.0,  # Fully opaque
+                facecolor="white",  # Explicit white background
+                edgecolor="black",  # Border color
+                fontsize=int(selected_theme.font_size * 0.8),
+            )
+            legend.set_zorder(101)  # Ensure it sits on top of everything
 
 
 def _plot_profile(
@@ -1925,6 +2045,7 @@ def _plot_profile(
     arrow_tail_width,
     cache_file=None,
     force_recompute=False,
+    ira_kmax=IRA_KMAX_DEFAULT,
 ):
     """Handles all logic for drawing 1D profile plots."""
     rmsd_rc = None
@@ -1941,7 +2062,7 @@ def _plot_profile(
         def compute_profile_data() -> pl.DataFrame:
             ira_instance = ira_mod.IRA()
             r_vals = calculate_rmsd_from_ref(
-                atoms_list, ira_instance, ref_atom=atoms_list[0]
+                atoms_list, ira_instance, ref_atom=atoms_list[0], ira_kmax=ira_kmax
             )
             return pl.DataFrame({"r": r_vals})
 

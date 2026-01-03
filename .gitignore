@@ -223,3 +223,8 @@ flycheck_*.el
 
 # undo-tree
 *.~undo-tree~
+
+# pixi environments
+.pixi
+*.egg-info
+*-SAVE-ERROR
