@@ -40,7 +40,7 @@ class IRAMatchResults:
 
 @dataclass(frozen=True)
 class IRAConfig:
-    """Configuration parameters for the Isomorphic Robust Alignment."""
+    """Configuration parameters for the Iterative Rotations and Alignment."""
 
     enabled: bool = False
     kmax: float = 1.8
@@ -84,6 +84,9 @@ def _apply_ira_alignment(
     if not (config.enabled and ira_mod):
         return False
 
+    if len(ref_atoms) > len(mobile_atoms):
+        return False
+
     ira_instance = ira_mod.IRA()
 
     inputs = IRAMatchInputs(
@@ -109,11 +112,14 @@ def _apply_ira_alignment(
 
     # Apply transformation: $x' = xR^T + t$
     transformed_pos = (mobile_atoms.get_positions() @ res.rotation.T) + res.translation
-
-    # Reorder positions and identities based on the permutation vector $P$
-    mobile_atoms.set_positions(transformed_pos[res.permutation])
-    mobile_atoms.set_atomic_numbers(mobile_atoms.get_atomic_numbers()[res.permutation])
-
+    # Set positions and identities based on the permutation vector $P$
+    p = res.permutation
+    mobile_atoms.positions = transformed_pos[p]
+    mobile_atoms.set_atomic_numbers(mobile_atoms.get_atomic_numbers()[p])
+    mobile_atoms.set_masses(mobile_atoms.get_masses()[p])
+    if mobile_atoms.get_velocities() is not None:
+        v_rotated = mobile_atoms.get_velocities() @ res.rotation.T
+        mobile_atoms.set_velocities(v_rotated[p])
     return True
 
 
