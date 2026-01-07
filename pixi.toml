@@ -3,7 +3,7 @@ name = "pycrumbs"
 version = "0.0.7.dev"
 description = "A dispatcher-based analytical and visualization suite for chemical physics"
 authors = ["Rohit Goswami <rgoswami[at]ieee[dot]org>"]
-channels = ["conda-forge"]
+channels = ["conda-forge", "https://repo.prefix.dev/rg-forge"]
 platforms = ["linux-64"]
 
 [tasks]
@@ -57,6 +57,7 @@ libgfortran-ng = ">=15.2.0,<16"
 pyvista = ">=0.46.4,<0.47"
 matplotlib = ">=3.10.8,<4"
 tblite-python = ">=0.5.0,<0.6"
+ira = ">=2.2.0,<3"
 
 [feature.test.pypi-dependencies]
 rgpycrumbs = { path = ".", editable=true }
