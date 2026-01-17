@@ -492,7 +492,7 @@ def plot_structure_strip(
         buf.close()
 
         # Adjust Zoom
-        effective_zoom = zoom * 0.25
+        effective_zoom = zoom * 0.45
         imagebox = OffsetImage(img_data, zoom=effective_zoom)
 
         ab = AnnotationBbox(
@@ -1365,18 +1365,23 @@ def main(
     fig = plt.figure(figsize=final_figsize, dpi=dpi)
 
     # Determine Layout
-    has_strip = plot_structures in ["all", "crit_points"]
+    has_strip = (
+        plot_structures in ["all", "crit_points"]
+        and plot_type == PlotType.LANDSCAPE.value
+    )
     if has_strip:
         # Calculate expected rows to adjust hspace
         # We need to know how many structures are being plotted
         # (Heuristic: start with critical points = 3 + additional structures)
-        n_expected = (3 if plot_structures == "crit_points" else 10) + len(additional_con or [])
+        n_expected = (3 if plot_structures == "crit_points" else 10) + len(
+            additional_con or []
+        )
         max_cols = 6
         n_rows = (n_expected + max_cols - 1) // max_cols
-        
+
         # Adjust hspace: 0.8 for multiple rows, 0.3 (or low value) for single
         calc_hspace = 0.8 if n_rows > 1 else 0.3
-        
+
         # Create 2 rows: Main Plot (Top), Strip (Bottom)
         gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=calc_hspace, figure=fig)
         ax = fig.add_subplot(gs[0])
@@ -2116,7 +2121,9 @@ def _plot_landscape(
                         va="bottom",
                         zorder=102,
                     )
-                    t.set_path_effects([mpl.patheffects.withStroke(linewidth=2.5, foreground='black')])
+                    t.set_path_effects(
+                        [mpl.patheffects.withStroke(linewidth=2.5, foreground="black")]
+                    )
                     main_plot_texts.append(t)
 
                 # Prevent label overlap on the main plot
@@ -2378,43 +2385,24 @@ def _plot_profile(
                     e_vals = y_for_insets
                     saddle_idx = np.argmax(e_vals)
                     indices_to_plot = sorted(list({0, saddle_idx, len(atoms_list) - 1}))
-
-                # Filter data for the strip
-                strip_atoms = [atoms_list[i] for i in indices_to_plot]
-                strip_x = [rc_for_insets[i] for i in indices_to_plot]
-                # Optional: Add energy labels to the strip
-                strip_labels = [f"{y_for_insets[i]:.2f}" for i in indices_to_plot]
-
-                if ax_strip is not None:
-                    # Use the new Strip method
-                    plot_structure_strip(
-                        ax_strip,
-                        strip_atoms,
-                        strip_x,
-                        labels=strip_labels,
-                        zoom=zoom_ratio,
-                        ase_rotation=ase_rotation,
-                        theme_color=selected_theme.textcolor,
-                    )
-                else:
-                    # Fallback to old Inset method (if ax_strip failed for some reason)
-                    plot_structure_insets(
-                        ax,
-                        atoms_list,
-                        rc_for_insets,
-                        y_for_insets,
-                        y_for_insets,
-                        plot_structures,
-                        plot_mode,
-                        draw_reactant=image_pos_reactant,
-                        draw_saddle=image_pos_saddle,
-                        draw_product=image_pos_product,
-                        zoom_ratio=zoom_ratio,
-                        ase_rotation=ase_rotation,
-                        arrow_head_length=arrow_head_length,
-                        arrow_head_width=arrow_head_width,
-                        arrow_tail_width=arrow_tail_width,
-                    )
+                # Fallback to old Inset method (if ax_strip failed for some reason)
+                plot_structure_insets(
+                    ax,
+                    atoms_list,
+                    rc_for_insets,
+                    y_for_insets,
+                    y_for_insets,
+                    plot_structures,
+                    plot_mode,
+                    draw_reactant=image_pos_reactant,
+                    draw_saddle=image_pos_saddle,
+                    draw_product=image_pos_product,
+                    zoom_ratio=zoom_ratio,
+                    ase_rotation=ase_rotation,
+                    arrow_head_length=arrow_head_length,
+                    arrow_head_width=arrow_head_width,
+                    arrow_tail_width=arrow_tail_width,
+                )
         else:
             color = colormap(idx / color_divisor)
             alpha = 1.0 if is_first_file else 0.5
