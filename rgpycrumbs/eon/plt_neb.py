@@ -54,6 +54,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
+import matplotlib.patheffects
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
@@ -445,6 +446,7 @@ def plot_structure_strip(
     zoom=0.3,
     ase_rotation="0x, 90y, 0z",
     theme_color="black",
+    max_cols=6,
 ):
     """
     Renders a horizontal gallery of atomic structures (equidistant).
@@ -453,16 +455,34 @@ def plot_structure_strip(
     ax.axis("off")
 
     n_plot = len(atoms_list)
-    # Set limits: 0 to N-1 with padding
-    ax.set_xlim(-0.5, n_plot - 0.5)
-    ax.set_ylim(-0.5, 0.5)
+    # Calculate Grid Dimensions
+    n_cols = min(n_plot, max_cols)
+    n_rows = (n_plot + max_cols - 1) // max_cols
+
+    # Define Layout Constants (Data Units)
+    row_step = 8.5  # Vertical distance between rows
+
+    # Set Limits
+    # X: [0, max_cols-1] with padding
+    ax.set_xlim(-0.5, n_cols - 0.5)
+    # Y: Top row at 0, bottom row at -(n_rows-1)*row_step
+    y_max = 0.6
+    y_min = -((n_rows - 1) * row_step) - 0.8
+    ax.set_ylim(y_min, y_max)
 
     for i in range(n_plot):
         atoms = atoms_list[i]
         # Force integer positioning (0, 1, 2...)
         x_pos = i
 
-        # 1. High-Res Rendering
+        # Grid Coordinates
+        col = i % max_cols
+        row = i // max_cols
+
+        x_pos = col
+        y_pos = -row * row_step
+
+        # High-Res Rendering
         buf = io.BytesIO()
         ase_write(
             buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=100
@@ -471,13 +491,13 @@ def plot_structure_strip(
         img_data = plt.imread(buf)
         buf.close()
 
-        # 2. Adjust Zoom
-        effective_zoom = zoom * 0.35
+        # Adjust Zoom
+        effective_zoom = zoom * 0.25
         imagebox = OffsetImage(img_data, zoom=effective_zoom)
 
         ab = AnnotationBbox(
             imagebox,
-            (x_pos, 0.0),
+            (x_pos, y_pos),
             frameon=False,
             xycoords="data",
             boxcoords="offset points",
@@ -488,11 +508,11 @@ def plot_structure_strip(
         if labels and i < len(labels):
             ax.text(
                 x_pos,
-                -0.8,  # Relative to the image center (0.0)
+                y_pos - 0.8,
                 labels[i],
                 ha="center",
                 va="top",
-                fontsize=10,
+                fontsize=11,
                 color=theme_color,
                 fontweight="bold",
             )
@@ -1347,8 +1367,18 @@ def main(
     # Determine Layout
     has_strip = plot_structures in ["all", "crit_points"]
     if has_strip:
+        # Calculate expected rows to adjust hspace
+        # We need to know how many structures are being plotted
+        # (Heuristic: start with critical points = 3 + additional structures)
+        n_expected = (3 if plot_structures == "crit_points" else 10) + len(additional_con or [])
+        max_cols = 6
+        n_rows = (n_expected + max_cols - 1) // max_cols
+        
+        # Adjust hspace: 0.8 for multiple rows, 0.3 (or low value) for single
+        calc_hspace = 0.8 if n_rows > 1 else 0.3
+        
         # Create 2 rows: Main Plot (Top), Strip (Bottom)
-        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=0.5, figure=fig)
+        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=calc_hspace, figure=fig)
         ax = fig.add_subplot(gs[0])
         # IMPORTANT: Do NOT share x-axis. The strip uses integer spacing (0,1,2).
         ax_strip = fig.add_subplot(gs[1])
@@ -1989,7 +2019,6 @@ def _plot_landscape(
         selected_theme.cmap_landscape,
         z_label,
     )
-
     # Consistent logic with insets: Max energy (excluding endpoints) or Min eigenvalue
     if plot_mode == "energy":
         # argmax of the interior points, then shift index by +1 to account for slicing
@@ -2087,7 +2116,7 @@ def _plot_landscape(
                         va="bottom",
                         zorder=102,
                     )
-                    # t.set_path_effects([mpl.patheffects.withStroke(linewidth=2.5, foreground='black')])
+                    t.set_path_effects([mpl.patheffects.withStroke(linewidth=2.5, foreground='black')])
                     main_plot_texts.append(t)
 
                 # Prevent label overlap on the main plot
