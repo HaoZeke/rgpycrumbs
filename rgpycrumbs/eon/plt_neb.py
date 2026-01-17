@@ -29,6 +29,7 @@ https://realpython.com/python-script-structure/
 #   "matplotlib",
 #   "numpy",
 #   "scipy",
+#   "adjustText",
 #   "cmcrameri",
 #   "rich",
 #   "ase",
@@ -57,6 +58,7 @@ from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.gridspec import GridSpec
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.patches import ArrowStyle
 from rich.logging import RichHandler
@@ -68,6 +70,7 @@ from scipy.interpolate import (
     splrep,
 )
 from scipy.signal import savgol_filter
+from adjustText import adjust_text
 
 from rgpycrumbs._aux import _import_from_parent_env
 from rgpycrumbs.geom.api.alignment import IRAConfig, align_structure_robust
@@ -175,7 +178,6 @@ RUHI_THEME = PlotTheme(
     highlight_color="black",
 )
 
-# Updated THEMES dictionary
 THEMES = {
     "cmc.batlow": BATLOW_THEME,
     "ruhi": RUHI_THEME,
@@ -408,24 +410,24 @@ def _load_or_compute_data(
     :return: The requested data.
     :rtype: pl.DataFrame
     """
-    # 1. Attempt to load from cache
+    # Attempt to load from cache
     if cache_file and cache_file.exists() and not force_recompute:
         log.info(
             f"Loading cached {context_name} data from [green]{cache_file}[/green]..."
         )
         try:
             df = pl.read_parquet(cache_file)
-            validation_check(df)  # Will raise ValueError if invalid
+            validation_check(df)
             log.info(f"Loaded {df.height} rows from cache.")
             return df
         except Exception as e:
             log.warning(f"Cache load failed or invalid: {e}. Recomputing...")
 
-    # 2. Compute if cache failed, didn't exist, or recompute requested
+    # Compute if cache failed, didn't exist, or recompute requested
     log.info(f"Computing {context_name} data...")
     df = computation_callback()
 
-    # 3. Save to cache
+    # Save to cache
     if cache_file:
         log.info(f"Saving {context_name} cache to [green]{cache_file}[/green]...")
         try:
@@ -434,6 +436,66 @@ def _load_or_compute_data(
             log.error(f"Failed to write cache file: {e}")
 
     return df
+
+
+def plot_structure_strip(
+    ax,
+    atoms_list,
+    labels=None,
+    zoom=0.3,
+    ase_rotation="0x, 90y, 0z",
+    theme_color="black",
+):
+    """
+    Renders a horizontal gallery of atomic structures (equidistant).
+    """
+    # completely turn off axis lines/ticks
+    ax.axis("off")
+
+    n_plot = len(atoms_list)
+    # Set limits: 0 to N-1 with padding
+    ax.set_xlim(-0.5, n_plot - 0.5)
+    ax.set_ylim(-0.5, 0.5)
+
+    for i in range(n_plot):
+        atoms = atoms_list[i]
+        # Force integer positioning (0, 1, 2...)
+        x_pos = i
+
+        # 1. High-Res Rendering
+        buf = io.BytesIO()
+        ase_write(
+            buf, atoms, format="png", rotation=ase_rotation, show_unit_cell=0, scale=100
+        )
+        buf.seek(0)
+        img_data = plt.imread(buf)
+        buf.close()
+
+        # 2. Adjust Zoom
+        effective_zoom = zoom * 0.35
+        imagebox = OffsetImage(img_data, zoom=effective_zoom)
+
+        ab = AnnotationBbox(
+            imagebox,
+            (x_pos, 0.0),
+            frameon=False,
+            xycoords="data",
+            boxcoords="offset points",
+            pad=0.0,
+        )
+        ax.add_artist(ab)
+
+        if labels and i < len(labels):
+            ax.text(
+                x_pos,
+                -0.8,  # Relative to the image center (0.0)
+                labels[i],
+                ha="center",
+                va="top",
+                fontsize=10,
+                color=theme_color,
+                fontweight="bold",
+            )
 
 
 # --- Plotting Functions ---
@@ -652,8 +714,8 @@ def plot_energy_path(
     """
     rc = path_data[1]
     energy = path_data[2]
-    f_para = path_data[3]  # Parallel force
-    deriv = -f_para  # Derivative dE/d(rc) = -F_parallel
+    f_para = path_data[3]
+    deriv = -f_para
 
     try:
         # Sort data by reaction coordinate for correct interpolation
@@ -1261,13 +1323,13 @@ def main(
 ):
     """Main entry point for NEB plot script."""
 
-    # --- 1. Setup Theme ---
+    # --- Setup Theme ---
     selected_theme = _setup_theme(
         theme, cmap_profile, cmap_landscape, fontsize_base, facecolor
     )
     setup_global_theme(selected_theme)
 
-    # --- 2. Dependency Checks ---
+    # --- Dependency Checks ---
     _run_dependency_checks(
         plot_type,
         rc_mode,
@@ -1276,17 +1338,34 @@ def main(
         con_file,
     )
 
-    # --- 3. Setup Figure ---
+    # --- Setup Figure ---
     final_figsize = _determine_figsize(figsize, fig_height, aspect_ratio)
-    fig, ax = plt.subplots(figsize=final_figsize, dpi=dpi)
+
+    # Initialize Figure
+    fig = plt.figure(figsize=final_figsize, dpi=dpi)
+
+    # Determine Layout
+    has_strip = plot_structures in ["all", "crit_points"]
+    if has_strip:
+        # Create 2 rows: Main Plot (Top), Strip (Bottom)
+        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=0.5, figure=fig)
+        ax = fig.add_subplot(gs[0])
+        # IMPORTANT: Do NOT share x-axis. The strip uses integer spacing (0,1,2).
+        ax_strip = fig.add_subplot(gs[1])
+        apply_plot_theme(ax_strip, selected_theme)
+    else:
+        gs = GridSpec(1, 1, figure=fig)
+        ax = fig.add_subplot(gs[0])
+        ax_strip = None
+
     apply_plot_theme(ax, selected_theme)
 
-    # --- 4. Load Structures ---
+    # --- Load Structures ---
     atoms_list, additional_atoms_data = _load_structures(
         con_file, additional_con, plot_type, rc_mode, ira_kmax
     )
 
-    # --- 5. Delegate to Plotting Function ---
+    # --- Delegate to Plotting Function ---
     if plot_type == PlotType.LANDSCAPE.value:
         final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
         final_ylabel = ylabel or r"RMSD from Product ($\AA$)"
@@ -1294,6 +1373,7 @@ def main(
 
         _plot_landscape(
             ax=ax,
+            ax_strip=ax_strip,
             atoms_list=atoms_list,
             input_dat_pattern=input_dat_pattern,
             input_path_pattern=input_path_pattern,
@@ -1331,6 +1411,7 @@ def main(
 
         _plot_profile(
             ax=ax,
+            ax_strip=ax_strip,
             fig=fig,
             input_dat_pattern=input_dat_pattern,
             atoms_list=atoms_list,
@@ -1362,7 +1443,7 @@ def main(
         if rc_mode == RCMode.PATH.value and normalize_rc:
             ax.set_xlim(0, 1)
 
-    # --- 6. Finalize ---
+    # --- Finalize ---
     if output_file:
         if not output_file.parent.exists():
             log.info(f"Creating output directory: [cyan]{output_file.parent}[/cyan]")
@@ -1636,6 +1717,7 @@ def _aggregate_all_paths(
 
 def _plot_landscape(
     ax,
+    ax_strip,
     atoms_list,
     input_dat_pattern,
     input_path_pattern,
@@ -1667,11 +1749,9 @@ def _plot_landscape(
     """Handles all logic for drawing 2D landscape plots."""
     ira_instance = ira_mod.IRA()
     # --- Efficient index-based pairing & truncation (fast; no Path.resolve) ---
-    # 1) discover .dat and .con step files
-    all_dat_paths = sorted(
-        Path(p) for p in glob.glob(input_dat_pattern)
-    )  # e.g. neb_*.dat
-    con_pattern = str(input_path_pattern)  # e.g. neb_path_*.con
+    # discover .dat and .con step files
+    all_dat_paths = sorted(Path(p) for p in glob.glob(input_dat_pattern))
+    con_pattern = str(input_path_pattern)
     all_con_paths = sorted(Path(p) for p in glob.glob(con_pattern))
 
     if not all_dat_paths:
@@ -1709,7 +1789,7 @@ def _plot_landscape(
         if idx is not None:
             con_index_map[idx] = p
 
-    # 4) If both maps have numeric indices, build sorted matched index list
+    # If both maps have numeric indices, build sorted matched index list
     common_indices = sorted(set(dat_index_map.keys()) & set(con_index_map.keys()))
     if common_indices:
         log.info(
@@ -1856,7 +1936,7 @@ def _plot_landscape(
                 scatter_r=all_pts_r,
                 scatter_p=all_pts_p,
             )
-        else:  # "rbf"
+        else:
             if rbf_smoothing is None:
                 # Shift and subtract to calculate distances between sequential
                 # images within each step grouping by 'step' to ensure we only
@@ -1923,51 +2003,154 @@ def _plot_landscape(
         final_rmsd_p[saddle_idx],
         marker="s",
         s=int(selected_theme.font_size * 2),
-        c="white",  # White fill
-        edgecolors="black",  # Black outline
+        c="white",
+        edgecolors="black",
         linewidths=1.5,
-        zorder=100,  # On top of everything
-        label="SP",  # Add to legend
+        zorder=100,
+        label="SP",
     )
 
-    # --- Plot Structures (Insets) ---
+    # --- Inset Positioning (Defined Early) ---
     image_pos_reactant = InsetImagePos(*draw_reactant)
     image_pos_saddle = InsetImagePos(*draw_saddle)
     image_pos_product = InsetImagePos(*draw_product)
 
+    # --- Plot Structures (Strip or Insets) ---
     if plot_structures != "none":
-        # Need atoms list for insets.
-        # Ensure we use the atoms from the *final* path to match the overlay.
-        # (Assuming 'atoms_list' passed in main corresponds to the final CON file)
-        plot_structure_insets(
-            ax,
-            atoms_list,
-            final_rmsd_r,
-            final_rmsd_p,
-            final_z_data,
-            plot_structures,
-            plot_mode,
-            draw_reactant=image_pos_reactant,
-            draw_saddle=image_pos_saddle,
-            draw_product=image_pos_product,
-            zoom_ratio=zoom_ratio,
-            ase_rotation=ase_rotation,
-            arrow_head_length=arrow_head_length,
-            arrow_head_width=arrow_head_width,
-            arrow_tail_width=arrow_tail_width,
-        )
+        if ax_strip is not None:
+            # --- STRIP MODE ---
+            strip_payload = []
 
-    # --- Additional Structure ---
+            # 1. Path Structures
+            if atoms_list:
+                indices_to_plot = []
+                if plot_structures == "all":
+                    indices_to_plot = list(range(len(atoms_list)))
+                elif plot_structures == "crit_points":
+                    indices_to_plot = sorted(list({0, saddle_idx, len(atoms_list) - 1}))
+
+                for i in indices_to_plot:
+                    # Define labels: R, SP, P, or numeric index
+                    lbl = str(i)
+                    if i == 0:
+                        lbl = "R"
+                    elif i == saddle_idx:
+                        lbl = "SP"
+                    elif i == len(atoms_list) - 1:
+                        lbl = "P"
+
+                    strip_payload.append(
+                        {
+                            "atoms": atoms_list[i],
+                            "x": final_rmsd_r[i],
+                            "y": final_rmsd_p[i],
+                            "label": lbl,
+                        }
+                    )
+
+            # 2. Additional Structures
+            if additional_atoms_data:
+                for add_atoms, add_r, add_p, add_label in additional_atoms_data:
+                    strip_payload.append(
+                        {"atoms": add_atoms, "x": add_r, "y": add_p, "label": add_label}
+                    )
+
+            # Render Strip
+            if strip_payload:
+                # Sort by X-coordinate so the strip order flows logically left-to-right
+                strip_payload.sort(key=lambda d: d["x"])
+
+                log.info(f"Plotting structure strip with {len(strip_payload)} images.")
+
+                # A. Plot Equidistant Strip
+                plot_structure_strip(
+                    ax_strip,
+                    atoms_list=[d["atoms"] for d in strip_payload],
+                    labels=[d["label"] for d in strip_payload],
+                    zoom=zoom_ratio,
+                    ase_rotation=ase_rotation,
+                    theme_color=selected_theme.textcolor,
+                )
+
+                # B. Annotate Main Plot (Link points to strip labels)
+                main_plot_texts = []
+                for d in strip_payload:
+                    # Use White text with Black outline for maximum contrast against contour
+                    t = ax.text(
+                        d["x"],
+                        d["y"],
+                        d["label"],
+                        fontsize=12,
+                        fontweight="bold",
+                        color="white",
+                        ha="center",
+                        va="bottom",
+                        zorder=102,
+                    )
+                    # t.set_path_effects([mpl.patheffects.withStroke(linewidth=2.5, foreground='black')])
+                    main_plot_texts.append(t)
+
+                # Prevent label overlap on the main plot
+                if adjust_text and main_plot_texts:
+                    adjust_text(
+                        main_plot_texts,
+                        ax=ax,
+                        arrowprops=dict(arrowstyle="-", color="white", lw=8.5),
+                        expand_points=(
+                            1.5,
+                            1.5,
+                        ),  # Push labels slightly away from the points
+                        force_text=0.5,
+                    )
+
+        else:
+            # --- FALLBACK INSET MODE ---
+            if atoms_list:
+                plot_structure_insets(
+                    ax,
+                    atoms_list,
+                    final_rmsd_r,
+                    final_rmsd_p,
+                    final_z_data,
+                    plot_structures,
+                    plot_mode,
+                    draw_reactant=image_pos_reactant,
+                    draw_saddle=image_pos_saddle,
+                    draw_product=image_pos_product,
+                    zoom_ratio=zoom_ratio,
+                    ase_rotation=ase_rotation,
+                    arrow_head_length=arrow_head_length,
+                    arrow_head_width=arrow_head_width,
+                    arrow_tail_width=arrow_tail_width,
+                )
+
+            if additional_atoms_data:
+                # Fallback additional atoms visualization
+                for i, (add_atoms, add_r, add_p, _) in enumerate(additional_atoms_data):
+                    flip = -1 if i % len(additional_atoms_data) == 0 else 1
+                    stagger_x = i * 15
+                    offset_x = image_pos_saddle.x + stagger_x
+                    offset_y = image_pos_saddle.y * flip
+                    current_rad = image_pos_saddle.rad * flip
+                    plot_single_inset(
+                        ax,
+                        add_atoms,
+                        add_r,
+                        add_p,
+                        xybox=(offset_x, offset_y),
+                        rad=current_rad,
+                        zoom=zoom_ratio,
+                        ase_rotation=ase_rotation,
+                        arrow_head_length=arrow_head_length,
+                        arrow_head_width=arrow_head_width,
+                        arrow_tail_width=arrow_tail_width,
+                    )
+
+    # --- Plot Markers for Additional Structures ---
     if additional_atoms_data:
-        # Use a qualitative colormap for discrete points
         marker_cmap = mpl.colormaps.get_cmap("tab10")
-
-        for i, (add_atoms, add_r, add_p, add_label) in enumerate(additional_atoms_data):
-            # Cycle colors based on index
+        for i, (_, add_r, add_p, add_label) in enumerate(additional_atoms_data):
             color = marker_cmap(i % 10)
-            # Even indices go down, odd indices flip up
-            flip = -1 if i % len(additional_atoms_data) == 0 else 1
-
             ax.plot(
                 add_r,
                 add_p,
@@ -1981,43 +2164,34 @@ def _plot_landscape(
                 label=add_label,
             )
 
-            if plot_structures != "none":
-                # Apply the flip to the y-offset and the arrow radius
-                # We also add a small x-stagger to prevent perfectly vertical overlap
-                stagger_x = i * 15
-                offset_x = image_pos_saddle.x + stagger_x
-                offset_y = image_pos_saddle.y * flip
-                current_rad = image_pos_saddle.rad * flip
+    # --- Legend ---
+    # Ensure legend is drawn if requested, covering SP and Additional Structures
+    if show_legend:
+        legend = ax.legend(
+            loc="lower left",
+            borderaxespad=0.5,
+            frameon=True,
+            framealpha=1.0,
+            facecolor="white",
+            edgecolor="black",
+            fontsize=int(selected_theme.font_size * 0.8),
+        )
+        legend.set_zorder(101)
 
-                plot_single_inset(
-                    ax,
-                    add_atoms,
-                    add_r,
-                    add_p,
-                    xybox=(offset_x, offset_y),
-                    rad=current_rad,
-                    zoom=zoom_ratio,
-                    ase_rotation=ase_rotation,
-                    arrow_head_length=arrow_head_length,
-                    arrow_head_width=arrow_head_width,
-                    arrow_tail_width=arrow_tail_width,
-                )
+    if ax_strip is not None:
+        # Get position of main plot (which might have shrunk due to colorbar)
+        pos_main = ax.get_position()
+        pos_strip = ax_strip.get_position()
 
-        if show_legend:
-            legend = ax.legend(
-                loc="lower left",  # nothing should be near the product / reactant
-                borderaxespad=0.5,  # Slightly more padding from edge
-                frameon=True,
-                framealpha=1.0,  # Fully opaque
-                facecolor="white",  # Explicit white background
-                edgecolor="black",  # Border color
-                fontsize=int(selected_theme.font_size * 0.8),
-            )
-            legend.set_zorder(101)  # Ensure it sits on top of everything
+        # Force strip to match the main plot's Left and Width
+        ax_strip.set_position(
+            [pos_main.x0, pos_strip.y0, pos_main.width, pos_strip.height]
+        )
 
 
 def _plot_profile(
     ax,
+    ax_strip,
     fig,
     input_dat_pattern,
     atoms_list,
@@ -2075,7 +2249,7 @@ def _plot_profile(
                 context_name="Profile RMSD",
             )
             rmsd_rc = df_rmsd["r"].to_numpy()
-            normalize_rc = False  # Disable normalization if using RMSD
+            normalize_rc = False
         except Exception as e:
             log.error(f"Could not secure RMSD data: {e}")
             # Fallback or exit depending on strictness; here we proceed without RMSD
@@ -2164,24 +2338,54 @@ def _plot_profile(
         if highlight_last and is_last_file:
             color, alpha, zorder = selected_theme.highlight_color, 1.0, 20
             plot_function(ax, path_data, color, alpha, zorder)
+
             if atoms_list and plot_structures != "none":
-                plot_structure_insets(
-                    ax,
-                    atoms_list,
-                    rc_for_insets,
-                    y_for_insets,
-                    y_for_insets,
-                    plot_structures,
-                    plot_mode,
-                    draw_reactant=image_pos_reactant,
-                    draw_saddle=image_pos_saddle,
-                    draw_product=image_pos_product,
-                    zoom_ratio=zoom_ratio,
-                    ase_rotation=ase_rotation,
-                    arrow_head_length=arrow_head_length,
-                    arrow_head_width=arrow_head_width,
-                    arrow_tail_width=arrow_tail_width,
-                )
+                # Determine which indices to plot
+                indices_to_plot = []
+                if plot_structures == "all":
+                    indices_to_plot = list(range(len(atoms_list)))
+                elif plot_structures == "crit_points":
+                    # Simple heuristic for critical points based on Energy
+                    e_vals = y_for_insets
+                    saddle_idx = np.argmax(e_vals)
+                    indices_to_plot = sorted(list({0, saddle_idx, len(atoms_list) - 1}))
+
+                # Filter data for the strip
+                strip_atoms = [atoms_list[i] for i in indices_to_plot]
+                strip_x = [rc_for_insets[i] for i in indices_to_plot]
+                # Optional: Add energy labels to the strip
+                strip_labels = [f"{y_for_insets[i]:.2f}" for i in indices_to_plot]
+
+                if ax_strip is not None:
+                    # Use the new Strip method
+                    plot_structure_strip(
+                        ax_strip,
+                        strip_atoms,
+                        strip_x,
+                        labels=strip_labels,
+                        zoom=zoom_ratio,
+                        ase_rotation=ase_rotation,
+                        theme_color=selected_theme.textcolor,
+                    )
+                else:
+                    # Fallback to old Inset method (if ax_strip failed for some reason)
+                    plot_structure_insets(
+                        ax,
+                        atoms_list,
+                        rc_for_insets,
+                        y_for_insets,
+                        y_for_insets,
+                        plot_structures,
+                        plot_mode,
+                        draw_reactant=image_pos_reactant,
+                        draw_saddle=image_pos_saddle,
+                        draw_product=image_pos_product,
+                        zoom_ratio=zoom_ratio,
+                        ase_rotation=ase_rotation,
+                        arrow_head_length=arrow_head_length,
+                        arrow_head_width=arrow_head_width,
+                        arrow_tail_width=arrow_tail_width,
+                    )
         else:
             color = colormap(idx / color_divisor)
             alpha = 1.0 if is_first_file else 0.5
