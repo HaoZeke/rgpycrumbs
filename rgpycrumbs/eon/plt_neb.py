@@ -51,10 +51,11 @@ from pathlib import Path
 import click
 import cmcrameri.cm  # noqa: F401
 import matplotlib as mpl
+import matplotlib.patheffects
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
-import matplotlib.patheffects
+from adjustText import adjust_text
 from ase.io import read as ase_read
 from ase.io import write as ase_write
 from matplotlib.collections import LineCollection
@@ -71,7 +72,6 @@ from scipy.interpolate import (
     splrep,
 )
 from scipy.signal import savgol_filter
-from adjustText import adjust_text
 
 from rgpycrumbs._aux import _import_from_parent_env
 from rgpycrumbs.geom.api.alignment import IRAConfig, align_structure_robust
