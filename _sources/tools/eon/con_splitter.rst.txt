@@ -30,6 +30,56 @@ feeds into EON via:
     initial_path_in = ipath.dat
     minimize_endpoints_for_ipath = False
 
+Refinement Strategies
+~~~~~~~~~~~~~~~~~~~~~
+
+Structural Alignment
+^^^^^^^^^^^^^^^^^^^^
+
+The ``--align-type`` option removes non-physical translational and rotational degrees of freedom that often accumulate during optimization.
+
+all
+    Aligns every intermediate image to the reactant. This creates a
+    visually smooth trajectory but can occasionally introduce artifacts if the
+    reaction path involves significant curvature.
+
+endpoints
+    Aligns only the reactant and product. This ensures consistent
+    boundary conditions while preserving the relative internal coordinates of the
+    intermediate images as optimized.
+
+Iterative Reordering and Alignment (IRA)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When using ``--use-ira``, the script handles atom index permutations. In complex
+NEB optimizations—especially those involving surface diffusion or molecular
+dissociations—atom indices in the output trajectory may not match the reactant's
+order. IRA finds the optimal mapping and alignment simultaneously, ensuring that
+the resulting ``.con`` files maintain a consistent atom numbering scheme across
+the entire path.
+
+Centering and Unit Cell Management
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``--center`` flag translates the center of mass of each image to the origin.
+Use ``--box-diagonal`` to override the simulation cell dimensions (e.g., ``20 20 20``), which ensures all generated images share an identical vacuum box for
+EON calculations.
+
+Initial Path Generation from Generic Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We may also generate valid starting points for an EON NEB calculation from a
+generic ``.xyz`` file or any ASE compatible input. For instance, for a two-image
+trajectory, to convert a reactant/product pair into the required EON format
+while fixing coordinate and mapping issues:
+
+.. code:: bash
+
+    python -m rgpycrumbs.cli eon con-splitter --images-per-path 2 initial.xyz --box-diagonal 25 25 25 --center --align-type endpoints --use-ira --ira-kmax 1.8
+
+This approach ensures that the reactant and product share an identical vacuum
+box, center of mass, and atom indexing before the NEB optimization begins.
+
 API Reference
 ~~~~~~~~~~~~~
 

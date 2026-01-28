@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../../../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.eon.con_splitter - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.eon.generate_nwchem_input" href="../generate_nwchem_input/index.html" /><link rel="prev" title="rgpycrumbs.eon" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.eon.con_splitter - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.eon.generate_nwchem_input" href="../generate_nwchem_input/index.html" /><link rel="prev" title="rgpycrumbs.eon._mlflow.log_params" href="../_mlflow/log_params/index.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/eon/con_splitter/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -118,6 +118,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">rgpycrumbs.eon</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
@@ -129,6 +130,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
 </ul>
 </li>
@@ -167,9 +169,23 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.ira_mod"><code class="docutils literal notranslate"><span class="pre">ira_mod</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.CONSOLE"><code class="docutils literal notranslate"><span class="pre">CONSOLE</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.AlignMode"><code class="docutils literal notranslate"><span class="pre">AlignMode</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.AlignMode.NONE"><code class="docutils literal notranslate">NONE</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.AlignMode.ALL"><code class="docutils literal notranslate">ALL</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.AlignMode.ENDPOINTS"><code class="docutils literal notranslate">ENDPOINTS</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.SplitMode"><code class="docutils literal notranslate"><span class="pre">SplitMode</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.SplitMode.NEB"><code class="docutils literal notranslate">NEB</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.SplitMode.FLEX"><code class="docutils literal notranslate">FLEX</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.align_path"><code class="docutils literal notranslate"><span class="pre">align_path()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.con_splitter"><code class="docutils literal notranslate"><span class="pre">con_splitter()</span></code></a></li>
 </ul>
 </li>
@@ -257,8 +273,26 @@ data-aria-dark="Switch to auto color mode">
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.CONSOLE" title="rgpycrumbs.eon.con_splitter.CONSOLE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONSOLE</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.ira_mod" title="rgpycrumbs.eon.con_splitter.ira_mod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ira_mod</span></code></a></p></td>
 <td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.CONSOLE" title="rgpycrumbs.eon.con_splitter.CONSOLE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CONSOLE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.AlignMode" title="rgpycrumbs.eon.con_splitter.AlignMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AlignMode</span></code></a></p></td>
+<td><p>Defines structural alignment strategies.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.SplitMode" title="rgpycrumbs.eon.con_splitter.SplitMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SplitMode</span></code></a></p></td>
+<td><p>Defines trajectory validation strictness.</p></td>
 </tr>
 </tbody>
 </table>
@@ -269,8 +303,11 @@ data-aria-dark="Switch to auto color mode">
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.con_splitter" title="rgpycrumbs.eon.con_splitter.con_splitter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">con_splitter</span></code></a>(neb_trajectory_file, output_dir, ...)</p></td>
-<td><p>Splits a multi-step NEB trajectory file (.traj, .con, etc.) into</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.align_path" title="rgpycrumbs.eon.con_splitter.align_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">align_path</span></code></a>(frames, mode, iraconf)</p></td>
+<td><p>Applies the selected alignment strategy to the image sequence.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.con_splitter" title="rgpycrumbs.eon.con_splitter.con_splitter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">con_splitter</span></code></a>(neb_trajectory_file, mode, output_dir, ...)</p></td>
+<td><p>Splits a multi-step trajectory file (.traj, .con, etc.) into</p></td>
 </tr>
 </tbody>
 </table>
@@ -279,14 +316,64 @@ data-aria-dark="Switch to auto color mode">
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.ira_mod">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">ira_mod</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#ira_mod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.ira_mod" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.CONSOLE">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">CONSOLE</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#CONSOLE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.CONSOLE" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.AlignMode">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">AlignMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#AlignMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.AlignMode" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>Defines structural alignment strategies.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.AlignMode.NONE">
+<span class="sig-name descname"><span class="pre">NONE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'none'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#AlignMode.NONE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.AlignMode.NONE" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.AlignMode.ALL">
+<span class="sig-name descname"><span class="pre">ALL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'all'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#AlignMode.ALL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.AlignMode.ALL" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.AlignMode.ENDPOINTS">
+<span class="sig-name descname"><span class="pre">ENDPOINTS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'endpoints'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#AlignMode.ENDPOINTS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.AlignMode.ENDPOINTS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.SplitMode">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">SplitMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#SplitMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.SplitMode" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
+<p>Defines trajectory validation strictness.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.SplitMode.NEB">
+<span class="sig-name descname"><span class="pre">NEB</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'neb'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#SplitMode.NEB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.SplitMode.NEB" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.SplitMode.FLEX">
+<span class="sig-name descname"><span class="pre">FLEX</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'flex'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#SplitMode.FLEX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.SplitMode.FLEX" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.align_path">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">align_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rgpycrumbs.eon.con_splitter.AlignMode" title="rgpycrumbs.eon.con_splitter.AlignMode"><span class="pre">AlignMode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iraconf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../geom/api/alignment/index.html#rgpycrumbs.geom.api.alignment.IRAConfig" title="rgpycrumbs.geom.api.alignment.IRAConfig"><span class="pre">rgpycrumbs.geom.api.alignment.IRAConfig</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#align_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.align_path" title="Link to this definition">¶</a></dt>
+<dd><p>Applies the selected alignment strategy to the image sequence.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.eon.con_splitter.con_splitter">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">con_splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neb_trajectory_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_per_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_list_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#con_splitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.con_splitter" title="Link to this definition">¶</a></dt>
-<dd><p>Splits a multi-step NEB trajectory file (.traj, .con, etc.) into
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.con_splitter.</span></span><span class="sig-name descname"><span class="pre">con_splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">neb_trajectory_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">images_per_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_diagonal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_ira</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_kmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_list_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/con_splitter.html#con_splitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.con_splitter.con_splitter" title="Link to this definition">¶</a></dt>
+<dd><p>Splits a multi-step trajectory file (.traj, .con, etc.) into
 individual .con files for a <em>single</em> specified path.</p>
 <p>This script reads a trajectory file, which may contain multiple NEB
 optimization steps (paths), and extracts only the frames corresponding
@@ -295,7 +382,9 @@ to a single specified path.</p>
 (e.g., ipath_000.con, ipath_001.con, …).</p>
 <p>It also generates a text file (default: ‘ipath.dat’) that lists the
 absolute paths of all created .con files.</p>
-<p>NEB_TRAJECTORY_FILE: Path to the input multi-image/multi-path trajectory.</p>
+<p>This utility extracts specific optimization steps and applies physical
+chemistry refinements such as centering, cell overrides, and structural
+alignment (RMSD minimization).</p>
 </dd></dl>
 
 </section>
@@ -307,10 +396,10 @@ absolute paths of all created .con files.</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../index.html">
+    <a href="../_mlflow/log_params/index.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">rgpycrumbs.eon</div></div>
+        <span>Previous</span><div class="title">rgpycrumbs.eon._mlflow.log_params</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="../generate_nwchem_input/index.html">

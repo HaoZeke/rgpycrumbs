@@ -1,0 +1,176 @@
+rgpycrumbs.geom.api.alignment
+=============================
+
+.. py:module:: rgpycrumbs.geom.api.alignment
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.api.alignment.ira_mod
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.api.alignment.IRAMatchInputs
+   rgpycrumbs.geom.api.alignment.IRAMatchResults
+   rgpycrumbs.geom.api.alignment.IRAConfig
+   rgpycrumbs.geom.api.alignment.AlignmentMethod
+   rgpycrumbs.geom.api.alignment.AlignmentResult
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.api.alignment._apply_ira_alignment
+   rgpycrumbs.geom.api.alignment.align_structure_robust
+
+
+Module Contents
+---------------
+
+.. py:data:: ira_mod
+
+.. py:class:: IRAMatchInputs
+
+   Encapsulates the raw arrays required for an IRA graph match.
+
+
+   .. py:attribute:: ref_count
+      :type:  int
+
+
+   .. py:attribute:: ref_numbers
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: ref_positions
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: mobile_count
+      :type:  int
+
+
+   .. py:attribute:: mobile_numbers
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: mobile_positions
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: kmax
+      :type:  float
+
+
+.. py:class:: IRAMatchResults
+
+   Encapsulates the transformation outputs from the IRA algorithm.
+
+
+   .. py:attribute:: rotation
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: translation
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: permutation
+      :type:  numpy.ndarray
+
+
+   .. py:attribute:: hausdorff_dist
+      :type:  float
+
+
+.. py:class:: IRAConfig
+
+   Configuration parameters for the Iterative Rotations and Alignment.
+
+
+   .. py:attribute:: enabled
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: kmax
+      :type:  float
+      :value: 1.8
+
+
+
+.. py:class:: AlignmentMethod(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Tracks which algorithm was successfully applied.
+
+
+   .. py:attribute:: ASE_PROCRUSTES
+
+
+   .. py:attribute:: IRA_PERMUTATION
+
+
+   .. py:attribute:: NONE
+
+
+.. py:class:: AlignmentResult
+
+   Container for alignment outputs.
+
+   :param atoms: The aligned structure (modified in-place, but returned for chaining).
+   :param method: The specific algorithm that was used.
+
+
+   .. py:attribute:: atoms
+      :type:  ase.Atoms
+
+
+   .. py:attribute:: method
+      :type:  AlignmentMethod
+
+
+   .. py:property:: used_ira
+      :type: bool
+
+
+      Helper to maintain backward compatibility with boolean checks.
+
+
+
+.. py:function:: _apply_ira_alignment(ref_atoms: ase.Atoms, mobile_atoms: ase.Atoms, config: IRAConfig) -> bool
+
+   Performs the low-level IRA isomorphism and affine transformation.
+
+   This function modifies mobile_atoms in-place. It returns True if the
+   alignment succeeds, or False if an error occurs or IRA remains unavailable.
+
+
+.. py:function:: align_structure_robust(ref_atoms: ase.Atoms, mobile_atoms: ase.Atoms, ira_config: IRAConfig) -> AlignmentResult
+
+   Aligns a mobile structure to a reference using IRA with an ASE fallback.
+
+   This method minimizes the RMSD between the reference and mobile structures.
+   It first attempts to solve the isomorphism problem (finding $P, R, t$)
+   using IRA. If IRA fails or remains unavailable, it defaults to standard
+   Procrustes superimposition (finding $R, t$) via ASE.
+
+   :param ref_atoms: The fixed reference configuration.
+   :param mobile_atoms: The configuration to align (modified in-place).
+   :param ira_config: Configuration object with state of IRA and the adjacency
+                      cutoff distance for IRA graph matching.
+   :return: An AlignmentResult.
+
+

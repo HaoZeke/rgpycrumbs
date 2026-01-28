@@ -43,7 +43,6 @@ Attributes
    rgpycrumbs.eon.plt_neb.DEFAULT_INPUT_PATTERN
    rgpycrumbs.eon.plt_neb.DEFAULT_PATH_PATTERN
    rgpycrumbs.eon.plt_neb.ROUNDING_DF
-   rgpycrumbs.eon.plt_neb.RBF_SMOOTHING
    rgpycrumbs.eon.plt_neb.IRA_KMAX_DEFAULT
 
 
@@ -73,6 +72,7 @@ Functions
    rgpycrumbs.eon.plt_neb.calculate_rmsd_from_ref
    rgpycrumbs.eon.plt_neb.calculate_landscape_coords
    rgpycrumbs.eon.plt_neb._load_or_compute_data
+   rgpycrumbs.eon.plt_neb.plot_structure_strip
    rgpycrumbs.eon.plt_neb.plot_single_inset
    rgpycrumbs.eon.plt_neb.plot_structure_insets
    rgpycrumbs.eon.plt_neb.plot_energy_path
@@ -251,10 +251,6 @@ Module Contents
    :value: 3
 
 
-.. py:data:: RBF_SMOOTHING
-   :value: 0.01
-
-
 .. py:data:: IRA_KMAX_DEFAULT
    :value: 1.8
 
@@ -309,8 +305,9 @@ Module Contents
 
    Calculates the RMSD of each structure in a list relative to a reference.
 
-   Uses the Iterative Reordering and Alignment (IRA) algorithm to find the
-   optimal alignment and permutation before calculating RMSD.
+   The function first attempts the IRA algorithm to handle atom permutations.
+   If IRA fails or lacks the necessary library, the code falls back to
+   standard ASE Procrustes alignment (minimize_rotation_and_translation).
 
    :param atoms_list: A list of ASE Atoms objects.
    :type atoms_list: list
@@ -356,6 +353,11 @@ Module Contents
    :type context_name: str
    :return: The requested data.
    :rtype: pl.DataFrame
+
+
+.. py:function:: plot_structure_strip(ax, atoms_list, labels=None, zoom=0.3, ase_rotation='0x, 90y, 0z', theme_color='black', max_cols=6)
+
+   Renders a horizontal gallery of atomic structures (equidistant).
 
 
 .. py:function:: plot_single_inset(ax, atoms, x_coord, y_coord, xybox=(15.0, 60.0), rad=0.0, zoom=0.4, ase_rotation='0x, 90y, 0z', arrow_head_length=0.4, arrow_head_width=0.4, arrow_tail_width=0.1)
@@ -530,7 +532,7 @@ Module Contents
    Applies labels, limits, and other plot aesthetics.
 
 
-.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, plot_type, landscape_mode, landscape_path, rc_mode, plot_structures, rbf_smoothing, rounding, show_pts, plot_mode, surface_type, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, cache_file, force_recompute, ira_kmax)
+.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, plot_type, landscape_mode, landscape_path, rc_mode, plot_structures, rbf_smoothing, rounding, show_pts, plot_mode, surface_type, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, show_legend, cache_file, force_recompute, ira_kmax)
 
    Main entry point for NEB plot script.
 
@@ -550,7 +552,7 @@ Module Contents
    Determines the final figure size based on user inputs.
 
 
-.. py:function:: _load_structures(con_file, additional_con, plot_type, rc_mode)
+.. py:function:: _load_structures(con_file, additional_con, plot_type, rc_mode, ira_kmax)
 
    Loads atoms from .con files and calcs RMSD for additional structure.
 
@@ -576,12 +578,12 @@ Module Contents
    where df_raw is a Polars DataFrame with columns: [r, p, z, step]
 
 
-.. py:function:: _plot_landscape(ax, atoms_list, input_dat_pattern, input_path_pattern, con_file, additional_atoms_data, landscape_path, landscape_mode, plot_mode, surface_type, plot_structures, show_pts, rbf_smoothing, rounding, selected_theme, cache_file, force_recompute, ira_kmax, draw_reactant, draw_saddle, draw_product, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width)
+.. py:function:: _plot_landscape(ax, ax_strip, atoms_list, input_dat_pattern, input_path_pattern, con_file, additional_atoms_data, landscape_path, landscape_mode, plot_mode, surface_type, plot_structures, show_pts, rbf_smoothing, rounding, selected_theme, cache_file, force_recompute, ira_kmax, draw_reactant, draw_saddle, draw_product, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, show_legend)
 
    Handles all logic for drawing 2D landscape plots.
 
 
-.. py:function:: _plot_profile(ax, fig, input_dat_pattern, atoms_list, additional_atoms_data, rc_mode, plot_mode, plot_structures, start, end, normalize_rc, highlight_last, selected_theme, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, cache_file=None, force_recompute=False)
+.. py:function:: _plot_profile(ax, ax_strip, fig, input_dat_pattern, atoms_list, additional_atoms_data, rc_mode, plot_mode, plot_structures, start, end, normalize_rc, highlight_last, selected_theme, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, cache_file=None, force_recompute=False, ira_kmax=IRA_KMAX_DEFAULT)
 
    Handles all logic for drawing 1D profile plots.
 

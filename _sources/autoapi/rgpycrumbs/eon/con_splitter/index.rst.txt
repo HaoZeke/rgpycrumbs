@@ -9,7 +9,17 @@ Attributes
 
 .. autoapisummary::
 
+   rgpycrumbs.eon.con_splitter.ira_mod
    rgpycrumbs.eon.con_splitter.CONSOLE
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.con_splitter.AlignMode
+   rgpycrumbs.eon.con_splitter.SplitMode
 
 
 Functions
@@ -17,17 +27,66 @@ Functions
 
 .. autoapisummary::
 
+   rgpycrumbs.eon.con_splitter.align_path
    rgpycrumbs.eon.con_splitter.con_splitter
 
 
 Module Contents
 ---------------
 
+.. py:data:: ira_mod
+
 .. py:data:: CONSOLE
 
-.. py:function:: con_splitter(neb_trajectory_file: pathlib.Path, output_dir: pathlib.Path | None, images_per_path: int, path_index: int, path_list_filename: str)
+.. py:class:: AlignMode(*args, **kwds)
 
-   Splits a multi-step NEB trajectory file (.traj, .con, etc.) into
+   Bases: :py:obj:`enum.Enum`
+
+
+   Defines structural alignment strategies.
+
+
+   .. py:attribute:: NONE
+      :value: 'none'
+
+
+
+   .. py:attribute:: ALL
+      :value: 'all'
+
+
+
+   .. py:attribute:: ENDPOINTS
+      :value: 'endpoints'
+
+
+
+.. py:class:: SplitMode(*args, **kwds)
+
+   Bases: :py:obj:`enum.Enum`
+
+
+   Defines trajectory validation strictness.
+
+
+   .. py:attribute:: NEB
+      :value: 'neb'
+
+
+
+   .. py:attribute:: FLEX
+      :value: 'flex'
+
+
+
+.. py:function:: align_path(frames, mode: AlignMode, iraconf: rgpycrumbs.geom.api.alignment.IRAConfig)
+
+   Applies the selected alignment strategy to the image sequence.
+
+
+.. py:function:: con_splitter(neb_trajectory_file: pathlib.Path, mode: str, output_dir: pathlib.Path | None, images_per_path: int, path_index: int, center: bool, box_diagonal: tuple[float, float, float], align_type: str, use_ira: bool, ira_kmax: float, path_list_filename: str)
+
+   Splits a multi-step trajectory file (.traj, .con, etc.) into
    individual .con files for a *single* specified path.
 
    This script reads a trajectory file, which may contain multiple NEB
@@ -40,6 +99,8 @@ Module Contents
    It also generates a text file (default: 'ipath.dat') that lists the
    absolute paths of all created .con files.
 
-   NEB_TRAJECTORY_FILE: Path to the input multi-image/multi-path trajectory.
+   This utility extracts specific optimization steps and applies physical
+   chemistry refinements such as centering, cell overrides, and structural
+   alignment (RMSD minimization).
 
 

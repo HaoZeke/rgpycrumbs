@@ -1,0 +1,37 @@
+rgpycrumbs.eon._mlflow.log_params
+=================================
+
+.. py:module:: rgpycrumbs.eon._mlflow.log_params
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon._mlflow.log_params.eon_config
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon._mlflow.log_params.log_config_ini
+
+
+Module Contents
+---------------
+
+.. py:data:: eon_config
+
+.. py:function:: log_config_ini(conf_ini: pathlib.Path = Path('config.ini'), *, w_artifact: bool = True, track_overrides: bool = False)
+
+   Logs the hydrated EON configuration and highlights user-provided overrides.
+
+   This function performs a three-way merge between the EON schema, the
+   hydrated defaults, and the user-provided config.ini. It ensures that
+   scientific provenance remains intact while providing a focused view of
+   modified hyperparameters.
+
+

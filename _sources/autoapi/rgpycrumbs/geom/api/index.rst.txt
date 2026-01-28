@@ -1,0 +1,15 @@
+rgpycrumbs.geom.api
+===================
+
+.. py:module:: rgpycrumbs.geom.api
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/geom/api/alignment/index
+
+

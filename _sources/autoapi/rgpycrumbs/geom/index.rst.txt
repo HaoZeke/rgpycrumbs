@@ -10,6 +10,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   /autoapi/rgpycrumbs/geom/api/index
    /autoapi/rgpycrumbs/geom/detect_fragments/index
 
 

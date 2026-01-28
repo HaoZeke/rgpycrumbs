@@ -10,6 +10,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   /autoapi/rgpycrumbs/eon/_mlflow/index
    /autoapi/rgpycrumbs/eon/con_splitter/index
    /autoapi/rgpycrumbs/eon/generate_nwchem_input/index
    /autoapi/rgpycrumbs/eon/plt_neb/index

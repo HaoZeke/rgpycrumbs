@@ -118,6 +118,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/index.html">rgpycrumbs.eon</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
@@ -129,6 +130,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
 </ul>
 </li>
@@ -168,6 +170,13 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#trajectory-splitting">Trajectory Splitting</a><ul>
 <li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#refinement-strategies">Refinement Strategies</a><ul>
+<li><a class="reference internal" href="#structural-alignment">Structural Alignment</a></li>
+<li><a class="reference internal" href="#iterative-reordering-and-alignment-ira">Iterative Reordering and Alignment (IRA)</a></li>
+<li><a class="reference internal" href="#centering-and-unit-cell-management">Centering and Unit Cell Management</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#initial-path-generation-from-generic-files">Initial Path Generation from Generic Files</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </li>
@@ -258,6 +267,50 @@ feeds into EON via:</p>
 </span><span data-line="3"><span class="na">minimize_endpoints_for_ipath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </span></pre></div>
 </div>
+</section>
+<section id="refinement-strategies">
+<h3>Refinement Strategies<a class="headerlink" href="#refinement-strategies" title="Link to this heading">¶</a></h3>
+<section id="structural-alignment">
+<h4>Structural Alignment<a class="headerlink" href="#structural-alignment" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">--align-type</span></code> option removes non-physical translational and rotational degrees of freedom that often accumulate during optimization.</p>
+<dl class="simple">
+<dt>all</dt><dd><p>Aligns every intermediate image to the reactant. This creates a
+visually smooth trajectory but can occasionally introduce artifacts if the
+reaction path involves significant curvature.</p>
+</dd>
+<dt>endpoints</dt><dd><p>Aligns only the reactant and product. This ensures consistent
+boundary conditions while preserving the relative internal coordinates of the
+intermediate images as optimized.</p>
+</dd>
+</dl>
+</section>
+<section id="iterative-reordering-and-alignment-ira">
+<h4>Iterative Reordering and Alignment (IRA)<a class="headerlink" href="#iterative-reordering-and-alignment-ira" title="Link to this heading">¶</a></h4>
+<p>When using <code class="docutils literal notranslate"><span class="pre">--use-ira</span></code>, the script handles atom index permutations. In complex
+NEB optimizations—especially those involving surface diffusion or molecular
+dissociations—atom indices in the output trajectory may not match the reactant’s
+order. IRA finds the optimal mapping and alignment simultaneously, ensuring that
+the resulting <code class="docutils literal notranslate"><span class="pre">.con</span></code> files maintain a consistent atom numbering scheme across
+the entire path.</p>
+</section>
+<section id="centering-and-unit-cell-management">
+<h4>Centering and Unit Cell Management<a class="headerlink" href="#centering-and-unit-cell-management" title="Link to this heading">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">--center</span></code> flag translates the center of mass of each image to the origin.
+Use <code class="docutils literal notranslate"><span class="pre">--box-diagonal</span></code> to override the simulation cell dimensions (e.g., <code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">20</span> <span class="pre">20</span></code>), which ensures all generated images share an identical vacuum box for
+EON calculations.</p>
+</section>
+</section>
+<section id="initial-path-generation-from-generic-files">
+<h3>Initial Path Generation from Generic Files<a class="headerlink" href="#initial-path-generation-from-generic-files" title="Link to this heading">¶</a></h3>
+<p>We may also generate valid starting points for an EON NEB calculation from a
+generic <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> file or any ASE compatible input. For instance, for a two-image
+trajectory, to convert a reactant/product pair into the required EON format
+while fixing coordinate and mapping issues:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-m<span class="w"> </span>rgpycrumbs.cli<span class="w"> </span>eon<span class="w"> </span>con-splitter<span class="w"> </span>--images-per-path<span class="w"> </span><span class="m">2</span><span class="w"> </span>initial.xyz<span class="w"> </span>--box-diagonal<span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">25</span><span class="w"> </span>--center<span class="w"> </span>--align-type<span class="w"> </span>endpoints<span class="w"> </span>--use-ira<span class="w"> </span>--ira-kmax<span class="w"> </span><span class="m">1</span>.8
+</span></pre></div>
+</div>
+<p>This approach ensures that the reactant and product share an identical vacuum
+box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </section>
 <section id="api-reference">
 <h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h3>
