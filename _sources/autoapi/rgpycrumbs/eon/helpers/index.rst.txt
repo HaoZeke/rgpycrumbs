@@ -15,7 +15,7 @@ Functions
 Module Contents
 ---------------
 
-.. py:function:: write_eon_config(path: Union[str, pathlib.Path], settings: dict[str, dict[str, Any]]) -> None
+.. py:function:: write_eon_config(path: str | pathlib.Path, settings: dict[str, dict[str, Any]]) -> None
 
    Writes a config.ini file for eOn using a dictionary structure.
 

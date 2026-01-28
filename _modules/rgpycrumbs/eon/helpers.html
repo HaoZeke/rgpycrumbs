@@ -214,15 +214,15 @@ data-aria-dark="Switch to auto color mode">
           <h1>Source code for rgpycrumbs.eon.helpers</h1><div class="highlight"><pre>
 <span></span><span data-line="1"><span class="c1"># Usage:</span>
 </span><span data-line="2"><span class="c1"># https://atomistic-cookbook.org/examples/eon-pet-neb/eon-pet-neb.html</span>
-</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
-</span><span data-line="5">
-</span><span data-line="6">
+</span><span data-line="3">
+</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">configparser</span>
+</span><span data-line="5"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
+</span><span data-line="7">
+</span><span data-line="8">
 <div class="viewcode-block" id="write_eon_config">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/eon/helpers/index.html#rgpycrumbs.eon.helpers.write_eon_config">[docs]</a>
-</span><span data-line="7"><span class="k">def</span><span class="w"> </span><span class="nf">write_eon_config</span><span class="p">(</span>
-</span><span data-line="8">    <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
-</span><span data-line="9"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="9"><span class="k">def</span><span class="w"> </span><span class="nf">write_eon_config</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span data-line="10"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="11"><span class="sd">    Writes a config.ini file for eOn using a dictionary structure.</span>
 </span><span data-line="12"><span class="sd">    &quot;&quot;&quot;</span>
