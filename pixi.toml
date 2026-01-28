@@ -3,7 +3,7 @@ name = "pycrumbs"
 version = "0.0.7.dev"
 description = "A dispatcher-based analytical and visualization suite for chemical physics"
 authors = ["Rohit Goswami <rgoswami[at]ieee[dot]org>"]
-channels = ["conda-forge"]
+channels = ["conda-forge", "https://repo.prefix.dev/rg-forge"]
 platforms = ["linux-64"]
 
 [tasks]
@@ -34,6 +34,18 @@ docs = {features = ["docs"]}
 test = { features = ["test"] }
 fragments = { features = ["fragments", "test"] }
 ptm = { features = ["ptm", "test"] }
+eonmlflow = { features = ["eonmlflow", "test"] }
+
+[pypi-options]
+# TODO(rg): only if the CPU version is needed
+# set these on the command line instead
+# export UV_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
+# export PIP_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
+extra-index-urls = ["https://download.pytorch.org/whl/cpu"]
+
+[feature.eonmlflow.dependencies]
+eon = ">=2.8.2,<3"
+mlflow = ">=3.8.0,<4"
 
 [feature.fragments.pypi-dependencies]
 ase = "~=3.23"
@@ -45,11 +57,13 @@ libgfortran-ng = ">=15.2.0,<16"
 pyvista = ">=0.46.4,<0.47"
 matplotlib = ">=3.10.8,<4"
 tblite-python = ">=0.5.0,<0.6"
+ira = ">=2.2.0,<3"
 
 [feature.test.pypi-dependencies]
 rgpycrumbs = { path = ".", editable=true }
 pytest = "*"
 click = ">=8.3.1, <9"
+numpy = ">=2.3.5, <3"
 
 [feature.ptm.dependencies]
 ovito = "*"
