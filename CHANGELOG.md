@@ -1,3 +1,22 @@
+## [v0.1.0](https://github.com/theochemui/eongit/tree/v0.1.0) - 2026-01-28
+
+### Added
+
+- feat(eon): add dictionary support ([#28ac681.eon](https://github.com/theochemui/eongit/issues/28ac681.eon))
+- feat(jup): add subprocess run helpers for atomistic-cookbook ([#a60da70.jup](https://github.com/theochemui/eongit/issues/a60da70.jup))
+- Added alignment using IRA for splitting con files.
+- Added robust alignment API using Isomorphic Robust Alignment (IRA) with ASE fallback.
+- Fallback to using ase minimize_rotations_and_translations if IRA fails.
+- Generate hydrated logging configurations for MLFlow.
+- feat(pltneb): Add a strip to handle sub-figures uniformly
+- feat(pltneb): Add multiple structures and labels
+- feat(pltneb): Automatically determine the smoothing factor from the global median RMSD step distance
+
+### Developer
+
+- Refactored alignment internals into structured dataclasses for improved API clarity.
+
+
 ## [v0.0.6](https://github.com/theochemui/eongit/tree/v0.0.6) - 2025-12-23
 
 ### Added
