@@ -1,10 +1,6 @@
 [tool.towncrier]
 directory = "docs/newsfragments"
-filename = "CHANGELOG.md"
-start_string = "<!-- towncrier release notes start -->\n"
-underlines = ["", "", ""]
-title_format = "## [{version}](https://github.com/HaoZeke/rgpycrumbs/tree/{version}) - {project_date}"
-issue_format = "[#{issue}](https://github.com/HaoZeke/rgpycrumbs/issues/{issue})"
+filename = "CHANGELOG.rst"
 
 [[tool.towncrier.type]]
 directory = "security"

@@ -4,6 +4,5 @@
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 
 #+begin_export rst
-.. include:: ../../CHANGELOG.md
-   :parser: commonmark
+.. include:: ../../CHANGELOG.rst
 #+end_export
