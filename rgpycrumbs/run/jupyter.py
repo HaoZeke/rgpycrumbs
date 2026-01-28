@@ -1,6 +1,5 @@
 # Usage:
 # https://atomistic-cookbook.org/examples/eon-pet-neb/eon-pet-neb.html
-import configparser
 import shutil
 import subprocess
 import sys
