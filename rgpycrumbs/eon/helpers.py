@@ -1,12 +1,12 @@
 # Usage:
 # https://atomistic-cookbook.org/examples/eon-pet-neb/eon-pet-neb.html
+
+import configparser
 from pathlib import Path
 from typing import Any, Union
 
 
-def write_eon_config(
-    path: Union[str, Path], settings: dict[str, dict[str, Any]]
-) -> None:
+def write_eon_config(path: str | Path, settings: dict[str, dict[str, Any]]) -> None:
     """
     Writes a config.ini file for eOn using a dictionary structure.
     """
