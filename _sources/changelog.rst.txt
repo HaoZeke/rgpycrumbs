@@ -4,5 +4,4 @@ Changelog
 
     :Author: `Rohit Goswami <https://rgoswami.me>`_
 
-.. include:: ../../CHANGELOG.md
-   :parser: commonmark
+.. include:: ../../CHANGELOG.rst

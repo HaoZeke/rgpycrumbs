@@ -23,6 +23,8 @@ Module Contents
 .. py:data:: y
 
 .. py:data:: Z
+   :value: 0
+
 
 .. py:data:: parser
 

@@ -1,0 +1,55 @@
+========================
+Jupyter Notebook Helpers
+========================
+
+
+
+Notebook Execution Helpers
+--------------------------
+
+Running shell commands and complex scientific workflows inside Jupyter
+notebooks can often lead to verbose and "scary" boilerplate code.
+
+  .. versionadded:: 0.1.0
+
+The \`rgpycrumbs.run.jupyter\` module provides clean abstractions for subprocess
+management and configuration generation, designed specifically for tutorial
+notebooks (like those in the Atomistic Cookbook).
+
+Subprocess Management
+~~~~~~~~~~~~~~~~~~~~~
+
+The ``run_command_or_exit`` function streams \`stdout\` and \`stderr\` in real-time
+to the notebook cell output, ensuring long-running simulation jobs (like
+\`eonclient\`) don't appear to hang.
+
+.. code:: python
+
+    from rgpycrumbs.run.jupyter import run_command_or_exit
+
+    # Runs 'eonclient', streams output, and raises SystemExit on failure
+    # This prevents the notebook from continuing if the simulation crashes.
+    run_command_or_exit(["eonclient"], timeout=300)
+
+Configuration Generation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Instead of writing \`config.ini\` files using fragile f-strings, use
+``write_eon_config`` to generate them from Python dictionaries.
+
+.. code:: python
+
+    from rgpycrumbs.run.jupyter import write_eon_config
+
+    settings = {
+        "Main": {"job": "nudged_elastic_band"},
+        "Potential": {"potential": "Metatomic"},
+    }
+
+    # Writes to ./config.ini safely
+    write_eon_config(".", settings)
+
+API Reference
+~~~~~~~~~~~~~
+
+For developer details see :mod:`rgpycrumbs.run.jupyter`.

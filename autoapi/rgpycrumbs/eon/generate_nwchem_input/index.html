@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../../../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.eon.generate_nwchem_input - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.eon.plt_neb" href="../plt_neb/index.html" /><link rel="prev" title="rgpycrumbs.eon.con_splitter" href="../con_splitter/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.eon.generate_nwchem_input - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.eon.helpers" href="../helpers/index.html" /><link rel="prev" title="rgpycrumbs.eon.con_splitter" href="../con_splitter/index.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/eon/generate_nwchem_input/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/prefix/index.html">Prefix Helpers</a><ul>
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -145,6 +152,10 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../prefix/index.html">rgpycrumbs.prefix</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../xts/index.html">rgpycrumbs.xts</a><ul>
@@ -307,10 +318,10 @@ output_path: The path for the generated NWChem input file.</p>
         <span>Previous</span><div class="title">rgpycrumbs.eon.con_splitter</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="../plt_neb/index.html">
+    <a href="../helpers/index.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">rgpycrumbs.eon.plt_neb</div>
+        <div class="title">rgpycrumbs.eon.helpers</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

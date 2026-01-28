@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Prefix Helpers</a><ul class="current">
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -147,6 +154,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -169,6 +180,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#removing-packages-from-custom-prefix-dev-channels">Removing packages from custom <code class="docutils literal notranslate">dev</span></code> channels</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-prefix-delete-packages">rgpycrumbs prefix delete-packages</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
@@ -246,10 +258,59 @@ data-aria-dark="Switch to auto color mode">
 <h1>Prefix Channel Package Deletion<a class="headerlink" href="#prefix-channel-package-deletion" title="Link to this heading">¶</a></h1>
 <section id="removing-packages-from-custom-prefix-dev-channels">
 <h2>Removing packages from custom <code class="docutils literal notranslate"><span class="pre">prefix.dev</span></code> channels<a class="headerlink" href="#removing-packages-from-custom-prefix-dev-channels" title="Link to this heading">¶</a></h2>
+<section id="rgpycrumbs-prefix-delete-packages">
+<h3>rgpycrumbs prefix delete-packages<a class="headerlink" href="#rgpycrumbs-prefix-delete-packages" title="Link to this heading">¶</a></h3>
+<p>Finds and deletes all versions of a package from a prefix.dev channel.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>prefix<span class="w"> </span>delete-packages<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-prefix-delete-packages-channel">
+<span class="sig-name descname"><span class="pre">--channel</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;channel&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-prefix-delete-packages-channel" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> The name of the prefix.dev channel (e.g., ‘rg-forge’).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-prefix-delete-packages-package-name">
+<span class="sig-name descname"><span class="pre">--package-name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;package_name&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-prefix-delete-packages-package-name" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> The name of the package to delete (e.g., ‘eon’). All files starting with this name will be targeted.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-prefix-delete-packages-api-key">
+<span class="sig-name descname"><span class="pre">--api-key</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;api_key&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-prefix-delete-packages-api-key" title="Link to this definition">¶</a></dt>
+<dd><p>Your prefix.dev API key. Can also be set via the PREFIX_API_KEY environment variable.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-prefix-delete-packages-version-regex">
+<span class="sig-name descname"><span class="pre">--version-regex</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;version_regex&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-prefix-delete-packages-version-regex" title="Link to this definition">¶</a></dt>
+<dd><p>A regex to match specific versions to delete (e.g., ‘^1.2.3$’). If not provided, all versions will be targeted.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-prefix-delete-packages-dry-run">
+<span class="sig-name descname"><span class="pre">--dry-run</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-prefix-delete-packages-dry-run" title="Link to this definition">¶</a></dt>
+<dd><p>Show which packages would be deleted without actually deleting them.</p>
+</dd></dl>
+
+<p class="rubric">Environment variables</p>
+<dl class="std envvar" id="rgpycrumbs-prefix-delete-packages-api-key-prefix-api-key">
+<dt class="sig sig-object std">
+<span class="sig-name descname"><span class="pre">PREFIX_API_KEY</span></span></dt>
+<dd><blockquote>
+<div><p>Provide a default for <a class="reference internal" href="#cmdoption-rgpycrumbs-prefix-delete-packages-api-key"><code class="xref std std-option docutils literal notranslate"><span class="pre">--api-key</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
+</section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">$ python -m rgpycrumbs.cli prefix delete-packages --help
-</span><span data-line="2">/home/runner/work/rgpycrumbs/rgpycrumbs/.pixi/envs/docs/bin/python: Error while finding module specification for &#39;rgpycrumbs.cli&#39; (ModuleNotFoundError: No module named &#39;rgpycrumbs&#39;)
+</span><span data-line="2">--&gt; Dispatching to: uv run /home/runner/work/rgpycrumbs/rgpycrumbs/rgpycrumbs/prefix/delete_packages.py --help
+</span><span data-line="3">Error: &#39;uv&#39; command not found. Is it installed?
 </span></pre></div>
 </div>
 </section>

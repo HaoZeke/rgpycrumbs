@@ -1,0 +1,56 @@
+===========================
+Robust Structural Alignment
+===========================
+
+
+
+Structural Alignment API
+------------------------
+
+The alignment module provides a robust mechanism for superimposing atomic
+structures.
+
+  .. versionadded:: 0.1.0
+
+It solves the "permutation-inversion" problem using the ****Iterative Rotations and Alignment (IRA)**** algorithm when available.
+If the \`ira\` library is missing or fails, it gracefully falls back to standard
+RMSD minimization (Procrustes analysis) via \`ase\`.
+
+Key Features
+~~~~~~~~~~~~
+
+- ****Permutation Invariance****: Correctly aligns molecules even if atom indices are scrambled (e.g., swapping two Hydrogens).
+
+- ****Hybrid Backend****: Prioritizes \`libira\` for graph-matching but defaults to \`ase.build.minimize\ :sub:`rotation`\ \ :sub:`and`\ \ :sub:`translation`\\` for simple rigid rotations.
+
+- ****In-Place Modification****: Modifies the target (mobile) \`Atoms\` object directly to match the reference.
+
+Usage Example
+~~~~~~~~~~~~~
+
+.. code:: python
+
+    from ase.build import molecule
+    from rgpycrumbs.geom.api.alignment import align_structure_robust, IRAConfig
+
+    # 1. Create a reference and a scrambled mobile structure
+    ref = molecule("H2O")
+    mobile = ref.copy()
+    mobile.rotate(90, 'z')
+    # Scramble indices: Swap H1 and H2
+    mobile = mobile[[0, 2, 1]]
+
+    # 2. Configure Alignment
+    config = IRAConfig(enabled=True, kmax=1.8)
+
+    # 3. Align
+    # 'mobile' is modified in-place to match 'ref'
+    result = align_structure_robust(ref, mobile, config)
+
+    print(f"Method used: {result.method}")
+    # Output: Method used: AlignmentMethod.IRA_PERMUTATION
+
+API Reference
+~~~~~~~~~~~~~
+
+For developer details see :mod:`rgpycrumbs.geom.api.alignment`.

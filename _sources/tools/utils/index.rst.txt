@@ -1,0 +1,17 @@
+
+
+General Utilities
+-----------------
+
+Helper functions for workflows, notebooks, and infrastructure.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Utilities
+
+   jupyter
+
+API Reference
+~~~~~~~~~~~~~
+
+For developer details, see the :doc:`Utilities Reference <../../autoapi/rgpycrumbs/run/index>`.

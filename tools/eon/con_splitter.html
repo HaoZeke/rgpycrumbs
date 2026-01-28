@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">EON Helpers</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -147,6 +154,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -169,6 +180,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#trajectory-splitting">Trajectory Splitting</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-eon-con-splitter">rgpycrumbs eon con-splitter</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#refinement-strategies">Refinement Strategies</a><ul>
 <li><a class="reference internal" href="#structural-alignment">Structural Alignment</a></li>
@@ -253,6 +265,113 @@ data-aria-dark="Switch to auto color mode">
 <h1>Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files<a class="headerlink" href="#splitting-con-files" title="Link to this heading">¶</a></h1>
 <section id="trajectory-splitting">
 <h2>Trajectory Splitting<a class="headerlink" href="#trajectory-splitting" title="Link to this heading">¶</a></h2>
+<section id="rgpycrumbs-eon-con-splitter">
+<h3>rgpycrumbs eon con-splitter<a class="headerlink" href="#rgpycrumbs-eon-con-splitter" title="Link to this heading">¶</a></h3>
+<p>Splits a multi-step trajectory file (.traj, .con, etc.) into
+individual .con files for a <em>single</em> specified path.</p>
+<p>This script reads a trajectory file, which may contain multiple NEB
+optimization steps (paths), and extracts only the frames corresponding
+to a single specified path.</p>
+<p>It writes each frame of that path into a separate .con file
+(e.g., ipath_000.con, ipath_001.con, …).</p>
+<p>It also generates a text file (default: ‘ipath.dat’) that lists the
+absolute paths of all created .con files.</p>
+<p>This utility extracts specific optimization steps and applies physical
+chemistry refinements such as centering, cell overrides, and structural
+alignment (RMSD minimization).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>con-splitter<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>NEB_TRAJECTORY_FILE
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-mode">
+<span class="sig-name descname"><span class="pre">--mode</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;mode&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-mode" title="Link to this definition">¶</a></dt>
+<dd><p>Validation mode: ‘neb’ (strict multiples) or ‘normal’ (flexible).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>neb | flex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-output-dir">
+<span class="sig-name descname"><span class="pre">--output-dir</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_dir&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-output-dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory to save output files. Defaults to the input filename stem.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-images-per-path">
+<span class="sig-name descname"><span class="pre">--images-per-path</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;images_per_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-images-per-path" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Number of images in a single NEB path (e.g., 7). [REQUIRED]</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-path-index">
+<span class="sig-name descname"><span class="pre">--path-index</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;path_index&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-path-index" title="Link to this definition">¶</a></dt>
+<dd><p>Index of the NEB path to extract (0-based). Use -1 for the last path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">-1</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-center">
+<span id="cmdoption-rgpycrumbs-eon-con-splitter-no-center"></span><span class="sig-name descname"><span class="pre">--center</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-center</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-center" title="Link to this definition">¶</a></dt>
+<dd><p>Center the atomic coordinates around the origin.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-box-diagonal">
+<span class="sig-name descname"><span class="pre">--box-diagonal</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;box_diagonal&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-box-diagonal" title="Link to this definition">¶</a></dt>
+<dd><p>Override the unit cell dimensions (Å) during processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">25.0,</span> <span class="pre">25.0,</span> <span class="pre">25.0</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-align-type">
+<span class="sig-name descname"><span class="pre">--align-type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;align_type&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-align-type" title="Link to this definition">¶</a></dt>
+<dd><p>Alignment: ‘all’ (every image), ‘endpoints’ (reactant/product), or ‘none’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>none | all | endpoints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-use-ira">
+<span class="sig-name descname"><span class="pre">--use-ira</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-use-ira" title="Link to this definition">¶</a></dt>
+<dd><p>Enable Iterative Reordering and Alignment (requires ira_mod).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-ira-kmax">
+<span class="sig-name descname"><span class="pre">--ira-kmax</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ira_kmax&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-ira-kmax" title="Link to this definition">¶</a></dt>
+<dd><p>kmax factor for the IRA matching algorithm.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-path-list-filename">
+<span class="sig-name descname"><span class="pre">--path-list-filename</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;path_list_filename&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-path-list-filename" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the file listing the generated .con absolute paths.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-con-splitter-arg-NEB_TRAJECTORY_FILE">
+<span class="sig-name descname"><span class="pre">NEB_TRAJECTORY_FILE</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-con-splitter-arg-NEB_TRAJECTORY_FILE" title="Link to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
 <p>To split a trajectory file:</p>

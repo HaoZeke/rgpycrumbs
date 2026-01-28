@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="tools/eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/prefix/index.html">Prefix Helpers</a><ul>
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -147,6 +154,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -168,30 +179,40 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#id1">v0.0.6 - 2025-12-23</a><ul>
-<li><a class="reference internal" href="#id2">Added</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-v0-1-1-2026-01-28">rgpycrumbs v0.1.1 (2026-01-28)</a><ul>
+<li><a class="reference internal" href="#fixed">Fixed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id1">Changelog</a><ul>
+<li><a class="reference internal" href="#v0-1-0-2026-01-28">v0.1.0 - 2026-01-28</a><ul>
+<li><a class="reference internal" href="#added">Added</a></li>
+<li><a class="reference internal" href="#developer">Developer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#v0-0-6-2025-12-23">v0.0.6 - 2025-12-23</a><ul>
+<li><a class="reference internal" href="#added-1">Added</a></li>
 <li><a class="reference internal" href="#id3">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id4">v0.0.5 - 2025-12-06</a><ul>
-<li><a class="reference internal" href="#id5">Added</a></li>
-<li><a class="reference internal" href="#id6">Changed</a></li>
-<li><a class="reference internal" href="#id7">Fixed</a></li>
+<li><a class="reference internal" href="#v0-0-5-2025-12-06">v0.0.5 - 2025-12-06</a><ul>
+<li><a class="reference internal" href="#added-2">Added</a></li>
+<li><a class="reference internal" href="#changed">Changed</a></li>
+<li><a class="reference internal" href="#fixed-1">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id8">v0.0.4 - 2025-12-01</a><ul>
-<li><a class="reference internal" href="#id9">Added</a></li>
-<li><a class="reference internal" href="#id10">Changed</a></li>
-<li><a class="reference internal" href="#id11">Fixed</a></li>
+<li><a class="reference internal" href="#v0-0-4-2025-12-01">v0.0.4 - 2025-12-01</a><ul>
+<li><a class="reference internal" href="#added-3">Added</a></li>
+<li><a class="reference internal" href="#changed-1">Changed</a></li>
+<li><a class="reference internal" href="#fixed-2">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id12">v0.0.3 - 2025-10-27</a><ul>
-<li><a class="reference internal" href="#id13">Added</a></li>
-<li><a class="reference internal" href="#id14">Changed</a></li>
+<li><a class="reference internal" href="#v0-0-3-2025-10-27">v0.0.3 - 2025-10-27</a><ul>
+<li><a class="reference internal" href="#added-4">Added</a></li>
+<li><a class="reference internal" href="#changed-2">Changed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id15">v0.0.2 - 2025-09-06</a><ul>
-<li><a class="reference internal" href="#id16">Added</a></li>
+<li><a class="reference internal" href="#v0-0-2-2025-09-06">v0.0.2 - 2025-09-06</a><ul>
+<li><a class="reference internal" href="#added-5">Added</a></li>
 </ul>
 </li>
 </ul>
@@ -270,99 +291,151 @@ data-aria-dark="Switch to auto color mode">
 </dd>
 </dl>
 </div></blockquote>
-<section id="id1">
-<h2><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.6">v0.0.6</a> - 2025-12-23<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
-<section id="id2">
-<h3>Added<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="rgpycrumbs-v0-1-1-2026-01-28">
+<h2>rgpycrumbs v0.1.1 (2026-01-28)<a class="headerlink" href="#rgpycrumbs-v0-1-1-2026-01-28" title="Link to this heading">¶</a></h2>
+<section id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li>Added a new fragment detection tool () supporting both Geometric (covalent radii) and Bond Order (GFN2-xTB) methodologies.</li>
-<li>feat(cli): drop dependency on click</li>
-<li>feat(pltneb): Add 'ira-kmax' to tweak settings for IRA</li>
+<li><p>Add an __init__ for modules</p></li>
+<li><p>Rework documentation</p></li>
 </ul>
+</section>
+</section>
+<section id="id1">
+<h2>Changelog<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<section id="v0-1-0-2026-01-28">
+<h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.1.0">v0.1.0</a> - 2026-01-28<a class="headerlink" href="#v0-1-0-2026-01-28" title="Link to this heading">¶</a></h3>
+<section id="added">
+<h4>Added<a class="headerlink" href="#added" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>feat(eon): add dictionary support
+(<a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/issues/28ac681.eon">#28ac681.eon</a>)</p></li>
+<li><p>feat(jup): add subprocess run helpers for atomistic-cookbook
+(<a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/issues/a60da70.jup">#a60da70.jup</a>)</p></li>
+<li><p>Added alignment using IRA for splitting con files.</p></li>
+<li><p>Added robust alignment API using Isomorphic Robust Alignment (IRA)
+with ASE fallback.</p></li>
+<li><p>Fallback to using ase minimize_rotations_and_translations if IRA
+fails.</p></li>
+<li><p>Generate hydrated logging configurations for MLFlow.</p></li>
+<li><p>feat(pltneb): Add a strip to handle sub-figures uniformly</p></li>
+<li><p>feat(pltneb): Add multiple structures and labels</p></li>
+<li><p>feat(pltneb): Automatically determine the smoothing factor from the
+global median RMSD step distance</p></li>
+</ul>
+</section>
+<section id="developer">
+<h4>Developer<a class="headerlink" href="#developer" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Refactored alignment internals into structured dataclasses for
+improved API clarity.</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-0-6-2025-12-23">
+<h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.6">v0.0.6</a> - 2025-12-23<a class="headerlink" href="#v0-0-6-2025-12-23" title="Link to this heading">¶</a></h3>
+<section id="added-1">
+<span id="id2"></span><h4>Added<a class="headerlink" href="#added-1" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Added a new fragment detection tool () supporting both Geometric
+(covalent radii) and Bond Order (GFN2-xTB) methodologies.</p></li>
+<li><p>feat(cli): drop dependency on click</p></li>
+<li><p>feat(pltneb): Add ‘ira-kmax’ to tweak settings for IRA</p></li>
+</ul>
+</section>
 <section id="id3">
 <h4>Fixed<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>Refactored internal import helper to use , fixing support for nested module imports (e.g., ).</li>
+<li><p>Refactored internal import helper to use , fixing support for nested
+module imports (e.g., ).</p></li>
 </ul>
 </section>
 </section>
-<section id="id4">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.5">v0.0.5</a> - 2025-12-06<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
-<section id="id5">
-<h4>Added<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<section id="v0-0-5-2025-12-06">
+<h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.5">v0.0.5</a> - 2025-12-06<a class="headerlink" href="#v0-0-5-2025-12-06" title="Link to this heading">¶</a></h3>
+<section id="added-2">
+<span id="id4"></span><h4>Added<a class="headerlink" href="#added-2" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>feat(pltneb): Add 'index' rc-mode to plot against image number</li>
+<li><p>feat(pltneb): Add ‘index’ rc-mode to plot against image number</p></li>
 </ul>
 </section>
-<section id="id6">
-<h4>Changed<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<section id="changed">
+<h4>Changed<a class="headerlink" href="#changed" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>Use white as a default background for plots</li>
-<li>feat(cache1D): Add disk caching for 1D profiles with rmsd using Parquet</li>
-<li>feat(cache2D): Add disk caching for 2D landscape plots using Parquet</li>
+<li><p>Use white as a default background for plots</p></li>
+<li><p>feat(cache1D): Add disk caching for 1D profiles with rmsd using
+Parquet</p></li>
+<li><p>feat(cache2D): Add disk caching for 2D landscape plots using Parquet</p></li>
 </ul>
 </section>
-<section id="id7">
-<h4>Fixed<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h4>
+<section id="fixed-1">
+<span id="id5"></span><h4>Fixed<a class="headerlink" href="#fixed-1" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts</li>
+<li><p>fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts</p></li>
 </ul>
 </section>
 </section>
-<section id="id8">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.4">v0.0.4</a> - 2025-12-01<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
-<section id="id9">
-<h4>Added<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
-<ul>
-<li>Added <code class="docutils literal notranslate"><span class="pre">_import_from_parent_env</span></code> helper to enable fallback imports from the parent python environment.</li>
-<li>Updated <code class="docutils literal notranslate"><span class="pre">con_splitter</span></code> to handle multi-path trajectories via <code class="docutils literal notranslate"><span class="pre">--images-per-path</span></code> and <code class="docutils literal notranslate"><span class="pre">--path-index</span></code> arguments.</li>
-</ul>
-</section>
-<section id="id10">
-<h4>Changed<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
-<ul>
-<li>Migrated linting configuration to <code class="docutils literal notranslate"><span class="pre">tool.ruff.lint</span></code> and applied global formatting fixes.</li>
-<li>Refactored CLI architecture to support dynamic command dispatch and environment propagation for isolated scripts.</li>
-<li>Updated <code class="docutils literal notranslate"><span class="pre">plt_neb</span></code> to use the new import helper for optional <code class="docutils literal notranslate"><span class="pre">ira_mod</span></code> loading.</li>
-</ul>
-</section>
-<section id="id11">
-<h4>Fixed<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
-<ul>
-<li>Added conditional skipping for <code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code> tests when <code class="docutils literal notranslate"><span class="pre">ase</span></code> is not present in the environment.</li>
-<li>Fixed variable name typo in <code class="docutils literal notranslate"><span class="pre">plt_neb</span></code> when falling back to globbed overlay data.</li>
-</ul>
-</section>
-</section>
-<section id="id12">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.3">v0.0.3</a> - 2025-10-27<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
-<section id="id13">
-<h4>Added<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<section id="v0-0-4-2025-12-01">
+<h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.4">v0.0.4</a> - 2025-12-01<a class="headerlink" href="#v0-0-4-2025-12-01" title="Link to this heading">¶</a></h3>
+<section id="added-3">
+<span id="id6"></span><h4>Added<a class="headerlink" href="#added-3" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>Add a FES direct reconstruction helper</li>
-<li>Add a version picker for the prefix package deleter</li>
-<li>Add an eigenvalue plotter</li>
-<li>Add more options for NEB visualization</li>
-<li>Add the PES estimated NEB plot</li>
-<li>Add the ruhi colorscheme</li>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">_import_from_parent_env</span></code> helper to enable fallback imports
+from the parent python environment.</p></li>
+<li><p>Updated <code class="docutils literal notranslate"><span class="pre">con_splitter</span></code> to handle multi-path trajectories via
+<code class="docutils literal notranslate"><span class="pre">--images-per-path</span></code> and <code class="docutils literal notranslate"><span class="pre">--path-index</span></code> arguments.</p></li>
 </ul>
 </section>
-<section id="id14">
-<h4>Changed<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h4>
+<section id="changed-1">
+<span id="id7"></span><h4>Changed<a class="headerlink" href="#changed-1" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>Use hermite interpolation for NEB plots</li>
+<li><p>Migrated linting configuration to <code class="docutils literal notranslate"><span class="pre">tool.ruff.lint</span></code> and applied
+global formatting fixes.</p></li>
+<li><p>Refactored CLI architecture to support dynamic command dispatch and
+environment propagation for isolated scripts.</p></li>
+<li><p>Updated <code class="docutils literal notranslate"><span class="pre">plt_neb</span></code> to use the new import helper for optional
+<code class="docutils literal notranslate"><span class="pre">ira_mod</span></code> loading.</p></li>
+</ul>
+</section>
+<section id="fixed-2">
+<span id="id8"></span><h4>Fixed<a class="headerlink" href="#fixed-2" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Added conditional skipping for <code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code> tests when <code class="docutils literal notranslate"><span class="pre">ase</span></code> is not
+present in the environment.</p></li>
+<li><p>Fixed variable name typo in <code class="docutils literal notranslate"><span class="pre">plt_neb</span></code> when falling back to globbed
+overlay data.</p></li>
 </ul>
 </section>
 </section>
-<section id="id15">
-<h3><a class="reference external" href="https://github.com/theochemui/eongit/tree/v0.0.2">v0.0.2</a> - 2025-09-06<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
-<section id="id16">
-<h4>Added<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h4>
+<section id="v0-0-3-2025-10-27">
+<h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.3">v0.0.3</a> - 2025-10-27<a class="headerlink" href="#v0-0-3-2025-10-27" title="Link to this heading">¶</a></h3>
+<section id="added-4">
+<span id="id9"></span><h4>Added<a class="headerlink" href="#added-4" title="Link to this heading">¶</a></h4>
 <ul class="simple">
-<li>Helper to delete prefix packages</li>
-<li>Helper to generate initial paths for EON's NEB</li>
-<li>EON helpers using OVITO</li>
-<li>Enable image insets for the NEB</li>
+<li><p>Add a FES direct reconstruction helper</p></li>
+<li><p>Add a version picker for the prefix package deleter</p></li>
+<li><p>Add an eigenvalue plotter</p></li>
+<li><p>Add more options for NEB visualization</p></li>
+<li><p>Add the PES estimated NEB plot</p></li>
+<li><p>Add the ruhi colorscheme</p></li>
+</ul>
+</section>
+<section id="changed-2">
+<span id="id10"></span><h4>Changed<a class="headerlink" href="#changed-2" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Use hermite interpolation for NEB plots</p></li>
+</ul>
+</section>
+</section>
+<section id="v0-0-2-2025-09-06">
+<h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.2">v0.0.2</a> - 2025-09-06<a class="headerlink" href="#v0-0-2-2025-09-06" title="Link to this heading">¶</a></h3>
+<section id="added-5">
+<span id="id11"></span><h4>Added<a class="headerlink" href="#added-5" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p>Helper to delete prefix packages</p></li>
+<li><p>Helper to generate initial paths for EON’s NEB</p></li>
+<li><p>EON helpers using OVITO</p></li>
+<li><p>Enable image insets for the NEB</p></li>
 </ul>
 </section>
 </section>

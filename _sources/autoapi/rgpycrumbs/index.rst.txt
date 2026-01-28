@@ -18,6 +18,7 @@ Submodules
    /autoapi/rgpycrumbs/parsers/index
    /autoapi/rgpycrumbs/plumed/index
    /autoapi/rgpycrumbs/prefix/index
+   /autoapi/rgpycrumbs/run/index
    /autoapi/rgpycrumbs/xts/index
 
 

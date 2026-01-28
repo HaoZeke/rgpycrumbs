@@ -1,0 +1,22 @@
+rgpycrumbs.eon.helpers
+======================
+
+.. py:module:: rgpycrumbs.eon.helpers
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.helpers.write_eon_config
+
+
+Module Contents
+---------------
+
+.. py:function:: write_eon_config(path: Union[str, pathlib.Path], settings: dict[str, dict[str, Any]]) -> None
+
+   Writes a config.ini file for eOn using a dictionary structure.
+
+

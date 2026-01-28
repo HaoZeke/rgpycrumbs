@@ -1,0 +1,31 @@
+rgpycrumbs.run.jupyter
+======================
+
+.. py:module:: rgpycrumbs.run.jupyter
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.run.jupyter._run_command_live
+   rgpycrumbs.run.jupyter.run_command_or_exit
+
+
+Module Contents
+---------------
+
+.. py:function:: _run_command_live(cmd: str | list[str], *, check: bool = True, timeout: float | None = None, capture: bool = False, encoding: str = 'utf-8') -> subprocess.CompletedProcess
+
+   Internal: run command and stream stdout/stderr live to current stdout.
+   If capture=True, also collect combined output and return it
+   in CompletedProcess.stdout.
+
+
+.. py:function:: run_command_or_exit(cmd: str | list[str], capture: bool = False, timeout: float | None = 300) -> subprocess.CompletedProcess
+
+   Helper wrapper to run commands, stream output, and exit script/notebook
+   cleanly on failure so sphinx-gallery sees the errors appropriately.
+
+

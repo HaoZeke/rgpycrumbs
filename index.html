@@ -87,12 +87,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="tools/eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/prefix/index.html">Prefix Helpers</a><ul>
@@ -120,6 +126,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -144,6 +151,10 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/prefix/index.html">rgpycrumbs.prefix</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
@@ -254,9 +265,9 @@ data-aria-dark="Switch to auto color mode">
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> functions as a unified dispatcher for research scripts and
-computational utilities, tailored for computational chemistry.</p>
-<p><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> employs <a class="reference external" href="https://peps.python.org/pep-0723/">PEP 723</a> metadata to isolate dependencies for each tool
-individually. This architecture ensures:</p>
+computational utilities, tailored for computational chemistry.  <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code>
+employs <a class="reference external" href="https://peps.python.org/pep-0723/">PEP 723</a> metadata to isolate dependencies for each tool individually
+ensuring:</p>
 <dl class="simple">
 <dt>Conflict-Free Execution</dt><dd><p>Scripts with incompatible requirements like
 different <code class="docutils literal notranslate"><span class="pre">numpy</span></code> versions run side-by-side without issue.</p>
@@ -266,11 +277,11 @@ fetches heavy libraries (like <code class="docutils literal notranslate"><span c
 executing a script that requires them.</p>
 </dd>
 <dt>Strict Reproducibility</dt><dd><p>Every script explicitly declares its necessary
-environment, preventing “works on my machine” errors.</p>
+environment, preventing “works on my machine” errors.
+Broadly speaking, the tooling here assists with computational methods to find</p>
 </dd>
 </dl>
-<p>Broadly speaking, the tooling here assists with computational methods to find
-reaction pathways, along with packaging helpers.</p>
+<p>reaction pathways, along with packaging helpers.</p>
 </section>
 <section id="advanced-neb-visualization">
 <h2>Advanced NEB Visualization<a class="headerlink" href="#advanced-neb-visualization" title="Link to this heading">¶</a></h2>
@@ -341,12 +352,18 @@ notebooks.</p>
 <li class="toctree-l1"><a class="reference internal" href="tools/eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/prefix/index.html">Prefix Helpers</a><ul>

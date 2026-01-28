@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="tools/eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tools/prefix/index.html">Prefix Helpers</a><ul>
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -147,6 +154,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -167,25 +178,7 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#id1">Contributor Covenant Code of Conduct</a><ul>
-<li><a class="reference internal" href="#id2">Our Pledge</a></li>
-<li><a class="reference internal" href="#id3">Our Standards</a></li>
-<li><a class="reference internal" href="#id4">Enforcement Responsibilities</a></li>
-<li><a class="reference internal" href="#id5">Scope</a></li>
-<li><a class="reference internal" href="#id6">Enforcement</a></li>
-<li><a class="reference internal" href="#id7">Enforcement Guidelines</a><ul>
-<li><a class="reference internal" href="#id8">1. Correction</a></li>
-<li><a class="reference internal" href="#id9">2. Warning</a></li>
-<li><a class="reference internal" href="#id10">3. Temporary Ban</a></li>
-<li><a class="reference internal" href="#id11">4. Permanent Ban</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id12">Attribution</a></li>
-</ul>
-</li>
-</ul>
-</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -262,126 +255,6 @@ data-aria-dark="Switch to auto color mode">
 </dd>
 </dl>
 </div></blockquote>
-<section id="id1">
-<h2>Contributor Covenant Code of Conduct<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
-<section id="id2">
-<h3>Our Pledge<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
-<p>We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex characteristics, gender
-identity and expression, level of experience, education, socio-economic status,
-nationality, personal appearance, race, caste, color, religion, or sexual
-identity and orientation.</p>
-<p>We pledge to act and interact in ways that contribute to an open, welcoming,
-diverse, inclusive, and healthy community.</p>
-</section>
-<section id="id3">
-<h3>Our Standards<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
-<p>Examples of behavior that contributes to a positive environment for our
-community include:</p>
-<ul class="simple">
-<li>Demonstrating empathy and kindness toward other people</li>
-<li>Being respectful of differing opinions, viewpoints, and experiences</li>
-<li>Giving and gracefully accepting constructive feedback</li>
-<li>Accepting responsibility and apologizing to those affected by our mistakes,
-and learning from the experience</li>
-<li>Focusing on what is best not just for us as individuals, but for the overall
-community</li>
-</ul>
-<p>Examples of unacceptable behavior include:</p>
-<ul class="simple">
-<li>The use of sexualized language or imagery, and sexual attention or advances of
-any kind</li>
-<li>Trolling, insulting or derogatory comments, and personal or political attacks</li>
-<li>Public or private harassment</li>
-<li>Publishing others' private information, such as a physical or email address,
-without their explicit permission</li>
-<li>Other conduct which could reasonably be considered inappropriate in a
-professional setting</li>
-</ul>
-</section>
-<section id="id4">
-<h3>Enforcement Responsibilities<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
-<p>Community leaders are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any behavior that they deem inappropriate, threatening, offensive,
-or harmful.</p>
-<p>Community leaders have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, and will communicate reasons for moderation
-decisions when appropriate.</p>
-</section>
-<section id="id5">
-<h3>Scope<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
-<p>This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.</p>
-</section>
-<section id="id6">
-<h3>Enforcement<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
-<p>Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-[INSERT CONTACT METHOD].
-All complaints will be reviewed and investigated promptly and fairly.</p>
-<p>All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.</p>
-</section>
-<section id="id7">
-<h3>Enforcement Guidelines<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
-<p>Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation of this Code of Conduct:</p>
-<section id="id8">
-<h4>1. Correction<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h4>
-<p><strong>Community Impact</strong>: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.</p>
-<p><strong>Consequence</strong>: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
-behavior was inappropriate. A public apology may be requested.</p>
-</section>
-<section id="id9">
-<h4>2. Warning<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h4>
-<p><strong>Community Impact</strong>: A violation through a single incident or series of
-actions.</p>
-<p><strong>Consequence</strong>: A warning with consequences for continued behavior. No
-interaction with the people involved, including unsolicited interaction with
-those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or permanent
-ban.</p>
-</section>
-<section id="id10">
-<h4>3. Temporary Ban<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
-<p><strong>Community Impact</strong>: A serious violation of community standards, including
-sustained inappropriate behavior.</p>
-<p><strong>Consequence</strong>: A temporary ban from any sort of interaction or public
-communication with the community for a specified period of time. No public or
-private interaction with the people involved, including unsolicited interaction
-with those enforcing the Code of Conduct, is allowed during this period.
-Violating these terms may lead to a permanent ban.</p>
-</section>
-<section id="id11">
-<h4>4. Permanent Ban<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
-<p><strong>Community Impact</strong>: Demonstrating a pattern of violation of community
-standards, including sustained inappropriate behavior, harassment of an
-individual, or aggression toward or disparagement of classes of individuals.</p>
-<p><strong>Consequence</strong>: A permanent ban from any sort of public interaction within the
-community.</p>
-</section>
-</section>
-<section id="id12">
-<h3>Attribution<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
-<p>This Code of Conduct is adapted from the <a class="reference external" href="https://www.contributor-covenant.org">Contributor Covenant</a>,
-version 2.1, available at
-<a class="reference external" href="https://www.contributor-covenant.org/version/2/1/code_of_conduct.html">https://www.contributor-covenant.org/version/2/1/code_of_conduct.html</a>.</p>
-<p>Community Impact Guidelines were inspired by
-<a class="reference external" href="https://github.com/mozilla/diversity">Mozilla’s code of conduct enforcement ladder</a>.</p>
-<p>For answers to common questions about this code of conduct, see the FAQ at
-<a class="reference external" href="https://www.contributor-covenant.org/faq">https://www.contributor-covenant.org/faq</a>. Translations are available at
-<a class="reference external" href="https://www.contributor-covenant.org/translations">https://www.contributor-covenant.org/translations</a>.</p>
-</section>
-</section>
 </section>
 
         </article><button class="back-to-top" type="button">

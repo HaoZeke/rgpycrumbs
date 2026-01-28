@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">EON Helpers</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -147,6 +154,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -169,6 +180,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#ptm-displacement">PTM Displacement</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-eon-ptmdisp">rgpycrumbs eon ptmdisp</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
@@ -250,10 +262,55 @@ data-aria-dark="Switch to auto color mode">
 structure (e.g., FCC) using Polyhedral Template Matching (PTM). It outputs the
 0-based indices of these defect atoms (e.g., interstitials), which is useful for
 filtering or setting up atom lists for the displacements used for EON calculations.</p>
+<section id="rgpycrumbs-eon-ptmdisp">
+<h3>rgpycrumbs eon ptmdisp<a class="headerlink" href="#rgpycrumbs-eon-ptmdisp" title="Link to this heading">¶</a></h3>
+<p>Analyzes FILENAME to find all atoms that are NOT the specified
+crystal structure type and prints their 0-based indices as a
+comma-separated list, suitable for use in other programs.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>ptmdisp<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>FILENAME
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-ptmdisp-s">
+<span id="cmdoption-rgpycrumbs-eon-ptmdisp-structure-type"></span><span class="sig-name descname"><span class="pre">-s</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--structure-type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;structure&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-ptmdisp-s" title="Link to this definition">¶</a></dt>
+<dd><p>The crystal structure to identify and exclude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">&lt;CrystalStructure.FCC:</span> <span class="pre">'FCC'&gt;</span></code></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p>Other | FCC | HCP | BCC | Icosahedral</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-ptmdisp-v">
+<span id="cmdoption-rgpycrumbs-eon-ptmdisp-verbose"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-ptmdisp-v" title="Link to this definition">¶</a></dt>
+<dd><p>Enable verbose informational output to stderr.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-ptmdisp-no-fcc-vacancy">
+<span class="sig-name descname"><span class="pre">--no-fcc-vacancy</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;no_fcc_vacancy&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-ptmdisp-no-fcc-vacancy" title="Link to this definition">¶</a></dt>
+<dd><p>Disable FCC vacancy processing.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-ptmdisp-arg-FILENAME">
+<span class="sig-name descname"><span class="pre">FILENAME</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-ptmdisp-arg-FILENAME" title="Link to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">$ python -m rgpycrumbs.cli eon ptmdisp --help
-</span><span data-line="2">/home/runner/work/rgpycrumbs/rgpycrumbs/.pixi/envs/docs/bin/python: Error while finding module specification for &#39;rgpycrumbs.cli&#39; (ModuleNotFoundError: No module named &#39;rgpycrumbs&#39;)
+</span><span data-line="2">--&gt; Dispatching to: uv run /home/runner/work/rgpycrumbs/rgpycrumbs/rgpycrumbs/eon/ptmdisp.py --help
+</span><span data-line="3">Error: &#39;uv&#39; command not found. Is it installed?
 </span></pre></div>
 </div>
 </section>

@@ -9,6 +9,7 @@ These tools provide visualization and bonding analysis.
    :maxdepth: 2
    :caption: Geometry Tools
 
+   alignment
    detect_fragments
 
 API Reference

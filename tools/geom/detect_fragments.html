@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Fragment Detection - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Prefix Helpers" href="../prefix/index.html" /><link rel="prev" title="Geometry Helpers" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Fragment Detection - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="General Utilities" href="../utils/index.html" /><link rel="prev" title="Robust Structural Alignment" href="alignment.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/geom/detect_fragments.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -88,12 +88,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1"><a class="reference internal" href="../eon/index.html">EON Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for EON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Geometry Helpers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
@@ -121,6 +127,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 </ul>
@@ -147,6 +154,10 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -169,6 +180,12 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#id1">Fragment Detection</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-geom-detect-fragments">rgpycrumbs geom detect-fragments</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-geom-detect-fragments-batch">batch</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-geom-detect-fragments-bond-order">bond-order</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-geom-detect-fragments-geometric">geometric</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#python-example">Python Example</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
@@ -247,6 +264,150 @@ data-aria-dark="Switch to auto color mode">
 <h1>Fragment Detection<a class="headerlink" href="#fragment-detection" title="Link to this heading">¶</a></h1>
 <section id="id1">
 <h2>Fragment Detection<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<section id="rgpycrumbs-geom-detect-fragments">
+<h3>rgpycrumbs geom detect-fragments<a class="headerlink" href="#rgpycrumbs-geom-detect-fragments" title="Link to this heading">¶</a></h3>
+<p>Fragment detection suite for physical chemistry simulations.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>geom<span class="w"> </span>detect-fragments<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</span></pre></div>
+</div>
+<section id="rgpycrumbs-geom-detect-fragments-batch">
+<h4>batch<a class="headerlink" href="#rgpycrumbs-geom-detect-fragments-batch" title="Link to this heading">¶</a></h4>
+<p>Processes directories and outputs CSV summaries.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>geom<span class="w"> </span>detect-fragments<span class="w"> </span>batch<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>DIRECTORY
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-batch-method">
+<span class="sig-name descname"><span class="pre">--method</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;method&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-batch-method" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>geometric | bond-order</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-batch-pattern">
+<span class="sig-name descname"><span class="pre">--pattern</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;pattern&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-batch-pattern" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-batch-output">
+<span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-batch-output" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-batch-min-dist">
+<span class="sig-name descname"><span class="pre">--min-dist</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;min_dist&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-batch-min-dist" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-batch-arg-DIRECTORY">
+<span class="sig-name descname"><span class="pre">DIRECTORY</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-batch-arg-DIRECTORY" title="Link to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-geom-detect-fragments-bond-order">
+<h4>bond-order<a class="headerlink" href="#rgpycrumbs-geom-detect-fragments-bond-order" title="Link to this heading">¶</a></h4>
+<p>Execute fragment detection using quantum mechanical bond orders.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>geom<span class="w"> </span>detect-fragments<span class="w"> </span>bond-order<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>FILENAME
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-method">
+<span class="sig-name descname"><span class="pre">--method</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;method&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-method" title="Link to this definition">¶</a></dt>
+<dd><p>The xTB Hamiltonian level for calculation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>GFN2-xTB | GFN1-xTB | IPEA-xTB</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-threshold">
+<span class="sig-name descname"><span class="pre">--threshold</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;threshold&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-threshold" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-charge">
+<span class="sig-name descname"><span class="pre">--charge</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;charge&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-charge" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-multiplicity">
+<span class="sig-name descname"><span class="pre">--multiplicity</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;multiplicity&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-multiplicity" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-min-dist">
+<span class="sig-name descname"><span class="pre">--min-dist</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;min_dist&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-min-dist" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-visualize">
+<span class="sig-name descname"><span class="pre">--visualize</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-visualize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-arg-FILENAME">
+<span class="sig-name descname"><span class="pre">FILENAME</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-bond-order-arg-FILENAME" title="Link to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-geom-detect-fragments-geometric">
+<h4>geometric<a class="headerlink" href="#rgpycrumbs-geom-detect-fragments-geometric" title="Link to this heading">¶</a></h4>
+<p>Executes geometric fragment detection.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>geom<span class="w"> </span>detect-fragments<span class="w"> </span>geometric<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>FILENAME
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-geometric-multiplier">
+<span class="sig-name descname"><span class="pre">--multiplier</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;multiplier&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-geometric-multiplier" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-geometric-radius-type">
+<span class="sig-name descname"><span class="pre">--radius-type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;radius_type&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-geometric-radius-type" title="Link to this definition">¶</a></dt>
+<dd><p>Choose ‘natural’ for Cordero radii or ‘covalent’ for standard ASE radii.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>natural | covalent</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-geometric-min-dist">
+<span class="sig-name descname"><span class="pre">--min-dist</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;min_dist&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-geometric-min-dist" title="Link to this definition">¶</a></dt>
+<dd><p>Merge threshold in Angstroms.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-geometric-visualize">
+<span class="sig-name descname"><span class="pre">--visualize</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-geometric-visualize" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-geom-detect-fragments-geometric-arg-FILENAME">
+<span class="sig-name descname"><span class="pre">FILENAME</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-geom-detect-fragments-geometric-arg-FILENAME" title="Link to this definition">¶</a></dt>
+<dd><p>Required argument</p>
+</dd></dl>
+
+</section>
+</section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
 <p>To analyze molecular fragments using the geometric method, useful for standard organic molecules, the way <code class="docutils literal notranslate"><span class="pre">ase</span></code> visualizations work:</p>
@@ -306,16 +467,16 @@ here</a>:</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="index.html">
+    <a href="alignment.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Geometry Helpers</div></div>
+        <span>Previous</span><div class="title">Robust Structural Alignment</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="../prefix/index.html">
+    <a href="../utils/index.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Prefix Helpers</div>
+        <div class="title">General Utilities</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

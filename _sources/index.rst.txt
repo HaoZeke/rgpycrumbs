@@ -13,13 +13,12 @@ Overview
 --------
 
 ``rgpycrumbs`` functions as a unified dispatcher for research scripts and
-computational utilities, tailored for computational chemistry.
-
-``rgpycrumbs`` employs `PEP 723 <https://peps.python.org/pep-0723/>`_ metadata to isolate dependencies for each tool
-individually. This architecture ensures:
+computational utilities, tailored for computational chemistry.  ``rgpycrumbs``
+employs `PEP 723 <https://peps.python.org/pep-0723/>`_ metadata to isolate dependencies for each tool individually
+ensuring:
 
 Conflict-Free Execution
-    Scripts with incompatible requirements like 
+    Scripts with incompatible requirements like
     different ``numpy`` versions run side-by-side without issue.
 
 On-Demand Retrieval
@@ -30,8 +29,8 @@ On-Demand Retrieval
 Strict Reproducibility
     Every script explicitly declares its necessary
     environment, preventing "works on my machine" errors.
+    Broadly speaking, the tooling here assists with computational methods to find
 
-Broadly speaking, the tooling here assists with computational methods to find
 reaction pathways, along with packaging helpers.
 
 Advanced NEB Visualization
@@ -105,6 +104,7 @@ Tool Categories
 
      tools/eon/index
      tools/geom/index
+     tools/utils/index
      tools/prefix/index
 
 Developer Reference
