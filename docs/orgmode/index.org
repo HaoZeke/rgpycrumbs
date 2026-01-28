@@ -18,20 +18,18 @@ file:../../branding/logo/pycrumbs_logo.webp
 
 * Overview
   ~rgpycrumbs~ functions as a unified dispatcher for research scripts and
-  computational utilities, tailored for computational chemistry.
+  computational utilities, tailored for computational chemistry.  ~rgpycrumbs~
+  employs [[https://peps.python.org/pep-0723/][PEP 723]] metadata to isolate dependencies for each tool individually
+  ensuring:
 
-~rgpycrumbs~ employs [[https://peps.python.org/pep-0723/][PEP 723]] metadata to isolate dependencies for each tool
-individually. This architecture ensures:
-
-- Conflict-Free Execution :: Scripts with incompatible requirements like 
+- Conflict-Free Execution :: Scripts with incompatible requirements like
   different ~numpy~ versions run side-by-side without issue.
 - On-Demand Retrieval :: The core package remains lightweight. The system
   fetches heavy libraries (like ~ase~ or ~matplotlib~) via ~uv~ only when
   executing a script that requires them.
 - Strict Reproducibility :: Every script explicitly declares its necessary
   environment, preventing "works on my machine" errors.
-
-Broadly speaking, the tooling here assists with computational methods to find
+  Broadly speaking, the tooling here assists with computational methods to find
 reaction pathways, along with packaging helpers.
 * Advanced NEB Visualization
 The @@rst::doc:`plt-neb tool <tools/eon/plt_neb>`@@ offers novel visualization
@@ -73,6 +71,7 @@ notebooks.
 
      tools/eon/index
      tools/geom/index
+     tools/utils/index
      tools/prefix/index
 #+END_EXPORT
 

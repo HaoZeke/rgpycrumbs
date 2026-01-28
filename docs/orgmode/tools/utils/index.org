@@ -1,0 +1,16 @@
+#+TITLE: Utilities
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* General Utilities
+  Helper functions for workflows, notebooks, and infrastructure.
+
+#+BEGIN_EXPORT rst
+.. toctree::
+   :maxdepth: 2
+   :caption: Utilities
+
+   jupyter
+#+END_EXPORT
+
+** API Reference
+For developer details, see the @@rst::doc:`Utilities Reference <../../autoapi/rgpycrumbs/run/index>`@@.

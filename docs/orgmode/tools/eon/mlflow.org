@@ -1,0 +1,39 @@
+#+TITLE: MLFlow Logging for EON
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Configuration Logging
+  When running EON simulations in a production environment, tracking the exact
+  parameters used is critical for reproducibility.
+  #+BEGIN_EXPORT rst
+  .. versionadded:: 0.1.0
+  #+END_EXPORT
+
+  The `rgpycrumbs.eon._mlflow` module provides helpers to log hydrated EON
+  configurations to an MLFlow tracking server.
+
+** Features
+   - **Hydration**: Merges the EON schema defaults with the user's `config.ini`.
+   - **Override Tracking**: Distinctly logs parameters that the user explicitly changed, separating them from default values.
+   - **Artifact Storage**: Uploads the raw `config.ini` as an artifact.
+
+** Usage
+   #+BEGIN_SRC python
+   import mlflow
+   from rgpycrumbs.eon._mlflow.log_params import log_config_ini
+   from pathlib import Path
+
+   mlflow.set_tracking_uri("http://localhost:5000")
+   mlflow.set_experiment("EON_Oxadiazole_Reaction")
+
+   with mlflow.start_run():
+       # Log parameters from the local config file
+       log_config_ini(
+           Path("config.ini"),
+           w_artifact=True,       # Upload file as artifact
+           track_overrides=True   # Log 'Overrides/Section/Key' params
+       )
+       print("Configuration logged.")
+   #+END_SRC
+
+** API Reference
+   For developer details see @@rst::mod:`rgpycrumbs.eon._mlflow`@@.

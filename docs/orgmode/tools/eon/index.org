@@ -11,6 +11,7 @@
 
    con_splitter
    generate_nwchem_input
+   mlflow
    plt_neb
    ptmdisp
 #+END_EXPORT

@@ -9,6 +9,7 @@
    :maxdepth: 2
    :caption: Geometry Tools
 
+   alignment
    detect_fragments
 #+END_EXPORT
 
