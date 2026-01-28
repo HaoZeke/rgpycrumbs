@@ -475,6 +475,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e4/94/3c57e8b1985e755c48972e2ecd59526d4bf0b52a1fe805bc52a8e98cb92d/sphinx_sitemap-2.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/04/2c/7aec6e0580f666d4f61474a50c4995a98abfff27d827f0e7bc8c4fa528f5/sphinxcontrib_programoutput-0.18-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/63/f9/f48a8f489c8ae8930f12c558b4dd26da96791837747fca87e9da2643f12d/sphobjinv-2.3.1.3-py3-none-any.whl
+      - pypi: ./
   eonmlflow:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -8226,6 +8227,11 @@ packages:
 - pypi: ./
   name: rgpycrumbs
   version: 0.0.7.dev31+g83fb4b9c8.d20251231
+  sha256: f9de81b4001fc34ae2afc27cf77e8c95b3acaa930fc738fc976e2e895ba27a58
+  requires_python: '>=3.10'
+- pypi: ./
+  name: rgpycrumbs
+  version: 0.1.1.dev4+ge12c11e73.d20260128
   sha256: f9de81b4001fc34ae2afc27cf77e8c95b3acaa930fc738fc976e2e895ba27a58
   requires_python: '>=3.10'
 - conda: https://conda.anaconda.org/conda-forge/noarch/rich-14.2.0-pyhcf101f3_0.conda
