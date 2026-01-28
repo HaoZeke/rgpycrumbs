@@ -1,9 +1,9 @@
-## [v0.1.0](https://github.com/theochemui/eongit/tree/v0.1.0) - 2026-01-28
+## [v0.1.0](https://github.com/HaoZeke/rgpycrumbs/tree/v0.1.0) - 2026-01-28
 
 ### Added
 
-- feat(eon): add dictionary support ([#28ac681.eon](https://github.com/theochemui/eongit/issues/28ac681.eon))
-- feat(jup): add subprocess run helpers for atomistic-cookbook ([#a60da70.jup](https://github.com/theochemui/eongit/issues/a60da70.jup))
+- feat(eon): add dictionary support ([#28ac681.eon](https://github.com/HaoZeke/rgpycrumbs/issues/28ac681.eon))
+- feat(jup): add subprocess run helpers for atomistic-cookbook ([#a60da70.jup](https://github.com/HaoZeke/rgpycrumbs/issues/a60da70.jup))
 - Added alignment using IRA for splitting con files.
 - Added robust alignment API using Isomorphic Robust Alignment (IRA) with ASE fallback.
 - Fallback to using ase minimize_rotations_and_translations if IRA fails.
@@ -17,7 +17,7 @@
 - Refactored alignment internals into structured dataclasses for improved API clarity.
 
 
-## [v0.0.6](https://github.com/theochemui/eongit/tree/v0.0.6) - 2025-12-23
+## [v0.0.6](https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.6) - 2025-12-23
 
 ### Added
 
@@ -30,7 +30,7 @@
 - Refactored internal import helper to use , fixing support for nested module imports (e.g., ).
 
 
-## [v0.0.5](https://github.com/theochemui/eongit/tree/v0.0.5) - 2025-12-06
+## [v0.0.5](https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.5) - 2025-12-06
 
 ### Added
 
@@ -47,7 +47,7 @@
 - fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts
 
 
-## [v0.0.4](https://github.com/theochemui/eongit/tree/v0.0.4) - 2025-12-01
+## [v0.0.4](https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.4) - 2025-12-01
 
 ### Added
 
@@ -66,7 +66,7 @@
 - Fixed variable name typo in `plt_neb` when falling back to globbed overlay data.
 
 
-## [v0.0.3](https://github.com/theochemui/eongit/tree/v0.0.3) - 2025-10-27
+## [v0.0.3](https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.3) - 2025-10-27
 
 ### Added
 
@@ -82,7 +82,7 @@
 - Use hermite interpolation for NEB plots
 
 
-## [v0.0.2](https://github.com/theochemui/eongit/tree/v0.0.2) - 2025-09-06
+## [v0.0.2](https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.2) - 2025-09-06
 
 ### Added
 
