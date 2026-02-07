@@ -60,6 +60,7 @@ from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
     load_structures_and_calculate_additional_rmsd,
+    load_augmenting_neb_data,
     estimate_rbf_smoothing,
 )
 from chemparseplot.plot.neb import (
@@ -119,6 +120,18 @@ IRA_KMAX_DEFAULT = 1.8
     multiple=True,
     default=None,
     help="Path(s) to additional .con file(s) and label.",
+)
+@click.option(
+    "--augment-dat",
+    type=str,
+    default=None,
+    help="Glob pattern for extra .dat files for surface fitting.",
+)
+@click.option(
+    "--augment-con",
+    type=str,
+    default=None,
+    help="Glob pattern for extra .con files for surface fitting.",
 )
 @click.option(
     "--sp-file",
@@ -407,6 +420,8 @@ def main(
     force_recompute,
     ira_kmax,
     sp_file,
+    augment_dat,
+    augment_con,
 ):
     """Main entry point for NEB plot script."""
 
@@ -494,6 +509,20 @@ def main(
             dat_paths, con_paths, y_col, None, cache_file, force_recompute, ira_kmax
         )
 
+        # --- Augmentation Logic ---
+        if augment_dat and augment_con and atoms_list:
+            log.info("Loading augmentation data...")
+            df_aug = load_augmenting_neb_data(
+                augment_dat,
+                augment_con,
+                ref_atoms=atoms_list[0],  # Main path Reactant
+                prod_atoms=atoms_list[-1], # Main path Product
+                y_data_column=y_col,
+                ira_kmax=ira_kmax,
+            )
+            if not df_aug.is_empty():
+                df = pl.concat([df, df_aug], how="diagonal")
+
         # Surface Generation
         if landscape_mode == "surface":
             if landscape_path == "last":
@@ -508,6 +537,7 @@ def main(
             z_all = df_surface["z"].to_numpy()
             gr_all = df_surface["grad_r"].to_numpy()
             gp_all = df_surface["grad_p"].to_numpy()
+            step_all = df_surface["step"].to_numpy()
 
             # Heuristic for RBF smoothing if missing
             if surface_type == "rbf" and rbf_smoothing is None:
@@ -521,6 +551,7 @@ def main(
                 gr_all,
                 gp_all,
                 z_all,
+                step_data=step_all,
                 method=surface_type,
                 rbf_smooth=rbf_smoothing,
                 cmap=active_theme.cmap_landscape,
