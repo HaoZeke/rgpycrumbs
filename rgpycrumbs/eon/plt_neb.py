@@ -121,6 +121,12 @@ IRA_KMAX_DEFAULT = 1.8
     help="Path(s) to additional .con file(s) and label.",
 )
 @click.option(
+    "--sp-file",
+    type=click.Path(exists=False, dir_okay=False, path_type=Path),
+    default=Path("sp.con"),
+    help="Path to explicit saddle point file (eOn sp.con).",
+)
+@click.option(
     "--plot-type",
     type=click.Choice(["profile", "landscape"]),
     default="profile",
@@ -400,6 +406,7 @@ def main(
     cache_file,
     force_recompute,
     ira_kmax,
+    sp_file,
 ):
     """Main entry point for NEB plot script."""
 
@@ -446,13 +453,14 @@ def main(
 
     atoms_list = None
     additional_atoms_data = []
+    sp_data = None
 
     # Only attempt to load structures if specifically requested or needed for the plot type
     if con_file:
         try:
-            atoms_list, additional_atoms_data = (
+            atoms_list, additional_atoms_data, sp_data = (
                 load_structures_and_calculate_additional_rmsd(
-                    con_file, additional_con, ira_kmax
+                    con_file, additional_con, ira_kmax, sp_file
                 )
             )
         except Exception as e:
@@ -531,14 +539,21 @@ def main(
         )
 
         # Saddle Point Marker
-        if plot_mode == "energy":
-            saddle_idx = np.argmax(final_z[1:-1]) + 1
+        if sp_data:
+            # Use explicit SP coordinates
+            sp_x, sp_y = sp_data["r"], sp_data["p"]
+            log.info(f"Plotting explicit SP at R={sp_x:.3f}, P={sp_y:.3f}")
         else:
-            saddle_idx = np.argmin(final_z)
+            # Fallback to heuristic
+            if plot_mode == "energy":
+                saddle_idx = np.argmax(final_z[1:-1]) + 1
+            else:
+                saddle_idx = np.argmin(final_z)
+            sp_x, sp_y = final_r[saddle_idx], final_p[saddle_idx]
 
         ax.scatter(
-            final_r[saddle_idx],
-            final_p[saddle_idx],
+            sp_x,
+            sp_y,
             marker="s",
             s=int(active_theme.font_size * 2),
             c="white",
@@ -566,30 +581,51 @@ def main(
                 )
 
         if has_strip and atoms_list:
-            indices = (
-                list(range(len(atoms_list)))
-                if plot_structures == "all"
-                else sorted(list({0, saddle_idx, len(atoms_list) - 1}))
-            )
             strip_payload = []
-            for i in indices:
-                lbl = (
-                    "R"
-                    if i == 0
-                    else (
-                        "SP"
-                        if i == saddle_idx
-                        else ("P" if i == len(atoms_list) - 1 else str(i))
-                    )
-                )
-                strip_payload.append(
-                    {
+            
+            # Add Reactant
+            strip_payload.append({
+                "atoms": atoms_list[0],
+                "x": final_r[0],
+                "y": final_p[0],
+                "label": "R"
+            })
+
+            # Add Saddle (Explicit or Heuristic)
+            if sp_data:
+                 strip_payload.append({
+                    "atoms": sp_data["atoms"],
+                    "x": sp_data["r"],
+                    "y": sp_data["p"],
+                    "label": "SP"
+                })
+            else:
+                # Re-calculate heuristic index if not available in this scope
+                s_idx = (np.argmax(final_z[1:-1]) + 1) if plot_mode == "energy" else np.argmin(final_z)
+                strip_payload.append({
+                    "atoms": atoms_list[s_idx],
+                    "x": final_r[s_idx],
+                    "y": final_p[s_idx],
+                    "label": "SP"
+                })
+
+            # Add Product
+            strip_payload.append({
+                "atoms": atoms_list[-1],
+                "x": final_r[-1],
+                "y": final_p[-1],
+                "label": "P"
+            })
+
+            # Add intermediate points if 'all' requested
+            if plot_structures == "all":
+                for i in range(1, len(atoms_list) - 1):
+                    strip_payload.append({
                         "atoms": atoms_list[i],
                         "x": final_r[i],
                         "y": final_p[i],
-                        "label": lbl,
-                    }
-                )
+                        "label": str(i)
+                    })
 
             # Add additional structures
             for add_atoms, add_r, add_p, add_label in additional_atoms_data:
