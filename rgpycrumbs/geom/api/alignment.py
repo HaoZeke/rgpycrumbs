@@ -153,3 +153,47 @@ def align_structure_robust(
     # Fallback to standard rigid superimposition
     minimize_rotation_and_translation(ref_atoms, mobile_atoms)
     return AlignmentResult(atoms=mobile_atoms, method=AlignmentMethod.ASE_PROCRUSTES)
+
+def calculate_rmsd_from_ref(
+    atoms_list: list[Atoms], ira_instance, ref_atom: Atoms, ira_kmax: float
+) -> np.ndarray:
+    """
+    Calculates the RMSD of each structure in a list relative to a reference.
+
+    The function first attempts the IRA algorithm to handle atom permutations.
+    If IRA fails or lacks the necessary library, the code falls back to
+    standard ASE Procrustes alignment via `align_structure_robust`.
+
+    :param atoms_list: A list of ASE Atoms objects.
+    :param ira_instance: An instantiated IRA object (or None).
+    :param ref_atom: The reference Atoms object to align against.
+    :param ira_kmax: kmax factor for IRA.
+    :return: An array of RMSD values.
+    """
+    rmsd_values = np.zeros(len(atoms_list))
+    coords_ref = ref_atom.get_positions()
+
+    # Configure IRA based on the presence of the instance
+    config = IRAConfig(enabled=(ira_instance is not None), kmax=ira_kmax)
+
+    for i, atom_i in enumerate(atoms_list):
+        if atom_i is ref_atom:
+            rmsd_values[i] = 0.0
+            continue
+
+        # Create a working copy to avoid mutating the original trajectory
+        mobile_copy = atom_i.copy()
+
+        align_structure_robust(
+            ref_atom,
+            mobile_copy,
+            config,
+        )
+
+        # Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$
+        coords_aligned = mobile_copy.get_positions()
+        diff_sq = (coords_ref - coords_aligned) ** 2
+        rmsd = np.sqrt(np.mean(np.sum(diff_sq, axis=1)))
+        rmsd_values[i] = rmsd
+
+    return rmsd_values
