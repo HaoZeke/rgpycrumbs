@@ -43,6 +43,7 @@ import logging
 from pathlib import Path
 
 import click
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
 import numpy as np
@@ -412,7 +413,6 @@ def main(
     )
     setup_global_theme(active_theme)
 
-    # 2. Setup Figure
     if fig_height and aspect_ratio:
         figsize = (fig_height * aspect_ratio, fig_height)
     elif fig_height or aspect_ratio:
@@ -444,7 +444,6 @@ def main(
 
     apply_axis_theme(ax, active_theme)
 
-    # 3. Data Loading (Delegated to Library)
     atoms_list = None
     additional_atoms_data = []
 
@@ -463,7 +462,6 @@ def main(
                 log.critical("Cannot proceed without structures. Exiting.")
                 exit(1)
 
-    # 4. Plot Execution
     if plot_type == "landscape":
         # --- Landscape Plot ---
         dat_paths = find_file_paths(input_dat_pattern)
@@ -500,6 +498,8 @@ def main(
             r_all = df_surface["r"].to_numpy()
             p_all = df_surface["p"].to_numpy()
             z_all = df_surface["z"].to_numpy()
+            gr_all = df_surface["grad_r"].to_numpy()
+            gp_all = df_surface["grad_p"].to_numpy()
 
             # Heuristic for RBF smoothing if missing
             if surface_type == "rbf" and rbf_smoothing is None:
@@ -510,6 +510,8 @@ def main(
                 ax,
                 r_all,
                 p_all,
+                gr_all,
+                gp_all,
                 z_all,
                 method=surface_type,
                 rbf_smooth=rbf_smoothing,
@@ -546,24 +548,40 @@ def main(
             label="SP",
         )
 
-        # Structure Strip / Insets
-        if has_strip and atoms_list:
-            # Determine indices
-            if plot_structures == "all":
-                indices = list(range(len(atoms_list)))
-            else:
-                indices = sorted(list({0, saddle_idx, len(atoms_list) - 1}))
+        if additional_atoms_data:
+            marker_cmap = mpl.colormaps.get_cmap("tab10")
+            for i, (_, add_r, add_p, add_label) in enumerate(additional_atoms_data):
+                color = marker_cmap(i % 10)
+                ax.plot(
+                    add_r,
+                    add_p,
+                    marker="*",
+                    markersize=int(active_theme.font_size * 1.1),
+                    color=color,
+                    markeredgecolor="white",
+                    markeredgewidth=1.0,
+                    linestyle="None",
+                    zorder=102,
+                    label=add_label,
+                )
 
-            # Build payload
+        if has_strip and atoms_list:
+            indices = (
+                list(range(len(atoms_list)))
+                if plot_structures == "all"
+                else sorted(list({0, saddle_idx, len(atoms_list) - 1}))
+            )
             strip_payload = []
             for i in indices:
-                lbl = str(i)
-                if i == 0:
-                    lbl = "R"
-                elif i == saddle_idx:
-                    lbl = "SP"
-                elif i == len(atoms_list) - 1:
-                    lbl = "P"
+                lbl = (
+                    "R"
+                    if i == 0
+                    else (
+                        "SP"
+                        if i == saddle_idx
+                        else ("P" if i == len(atoms_list) - 1 else str(i))
+                    )
+                )
                 strip_payload.append(
                     {
                         "atoms": atoms_list[i],
@@ -692,45 +710,68 @@ def main(
             )
 
             if highlight_last and is_last and atoms_list and plot_structures != "none":
-                indices = []
-                if plot_structures == "all":
-                    indices = list(range(len(atoms_list)))
-                elif plot_structures == "crit_points":
-                    y_vals = data[y_col]
-                    if plot_mode == "energy":
-                        # exclude endpoints for saddle search
-                        saddle_idx = np.argmax(y_vals[1:-1]) + 1
-                    else:
-                        saddle_idx = np.argmin(y_vals)
-                    indices = sorted(list({0, saddle_idx, len(atoms_list) - 1}))
-
+                indices = (
+                    list(range(len(atoms_list)))
+                    if plot_structures == "all"
+                    else sorted(
+                        list(
+                            {
+                                0,
+                                np.argmax(data[y_col][1:-1]) + 1
+                                if plot_mode == "energy"
+                                else np.argmin(data[y_col]),
+                                len(atoms_list) - 1,
+                            }
+                        )
+                    )
+                )
                 for i in indices:
-                    # Positioning Logic
-                    if plot_structures == "all":
-                        y_offset = 60.0 if i % 2 == 0 else -60.0
-                        xybox = (15.0, y_offset)
-                        rad = 0.1 if i % 2 == 0 else -0.1
-                    elif i == 0:
-                        xybox = (draw_reactant[0], draw_reactant[1])
-                        rad = draw_reactant[2]
+                    if i == 0:
+                        xybox, rad = draw_reactant[:2], draw_reactant[2]
                     elif i == len(atoms_list) - 1:
-                        xybox = (draw_product[0], draw_product[1])
-                        rad = draw_product[2]
-                    else:  # Saddle
-                        xybox = (draw_saddle[0], draw_saddle[1])
-                        rad = draw_saddle[2]
+                        xybox, rad = draw_product[:2], draw_product[2]
+                    else:
+                        xybox, rad = draw_saddle[:2], draw_saddle[2]
 
-                    x_coord = data[1][i]
-                    y_coord = data[y_col][i]
+                    if plot_structures == "all":
+                        xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
+                        rad = 0.1 if i % 2 == 0 else -0.1
 
                     # Call library function
                     plot_structure_inset(
                         ax,
                         atoms_list[i],
-                        x_coord,
-                        y_coord,
-                        xybox=xybox,
-                        rad=rad,
+                        data[1][i],
+                        data[y_col][i],
+                        xybox,
+                        rad,
+                        zoom=zoom_ratio,
+                        rotation=ase_rotation,
+                    )
+
+        # --- Profile Additional Structures ---
+        if additional_atoms_data and rc_mode == "rmsd":
+            for i, (add_atoms, add_r, _, add_label) in enumerate(additional_atoms_data):
+                ax.axvline(
+                    add_r,
+                    color=active_theme.gridcolor,
+                    linestyle=":",
+                    linewidth=2,
+                    zorder=90,
+                )
+                if plot_structures != "none":
+                    y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
+                    y_pos = ax.get_ylim()[0] + 0.9 * y_span
+                    plot_structure_inset(
+                        ax,
+                        add_atoms,
+                        add_r,
+                        y_pos,
+                        xybox=(
+                            draw_saddle[0] + (i * 15),
+                            draw_saddle[1],
+                        ),  # Stagger slightly
+                        rad=draw_saddle[2],
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         arrow_props={
@@ -754,13 +795,12 @@ def main(
         final_ylabel = ylabel or "Relative Energy (eV)"
         final_title = title
 
-    # 5. Final Aesthetics
+    # Final Aesthetics
     ax.set_xlabel(final_xlabel, weight="bold")
     ax.set_ylabel(final_ylabel, weight="bold")
     ax.set_title(final_title)
     ax.minorticks_on()
 
-    # --- RESTORED LOGIC: Legend ---
     if show_legend:
         ax.legend(
             loc="lower left",
@@ -772,9 +812,7 @@ def main(
             fontsize=int(active_theme.font_size * 0.8),
         ).set_zorder(101)
 
-    # --- RESTORED LOGIC: Layout Alignment for Strip ---
-    if ax_strip is not None:
-        # Get position of main plot (which might have shrunk due to colorbar)
+    if ax_strip:
         pos_main = ax.get_position()
         pos_strip = ax_strip.get_position()
 
