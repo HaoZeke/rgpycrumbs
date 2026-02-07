@@ -506,22 +506,18 @@ def main(
         )
 
         df = aggregate_neb_landscape_data(
-            dat_paths, con_paths, y_col, None, cache_file, force_recompute, ira_kmax
+            dat_paths, 
+            con_paths, 
+            y_col, 
+            None, 
+            cache_file, 
+            force_recompute, 
+            ira_kmax,
+            augment_dat=augment_dat,
+            augment_con=augment_con,
+            ref_atoms=atoms_list[0] if atoms_list else None, # main reactant
+            prod_atoms=atoms_list[-1] if atoms_list else None, # main product
         )
-
-        # --- Augmentation Logic ---
-        if augment_dat and augment_con and atoms_list:
-            log.info("Loading augmentation data...")
-            df_aug = load_augmenting_neb_data(
-                augment_dat,
-                augment_con,
-                ref_atoms=atoms_list[0],  # Main path Reactant
-                prod_atoms=atoms_list[-1], # Main path Product
-                y_data_column=y_col,
-                ira_kmax=ira_kmax,
-            )
-            if not df_aug.is_empty():
-                df = pl.concat([df, df_aug], how="diagonal")
 
         # Surface Generation
         if landscape_mode == "surface":
