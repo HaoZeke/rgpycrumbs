@@ -29,12 +29,13 @@ https://realpython.com/python-script-structure/
 #   "matplotlib",
 #   "numpy",
 #   "scipy",
+#   "jax",
 #   "adjustText",
 #   "cmcrameri",
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot @ file:///home/rgoswami/Git/Github/Python/chemparseplot/",
+#   "chemparseplot==0.1.0",
 #   "rgpycrumbs",
 # ]
 # ///
@@ -185,7 +186,7 @@ IRA_KMAX_DEFAULT = 1.8
 )
 @click.option(
     "--surface-type",
-    type=click.Choice(["grid", "rbf"]),
+    type=click.Choice(["grid", "rbf", "grad_matern", "grad_imq", "matern", "imq", "grad_rq", "grad_se"]),
     default="rbf",
     help="Interpolation method for the 2D surface.",
 )
@@ -232,7 +233,7 @@ IRA_KMAX_DEFAULT = 1.8
     "--figsize",
     nargs=2,
     type=(float, float),
-    default=(10, 7),
+    default=(5.37, 5.37),
     show_default=True,
     help="Figure width, height in inches.",
 )
@@ -536,7 +537,7 @@ def main(
             step_all = df_surface["step"].to_numpy()
 
             # Heuristic for RBF smoothing if missing
-            if surface_type == "rbf" and rbf_smoothing is None:
+            if rbf_smoothing is None:
                 rbf_smoothing = estimate_rbf_smoothing(df)
                 log.info(f"Calculated heuristic RBF smoothing: {rbf_smoothing:.4f}")
 
@@ -863,6 +864,9 @@ def main(
     ax.set_ylabel(final_ylabel, weight="bold")
     ax.set_title(final_title)
     ax.minorticks_on()
+
+    if plot_type == "landscape" and not aspect_ratio:
+        ax.set_aspect('equal')
 
     if show_legend:
         ax.legend(
