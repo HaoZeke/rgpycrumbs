@@ -239,11 +239,14 @@ def con_splitter(
         logging.info("Centering structures...")
     if box_diagonal:
         logging.info("Overriding box...")
-    for atoms in frames:
-        if center:
-            atoms.center()
-        if box_diagonal:
+    if center and len(frames) > 0:
+        ref_atoms = frames[0].copy()
+        ref_center = ref_atoms.get_center_of_mass()
+        box_center = [d/2.0 for d in box_diagonal]
+        shift = box_center - ref_center
+        for atoms in frames:
             atoms.set_cell(box_diagonal)
+            atoms.translate(shift)
 
     align_strategy = AlignMode(align_type)
     if align_strategy != AlignMode.NONE:
