@@ -485,36 +485,39 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="239">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Centering structures...&quot;</span><span class="p">)</span>
 </span><span data-line="240">    <span class="k">if</span> <span class="n">box_diagonal</span><span class="p">:</span>
 </span><span data-line="241">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Overriding box...&quot;</span><span class="p">)</span>
-</span><span data-line="242">    <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
-</span><span data-line="243">        <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
-</span><span data-line="244">            <span class="n">atoms</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
-</span><span data-line="245">        <span class="k">if</span> <span class="n">box_diagonal</span><span class="p">:</span>
-</span><span data-line="246">            <span class="n">atoms</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">box_diagonal</span><span class="p">)</span>
-</span><span data-line="247">
-</span><span data-line="248">    <span class="n">align_strategy</span> <span class="o">=</span> <span class="n">AlignMode</span><span class="p">(</span><span class="n">align_type</span><span class="p">)</span>
-</span><span data-line="249">    <span class="k">if</span> <span class="n">align_strategy</span> <span class="o">!=</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
-</span><span data-line="250">        <span class="n">frames</span> <span class="o">=</span> <span class="n">align_path</span><span class="p">(</span>
-</span><span data-line="251">            <span class="n">frames</span><span class="p">,</span> <span class="n">align_strategy</span><span class="p">,</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="n">use_ira</span><span class="p">,</span> <span class="n">kmax</span><span class="o">=</span><span class="n">ira_kmax</span><span class="p">)</span>
-</span><span data-line="252">        <span class="p">)</span>
-</span><span data-line="253">
-</span><span data-line="254">    <span class="n">created_paths</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="255">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
-</span><span data-line="256">        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ipath_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.con&quot;</span>
-</span><span data-line="257">        <span class="n">dest</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">name</span>
-</span><span data-line="258">        <span class="n">asewrite</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
-</span><span data-line="259">        <span class="n">created_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="o">.</span><span class="n">resolve</span><span class="p">()))</span>
-</span><span data-line="260">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Saved [green]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">)</span>
-</span><span data-line="261">
-</span><span data-line="262">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">path_list_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="263">        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">created_paths</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="242">    <span class="k">if</span> <span class="n">center</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="243">        <span class="n">ref_atoms</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span data-line="244">        <span class="n">ref_center</span> <span class="o">=</span> <span class="n">ref_atoms</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">()</span>
+</span><span data-line="245">        <span class="n">box_center</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">/</span><span class="mf">2.0</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">box_diagonal</span><span class="p">]</span>
+</span><span data-line="246">        <span class="n">shift</span> <span class="o">=</span> <span class="n">box_center</span> <span class="o">-</span> <span class="n">ref_center</span>
+</span><span data-line="247">        <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+</span><span data-line="248">            <span class="n">atoms</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">box_diagonal</span><span class="p">)</span>
+</span><span data-line="249">            <span class="n">atoms</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+</span><span data-line="250">
+</span><span data-line="251">    <span class="n">align_strategy</span> <span class="o">=</span> <span class="n">AlignMode</span><span class="p">(</span><span class="n">align_type</span><span class="p">)</span>
+</span><span data-line="252">    <span class="k">if</span> <span class="n">align_strategy</span> <span class="o">!=</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+</span><span data-line="253">        <span class="n">frames</span> <span class="o">=</span> <span class="n">align_path</span><span class="p">(</span>
+</span><span data-line="254">            <span class="n">frames</span><span class="p">,</span> <span class="n">align_strategy</span><span class="p">,</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="n">use_ira</span><span class="p">,</span> <span class="n">kmax</span><span class="o">=</span><span class="n">ira_kmax</span><span class="p">)</span>
+</span><span data-line="255">        <span class="p">)</span>
+</span><span data-line="256">
+</span><span data-line="257">    <span class="n">created_paths</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="258">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
+</span><span data-line="259">        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ipath_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.con&quot;</span>
+</span><span data-line="260">        <span class="n">dest</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">name</span>
+</span><span data-line="261">        <span class="n">asewrite</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
+</span><span data-line="262">        <span class="n">created_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="o">.</span><span class="n">resolve</span><span class="p">()))</span>
+</span><span data-line="263">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Saved [green]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">)</span>
 </span><span data-line="264">
-</span><span data-line="265">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path list saved to [magenta]</span><span class="si">{</span><span class="n">path_list_filename</span><span class="si">}</span><span class="s2">[/magenta]&quot;</span><span class="p">)</span>
-</span><span data-line="266">    <span class="n">CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="s2">&quot;[bold green]Complete[/bold green]&quot;</span><span class="p">)</span></div>
-
+</span><span data-line="265">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">path_list_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="266">        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">created_paths</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span data-line="267">
-</span><span data-line="268">
-</span><span data-line="269"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span><span data-line="270">    <span class="n">con_splitter</span><span class="p">()</span>
+</span><span data-line="268">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path list saved to [magenta]</span><span class="si">{</span><span class="n">path_list_filename</span><span class="si">}</span><span class="s2">[/magenta]&quot;</span><span class="p">)</span>
+</span><span data-line="269">    <span class="n">CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="s2">&quot;[bold green]Complete[/bold green]&quot;</span><span class="p">)</span></div>
+
+</span><span data-line="270">
+</span><span data-line="271">
+</span><span data-line="272"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span data-line="273">    <span class="n">con_splitter</span><span class="p">()</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -549,32 +552,6 @@ data-aria-dark="Switch to auto color mode">
           align-items: center;
         "
       >
-        
-        <span style="display: inline-flex; align-items: center; gap: 0.3em">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="1em"
-            height="1em"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"
-            ></path>
-          </svg>
-          <span
-            >Hosted by
-            <a
-              href="https://www.netlify.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="color: inherit; text-decoration: underline"
-              >Netlify</a
-            ></span
-          >
-        </span>
-
         
         <span style="display: inline-flex; align-items: center; gap: 0.3em">
           <svg

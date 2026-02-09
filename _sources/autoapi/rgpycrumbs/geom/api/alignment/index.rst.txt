@@ -31,6 +31,7 @@ Functions
 
    rgpycrumbs.geom.api.alignment._apply_ira_alignment
    rgpycrumbs.geom.api.alignment.align_structure_robust
+   rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref
 
 
 Module Contents
@@ -172,5 +173,20 @@ Module Contents
    :param ira_config: Configuration object with state of IRA and the adjacency
                       cutoff distance for IRA graph matching.
    :return: An AlignmentResult.
+
+
+.. py:function:: calculate_rmsd_from_ref(atoms_list: list[ase.Atoms], ira_instance, ref_atom: ase.Atoms, ira_kmax: float) -> numpy.ndarray
+
+   Calculates the RMSD of each structure in a list relative to a reference.
+
+   The function first attempts the IRA algorithm to handle atom permutations.
+   If IRA fails or lacks the necessary library, the code falls back to
+   standard ASE Procrustes alignment via `align_structure_robust`.
+
+   :param atoms_list: A list of ASE Atoms objects.
+   :param ira_instance: An instantiated IRA object (or None).
+   :param ref_atom: The reference Atoms object to align against.
+   :param ira_kmax: kmax factor for IRA.
+   :return: An array of RMSD values.
 
 

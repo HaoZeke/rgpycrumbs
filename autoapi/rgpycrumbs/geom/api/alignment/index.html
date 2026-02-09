@@ -220,6 +220,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment._apply_ira_alignment"><code class="docutils literal notranslate"><span class="pre">_apply_ira_alignment()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.align_structure_robust"><code class="docutils literal notranslate"><span class="pre">align_structure_robust()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref"><code class="docutils literal notranslate"><span class="pre">calculate_rmsd_from_ref()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -351,6 +352,9 @@ data-aria-dark="Switch to auto color mode">
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.align_structure_robust" title="rgpycrumbs.geom.api.alignment.align_structure_robust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">align_structure_robust</span></code></a>(→ AlignmentResult)</p></td>
 <td><p>Aligns a mobile structure to a reference using IRA with an ASE fallback.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref" title="rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_rmsd_from_ref</span></code></a>(→ numpy.ndarray)</p></td>
+<td><p>Calculates the RMSD of each structure in a list relative to a reference.</p></td>
 </tr>
 </tbody>
 </table>
@@ -529,6 +533,28 @@ cutoff distance for IRA graph matching.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">calculate_rmsd_from_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ase.Atoms</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_kmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#calculate_rmsd_from_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the RMSD of each structure in a list relative to a reference.</p>
+<p>The function first attempts the IRA algorithm to handle atom permutations.
+If IRA fails or lacks the necessary library, the code falls back to
+standard ASE Procrustes alignment via <cite>align_structure_robust</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>atoms_list</strong> – A list of ASE Atoms objects.</p></li>
+<li><p><strong>ira_instance</strong> – An instantiated IRA object (or None).</p></li>
+<li><p><strong>ref_atom</strong> – The reference Atoms object to align against.</p></li>
+<li><p><strong>ira_kmax</strong> – kmax factor for IRA.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An array of RMSD values.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -579,32 +605,6 @@ cutoff distance for IRA graph matching.</p></li>
           align-items: center;
         "
       >
-        
-        <span style="display: inline-flex; align-items: center; gap: 0.3em">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="1em"
-            height="1em"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"
-            ></path>
-          </svg>
-          <span
-            >Hosted by
-            <a
-              href="https://www.netlify.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="color: inherit; text-decoration: underline"
-              >Netlify</a
-            ></span
-          >
-        </span>
-
         
         <span style="display: inline-flex; align-items: center; gap: 0.3em">
           <svg
