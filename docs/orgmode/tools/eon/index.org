@@ -1,8 +1,8 @@
-#+TITLE: EON Tools
+#+TITLE: eOn Tools
 #+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
 
-* EON Helpers
-  These tools work with [[https://eondocs.org][EON output files]].
+* eOn Helpers
+  These tools work with [[https://eondocs.org][eOn output files]].
 
 #+BEGIN_EXPORT rst
 .. toctree::
@@ -17,5 +17,5 @@
 #+END_EXPORT
 
 ** API Reference
-For developer details, see the :doc:`EON Helper Reference
+For developer details, see the :doc:`eOn Helper Reference
 <../../autoapi/rgpycrumbs/eon/index>`[fn:: Also linked in each section.].

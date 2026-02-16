@@ -13,5 +13,16 @@
    detect_fragments
 #+END_EXPORT
 
+** Library Modules
+The ~rgpycrumbs.geom~ package also includes importable library modules:
+
+- ~rgpycrumbs.geom.analysis~ :: Structure analysis: distance matrices, bond
+  matrices, fragment detection, centroid distances, and RMSD-corrected
+  distances. Uses ASE's ~NeighborList~ and depth-first search for fragment
+  identification.
+- ~rgpycrumbs.geom.ira~ :: IRA (Iterative Rotations and Assignments) matching
+  for RMSD-based structure comparison. Provides ~do_ira()~, ~calculate_rmsd()~,
+  and ~is_ira_pair()~ functions along with the ~IRAComp~ dataclass.
+
 ** API Reference
 For developer details, see the @@rst::doc:`Geometry Helper Reference <../../autoapi/rgpycrumbs/geom/index>`@@[fn:: Also linked in each section.].

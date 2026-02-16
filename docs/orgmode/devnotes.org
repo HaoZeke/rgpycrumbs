@@ -55,14 +55,46 @@ The library is designed with the following principles in mind:
   between different tools in the collection.
 
 - Lightweight Core, On-Demand Dependencies :: The installable ~rgpycrumbs~
-  package is minimal, with its only dependency being the ~click~ library for the
-  CLI dispatcher. Heavy scientific libraries like ~matplotlib~  are not part of
-  the base installation. They are fetched by ~uv~ only when a script that needs
-  them is executed, ensuring the user's base Python environment remains clean
-  and lightweight.
+  package has minimal core dependencies (~click~, ~numpy~). Heavy scientific
+  libraries are available as optional extras (e.g. ~pip install
+  rgpycrumbs[surfaces]~ for JAX). For CLI tools, dependencies are fetched by
+  ~uv~ only when a script that needs them is executed, keeping the base
+  installation lightweight.
 
 - Modular & Extensible Tooling :: Each utility is an independent script. This
   modularity simplifies development, testing, and maintenance, as changes to one
   tool cannot inadvertently affect another. New tools can be added to the
   collection without modifying the core dispatcher logic, making the system
   easily extensible.
+
+* Library Modules
+  :PROPERTIES:
+  :ID:       library-modules
+  :END:
+
+In addition to the CLI dispatcher, ~rgpycrumbs~ provides importable library
+modules for computational tasks. These are used by downstream packages like
+~chemparseplot~ and can be used directly in notebooks or custom scripts.
+
+** Module Structure
+
+- ~rgpycrumbs.surfaces~ :: JAX-based surface fitting with kernel methods (TPS,
+  RBF, Matern 5/2, SE, IMQ). Includes gradient-enhanced variants. Optional
+  dependency: ~jax~.
+- ~rgpycrumbs.geom.analysis~ :: Structure analysis using ASE: distance matrices,
+  bond matrices, and fragment detection via depth-first search on neighbor
+  lists. Optional dependencies: ~ase~, ~scipy~.
+- ~rgpycrumbs.geom.ira~ :: Iterative Rotations and Assignments (IRA) for
+  RMSD-based structure comparison. Optional dependency: ~ira_mod~.
+- ~rgpycrumbs.interpolation~ :: Spline interpolation utilities built on SciPy.
+  Optional dependency: ~scipy~.
+- ~rgpycrumbs.basetypes~ :: Shared data structures (namedtuples and dataclasses)
+  for NEB iterations, NEB paths, saddle search measurements, dimer
+  optimization, molecular geometries, and spin identification. No extra
+  dependencies.
+
+** Lazy Loading
+The top-level ~rgpycrumbs/__init__.py~ uses ~__getattr__~ for lazy imports, so
+modules with heavy optional dependencies (like JAX) are only loaded when
+accessed. This keeps ~import rgpycrumbs~ fast regardless of which extras are
+installed.
