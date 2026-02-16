@@ -18,8 +18,19 @@ jobs:
           cache: true
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
           activate-environment: false
-      - name: Run tests
+      - name: Run core tests
         shell: bash -el {0}
         run: |
           pixi r -e test pytest -m pure
+      - name: Run fragments tests
+        shell: bash -el {0}
+        run: |
           pixi r -e fragments pytest -m fragments
+      - name: Run surfaces tests
+        shell: bash -el {0}
+        run: |
+          pixi r -e surfaces pytest -m surfaces
+      - name: Run align tests
+        shell: bash -el {0}
+        run: |
+          pixi r -e test pytest -m align
