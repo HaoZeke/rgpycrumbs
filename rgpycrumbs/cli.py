@@ -1,10 +1,11 @@
-import argparse
 import logging
 import os
 import site
 import subprocess
 import sys
 from pathlib import Path
+
+import click
 
 # Configure logging to output to stderr
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -23,7 +24,7 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
     )
 
 
-def _dispatch(group: str, script_name: str, script_args: list):
+def _dispatch(group: str, script_name: str, script_args: tuple):
     """
     Sets up the environment and runs the target script via 'uv run'.
     """
@@ -32,8 +33,7 @@ def _dispatch(group: str, script_name: str, script_args: list):
     script_path = PACKAGE_ROOT / group / filename
 
     if not script_path.is_file():
-        rerr = f"Error: Script not found at '{script_path}'"
-        logging.error(rerr)
+        click.echo(f"Error: Script not found at '{script_path}'", err=True)
         sys.exit(1)
 
     command = ["uv", "run", str(script_path), *script_args]
@@ -53,13 +53,12 @@ def _dispatch(group: str, script_name: str, script_args: list):
     current_pythonpath = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = f"{project_root}{os.pathsep}{current_pythonpath}"
 
-    logging.info(f"--> Dispatching to: {' '.join(command)}")
+    click.echo(f"--> Dispatching to: {' '.join(command)}")
 
     try:
-        # Use subprocess.run to block until completion
         subprocess.run(command, check=True, env=env)  # noqa: S603
     except FileNotFoundError:
-        logging.error("Error: 'uv' command not found. Is it installed?")
+        click.echo("Error: 'uv' command not found. Is it installed?", err=True)
         sys.exit(1)
     except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
@@ -67,86 +66,50 @@ def _dispatch(group: str, script_name: str, script_args: list):
         sys.exit(130)
 
 
+def _make_script_command(group_name: str, script_stem: str) -> click.Command:
+    """Creates a click command that dispatches to a PEP 723 script."""
+    display_name = script_stem.replace("_", "-")
+
+    @click.command(
+        name=display_name,
+        context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
+    )
+    @click.pass_context
+    def cmd(ctx):
+        _dispatch(group_name, display_name, tuple(ctx.args))
+
+    cmd.help = f"Run the {display_name} script."
+    return cmd
+
+
+@click.group()
+@click.version_option(package_name="rgpycrumbs")
 def main():
-    parser = argparse.ArgumentParser(
-        prog="rgpycrumbs",
-        description="A dispatcher that runs self-contained scripts using 'uv'.",
+    """A dispatcher that runs self-contained PEP 723 scripts using 'uv'."""
+
+
+# --- DYNAMIC DISCOVERY ---
+# Scan the package directory for subfolders (groups) and register them
+_valid_groups = sorted(
+    d.name
+    for d in PACKAGE_ROOT.iterdir()
+    if d.is_dir() and not d.name.startswith(("_", "."))
+)
+
+for _group in _valid_groups:
+    _file_stems = _get_scripts_in_folder(_group)
+    if not _file_stems:
+        continue
+
+    # Create a click group for this category
+    _group_cmd = click.Group(
+        name=_group, help=f"Tools in the '{_group}' category."
     )
 
-    # Create subparsers for the groups (e.g., 'eon', 'prefix')
-    subparsers = parser.add_subparsers(
-        title="Command Groups", dest="group", required=True, metavar="GROUP"
-    )
+    for _stem in _file_stems:
+        _group_cmd.add_command(_make_script_command(_group, _stem))
 
-    # --- DYNAMIC DISCOVERY ---
-    # Scan the package directory for subfolders (groups)
-    valid_groups = sorted(
-        d.name
-        for d in PACKAGE_ROOT.iterdir()
-        if d.is_dir() and not d.name.startswith(("_", "."))
-    )
-
-    for group in valid_groups:
-        file_stems = _get_scripts_in_folder(group)
-        if not file_stems:
-            continue
-
-        # Create a display list with hyphens (e.g. plt-neb)
-        display_scripts = [s.replace("_", "-") for s in file_stems]
-
-        # Build a set of all valid inputs (both _ and - forms) for manual validation
-        valid_inputs = set(file_stems) | set(display_scripts)
-
-        # Create a subparser for this group
-        group_parser = subparsers.add_parser(
-            group,
-            help=f"Tools in the '{group}' category.",
-            description=f"Available scripts in '{group}':\n"
-            f"  {', '.join(display_scripts)}",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-        )
-
-        # The script name is a positional argument.
-        # We REMOVE 'choices' to hide the ugly list from the usage string.
-        # We manually validate later.
-        group_parser.add_argument(
-            "script",
-            help="The specific script to run (e.g., 'plt-neb')."
-            " Accepts names with '_' or '-'.",
-            metavar="SCRIPT",
-        )
-
-        # REMAINDER captures everything after the script name (flags, args, etc.)
-        group_parser.add_argument(
-            "script_args",
-            nargs=argparse.REMAINDER,
-            help="Arguments passed to the script.",
-        )
-
-        # Attach the valid inputs to the parser instance so we can check later
-        # (This is a bit hacky but keeps the main() logic clean)
-        group_parser.set_defaults(valid_inputs=valid_inputs)
-
-    # Parse
-    if len(sys.argv) == 1:
-        parser.print_help(sys.stderr)
-        sys.exit(1)
-
-    args = parser.parse_args()
-
-    # Manual Validation of the script name
-    if args.script not in args.valid_inputs:
-        logging.error(
-            f"Error: Invalid script '{args.script}' for group '{args.group}'."
-        )
-        # Re-generate the "nice" list for the error message
-        file_stems = _get_scripts_in_folder(args.group)
-        display_scripts = [s.replace("_", "-") for s in file_stems]
-        logging.error(f"Available scripts: {', '.join(display_scripts)}")
-        sys.exit(1)
-
-    # Dispatch
-    _dispatch(args.group, args.script, args.script_args)
+    main.add_command(_group_cmd)
 
 
 if __name__ == "__main__":
