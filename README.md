@@ -4,10 +4,13 @@
 -   [About](#about)
     -   [CLI Design Philosophy](#cli-how)
 -   [Usage](#usage)
+    -   [Library API](#library-api)
     -   [CLI Tools](#cli-tools)
-        -   [EON](#cli-eon)
+        -   [eOn](#cli-eon)
 -   [Contributing](#contributing)
     -   [Development](#development)
+        -   [When is pixi needed?](#org2e8fba9)
+        -   [Versioning](#org78f235e)
     -   [Release Process](#release-notes)
 -   [License](#license)
 
@@ -21,12 +24,20 @@
 
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
-A **pure-python** module of helpful scripts / CLIs I have written mostly for quick
-and dirty parsing / plotting of optimization methods. Loosely grouped. Not
-typically optimal at all.
+A **pure-python** computational library and CLI toolkit for chemical physics
+research. `rgpycrumbs` provides both importable library modules for
+computational tasks (surface fitting, structure analysis, interpolation) and a
+dispatcher-based CLI for running self-contained research scripts.
 
-Most of these rely heavily on optional dependencies, with the exception of the
-`_aux` helpers (pure Python).
+The library side offers:
+
+-   **Surface fitting** (`rgpycrumbs.surfaces`) &#x2013; JAX-based kernel methods (TPS, RBF, Matern, SE, IMQ) with gradient-enhanced variants for energy landscape interpolation
+-   **Structure analysis** (`rgpycrumbs.geom.analysis`) &#x2013; distance matrices, bond matrices, and fragment detection via ASE
+-   **IRA matching** (`rgpycrumbs.geom.ira`) &#x2013; iterative rotations and assignments for RMSD-based structure comparison
+-   **Interpolation** (`rgpycrumbs.interpolation`) &#x2013; spline interpolation utilities
+-   **Data types** (`rgpycrumbs.basetypes`) &#x2013; shared data structures for NEB paths, saddle searches, and molecular geometries
+
+The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`.
 
 
 <a id="cli-how"></a>
@@ -49,11 +60,11 @@ The library is designed with the following principles in mind:
     between different tools in the collection.
 
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
-    package is minimal, with its only dependency being the `click` library for the
-    CLI dispatcher. Heavy scientific libraries like `matplotlib`  are not part of
-    the base installation. They are fetched by `uv` only when a script that needs
-    them is executed, ensuring the user's base Python environment remains clean
-    and lightweight.
+    package has minimal core dependencies (`click`, `numpy`). Heavy scientific
+    libraries are available as optional extras (e.g. `pip install
+      rgpycrumbs[surfaces]` for JAX). For CLI tools, dependencies are fetched by
+    `uv` only when a script that needs them is executed, keeping the base
+    installation lightweight.
 
 -   **Modular & Extensible Tooling:** Each utility is an independent script. This
     modularity simplifies development, testing, and maintenance, as changes to one
@@ -65,6 +76,26 @@ The library is designed with the following principles in mind:
 <a id="usage"></a>
 
 # Usage
+
+
+<a id="library-api"></a>
+
+## Library API
+
+The library modules can be imported directly:
+
+    # Surface fitting (requires jax: pip install rgpycrumbs[surfaces])
+    from rgpycrumbs.surfaces import get_surface_model
+    model = get_surface_model("tps")
+    
+    # Structure analysis (requires ase, scipy: pip install rgpycrumbs[analysis])
+    from rgpycrumbs.geom.analysis import analyze_structure
+    
+    # Spline interpolation (requires scipy: pip install rgpycrumbs[interpolation])
+    from rgpycrumbs.interpolation import spline_interp
+    
+    # Data types (no extra deps)
+    from rgpycrumbs.basetypes import nebpath, SaddleMeasure
 
 
 <a id="cli-tools"></a>
@@ -91,7 +122,7 @@ You can see the list of available command groups:
 
 <a id="cli-eon"></a>
 
-### EON
+### eOn
 
 -   Plotting NEB Paths (`plt-neb`)
 
@@ -146,32 +177,33 @@ best practices](https://realpython.com/python-script-structure/).
 
 ## Development
 
-This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development
-tool with [`hatchling`](https://hatch.pypa.io/) +
-[`hatch-vcs`](https://github.com/ofek/hatch-vcs) for building and versioning.
+This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development tool with
+[`hatchling`](https://hatch.pypa.io/) + [`hatch-vcs`](https://github.com/ofek/hatch-vcs) for building and versioning.
 
-### Setup
+    # Clone and install in development mode with test dependencies
+    uv sync --extra test
+    
+    # Run the pure tests (no heavy optional deps)
+    uv run pytest -m pure
+    
+    # Run interpolation tests (needs scipy)
+    uv run --extra interpolation pytest -m interpolation
 
-```bash
-# Clone and install in development mode with test dependencies
-uv sync --extra test
 
-# Run the pure tests (no heavy optional deps)
-uv run pytest -m pure
-
-# Run interpolation tests (needs scipy)
-uv run --extra interpolation pytest -m interpolation
-```
+<a id="org2e8fba9"></a>
 
 ### When is pixi needed?
 
-[Pixi](https://prefix.dev/) is only needed for features that require
-**conda-only** packages (not available on PyPI):
+[Pixi](https://prefix.dev/) is only needed for features that require **conda-only** packages (not
+available on PyPI):
 
-- `fragments` tests: need `tblite`, `ira`, `pyvista` (conda)
-- `surfaces` tests: may prefer conda `jax` builds
+-   `fragments` tests: need `tblite`, `ira`, `pyvista` (conda)
+-   `surfaces` tests: may prefer conda `jax` builds
 
 For everything else, `uv` is sufficient.
+
+
+<a id="org78f235e"></a>
 
 ### Versioning
 
@@ -185,23 +217,21 @@ automatically (e.g. `1.0.1.dev3+gabcdef`).
 
 ## Release Process
 
-```bash
-# 1. Ensure tests pass
-uv run --extra test pytest -m pure
-
-# 2. Build changelog (uses towncrier fragments in doc/release/upcoming_changes/)
-uvx towncrier build --version "v1.0.0"
-
-# 3. Commit the changelog
-git add CHANGELOG.rst && git commit -m "doc: release notes for v1.0.0"
-
-# 4. Tag the release (hatch-vcs derives the version from this tag)
-git tag -a v1.0.0 -m "Version 1.0.0"
-
-# 5. Build and publish
-uvx hatch build
-uvx hatch publish
-```
+    # 1. Ensure tests pass
+    uv run --extra test pytest -m pure
+    
+    # 2. Build changelog (uses towncrier fragments in docs/newsfragments/)
+    uvx towncrier build --version "v1.0.0"
+    
+    # 3. Commit the changelog
+    git add CHANGELOG.rst && git commit -m "doc: release notes for v1.0.0"
+    
+    # 4. Tag the release (hatch-vcs derives the version from this tag)
+    git tag -a v1.0.0 -m "Version 1.0.0"
+    
+    # 5. Build and publish
+    uv build
+    uvx twine upload dist/*
 
 
 <a id="license"></a>
