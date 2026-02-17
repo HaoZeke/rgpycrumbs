@@ -7,7 +7,8 @@
     -   [CLI Tools](#cli-tools)
         -   [EON](#cli-eon)
 -   [Contributing](#contributing)
-    -   [Release notes](#release-notes)
+    -   [Development](#development)
+    -   [Release Process](#release-notes)
 -   [License](#license)
 
 
@@ -141,16 +142,66 @@ All contributions are welcome, but for the CLI tools please follow [established
 best practices](https://realpython.com/python-script-structure/).
 
 
+<a id="development"></a>
+
+## Development
+
+This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development
+tool with [`hatchling`](https://hatch.pypa.io/) +
+[`hatch-vcs`](https://github.com/ofek/hatch-vcs) for building and versioning.
+
+### Setup
+
+```bash
+# Clone and install in development mode with test dependencies
+uv sync --extra test
+
+# Run the pure tests (no heavy optional deps)
+uv run pytest -m pure
+
+# Run interpolation tests (needs scipy)
+uv run --extra interpolation pytest -m interpolation
+```
+
+### When is pixi needed?
+
+[Pixi](https://prefix.dev/) is only needed for features that require
+**conda-only** packages (not available on PyPI):
+
+- `fragments` tests: need `tblite`, `ira`, `pyvista` (conda)
+- `surfaces` tests: may prefer conda `jax` builds
+
+For everything else, `uv` is sufficient.
+
+### Versioning
+
+Versions are derived automatically from **git tags** via `hatch-vcs`
+(setuptools-scm). There is no manual version field; the version is the latest
+tag (e.g. `v1.0.0` → `1.0.0`). Between tags, dev versions are generated
+automatically (e.g. `1.0.1.dev3+gabcdef`).
+
+
 <a id="release-notes"></a>
 
-## Release notes
+## Release Process
 
-Generally this is a `hatch` project, so:
+```bash
+# 1. Ensure tests pass
+uv run --extra test pytest -m pure
 
-    uvx hatch test
-    uvx towncrier build --version "v0.0.4"
-    git tag -a v0.0.4 -m "Version 0.0.4 release"
-    uvx hatch build
+# 2. Build changelog (uses towncrier fragments in doc/release/upcoming_changes/)
+uvx towncrier build --version "v1.0.0"
+
+# 3. Commit the changelog
+git add CHANGELOG.rst && git commit -m "doc: release notes for v1.0.0"
+
+# 4. Tag the release (hatch-vcs derives the version from this tag)
+git tag -a v1.0.0 -m "Version 1.0.0"
+
+# 5. Build and publish
+uvx hatch build
+uvx hatch publish
+```
 
 
 <a id="license"></a>
