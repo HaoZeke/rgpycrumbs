@@ -1,3 +1,19 @@
+rgpycrumbs v1.0.1 (2026-02-17)
+==============================
+
+Added
+-----
+
+- CI workflow to auto-generate ``README.md`` from ``readme_src.org`` on push to main.
+- Downstream users page (``used_by.org``) listing public projects that depend on ``rgpycrumbs``.
+
+
+Changed
+-------
+
+- Updated ``readme_src.org`` with current ``uv`` + ``hatch-vcs`` + ``twine`` development and release workflow.
+
+
 rgpycrumbs v1.0.0 (2026-02-17)
 ==============================
 
