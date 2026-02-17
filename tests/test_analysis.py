@@ -19,14 +19,14 @@ pytestmark = pytest.mark.align
 
 @pytest.fixture
 def water_molecule():
-    """Creates a single water molecule."""
-    return Atoms("H2O", positions=[[0, 0, 0], [0, 0.76, 0.59], [0, -0.76, 0.59]])
+    """Creates a single water molecule with correct O-H bond lengths (~0.96 A)."""
+    return Atoms("OH2", positions=[[0, 0, 0], [0.757, 0.587, 0], [-0.757, 0.587, 0]])
 
 
 @pytest.fixture
 def water_dimer():
     """Creates two water molecules separated by 5 Angstroms."""
-    h2o = Atoms("H2O", positions=[[0, 0, 0], [0, 0.76, 0.59], [0, -0.76, 0.59]])
+    h2o = Atoms("OH2", positions=[[0, 0, 0], [0.757, 0.587, 0], [-0.757, 0.587, 0]])
     dimer = h2o.copy()
     h2o_2 = h2o.copy()
     h2o_2.translate([5.0, 0, 0])
@@ -49,7 +49,7 @@ def h2_molecule():
 @pytest.fixture
 def three_fragments():
     """Three water molecules well-separated."""
-    h2o = Atoms("H2O", positions=[[0, 0, 0], [0, 0.76, 0.59], [0, -0.76, 0.59]])
+    h2o = Atoms("OH2", positions=[[0, 0, 0], [0.757, 0.587, 0], [-0.757, 0.587, 0]])
     system = h2o.copy()
     h2o_2 = h2o.copy()
     h2o_2.translate([5.0, 0, 0])
