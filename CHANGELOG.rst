@@ -1,3 +1,37 @@
+rgpycrumbs v1.0.0 (2026-02-17)
+==============================
+
+Removed
+-------
+
+- ``ira_mod`` from pip-installable optional dependencies (conda-only; managed exclusively via ``pixi``). (#37)
+- ``pdm`` and ``pip`` from ``pixi`` base dependencies. (#37)
+
+
+Added
+-----
+
+- Library modules extracted from chemparseplot: ``basetypes`` (NEB, dimer, saddle point data types), ``surfaces`` (JAX-based GP surface fitting with gradient-enhanced kernels), ``interpolation`` (spline helpers), and ``parsers`` (common parsing patterns). (#36)
+- Public API with lazy loading via ``__getattr__`` for ``surfaces``, ``basetypes``, and ``interpolation`` modules. (#36)
+- Click-based CLI dispatcher with ``rgpycrumbs`` entry point. (#36)
+- Optional dependency groups for ``surfaces`` (JAX), ``analysis`` (ASE, scipy), and ``interpolation`` (scipy). (#36)
+- ``test`` and ``lint`` optional dependency groups in ``pyproject.toml``. (#37)
+- ``rich`` as a core dependency (used across CLI modules). (#37)
+
+
+Changed
+-------
+
+- ``uv``-first development workflow; ``pixi`` now only needed for conda-gated features (IRA, fragments). (#37)
+- CI split into ``uv`` job (pure, interpolation, align tests on Python 3.10-3.12) and ``pixi`` job (fragments, surfaces tests requiring conda packages). (#37)
+
+
+Fixed
+-----
+
+- Interpolation tests correctly marked as ``interpolation`` (needs scipy), not ``pure``. (#37)
+
+
 rgpycrumbs v0.1.2 (2026-01-28)
 ==============================
 
