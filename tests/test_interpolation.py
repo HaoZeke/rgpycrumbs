@@ -3,9 +3,9 @@ import pytest
 
 from tests.conftest import skip_if_not_env
 
-skip_if_not_env("pure")
+skip_if_not_env("interpolation")
 
-pytestmark = pytest.mark.pure
+pytestmark = pytest.mark.interpolation
 
 
 def test_spline_interp_basic():

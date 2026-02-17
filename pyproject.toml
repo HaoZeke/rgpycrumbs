@@ -37,7 +37,14 @@ dynamic = [ "version" ]
 surfaces = [ "jax>=0.4" ]
 analysis = [ "ase>=3.22", "scipy>=1.11" ]
 interpolation = [ "scipy>=1.11" ]
-ira = [ "ira_mod" ]
+# ira_mod is conda-only (via pixi); not a pip-installable extra
+test = [
+  "pytest>=9.0",
+  "pytest-cov>=4.1.0",
+]
+lint = [
+  "ruff>=0.1.6",
+]
 
 [project.scripts]
 rgpycrumbs = "rgpycrumbs.cli:main"
@@ -141,6 +148,7 @@ markers = [
     "ptm: mark a test as needing only the ptm environment (run with '-m ptm').",
     "eon: mark a test as needing only the eon environment (run with '-m eon').",
     "align: mark a test as needing only the align environment (run with '-m align').",
+    "interpolation: mark a test as needing scipy (run with '-m interpolation').",
     "surfaces: mark a test as needing jax (run with '-m surfaces').",
     "ira: mark a test as needing ira_mod (run with '-m ira').",
     "slow: mark tests as slow (deselect with '-m \"not slow\"').",

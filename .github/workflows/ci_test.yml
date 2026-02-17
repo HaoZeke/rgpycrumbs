@@ -4,9 +4,30 @@ concurrency:
   cancel-in-progress: true
 on: [push, pull_request]
 jobs:
-  build_eon:
+  test-uv:
     runs-on: ${{ matrix.os }}
-    name: test (${{ matrix.os }})
+    name: uv tests (${{ matrix.os }}, py${{ matrix.python }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04]
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Run pure tests
+        run: uv run --extra test pytest -m pure
+      - name: Run interpolation tests
+        run: uv run --extra test --extra interpolation pytest -m interpolation
+      - name: Run align tests
+        run: uv run --extra test --extra analysis pytest -m align
+  test-pixi:
+    runs-on: ${{ matrix.os }}
+    name: pixi tests (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -18,10 +39,6 @@ jobs:
           cache: true
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
           activate-environment: false
-      - name: Run core tests
-        shell: bash -el {0}
-        run: |
-          pixi r -e test pytest -m pure
       - name: Run fragments tests
         shell: bash -el {0}
         run: |
@@ -30,7 +47,3 @@ jobs:
         shell: bash -el {0}
         run: |
           pixi r -e surfaces pytest -m surfaces
-      - name: Run align tests
-        shell: bash -el {0}
-        run: |
-          pixi r -e test pytest -m align
