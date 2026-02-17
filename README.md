@@ -9,8 +9,8 @@
         -   [eOn](#cli-eon)
 -   [Contributing](#contributing)
     -   [Development](#development)
-        -   [When is pixi needed?](#org2e8fba9)
-        -   [Versioning](#org78f235e)
+        -   [When is pixi needed?](#org5698d9e)
+        -   [Versioning](#orgc6d2447)
     -   [Release Process](#release-notes)
 -   [License](#license)
 
@@ -190,7 +190,7 @@ This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development 
     uv run --extra interpolation pytest -m interpolation
 
 
-<a id="org2e8fba9"></a>
+<a id="org5698d9e"></a>
 
 ### When is pixi needed?
 
@@ -203,7 +203,7 @@ available on PyPI):
 For everything else, `uv` is sufficient.
 
 
-<a id="org78f235e"></a>
+<a id="orgc6d2447"></a>
 
 ### Versioning
 
