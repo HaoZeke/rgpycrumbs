@@ -16,7 +16,7 @@ rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
 
 This creates a directory named ~initial_images~ containing ~ipath_000.con~,
 ~ipath_001.con~, etc., along with an ~ipath.dat~ file listing their paths which
-feeds into EON via:
+feeds into eOn via:
 
 #+begin_src ini
 [Nudged Elastic Band]
@@ -29,7 +29,7 @@ minimize_endpoints_for_ipath = False
 # for the names
 # or better
 # ❯ sphobjinv suggest -t 90 -u https://eondocs.org/objects/inv "NudgedElasticBand"
-# For all EON NEB options, see the @@rst::external:py:pydantic_model:`eon:eon.schema.NudgedElasticBandConfig`@@ schema.
+# For all eOn NEB options, see the @@rst::external:py:pydantic_model:`eon:eon.schema.NudgedElasticBandConfig`@@ schema.
 
 ** Refinement Strategies
 *** Structural Alignment
@@ -51,11 +51,11 @@ the entire path.
 The ~--center~ flag translates the center of mass of each image to the origin.
 Use ~--box-diagonal~ to override the simulation cell dimensions (e.g., ~20 20
 20~), which ensures all generated images share an identical vacuum box for
-EON calculations.
+eOn calculations.
 ** Initial Path Generation from Generic Files
-We may also generate valid starting points for an EON NEB calculation from a
+We may also generate valid starting points for an eOn NEB calculation from a
 generic ~.xyz~ file or any ASE compatible input. For instance, for a two-image
-trajectory, to convert a reactant/product pair into the required EON format
+trajectory, to convert a reactant/product pair into the required eOn format
 while fixing coordinate and mapping issues:
 
 #+BEGIN_SRC bash 

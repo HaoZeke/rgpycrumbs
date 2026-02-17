@@ -24,7 +24,7 @@ Please review the technical requirements before submitting a Pull Request:
 * Reporting Issues
 Use the [[https://github.com/HaoZeke/rgpycrumbs/issues][GitHub issue tracker]] to report bugs or suggest enhancements. Please
 provide a minimal reproducible example for all bug reports. User facing comments
-may be directed also to the [[https://matsci.org/c/eon/72][EON materials science section]].
+may be directed also to the [[https://matsci.org/c/eon/72][eOn materials science section]].
 
 * Contributing 
   For details on the dispatcher architecture or internal API:

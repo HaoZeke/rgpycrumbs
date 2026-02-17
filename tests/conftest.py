@@ -9,6 +9,8 @@ ENVIRONMENT_REQUIREMENTS = {
     "eon": ["ase", "eon"],
     "align": ["ase", "numpy"],
     "pure": ["numpy"],
+    "surfaces": ["jax"],
+    "ira": ["ira_mod"],
 }
 
 

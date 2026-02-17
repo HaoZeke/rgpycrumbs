@@ -80,7 +80,7 @@ def generate_nwchem_input(
     try:
         with open(output_path, "w") as f:
             f.write("start nwchem_socket_job\n")
-            f.write('title "NWChem Server for EON"\n\n')
+            f.write('title "NWChem Server for eOn"\n\n')
 
             f.write(f"memory {mem_in_gb} gb\n\n")
 
@@ -118,7 +118,7 @@ def generate_nwchem_input(
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default=Path("pos.con"),
     show_default=True,
-    help="Path to the input geometry file (e.g., in EON .con format).",
+    help="Path to the input geometry file (e.g., in eOn .con format).",
 )
 @click.option(
     "--config",
@@ -135,7 +135,7 @@ def generate_nwchem_input(
     help="Name of the final NWChem input file to be generated.",
 )
 def main(pos_file: Path, config: Path, output: Path):
-    """Generate an NWChem input file for use with the EON SocketNWChemPot."""
+    """Generate an NWChem input file for use with the eOn SocketNWChemPot."""
     logging.info(f"Reading settings from [cyan]{config}[/cyan]")
     try:
         ini_parser = configparser.ConfigParser()

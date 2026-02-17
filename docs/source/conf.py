@@ -63,7 +63,7 @@ html_static_path = ["_static"]
 html_theme_options = {
     "github_url": "https://github.com/Haozeke/rgpycrumbs",
     # "nav_links": [
-    #     {"title": "EON Tools", "url": "eon_tools"},
+    #     {"title": "eOn Tools", "url": "eon_tools"},
     # ],
 }
 

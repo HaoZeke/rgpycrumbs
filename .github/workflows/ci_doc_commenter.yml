@@ -1,5 +1,5 @@
 name: Comment on pull request
-# Adapted from the atomistic-cookbook and EON
+# Adapted from the atomistic-cookbook and eOn
 
 on:
   workflow_run:

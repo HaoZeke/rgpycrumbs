@@ -27,7 +27,7 @@ authoring rules:
 - Command Line Reference :: Use the ~.. click::~ directive inside a 
   ~#+BEGIN_EXPORT rst~ block to automatically generate CLI documentation.
 - External References :: Use the ~@@rst::...@@~ syntax for specific 
-  intersphinx links (e.g., pointing to the EON schema).
+  intersphinx links (e.g., pointing to the eOn schema).
 - Source Code Links :: Link to the internal API reference using 
   ~@@rst::mod:`rgpycrumbs.path.to.module`@@~.
 
@@ -38,7 +38,7 @@ Every new tool documentation should follow this approximate structure:
 - CLI Export :: The ~click~ directive for automated help output.
 - Usage :: A ~#+BEGIN_SRC shell~ block showing a real-world example.
 - Integration :: Context on how the tool interacts with external  software
-  (e.g., EON config snippets).
+  (e.g., eOn config snippets).
 - API Reference :: A link to the developer source documentation.
 
 * Verifying Changes

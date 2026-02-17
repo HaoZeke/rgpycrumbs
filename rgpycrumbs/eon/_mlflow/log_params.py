@@ -5,7 +5,7 @@ import mlflow
 
 from rgpycrumbs._aux import _import_from_parent_env
 
-# Access the legacy EON config module
+# Access the legacy eOn config module
 eon_config = _import_from_parent_env("eon.config")
 
 
@@ -16,9 +16,9 @@ def log_config_ini(
     track_overrides: bool = False,
 ):
     """
-    Logs the hydrated EON configuration and highlights user-provided overrides.
+    Logs the hydrated eOn configuration and highlights user-provided overrides.
 
-    This function performs a three-way merge between the EON schema, the
+    This function performs a three-way merge between the eOn schema, the
     hydrated defaults, and the user-provided config.ini. It ensures that
     scientific provenance remains intact while providing a focused view of
     modified hyperparameters.

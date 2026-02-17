@@ -8,12 +8,20 @@
 #+begin_export markdown
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 #+end_export
-A *pure-python* module of helpful scripts / CLIs I have written mostly for quick
-and dirty parsing / plotting of optimization methods. Loosely grouped. Not
-typically optimal at all.
+A *pure-python* computational library and CLI toolkit for chemical physics
+research. ~rgpycrumbs~ provides both importable library modules for
+computational tasks (surface fitting, structure analysis, interpolation) and a
+dispatcher-based CLI for running self-contained research scripts.
 
-Most of these rely heavily on optional dependencies, with the exception of the
-~_aux~ helpers (pure Python).
+The library side offers:
+
+- *Surface fitting* (~rgpycrumbs.surfaces~) -- JAX-based kernel methods (TPS, RBF, Matern, SE, IMQ) with gradient-enhanced variants for energy landscape interpolation
+- *Structure analysis* (~rgpycrumbs.geom.analysis~) -- distance matrices, bond matrices, and fragment detection via ASE
+- *IRA matching* (~rgpycrumbs.geom.ira~) -- iterative rotations and assignments for RMSD-based structure comparison
+- *Interpolation* (~rgpycrumbs.interpolation~) -- spline interpolation utilities
+- *Data types* (~rgpycrumbs.basetypes~) -- shared data structures for NEB paths, saddle searches, and molecular geometries
+
+The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + ~uv~.
 
 ** CLI Design Philosophy
 :PROPERTIES:
@@ -36,11 +44,11 @@ The library is designed with the following principles in mind:
   between different tools in the collection.
 
 - Lightweight Core, On-Demand Dependencies :: The installable ~rgpycrumbs~
-  package is minimal, with its only dependency being the ~click~ library for the
-  CLI dispatcher. Heavy scientific libraries like ~matplotlib~  are not part of
-  the base installation. They are fetched by ~uv~ only when a script that needs
-  them is executed, ensuring the user's base Python environment remains clean
-  and lightweight.
+  package has minimal core dependencies (~click~, ~numpy~). Heavy scientific
+  libraries are available as optional extras (e.g. ~pip install
+  rgpycrumbs[surfaces]~ for JAX). For CLI tools, dependencies are fetched by
+  ~uv~ only when a script that needs them is executed, keeping the base
+  installation lightweight.
 
 - Modular & Extensible Tooling :: Each utility is an independent script. This
   modularity simplifies development, testing, and maintenance, as changes to one
@@ -51,6 +59,26 @@ The library is designed with the following principles in mind:
 :PROPERTIES:
 :CUSTOM_ID: usage
 :END:
+** Library API
+:PROPERTIES:
+:CUSTOM_ID: library-api
+:END:
+The library modules can be imported directly:
+#+BEGIN_SRC python
+# Surface fitting (requires jax: pip install rgpycrumbs[surfaces])
+from rgpycrumbs.surfaces import get_surface_model
+model = get_surface_model("tps")
+
+# Structure analysis (requires ase, scipy: pip install rgpycrumbs[analysis])
+from rgpycrumbs.geom.analysis import analyze_structure
+
+# Spline interpolation (requires scipy: pip install rgpycrumbs[interpolation])
+from rgpycrumbs.interpolation import spline_interp
+
+# Data types (no extra deps)
+from rgpycrumbs.basetypes import nebpath, SaddleMeasure
+#+END_SRC
+
 ** CLI Tools
 :PROPERTIES:
 :CUSTOM_ID: cli-tools
@@ -74,7 +102,7 @@ Options:
 Commands:
   eon  Dispatches to a script within the 'eon' submodule.
 #+END_SRC
-*** EON
+*** eOn
 :PROPERTIES:
 :CUSTOM_ID: cli-eon
 :END:
