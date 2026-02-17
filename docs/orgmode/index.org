@@ -99,6 +99,7 @@ The package also includes *pure-python* helpers for parsing logs like those from
      :maxdepth: 2
      :caption: Reference
 
+     used_by
      changelog
      devnotes
      contributing/index
