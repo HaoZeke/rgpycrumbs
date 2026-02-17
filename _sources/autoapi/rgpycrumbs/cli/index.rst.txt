@@ -10,6 +10,8 @@ Attributes
 .. autoapisummary::
 
    rgpycrumbs.cli.PACKAGE_ROOT
+   rgpycrumbs.cli._valid_groups
+   rgpycrumbs.cli._file_stems
 
 
 Functions
@@ -19,6 +21,7 @@ Functions
 
    rgpycrumbs.cli._get_scripts_in_folder
    rgpycrumbs.cli._dispatch
+   rgpycrumbs.cli._make_script_command
    rgpycrumbs.cli.main
 
 
@@ -32,10 +35,24 @@ Module Contents
    Returns a sorted list of script names (without extension) in a folder.
 
 
-.. py:function:: _dispatch(group: str, script_name: str, script_args: list)
+.. py:function:: _dispatch(group: str, script_name: str, script_args: tuple)
 
    Sets up the environment and runs the target script via 'uv run'.
 
 
+.. py:function:: _make_script_command(group_name: str, script_stem: str) -> click.Command
+
+   Creates a click command that dispatches to a PEP 723 script.
+
+
 .. py:function:: main()
+
+   A dispatcher that runs self-contained PEP 723 scripts using 'uv'.
+
+
+.. py:data:: _valid_groups
+
+.. py:data:: _file_stems
+   :value: []
+
 

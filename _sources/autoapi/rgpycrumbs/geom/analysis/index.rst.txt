@@ -1,0 +1,40 @@
+rgpycrumbs.geom.analysis
+========================
+
+.. py:module:: rgpycrumbs.geom.analysis
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.analysis.analyze_structure
+
+
+Module Contents
+---------------
+
+.. py:function:: analyze_structure(atoms: ase.Atoms, covalent_scale: float = 1.2) -> tuple[numpy.ndarray, numpy.ndarray, list[list[int]]]
+
+   Analyzes an ASE Atoms object to calculate the distance matrix, bond matrix,
+   and identify molecular fragments.
+
+   Args:
+       atoms: The ASE Atoms object to analyze.
+       covalent_scale:  A scaling factor applied to the covalent radii to
+           determine the bonding threshold.  A bond is formed if the distance
+           between two atoms is less than or equal to the sum of their
+           covalent radii, multiplied by this factor.
+
+   Returns:
+       A tuple containing:
+       - distance_matrix: A NumPy array representing the pairwise distances
+         between all atoms in the system.
+       - bond_matrix: A NumPy array representing the adjacency matrix of the
+         molecular graph.  bond_matrix[i, j] = 1 if atoms i and j are
+         bonded, and 0 otherwise.
+       - fragments: A list of lists, where each inner list contains the indices
+         of the atoms belonging to a connected fragment.
+
+

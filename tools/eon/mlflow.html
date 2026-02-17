@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>MLFlow Logging for EON - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Plotting NEB paths" href="plt_neb.html" /><link rel="prev" title="Generators for NWChem" href="generate_nwchem_input.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>MLFlow Logging for eOn - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Plotting NEB paths" href="plt_neb.html" /><link rel="prev" title="Generators for NWChem" href="generate_nwchem_input.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/eon/mlflow.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -22,7 +22,7 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="rgpycrumbs.rgoswami.me/tools/eon/mlflow.html"/>
-  <meta property="og:title" content="MLFlow Logging for EON"/>
+  <meta property="og:title" content="MLFlow Logging for eOn"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Manual favicon handling with favicon.io -->
 <!-- since sphinx-favicon doesn't work with shibuya -->
@@ -85,10 +85,10 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">EON Helpers</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">eOn Helpers</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">MLFlow Logging for EON</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MLFlow Logging for eOn</a></li>
 <li class="toctree-l2"><a class="reference internal" href="plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/index.html">rgpycrumbs.eon</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
@@ -130,6 +131,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/func/index.html">rgpycrumbs.func</a><ul>
@@ -137,10 +139,13 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
@@ -158,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -202,11 +208,11 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <a itemprop="item" href="index.html"><span itemprop="name">EON Helpers</span></a>
+        <a itemprop="item" href="index.html"><span itemprop="name">eOn Helpers</span></a>
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">MLFlow Logging for EON</strong>
+        <strong itemprop="name">MLFlow Logging for eOn</strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -255,22 +261,22 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </div><article class="yue" role="main">
           <section id="mlflow-logging-for-eon">
-<h1>MLFlow Logging for EON<a class="headerlink" href="#mlflow-logging-for-eon" title="Link to this heading">¶</a></h1>
+<h1>MLFlow Logging for eOn<a class="headerlink" href="#mlflow-logging-for-eon" title="Link to this heading">¶</a></h1>
 <section id="configuration-logging">
 <h2>Configuration Logging<a class="headerlink" href="#configuration-logging" title="Link to this heading">¶</a></h2>
-<p>When running EON simulations in a production environment, tracking the exact
+<p>When running eOn simulations in a production environment, tracking the exact
 parameters used is critical for reproducibility.</p>
 <blockquote>
 <div><div class="versionadded">
 <p><span class="versionmodified added">Added in version 0.1.0.</span></p>
 </div>
 </div></blockquote>
-<p>The `rgpycrumbs.eon.<sub>mlflow</sub>\` module provides helpers to log hydrated EON
+<p>The `rgpycrumbs.eon.<sub>mlflow</sub>\` module provides helpers to log hydrated eOn
 configurations to an MLFlow tracking server.</p>
 <section id="features">
 <h3>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h3>
 <ul class="simple">
-<li><p><strong>**Hydration**</strong>: Merges the EON schema defaults with the user’s `config.ini`.</p></li>
+<li><p><strong>**Hydration**</strong>: Merges the eOn schema defaults with the user’s `config.ini`.</p></li>
 <li><p><strong>**Override Tracking**</strong>: Distinctly logs parameters that the user explicitly changed, separating them from default values.</p></li>
 <li><p><strong>**Artifact Storage**</strong>: Uploads the raw `config.ini` as an artifact.</p></li>
 </ul>
@@ -282,7 +288,7 @@ configurations to an MLFlow tracking server.</p>
 </span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="4">
 </span><span data-line="5"><span class="n">mlflow</span><span class="o">.</span><span class="n">set_tracking_uri</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000&quot;</span><span class="p">)</span>
-</span><span data-line="6"><span class="n">mlflow</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="s2">&quot;EON_Oxadiazole_Reaction&quot;</span><span class="p">)</span>
+</span><span data-line="6"><span class="n">mlflow</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="s2">&quot;eOn_Oxadiazole_Reaction&quot;</span><span class="p">)</span>
 </span><span data-line="7">
 </span><span data-line="8"><span class="k">with</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">start_run</span><span class="p">():</span>
 </span><span data-line="9">    <span class="c1"># Log parameters from the local config file</span>

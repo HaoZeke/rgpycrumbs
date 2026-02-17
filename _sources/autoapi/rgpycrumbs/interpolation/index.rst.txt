@@ -1,0 +1,19 @@
+rgpycrumbs.interpolation
+========================
+
+.. py:module:: rgpycrumbs.interpolation
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.interpolation.spline_interp
+
+
+Module Contents
+---------------
+
+.. py:function:: spline_interp(x, y, num=100, knots=3)
+

@@ -1,0 +1,307 @@
+rgpycrumbs.surfaces
+===================
+
+.. py:module:: rgpycrumbs.surfaces
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.k_matrix_matern_grad_map
+   rgpycrumbs.surfaces.k_matrix_se_grad_map
+   rgpycrumbs.surfaces.k_matrix_imq_grad_map
+   rgpycrumbs.surfaces.k_matrix_rq_grad_map
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.FastTPS
+   rgpycrumbs.surfaces.FastMatern
+   rgpycrumbs.surfaces.GradientMatern
+   rgpycrumbs.surfaces.FastIMQ
+   rgpycrumbs.surfaces.GradientSE
+   rgpycrumbs.surfaces.GradientIMQ
+   rgpycrumbs.surfaces.GradientRQ
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.safe_cholesky_solve
+   rgpycrumbs.surfaces.generic_negative_mll
+   rgpycrumbs.surfaces._tps_kernel_matrix
+   rgpycrumbs.surfaces.negative_mll_tps
+   rgpycrumbs.surfaces._tps_solve
+   rgpycrumbs.surfaces._tps_predict
+   rgpycrumbs.surfaces._matern_kernel_matrix
+   rgpycrumbs.surfaces.negative_mll_matern_std
+   rgpycrumbs.surfaces._matern_solve
+   rgpycrumbs.surfaces._matern_predict
+   rgpycrumbs.surfaces.matern_kernel_elem
+   rgpycrumbs.surfaces.full_covariance_matern
+   rgpycrumbs.surfaces.negative_mll_matern_grad
+   rgpycrumbs.surfaces._grad_matern_solve
+   rgpycrumbs.surfaces._grad_matern_predict
+   rgpycrumbs.surfaces._imq_kernel_matrix
+   rgpycrumbs.surfaces.negative_mll_imq_std
+   rgpycrumbs.surfaces._imq_solve
+   rgpycrumbs.surfaces._imq_predict
+   rgpycrumbs.surfaces.se_kernel_elem
+   rgpycrumbs.surfaces.full_covariance_se
+   rgpycrumbs.surfaces.negative_mll_se_grad
+   rgpycrumbs.surfaces._grad_se_solve
+   rgpycrumbs.surfaces._grad_se_predict
+   rgpycrumbs.surfaces.imq_kernel_elem
+   rgpycrumbs.surfaces.full_covariance_imq
+   rgpycrumbs.surfaces.negative_mll_imq_grad
+   rgpycrumbs.surfaces.negative_mll_imq_map
+   rgpycrumbs.surfaces._grad_imq_solve
+   rgpycrumbs.surfaces._grad_imq_predict
+   rgpycrumbs.surfaces.rq_kernel_base
+   rgpycrumbs.surfaces.rq_kernel_elem
+   rgpycrumbs.surfaces.full_covariance_rq
+   rgpycrumbs.surfaces.negative_mll_rq_map
+   rgpycrumbs.surfaces._grad_rq_solve
+   rgpycrumbs.surfaces._grad_rq_predict
+   rgpycrumbs.surfaces.get_surface_model
+
+
+Module Contents
+---------------
+
+.. py:function:: safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3)
+
+   Retries Cholesky with increasing jitter if it fails.
+
+
+.. py:function:: generic_negative_mll(K, y, noise_scalar)
+
+.. py:function:: _tps_kernel_matrix(x)
+
+.. py:function:: negative_mll_tps(log_params, x, y)
+
+.. py:function:: _tps_solve(x, y, sm)
+
+.. py:function:: _tps_predict(x_query, x_obs, w, v)
+
+.. py:class:: FastTPS(x_obs, y_obs, smoothing=0.001, optimize=True, **kwargs)
+
+   .. py:attribute:: x_obs
+
+
+   .. py:attribute:: y_obs
+
+
+   .. py:attribute:: y_mean
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Batched prediction to prevent OOM errors on large grids.
+
+
+
+.. py:function:: _matern_kernel_matrix(x, length_scale)
+
+.. py:function:: negative_mll_matern_std(log_params, x, y)
+
+.. py:function:: _matern_solve(x, y, sm, length_scale)
+
+.. py:function:: _matern_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:class:: FastMatern(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
+
+   .. py:attribute:: x_obs
+
+
+   .. py:attribute:: y_obs
+
+
+   .. py:attribute:: y_mean
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Batched prediction for Matern.
+
+
+
+.. py:function:: matern_kernel_elem(x1, x2, length_scale=1.0)
+
+.. py:function:: full_covariance_matern(x1, x2, length_scale)
+
+.. py:data:: k_matrix_matern_grad_map
+
+.. py:function:: negative_mll_matern_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_matern_solve(x, y_full, noise_scalar, length_scale)
+
+.. py:function:: _grad_matern_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:class:: GradientMatern(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y_full
+
+
+   .. py:attribute:: e_mean
+
+
+   .. py:attribute:: y_flat
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+
+.. py:function:: _imq_kernel_matrix(x, epsilon)
+
+.. py:function:: negative_mll_imq_std(log_params, x, y)
+
+.. py:function:: _imq_solve(x, y, sm, epsilon)
+
+.. py:function:: _imq_predict(x_query, x_obs, alpha, epsilon)
+
+.. py:class:: FastIMQ(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
+
+   .. py:attribute:: x_obs
+
+
+   .. py:attribute:: y_obs
+
+
+   .. py:attribute:: y_mean
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+
+.. py:function:: se_kernel_elem(x1, x2, length_scale=1.0)
+
+.. py:function:: full_covariance_se(x1, x2, length_scale)
+
+.. py:data:: k_matrix_se_grad_map
+
+.. py:function:: negative_mll_se_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_se_solve(x, y_full, noise_scalar, length_scale)
+
+.. py:function:: _grad_se_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:class:: GradientSE(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y_full
+
+
+   .. py:attribute:: e_mean
+
+
+   .. py:attribute:: y_flat
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+
+.. py:function:: imq_kernel_elem(x1, x2, epsilon=1.0)
+
+.. py:function:: full_covariance_imq(x1, x2, epsilon)
+
+.. py:data:: k_matrix_imq_grad_map
+
+.. py:function:: negative_mll_imq_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_imq_solve(x, y_full, noise_scalar, epsilon)
+
+.. py:function:: _grad_imq_predict(x_query, x_obs, alpha, epsilon)
+
+.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y_full
+
+
+   .. py:attribute:: e_mean
+
+
+   .. py:attribute:: y_flat
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+
+.. py:function:: rq_kernel_base(x1, x2, length_scale, alpha)
+
+   Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha
+
+
+.. py:function:: rq_kernel_elem(x1, x2, params)
+
+   SYMMETRIC KERNEL TRICK: k_sym(x, x') = k(x, x') + k(swap(x), x')
+   Enforces f(r, p) = f(p, r) globally.
+
+
+.. py:function:: full_covariance_rq(x1, x2, params)
+
+.. py:data:: k_matrix_rq_grad_map
+
+.. py:function:: negative_mll_rq_map(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_rq_solve(x, y_full, noise_scalar, params)
+
+.. py:function:: _grad_rq_predict(x_query, x_obs, alpha, params)
+
+.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y_full
+
+
+   .. py:attribute:: e_mean
+
+
+   .. py:attribute:: y_flat
+
+
+   .. py:attribute:: params
+
+
+   .. py:attribute:: alpha
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+
+.. py:function:: get_surface_model(name)
+

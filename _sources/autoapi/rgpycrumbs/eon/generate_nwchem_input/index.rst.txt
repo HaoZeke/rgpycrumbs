@@ -32,6 +32,6 @@ Module Contents
 
 .. py:function:: main(pos_file: pathlib.Path, config: pathlib.Path, output: pathlib.Path)
 
-   Generate an NWChem input file for use with the EON SocketNWChemPot.
+   Generate an NWChem input file for use with the eOn SocketNWChemPot.
 
 

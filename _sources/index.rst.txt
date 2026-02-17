@@ -12,25 +12,22 @@
 Overview
 --------
 
-``rgpycrumbs`` functions as a unified dispatcher for research scripts and
-computational utilities, tailored for computational chemistry.  ``rgpycrumbs``
-employs `PEP 723 <https://peps.python.org/pep-0723/>`_ metadata to isolate dependencies for each tool individually
-ensuring:
+``rgpycrumbs`` is a computational library and CLI toolkit for chemical physics
+research. It provides both **importable library modules** for computational
+tasks and a **dispatcher-based CLI** for running self-contained research scripts.
 
-Conflict-Free Execution
-    Scripts with incompatible requirements like
-    different ``numpy`` versions run side-by-side without issue.
+Library Modules
+    Importable Python modules for surface fitting (JAX-based
+    kernel methods), structure analysis (distance matrices, fragment detection),
+    IRA matching (RMSD-based structure comparison), spline interpolation, and
+    shared data types for NEB paths and saddle searches.
 
-On-Demand Retrieval
-    The core package remains lightweight. The system
-    fetches heavy libraries (like ``ase`` or ``matplotlib``) via ``uv`` only when
-    executing a script that requires them.
+CLI Dispatcher
+    A unified command-line interface that employs `PEP 723 <https://peps.python.org/pep-0723/>`_
+    metadata to isolate dependencies per script via ``uv``, ensuring conflict-free
+    and reproducible execution.
 
-Strict Reproducibility
-    Every script explicitly declares its necessary
-    environment, preventing "works on my machine" errors.
-    Broadly speaking, the tooling here assists with computational methods to find
-
+Broadly speaking, the tooling here assists with computational methods to find
 reaction pathways, along with packaging helpers.
 
 Advanced NEB Visualization
@@ -54,14 +51,14 @@ Structural Context
 Simulation Setup & Analysis
 ---------------------------
 
-EON
+eOn
 ~~~
 
 NEB initial path generation
     :doc:`con-splitter <tools/eon/con_splitter>`
     simplifies the generation of initial paths enabling for instance ``IDPP``
     initialization through ``ase`` by processing multi-image trajectories into
-    EON-compatible input lists.
+    eOn-compatible input lists.
 
 Defect Identification
     :doc:`ptmdisp <tools/eon/ptmdisp>`
@@ -70,7 +67,7 @@ Defect Identification
 
 ``NWChem`` Input Generation
     :doc:`generate-nwchem-input <tools/eon/generate_nwchem_input>`
-    generates complete input files compatible with EON's ``SocketNWChemPot``,
+    generates complete input files compatible with eOn's ``SocketNWChemPot``,
     merging geometry data with calculation settings.
 
 PLUMED
@@ -88,12 +85,38 @@ Prefix.dev Management
     channels by automating the cleanup of old or specific package versions on
     `prefix.dev <https://prefix.dev>`_.
 
+Library API
+-----------
+
+Beyond the CLI tools, ``rgpycrumbs`` provides importable library modules:
+
+``rgpycrumbs.surfaces``
+    JAX-based surface fitting with TPS, RBF, Matern 5/2,
+    SE, and IMQ kernels. Includes gradient-enhanced variants for energy landscape
+    interpolation. Install with ``pip install rgpycrumbs[surfaces]``.
+
+``rgpycrumbs.geom.analysis``
+    Structure analysis: distance matrices, bond
+    matrices, and fragment detection via ASE's ``NeighborList``. Install with ``pip install rgpycrumbs[analysis]``.
+
+``rgpycrumbs.geom.ira``
+    Iterative Rotations and Assignments (IRA) for
+    RMSD-based structure comparison. Install with ``pip install rgpycrumbs[ira]``.
+
+``rgpycrumbs.interpolation``
+    Spline interpolation utilities built on SciPy.
+    Install with ``pip install rgpycrumbs[interpolation]``.
+
+``rgpycrumbs.basetypes``
+    Shared data structures (``nebiter``, ``nebpath``,
+    ``SaddleMeasure``, ``DimerOpt``, ``MolGeom``, ``SpinID``) used across ``rgpycrumbs``
+    and ``chemparseplot``. No extra dependencies required.
+
 Utility Functions
 -----------------
 
-Beyond the command line tools, the package includes **pure-python** helpers for
-parsing logs like those from `bless <https://crates.io/crates/bless>`_ and managing data structures in Jupyter
-notebooks.
+The package also includes **pure-python** helpers for parsing logs like those from
+`bless <https://crates.io/crates/bless>`_ and managing data structures in Jupyter notebooks.
 
 Tool Categories
 ---------------

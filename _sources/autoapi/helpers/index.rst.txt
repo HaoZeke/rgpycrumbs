@@ -9,11 +9,25 @@ Functions
 
 .. autoapisummary::
 
-   helpers.one_day_tdelta
+   helpers.tail
+   helpers.head_search
 
 
 Module Contents
 ---------------
 
-.. py:function:: one_day_tdelta(etime: str, stime: str, format_time: str = '%H:%M:%S')
+.. py:function:: tail(filename, n)
+
+.. py:function:: head_search(filename: pathlib.Path, sstr: str, n=60)
+
+   Checks if the search string is found in the first n lines of a file.
+
+   Args:
+       filename (Path): Path to the file.
+       sstr (str): The search string.
+       n (int, optional): Number of lines to read. Defaults to 60.
+
+   Returns:
+       bool: True if the search string is found, False otherwise.
+
 

@@ -36,7 +36,7 @@ Reporting Issues
 
 Use the `GitHub issue tracker <https://github.com/HaoZeke/rgpycrumbs/issues>`_ to report bugs or suggest enhancements. Please
 provide a minimal reproducible example for all bug reports. User facing comments
-may be directed also to the `EON materials science section <https://matsci.org/c/eon/72>`_.
+may be directed also to the `eOn materials science section <https://matsci.org/c/eon/72>`_.
 
 Contributing
 ------------

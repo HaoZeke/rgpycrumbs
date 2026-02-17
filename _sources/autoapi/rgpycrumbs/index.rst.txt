@@ -11,14 +11,42 @@ Submodules
    :maxdepth: 1
 
    /autoapi/rgpycrumbs/_aux/index
+   /autoapi/rgpycrumbs/basetypes/index
    /autoapi/rgpycrumbs/cli/index
    /autoapi/rgpycrumbs/eon/index
    /autoapi/rgpycrumbs/func/index
    /autoapi/rgpycrumbs/geom/index
+   /autoapi/rgpycrumbs/interpolation/index
    /autoapi/rgpycrumbs/parsers/index
    /autoapi/rgpycrumbs/plumed/index
    /autoapi/rgpycrumbs/prefix/index
    /autoapi/rgpycrumbs/run/index
+   /autoapi/rgpycrumbs/surfaces/index
    /autoapi/rgpycrumbs/xts/index
 
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.__version__
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.__getattr__
+
+
+Package Contents
+----------------
+
+.. py:data:: __version__
+   :value: 'unknown'
+
+
+.. py:function:: __getattr__(name)
 

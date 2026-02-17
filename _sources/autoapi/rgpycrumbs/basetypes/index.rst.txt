@@ -1,0 +1,169 @@
+rgpycrumbs.basetypes
+====================
+
+.. py:module:: rgpycrumbs.basetypes
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.basetypes.nebiter
+   rgpycrumbs.basetypes.nebpath
+   rgpycrumbs.basetypes.DimerOpt
+   rgpycrumbs.basetypes.SpinID
+   rgpycrumbs.basetypes.MolGeom
+   rgpycrumbs.basetypes.SaddleMeasure
+
+
+Module Contents
+---------------
+
+.. py:class:: nebiter
+
+   Bases: :py:obj:`tuple`
+
+
+   .. py:attribute:: iteration
+
+
+   .. py:attribute:: nebpath
+
+
+.. py:class:: nebpath
+
+   Bases: :py:obj:`tuple`
+
+
+   .. py:attribute:: norm_dist
+
+
+   .. py:attribute:: arc_dist
+
+
+   .. py:attribute:: energy
+
+
+.. py:class:: DimerOpt
+
+   .. py:attribute:: saddle
+      :type:  str
+      :value: 'dimer'
+
+
+
+   .. py:attribute:: rot
+      :type:  str
+      :value: 'lbfgs'
+
+
+
+   .. py:attribute:: trans
+      :type:  str
+      :value: 'lbfgs'
+
+
+
+.. py:class:: SpinID
+
+   .. py:attribute:: mol_id
+      :type:  int
+
+
+   .. py:attribute:: spin
+      :type:  str
+
+
+.. py:class:: MolGeom
+
+   .. py:attribute:: pos
+      :type:  numpy.array
+
+
+   .. py:attribute:: energy
+      :type:  float
+
+
+   .. py:attribute:: forces
+      :type:  numpy.array
+
+
+.. py:class:: SaddleMeasure
+
+   .. py:attribute:: pes_calls
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: iter_steps
+      :type:  int
+      :value: 0
+
+
+
+   .. py:attribute:: tot_time
+      :type:  datetime.timedelta
+
+
+   .. py:attribute:: saddle_energy
+      :type:  float
+
+
+   .. py:attribute:: saddle_fmax
+      :type:  float
+
+
+   .. py:attribute:: success
+      :type:  bool
+      :value: False
+
+
+
+   .. py:attribute:: method
+      :type:  str
+      :value: 'not run'
+
+
+
+   .. py:attribute:: dimer_rot
+      :type:  str
+      :value: 'n/a'
+
+
+
+   .. py:attribute:: dimer_trans
+      :type:  str
+      :value: 'n/a'
+
+
+
+   .. py:attribute:: init_energy
+      :type:  float
+
+
+   .. py:attribute:: barrier
+      :type:  float
+
+
+   .. py:attribute:: mol_id
+      :type:  int
+
+
+   .. py:attribute:: spin
+      :type:  str
+      :value: 'unknown'
+
+
+
+   .. py:attribute:: scf
+      :type:  float
+
+
+   .. py:attribute:: termination_status
+      :type:  str
+      :value: 'not set'
+
+
+

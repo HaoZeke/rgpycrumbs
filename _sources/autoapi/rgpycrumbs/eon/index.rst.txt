@@ -16,5 +16,6 @@ Submodules
    /autoapi/rgpycrumbs/eon/helpers/index
    /autoapi/rgpycrumbs/eon/plt_neb/index
    /autoapi/rgpycrumbs/eon/ptmdisp/index
+   /autoapi/rgpycrumbs/eon/to_mlflow/index
 
 

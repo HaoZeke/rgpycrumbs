@@ -48,7 +48,7 @@ Command Line Reference
 
 External References
     Use the ``@@rst::...@@`` syntax for specific 
-    intersphinx links (e.g., pointing to the EON schema).
+    intersphinx links (e.g., pointing to the eOn schema).
 
 Source Code Links
     Link to the internal API reference using 
@@ -70,7 +70,7 @@ Usage
 
 Integration
     Context on how the tool interacts with external  software
-    (e.g., EON config snippets).
+    (e.g., eOn config snippets).
 
 API Reference
     A link to the developer source documentation.

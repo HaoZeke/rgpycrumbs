@@ -85,10 +85,10 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">EON Helpers</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/mlflow.html">MLFlow Logging for EON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/mlflow.html">MLFlow Logging for eOn</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../helpers/index.html">helpers</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../index.html">rgpycrumbs</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="../index.html">rgpycrumbs.eon</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
@@ -130,6 +131,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../func/index.html">rgpycrumbs.func</a><ul>
@@ -137,10 +139,13 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
@@ -158,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -273,7 +279,7 @@ data-aria-dark="Switch to auto color mode">
 <td><p>Generates a complete NWChem input file by combining atom types from a .con</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.generate_nwchem_input.main" title="rgpycrumbs.eon.generate_nwchem_input.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(pos_file, config, output)</p></td>
-<td><p>Generate an NWChem input file for use with the EON SocketNWChemPot.</p></td>
+<td><p>Generate an NWChem input file for use with the eOn SocketNWChemPot.</p></td>
 </tr>
 </tbody>
 </table>
@@ -300,7 +306,7 @@ output_path: The path for the generated NWChem input file.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.eon.generate_nwchem_input.main">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.generate_nwchem_input.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/generate_nwchem_input.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.generate_nwchem_input.main" title="Link to this definition">¶</a></dt>
-<dd><p>Generate an NWChem input file for use with the EON SocketNWChemPot.</p>
+<dd><p>Generate an NWChem input file for use with the eOn SocketNWChemPot.</p>
 </dd></dl>
 
 </section>

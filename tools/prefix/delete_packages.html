@@ -85,10 +85,10 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../eon/index.html">EON Helpers</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="../eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for EON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for eOn</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/plt_neb.html">Plotting NEB paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/index.html">rgpycrumbs.eon</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
@@ -130,6 +131,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/func/index.html">rgpycrumbs.func</a><ul>
@@ -137,10 +139,13 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
@@ -158,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -309,8 +315,12 @@ data-aria-dark="Switch to auto color mode">
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">$ python -m rgpycrumbs.cli prefix delete-packages --help
-</span><span data-line="2">--&gt; Dispatching to: uv run /home/runner/work/rgpycrumbs/rgpycrumbs/rgpycrumbs/prefix/delete_packages.py --help
-</span><span data-line="3">Error: &#39;uv&#39; command not found. Is it installed?
+</span><span data-line="2">Usage: python -m rgpycrumbs.cli prefix delete-packages [OPTIONS]
+</span><span data-line="3">
+</span><span data-line="4">  Run the delete-packages script.
+</span><span data-line="5">
+</span><span data-line="6">Options:
+</span><span data-line="7">  --help  Show this message and exit.
 </span></pre></div>
 </div>
 </section>

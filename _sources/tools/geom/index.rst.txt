@@ -12,6 +12,22 @@ These tools provide visualization and bonding analysis.
    alignment
    detect_fragments
 
+Library Modules
+~~~~~~~~~~~~~~~
+
+The ``rgpycrumbs.geom`` package also includes importable library modules:
+
+``rgpycrumbs.geom.analysis``
+    Structure analysis: distance matrices, bond
+    matrices, fragment detection, centroid distances, and RMSD-corrected
+    distances. Uses ASE's ``NeighborList`` and depth-first search for fragment
+    identification.
+
+``rgpycrumbs.geom.ira``
+    IRA (Iterative Rotations and Assignments) matching
+    for RMSD-based structure comparison. Provides ``do_ira()``, ``calculate_rmsd()``,
+    and ``is_ira_pair()`` functions along with the ``IRAComp`` dataclass.
+
 API Reference
 ~~~~~~~~~~~~~
 

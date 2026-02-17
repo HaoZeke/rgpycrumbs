@@ -1,9 +1,9 @@
 
 
-EON Helpers
+eOn Helpers
 -----------
 
-These tools work with `EON output files <https://eondocs.org>`_.
+These tools work with `eOn output files <https://eondocs.org>`_.
 
 .. toctree::
    :maxdepth: 2
@@ -18,7 +18,7 @@ These tools work with `EON output files <https://eondocs.org>`_.
 API Reference
 ~~~~~~~~~~~~~
 
-For developer details, see the :doc:\`EON Helper Reference
+For developer details, see the :doc:\`eOn Helper Reference
 <../../autoapi/rgpycrumbs/eon/index>\` [1]_ .
 
 

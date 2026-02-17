@@ -1,0 +1,82 @@
+rgpycrumbs.geom.ira
+===================
+
+.. py:module:: rgpycrumbs.geom.ira
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.ira.IncomparableStructuresError
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.ira.IRAComp
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.ira._perform_ira_match
+   rgpycrumbs.geom.ira.is_ira_pair
+   rgpycrumbs.geom.ira.do_ira
+   rgpycrumbs.geom.ira.calculate_rmsd
+
+
+Module Contents
+---------------
+
+.. py:class:: IRAComp
+
+   .. py:attribute:: rot
+      :type:  numpy.array
+
+
+   .. py:attribute:: trans
+      :type:  numpy.array
+
+
+   .. py:attribute:: perm
+      :type:  numpy.array
+
+
+   .. py:attribute:: hd
+      :type:  float
+
+
+.. py:exception:: IncomparableStructuresError
+
+   Bases: :py:obj:`ValueError`
+
+
+   Custom exception raised for incompatible atomistic structures.
+
+
+.. py:function:: _perform_ira_match(atm1, atm2, k_factor=2.8)
+
+   Performs IRA matching. Internal function.
+
+
+.. py:function:: is_ira_pair(atm1, atm2, hd_tol=1, k_factor=2.8)
+
+   Checks if two atomistic structures are an IRA pair.
+
+
+.. py:function:: do_ira(atm1, atm2, k_factor=2.8)
+
+   Performs IRA matching on two atomistic structures.
+
+
+.. py:function:: calculate_rmsd(atm1, atm2, k_factor=2.8)
+
+   Calculates RMSD using do_ira.
+
+

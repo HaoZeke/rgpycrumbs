@@ -58,13 +58,44 @@ Example Test Structure
     def test_feature_execution():
         assert core_feature() is True
 
+Available Markers & Environments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following markers and their corresponding ``pixi`` environments are available:
+
+.. table::
+
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | Marker        | Environment            | Dependencies        | What it tests                            |
+    +===============+========================+=====================+==========================================+
+    | ``pure``      | ``test``               | ``numpy``           | Core utilities, basetypes, interpolation |
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | ``align``     | ``test``               | ``ase``, ``numpy``  | Structure analysis, alignment            |
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | ``fragments`` | ``fragments``          | ``ase``, ``tblite`` | Fragment detection with tight-binding    |
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | ``surfaces``  | ``surfaces``           | ``jax``             | Surface fitting kernels and models       |
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | ``ptm``       | ``ptm``                | ``ase``, ``ovito``  | Polyhedral template matching             |
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | ``eon``       | ``eonmlflow``          | ``ase``, ``eon``    | eOn integration                          |
+    +---------------+------------------------+---------------------+------------------------------------------+
+    | ``ira``       | (requires ``ira_mod``) | ``ira_mod``         | IRA matching and RMSD comparison         |
+    +---------------+------------------------+---------------------+------------------------------------------+
+
 Running Tests
 ~~~~~~~~~~~~~
 
-Execute tests within the specific environment that provides the necessary 
+Execute tests within the specific environment that provides the necessary
 dependencies:
 
 .. code:: shell
 
     # Run tests for a specific suite
     pixi run -e <env_name> pytest -m <marker_name>
+
+    # Examples
+    pixi run -e test pytest -m pure
+    pixi run -e test pytest -m align
+    pixi run -e surfaces pytest -m surfaces
+    pixi run -e fragments pytest -m fragments

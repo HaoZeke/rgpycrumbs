@@ -1,5 +1,5 @@
 ======================
-MLFlow Logging for EON
+MLFlow Logging for eOn
 ======================
 
 
@@ -7,18 +7,18 @@ MLFlow Logging for EON
 Configuration Logging
 ---------------------
 
-When running EON simulations in a production environment, tracking the exact
+When running eOn simulations in a production environment, tracking the exact
 parameters used is critical for reproducibility.
 
   .. versionadded:: 0.1.0
 
-The \`rgpycrumbs.eon.\ :sub:`mlflow`\\` module provides helpers to log hydrated EON
+The \`rgpycrumbs.eon.\ :sub:`mlflow`\\` module provides helpers to log hydrated eOn
 configurations to an MLFlow tracking server.
 
 Features
 ~~~~~~~~
 
-- ****Hydration****: Merges the EON schema defaults with the user's \`config.ini\`.
+- ****Hydration****: Merges the eOn schema defaults with the user's \`config.ini\`.
 
 - ****Override Tracking****: Distinctly logs parameters that the user explicitly changed, separating them from default values.
 
@@ -34,7 +34,7 @@ Usage
     from pathlib import Path
 
     mlflow.set_tracking_uri("http://localhost:5000")
-    mlflow.set_experiment("EON_Oxadiazole_Reaction")
+    mlflow.set_experiment("eOn_Oxadiazole_Reaction")
 
     with mlflow.start_run():
         # Log parameters from the local config file

@@ -1,0 +1,62 @@
+rgpycrumbs.eon.to_mlflow
+========================
+
+.. py:module:: rgpycrumbs.eon.to_mlflow
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.to_mlflow.CONSOLE
+   rgpycrumbs.eon.to_mlflow.log
+   rgpycrumbs.eon.to_mlflow.NEB_ITER_RE
+   rgpycrumbs.eon.to_mlflow.DIMER_STEP_RE
+   rgpycrumbs.eon.to_mlflow.IDIMER_ROT_RE
+   rgpycrumbs.eon.to_mlflow.POT_CALLS_RE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.to_mlflow.parse_and_log_metrics
+   rgpycrumbs.eon.to_mlflow.plot_structure_evolution
+   rgpycrumbs.eon.to_mlflow.main
+
+
+Module Contents
+---------------
+
+.. py:data:: CONSOLE
+
+.. py:data:: log
+
+.. py:data:: NEB_ITER_RE
+
+.. py:data:: DIMER_STEP_RE
+
+.. py:data:: IDIMER_ROT_RE
+
+.. py:data:: POT_CALLS_RE
+
+.. py:function:: parse_and_log_metrics(log_file: pathlib.Path)
+
+   Parses the eOn client log and logs metrics using a global step counter.
+
+   This function tracks transitions between NEB and Dimer searches to provide
+   a unified convergence timeline.
+
+
+.. py:function:: plot_structure_evolution(atoms_list, plot_every=5)
+
+   Generates a horizontal strip showing atomic configuration changes.
+
+
+.. py:function:: main(log_file, config_file, traj_file, experiment, track_overrides)
+
+   Parses eOn logs and logs metrics, plots, and artifacts to MLflow.
+
+
