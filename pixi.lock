@@ -8632,8 +8632,8 @@ packages:
   timestamp: 1760802465911
 - pypi: ./
   name: rgpycrumbs
-  version: 0.1.4.dev5+g0df43f4f7
-  sha256: 0d0d45d9ed2ad3f9005217d27e32d2699399de20d7f391455ee6a9aa0e0a67a6
+  version: 0.1.4.dev7+g457f5aaca
+  sha256: cb82cdbffb9b789167d038ec0678257cfa7ffb10c131da89d7b710f1f5d30698
   requires_dist:
   - click>=8.1
   - numpy>=1.24
