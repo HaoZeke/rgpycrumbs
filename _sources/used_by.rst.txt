@@ -1,0 +1,73 @@
+=======
+Used By
+=======
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+The following projects use ``rgpycrumbs`` as a dependency or tool.
+
+Libraries
+---------
+
+`chemparseplot <https://github.com/HaoZeke/chemparseplot>`_
+    Parsers and plotting tools for computational chemistry. Uses
+    ``rgpycrumbs.basetypes``, ``rgpycrumbs.interpolation``, ``rgpycrumbs.surfaces``,
+    and ``rgpycrumbs.parsers`` as core dependencies.
+
+Research Software
+-----------------
+
+`eOn <https://github.com/TheochemUI/eOn>`_
+    Long-timescale molecular dynamics code. Documentation references
+    ``rgpycrumbs`` as the companion diagnostic and visualization suite
+    (`docs <https://eon.theochemui.org/>`_).
+
+Reproducibility Packages
+------------------------
+
+`nebmmf\ :sub:`repro`\ <https://github.com/HaoZeke/nebmmf_repro>`_
+    Reproduction package for NEB machine-learned force field
+    work. Uses ``rgpycrumbs`` CLI for NEB plotting and the alignment API.
+
+`nebviz\ :sub:`repro`\ <https://github.com/HaoZeke/nebviz_repro>`_
+    Reproduction package for 2D NEB visualization methods. Imports
+    ``rgpycrumbs.eon.helpers`` and runs the CLI for 2D landscape plots.
+
+`otgpd\ :sub:`repro`\ <https://github.com/TheochemUI/otgpd_repro>`_
+    Reproduction package for on-the-fly GP dimer searches. Imports
+    ``rgpycrumbs._aux``, runs CLI for GP trajectory analysis and fragment detection.
+
+`gpr\ :sub:`sella`\ \ :sub:`repro`\ <https://github.com/TheochemUI/gpr_sella_repro>`_
+    Reproduction package for GP-accelerated Sella saddle point
+    searches (ChemPhysChem, doi: `10.1002/cphc.202500730 <https://doi.org/10.1002/cphc.202500730>`_). Uses ``rgpycrumbs`` for
+    auxiliary helpers, parsers, and structure analysis.
+
+`brms\ :sub:`idrot`\ \ :sub:`repro`\ <https://github.com/HaoZeke/brms_idrot_repro>`_
+    Bayesian reaction mechanism studies reproduction package.
+    Uses both ``rgpycrumbs`` and ``chemparseplot`` for parsing and analysis.
+
+External Projects
+-----------------
+
+`atomistic-cookbook <https://github.com/lab-cosmo/atomistic-cookbook>`_ (lab-cosmo)
+    Community cookbook for atomistic simulations.
+    The `eOn PET-NEB example <https://atomistic-cookbook.org/examples/eon-pet-neb/eon-pet-neb.html>`_ imports ``rgpycrumbs.eon.helpers`` and
+    ``rgpycrumbs.run.jupyter``.
+
+`metatensor ecosystem-article <https://github.com/metatensor/ecosystem-article>`_ (metatensor)
+    Metatensor ecosystem paper. Uses
+    ``rgpycrumbs`` for eOn NEB plotting and PLUMED FES reconstruction workflows.
+
+Academic Work
+-------------
+
+- Rohit Goswami, *Efficient Exploration of Chemical Kinetics*, Doctoral
+  dissertation, University of Iceland, 2025.
+  arXiv: `2510.21368 <https://arxiv.org/abs/2510.21368>`_,
+  doi: `10.48550/arXiv.2510.21368 <https://doi.org/10.48550/arXiv.2510.21368>`_.
+  Uses ``rgpycrumbs`` throughout for NEB visualization, surface fitting,
+  structure analysis, and fragment detection.
+
+`python\ :sub:`dissemination`\ \ :sub:`workbench`\ <https://github.com/HaoZeke/python_dissemination_workbench>`_
+    Teaching materials referencing ``rgpycrumbs``
+    as a helper utility example.

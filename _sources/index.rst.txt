@@ -139,6 +139,7 @@ For details on the dispatcher architecture or internal API:
      :maxdepth: 2
      :caption: Reference
 
+     used_by
      changelog
      devnotes
      contributing/index
