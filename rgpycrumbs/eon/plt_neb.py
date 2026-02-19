@@ -40,6 +40,7 @@ https://realpython.com/python-script-structure/
 # ]
 # ///
 
+import io
 import logging
 from pathlib import Path
 
@@ -171,6 +172,12 @@ IRA_KMAX_DEFAULT = 1.8
     type=click.Choice(["last", "all"]),
     default="all",
     help="Last uses an interpolation only on the last path, otherwise use all points.",
+)
+@click.option(
+    "--project-path/--no-project-path",
+    is_flag=True,
+    default=True,
+    help="Project landscape coordinates into the reaction valley (s, d).",
 )
 @click.option(
     "--rc-mode",
@@ -374,6 +381,7 @@ def main(
     plot_type,
     landscape_mode,
     landscape_path,
+    project_path,
     rc_mode,
     plot_structures,
     rbf_smoothing,
@@ -553,7 +561,8 @@ def main(
                 rbf_smooth=rbf_smoothing,
                 cmap=active_theme.cmap_landscape,
                 show_pts=show_pts,
-                variance_threshold = 0.5, # 50% uncertainity
+                variance_threshold=0.5, # 50% uncertainity
+                project_path=project_path,
             )
 
         # Path Overlay (Final Step)
@@ -564,21 +573,36 @@ def main(
         final_z = df_final["z"].to_numpy()
 
         plot_landscape_path_overlay(
-            ax, final_r, final_p, final_z, active_theme.cmap_landscape, z_label
+            ax, final_r, final_p, final_z, active_theme.cmap_landscape, z_label, project_path=project_path
         )
 
         # Saddle Point Marker
         if sp_data:
             # Use explicit SP coordinates
-            sp_x, sp_y = sp_data["r"], sp_data["p"]
-            log.info(f"Plotting explicit SP at R={sp_x:.3f}, P={sp_y:.3f}")
+            sp_x_raw, sp_y_raw = sp_data["r"], sp_data["p"]
+            log.info(f"Plotting explicit SP at R={sp_x_raw:.3f}, P={sp_y_raw:.3f}")
         else:
             # Fallback to heuristic
             if plot_mode == "energy":
                 saddle_idx = np.argmax(final_z[1:-1]) + 1
             else:
                 saddle_idx = np.argmin(final_z)
-            sp_x, sp_y = final_r[saddle_idx], final_p[saddle_idx]
+            sp_x_raw, sp_y_raw = final_r[saddle_idx], final_p[saddle_idx]
+
+        # Apply projection to saddle point if enabled
+        if project_path:
+            r_start, p_start = final_r[0], final_p[0]
+            r_end, p_end = final_r[-1], final_p[-1]
+            vec_r = r_end - r_start
+            vec_p = p_end - p_start
+            path_norm = np.hypot(vec_r, vec_p)
+            u_r, u_p = vec_r / path_norm, vec_p / path_norm
+            v_r, v_p = -u_p, u_r
+            
+            sp_x = (sp_x_raw - r_start) * u_r + (sp_y_raw - p_start) * u_p
+            sp_y = (sp_x_raw - r_start) * v_r + (sp_y_raw - p_start) * v_p
+        else:
+            sp_x, sp_y = sp_x_raw, sp_y_raw
 
         ax.scatter(
             sp_x,
@@ -596,9 +620,16 @@ def main(
             marker_cmap = mpl.colormaps.get_cmap("tab10")
             for i, (_, add_r, add_p, add_label) in enumerate(additional_atoms_data):
                 color = marker_cmap(i % 10)
+                
+                if project_path:
+                    plot_add_r = (add_r - r_start) * u_r + (add_p - p_start) * u_p
+                    plot_add_p = (add_r - r_start) * v_r + (add_p - p_start) * v_p
+                else:
+                    plot_add_r, plot_add_p = add_r, add_p
+
                 ax.plot(
-                    add_r,
-                    add_p,
+                    plot_add_r,
+                    plot_add_p,
                     marker="*",
                     markersize=int(active_theme.font_size * 1.1),
                     color=color,
@@ -612,57 +643,70 @@ def main(
         if has_strip and atoms_list:
             strip_payload = []
             
+            # Helper to calculate projected coordinates for labels
+            def get_projected_coords(r_val, p_val):
+                if project_path:
+                    s_val = (r_val - r_start) * u_r + (p_val - p_start) * u_p
+                    d_val = (r_val - r_start) * v_r + (p_val - p_start) * v_p
+                    return s_val, d_val
+                return r_val, p_val
+            
             # Add Reactant
+            rx, ry = get_projected_coords(final_r[0], final_p[0])
             strip_payload.append({
                 "atoms": atoms_list[0],
-                "x": final_r[0],
-                "y": final_p[0],
+                "x": rx,
+                "y": ry,
                 "label": "R"
             })
 
             # Add Saddle (Explicit or Heuristic)
             if sp_data:
-                 strip_payload.append({
+                sx, sy = get_projected_coords(sp_data["r"], sp_data["p"])
+                strip_payload.append({
                     "atoms": sp_data["atoms"],
-                    "x": sp_data["r"],
-                    "y": sp_data["p"],
+                    "x": sx,
+                    "y": sy,
                     "label": "SP"
                 })
             else:
-                # Re-calculate heuristic index if not available in this scope
                 s_idx = (np.argmax(final_z[1:-1]) + 1) if plot_mode == "energy" else np.argmin(final_z)
+                sx, sy = get_projected_coords(final_r[s_idx], final_p[s_idx])
                 strip_payload.append({
                     "atoms": atoms_list[s_idx],
-                    "x": final_r[s_idx],
-                    "y": final_p[s_idx],
+                    "x": sx,
+                    "y": sy,
                     "label": "SP"
                 })
 
             # Add Product
+            px, py = get_projected_coords(final_r[-1], final_p[-1])
             strip_payload.append({
                 "atoms": atoms_list[-1],
-                "x": final_r[-1],
-                "y": final_p[-1],
+                "x": px,
+                "y": py,
                 "label": "P"
             })
 
             # Add intermediate points if 'all' requested
             if plot_structures == "all":
                 for i in range(1, len(atoms_list) - 1):
+                    ix, iy = get_projected_coords(final_r[i], final_p[i])
                     strip_payload.append({
                         "atoms": atoms_list[i],
-                        "x": final_r[i],
-                        "y": final_p[i],
+                        "x": ix,
+                        "y": iy,
                         "label": str(i)
                     })
 
             # Add additional structures
             for add_atoms, add_r, add_p, add_label in additional_atoms_data:
+                ax_r, ax_p = get_projected_coords(add_r, add_p)
                 strip_payload.append(
                     {
                         "atoms": add_atoms,
-                        "x": add_r,
-                        "y": add_p,
+                        "x": ax_r,
+                        "y": ax_p,
                         "label": add_label,
                     }
                 )
@@ -709,9 +753,14 @@ def main(
                 )
 
         # Labels
-        final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
-        final_ylabel = ylabel or r"RMSD from Product ($\AA$)"
-        final_title = "RMSD(R,P) projection" if title == "NEB Path" else title
+        if project_path:
+            final_xlabel = xlabel or r"Reaction Progress, $s$ ($\AA$)"
+            final_ylabel = ylabel or r"Orthogonal Distance, $d$ ($\AA$)"
+            final_title = "Reaction Valley Projection" if title == "NEB Path" else title
+        else:
+            final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
+            final_ylabel = ylabel or r"RMSD from Product ($\AA$)"
+            final_title = "RMSD(R,P) projection" if title == "NEB Path" else title
 
     else:
         # --- Profile Plot ---
@@ -867,7 +916,10 @@ def main(
     ax.minorticks_on()
 
     if plot_type == "landscape" and not aspect_ratio:
-        ax.set_aspect('equal')
+            if project_path:
+                ax.set_aspect('auto')
+            else:
+                ax.set_aspect('equal')
 
     if show_legend:
         ax.legend(
