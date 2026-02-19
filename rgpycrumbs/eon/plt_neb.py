@@ -930,7 +930,9 @@ def main(
 
     if show_legend:
         ax.legend(
-            loc="upper left",
+            # Upper left is orthogonal to 0 distance from R, unlikely
+            # Lower left is near 0 w.r.t R and P, always spurious
+            loc="upper left" if project_path else "lower left",
             borderaxespad=0.5,
             frameon=True,
             framealpha=1.0,
