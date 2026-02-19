@@ -35,7 +35,7 @@ https://realpython.com/python-script-structure/
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot==0.1.0",
+#   "chemparseplot @ /home/rgoswami/Git/Github/Python/chemparseplot",
 #   "rgpycrumbs",
 # ]
 # ///
@@ -553,6 +553,7 @@ def main(
                 rbf_smooth=rbf_smoothing,
                 cmap=active_theme.cmap_landscape,
                 show_pts=show_pts,
+                variance_threshold = 0.5, # 50% uncertainity
             )
 
         # Path Overlay (Final Step)
