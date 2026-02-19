@@ -549,6 +549,12 @@ def main(
                 rbf_smoothing = estimate_rbf_smoothing(df)
                 log.info(f"Calculated heuristic RBF smoothing: {rbf_smoothing:.4f}")
 
+            extra_pts = []
+            if sp_data:
+                extra_pts.append([sp_data["r"], sp_data["p"]])
+            for _, add_r, add_p, _ in additional_atoms_data:
+                extra_pts.append([add_r, add_p])
+            extra_pts_arr = np.array(extra_pts) if extra_pts else None
             plot_landscape_surface(
                 ax,
                 r_all,
@@ -561,8 +567,9 @@ def main(
                 rbf_smooth=rbf_smoothing,
                 cmap=active_theme.cmap_landscape,
                 show_pts=show_pts,
-                variance_threshold=0.5, # 50% uncertainity
+                variance_threshold=0.9, # 90% uncertainity
                 project_path=project_path,
+                extra_points=extra_pts_arr,
             )
 
         # Path Overlay (Final Step)
@@ -923,7 +930,7 @@ def main(
 
     if show_legend:
         ax.legend(
-            loc="lower left",
+            loc="upper left",
             borderaxespad=0.5,
             frameon=True,
             framealpha=1.0,
