@@ -42,6 +42,14 @@ def simple_2d_data():
 
 
 @pytest.fixture
+def gradient_2d_data(simple_2d_data):
+    """Gradients for the quadratic bowl z = x^2 + y^2."""
+    x, y = simple_2d_data
+    grads = 2.0 * x
+    return x, y, grads
+
+
+@pytest.fixture
 def query_points():
     """A small grid of query points."""
     return jnp.array(
@@ -217,6 +225,41 @@ def test_fast_imq_interpolates_training_points(simple_2d_data):
     model = FastIMQ(x, y, smoothing=1e-6, length_scale=1.0, optimize=False)
     preds = model(x)
     assert jnp.allclose(preds, y, atol=0.5)
+
+
+# ---------------------------------------------------------------------------
+# Variance prediction tests
+# ---------------------------------------------------------------------------
+
+
+def test_predict_var_non_gradient_models(simple_2d_data, query_points):
+    """Test variance prediction for standard implementations."""
+    x, y = simple_2d_data
+    for ModelClass in [FastTPS, FastMatern, FastIMQ]:
+        model = ModelClass(x, y, optimize=False, length_scale=1.0, smoothing=1e-4)
+        var = model.predict_var(query_points)
+        assert var.shape == (query_points.shape[0],)
+        assert jnp.all(var >= 0.0)
+        assert jnp.all(jnp.isfinite(var))
+
+        # Variance at training points should drop significantly
+        var_train = model.predict_var(x)
+        assert jnp.all(var_train < 1e-1)
+
+
+def test_predict_var_gradient_models(gradient_2d_data, query_points):
+    """Test variance prediction for gradient-enhanced kernels."""
+    x, y, grads = gradient_2d_data
+    for ModelClass in [GradientMatern, GradientIMQ, GradientSE, GradientRQ]:
+        model = ModelClass(x, y, gradients=grads, optimize=False, length_scale=1.0, smoothing=1e-4)
+        var = model.predict_var(query_points)
+        assert var.shape == (query_points.shape[0],)
+        assert jnp.all(var >= 0.0)
+        assert jnp.all(jnp.isfinite(var))
+        
+        # Variance at training points should drop significantly
+        var_train = model.predict_var(x)
+        assert jnp.all(var_train < 1e-1)
 
 
 # ---------------------------------------------------------------------------

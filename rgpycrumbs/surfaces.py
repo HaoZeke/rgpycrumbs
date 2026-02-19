@@ -80,7 +80,8 @@ def _tps_solve(x, y, sm):
     rhs = jnp.concatenate([y, jnp.zeros(M, dtype=jnp.float32)])
 
     coeffs = jnp.linalg.solve(lhs, rhs)
-    return coeffs[:N], coeffs[N:]
+    lhs_inv = jnp.linalg.inv(lhs)
+    return coeffs[:N], coeffs[N:], lhs_inv
 
 
 @jit
@@ -93,6 +94,19 @@ def _tps_predict(x_query, x_obs, w, v):
         [jnp.ones((x_query.shape[0], 1), dtype=jnp.float32), x_query], axis=1
     )
     return K_q @ w + P_q @ v
+
+
+@jit
+def _tps_var(x_query, x_obs, lhs_inv):
+    d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
+    r = jnp.sqrt(d2 + 1e-12)
+    K_q = r**2 * jnp.log(r)
+    P_q = jnp.concatenate(
+        [jnp.ones((x_query.shape[0], 1), dtype=jnp.float32), x_query], axis=1
+    )
+    KP_q = jnp.concatenate([K_q, P_q], axis=1)
+    var = -jnp.sum((KP_q @ lhs_inv) * KP_q, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class FastTPS:
@@ -121,7 +135,7 @@ class FastTPS:
         else:
             self.sm = init_sm
 
-        self.w, self.v = _tps_solve(self.x_obs, self.y_obs, self.sm)
+        self.w, self.v, self.K_inv = _tps_solve(self.x_obs, self.y_obs, self.sm)
 
     def __call__(self, x_query, chunk_size=500):
         """
@@ -133,6 +147,14 @@ class FastTPS:
             chunk = x_query[i : i + chunk_size]
             preds.append(_tps_predict(chunk, self.x_obs, self.w, self.v))
         return jnp.concatenate(preds, axis=0)
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_tps_var(chunk, self.x_obs, self.K_inv))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # ==============================================================================
@@ -169,7 +191,11 @@ def _matern_solve(x, y, sm, length_scale):
     # mean(y) before fitting and add it back after.
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
-    return alpha
+    
+    eye = jnp.eye(K.shape[0])
+    L_inv = jnp.linalg.solve(L, eye)
+    K_inv = L_inv.T @ L_inv
+    return alpha, K_inv
 
 
 @jit
@@ -183,6 +209,16 @@ def _matern_predict(x_query, x_obs, alpha, length_scale):
     )
 
     return K_q @ alpha
+
+
+@jit
+def _matern_var(x_query, x_obs, K_inv, length_scale):
+    d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
+    r = jnp.sqrt(d2 + 1e-12)
+    sqrt5_r_l = jnp.sqrt(5.0) * r / length_scale
+    K_q = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * length_scale**2)) * jnp.exp(-sqrt5_r_l)
+    var = 1.0 - jnp.sum((K_q @ K_inv) * K_q, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class FastMatern:
@@ -223,7 +259,7 @@ class FastMatern:
             self.ls = init_ls
             self.noise = init_noise
 
-        self.alpha = _matern_solve(self.x_obs, y_centered, self.noise, self.ls)
+        self.alpha, self.K_inv = _matern_solve(self.x_obs, y_centered, self.noise, self.ls)
 
     def __call__(self, x_query, chunk_size=500):
         """
@@ -235,6 +271,14 @@ class FastMatern:
             chunk = x_query[i : i + chunk_size]
             preds.append(_matern_predict(chunk, self.x_obs, self.alpha, self.ls))
         return jnp.concatenate(preds, axis=0) + self.y_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_matern_var(chunk, self.x_obs, self.K_inv, self.ls))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # ==============================================================================
@@ -292,8 +336,9 @@ def _grad_matern_solve(x, y_full, noise_scalar, length_scale):
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_full = K_full + diag_noise
+    K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
-    return alpha
+    return alpha, K_inv
 
 
 @jit
@@ -306,6 +351,20 @@ def _grad_matern_predict(x_query, x_obs, alpha, length_scale):
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
     M, N, D_plus_1 = K_q.shape
     return K_q.reshape(M, N * D_plus_1) @ alpha
+
+
+@jit
+def _grad_matern_var(x_query, x_obs, K_inv, length_scale):
+    def get_query_row(xq, xo):
+        kee = matern_kernel_elem(xq, xo, length_scale)
+        ked = jax.grad(matern_kernel_elem, argnums=1)(xq, xo, length_scale)
+        return jnp.concatenate([kee[None], ked])
+
+    K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
+    M, N, D_plus_1 = K_q.shape
+    K_q_flat = K_q.reshape(M, N * D_plus_1)
+    var = 1.0 - jnp.sum((K_q_flat @ K_inv) * K_q_flat, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class GradientMatern:
@@ -354,7 +413,7 @@ class GradientMatern:
         else:
             self.ls, self.noise = init_ls, init_noise
 
-        self.alpha = _grad_matern_solve(self.x, self.y_full, self.noise, self.ls)
+        self.alpha, self.K_inv = _grad_matern_solve(self.x, self.y_full, self.noise, self.ls)
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -363,6 +422,14 @@ class GradientMatern:
             chunk = x_query[i : i + chunk_size]
             preds.append(_grad_matern_predict(chunk, self.x, self.alpha, self.ls))
         return jnp.concatenate(preds, axis=0) + self.e_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_grad_matern_var(chunk, self.x, self.K_inv, self.ls))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # ==============================================================================
@@ -390,7 +457,11 @@ def _imq_solve(x, y, sm, epsilon):
     K = K + jnp.eye(x.shape[0]) * sm
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
-    return alpha
+    
+    eye = jnp.eye(K.shape[0])
+    L_inv = jnp.linalg.solve(L, eye)
+    K_inv = L_inv.T @ L_inv
+    return alpha, K_inv
 
 
 @jit
@@ -398,6 +469,14 @@ def _imq_predict(x_query, x_obs, alpha, epsilon):
     d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
     K_q = 1.0 / jnp.sqrt(d2 + epsilon**2)
     return K_q @ alpha
+
+
+@jit
+def _imq_var(x_query, x_obs, K_inv, epsilon):
+    d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
+    K_q = 1.0 / jnp.sqrt(d2 + epsilon**2)
+    var = (1.0 / epsilon) - jnp.sum((K_q @ K_inv) * K_q, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class FastIMQ:
@@ -430,7 +509,7 @@ class FastIMQ:
         else:
             self.epsilon, self.noise = init_eps, init_noise
 
-        self.alpha = _imq_solve(self.x_obs, y_centered, self.noise, self.epsilon)
+        self.alpha, self.K_inv = _imq_solve(self.x_obs, y_centered, self.noise, self.epsilon)
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -439,6 +518,14 @@ class FastIMQ:
             chunk = x_query[i : i + chunk_size]
             preds.append(_imq_predict(chunk, self.x_obs, self.alpha, self.epsilon))
         return jnp.concatenate(preds, axis=0) + self.y_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_imq_var(chunk, self.x_obs, self.K_inv, self.epsilon))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # ==============================================================================
@@ -492,8 +579,9 @@ def _grad_se_solve(x, y_full, noise_scalar, length_scale):
     diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_full = K_full + diag_noise
 
+    K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
-    return alpha
+    return alpha, K_inv
 
 
 @jit
@@ -506,6 +594,20 @@ def _grad_se_predict(x_query, x_obs, alpha, length_scale):
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
     M, N, D_plus_1 = K_q.shape
     return K_q.reshape(M, N * D_plus_1) @ alpha
+
+
+@jit
+def _grad_se_var(x_query, x_obs, K_inv, length_scale):
+    def get_query_row(xq, xo):
+        kee = se_kernel_elem(xq, xo, length_scale)
+        ked = jax.grad(se_kernel_elem, argnums=1)(xq, xo, length_scale)
+        return jnp.concatenate([kee[None], ked])
+
+    K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
+    M, N, D_plus_1 = K_q.shape
+    K_q_flat = K_q.reshape(M, N * D_plus_1)
+    var = 1.0 - jnp.sum((K_q_flat @ K_inv) * K_q_flat, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class GradientSE:
@@ -554,7 +656,7 @@ class GradientSE:
         else:
             self.ls, self.noise = init_ls, init_noise
 
-        self.alpha = _grad_se_solve(self.x, self.y_full, self.noise, self.ls)
+        self.alpha, self.K_inv = _grad_se_solve(self.x, self.y_full, self.noise, self.ls)
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -563,6 +665,14 @@ class GradientSE:
             chunk = x_query[i : i + chunk_size]
             preds.append(_grad_se_predict(chunk, self.x, self.alpha, self.ls))
         return jnp.concatenate(preds, axis=0) + self.e_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_grad_se_var(chunk, self.x, self.K_inv, self.ls))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # ==============================================================================
@@ -637,8 +747,9 @@ def _grad_imq_solve(x, y_full, noise_scalar, epsilon):
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_full = K_full + diag_noise
+    K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
-    return alpha
+    return alpha, K_inv
 
 
 @jit
@@ -651,6 +762,20 @@ def _grad_imq_predict(x_query, x_obs, alpha, epsilon):
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
     M, N, D_plus_1 = K_q.shape
     return K_q.reshape(M, N * D_plus_1) @ alpha
+
+
+@jit
+def _grad_imq_var(x_query, x_obs, K_inv, epsilon):
+    def get_query_row(xq, xo):
+        kee = imq_kernel_elem(xq, xo, epsilon)
+        ked = jax.grad(imq_kernel_elem, argnums=1)(xq, xo, epsilon)
+        return jnp.concatenate([kee[None], ked])
+
+    K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
+    M, N, D_plus_1 = K_q.shape
+    K_q_flat = K_q.reshape(M, N * D_plus_1)
+    var = (1.0 / epsilon) - jnp.sum((K_q_flat @ K_inv) * K_q_flat, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class GradientIMQ:
@@ -699,7 +824,7 @@ class GradientIMQ:
         else:
             self.epsilon, self.noise = init_eps, init_noise
 
-        self.alpha = _grad_imq_solve(self.x, self.y_full, self.noise, self.epsilon)
+        self.alpha, self.K_inv = _grad_imq_solve(self.x, self.y_full, self.noise, self.epsilon)
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -708,6 +833,14 @@ class GradientIMQ:
             chunk = x_query[i : i + chunk_size]
             preds.append(_grad_imq_predict(chunk, self.x, self.alpha, self.epsilon))
         return jnp.concatenate(preds, axis=0) + self.e_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_grad_imq_var(chunk, self.x, self.K_inv, self.epsilon))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # ==============================================================================
@@ -803,8 +936,9 @@ def _grad_rq_solve(x, y_full, noise_scalar, params):
     diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_full = K_full + diag_noise
 
+    K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
-    return alpha
+    return alpha, K_inv
 
 
 @jit
@@ -817,6 +951,25 @@ def _grad_rq_predict(x_query, x_obs, alpha, params):
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
     M, N, D_plus_1 = K_q.shape
     return K_q.reshape(M, N * D_plus_1) @ alpha
+
+
+@jit
+def _grad_rq_var(x_query, x_obs, K_inv, params):
+    def get_query_row(xq, xo):
+        kee = rq_kernel_elem(xq, xo, params)
+        ked = jax.grad(rq_kernel_elem, argnums=1)(xq, xo, params)
+        return jnp.concatenate([kee[None], ked])
+
+    K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
+    M, N, D_plus_1 = K_q.shape
+    K_q_flat = K_q.reshape(M, N * D_plus_1)
+    
+    def self_var(xq):
+        return rq_kernel_elem(xq, xq, params)
+    base_var = vmap(self_var)(x_query)
+
+    var = base_var - jnp.sum((K_q_flat @ K_inv) * K_q_flat, axis=1)
+    return jnp.maximum(var, 0.0)
 
 
 class GradientRQ:
@@ -870,7 +1023,7 @@ class GradientRQ:
             self.ls, self.alpha_param, self.noise = init_ls, init_alpha, init_noise
 
         self.params = jnp.array([self.ls, self.alpha_param])
-        self.alpha = _grad_rq_solve(self.x, self.y_full, self.noise, self.params)
+        self.alpha, self.K_inv = _grad_rq_solve(self.x, self.y_full, self.noise, self.params)
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -879,6 +1032,14 @@ class GradientRQ:
             chunk = x_query[i : i + chunk_size]
             preds.append(_grad_rq_predict(chunk, self.x, self.alpha, self.params))
         return jnp.concatenate(preds, axis=0) + self.e_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(_grad_rq_var(chunk, self.x, self.K_inv, self.params))
+        return jnp.concatenate(vars_list, axis=0)
 
 
 # Factory for string-based instantiation
