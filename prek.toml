@@ -1,0 +1,50 @@
+exclude = """(?x)(
+    ^\\.pixi/|
+    ^\\.uv/|
+    ^docs/build/|
+    ^docs/source/_static/favicons/site\\.webmanifest$|
+    ^.*.svg$
+)"""
+
+# Prek implements these directly.
+[[repos]]
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  { id = "check-yaml" },
+  { id = "check-toml" },
+  { id = "check-added-large-files", args = [
+    "--maxkb=1000",
+  ] },
+  { id = "check-merge-conflict" },
+]
+repo = "builtin"
+[[repos]]
+hooks = [
+  { id = "check-ast" },
+  { id = "debug-statements" },
+  { id = "check-case-conflict" },
+]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v6.0.0"
+[[repos]]
+hooks = [
+  { id = "ruff", args = [
+    "--fix",
+  ], types_or = [
+    "python",
+  ] },
+  { id = "ruff-format", types_or = [
+    "python",
+  ] },
+]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.15.2"
+[[repos]]
+hooks = [ { id = "taplo-format", args = [ "--config", ".taplo.toml" ] } ]
+repo  = "https://github.com/ComPWA/taplo-pre-commit"
+rev   = "v0.9.3"
+[[repos]]
+hooks = [ { id = "codespell", args = [ "--skip=*.lock,*.csv" ] } ]
+repo  = "https://github.com/codespell-project/codespell"
+rev   = "v2.4.1"
