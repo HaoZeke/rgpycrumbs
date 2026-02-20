@@ -1,3 +1,24 @@
+rgpycrumbs unknown (2026-02-21)
+===============================
+
+Added
+-----
+
+- Comprehensive pytest suite for surface models, covering fit, prediction, variance, and optimization.
+
+
+Developer
+---------
+
+- Added detailed API docstrings and Org-mode documentation for surfaces, including uncertainty and variance windowing.
+
+
+Changed
+-------
+
+- Refactored rgpycrumbs.surfaces into a structured package with BaseSurface and BaseGradientSurface abstractions.
+
+
 rgpycrumbs v1.0.1 (2026-02-17)
 ==============================
 

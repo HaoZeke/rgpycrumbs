@@ -1,7 +1,7 @@
 #+TITLE: Used By
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+EMAIL: rgoswami@ieee.org
-#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t ^:nil
 
 The following projects use ~rgpycrumbs~ as a dependency or tool.
 

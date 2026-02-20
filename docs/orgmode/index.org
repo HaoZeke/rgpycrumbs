@@ -1,6 +1,6 @@
 #+TITLE: ~rgpycrumbs~
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
-#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil ^:nil
 
 # Metadata first, including the heading
 #+begin_export rst
