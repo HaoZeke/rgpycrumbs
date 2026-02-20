@@ -27,7 +27,7 @@ def _run_command_live(
 
     # Start the process
     # We combine stderr into stdout so we only have one stream to read
-    proc = subprocess.Popen(
+    proc = subprocess.Popen(  # noqa: S603
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

@@ -1,10 +1,10 @@
 [workspace]
-name = "pycrumbs"
-version = "0.0.7.dev"
+authors     = [ "Rohit Goswami <rgoswami[at]ieee[dot]org>" ]
+channels    = [ "conda-forge", "https://repo.prefix.dev/rg-forge" ]
 description = "A dispatcher-based analytical and visualization suite for chemical physics"
-authors = ["Rohit Goswami <rgoswami[at]ieee[dot]org>"]
-channels = ["conda-forge", "https://repo.prefix.dev/rg-forge"]
-platforms = ["linux-64"]
+name        = "pycrumbs"
+platforms   = [ "linux-64" ]
+version     = "0.0.7.dev"
 
 [tasks]
 
@@ -12,62 +12,62 @@ platforms = ["linux-64"]
 python = ">=3.10"
 
 [feature.docs.dependencies]
-emacs = ">=30.2,<31"
-nodejs = ">=25.2.1,<25.3"
+adjusttext     = ">=1.3.0,<2"
+ase            = ">=3.27.0,<4"
+emacs          = ">=30.2,<31"
+mlflow         = ">=3.8.1,<4"
+nodejs         = ">=25.2.1,<25.3"
+numpy          = ">=2.4.1,<3"
 sphinx-favicon = ">=1.0.1,<2"
-ase = ">=3.27.0,<4"
-numpy = ">=2.4.1,<3"
-mlflow = ">=3.8.1,<4"
-adjusttext = ">=1.3.0,<2"
 
 [feature.docs.pypi-dependencies]
-rgpycrumbs = { path = ".", editable = true }
-shibuya = ">=2025.12.13, <2026"
-sphinx-click = ">=6.2.0, <7"
-sphinx = ">=9.0.4, <10"
+autodoc-pydantic            = ">=2.2.0, <3"
+rgpycrumbs                  = { path = ".", editable = true }
+shibuya                     = ">=2025.12.13, <2026"
+sphinx                      = ">=9.0.4, <10"
+sphinx-autoapi              = ">=3.6.0, <4"
+sphinx-click                = ">=6.2.0, <7"
+sphinx-sitemap              = ">=2.9.0, <3"
 sphinxcontrib-programoutput = ">=0.18, <0.19"
-sphinx-autoapi = ">=3.6.0, <4"
-sphobjinv = ">=2.3.1.3, <3"
-autodoc-pydantic = ">=2.2.0, <3"
-sphinx-sitemap = ">=2.9.0, <3"
+sphobjinv                   = ">=2.3.1.3, <3"
 
 [environments]
-docs = {features = ["docs"]}
-test = { features = ["test"] }
-fragments = { features = ["fragments", "test"] }
-ptm = { features = ["ptm", "test"] }
-surfaces = { features = ["surfaces", "test"] }
-eonmlflow = { features = ["eonmlflow", "test"] }
+docs      = { features = [ "docs" ] }
+eonmlflow = { features = [ "eonmlflow", "test" ] }
+fragments = { features = [ "fragments", "test" ] }
+ptm       = { features = [ "ptm", "test" ] }
+surfaces  = { features = [ "surfaces", "test" ] }
+test      = { features = [ "test" ] }
 
 [pypi-options]
 # TODO(rg): only if the CPU version is needed
 # set these on the command line instead
 # export UV_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
 # export PIP_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
-extra-index-urls = ["https://download.pytorch.org/whl/cpu"]
+extra-index-urls = [ "https://download.pytorch.org/whl/cpu" ]
 
 [feature.eonmlflow.dependencies]
-eon = ">=2.8.2,<3"
+eon    = ">=2.8.2,<3"
 mlflow = ">=3.8.0,<4"
 
 [feature.fragments.pypi-dependencies]
-ase = "~=3.23"
+ase       = "~=3.23"
 cmcrameri = ">=1.9, <2"
 
 [feature.fragments.dependencies]
-gfortran = ">=15.2.0,<15.3"
+gfortran       = ">=15.2.0,<15.3"
+ira            = ">=2.2.0,<3"
 libgfortran-ng = ">=15.2.0,<16"
-pyvista = ">=0.46.4,<0.47"
-matplotlib = ">=3.10.8,<4"
-tblite-python = ">=0.5.0,<0.6"
-ira = ">=2.2.0,<3"
+matplotlib     = ">=3.10.8,<4"
+pyvista        = ">=0.46.4,<0.47"
+tblite-python  = ">=0.5.0,<0.6"
 
 [feature.test.pypi-dependencies]
-rgpycrumbs = { path = ".", editable=true }
-pytest = "*"
-click = ">=8.3.1, <9"
-numpy = ">=2.3.5, <3"
-scipy = ">=1.11"
+click      = ">=8.3.1, <9"
+numpy      = ">=2.3.5, <3"
+pytest     = "*"
+rgpycrumbs = { path = ".", editable = true }
+scipy      = ">=1.11"
 
 [feature.test.dependencies]
 ase = ">=3.23,<4"
@@ -79,7 +79,7 @@ jax = ">=0.4"
 ovito = "*"
 
 [feature.ptm.pypi-dependencies]
-ase = ">=3.26.0, <4"
+ase   = ">=3.26.0, <4"
 ovito = ">=3.14.1, <4"
 
 [feature.docs.tasks.minify]
@@ -96,24 +96,19 @@ npx html-minifier-terser \
 
 
 [feature.docs.tasks.docbld]
-depends-on = [
-"mkrst",
-"sphinxbld",
-]
+depends-on = [ "mkrst", "sphinxbld" ]
 
 [feature.docs.tasks.sphinxbld]
-depends-on = [
-{ task = "mkrst", environment = "docs" },
-]
 cmd = """
 sphinx-build docs/source/ docs/build
 """
+depends-on = [ { task = "mkrst", environment = "docs" } ]
 
 [feature.docs.tasks.mkrst]
-cwd = "docs"
 cmd = """
 emacs --batch --load export.el
 """
+cwd = "docs"
 
 [feature.docs.tasks.docdel]
 cwd = "docs"

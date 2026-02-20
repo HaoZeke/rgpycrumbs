@@ -74,7 +74,9 @@ def align_path(frames, mode: AlignMode, iraconf: IRAConfig):
     if mode == AlignMode.ALL:
         logging.info("Aligning [bold]all[/bold] images to reactant reference.")
         return [ref.copy()] + [
-            align_structure_robust(ref, f.copy(), IRAConfig(use_ira, kmax)).atoms
+            align_structure_robust(
+                ref, f.copy(), IRAConfig(iraconf.use_ira, iraconf.kmax)
+            ).atoms
             for f in frames[1:]
         ]
 
@@ -242,7 +244,7 @@ def con_splitter(
     if center and len(frames) > 0:
         ref_atoms = frames[0].copy()
         ref_center = ref_atoms.get_center_of_mass()
-        box_center = [d/2.0 for d in box_diagonal]
+        box_center = [d / 2.0 for d in box_diagonal]
         shift = box_center - ref_center
         for atoms in frames:
             atoms.set_cell(box_diagonal)

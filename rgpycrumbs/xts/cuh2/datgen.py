@@ -6,10 +6,13 @@ from rgpycrumbs._aux import get_gitroot, getstrform
 
 def get_from_gitroot_con(
     fname="cuh2.con",
-    hh_range=cuh2slab.PltRange(low=-0.05, high=5),
-    h2slab_range=cuh2slab.PltRange(low=-0.05, high=5),
-    n_points=cuh2slab.PlotPoints(x_npt=40, y_npt=40),
+    hh_range=None,
+    h2slab_range=None,
+    n_points=None,
 ):
+    hh_range = hh_range or cuh2slab.PltRange(low=-0.05, high=5)
+    h2slab_range = h2slab_range or cuh2slab.PltRange(low=-0.05, high=5)
+    n_points = n_points or cuh2slab.PlotPoints(x_npt=40, y_npt=40)
     cuh2_dat = get_gitroot()
     cuh2_min = ase.io.read(getstrform(cuh2_dat / fname))
     cuh2_min.calc = cuh2slab.CuH2PotSlab()

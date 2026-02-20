@@ -40,9 +40,7 @@ def head_search(filename: Path, sstr: str, n=60):
 
     try:
         with (
-            gzip.open(filename, "rt")
-            if filename.suffix == ".gz"
-            else open(filename)
+            gzip.open(filename, "rt") if filename.suffix == ".gz" else open(filename)
         ) as f:
             for _ in range(n):
                 line = next(f).strip()

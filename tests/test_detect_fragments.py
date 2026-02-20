@@ -14,6 +14,7 @@ from rgpycrumbs.geom.detect_fragments import (  # noqa: E402
 
 pytestmark = pytest.mark.fragments
 
+
 @pytest.fixture
 def nitrogen_molecule():
     """Creates a nitrogen molecule with a standard triple bond length."""

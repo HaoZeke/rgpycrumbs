@@ -95,8 +95,9 @@ class TestImportFromParentEnv:
         test_path = ["/local/lib"]
         monkeypatch.setattr(sys, "path", test_path)
 
-        def side_effect(*args, **kwargs):
-            # If the parent path has been added, remove it prematurely to trigger ValueError in cleanup
+        def side_effect(*args, **kwargs):  # noqa: ARG001
+            # If the parent path has been added, remove it prematurely to
+            # trigger ValueError in cleanup
             if "/parent/lib" in sys.path:
                 sys.path.remove("/parent/lib")
                 raise ImportError("Fail parent")

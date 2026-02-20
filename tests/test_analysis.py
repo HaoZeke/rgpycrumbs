@@ -76,7 +76,7 @@ def test_analyze_single_molecule(water_molecule):
 
 def test_analyze_dimer_two_fragments(water_dimer):
     """Two well-separated molecules should be identified as two fragments."""
-    _, _, frags, centroid_dists, corrected_dists = analyze_structure(water_dimer)
+    _, _, frags, centroid_dists, _ = analyze_structure(water_dimer)
     assert len(frags) == 2
     assert len(frags[0]) == 3
     assert len(frags[1]) == 3
@@ -86,7 +86,7 @@ def test_analyze_dimer_two_fragments(water_dimer):
 
 def test_analyze_three_fragments(three_fragments):
     """Three well-separated molecules should yield three fragments."""
-    _, _, frags, centroid_dists, corrected_dists = analyze_structure(three_fragments)
+    _, _, frags, _ = analyze_structure(three_fragments)
     assert len(frags) == 3
     for frag in frags:
         assert len(frag) == 3  # each water has 3 atoms
@@ -141,9 +141,7 @@ def test_bond_matrix_binary(water_dimer):
 
 def test_single_atom(single_atom):
     """A single atom should yield one fragment with no bonds."""
-    dist_mat, bond_mat, frags, centroid_dists, corrected_dists = analyze_structure(
-        single_atom
-    )
+    dist_mat, bond_mat, frags, _ = analyze_structure(single_atom)
     assert dist_mat.shape == (1, 1)
     assert bond_mat.shape == (1, 1)
     assert len(frags) == 1

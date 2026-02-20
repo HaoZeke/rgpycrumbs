@@ -58,7 +58,7 @@ generic ~.xyz~ file or any ASE compatible input. For instance, for a two-image
 trajectory, to convert a reactant/product pair into the required eOn format
 while fixing coordinate and mapping issues:
 
-#+BEGIN_SRC bash 
+#+BEGIN_SRC bash
 python -m rgpycrumbs.cli eon con-splitter --images-per-path 2 initial.xyz --box-diagonal 25 25 25 --center --align-type endpoints --use-ira --ira-kmax 1.8
 #+END_SRC
 

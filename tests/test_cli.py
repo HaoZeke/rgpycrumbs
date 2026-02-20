@@ -1,10 +1,13 @@
 import sys
-import pytest
 from unittest.mock import patch
+
+import pytest
 from click.testing import CliRunner
-from rgpycrumbs.cli import main, _make_script_command
+
+from rgpycrumbs.cli import _make_script_command, main
 
 pytestmark = pytest.mark.pure
+
 
 @pytest.fixture
 def runner():
@@ -18,13 +21,14 @@ def mock_script_group(monkeypatch):
     dummy_cmd = _make_script_command("dummy_group", "dummy_script.py")
     main.add_command(dummy_cmd, name="dummy_script")
 
-    # We also need to mock the path resolution inside _dispatch so it doesn't sys.exit(1)
-    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    # We also need to mock the path resolution inside _dispatch so it doesn't
+    # sys.exit(1)
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)  # noqa: ARG005
     monkeypatch.setattr("rgpycrumbs.cli.Path.resolve", lambda self: self)
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_standard_execution(mock_run, runner, mock_script_group):
+def test_cli_standard_execution(mock_run, runner, mock_script_group):  # noqa: ARG001
     """Test that default execution uses 'uv run'."""
     result = runner.invoke(main, ["dummy_script", "arg1"])
 
@@ -40,7 +44,7 @@ def test_cli_standard_execution(mock_run, runner, mock_script_group):
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_dev_execution(mock_run, runner, mock_script_group):
+def test_cli_dev_execution(mock_run, runner, mock_script_group):  # noqa: ARG001
     """Test that the --dev flag switches execution to sys.executable."""
     result = runner.invoke(main, ["--dev", "dummy_script", "arg1"])
 
@@ -54,7 +58,7 @@ def test_cli_dev_execution(mock_run, runner, mock_script_group):
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_verbose_output(mock_run, runner, mock_script_group):
+def test_cli_verbose_output(mock_run, runner, mock_script_group):  # noqa: ARG001
     """Test that the --verbose flag prints the paths before execution."""
     result = runner.invoke(main, ["--verbose", "dummy_script"])
 

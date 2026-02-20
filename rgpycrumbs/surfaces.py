@@ -1,3 +1,5 @@
+import logging
+
 import jax
 import jax.numpy as jnp
 import jax.scipy.optimize as jopt
@@ -23,7 +25,8 @@ def safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3):
             alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
             log_det = 2.0 * jnp.sum(jnp.log(jnp.diag(L)))
             return alpha, log_det
-        except:
+        except Exception as e:
+            logging.debug(f"Cholesky failed: {e}")
             continue
 
     # Fallback for compilation safety (NaN propagation)
@@ -191,7 +194,7 @@ def _matern_solve(x, y, sm, length_scale):
     # mean(y) before fitting and add it back after.
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
-    
+
     eye = jnp.eye(K.shape[0])
     L_inv = jnp.linalg.solve(L, eye)
     K_inv = L_inv.T @ L_inv
@@ -204,9 +207,7 @@ def _matern_predict(x_query, x_obs, alpha, length_scale):
     r = jnp.sqrt(d2 + 1e-12)
 
     sqrt5_r_l = jnp.sqrt(5.0) * r / length_scale
-    K_q = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * length_scale**2)) * jnp.exp(
-        -sqrt5_r_l
-    )
+    K_q = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * length_scale**2)) * jnp.exp(-sqrt5_r_l)
 
     return K_q @ alpha
 
@@ -259,7 +260,9 @@ class FastMatern:
             self.ls = init_ls
             self.noise = init_noise
 
-        self.alpha, self.K_inv = _matern_solve(self.x_obs, y_centered, self.noise, self.ls)
+        self.alpha, self.K_inv = _matern_solve(
+            self.x_obs, y_centered, self.noise, self.ls
+        )
 
     def __call__(self, x_query, chunk_size=500):
         """
@@ -413,7 +416,9 @@ class GradientMatern:
         else:
             self.ls, self.noise = init_ls, init_noise
 
-        self.alpha, self.K_inv = _grad_matern_solve(self.x, self.y_full, self.noise, self.ls)
+        self.alpha, self.K_inv = _grad_matern_solve(
+            self.x, self.y_full, self.noise, self.ls
+        )
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -457,7 +462,7 @@ def _imq_solve(x, y, sm, epsilon):
     K = K + jnp.eye(x.shape[0]) * sm
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
-    
+
     eye = jnp.eye(K.shape[0])
     L_inv = jnp.linalg.solve(L, eye)
     K_inv = L_inv.T @ L_inv
@@ -509,7 +514,9 @@ class FastIMQ:
         else:
             self.epsilon, self.noise = init_eps, init_noise
 
-        self.alpha, self.K_inv = _imq_solve(self.x_obs, y_centered, self.noise, self.epsilon)
+        self.alpha, self.K_inv = _imq_solve(
+            self.x_obs, y_centered, self.noise, self.epsilon
+        )
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -696,9 +703,7 @@ def full_covariance_imq(x1, x2, epsilon):
     return jnp.concatenate([row1[None, :], row2], axis=0)
 
 
-k_matrix_imq_grad_map = vmap(
-    vmap(full_covariance_imq, (None, 0, None)), (0, None, None)
-)
+k_matrix_imq_grad_map = vmap(vmap(full_covariance_imq, (None, 0, None)), (0, None, None))
 
 
 def negative_mll_imq_grad(log_params, x, y_flat, D_plus_1):
@@ -708,6 +713,7 @@ def negative_mll_imq_grad(log_params, x, y_flat, D_plus_1):
     N = x.shape[0]
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     return generic_negative_mll(K_full, y_flat, noise_scalar)
+
 
 def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
     log_eps = log_params[0]
@@ -728,7 +734,7 @@ def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
     # NegLogPDF: -(alpha-1)*log(x) + beta*x
 
     alpha_g = 2.0  # Shape=2 ensures the distribution goes to 0 at epsilon=0 (physical)
-    beta_g = 1.0 / (init_eps + 1e-6) # Rate set so the peak (mode) is roughly at init_eps
+    beta_g = 1.0 / (init_eps + 1e-6)  # Rate set so the peak (mode) is roughly at init_eps
 
     # This linear 'epsilon' term is what stops it from shooting up
     eps_penalty = -(alpha_g - 1.0) * log_eps + beta_g * epsilon
@@ -739,6 +745,7 @@ def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
     noise_penalty = (log_noise - noise_target) ** 2 / 0.5
 
     return mll_cost + eps_penalty + noise_penalty
+
 
 @jit
 def _grad_imq_solve(x, y_full, noise_scalar, epsilon):
@@ -814,7 +821,9 @@ class GradientIMQ:
             x0 = jnp.array([jnp.log(init_eps), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                return negative_mll_imq_map(log_p, init_eps, self.x, self.y_flat, D_plus_1)
+                return negative_mll_imq_map(
+                    log_p, init_eps, self.x, self.y_flat, D_plus_1
+                )
 
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
             self.epsilon = float(jnp.exp(results.x[0]))
@@ -824,7 +833,9 @@ class GradientIMQ:
         else:
             self.epsilon, self.noise = init_eps, init_noise
 
-        self.alpha, self.K_inv = _grad_imq_solve(self.x, self.y_full, self.noise, self.epsilon)
+        self.alpha, self.K_inv = _grad_imq_solve(
+            self.x, self.y_full, self.noise, self.epsilon
+        )
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
@@ -963,9 +974,10 @@ def _grad_rq_var(x_query, x_obs, K_inv, params):
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
     M, N, D_plus_1 = K_q.shape
     K_q_flat = K_q.reshape(M, N * D_plus_1)
-    
+
     def self_var(xq):
         return rq_kernel_elem(xq, xq, params)
+
     base_var = vmap(self_var)(x_query)
 
     var = base_var - jnp.sum((K_q_flat @ K_inv) * K_q_flat, axis=1)
@@ -1023,7 +1035,9 @@ class GradientRQ:
             self.ls, self.alpha_param, self.noise = init_ls, init_alpha, init_noise
 
         self.params = jnp.array([self.ls, self.alpha_param])
-        self.alpha, self.K_inv = _grad_rq_solve(self.x, self.y_full, self.noise, self.params)
+        self.alpha, self.K_inv = _grad_rq_solve(
+            self.x, self.y_full, self.noise, self.params
+        )
 
     def __call__(self, x_query, chunk_size=500):
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
