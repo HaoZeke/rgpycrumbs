@@ -28,7 +28,7 @@
    This "windowed" evaluation ensures that the large $N_{query} 	imes N_{train}$ cross-covariance matrices do not exhaust system memory.
 
 ** Numerical Stability
-   Gradient-enhanced models use auto-differentiation (via ~jax.grad~ and ~jax.jacfwd~) to construct the full $(D+1)N 	imes (D+1)N$ covariance matrix. 
+   Gradient-enhanced models use auto-differentiation (via ~jax.grad~ and ~jax.jacfwd~) to construct the full $(D+1)N 	imes (D+1)N$ covariance matrix.
    - *Cholesky Fallback*: The ~safe_cholesky_solve~ utility attempts Cholesky decomposition with increasing jitter to handle near-singular matrices.
    - *Float Precision*: By default, models use ~float32~ for performance and compatibility with visualization backends, but ~jax_enable_x64~ can be toggled if higher precision is required.
 
