@@ -16,7 +16,19 @@ jax.config.update("jax_enable_x64", False)
 
 
 def safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3):
-    """Retries Cholesky with increasing jitter if it fails."""
+    """
+    Retries Cholesky decomposition with increasing jitter if it fails.
+
+    Args:
+        K: Covariance matrix.
+        y: Observation vector.
+        noise_scalar: Initial noise level.
+        jitter_steps: Number of retry attempts with increasing jitter.
+
+    Returns:
+        tuple: (alpha, log_det) where alpha is the solution vector and
+               log_det is the log determinant of the jittered matrix.
+    """
     N = K.shape[0]
 
     # Try successively larger jitters: 1e-6, 1e-5, 1e-4
@@ -36,6 +48,17 @@ def safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3):
 
 
 def generic_negative_mll(K, y, noise_scalar):
+    """
+    Calculates the negative Marginal Log-Likelihood (MLL).
+
+    Args:
+        K: Covariance matrix.
+        y: Observation vector.
+        noise_scalar: Noise level for regularization.
+
+    Returns:
+        float: The negative MLL value, or a high penalty if Cholesky fails.
+    """
     alpha, log_det = safe_cholesky_solve(K, y, noise_scalar)
 
     data_fit = 0.5 * jnp.dot(y.flatten(), alpha.flatten())
@@ -44,6 +67,194 @@ def generic_negative_mll(K, y, noise_scalar):
     cost = data_fit + complexity
     # heavy penalty if Cholesky failed (NaN)
     return jnp.where(jnp.isnan(cost), 1e9, cost)
+
+
+# ==============================================================================
+# BASE CLASSES
+# ==============================================================================
+
+
+class BaseSurface:
+    """
+    Abstract base class for standard (non-gradient) surface models.
+
+    Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
+    """
+
+    def __init__(
+        self, x_obs, y_obs, smoothing=1e-3, length_scale=None, optimize=True, **kwargs
+    ):
+        """
+        Initializes and fits the surface model.
+
+        Args:
+            x_obs: Training inputs (N, D).
+            y_obs: Training observations (N,).
+            smoothing: Initial noise/smoothing parameter.
+            length_scale: Initial length scale parameter(s).
+            optimize: Whether to optimize parameters via MLE.
+            **kwargs: Additional model-specific parameters.
+        """
+        self.x_obs = jnp.asarray(x_obs, dtype=jnp.float32)
+        self.y_obs = jnp.asarray(y_obs, dtype=jnp.float32)
+        # Center the data
+        self.y_mean = jnp.mean(self.y_obs)
+        self.y_centered = self.y_obs - self.y_mean
+
+        self._fit(smoothing, length_scale, optimize)
+        self._solve()
+
+    def _fit(self, smoothing, length_scale, optimize):
+        """Internal method to perform parameter optimization."""
+        raise NotImplementedError
+
+    def _solve(self):
+        """Internal method to solve the linear system for weights."""
+        raise NotImplementedError
+
+    def __call__(self, x_query, chunk_size=500):
+        """
+        Predict values at query points.
+
+        Args:
+            x_query: Query inputs (M, D).
+            chunk_size: Number of points to process per batch to avoid OOM.
+
+        Returns:
+            jnp.ndarray: Predicted values (M,).
+        """
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        preds = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            preds.append(self._predict_chunk(chunk))
+        return jnp.concatenate(preds, axis=0) + self.y_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        """
+        Predict posterior variance at query points.
+
+        Args:
+            x_query: Query inputs (M, D).
+            chunk_size: Number of points to process per batch.
+
+        Returns:
+            jnp.ndarray: Predicted variances (M,).
+        """
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(self._var_chunk(chunk))
+        return jnp.concatenate(vars_list, axis=0)
+
+    def _predict_chunk(self, chunk):
+        """Internal method for batch prediction."""
+        raise NotImplementedError
+
+    def _var_chunk(self, chunk):
+        """Internal method for batch variance."""
+        raise NotImplementedError
+
+
+class BaseGradientSurface:
+    """
+    Abstract base class for gradient-enhanced surface models.
+
+    Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
+    These models incorporate both values and their gradients into the fit.
+    """
+
+    def __init__(
+        self,
+        x,
+        y,
+        gradients=None,
+        smoothing=1e-4,
+        length_scale=None,
+        optimize=True,
+        **kwargs,
+    ):
+        """
+        Initializes and fits the gradient-enhanced surface model.
+
+        Args:
+            x: Training inputs (N, D).
+            y: Training values (N,).
+            gradients: Training gradients (N, D).
+            smoothing: Initial noise/smoothing parameter.
+            length_scale: Initial length scale parameter(s).
+            optimize: Whether to optimize parameters.
+            **kwargs: Additional model-specific parameters.
+        """
+        self.x = jnp.asarray(x, dtype=jnp.float32)
+        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
+        grad_vals = (
+            jnp.asarray(gradients, dtype=jnp.float32)
+            if gradients is not None
+            else jnp.zeros_like(self.x)
+        )
+
+        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
+        self.e_mean = jnp.mean(y_energies)
+        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
+        self.y_flat = self.y_full.flatten()
+        self.D_plus_1 = self.x.shape[1] + 1
+
+        self._fit(smoothing, length_scale, optimize)
+        self._solve()
+
+    def _fit(self, smoothing, length_scale, optimize):
+        """Internal method to perform parameter optimization."""
+        raise NotImplementedError
+
+    def _solve(self):
+        """Internal method to solve the linear system for weights."""
+        raise NotImplementedError
+
+    def __call__(self, x_query, chunk_size=500):
+        """
+        Predict values at query points.
+
+        Args:
+            x_query: Query inputs (M, D).
+            chunk_size: Number of points to process per batch.
+
+        Returns:
+            jnp.ndarray: Predicted values (M,).
+        """
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        preds = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            preds.append(self._predict_chunk(chunk))
+        return jnp.concatenate(preds, axis=0) + self.e_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        """
+        Predict posterior variance at query points.
+
+        Args:
+            x_query: Query inputs (M, D).
+            chunk_size: Number of points to process per batch.
+
+        Returns:
+            jnp.ndarray: Predicted variances (M,).
+        """
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(self._var_chunk(chunk))
+        return jnp.concatenate(vars_list, axis=0)
+
+    def _predict_chunk(self, chunk):
+        """Internal method for batch prediction."""
+        raise NotImplementedError
+
+    def _var_chunk(self, chunk):
+        """Internal method for batch variance."""
+        raise NotImplementedError
 
 
 # ==============================================================================
@@ -115,7 +326,21 @@ def _tps_var(x_query, x_obs, lhs_inv):
 
 
 class FastTPS:
+    """
+    Thin Plate Spline (TPS) surface implementation.
+    Includes a polynomial mean function and supports smoothing optimization.
+    """
+
     def __init__(self, x_obs, y_obs, smoothing=1e-3, optimize=True, **kwargs):
+        """
+        Initializes the TPS model.
+
+        Args:
+            x_obs: Training inputs (N, D).
+            y_obs: Training observations (N,).
+            smoothing: Initial smoothing parameter.
+            optimize: Whether to optimize the smoothing parameter.
+        """
         self.x_obs = jnp.asarray(x_obs, dtype=jnp.float32)
         self.y_obs = jnp.asarray(y_obs, dtype=jnp.float32)
 
@@ -144,7 +369,14 @@ class FastTPS:
 
     def __call__(self, x_query, chunk_size=500):
         """
-        Batched prediction to prevent OOM errors on large grids.
+        Predict values at query points using chunking.
+
+        Args:
+            x_query: Query inputs (M, D).
+            chunk_size: Processing batch size.
+
+        Returns:
+            jnp.ndarray: Predicted values (M,).
         """
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
         preds = []
@@ -154,6 +386,16 @@ class FastTPS:
         return jnp.concatenate(preds, axis=0)
 
     def predict_var(self, x_query, chunk_size=500):
+        """
+        Predict posterior variance at query points.
+
+        Args:
+            x_query: Query inputs (M, D).
+            chunk_size: Processing batch size.
+
+        Returns:
+            jnp.ndarray: Predicted variances (M,).
+        """
         x_query = jnp.asarray(x_query, dtype=jnp.float32)
         vars_list = []
         for i in range(0, x_query.shape[0], chunk_size):
@@ -190,10 +432,6 @@ def negative_mll_matern_std(log_params, x, y):
 def _matern_solve(x, y, sm, length_scale):
     K = _matern_kernel_matrix(x, length_scale)
     K = K + jnp.eye(x.shape[0]) * sm
-    # 3. Solve (Cholesky is faster/stable for positive definite kernels like Matérn)
-    # Note: We don't use the polynomial 'P' matrix here usually, as Matérn
-    # decays to mean zero. If you want it to revert to a mean value, subtract
-    # mean(y) before fitting and add it back after.
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
 
@@ -207,10 +445,8 @@ def _matern_solve(x, y, sm, length_scale):
 def _matern_predict(x_query, x_obs, alpha, length_scale):
     d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
     r = jnp.sqrt(d2 + 1e-12)
-
     sqrt5_r_l = jnp.sqrt(5.0) * r / length_scale
     K_q = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * length_scale**2)) * jnp.exp(-sqrt5_r_l)
-
     return K_q @ alpha
 
 
@@ -224,19 +460,11 @@ def _matern_var(x_query, x_obs, K_inv, length_scale):
     return jnp.maximum(var, 0.0)
 
 
-class FastMatern:
-    def __init__(
-        self, x_obs, y_obs, smoothing=1e-3, length_scale=None, optimize=True, **kwargs
-    ):
-        self.x_obs = jnp.asarray(x_obs, dtype=jnp.float32)
-        self.y_obs = jnp.asarray(y_obs, dtype=jnp.float32)
-        # Center the data (important for stationary kernels like Matérn)
-        self.y_mean = jnp.mean(self.y_obs)
-        y_centered = self.y_obs - self.y_mean
+class FastMatern(BaseSurface):
+    """Matérn 5/2 surface implementation."""
 
-        # Heuristic
+    def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
-            # Simple heuristic: sqrt(span) / 2 is often a safe start for density
             span = jnp.max(self.x_obs, axis=0) - jnp.min(self.x_obs, axis=0)
             init_ls = jnp.mean(span) * 0.2
         else:
@@ -245,45 +473,30 @@ class FastMatern:
         init_noise = max(smoothing, 1e-4)
 
         if optimize:
-            # Optimize [log_ls, log_noise]
             x0 = jnp.array([jnp.log(init_ls), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                return negative_mll_matern_std(log_p, self.x_obs, y_centered)
+                return negative_mll_matern_std(log_p, self.x_obs, self.y_centered)
 
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
             self.ls = float(jnp.exp(results.x[0]))
             self.noise = float(jnp.exp(results.x[1]))
 
             if jnp.isnan(self.ls) or jnp.isnan(self.noise):
-                self.ls = init_ls
-                self.noise = init_noise
+                self.ls, self.noise = init_ls, init_noise
         else:
-            self.ls = init_ls
-            self.noise = init_noise
+            self.ls, self.noise = init_ls, init_noise
 
+    def _solve(self):
         self.alpha, self.K_inv = _matern_solve(
-            self.x_obs, y_centered, self.noise, self.ls
+            self.x_obs, self.y_centered, self.noise, self.ls
         )
 
-    def __call__(self, x_query, chunk_size=500):
-        """
-        Batched prediction for Matern.
-        """
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(_matern_predict(chunk, self.x_obs, self.alpha, self.ls))
-        return jnp.concatenate(preds, axis=0) + self.y_mean
+    def _predict_chunk(self, chunk):
+        return _matern_predict(chunk, self.x_obs, self.alpha, self.ls)
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(_matern_var(chunk, self.x_obs, self.K_inv, self.ls))
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _matern_var(chunk, self.x_obs, self.K_inv, self.ls)
 
 
 # ==============================================================================
@@ -300,11 +513,6 @@ def matern_kernel_elem(x1, x2, length_scale=1.0):
     return val
 
 
-# --- Auto-Diff the Kernel to get Gradient Covariances ---
-# This creates a function that returns the (D+1)x(D+1) covariance block
-# [ Cov(E, E)    Cov(E, dX)    Cov(E, dY) ]
-# [ Cov(dX, E)   Cov(dX, dX)   Cov(dX, dY) ]
-# [ Cov(dY, E)   Cov(dY, dX)   Cov(dY, dY) ]
 def full_covariance_matern(x1, x2, length_scale):
     k_ee = matern_kernel_elem(x1, x2, length_scale)
     k_ed = jax.grad(matern_kernel_elem, argnums=1)(x1, x2, length_scale)
@@ -312,10 +520,7 @@ def full_covariance_matern(x1, x2, length_scale):
     k_dd = jax.jacfwd(jax.grad(matern_kernel_elem, argnums=1), argnums=0)(
         x1, x2, length_scale
     )
-    # Top row: [E-E, E-dx, E-dy]
     row1 = jnp.concatenate([k_ee[None], k_ed])
-    # Bottom rows: [dx-E,  dx-dx, dx-dy]
-    #              [dy-E,  dy-dx, dy-dy]
     row2 = jnp.concatenate([k_de[:, None], k_dd], axis=1)
     return jnp.concatenate([row1[None, :], row2], axis=0)
 
@@ -372,31 +577,10 @@ def _grad_matern_var(x_query, x_obs, K_inv, length_scale):
     return jnp.maximum(var, 0.0)
 
 
-class GradientMatern:
-    def __init__(
-        self,
-        x,
-        y,
-        gradients=None,
-        smoothing=1e-4,
-        length_scale=None,
-        optimize=True,
-        **kwargs,
-    ):
-        self.x = jnp.asarray(x, dtype=jnp.float32)
-        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
-        grad_vals = (
-            jnp.asarray(gradients, dtype=jnp.float32)
-            if gradients is not None
-            else jnp.zeros_like(self.x)
-        )
+class GradientMatern(BaseGradientSurface):
+    """Gradient-enhanced Matérn 5/2 surface implementation."""
 
-        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
-        self.e_mean = jnp.mean(y_energies)
-        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
-        self.y_flat = self.y_full.flatten()
-        D_plus_1 = self.x.shape[1] + 1
-
+    def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
             span = jnp.max(self.x, axis=0) - jnp.min(self.x, axis=0)
             init_ls = jnp.mean(span) * 0.5
@@ -408,7 +592,7 @@ class GradientMatern:
             x0 = jnp.array([jnp.log(init_ls), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                return negative_mll_matern_grad(log_p, self.x, self.y_flat, D_plus_1)
+                return negative_mll_matern_grad(log_p, self.x, self.y_flat, self.D_plus_1)
 
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
             self.ls = float(jnp.exp(results.x[0]))
@@ -418,25 +602,16 @@ class GradientMatern:
         else:
             self.ls, self.noise = init_ls, init_noise
 
+    def _solve(self):
         self.alpha, self.K_inv = _grad_matern_solve(
             self.x, self.y_full, self.noise, self.ls
         )
 
-    def __call__(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(_grad_matern_predict(chunk, self.x, self.alpha, self.ls))
-        return jnp.concatenate(preds, axis=0) + self.e_mean
+    def _predict_chunk(self, chunk):
+        return _grad_matern_predict(chunk, self.x, self.alpha, self.ls)
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(_grad_matern_var(chunk, self.x, self.K_inv, self.ls))
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _grad_matern_var(chunk, self.x, self.K_inv, self.ls)
 
 
 # ==============================================================================
@@ -486,15 +661,10 @@ def _imq_var(x_query, x_obs, K_inv, epsilon):
     return jnp.maximum(var, 0.0)
 
 
-class FastIMQ:
-    def __init__(
-        self, x_obs, y_obs, smoothing=1e-3, length_scale=None, optimize=True, **kwargs
-    ):
-        self.x_obs = jnp.asarray(x_obs, dtype=jnp.float32)
-        self.y_obs = jnp.asarray(y_obs, dtype=jnp.float32)
-        self.y_mean = jnp.mean(self.y_obs)
-        y_centered = self.y_obs - self.y_mean
+class FastIMQ(BaseSurface):
+    """Inverse Multi-Quadratic (IMQ) surface implementation."""
 
+    def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
             span = jnp.max(self.x_obs, axis=0) - jnp.min(self.x_obs, axis=0)
             init_eps = jnp.mean(span) * 0.8
@@ -506,7 +676,7 @@ class FastIMQ:
             x0 = jnp.array([jnp.log(init_eps), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                return negative_mll_imq_std(log_p, self.x_obs, y_centered)
+                return negative_mll_imq_std(log_p, self.x_obs, self.y_centered)
 
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
             self.epsilon = float(jnp.exp(results.x[0]))
@@ -516,42 +686,30 @@ class FastIMQ:
         else:
             self.epsilon, self.noise = init_eps, init_noise
 
+    def _solve(self):
         self.alpha, self.K_inv = _imq_solve(
-            self.x_obs, y_centered, self.noise, self.epsilon
+            self.x_obs, self.y_centered, self.noise, self.epsilon
         )
 
-    def __call__(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(_imq_predict(chunk, self.x_obs, self.alpha, self.epsilon))
-        return jnp.concatenate(preds, axis=0) + self.y_mean
+    def _predict_chunk(self, chunk):
+        return _imq_predict(chunk, self.x_obs, self.alpha, self.epsilon)
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(_imq_var(chunk, self.x_obs, self.K_inv, self.epsilon))
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _imq_var(chunk, self.x_obs, self.K_inv, self.epsilon)
 
 
 # ==============================================================================
 # 6. SQUARED EXPONENTIAL (SE) - "The Classic"
-#    k(r) = exp(-r^2 / (2 * l^2))
 # ==============================================================================
 
 
 def se_kernel_elem(x1, x2, length_scale=1.0):
     d2 = jnp.sum((x1 - x2) ** 2)
-    # Clamp length_scale to avoid division by zero
     ls = jnp.maximum(length_scale, 1e-5)
     val = jnp.exp(-d2 / (2.0 * ls**2))
     return val
 
 
-# Auto-diff covariance block
 def full_covariance_se(x1, x2, length_scale):
     k_ee = se_kernel_elem(x1, x2, length_scale)
     k_ed = jax.grad(se_kernel_elem, argnums=1)(x1, x2, length_scale)
@@ -559,20 +717,17 @@ def full_covariance_se(x1, x2, length_scale):
     k_dd = jax.jacfwd(jax.grad(se_kernel_elem, argnums=1), argnums=0)(
         x1, x2, length_scale
     )
-
     row1 = jnp.concatenate([k_ee[None], k_ed])
     row2 = jnp.concatenate([k_de[:, None], k_dd], axis=1)
     return jnp.concatenate([row1[None, :], row2], axis=0)
 
 
-# Vectorize
 k_matrix_se_grad_map = vmap(vmap(full_covariance_se, (None, 0, None)), (0, None, None))
 
 
 def negative_mll_se_grad(log_params, x, y_flat, D_plus_1):
     length_scale = jnp.exp(log_params[0])
     noise_scalar = jnp.exp(log_params[1])
-
     K_blocks = k_matrix_se_grad_map(x, x, length_scale)
     N = x.shape[0]
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
@@ -584,10 +739,8 @@ def _grad_se_solve(x, y_full, noise_scalar, length_scale):
     K_blocks = k_matrix_se_grad_map(x, x, length_scale)
     N, _, D_plus_1, _ = K_blocks.shape
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
-
     diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_full = K_full + diag_noise
-
     K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
     return alpha, K_inv
@@ -619,31 +772,10 @@ def _grad_se_var(x_query, x_obs, K_inv, length_scale):
     return jnp.maximum(var, 0.0)
 
 
-class GradientSE:
-    def __init__(
-        self,
-        x,
-        y,
-        gradients=None,
-        smoothing=1e-4,
-        length_scale=None,
-        optimize=True,
-        **kwargs,
-    ):
-        self.x = jnp.asarray(x, dtype=jnp.float32)
-        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
-        grad_vals = (
-            jnp.asarray(gradients, dtype=jnp.float32)
-            if gradients is not None
-            else jnp.zeros_like(self.x)
-        )
+class GradientSE(BaseGradientSurface):
+    """Gradient-enhanced Squared Exponential (SE) surface implementation."""
 
-        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
-        self.e_mean = jnp.mean(y_energies)
-        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
-        self.y_flat = self.y_full.flatten()
-        D_plus_1 = self.x.shape[1] + 1
-
+    def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
             span = jnp.max(self.x, axis=0) - jnp.min(self.x, axis=0)
             init_ls = jnp.mean(span) * 0.4
@@ -655,7 +787,7 @@ class GradientSE:
             x0 = jnp.array([jnp.log(init_ls), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                return negative_mll_se_grad(log_p, self.x, self.y_flat, D_plus_1)
+                return negative_mll_se_grad(log_p, self.x, self.y_flat, self.D_plus_1)
 
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
             self.ls = float(jnp.exp(results.x[0]))
@@ -665,23 +797,14 @@ class GradientSE:
         else:
             self.ls, self.noise = init_ls, init_noise
 
+    def _solve(self):
         self.alpha, self.K_inv = _grad_se_solve(self.x, self.y_full, self.noise, self.ls)
 
-    def __call__(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(_grad_se_predict(chunk, self.x, self.alpha, self.ls))
-        return jnp.concatenate(preds, axis=0) + self.e_mean
+    def _predict_chunk(self, chunk):
+        return _grad_se_predict(chunk, self.x, self.alpha, self.ls)
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(_grad_se_var(chunk, self.x, self.K_inv, self.ls))
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _grad_se_var(chunk, self.x, self.K_inv, self.ls)
 
 
 # ==============================================================================
@@ -720,32 +843,20 @@ def negative_mll_imq_grad(log_params, x, y_flat, D_plus_1):
 def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
     log_eps = log_params[0]
     log_noise = log_params[1]
-
     epsilon = jnp.exp(log_eps)
     noise_scalar = jnp.exp(log_noise)
 
-    # Likelihood (Data Fit)
     K_blocks = k_matrix_imq_grad_map(x, x, epsilon)
     N = x.shape[0]
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     mll_cost = generic_negative_mll(K_full, y_flat, noise_scalar)
 
-    # --- Gamma Prior on Epsilon ---
-    # Distribution should peak at 'init_eps' but kills large values.
-    # Gamma PDF: x^(alpha-1) * exp(-beta * x)
-    # NegLogPDF: -(alpha-1)*log(x) + beta*x
-
-    alpha_g = 2.0  # Shape=2 ensures the distribution goes to 0 at epsilon=0 (physical)
-    beta_g = 1.0 / (init_eps + 1e-6)  # Rate set so the peak (mode) is roughly at init_eps
-
-    # This linear 'epsilon' term is what stops it from shooting up
+    alpha_g = 2.0
+    beta_g = 1.0 / (init_eps + 1e-6)
     eps_penalty = -(alpha_g - 1.0) * log_eps + beta_g * epsilon
 
-    # --- Log-Normal Prior on Noise ---
-    # Log-Normal is fine for noise; to stay in a magnitude range
     noise_target = jnp.log(1e-2)
     noise_penalty = (log_noise - noise_target) ** 2 / 0.5
-
     return mll_cost + eps_penalty + noise_penalty
 
 
@@ -787,31 +898,10 @@ def _grad_imq_var(x_query, x_obs, K_inv, epsilon):
     return jnp.maximum(var, 0.0)
 
 
-class GradientIMQ:
-    def __init__(
-        self,
-        x,
-        y,
-        gradients=None,
-        smoothing=1e-4,
-        length_scale=None,
-        optimize=True,
-        **kwargs,
-    ):
-        self.x = jnp.asarray(x, dtype=jnp.float32)
-        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
-        grad_vals = (
-            jnp.asarray(gradients, dtype=jnp.float32)
-            if gradients is not None
-            else jnp.zeros_like(self.x)
-        )
+class GradientIMQ(BaseGradientSurface):
+    """Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation."""
 
-        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
-        self.e_mean = jnp.mean(y_energies)
-        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
-        self.y_flat = self.y_full.flatten()
-        D_plus_1 = self.x.shape[1] + 1
-
+    def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
             span = jnp.max(self.x, axis=0) - jnp.min(self.x, axis=0)
             init_eps = jnp.mean(span) * 0.8
@@ -824,7 +914,7 @@ class GradientIMQ:
 
             def loss_fn(log_p):
                 return negative_mll_imq_map(
-                    log_p, init_eps, self.x, self.y_flat, D_plus_1
+                    log_p, init_eps, self.x, self.y_flat, self.D_plus_1
                 )
 
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
@@ -835,30 +925,20 @@ class GradientIMQ:
         else:
             self.epsilon, self.noise = init_eps, init_noise
 
+    def _solve(self):
         self.alpha, self.K_inv = _grad_imq_solve(
             self.x, self.y_full, self.noise, self.epsilon
         )
 
-    def __call__(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(_grad_imq_predict(chunk, self.x, self.alpha, self.epsilon))
-        return jnp.concatenate(preds, axis=0) + self.e_mean
+    def _predict_chunk(self, chunk):
+        return _grad_imq_predict(chunk, self.x, self.alpha, self.epsilon)
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(_grad_imq_var(chunk, self.x, self.K_inv, self.epsilon))
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _grad_imq_var(chunk, self.x, self.K_inv, self.epsilon)
 
 
 # ==============================================================================
 # 7. RATIONAL QUADRATIC (RQ)
-#    k(r) = (1 + r^2 / (2 * alpha * l^2))^(-alpha)
 # ==============================================================================
 
 
@@ -871,32 +951,18 @@ def rq_kernel_base(x1, x2, length_scale, alpha):
 
 
 def rq_kernel_elem(x1, x2, params):
-    """
-    SYMMETRIC KERNEL TRICK: k_sym(x, x') = k(x, x') + k(swap(x), x')
-    Enforces f(r, p) = f(p, r) globally.
-    """
-    # Params: [length_scale, alpha]
     length_scale = params[0]
     alpha = params[1]
-
-    # Standard interaction
     k_direct = rq_kernel_base(x1, x2, length_scale, alpha)
-
-    # Swapped interaction (Mirror across diagonal)
-    # x1[::-1] swaps (r, p) -> (p, r)
     k_mirror = rq_kernel_base(x1[::-1], x2, length_scale, alpha)
-
-    # Summing them enforces symmetry in the output function
     return k_direct + k_mirror
 
 
-# Auto-diff covariance block
 def full_covariance_rq(x1, x2, params):
     k_ee = rq_kernel_elem(x1, x2, params)
     k_ed = jax.grad(rq_kernel_elem, argnums=1)(x1, x2, params)
     k_de = jax.grad(rq_kernel_elem, argnums=0)(x1, x2, params)
     k_dd = jax.jacfwd(jax.grad(rq_kernel_elem, argnums=1), argnums=0)(x1, x2, params)
-
     row1 = jnp.concatenate([k_ee[None], k_ed])
     row2 = jnp.concatenate([k_de[:, None], k_dd], axis=1)
     return jnp.concatenate([row1[None, :], row2], axis=0)
@@ -905,38 +971,26 @@ def full_covariance_rq(x1, x2, params):
 k_matrix_rq_grad_map = vmap(vmap(full_covariance_rq, (None, 0, None)), (0, None, None))
 
 
-# --- MAXIMUM A POSTERIORI LOSS ---
 def negative_mll_rq_map(log_params, x, y_flat, D_plus_1):
     log_ls = log_params[0]
     log_alpha = log_params[1]
     log_noise = log_params[2]
-
     length_scale = jnp.exp(log_ls)
     alpha = jnp.exp(log_alpha)
     noise_scalar = jnp.exp(log_noise)
 
-    # 1. Likelihood (Data Fit)
     params = jnp.array([length_scale, alpha])
     K_blocks = k_matrix_rq_grad_map(x, x, params)
     N = x.shape[0]
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     mll_cost = generic_negative_mll(K_full, y_flat, noise_scalar)
 
-    # LS Prior: Target 1.5 Å (Forces global connection).
-    # Variance 0.05 (Very Stiff)
     ls_target = jnp.log(1.5)
     ls_penalty = (log_ls - ls_target) ** 2 / 0.05
-
-    # Noise Prior: Target 1e-2 (Relaxes "Exactness").
-    # Allows the surface to smooth out gradient conflicts (fixing bubbles).
-    # Variance 1.0 (Medium) -> Allows some data-driven movement.
     noise_target = jnp.log(1e-2)
     noise_penalty = (log_noise - noise_target) ** 2 / 1.0
-
-    # Alpha Prior: Target 0.8 (Long tails / Global structure).
     alpha_target = jnp.log(0.8)
     alpha_penalty = (log_alpha - alpha_target) ** 2 / 0.5
-
     return mll_cost + ls_penalty + noise_penalty + alpha_penalty
 
 
@@ -945,10 +999,8 @@ def _grad_rq_solve(x, y_full, noise_scalar, params):
     K_blocks = k_matrix_rq_grad_map(x, x, params)
     N, _, D_plus_1, _ = K_blocks.shape
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
-
     diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_full = K_full + diag_noise
-
     K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
     return alpha, K_inv
@@ -981,37 +1033,14 @@ def _grad_rq_var(x_query, x_obs, K_inv, params):
         return rq_kernel_elem(xq, xq, params)
 
     base_var = vmap(self_var)(x_query)
-
     var = base_var - jnp.sum((K_q_flat @ K_inv) * K_q_flat, axis=1)
     return jnp.maximum(var, 0.0)
 
 
-class GradientRQ:
-    def __init__(
-        self,
-        x,
-        y,
-        gradients=None,
-        smoothing=1e-4,
-        length_scale=None,
-        optimize=True,
-        **kwargs,
-    ):
-        self.x = jnp.asarray(x, dtype=jnp.float32)
-        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
-        grad_vals = (
-            jnp.asarray(gradients, dtype=jnp.float32)
-            if gradients is not None
-            else jnp.zeros_like(self.x)
-        )
+class GradientRQ(BaseGradientSurface):
+    """Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation."""
 
-        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
-        self.e_mean = jnp.mean(y_energies)
-        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
-        self.y_flat = self.y_full.flatten()
-        D_plus_1 = self.x.shape[1] + 1
-
-        # Initial Guesses (Seed the optimizer in the physical basin)
+    def _fit(self, smoothing, length_scale, optimize):
         init_ls = length_scale if length_scale is not None else 1.5
         init_alpha = 1.0
         init_noise = 1e-2
@@ -1020,42 +1049,29 @@ class GradientRQ:
             x0 = jnp.array([jnp.log(init_ls), jnp.log(init_alpha), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                # Use the MAP loss (with priors)
-                return negative_mll_rq_map(log_p, self.x, self.y_flat, D_plus_1)
+                return negative_mll_rq_map(log_p, self.x, self.y_flat, self.D_plus_1)
 
-            # BFGS with Stiff Priors
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
-
             self.ls = float(jnp.exp(results.x[0]))
             self.alpha_param = float(jnp.exp(results.x[1]))
             self.noise = float(jnp.exp(results.x[2]))
 
-            # Fallback if optimization diverges
             if jnp.isnan(self.ls) or jnp.isnan(self.noise):
                 self.ls, self.alpha_param, self.noise = init_ls, init_alpha, init_noise
         else:
             self.ls, self.alpha_param, self.noise = init_ls, init_alpha, init_noise
-
         self.params = jnp.array([self.ls, self.alpha_param])
+
+    def _solve(self):
         self.alpha, self.K_inv = _grad_rq_solve(
             self.x, self.y_full, self.noise, self.params
         )
 
-    def __call__(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(_grad_rq_predict(chunk, self.x, self.alpha, self.params))
-        return jnp.concatenate(preds, axis=0) + self.e_mean
+    def _predict_chunk(self, chunk):
+        return _grad_rq_predict(chunk, self.x, self.alpha, self.params)
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(_grad_rq_var(chunk, self.x, self.K_inv, self.params))
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _grad_rq_var(chunk, self.x, self.K_inv, self.params)
 
 
 # ==============================================================================
@@ -1068,46 +1084,26 @@ def _stable_nystrom_grad_imq_solve(x, y_full, x_inducing, noise_scalar, epsilon)
     N = x.shape[0]
     M = x_inducing.shape[0]
     D_plus_1 = x.shape[1] + 1
-
-    # 1. Base inducing point matrix (K_mm)
     K_mm_blocks = k_matrix_imq_grad_map(x_inducing, x_inducing, epsilon)
     K_mm = K_mm_blocks.transpose(0, 2, 1, 3).reshape(M * D_plus_1, M * D_plus_1)
-
-    # Heavier jitter is required for float32 gradient matrices
     jitter = (noise_scalar + 1e-4) * jnp.eye(M * D_plus_1)
     K_mm = K_mm + jitter
-
-    # Stable Cholesky factorization of K_mm
     L = jnp.linalg.cholesky(K_mm)
-
-    # 2. Cross-covariance matrix (K_mn)
     K_nm_blocks = k_matrix_imq_grad_map(x, x_inducing, epsilon)
     K_nm = K_nm_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, M * D_plus_1)
     K_mn = K_nm.T
-
-    # 3. Normalized features: V = L^{-1} K_mn
-    # This avoids squaring the condition number!
     V = jlinalg.solve_triangular(L, K_mn, lower=True)
-
-    # 4. Inner system: S = V V^T + sigma^2 I
     sigma2 = noise_scalar + 1e-6
     S = V @ V.T + sigma2 * jnp.eye(M * D_plus_1)
     L_S = jnp.linalg.cholesky(S)
-
-    # 5. Solve for weights: alpha_m = L^{-T} S^{-1} V y
     Vy = V @ y_full.flatten()
     beta = jlinalg.cho_solve((L_S, True), Vy)
     alpha_m = jlinalg.solve_triangular(L.T, beta, lower=False)
-
-    # 6. Effective precision matrix for predictive variance
-    # W = L^{-T} (I - sigma^2 S^{-1}) L^{-1}
     I_M = jnp.eye(M * D_plus_1)
     S_inv = jlinalg.cho_solve((L_S, True), I_M)
     inner = I_M - sigma2 * S_inv
-
     L_inv = jlinalg.solve_triangular(L, I_M, lower=True)
     W = L_inv.T @ inner @ L_inv
-
     return alpha_m, W
 
 
@@ -1133,12 +1129,13 @@ def _nystrom_grad_imq_var(x_query, x_inducing, W, epsilon):
     K_qm = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_inducing)
     Q, M, D_plus_1 = K_qm.shape
     K_qm_flat = K_qm.reshape(Q, M * D_plus_1)
-
     var = (1.0 / epsilon) - jnp.sum((K_qm_flat @ W) * K_qm_flat, axis=1)
     return jnp.maximum(var, 0.0)
 
 
-class NystromGradientIMQ:
+class NystromGradientIMQ(BaseGradientSurface):
+    """Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface."""
+
     def __init__(
         self,
         x,
@@ -1151,86 +1148,78 @@ class NystromGradientIMQ:
         optimize=True,
         **kwargs,
     ):
-        self.x = jnp.asarray(x, dtype=jnp.float32)
-        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
-        grad_vals = (
-            jnp.asarray(gradients, dtype=jnp.float32)
-            if gradients is not None
-            else jnp.zeros_like(self.x)
-        )
+        """
+        Initializes the Nystrom-approximated model.
 
-        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
-        self.e_mean = jnp.mean(y_energies)
-        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
+        Args:
+            x: Training inputs.
+            y: Training values.
+            gradients: Training gradients.
+            n_inducing: Number of inducing points to sample.
+            nimags: Path-based image count for structured sampling.
+            smoothing: Noise level.
+            length_scale: Initial epsilon for IMQ.
+            optimize: Optimization toggle.
+        """
+        self.n_inducing = n_inducing
+        self.nimags = nimags
+        super().__init__(x, y, gradients, smoothing, length_scale, optimize, **kwargs)
 
+    def _fit(self, smoothing, length_scale, optimize):
         N_total = self.x.shape[0]
-
-        # --- PATH-BASED SAMPLING ---
-        # TODO(rg): extract
-        if N_total <= n_inducing:
+        if N_total <= self.n_inducing:
             self.x_inducing = self.x
             self.y_full_inducing = self.y_full
         else:
             rng = np.random.RandomState(42)
-            # Ensure nimags is a valid integer for path-chunking
-            if nimags is not None and nimags > 0:
-                n_paths = N_total // nimags
-                paths_to_sample = max(1, n_inducing // nimags)
-
-                # Anchor inducing points to the most converged paths.
-                # Early unrelaxed geometries possess high strain and unphysical gradients.
+            if self.nimags is not None and self.nimags > 0:
+                n_paths = N_total // self.nimags
+                paths_to_sample = max(1, self.n_inducing // self.nimags)
                 if n_paths > 1:
                     start_idx = max(0, n_paths - paths_to_sample)
                     path_indices = np.arange(start_idx, n_paths)
                 else:
                     path_indices = np.array([0])
-
                 idx = np.concatenate(
-                    [np.arange(p * nimags, (p + 1) * nimags) for p in path_indices]
+                    [
+                        np.arange(p * self.nimags, (p + 1) * self.nimags)
+                        for p in path_indices
+                    ]
                 )
-                # Ensure we don't exceed N_total if the last path is partial
                 idx = idx[idx < N_total]
-
                 self.x_inducing = self.x[idx]
                 self.y_full_inducing = self.y_full[idx]
             else:
-                # Fallback to random if nimags is messed up
-                idx = rng.choice(N_total, min(n_inducing, N_total), replace=False)
+                idx = rng.choice(N_total, min(self.n_inducing, N_total), replace=False)
                 self.x_inducing = self.x[idx]
                 self.y_full_inducing = self.y_full[idx]
-
         self.epsilon = length_scale if length_scale is not None else 0.5
         self.noise = smoothing
 
+    def _solve(self):
         self.alpha_m, self.W = _stable_nystrom_grad_imq_solve(
             self.x, self.y_full, self.x_inducing, self.noise, self.epsilon
         )
 
-    def __call__(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        preds = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            preds.append(
-                _nystrom_grad_imq_predict(
-                    chunk, self.x_inducing, self.alpha_m, self.epsilon
-                )
-            )
-        return jnp.concatenate(preds, axis=0) + self.e_mean
+    def _predict_chunk(self, chunk):
+        return _nystrom_grad_imq_predict(
+            chunk, self.x_inducing, self.alpha_m, self.epsilon
+        )
 
-    def predict_var(self, x_query, chunk_size=500):
-        x_query = jnp.asarray(x_query, dtype=jnp.float32)
-        vars_list = []
-        for i in range(0, x_query.shape[0], chunk_size):
-            chunk = x_query[i : i + chunk_size]
-            vars_list.append(
-                _nystrom_grad_imq_var(chunk, self.x_inducing, self.W, self.epsilon)
-            )
-        return jnp.concatenate(vars_list, axis=0)
+    def _var_chunk(self, chunk):
+        return _nystrom_grad_imq_var(chunk, self.x_inducing, self.W, self.epsilon)
 
 
-# Factory for string-based instantiation
 def get_surface_model(name):
+    """
+    Factory function to retrieve surface model classes by name.
+
+    Args:
+        name: Model identifier (e.g., 'grad_matern', 'tps', 'imq').
+
+    Returns:
+        type: The model class. Defaults to GradientMatern.
+    """
     models = {
         "grad_matern": GradientMatern,
         "grad_rq": GradientRQ,
