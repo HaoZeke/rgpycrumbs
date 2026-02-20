@@ -19,12 +19,16 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
     folder_path = PACKAGE_ROOT / folder_name
     if not folder_path.is_dir():
         return []
-    return sorted(
-        f.stem for f in folder_path.glob("*.py") if not f.name.startswith("_")
-    )
+    return sorted(f.stem for f in folder_path.glob("*.py") if not f.name.startswith("_"))
 
 
-def _dispatch(group: str, script_name: str, script_args: tuple, is_dev: bool = False):
+def _dispatch(
+    group: str,
+    script_name: str,
+    script_args: tuple,
+    is_dev: bool = False,
+    is_verbose: bool = False,
+):
     """
     Sets up the environment and runs the target script via 'uv run'.
     """
@@ -40,6 +44,10 @@ def _dispatch(group: str, script_name: str, script_args: tuple, is_dev: bool = F
         command = ["uv", "run", str(script_path), *script_args]
     else:
         command = [sys.executable, str(script_path), *script_args]
+
+    if is_verbose:
+        click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
+        click.echo(f"VERBOSE: Constructed command -> {' '.join(command)}", err=True)
 
     # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
@@ -81,7 +89,14 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
     def cmd(ctx):
         # Retrieve the dev flag safely from the parent context
         is_dev = ctx.obj.get("is_dev", False) if ctx.obj else False
-        _dispatch(group_name, display_name, tuple(ctx.args), is_dev=is_dev)
+        is_verbose = ctx.obj.get("is_verbose", False) if ctx.obj else False
+        _dispatch(
+            group_name,
+            display_name,
+            tuple(ctx.args),
+            is_dev=is_dev,
+            is_verbose=is_verbose,
+        )
 
     cmd.help = f"Run the {display_name} script."
     return cmd
@@ -89,17 +104,24 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
 
 @click.group()
 @click.option(
-    "--dev", 
-    is_flag=True, 
-    help="Run using sys.executable instead of 'uv run' for local development."
+    "--dev",
+    is_flag=True,
+    help="Run using sys.executable instead of 'uv run' for local development.",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Print script paths and constructed commands before execution.",
 )
 @click.version_option(package_name="rgpycrumbs")
 @click.pass_context
-def main(ctx, dev):
+def main(ctx, dev, verbose):
     """A dispatcher that runs self-contained PEP 723 scripts using 'uv'."""
     # Ensure ctx.obj is a dictionary so we can store state in it
     ctx.ensure_object(dict)
     ctx.obj["is_dev"] = dev
+    ctx.obj["is_verbose"] = verbose
 
 
 # --- DYNAMIC DISCOVERY ---
@@ -116,9 +138,7 @@ for _group in _valid_groups:
         continue
 
     # Create a click group for this category
-    _group_cmd = click.Group(
-        name=_group, help=f"Tools in the '{_group}' category."
-    )
+    _group_cmd = click.Group(name=_group, help=f"Tools in the '{_group}' category.")
 
     for _stem in _file_stems:
         _group_cmd.add_command(_make_script_command(_group, _stem))
