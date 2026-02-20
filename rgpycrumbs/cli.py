@@ -24,7 +24,7 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
     )
 
 
-def _dispatch(group: str, script_name: str, script_args: tuple):
+def _dispatch(group: str, script_name: str, script_args: tuple, is_dev: bool = False):
     """
     Sets up the environment and runs the target script via 'uv run'.
     """
@@ -36,7 +36,10 @@ def _dispatch(group: str, script_name: str, script_args: tuple):
         click.echo(f"Error: Script not found at '{script_path}'", err=True)
         sys.exit(1)
 
-    command = ["uv", "run", str(script_path), *script_args]
+    if not is_dev:
+        command = ["uv", "run", str(script_path), *script_args]
+    else:
+        command = [sys.executable, str(script_path), *script_args]
 
     # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
@@ -76,16 +79,27 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
     )
     @click.pass_context
     def cmd(ctx):
-        _dispatch(group_name, display_name, tuple(ctx.args))
+        # Retrieve the dev flag safely from the parent context
+        is_dev = ctx.obj.get("is_dev", False) if ctx.obj else False
+        _dispatch(group_name, display_name, tuple(ctx.args), is_dev=is_dev)
 
     cmd.help = f"Run the {display_name} script."
     return cmd
 
 
 @click.group()
+@click.option(
+    "--dev", 
+    is_flag=True, 
+    help="Run using sys.executable instead of 'uv run' for local development."
+)
 @click.version_option(package_name="rgpycrumbs")
-def main():
+@click.pass_context
+def main(ctx, dev):
     """A dispatcher that runs self-contained PEP 723 scripts using 'uv'."""
+    # Ensure ctx.obj is a dictionary so we can store state in it
+    ctx.ensure_object(dict)
+    ctx.obj["is_dev"] = dev
 
 
 # --- DYNAMIC DISCOVERY ---
