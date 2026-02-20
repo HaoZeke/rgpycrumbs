@@ -12,6 +12,25 @@ failures and import-time crashes.
 pixi install
 #+END_SRC
 
+* Local Development & Editable Installs
+By default, the ~rgpycrumbs~ dispatcher runs scripts using ~uv run~. This enforces strict environment isolation by resolving and fetching a script's PEP 723 inline dependencies on the fly. 
+
+While excellent for reproducibility, this behavior bypasses your local Python environment. If you are actively developing a dependent package (e.g., you installed it locally via ~pip install -e .~ or ~pixi add --editable~), ~uv run~ will ignore your local edits and fetch the published version instead.
+
+To force ~rgpycrumbs~ to use your active environment and respect your editable installs, use the ~--dev~ flag:
+
+#+BEGIN_SRC shell
+# Standard execution (Isolated: uv resolves dependencies from scratch)
+rgpycrumbs mygroup myscript
+
+# Development execution (Active Env: uses sys.executable, respects editable installs)
+rgpycrumbs --dev mygroup myscript
+#+END_SRC
+
+** Workflow for Dependent Packages
+1. Activate your desired ~pixi~ environment (e.g., ~pixi shell -e test~).
+2. Install your dependent package in editable mode if not already managed by pixi (e.g., ~pip install -e /path/to/local/dependency~).
+3. Run your script using the ~--dev~ flag to test your local package modifications: ~rgpycrumbs --dev <group> <script>~.
 * Testing Guidelines
 The test suite utilizes custom markers to scope tests to specific environments. 
 This prevents ~ModuleNotFoundError~ during the ~pytest~ collection phase.

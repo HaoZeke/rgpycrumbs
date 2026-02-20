@@ -15,7 +15,8 @@ Please review the technical requirements before submitting a Pull Request:
 
 - Development Environment :: We use ~pixi~ for environment management. 
   Read the [[file:test_requirements.org][Testing & Environment Requirements]] to understand how to handle 
-  conflicting dependencies.
+  conflicting dependencies, and how to use the ~--dev~ flag when working 
+  with local, editable installs of dependent packages.
 - Code Style :: We follow a "Dispatcher" pattern detailed in the [[file:~/Git/Github/Python/rgpycrumbs/docs/orgmode/devnotes.org][design and architecture notes]]. Keep core logic in 
   independent scripts using PEP 723 metadata as per these [[https://realpython.com/python-script-structure/][real python best practices]].
 - Documentation :: We author all documentation in ~orgmode~ converted to ~rst~,
