@@ -302,18 +302,6 @@ IRA_KMAX_DEFAULT = 1.8
     default="hermite",
     help="Spline interpolation method.",
 )
-@click.option(
-    "--savgol-window",
-    type=int,
-    default=5,
-    help="Savitzky-Golay filter window.",
-)
-@click.option(
-    "--savgol-order",
-    type=int,
-    default=2,
-    help="Savitzky-Golay filter order.",
-)
 # --- Inset Position Options ---
 @click.option(
     "--draw-reactant",
