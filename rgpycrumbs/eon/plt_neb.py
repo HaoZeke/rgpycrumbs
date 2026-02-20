@@ -543,7 +543,9 @@ def main(
                 rbf_smooth=rbf_smoothing,
                 cmap=active_theme.cmap_landscape,
                 show_pts=show_pts,
-                variance_threshold=0.9,  # 90% uncertainty
+                # so we always show 5% and 95%, this is the user defined additional one
+                # TODO(rg): just be a user parameter..
+                variance_threshold=0.5,  # 50% uncertainty
                 project_path=project_path,
                 extra_points=extra_pts_arr,
             )
