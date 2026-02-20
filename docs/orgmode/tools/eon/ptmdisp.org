@@ -14,7 +14,7 @@ filtering or setting up atom lists for the displacements used for eOn calculatio
 #+END_EXPORT
 
 ** Usage
-# TODO(rg): Actually use real exampes here instead
+# TODO(rg): Actually use real examples here instead
 #+BEGIN_EXPORT rst
 .. command-output:: python -m rgpycrumbs.cli eon ptmdisp --help
    :cwd: ../../

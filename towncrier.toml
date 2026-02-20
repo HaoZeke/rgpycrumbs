@@ -1,40 +1,40 @@
 [tool.towncrier]
 directory = "docs/newsfragments"
-filename = "CHANGELOG.rst"
+filename  = "CHANGELOG.rst"
 
 [[tool.towncrier.type]]
-directory = "security"
-name = "Security"
+directory   = "security"
+name        = "Security"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "removed"
-name = "Removed"
+directory   = "removed"
+name        = "Removed"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "deprecated"
-name = "Deprecated"
+directory   = "deprecated"
+name        = "Deprecated"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "added"
-name = "Added"
+directory   = "added"
+name        = "Added"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "dev"
-name = "Developer"
+directory   = "dev"
+name        = "Developer"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "changed"
-name = "Changed"
+directory   = "changed"
+name        = "Changed"
 showcontent = true
 
 [[tool.towncrier.type]]
-directory = "fixed"
-name = "Fixed"
+directory   = "fixed"
+name        = "Fixed"
 showcontent = true
 
 [[tool.towncrier.type]]

@@ -56,9 +56,7 @@ def defect_fcc_cu_file(tmp_path):
     # The expected "defective" indices are the neighbors of the original atom.
     # Note: Indices of atoms after the deleted one will shift down by 1.
     # We must account for this shift in our expected indices set.
-    final_expected_indices = {
-        i if i < vacancy_index else i - 1 for i in neighbor_indices
-    }
+    final_expected_indices = {i if i < vacancy_index else i - 1 for i in neighbor_indices}
 
     return filepath, final_expected_indices
 
@@ -101,9 +99,7 @@ def test_find_indices_on_perfect_bcc(perfect_bcc_fe_file):
     On a perfect bulk BCC crystal, searching for non-BCC atoms should return an empty list.
     """
     indices = find_mismatch_indices(perfect_bcc_fe_file, CrystalStructure.BCC)
-    assert len(indices) == 0, (
-        "Should find no non-BCC atoms in a perfect bulk BCC crystal"
-    )
+    assert len(indices) == 0, "Should find no non-BCC atoms in a perfect bulk BCC crystal"
 
 
 ### Integration Tests for the Command-Line Interface (CLI) ###

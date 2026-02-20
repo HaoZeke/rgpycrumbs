@@ -154,6 +154,7 @@ def align_structure_robust(
     minimize_rotation_and_translation(ref_atoms, mobile_atoms)
     return AlignmentResult(atoms=mobile_atoms, method=AlignmentMethod.ASE_PROCRUSTES)
 
+
 def calculate_rmsd_from_ref(
     atoms_list: list[Atoms], ira_instance, ref_atom: Atoms, ira_kmax: float
 ) -> np.ndarray:

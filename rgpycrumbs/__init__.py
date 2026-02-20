@@ -17,4 +17,5 @@ def __getattr__(name):
         from rgpycrumbs import interpolation
 
         return interpolation
-    raise AttributeError(f"module 'rgpycrumbs' has no attribute {name}")
+    aerr = f"module 'rgpycrumbs' has no attribute {name}"
+    raise AttributeError(aerr)

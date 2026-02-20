@@ -71,7 +71,7 @@ def get_packages_to_delete(channel, package_name, version_regex):
             )
             repodata_url = f"{BASE_URL}/{channel}/{platform}/repodata.json"
             try:
-                response = requests.get(repodata_url)
+                response = requests.get(repodata_url, timeout=10)
                 if response.status_code == 404:
                     log.debug(f"No repodata.json found for {platform}, skipping.")
                     continue
@@ -129,7 +129,7 @@ def delete_package(session, channel, platform, filename, dry_run=False):
 # --- Command-Line Interface ---
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
     "--channel",
     required=True,

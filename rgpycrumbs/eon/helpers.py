@@ -3,7 +3,7 @@
 
 import configparser
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 
 def write_eon_config(path: str | Path, settings: dict[str, dict[str, Any]]) -> None:

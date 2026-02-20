@@ -1,6 +1,7 @@
 import contextlib
 import importlib
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -11,9 +12,10 @@ def getstrform(pathobj):
 
 
 def get_gitroot():
+    git_path = shutil.which("git") or "git"
     gitroot = Path(
-        subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
+        subprocess.run(  # noqa: S603
+            [git_path, "rev-parse", "--show-toplevel"],
             check=True,
             capture_output=True,
             cwd=Path.cwd(),
@@ -52,9 +54,7 @@ def _import_from_parent_env(module_name: str):
 
     # 3. Temporarily extend sys.path
     # Filter out empty strings and paths already in sys.path
-    paths_to_add = [
-        p for p in parent_paths.split(os.pathsep) if p and p not in sys.path
-    ]
+    paths_to_add = [p for p in parent_paths.split(os.pathsep) if p and p not in sys.path]
     sys.path.extend(paths_to_add)
 
     try:

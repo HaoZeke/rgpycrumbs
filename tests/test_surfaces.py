@@ -10,10 +10,10 @@ from rgpycrumbs.surfaces import (  # noqa: E402
     FastIMQ,
     FastMatern,
     FastTPS,
+    GradientIMQ,
     GradientMatern,
     GradientRQ,
     GradientSE,
-    GradientIMQ,
     _imq_kernel_matrix,
     _matern_kernel_matrix,
     _tps_kernel_matrix,
@@ -52,9 +52,7 @@ def gradient_2d_data(simple_2d_data):
 @pytest.fixture
 def query_points():
     """A small grid of query points."""
-    return jnp.array(
-        [[0.0, 0.0], [0.5, 0.5], [-0.5, 0.5]], dtype=jnp.float32
-    )
+    return jnp.array([[0.0, 0.0], [0.5, 0.5], [-0.5, 0.5]], dtype=jnp.float32)
 
 
 # ---------------------------------------------------------------------------
@@ -93,18 +91,14 @@ def test_tps_kernel_matrix_shape():
 
 def test_tps_kernel_matrix_symmetric():
     """Test that TPS kernel matrix is symmetric."""
-    x = jnp.array(
-        [[0.0, 0.0], [1.0, 0.5], [0.5, 1.0], [2.0, 2.0]], dtype=jnp.float32
-    )
+    x = jnp.array([[0.0, 0.0], [1.0, 0.5], [0.5, 1.0], [2.0, 2.0]], dtype=jnp.float32)
     K = _tps_kernel_matrix(x)
     assert jnp.allclose(K, K.T, atol=1e-6)
 
 
 def test_matern_kernel_matrix_shape_and_symmetry():
     """Test that Matern kernel has correct shape and is symmetric."""
-    x = jnp.array(
-        [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], dtype=jnp.float32
-    )
+    x = jnp.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]], dtype=jnp.float32)
     K = _matern_kernel_matrix(x, length_scale=1.0)
     assert K.shape == (4, 4)
     assert jnp.allclose(K, K.T, atol=1e-6)
@@ -119,9 +113,7 @@ def test_matern_kernel_diagonal_ones():
 
 def test_imq_kernel_matrix_shape_and_symmetry():
     """Test that IMQ kernel has correct shape and is symmetric."""
-    x = jnp.array(
-        [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]], dtype=jnp.float32
-    )
+    x = jnp.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]], dtype=jnp.float32)
     K = _imq_kernel_matrix(x, epsilon=1.0)
     assert K.shape == (3, 3)
     assert jnp.allclose(K, K.T, atol=1e-6)
@@ -129,9 +121,7 @@ def test_imq_kernel_matrix_shape_and_symmetry():
 
 def test_imq_kernel_positive_values():
     """IMQ kernel values should always be positive."""
-    x = jnp.array(
-        [[0.0, 0.0], [5.0, 5.0], [-3.0, 2.0]], dtype=jnp.float32
-    )
+    x = jnp.array([[0.0, 0.0], [5.0, 5.0], [-3.0, 2.0]], dtype=jnp.float32)
     K = _imq_kernel_matrix(x, epsilon=1.0)
     assert jnp.all(K > 0)
 
@@ -251,12 +241,14 @@ def test_predict_var_gradient_models(gradient_2d_data, query_points):
     """Test variance prediction for gradient-enhanced kernels."""
     x, y, grads = gradient_2d_data
     for ModelClass in [GradientMatern, GradientIMQ, GradientSE, GradientRQ]:
-        model = ModelClass(x, y, gradients=grads, optimize=False, length_scale=1.0, smoothing=1e-4)
+        model = ModelClass(
+            x, y, gradients=grads, optimize=False, length_scale=1.0, smoothing=1e-4
+        )
         var = model.predict_var(query_points)
         assert var.shape == (query_points.shape[0],)
         assert jnp.all(var >= 0.0)
         assert jnp.all(jnp.isfinite(var))
-        
+
         # Variance at training points should drop significantly
         var_train = model.predict_var(x)
         assert jnp.all(var_train < 1e-1)

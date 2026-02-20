@@ -112,7 +112,7 @@ def generate_nwchem_input(
     logging.info("[bold green]Success![/bold green] NWChem input file generated.")
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.option(
     "--pos-file",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),

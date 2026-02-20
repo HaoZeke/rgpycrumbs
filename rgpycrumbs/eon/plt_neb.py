@@ -40,8 +40,8 @@ https://realpython.com/python-script-structure/
 # ]
 # ///
 
-import io
 import logging
+import sys
 from pathlib import Path
 
 import click
@@ -55,14 +55,12 @@ from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
     estimate_rbf_smoothing,
-    load_augmenting_neb_data,
     load_structures_and_calculate_additional_rmsd,
 )
 
 # --- Library Imports ---
 from chemparseplot.parse.file_ import find_file_paths
 from chemparseplot.plot.neb import (
-    InsetImagePos,
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
@@ -90,7 +88,6 @@ log = logging.getLogger("rich")
 # --- Constants ---
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
-ROUNDING_DF = 3
 IRA_KMAX_DEFAULT = 1.8
 
 
@@ -154,13 +151,6 @@ IRA_KMAX_DEFAULT = 1.8
     help="Smoothing term for 2D RBF.",
 )
 @click.option(
-    "--rounding",
-    type=int,
-    default=ROUNDING_DF,
-    show_default=True,
-    help="Data rounding term for 2D plots.",
-)
-@click.option(
     "--landscape-mode",
     type=click.Choice(["path", "surface"]),
     default="surface",
@@ -192,7 +182,9 @@ IRA_KMAX_DEFAULT = 1.8
 )
 @click.option(
     "--surface-type",
-    type=click.Choice(["grid", "rbf", "grad_matern", "grad_imq", "matern", "imq", "grad_rq", "grad_se"]),
+    type=click.Choice(
+        ["grid", "rbf", "grad_matern", "grad_imq", "matern", "imq", "grad_rq", "grad_se"]
+    ),
     default="rbf",
     help="Interpolation method for the 2D surface.",
 )
@@ -384,7 +376,6 @@ def main(
     rc_mode,
     plot_structures,
     rbf_smoothing,
-    rounding,
     show_pts,
     plot_mode,
     surface_type,
@@ -416,8 +407,6 @@ def main(
     arrow_tail_width,
     # --- Spline ---
     spline_method,
-    savgol_window,
-    savgol_order,
     # --- Inset Positions ---
     draw_reactant,
     draw_saddle,
@@ -491,7 +480,7 @@ def main(
             # Critical failure for landscape/RMSD modes
             if plot_type == "landscape" or rc_mode == "rmsd":
                 log.critical("Cannot proceed without structures. Exiting.")
-                exit(1)
+                sys.exit(1)
 
     if plot_type == "landscape":
         # --- Landscape Plot ---
@@ -500,7 +489,7 @@ def main(
 
         if not dat_paths:
             log.critical(f"No data files found for pattern: {input_dat_pattern}")
-            exit(1)
+            sys.exit(1)
 
         # Fallback if no path files found but main file exists
         if not con_paths and con_file:
@@ -523,8 +512,8 @@ def main(
             ira_kmax,
             augment_dat=augment_dat,
             augment_con=augment_con,
-            ref_atoms=atoms_list[0] if atoms_list else None, # main reactant
-            prod_atoms=atoms_list[-1] if atoms_list else None, # main product
+            ref_atoms=atoms_list[0] if atoms_list else None,  # main reactant
+            prod_atoms=atoms_list[-1] if atoms_list else None,  # main product
         )
 
         # Surface Generation
@@ -566,7 +555,7 @@ def main(
                 rbf_smooth=rbf_smoothing,
                 cmap=active_theme.cmap_landscape,
                 show_pts=show_pts,
-                variance_threshold=0.9, # 90% uncertainity
+                variance_threshold=0.9,  # 90% uncertainty
                 project_path=project_path,
                 extra_points=extra_pts_arr,
             )
@@ -579,7 +568,13 @@ def main(
         final_z = df_final["z"].to_numpy()
 
         plot_landscape_path_overlay(
-            ax, final_r, final_p, final_z, active_theme.cmap_landscape, z_label, project_path=project_path
+            ax,
+            final_r,
+            final_p,
+            final_z,
+            active_theme.cmap_landscape,
+            z_label,
+            project_path=project_path,
         )
 
         # Saddle Point Marker
@@ -659,51 +654,38 @@ def main(
 
             # Add Reactant
             rx, ry = get_projected_coords(final_r[0], final_p[0])
-            strip_payload.append({
-                "atoms": atoms_list[0],
-                "x": rx,
-                "y": ry,
-                "label": "R"
-            })
+            strip_payload.append({"atoms": atoms_list[0], "x": rx, "y": ry, "label": "R"})
 
             # Add Saddle (Explicit or Heuristic)
             if sp_data:
                 sx, sy = get_projected_coords(sp_data["r"], sp_data["p"])
-                strip_payload.append({
-                    "atoms": sp_data["atoms"],
-                    "x": sx,
-                    "y": sy,
-                    "label": "SP"
-                })
+                strip_payload.append(
+                    {"atoms": sp_data["atoms"], "x": sx, "y": sy, "label": "SP"}
+                )
             else:
-                s_idx = (np.argmax(final_z[1:-1]) + 1) if plot_mode == "energy" else np.argmin(final_z)
+                s_idx = (
+                    (np.argmax(final_z[1:-1]) + 1)
+                    if plot_mode == "energy"
+                    else np.argmin(final_z)
+                )
                 sx, sy = get_projected_coords(final_r[s_idx], final_p[s_idx])
-                strip_payload.append({
-                    "atoms": atoms_list[s_idx],
-                    "x": sx,
-                    "y": sy,
-                    "label": "SP"
-                })
+                strip_payload.append(
+                    {"atoms": atoms_list[s_idx], "x": sx, "y": sy, "label": "SP"}
+                )
 
             # Add Product
             px, py = get_projected_coords(final_r[-1], final_p[-1])
-            strip_payload.append({
-                "atoms": atoms_list[-1],
-                "x": px,
-                "y": py,
-                "label": "P"
-            })
+            strip_payload.append(
+                {"atoms": atoms_list[-1], "x": px, "y": py, "label": "P"}
+            )
 
             # Add intermediate points if 'all' requested
             if plot_structures == "all":
                 for i in range(1, len(atoms_list) - 1):
                     ix, iy = get_projected_coords(final_r[i], final_p[i])
-                    strip_payload.append({
-                        "atoms": atoms_list[i],
-                        "x": ix,
-                        "y": iy,
-                        "label": str(i)
-                    })
+                    strip_payload.append(
+                        {"atoms": atoms_list[i], "x": ix, "y": iy, "label": str(i)}
+                    )
 
             # Add additional structures
             for add_atoms, add_r, add_p, add_label in additional_atoms_data:
@@ -753,7 +735,7 @@ def main(
                 adjust_text(
                     main_plot_texts,
                     ax=ax,
-                    arrowprops=dict(arrowstyle="-", color="white", lw=1.5),
+                    arrowprops={"arrowstyle": "-", "color": "white", "lw": 1.5},
                     expand_points=(1.5, 1.5),
                     force_text=0.5,
                 )
@@ -775,7 +757,7 @@ def main(
 
         if not file_paths_to_plot:
             log.error("No files found in range.")
-            exit(1)
+            sys.exit(1)
 
         # Optional: Load RMSD for X-axis
         rmsd_rc = None
@@ -796,7 +778,8 @@ def main(
         for idx, fpath in enumerate(file_paths_to_plot):
             try:
                 data = np.loadtxt(fpath, skiprows=1).T
-            except Exception:
+            except Exception as ex:
+                log.error(ex)
                 continue
 
             # X-Axis Logic
@@ -834,15 +817,13 @@ def main(
                     list(range(len(atoms_list)))
                     if plot_structures == "all"
                     else sorted(
-                        list(
-                            {
-                                0,
-                                np.argmax(data[y_col][1:-1]) + 1
-                                if plot_mode == "energy"
-                                else np.argmin(data[y_col]),
-                                len(atoms_list) - 1,
-                            }
-                        )
+                        {
+                            0,
+                            np.argmax(data[y_col][1:-1]) + 1
+                            if plot_mode == "energy"
+                            else np.argmin(data[y_col]),
+                            len(atoms_list) - 1,
+                        }
                     )
                 )
                 for i in indices:
@@ -871,7 +852,7 @@ def main(
 
         # --- Profile Additional Structures ---
         if additional_atoms_data and rc_mode == "rmsd":
-            for i, (add_atoms, add_r, _, add_label) in enumerate(additional_atoms_data):
+            for i, (add_atoms, add_r, _) in enumerate(additional_atoms_data):
                 ax.axvline(
                     add_r,
                     color=active_theme.gridcolor,
@@ -922,10 +903,10 @@ def main(
     ax.minorticks_on()
 
     if plot_type == "landscape" and not aspect_ratio:
-            if project_path:
-                ax.set_aspect("auto")
-            else:
-                ax.set_aspect("equal")
+        if project_path:
+            ax.set_aspect("auto")
+        else:
+            ax.set_aspect("equal")
 
     if show_legend:
         ax.legend(

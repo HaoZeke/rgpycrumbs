@@ -148,7 +148,8 @@ def calculate_fes_from_hills(hills, imin=1, imax=None, xlim=None, ylim=None, npo
     # --- Parameter Validation and Setup ---
     if imax is not None and num_hills < imax:
         warnings.warn(
-            f"Warning: You requested imax={imax}, but only {num_hills} hills are available. Using all hills."
+            f"Warning: You requested imax={imax}, but only {num_hills} hills are available. Using all hills.",
+            stacklevel=2,
         )
         imax = num_hills
 
@@ -530,7 +531,7 @@ if __name__ == "__main__":
                     marker="x",
                     label="Minima",
                 )
-                for i, row in minima_df.iterrows():
+                for _, row in minima_df.iterrows():
                     ax.text(
                         row["CV1"],
                         row["CV2"],
@@ -565,7 +566,7 @@ if __name__ == "__main__":
                     zorder=5,
                     label="Minima",
                 )
-                for i, row in minima_df.iterrows():
+                for _, row in minima_df.iterrows():
                     ax.text(
                         row["CV1"],
                         row["free_energy"],

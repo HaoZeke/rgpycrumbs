@@ -5,9 +5,7 @@
 # dependencies = [
 #     "click",
 #     "matplotlib",
-#     "pandas",
 #     "rich",
-#     "seaborn",
 #     "ase",
 #     "mlflow",
 # ]
@@ -16,7 +14,6 @@
 import io
 import logging
 import re
-import sys
 from pathlib import Path
 
 import ase.data
@@ -24,8 +21,6 @@ import ase.io
 import click
 import matplotlib.pyplot as plt
 import mlflow
-import pandas as pd
-import seaborn as sns
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from rich.console import Console
 from rich.logging import RichHandler
@@ -124,9 +119,7 @@ def parse_and_log_metrics(log_file: Path):
 
             # 4. Final summary metrics
             elif pot_match := POT_CALLS_RE.search(line):
-                mlflow.log_metric(
-                    "total.potential_calls", int(pot_match.group("count"))
-                )
+                mlflow.log_metric("total.potential_calls", int(pot_match.group("count")))
 
     log.info(f"Processed [magenta]{global_step}[/magenta] total optimization steps.")
 

@@ -1,16 +1,13 @@
 import ast
 import re
-import subprocess
 import warnings
 from pathlib import Path
 
-import ase
-import ase.io
 import cmcrameri.cm as cmc
 import matplotlib.pyplot as plt
 import numpy as np
 
-from rgpycrumbs.func.muller_brown import muller_brown, muller_brown_gradient
+from rgpycrumbs.func.muller_brown import muller_brown
 
 x = np.linspace(-1.5, 1.2, 400)
 y = np.linspace(-0.2, 2.0, 400)
@@ -51,7 +48,7 @@ if __name__ == "__main__":
     plt.contourf(X, Y, Z, 50, cmap=cmc.batlow, alpha=0.6)
     plt.colorbar()
     if np.any(np.sum(path_arr, axis=1) > 1e2):
-        warnings.warn("Filtered high values")
+        warnings.warn("Filtered high values", stacklevel=2)
         path_arr = path_arr[np.sum(path_arr, axis=1) < 1e2]
     plt.scatter(
         path_arr[:nimgs, 0],

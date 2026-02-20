@@ -37,7 +37,7 @@ import numpy as np
 from ovito.io.ase import ase_to_ovito
 from ovito.modifiers import (
     CentroSymmetryModifier,
-    DeleteSelectedModifier,
+    DeleteSelectedModifier,  # noqa: F401
     ExpressionSelectionModifier,
     InvertSelectionModifier,
     PolyhedralTemplateMatchingModifier,
@@ -143,7 +143,6 @@ def find_mismatch_indices(
     vacancy = np.where(data.particles.selection.array == 0)[0]
     interstitial = np.setdiff1d(mismatch_indices, vacancy)
     positions = data.particles.positions
-    center_vacancy = np.mean(positions[vacancy], axis=0)
     center_interstitial = np.mean(positions[interstitial], axis=0)
     selection_radius_sq = selection_radius**2
 
@@ -170,7 +169,7 @@ def find_mismatch_indices(
 
 
 # 4. MAIN SCRIPT LOGIC (with Click for CLI)
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument(
     "filename",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True),

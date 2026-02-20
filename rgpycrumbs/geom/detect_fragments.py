@@ -273,7 +273,7 @@ def visualize_with_pyvista(
     radii = covalent_radii[nums] * 0.45
 
     # Render Atoms
-    for i, (p, n) in enumerate(zip(pos, nums)):
+    for i, (p, n) in enumerate(zip(pos, nums, strict=False)):
         sphere = pv.Sphere(
             radius=radii[i], center=p, theta_resolution=24, phi_resolution=24
         )
@@ -391,7 +391,10 @@ def visualize_with_pyvista(
 
 
 def print_results(
-    console: Console, atoms: Atoms, n_components: int, labels: np.ndarray
+    console: Console,
+    atoms: Atoms,
+    n_components: int,  # noqa: ARG001
+    labels: np.ndarray,
 ) -> None:
     """Displays analysis results in a structured table."""
     console.rule("[bold green]Analysis Summary[/]")
@@ -423,9 +426,7 @@ def main():
     default="natural",
     help="Choose 'natural' for Cordero radii or 'covalent' for standard ASE radii.",
 )
-@click.option(
-    "--min-dist", default=0.0, type=float, help="Merge threshold in Angstroms."
-)
+@click.option("--min-dist", default=0.0, type=float, help="Merge threshold in Angstroms.")
 @click.option("--visualize", is_flag=True)
 def geometric(filename, multiplier, radius_type, min_dist, visualize):
     """Executes geometric fragment detection."""
