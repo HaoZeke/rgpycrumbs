@@ -2,7 +2,9 @@ import logging
 
 import jax
 import jax.numpy as jnp
+import jax.scipy.linalg as jlinalg
 import jax.scipy.optimize as jopt
+import numpy as np
 from jax import jit, vmap
 
 # Force float32 for speed/viz
@@ -1056,6 +1058,177 @@ class GradientRQ:
         return jnp.concatenate(vars_list, axis=0)
 
 
+# ==============================================================================
+# NYSTRÖM GRADIENT-ENHANCED IMQ
+# ==============================================================================
+
+
+@jit
+def _stable_nystrom_grad_imq_solve(x, y_full, x_inducing, noise_scalar, epsilon):
+    N = x.shape[0]
+    M = x_inducing.shape[0]
+    D_plus_1 = x.shape[1] + 1
+
+    # 1. Base inducing point matrix (K_mm)
+    K_mm_blocks = k_matrix_imq_grad_map(x_inducing, x_inducing, epsilon)
+    K_mm = K_mm_blocks.transpose(0, 2, 1, 3).reshape(M * D_plus_1, M * D_plus_1)
+
+    # Heavier jitter is required for float32 gradient matrices
+    jitter = (noise_scalar + 1e-4) * jnp.eye(M * D_plus_1)
+    K_mm = K_mm + jitter
+
+    # Stable Cholesky factorization of K_mm
+    L = jnp.linalg.cholesky(K_mm)
+
+    # 2. Cross-covariance matrix (K_mn)
+    K_nm_blocks = k_matrix_imq_grad_map(x, x_inducing, epsilon)
+    K_nm = K_nm_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, M * D_plus_1)
+    K_mn = K_nm.T
+
+    # 3. Normalized features: V = L^{-1} K_mn
+    # This avoids squaring the condition number!
+    V = jlinalg.solve_triangular(L, K_mn, lower=True)
+
+    # 4. Inner system: S = V V^T + sigma^2 I
+    sigma2 = noise_scalar + 1e-6
+    S = V @ V.T + sigma2 * jnp.eye(M * D_plus_1)
+    L_S = jnp.linalg.cholesky(S)
+
+    # 5. Solve for weights: alpha_m = L^{-T} S^{-1} V y
+    Vy = V @ y_full.flatten()
+    beta = jlinalg.cho_solve((L_S, True), Vy)
+    alpha_m = jlinalg.solve_triangular(L.T, beta, lower=False)
+
+    # 6. Effective precision matrix for predictive variance
+    # W = L^{-T} (I - sigma^2 S^{-1}) L^{-1}
+    I_M = jnp.eye(M * D_plus_1)
+    S_inv = jlinalg.cho_solve((L_S, True), I_M)
+    inner = I_M - sigma2 * S_inv
+
+    L_inv = jlinalg.solve_triangular(L, I_M, lower=True)
+    W = L_inv.T @ inner @ L_inv
+
+    return alpha_m, W
+
+
+@jit
+def _nystrom_grad_imq_predict(x_query, x_inducing, alpha_m, epsilon):
+    def get_query_row(xq, xo):
+        kee = imq_kernel_elem(xq, xo, epsilon)
+        ked = jax.grad(imq_kernel_elem, argnums=1)(xq, xo, epsilon)
+        return jnp.concatenate([kee[None], ked])
+
+    K_qm = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_inducing)
+    Q, M, D_plus_1 = K_qm.shape
+    return K_qm.reshape(Q, M * D_plus_1) @ alpha_m
+
+
+@jit
+def _nystrom_grad_imq_var(x_query, x_inducing, W, epsilon):
+    def get_query_row(xq, xo):
+        kee = imq_kernel_elem(xq, xo, epsilon)
+        ked = jax.grad(imq_kernel_elem, argnums=1)(xq, xo, epsilon)
+        return jnp.concatenate([kee[None], ked])
+
+    K_qm = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_inducing)
+    Q, M, D_plus_1 = K_qm.shape
+    K_qm_flat = K_qm.reshape(Q, M * D_plus_1)
+
+    var = (1.0 / epsilon) - jnp.sum((K_qm_flat @ W) * K_qm_flat, axis=1)
+    return jnp.maximum(var, 0.0)
+
+
+class NystromGradientIMQ:
+    def __init__(
+        self,
+        x,
+        y,
+        gradients=None,
+        n_inducing=300,
+        nimags=None,
+        smoothing=1e-3,
+        length_scale=None,
+        optimize=True,
+        **kwargs,
+    ):
+        self.x = jnp.asarray(x, dtype=jnp.float32)
+        y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
+        grad_vals = (
+            jnp.asarray(gradients, dtype=jnp.float32)
+            if gradients is not None
+            else jnp.zeros_like(self.x)
+        )
+
+        self.y_full = jnp.concatenate([y_energies, grad_vals], axis=1)
+        self.e_mean = jnp.mean(y_energies)
+        self.y_full = self.y_full.at[:, 0].add(-self.e_mean)
+
+        N_total = self.x.shape[0]
+
+        # --- PATH-BASED SAMPLING ---
+        # TODO(rg): extract
+        if N_total <= n_inducing:
+            self.x_inducing = self.x
+            self.y_full_inducing = self.y_full
+        else:
+            rng = np.random.RandomState(42)
+            # Ensure nimags is a valid integer for path-chunking
+            if nimags is not None and nimags > 0:
+                n_paths = N_total // nimags
+                paths_to_sample = max(1, n_inducing // nimags)
+
+                # Anchor inducing points to the most converged paths.
+                # Early unrelaxed geometries possess high strain and unphysical gradients.
+                if n_paths > 1:
+                    start_idx = max(0, n_paths - paths_to_sample)
+                    path_indices = np.arange(start_idx, n_paths)
+                else:
+                    path_indices = np.array([0])
+
+                idx = np.concatenate(
+                    [np.arange(p * nimags, (p + 1) * nimags) for p in path_indices]
+                )
+                # Ensure we don't exceed N_total if the last path is partial
+                idx = idx[idx < N_total]
+
+                self.x_inducing = self.x[idx]
+                self.y_full_inducing = self.y_full[idx]
+            else:
+                # Fallback to random if nimags is messed up
+                idx = rng.choice(N_total, min(n_inducing, N_total), replace=False)
+                self.x_inducing = self.x[idx]
+                self.y_full_inducing = self.y_full[idx]
+
+        self.epsilon = length_scale if length_scale is not None else 0.5
+        self.noise = smoothing
+
+        self.alpha_m, self.W = _stable_nystrom_grad_imq_solve(
+            self.x, self.y_full, self.x_inducing, self.noise, self.epsilon
+        )
+
+    def __call__(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        preds = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            preds.append(
+                _nystrom_grad_imq_predict(
+                    chunk, self.x_inducing, self.alpha_m, self.epsilon
+                )
+            )
+        return jnp.concatenate(preds, axis=0) + self.e_mean
+
+    def predict_var(self, x_query, chunk_size=500):
+        x_query = jnp.asarray(x_query, dtype=jnp.float32)
+        vars_list = []
+        for i in range(0, x_query.shape[0], chunk_size):
+            chunk = x_query[i : i + chunk_size]
+            vars_list.append(
+                _nystrom_grad_imq_var(chunk, self.x_inducing, self.W, self.epsilon)
+            )
+        return jnp.concatenate(vars_list, axis=0)
+
+
 # Factory for string-based instantiation
 def get_surface_model(name):
     models = {
@@ -1063,6 +1236,7 @@ def get_surface_model(name):
         "grad_rq": GradientRQ,
         "grad_se": GradientSE,
         "grad_imq": GradientIMQ,
+        "grad_imq_ny": NystromGradientIMQ,
         "matern": FastMatern,
         "imq": FastIMQ,
         "tps": FastTPS,

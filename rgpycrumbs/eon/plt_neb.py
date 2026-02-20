@@ -183,7 +183,17 @@ IRA_KMAX_DEFAULT = 1.8
 @click.option(
     "--surface-type",
     type=click.Choice(
-        ["grid", "rbf", "grad_matern", "grad_imq", "matern", "imq", "grad_rq", "grad_se"]
+        [
+            "grid",
+            "rbf",
+            "grad_matern",
+            "grad_imq",
+            "grad_imq_ny",
+            "matern",
+            "imq",
+            "grad_rq",
+            "grad_se",
+        ]
     ),
     default="rbf",
     help="Interpolation method for the 2D surface.",
