@@ -87,6 +87,7 @@ The package also includes *pure-python* helpers for parsing logs like those from
 
      tools/eon/index
      tools/geom/index
+     tools/surfaces
      tools/utils/index
      tools/prefix/index
 #+END_EXPORT
