@@ -14,6 +14,7 @@ from rgpycrumbs.surfaces import (  # noqa: E402
     GradientMatern,
     GradientRQ,
     GradientSE,
+    NystromGradientIMQ,
     _imq_kernel_matrix,
     _matern_kernel_matrix,
     _tps_kernel_matrix,
@@ -70,6 +71,7 @@ def test_get_surface_model_returns_classes():
     assert get_surface_model("grad_rq") is GradientRQ
     assert get_surface_model("grad_se") is GradientSE
     assert get_surface_model("grad_imq") is GradientIMQ
+    assert get_surface_model("grad_imq_ny") is NystromGradientIMQ
 
 
 def test_get_surface_model_default():
@@ -218,6 +220,73 @@ def test_fast_imq_interpolates_training_points(simple_2d_data):
 
 
 # ---------------------------------------------------------------------------
+# Model instantiation and prediction tests (gradient-enhanced models)
+# ---------------------------------------------------------------------------
+
+
+def test_gradient_matern_fit_and_predict(gradient_2d_data, query_points):
+    """GradientMatern should fit and produce finite predictions."""
+    x, y, grads = gradient_2d_data
+    model = GradientMatern(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    preds = model(query_points)
+    assert preds.shape == (3,)
+    assert jnp.all(jnp.isfinite(preds))
+
+
+def test_gradient_imq_fit_and_predict(gradient_2d_data, query_points):
+    """GradientIMQ should fit and produce finite predictions."""
+    x, y, grads = gradient_2d_data
+    model = GradientIMQ(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    preds = model(query_points)
+    assert preds.shape == (3,)
+    assert jnp.all(jnp.isfinite(preds))
+
+
+def test_gradient_se_fit_and_predict(gradient_2d_data, query_points):
+    """GradientSE should fit and produce finite predictions."""
+    x, y, grads = gradient_2d_data
+    model = GradientSE(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    preds = model(query_points)
+    assert preds.shape == (3,)
+    assert jnp.all(jnp.isfinite(preds))
+
+
+def test_gradient_rq_fit_and_predict(gradient_2d_data, query_points):
+    """GradientRQ should fit and produce finite predictions."""
+    x, y, grads = gradient_2d_data
+    model = GradientRQ(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    preds = model(query_points)
+    assert preds.shape == (3,)
+    assert jnp.all(jnp.isfinite(preds))
+
+
+def test_nystrom_gradient_imq_fit_and_predict(gradient_2d_data, query_points):
+    """NystromGradientIMQ should fit and produce finite predictions."""
+    x, y, grads = gradient_2d_data
+    # Use n_inducing >= N_total to test basic fit
+    model = NystromGradientIMQ(
+        x, y, gradients=grads, n_inducing=10, optimize=False, length_scale=1.0
+    )
+    preds = model(query_points)
+    assert preds.shape == (3,)
+    assert jnp.all(jnp.isfinite(preds))
+
+
+def test_nystrom_gradient_imq_path_sampling(gradient_2d_data):
+    """Test the path-based sampling logic in NystromGradientIMQ."""
+    x, y, grads = gradient_2d_data
+    # Create synthetic "paths"
+    nimags = 2
+    # Simple data has 5 points, so 2 paths of 2 and 1 residual
+    model = NystromGradientIMQ(
+        x, y, gradients=grads, n_inducing=2, nimags=nimags, optimize=False
+    )
+    # The sampling logic should produce an x_inducing
+    assert model.x_inducing.shape[0] <= 4  # max(1, 2//2) paths * 2 = 2 or more points
+    assert jnp.all(jnp.isfinite(model.x_inducing))
+
+
+# ---------------------------------------------------------------------------
 # Variance prediction tests
 # ---------------------------------------------------------------------------
 
@@ -305,19 +374,80 @@ def test_fast_imq_with_optimization(simple_2d_data, query_points):
     assert model.noise > 0
 
 
+def test_gradient_matern_with_optimization(gradient_2d_data, query_points):
+    """GradientMatern with optimize=True should produce finite results."""
+    x, y, grads = gradient_2d_data
+    model = GradientMatern(x, y, gradients=grads, optimize=True)
+    preds = model(query_points)
+    assert jnp.all(jnp.isfinite(preds))
+    assert model.ls > 0
+    assert model.noise > 0
+
+
+def test_gradient_imq_with_optimization(gradient_2d_data, query_points):
+    """GradientIMQ with optimize=True should produce finite results."""
+    x, y, grads = gradient_2d_data
+    model = GradientIMQ(x, y, gradients=grads, optimize=True)
+    preds = model(query_points)
+    assert jnp.all(jnp.isfinite(preds))
+    assert model.epsilon > 0
+    assert model.noise > 0
+
+
+def test_gradient_se_with_optimization(gradient_2d_data, query_points):
+    """GradientSE with optimize=True should produce finite results."""
+    x, y, grads = gradient_2d_data
+    model = GradientSE(x, y, gradients=grads, optimize=True)
+    preds = model(query_points)
+    assert jnp.all(jnp.isfinite(preds))
+    assert model.ls > 0
+    assert model.noise > 0
+
+
+def test_gradient_rq_with_optimization(gradient_2d_data, query_points):
+    """GradientRQ with optimize=True should produce finite results."""
+    x, y, grads = gradient_2d_data
+    model = GradientRQ(x, y, gradients=grads, optimize=True)
+    preds = model(query_points)
+    assert jnp.all(jnp.isfinite(preds))
+    assert model.ls > 0
+    assert model.alpha_param > 0
+    assert model.noise > 0
+
+
 # ---------------------------------------------------------------------------
 # Prediction at origin sanity check
 # ---------------------------------------------------------------------------
 
 
-def test_models_predict_minimum_near_origin(simple_2d_data):
-    """For z = x^2 + y^2, all models should predict a low value at the origin."""
-    x, y = simple_2d_data
+def test_gradient_models_predict_minimum_near_origin(gradient_2d_data):
+    """For z = x^2 + y^2, gradient-enhanced models should predict a low value at the origin."""
+    x, y, grads = gradient_2d_data
     origin = jnp.array([[0.0, 0.0]], dtype=jnp.float32)
 
-    for ModelClass in [FastTPS, FastMatern, FastIMQ]:
-        model = ModelClass(x, y, optimize=False, length_scale=1.0)
+    for ModelClass in [GradientMatern, GradientIMQ, GradientSE, GradientRQ]:
+        model = ModelClass(
+            x, y, gradients=grads, optimize=False, length_scale=1.0, smoothing=1e-4
+        )
         pred = float(model(origin)[0])
-        # The minimum of x^2+y^2 is 0 at the origin
-        # Model should predict something reasonably low (< max training value)
-        assert pred < float(jnp.max(y)) + 1.0, f"{ModelClass.__name__} predicted {pred}"
+        assert pred < float(jnp.max(y)), f"{ModelClass.__name__} predicted {pred}"
+
+
+def test_gradient_influence():
+    """Verify that providing different gradients changes the model output."""
+    x = jnp.array([[0.0, 0.0]], dtype=jnp.float32)
+    y = jnp.array([0.0], dtype=jnp.float32)
+    query = jnp.array([[1.0, 1.0]], dtype=jnp.float32)
+
+    grads1 = jnp.array([[0.0, 0.0]], dtype=jnp.float32)
+    grads2 = jnp.array([[10.0, 10.0]], dtype=jnp.float32)
+
+    for ModelClass in [GradientMatern, GradientIMQ, GradientSE, GradientRQ]:
+        m1 = ModelClass(x, y, gradients=grads1, optimize=False, length_scale=1.0)
+        m2 = ModelClass(x, y, gradients=grads2, optimize=False, length_scale=1.0)
+
+        pred1 = m1(query)
+        pred2 = m2(query)
+
+        # The predictions should differ because the gradients at (0,0) are different
+        assert not jnp.allclose(pred1, pred2, atol=1e-3), f"{ModelClass.__name__}"
