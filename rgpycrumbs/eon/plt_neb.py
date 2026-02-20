@@ -35,7 +35,7 @@ https://realpython.com/python-script-structure/
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot @ /home/rgoswami/Git/Github/Python/chemparseplot",
+#   "chemparseplot",
 #   "rgpycrumbs",
 # ]
 # ///
@@ -46,25 +46,21 @@ from pathlib import Path
 
 import click
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
+import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
-from matplotlib.gridspec import GridSpec
-from matplotlib.patches import ArrowStyle
-from rich.logging import RichHandler
-
 from adjustText import adjust_text
-
-# --- Library Imports ---
-from chemparseplot.parse.file_ import find_file_paths
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
-    load_structures_and_calculate_additional_rmsd,
-    load_augmenting_neb_data,
     estimate_rbf_smoothing,
+    load_augmenting_neb_data,
+    load_structures_and_calculate_additional_rmsd,
 )
+
+# --- Library Imports ---
+from chemparseplot.parse.file_ import find_file_paths
 from chemparseplot.plot.neb import (
     InsetImagePos,
     plot_energy_path,
@@ -78,6 +74,9 @@ from chemparseplot.plot.theme import (
     get_theme,
     setup_global_theme,
 )
+from matplotlib.gridspec import GridSpec
+from matplotlib.patches import ArrowStyle
+from rich.logging import RichHandler
 
 # --- Logging Setup ---
 logging.basicConfig(
@@ -515,12 +514,12 @@ def main(
         )
 
         df = aggregate_neb_landscape_data(
-            dat_paths, 
-            con_paths, 
-            y_col, 
-            None, 
-            cache_file, 
-            force_recompute, 
+            dat_paths,
+            con_paths,
+            y_col,
+            None,
+            cache_file,
+            force_recompute,
             ira_kmax,
             augment_dat=augment_dat,
             augment_con=augment_con,
@@ -605,7 +604,7 @@ def main(
             path_norm = np.hypot(vec_r, vec_p)
             u_r, u_p = vec_r / path_norm, vec_p / path_norm
             v_r, v_p = -u_p, u_r
-            
+
             sp_x = (sp_x_raw - r_start) * u_r + (sp_y_raw - p_start) * u_p
             sp_y = (sp_x_raw - r_start) * v_r + (sp_y_raw - p_start) * v_p
         else:
@@ -627,7 +626,7 @@ def main(
             marker_cmap = mpl.colormaps.get_cmap("tab10")
             for i, (_, add_r, add_p, add_label) in enumerate(additional_atoms_data):
                 color = marker_cmap(i % 10)
-                
+
                 if project_path:
                     plot_add_r = (add_r - r_start) * u_r + (add_p - p_start) * u_p
                     plot_add_p = (add_r - r_start) * v_r + (add_p - p_start) * v_p
@@ -649,7 +648,7 @@ def main(
 
         if has_strip and atoms_list:
             strip_payload = []
-            
+
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
@@ -657,7 +656,7 @@ def main(
                     d_val = (r_val - r_start) * v_r + (p_val - p_start) * v_p
                     return s_val, d_val
                 return r_val, p_val
-            
+
             # Add Reactant
             rx, ry = get_projected_coords(final_r[0], final_p[0])
             strip_payload.append({
@@ -924,9 +923,9 @@ def main(
 
     if plot_type == "landscape" and not aspect_ratio:
             if project_path:
-                ax.set_aspect('auto')
+                ax.set_aspect("auto")
             else:
-                ax.set_aspect('equal')
+                ax.set_aspect("equal")
 
     if show_legend:
         ax.legend(
