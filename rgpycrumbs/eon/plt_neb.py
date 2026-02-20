@@ -730,8 +730,8 @@ def main(
 
         # Labels
         if project_path:
-            final_xlabel = xlabel or r"Reaction Progress, $s$ ($\AA$)"
-            final_ylabel = ylabel or r"Orthogonal Distance, $d$ ($\AA$)"
+            final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
+            final_ylabel = ylabel or r"Orthogonal Deviation $d$ ($\AA$)"
             final_title = "Reaction Valley Projection" if title == "NEB Path" else title
         else:
             final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
@@ -891,10 +891,14 @@ def main(
     ax.minorticks_on()
 
     if plot_type == "landscape" and not aspect_ratio:
+        ax.set_aspect("equal")
         if project_path:
-            ax.set_aspect("auto")
-        else:
-            ax.set_aspect("equal")
+            # Force Y-axis to be symmetric and match the X-axis span
+            x_min, x_max = ax.get_xlim()
+            x_span = x_max - x_min
+            half_span = x_span / 2
+            ax.set_ylim(-half_span, half_span)
+            log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 
     if show_legend:
         ax.legend(
