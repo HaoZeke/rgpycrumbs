@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 import click
-from rich.logging import RichHandler
 from pychum import render_nwchem
+from rich.logging import RichHandler
 
 # --- Logging Configuration ---
 logging.basicConfig(
