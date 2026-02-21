@@ -8221,8 +8221,8 @@ packages:
   timestamp: 1766926974520
 - pypi: ./
   name: rgpycrumbs
-  version: 1.0.2.dev14+g5ba403e43.d20260220
-  sha256: f6848c20f095ad1cba262c9e9361981fe2976c831f8953a647ce12fa11b5ad72
+  version: 1.0.2.dev20+gd833374c0.d20260221
+  sha256: 447e31514bb753ef10ff148402d1c02d6d6765023961d0163578ce277ef3b002
   requires_dist:
   - click>=8.1
   - numpy>=1.24
@@ -8232,6 +8232,8 @@ packages:
   - scipy>=1.11 ; extra == 'interpolation'
   - ruff>=0.1.6 ; extra == 'lint'
   - jax>=0.4 ; extra == 'surfaces'
+  - chemparseplot ; extra == 'test'
+  - pychum ; extra == 'test'
   - pytest-cov>=4.1.0 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
   requires_python: '>=3.10'

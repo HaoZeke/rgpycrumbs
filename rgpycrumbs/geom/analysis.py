@@ -7,7 +7,13 @@ from scipy.spatial.distance import cdist
 
 def analyze_structure(
     atoms: ase.Atoms, covalent_scale: float = 1.2
-) -> tuple[np.ndarray, np.ndarray, list[list[int]], np.ndarray, list[tuple[float, str, str, float, float]]]:
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    list[list[int]],
+    np.ndarray,
+    list[tuple[float, str, str, float, float]],
+]:
     """
     Analyzes an ASE Atoms object to calculate the distance matrix, bond matrix,
     identify molecular fragments, and calculate inter-fragment distances.

@@ -30,20 +30,20 @@ digraph G {
     rgpycrumbs [label="rgpycrumbs\n(Core Utilities & Dispatcher)", fillcolor="#fff9c4"];
     pychum [label="pychum\n(Input Generation)", fillcolor="#e1f5fe"];
     chemparseplot [label="chemparseplot\n(Parsers & Plotting)", fillcolor="#e1f5fe"];
-    
+
     eon [label="eOn", fillcolor="#f5f5f5"];
     orca [label="ORCA", fillcolor="#f5f5f5"];
 
     // Dependencies and Usage
     rgpycrumbs -> pychum [label="dispatches to"];
     rgpycrumbs -> chemparseplot [label="dispatches to"];
-    
+
     chemparseplot -> rgpycrumbs [label="imports from"];
     pychum -> rgpycrumbs [label="imports from"];
 
     pychum -> eon [label="generates input for", style=dashed];
     pychum -> orca [label="generates input for", style=dashed];
-    
+
     chemparseplot -> eon [label="parses output from", style=dashed];
     chemparseplot -> orca [label="parses output from", style=dashed];
 
