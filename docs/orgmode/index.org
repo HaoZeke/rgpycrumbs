@@ -16,6 +16,41 @@
 # Copied over by sphinx-build
 file:../../branding/logo/pycrumbs_logo.webp
 
+* Ecosystem Overview
+  The ~rgpycrumbs~ suite consists of several interlinked projects designed to
+  streamline computational chemistry workflows.
+
+#+begin_src dot :file ecosystem.svg :exports results
+digraph G {
+    rankdir=LR;
+    node [shape=box, style=filled, fontname="Helvetica", fontsize=10];
+    compound=true;
+
+    // Nodes
+    rgpycrumbs [label="rgpycrumbs\n(Core Utilities & Dispatcher)", fillcolor="#fff9c4"];
+    pychum [label="pychum\n(Input Generation)", fillcolor="#e1f5fe"];
+    chemparseplot [label="chemparseplot\n(Parsers & Plotting)", fillcolor="#e1f5fe"];
+    
+    eon [label="eOn", fillcolor="#f5f5f5"];
+    orca [label="ORCA", fillcolor="#f5f5f5"];
+
+    // Dependencies and Usage
+    rgpycrumbs -> pychum [label="dispatches to"];
+    rgpycrumbs -> chemparseplot [label="dispatches to"];
+    
+    chemparseplot -> rgpycrumbs [label="imports from"];
+    pychum -> rgpycrumbs [label="imports from"];
+
+    pychum -> eon [label="generates input for", style=dashed];
+    pychum -> orca [label="generates input for", style=dashed];
+    
+    chemparseplot -> eon [label="parses output from", style=dashed];
+    chemparseplot -> orca [label="parses output from", style=dashed];
+
+    rgpycrumbs -> eon [label="manages / visualizes", color="#4caf50"];
+}
+#+end_src
+
 * Overview
   ~rgpycrumbs~ is a computational library and CLI toolkit for chemical physics
   research. It provides both *importable library modules* for computational
@@ -52,6 +87,9 @@ capabilities for Nudged Elastic Band calculations:
 - ~NWChem~ Input Generation :: @@rst::doc:`generate-nwchem-input <tools/eon/generate_nwchem_input>`@@
   generates complete input files compatible with eOn's ~SocketNWChemPot~,
   merging geometry data with calculation settings.
+** ORCA
+- Input Generation :: @@rst::doc:`generate-orca-input <tools/orca/generate_orca_input>`@@
+  generates ORCA input files from TOML configurations, supporting NEB and single-point runs.
 ** PLUMED
 - Free Energy Reconstruction :: Pure-python implementations for reconstructing
   bias potentials from PLUMED hills files.
@@ -86,6 +124,7 @@ The package also includes *pure-python* helpers for parsing logs like those from
      :caption: Tools
 
      tools/eon/index
+     tools/orca/index
      tools/geom/index
      tools/surfaces
      tools/utils/index
