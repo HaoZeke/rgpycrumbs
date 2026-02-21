@@ -2,7 +2,7 @@
 # Table of Contents
 
 -   [About](#about)
-    -   [Ecosystem Overview](#org369b7ed)
+    -   [Ecosystem Overview](#org723df51)
     -   [CLI Design Philosophy](#cli-how)
 -   [Usage](#usage)
     -   [Library API](#library-api)
@@ -10,8 +10,8 @@
         -   [eOn](#cli-eon)
 -   [Contributing](#contributing)
     -   [Development](#development)
-        -   [When is pixi needed?](#org0ef8b0d)
-        -   [Versioning](#org0974275)
+        -   [When is pixi needed?](#org1e75565)
+        -   [Versioning](#org4873ddd)
     -   [Release Process](#release-notes)
 -   [License](#license)
 
@@ -41,7 +41,7 @@ The library side offers:
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`.
 
 
-<a id="org369b7ed"></a>
+<a id="org723df51"></a>
 
 ## Ecosystem Overview
 
@@ -97,13 +97,13 @@ The library modules can be imported directly:
     # Surface fitting (requires jax: pip install rgpycrumbs[surfaces])
     from rgpycrumbs.surfaces import get_surface_model
     model = get_surface_model("tps")
-
+    
     # Structure analysis (requires ase, scipy: pip install rgpycrumbs[analysis])
     from rgpycrumbs.geom.analysis import analyze_structure
-
+    
     # Spline interpolation (requires scipy: pip install rgpycrumbs[interpolation])
     from rgpycrumbs.interpolation import spline_interp
-
+    
     # Data types (no extra deps)
     from rgpycrumbs.basetypes import nebpath, SaddleMeasure
 
@@ -120,12 +120,12 @@ You can see the list of available command groups:
 
     $ python -m rgpycrumbs.cli --help
     Usage: rgpycrumbs [OPTIONS] COMMAND [ARGS]...
-
+    
       A dispatcher that runs self-contained scripts using 'uv'.
-
+    
     Options:
       --help  Show this message and exit.
-
+    
     Commands:
       eon  Dispatches to a script within the 'eon' submodule.
 
@@ -137,13 +137,13 @@ You can see the list of available command groups:
 -   Plotting NEB Paths (`plt-neb`)
 
     This script visualizes the energy profile of Nudged Elastic Band (NEB) calculations over optimization steps.
-
+    
     To see the help text for this specific script:
-
+    
         $ python -m rgpycrumbs eon plt-neb --help
         --> Dispatching to: uv run /path/to/rgpycrumbs/eon/plt_neb.py --help
         Usage: plt_neb.py [OPTIONS]
-
+        
           Plots a series of NEB energy paths from .dat files.
         ...
         Options:
@@ -152,13 +152,13 @@ You can see the list of available command groups:
           --start INTEGER           Starting file index to plot (inclusive).
           --end INTEGER             Ending file index to plot (exclusive).
           --help                    Show this message and exit.
-
+    
     To plot a specific range of `neb_*.dat` files and save the output:
-
+    
         python -m rgpycrumbs eon plt-neb --start 100 --end 150 -o final_path.pdf
-
+    
     To show the plot interactively without saving:
-
+    
         python -m rgpycrumbs eon plt-neb --start 280
 
 -   Splitting CON files (`con-splitter`)
@@ -166,11 +166,11 @@ You can see the list of available command groups:
     This script takes a multi-image trajectory file (e.g., from a finished NEB
     calculation) and splits it into individual frame files, creating an input file
     for a new calculation.
-
+    
     To split a trajectory file:
-
+    
         rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
-
+    
     This will create a directory named `initial_images` containing `ipath_000.con`,
     `ipath_001.con`, etc., along with an `ipath.dat` file listing their paths.
 
@@ -192,15 +192,15 @@ This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development 
 
     # Clone and install in development mode with test dependencies
     uv sync --extra test
-
+    
     # Run the pure tests (no heavy optional deps)
     uv run pytest -m pure
-
+    
     # Run interpolation tests (needs scipy)
     uv run --extra interpolation pytest -m interpolation
 
 
-<a id="org0ef8b0d"></a>
+<a id="org1e75565"></a>
 
 ### When is pixi needed?
 
@@ -213,7 +213,7 @@ available on PyPI):
 For everything else, `uv` is sufficient.
 
 
-<a id="org0974275"></a>
+<a id="org4873ddd"></a>
 
 ### Versioning
 
@@ -229,16 +229,16 @@ automatically (e.g. `1.0.1.dev3+gabcdef`).
 
     # 1. Ensure tests pass
     uv run --extra test pytest -m pure
-
+    
     # 2. Build changelog (uses towncrier fragments in docs/newsfragments/)
     uvx towncrier build --version "v1.0.0"
-
+    
     # 3. Commit the changelog
     git add CHANGELOG.rst && git commit -m "doc: release notes for v1.0.0"
-
+    
     # 4. Tag the release (hatch-vcs derives the version from this tag)
     git tag -a v1.0.0 -m "Version 1.0.0"
-
+    
     # 5. Build and publish
     uv build
     uvx twine upload dist/*
@@ -253,3 +253,4 @@ via:
 
 -   The Zenodo DOI for general use.
 -   The `wailord` paper for ORCA usage
+
