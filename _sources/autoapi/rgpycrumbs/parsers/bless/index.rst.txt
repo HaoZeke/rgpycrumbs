@@ -10,6 +10,13 @@ Attributes
 .. autoapisummary::
 
    rgpycrumbs.parsers.bless.BLESS_LOG
+
+
+Functions
+---------
+
+.. autoapisummary::
+
    rgpycrumbs.parsers.bless.BLESS_TIME
 
 
@@ -18,5 +25,5 @@ Module Contents
 
 .. py:data:: BLESS_LOG
 
-.. py:data:: BLESS_TIME
+.. py:function:: BLESS_TIME(x: str) -> datetime.datetime
 

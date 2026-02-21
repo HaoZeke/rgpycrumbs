@@ -35,7 +35,7 @@ Module Contents
    Returns a sorted list of script names (without extension) in a folder.
 
 
-.. py:function:: _dispatch(group: str, script_name: str, script_args: tuple)
+.. py:function:: _dispatch(group: str, script_name: str, script_args: tuple, is_dev: bool = False, is_verbose: bool = False)
 
    Sets up the environment and runs the target script via 'uv run'.
 
@@ -45,7 +45,7 @@ Module Contents
    Creates a click command that dispatches to a PEP 723 script.
 
 
-.. py:function:: main()
+.. py:function:: main(ctx, dev, verbose)
 
    A dispatcher that runs self-contained PEP 723 scripts using 'uv'.
 

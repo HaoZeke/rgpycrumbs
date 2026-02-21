@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Geometry Helpers - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Robust Structural Alignment" href="alignment.html" /><link rel="prev" title="Polyhedral Template Matcher" href="../eon/ptmdisp.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Geometry Helpers - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Robust Structural Alignment" href="alignment.html" /><link rel="prev" title="ORCA Input Generator" href="../orca/generate_orca_input.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/geom/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -296,10 +308,10 @@ and <code class="docutils literal notranslate"><span class="pre">is_ira_pair()</
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../eon/ptmdisp.html">
+    <a href="../orca/generate_orca_input.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Polyhedral Template Matcher</div></div>
+        <span>Previous</span><div class="title">ORCA Input Generator</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="alignment.html">

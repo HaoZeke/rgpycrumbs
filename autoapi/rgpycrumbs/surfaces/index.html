@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.surfaces - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="rgpycrumbs.xts" href="../xts/index.html" /><link rel="prev" title="rgpycrumbs.run.jupyter" href="../run/jupyter/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.surfaces - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="rgpycrumbs.surfaces._base" href="_base/index.html" /><link rel="prev" title="rgpycrumbs.run.jupyter" href="../run/jupyter/index.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/surfaces/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -186,108 +198,99 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
-<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.safe_cholesky_solve"><code class="docutils literal notranslate"><span class="pre">safe_cholesky_solve()</span></code></a></li>
+<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface"><code class="docutils literal notranslate"><span class="pre">BaseGradientSurface</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.x"><code class="docutils literal notranslate">x</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.y_full"><code class="docutils literal notranslate">y_full</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.e_mean"><code class="docutils literal notranslate">e_mean</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.y_flat"><code class="docutils literal notranslate">y_flat</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.D_plus_1"><code class="docutils literal notranslate">D_plus_1</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface.predict_var"><code class="docutils literal notranslate">predict_var()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface"><code class="docutils literal notranslate"><span class="pre">BaseSurface</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface.x_obs"><code class="docutils literal notranslate">x_obs</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface.y_obs"><code class="docutils literal notranslate">y_obs</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface.y_mean"><code class="docutils literal notranslate">y_mean</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface.y_centered"><code class="docutils literal notranslate">y_centered</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface.predict_var"><code class="docutils literal notranslate">predict_var()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.generic_negative_mll"><code class="docutils literal notranslate"><span class="pre">generic_negative_mll()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.safe_cholesky_solve"><code class="docutils literal notranslate"><span class="pre">safe_cholesky_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces._imq_kernel_matrix"><code class="docutils literal notranslate"><span class="pre">_imq_kernel_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces._matern_kernel_matrix"><code class="docutils literal notranslate"><span class="pre">_matern_kernel_matrix()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces._tps_kernel_matrix"><code class="docutils literal notranslate"><span class="pre">_tps_kernel_matrix()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_tps"><code class="docutils literal notranslate"><span class="pre">negative_mll_tps()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._tps_solve"><code class="docutils literal notranslate"><span class="pre">_tps_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._tps_predict"><code class="docutils literal notranslate"><span class="pre">_tps_predict()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ"><code class="docutils literal notranslate"><span class="pre">GradientIMQ</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern"><code class="docutils literal notranslate"><span class="pre">GradientMatern</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ"><code class="docutils literal notranslate"><span class="pre">GradientRQ</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE"><code class="docutils literal notranslate"><span class="pre">GradientSE</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ"><code class="docutils literal notranslate"><span class="pre">NystromGradientIMQ</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ.n_inducing"><code class="docutils literal notranslate">n_inducing</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ.nimags"><code class="docutils literal notranslate">nimags</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ"><code class="docutils literal notranslate"><span class="pre">FastIMQ</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern"><code class="docutils literal notranslate"><span class="pre">FastMatern</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern._fit"><code class="docutils literal notranslate">_fit()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern._solve"><code class="docutils literal notranslate">_solve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern._predict_chunk"><code class="docutils literal notranslate">_predict_chunk()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern._var_chunk"><code class="docutils literal notranslate">_var_chunk()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS"><code class="docutils literal notranslate"><span class="pre">FastTPS</span></code></a><ul>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS.x_obs"><code class="docutils literal notranslate">x_obs</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS.y_obs"><code class="docutils literal notranslate">y_obs</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS.y_mean"><code class="docutils literal notranslate">y_mean</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._matern_kernel_matrix"><code class="docutils literal notranslate"><span class="pre">_matern_kernel_matrix()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_matern_std"><code class="docutils literal notranslate"><span class="pre">negative_mll_matern_std()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._matern_solve"><code class="docutils literal notranslate"><span class="pre">_matern_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._matern_predict"><code class="docutils literal notranslate"><span class="pre">_matern_predict()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern"><code class="docutils literal notranslate"><span class="pre">FastMatern</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern.x_obs"><code class="docutils literal notranslate">x_obs</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern.y_obs"><code class="docutils literal notranslate">y_obs</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern.y_mean"><code class="docutils literal notranslate">y_mean</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.matern_kernel_elem"><code class="docutils literal notranslate"><span class="pre">matern_kernel_elem()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_matern"><code class="docutils literal notranslate"><span class="pre">full_covariance_matern()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_matern_grad_map"><code class="docutils literal notranslate"><span class="pre">k_matrix_matern_grad_map</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_matern_grad"><code class="docutils literal notranslate"><span class="pre">negative_mll_matern_grad()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_matern_solve"><code class="docutils literal notranslate"><span class="pre">_grad_matern_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_matern_predict"><code class="docutils literal notranslate"><span class="pre">_grad_matern_predict()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern"><code class="docutils literal notranslate"><span class="pre">GradientMatern</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern.x"><code class="docutils literal notranslate">x</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern.y_full"><code class="docutils literal notranslate">y_full</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern.e_mean"><code class="docutils literal notranslate">e_mean</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern.y_flat"><code class="docutils literal notranslate">y_flat</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._imq_kernel_matrix"><code class="docutils literal notranslate"><span class="pre">_imq_kernel_matrix()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_imq_std"><code class="docutils literal notranslate"><span class="pre">negative_mll_imq_std()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._imq_solve"><code class="docutils literal notranslate"><span class="pre">_imq_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._imq_predict"><code class="docutils literal notranslate"><span class="pre">_imq_predict()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ"><code class="docutils literal notranslate"><span class="pre">FastIMQ</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ.x_obs"><code class="docutils literal notranslate">x_obs</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ.y_obs"><code class="docutils literal notranslate">y_obs</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ.y_mean"><code class="docutils literal notranslate">y_mean</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.se_kernel_elem"><code class="docutils literal notranslate"><span class="pre">se_kernel_elem()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_se"><code class="docutils literal notranslate"><span class="pre">full_covariance_se()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_se_grad_map"><code class="docutils literal notranslate"><span class="pre">k_matrix_se_grad_map</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_se_grad"><code class="docutils literal notranslate"><span class="pre">negative_mll_se_grad()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_se_solve"><code class="docutils literal notranslate"><span class="pre">_grad_se_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_se_predict"><code class="docutils literal notranslate"><span class="pre">_grad_se_predict()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE"><code class="docutils literal notranslate"><span class="pre">GradientSE</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE.x"><code class="docutils literal notranslate">x</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE.y_full"><code class="docutils literal notranslate">y_full</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE.e_mean"><code class="docutils literal notranslate">e_mean</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE.y_flat"><code class="docutils literal notranslate">y_flat</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.imq_kernel_elem"><code class="docutils literal notranslate"><span class="pre">imq_kernel_elem()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_imq"><code class="docutils literal notranslate"><span class="pre">full_covariance_imq()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_imq_grad_map"><code class="docutils literal notranslate"><span class="pre">k_matrix_imq_grad_map</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_imq_grad"><code class="docutils literal notranslate"><span class="pre">negative_mll_imq_grad()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_imq_map"><code class="docutils literal notranslate"><span class="pre">negative_mll_imq_map()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_imq_solve"><code class="docutils literal notranslate"><span class="pre">_grad_imq_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_imq_predict"><code class="docutils literal notranslate"><span class="pre">_grad_imq_predict()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ"><code class="docutils literal notranslate"><span class="pre">GradientIMQ</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ.x"><code class="docutils literal notranslate">x</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ.y_full"><code class="docutils literal notranslate">y_full</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ.e_mean"><code class="docutils literal notranslate">e_mean</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ.y_flat"><code class="docutils literal notranslate">y_flat</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.rq_kernel_base"><code class="docutils literal notranslate"><span class="pre">rq_kernel_base()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.rq_kernel_elem"><code class="docutils literal notranslate"><span class="pre">rq_kernel_elem()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_rq"><code class="docutils literal notranslate"><span class="pre">full_covariance_rq()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_rq_grad_map"><code class="docutils literal notranslate"><span class="pre">k_matrix_rq_grad_map</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_rq_map"><code class="docutils literal notranslate"><span class="pre">negative_mll_rq_map()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_rq_solve"><code class="docutils literal notranslate"><span class="pre">_grad_rq_solve()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces._grad_rq_predict"><code class="docutils literal notranslate"><span class="pre">_grad_rq_predict()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ"><code class="docutils literal notranslate"><span class="pre">GradientRQ</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.x"><code class="docutils literal notranslate">x</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.y_full"><code class="docutils literal notranslate">y_full</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.e_mean"><code class="docutils literal notranslate">e_mean</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.y_flat"><code class="docutils literal notranslate">y_flat</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.params"><code class="docutils literal notranslate">params</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.alpha"><code class="docutils literal notranslate">alpha</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ.__call__"><code class="docutils literal notranslate">__call__()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS.predict_var"><code class="docutils literal notranslate">predict_var()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#rgpycrumbs.surfaces.get_surface_model"><code class="docutils literal notranslate"><span class="pre">get_surface_model()</span></code></a></li>
@@ -368,25 +371,15 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue" role="main">
           <section id="module-rgpycrumbs.surfaces">
 <span id="rgpycrumbs-surfaces"></span><h1>rgpycrumbs.surfaces<a class="headerlink" href="#module-rgpycrumbs.surfaces" title="Link to this heading">¶</a></h1>
-<section id="attributes">
-<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_matern_grad_map" title="rgpycrumbs.surfaces.k_matrix_matern_grad_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_matrix_matern_grad_map</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_se_grad_map" title="rgpycrumbs.surfaces.k_matrix_se_grad_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_matrix_se_grad_map</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_imq_grad_map" title="rgpycrumbs.surfaces.k_matrix_imq_grad_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_matrix_imq_grad_map</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.k_matrix_rq_grad_map" title="rgpycrumbs.surfaces.k_matrix_rq_grad_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_matrix_rq_grad_map</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
 </div>
 </section>
 <section id="classes">
@@ -394,26 +387,35 @@ data-aria-dark="Switch to auto color mode">
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS" title="rgpycrumbs.surfaces.FastTPS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastTPS</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.BaseGradientSurface" title="rgpycrumbs.surfaces.BaseGradientSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseGradientSurface</span></code></a></p></td>
+<td><p>Abstract base class for gradient-enhanced surface models.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern" title="rgpycrumbs.surfaces.FastMatern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastMatern</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.BaseSurface" title="rgpycrumbs.surfaces.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseSurface</span></code></a></p></td>
+<td><p>Abstract base class for standard (non-gradient) surface models.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern" title="rgpycrumbs.surfaces.GradientMatern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientMatern</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ" title="rgpycrumbs.surfaces.GradientIMQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientIMQ</span></code></a></p></td>
+<td><p>Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ" title="rgpycrumbs.surfaces.FastIMQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastIMQ</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE" title="rgpycrumbs.surfaces.GradientSE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientSE</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientIMQ" title="rgpycrumbs.surfaces.GradientIMQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientIMQ</span></code></a></p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientMatern" title="rgpycrumbs.surfaces.GradientMatern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientMatern</span></code></a></p></td>
+<td><p>Gradient-enhanced Matérn 5/2 surface implementation.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientRQ" title="rgpycrumbs.surfaces.GradientRQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientRQ</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.GradientSE" title="rgpycrumbs.surfaces.GradientSE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GradientSE</span></code></a></p></td>
+<td><p>Gradient-enhanced Squared Exponential (SE) surface implementation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.NystromGradientIMQ" title="rgpycrumbs.surfaces.NystromGradientIMQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NystromGradientIMQ</span></code></a></p></td>
+<td><p>Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.FastIMQ" title="rgpycrumbs.surfaces.FastIMQ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastIMQ</span></code></a></p></td>
+<td><p>Inverse Multi-Quadratic (IMQ) surface implementation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.FastMatern" title="rgpycrumbs.surfaces.FastMatern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastMatern</span></code></a></p></td>
+<td><p>Matérn 5/2 surface implementation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.FastTPS" title="rgpycrumbs.surfaces.FastTPS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FastTPS</span></code></a></p></td>
+<td><p>Thin Plate Spline (TPS) surface implementation.</p></td>
 </tr>
 </tbody>
 </table>
@@ -424,563 +426,523 @@ data-aria-dark="Switch to auto color mode">
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.safe_cholesky_solve" title="rgpycrumbs.surfaces.safe_cholesky_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_cholesky_solve</span></code></a>(K, y, noise_scalar[, jitter_steps])</p></td>
-<td><p>Retries Cholesky with increasing jitter if it fails.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.generic_negative_mll" title="rgpycrumbs.surfaces.generic_negative_mll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generic_negative_mll</span></code></a>(K, y, noise_scalar)</p></td>
+<td><p>Calculates the negative Marginal Log-Likelihood (MLL).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.generic_negative_mll" title="rgpycrumbs.surfaces.generic_negative_mll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generic_negative_mll</span></code></a>(K, y, noise_scalar)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.safe_cholesky_solve" title="rgpycrumbs.surfaces.safe_cholesky_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_cholesky_solve</span></code></a>(K, y, noise_scalar[, jitter_steps])</p></td>
+<td><p>Retries Cholesky decomposition with increasing jitter if it fails.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._imq_kernel_matrix" title="rgpycrumbs.surfaces._imq_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_imq_kernel_matrix</span></code></a>(x, epsilon)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._matern_kernel_matrix" title="rgpycrumbs.surfaces._matern_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_matern_kernel_matrix</span></code></a>(x, length_scale)</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._tps_kernel_matrix" title="rgpycrumbs.surfaces._tps_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_tps_kernel_matrix</span></code></a>(x)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_tps" title="rgpycrumbs.surfaces.negative_mll_tps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_tps</span></code></a>(log_params, x, y)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._tps_solve" title="rgpycrumbs.surfaces._tps_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_tps_solve</span></code></a>(x, y, sm)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._tps_predict" title="rgpycrumbs.surfaces._tps_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_tps_predict</span></code></a>(x_query, x_obs, w, v)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._matern_kernel_matrix" title="rgpycrumbs.surfaces._matern_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_matern_kernel_matrix</span></code></a>(x, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_matern_std" title="rgpycrumbs.surfaces.negative_mll_matern_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_matern_std</span></code></a>(log_params, x, y)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._matern_solve" title="rgpycrumbs.surfaces._matern_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_matern_solve</span></code></a>(x, y, sm, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._matern_predict" title="rgpycrumbs.surfaces._matern_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_matern_predict</span></code></a>(x_query, x_obs, alpha, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.matern_kernel_elem" title="rgpycrumbs.surfaces.matern_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matern_kernel_elem</span></code></a>(x1, x2[, length_scale])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_matern" title="rgpycrumbs.surfaces.full_covariance_matern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_matern</span></code></a>(x1, x2, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_matern_grad" title="rgpycrumbs.surfaces.negative_mll_matern_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_matern_grad</span></code></a>(log_params, x, y_flat, D_plus_1)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_matern_solve" title="rgpycrumbs.surfaces._grad_matern_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_matern_solve</span></code></a>(x, y_full, noise_scalar, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_matern_predict" title="rgpycrumbs.surfaces._grad_matern_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_matern_predict</span></code></a>(x_query, x_obs, alpha, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._imq_kernel_matrix" title="rgpycrumbs.surfaces._imq_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_imq_kernel_matrix</span></code></a>(x, epsilon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_imq_std" title="rgpycrumbs.surfaces.negative_mll_imq_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_imq_std</span></code></a>(log_params, x, y)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._imq_solve" title="rgpycrumbs.surfaces._imq_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_imq_solve</span></code></a>(x, y, sm, epsilon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._imq_predict" title="rgpycrumbs.surfaces._imq_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_imq_predict</span></code></a>(x_query, x_obs, alpha, epsilon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.se_kernel_elem" title="rgpycrumbs.surfaces.se_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">se_kernel_elem</span></code></a>(x1, x2[, length_scale])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_se" title="rgpycrumbs.surfaces.full_covariance_se"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_se</span></code></a>(x1, x2, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_se_grad" title="rgpycrumbs.surfaces.negative_mll_se_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_se_grad</span></code></a>(log_params, x, y_flat, D_plus_1)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_se_solve" title="rgpycrumbs.surfaces._grad_se_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_se_solve</span></code></a>(x, y_full, noise_scalar, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_se_predict" title="rgpycrumbs.surfaces._grad_se_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_se_predict</span></code></a>(x_query, x_obs, alpha, length_scale)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.imq_kernel_elem" title="rgpycrumbs.surfaces.imq_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imq_kernel_elem</span></code></a>(x1, x2[, epsilon])</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_imq" title="rgpycrumbs.surfaces.full_covariance_imq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_imq</span></code></a>(x1, x2, epsilon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_imq_grad" title="rgpycrumbs.surfaces.negative_mll_imq_grad"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_imq_grad</span></code></a>(log_params, x, y_flat, D_plus_1)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_imq_map" title="rgpycrumbs.surfaces.negative_mll_imq_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_imq_map</span></code></a>(log_params, init_eps, x, y_flat, ...)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_imq_solve" title="rgpycrumbs.surfaces._grad_imq_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_imq_solve</span></code></a>(x, y_full, noise_scalar, epsilon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_imq_predict" title="rgpycrumbs.surfaces._grad_imq_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_imq_predict</span></code></a>(x_query, x_obs, alpha, epsilon)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.rq_kernel_base" title="rgpycrumbs.surfaces.rq_kernel_base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rq_kernel_base</span></code></a>(x1, x2, length_scale, alpha)</p></td>
-<td><p>Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.rq_kernel_elem" title="rgpycrumbs.surfaces.rq_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rq_kernel_elem</span></code></a>(x1, x2, params)</p></td>
-<td><p>SYMMETRIC KERNEL TRICK: k_sym(x, x') = k(x, x') + k(swap(x), x')</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.full_covariance_rq" title="rgpycrumbs.surfaces.full_covariance_rq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_rq</span></code></a>(x1, x2, params)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.negative_mll_rq_map" title="rgpycrumbs.surfaces.negative_mll_rq_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_rq_map</span></code></a>(log_params, x, y_flat, D_plus_1)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_rq_solve" title="rgpycrumbs.surfaces._grad_rq_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_rq_solve</span></code></a>(x, y_full, noise_scalar, params)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._grad_rq_predict" title="rgpycrumbs.surfaces._grad_rq_predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_grad_rq_predict</span></code></a>(x_query, x_obs, alpha, params)</p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.get_surface_model" title="rgpycrumbs.surfaces.get_surface_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_surface_model</span></code></a>(name)</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.get_surface_model" title="rgpycrumbs.surfaces.get_surface_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_surface_model</span></code></a>(name)</p></td>
+<td><p>Factory function to retrieve surface model classes by name.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
-<section id="module-contents">
-<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.safe_cholesky_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">safe_cholesky_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#safe_cholesky_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.safe_cholesky_solve" title="Link to this definition">¶</a></dt>
-<dd><p>Retries Cholesky with increasing jitter if it fails.</p>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">BaseGradientSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface" title="Link to this definition">¶</a></dt>
+<dd><p>Abstract base class for gradient-enhanced surface models.</p>
+<p>Derived classes must implement <cite>_fit</cite>, <cite>_solve</cite>, <cite>_predict_chunk</cite>, and <cite>_var_chunk</cite>.
+These models incorporate both values and their gradients into the fit.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.x">
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.x" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.y_full">
+<span class="sig-name descname"><span class="pre">y_full</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.y_full" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.e_mean">
+<span class="sig-name descname"><span class="pre">e_mean</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.e_mean" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.y_flat">
+<span class="sig-name descname"><span class="pre">y_flat</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.y_flat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.D_plus_1">
+<span class="sig-name descname"><span class="pre">D_plus_1</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.D_plus_1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface._fit">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface._solve">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict values at query points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
+chunk_size: Number of points to process per batch.</p>
+</dd>
+<dt>Returns:</dt><dd><p>jnp.ndarray: Predicted values (M,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface.predict_var">
+<span class="sig-name descname"><span class="pre">predict_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface.predict_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface.predict_var" title="Link to this definition">¶</a></dt>
+<dd><p>Predict posterior variance at query points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
+chunk_size: Number of points to process per batch.</p>
+</dd>
+<dt>Returns:</dt><dd><p>jnp.ndarray: Predicted variances (M,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface._predict_chunk">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseGradientSurface._var_chunk">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseGradientSurface._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">BaseSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface" title="Link to this definition">¶</a></dt>
+<dd><p>Abstract base class for standard (non-gradient) surface models.</p>
+<p>Derived classes must implement <cite>_fit</cite>, <cite>_solve</cite>, <cite>_predict_chunk</cite>, and <cite>_var_chunk</cite>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface.x_obs">
+<span class="sig-name descname"><span class="pre">x_obs</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface.x_obs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface.y_obs">
+<span class="sig-name descname"><span class="pre">y_obs</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface.y_obs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface.y_mean">
+<span class="sig-name descname"><span class="pre">y_mean</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface.y_mean" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface.y_centered">
+<span class="sig-name descname"><span class="pre">y_centered</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface.y_centered" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface._fit">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface._solve">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict values at query points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
+chunk_size: Number of points to process per batch to avoid OOM.</p>
+</dd>
+<dt>Returns:</dt><dd><p>jnp.ndarray: Predicted values (M,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface.predict_var">
+<span class="sig-name descname"><span class="pre">predict_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface.predict_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface.predict_var" title="Link to this definition">¶</a></dt>
+<dd><p>Predict posterior variance at query points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
+chunk_size: Number of points to process per batch.</p>
+</dd>
+<dt>Returns:</dt><dd><p>jnp.ndarray: Predicted variances (M,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface._predict_chunk">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.BaseSurface._var_chunk">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.BaseSurface._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces.generic_negative_mll">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">generic_negative_mll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#generic_negative_mll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.generic_negative_mll" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._tps_kernel_matrix">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_tps_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_tps_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._tps_kernel_matrix" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_tps">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_tps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_tps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_tps" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._tps_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_tps_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_tps_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._tps_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._tps_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_tps_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_tps_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._tps_predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">FastTPS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastTPS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.x_obs">
-<span class="sig-name descname"><span class="pre">x_obs</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastTPS.x_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.x_obs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.y_obs">
-<span class="sig-name descname"><span class="pre">y_obs</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastTPS.y_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.y_obs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.y_mean">
-<span class="sig-name descname"><span class="pre">y_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastTPS.y_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.y_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastTPS.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Batched prediction to prevent OOM errors on large grids.</p>
-</dd></dl>
-
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">generic_negative_mll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#generic_negative_mll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.generic_negative_mll" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates the negative Marginal Log-Likelihood (MLL).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>K: Covariance matrix.
+y: Observation vector.
+noise_scalar: Noise level for regularization.</p>
+</dd>
+<dt>Returns:</dt><dd><p>float: The negative MLL value, or a high penalty if Cholesky fails.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._matern_kernel_matrix">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_matern_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_matern_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._matern_kernel_matrix" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_matern_std">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_matern_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_matern_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_matern_std" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._matern_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_matern_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_matern_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._matern_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._matern_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_matern_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_matern_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._matern_predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">FastMatern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastMatern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern.x_obs">
-<span class="sig-name descname"><span class="pre">x_obs</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastMatern.x_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern.x_obs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern.y_obs">
-<span class="sig-name descname"><span class="pre">y_obs</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastMatern.y_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern.y_obs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern.y_mean">
-<span class="sig-name descname"><span class="pre">y_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastMatern.y_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern.y_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastMatern.alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern.alpha" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastMatern.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Batched prediction for Matern.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.matern_kernel_elem">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">matern_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#matern_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.matern_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.full_covariance_matern">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">full_covariance_matern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#full_covariance_matern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.full_covariance_matern" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.k_matrix_matern_grad_map">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">k_matrix_matern_grad_map</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#k_matrix_matern_grad_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.k_matrix_matern_grad_map" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_matern_grad">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_matern_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_plus_1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_matern_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_matern_grad" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_matern_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_matern_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_full</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_matern_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_matern_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_matern_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_matern_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_matern_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_matern_predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientMatern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern.x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern.x" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern.y_full">
-<span class="sig-name descname"><span class="pre">y_full</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern.y_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern.y_full" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern.e_mean">
-<span class="sig-name descname"><span class="pre">e_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern.e_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern.e_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern.y_flat">
-<span class="sig-name descname"><span class="pre">y_flat</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern.y_flat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern.y_flat" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern.alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern.alpha" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientMatern.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern.__call__" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.safe_cholesky_solve">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">safe_cholesky_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_base.html#safe_cholesky_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.safe_cholesky_solve" title="Link to this definition">¶</a></dt>
+<dd><p>Retries Cholesky decomposition with increasing jitter if it fails.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>K: Covariance matrix.
+y: Observation vector.
+noise_scalar: Initial noise level.
+jitter_steps: Number of retry attempts with increasing jitter.</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>tuple: (alpha, log_det) where alpha is the solution vector and</dt><dd><p>log_det is the log determinant of the jittered matrix.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._imq_kernel_matrix">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_imq_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_imq_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._imq_kernel_matrix" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_imq_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_kernels.html#_imq_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._imq_kernel_matrix" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_imq_std">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_imq_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_imq_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_imq_std" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces._matern_kernel_matrix">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_matern_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_kernels.html#_matern_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._matern_kernel_matrix" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._imq_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_imq_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_imq_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._imq_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._imq_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_imq_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_imq_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._imq_predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">FastIMQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastIMQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ.x_obs">
-<span class="sig-name descname"><span class="pre">x_obs</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastIMQ.x_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ.x_obs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ.y_obs">
-<span class="sig-name descname"><span class="pre">y_obs</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastIMQ.y_obs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ.y_obs" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ.y_mean">
-<span class="sig-name descname"><span class="pre">y_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastIMQ.y_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ.y_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastIMQ.alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ.alpha" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#FastIMQ.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ.__call__" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.se_kernel_elem">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">se_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#se_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.se_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.full_covariance_se">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">full_covariance_se</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#full_covariance_se"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.full_covariance_se" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.k_matrix_se_grad_map">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">k_matrix_se_grad_map</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#k_matrix_se_grad_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.k_matrix_se_grad_map" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_se_grad">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_se_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_plus_1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_se_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_se_grad" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_se_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_se_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_full</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_se_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_se_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_se_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_se_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_se_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_se_predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE.x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE.x" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE.y_full">
-<span class="sig-name descname"><span class="pre">y_full</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE.y_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE.y_full" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE.e_mean">
-<span class="sig-name descname"><span class="pre">e_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE.e_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE.e_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE.y_flat">
-<span class="sig-name descname"><span class="pre">y_flat</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE.y_flat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE.y_flat" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE.alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE.alpha" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientSE.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE.__call__" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.imq_kernel_elem">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">imq_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#imq_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.imq_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.full_covariance_imq">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">full_covariance_imq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#full_covariance_imq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.full_covariance_imq" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.k_matrix_imq_grad_map">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">k_matrix_imq_grad_map</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#k_matrix_imq_grad_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.k_matrix_imq_grad_map" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_imq_grad">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_imq_grad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_plus_1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_imq_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_imq_grad" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_imq_map">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_imq_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_eps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_plus_1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_imq_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_imq_map" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_imq_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_imq_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_full</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_imq_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_imq_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_imq_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_imq_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_imq_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_imq_predict" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces._tps_kernel_matrix">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_tps_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/_kernels.html#_tps_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._tps_kernel_matrix" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientIMQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ.x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ.x" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ.y_full">
-<span class="sig-name descname"><span class="pre">y_full</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ.y_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ.y_full" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ.e_mean">
-<span class="sig-name descname"><span class="pre">e_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ.e_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ.e_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ.y_flat">
-<span class="sig-name descname"><span class="pre">y_flat</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ.y_flat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ.y_flat" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ.alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ.alpha" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientIMQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientIMQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseGradientSurface" title="rgpycrumbs.surfaces._base.BaseGradientSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseGradientSurface</span></code></a></p>
+<p>Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientIMQ._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientIMQ.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ.__call__" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientIMQ._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientIMQ._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientIMQ._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientIMQ._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientIMQ._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.rq_kernel_base">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">rq_kernel_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#rq_kernel_base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.rq_kernel_base" title="Link to this definition">¶</a></dt>
-<dd><p>Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientMatern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientMatern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseGradientSurface" title="rgpycrumbs.surfaces._base.BaseGradientSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseGradientSurface</span></code></a></p>
+<p>Gradient-enhanced Matérn 5/2 surface implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientMatern._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.rq_kernel_elem">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">rq_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#rq_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.rq_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd><p>SYMMETRIC KERNEL TRICK: k_sym(x, x’) = k(x, x’) + k(swap(x), x’)
-Enforces f(r, p) = f(p, r) globally.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientMatern._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.full_covariance_rq">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">full_covariance_rq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#full_covariance_rq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.full_covariance_rq" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientMatern._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.k_matrix_rq_grad_map">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">k_matrix_rq_grad_map</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#k_matrix_rq_grad_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.k_matrix_rq_grad_map" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientMatern._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientMatern._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientMatern._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.negative_mll_rq_map">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">negative_mll_rq_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_flat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D_plus_1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#negative_mll_rq_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.negative_mll_rq_map" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_rq_solve">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_rq_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_full</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_rq_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_rq_solve" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces._grad_rq_predict">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">_grad_rq_predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#_grad_rq_predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._grad_rq_predict" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+</dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientRQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.x" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientRQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientRQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseGradientSurface" title="rgpycrumbs.surfaces._base.BaseGradientSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseGradientSurface</span></code></a></p>
+<p>Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientRQ._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientRQ._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientRQ._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientRQ._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">GradientSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientSE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseGradientSurface" title="rgpycrumbs.surfaces._base.BaseGradientSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseGradientSurface</span></code></a></p>
+<p>Gradient-enhanced Squared Exponential (SE) surface implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientSE._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientSE._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientSE._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientSE._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#GradientSE._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientSE._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">NystromGradientIMQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_inducing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nimags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#NystromGradientIMQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseGradientSurface" title="rgpycrumbs.surfaces._base.BaseGradientSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseGradientSurface</span></code></a></p>
+<p>Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ.n_inducing">
+<span class="sig-name descname"><span class="pre">n_inducing</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">300</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ.n_inducing" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.y_full">
-<span class="sig-name descname"><span class="pre">y_full</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.y_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.y_full" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.e_mean">
-<span class="sig-name descname"><span class="pre">e_mean</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.e_mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.e_mean" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.y_flat">
-<span class="sig-name descname"><span class="pre">y_flat</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.y_flat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.y_flat" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.params">
-<span class="sig-name descname"><span class="pre">params</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.params" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.alpha">
-<span class="sig-name descname"><span class="pre">alpha</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.alpha" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ.nimags">
+<span class="sig-name descname"><span class="pre">nimags</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ.nimags" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="rgpycrumbs.surfaces.GradientRQ.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#GradientRQ.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.GradientRQ.__call__" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#NystromGradientIMQ._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#NystromGradientIMQ._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#NystromGradientIMQ._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.NystromGradientIMQ._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/gradient.html#NystromGradientIMQ._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.NystromGradientIMQ._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">FastIMQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastIMQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseSurface" title="rgpycrumbs.surfaces._base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseSurface</span></code></a></p>
+<p>Inverse Multi-Quadratic (IMQ) surface implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastIMQ._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastIMQ._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastIMQ._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastIMQ._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastIMQ._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastIMQ._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">FastMatern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastMatern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="_base/index.html#rgpycrumbs.surfaces._base.BaseSurface" title="rgpycrumbs.surfaces._base.BaseSurface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces._base.BaseSurface</span></code></a></p>
+<p>Matérn 5/2 surface implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern._fit">
+<span class="sig-name descname"><span class="pre">_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastMatern._fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern._fit" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to perform parameter optimization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern._solve">
+<span class="sig-name descname"><span class="pre">_solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastMatern._solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern._solve" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method to solve the linear system for weights.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern._predict_chunk">
+<span class="sig-name descname"><span class="pre">_predict_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastMatern._predict_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern._predict_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch prediction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastMatern._var_chunk">
+<span class="sig-name descname"><span class="pre">_var_chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chunk</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastMatern._var_chunk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastMatern._var_chunk" title="Link to this definition">¶</a></dt>
+<dd><p>Internal method for batch variance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">FastTPS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastTPS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS" title="Link to this definition">¶</a></dt>
+<dd><p>Thin Plate Spline (TPS) surface implementation.
+Includes a polynomial mean function and supports smoothing optimization.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.x_obs">
+<span class="sig-name descname"><span class="pre">x_obs</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.x_obs" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.y_obs">
+<span class="sig-name descname"><span class="pre">y_obs</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.y_obs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.y_mean">
+<span class="sig-name descname"><span class="pre">y_mean</span></span><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.y_mean" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastTPS.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict values at query points using chunking.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
+chunk_size: Processing batch size.</p>
+</dd>
+<dt>Returns:</dt><dd><p>jnp.ndarray: Predicted values (M,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs.surfaces.FastTPS.predict_var">
+<span class="sig-name descname"><span class="pre">predict_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces/standard.html#FastTPS.predict_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.FastTPS.predict_var" title="Link to this definition">¶</a></dt>
+<dd><p>Predict posterior variance at query points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
+chunk_size: Processing batch size.</p>
+</dd>
+<dt>Returns:</dt><dd><p>jnp.ndarray: Predicted variances (M,).</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces.get_surface_model">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.</span></span><span class="sig-name descname"><span class="pre">get_surface_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/surfaces.html#get_surface_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.get_surface_model" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Factory function to retrieve surface model classes by name.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>name: Model identifier (e.g., ‘grad_matern’, ‘tps’, ‘imq’).</p>
+</dd>
+<dt>Returns:</dt><dd><p>type: The model class. Defaults to GradientMatern.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 </section>
@@ -997,10 +959,10 @@ Enforces f(r, p) = f(p, r) globally.</p>
         <span>Previous</span><div class="title">rgpycrumbs.run.jupyter</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="../xts/index.html">
+    <a href="_base/index.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">rgpycrumbs.xts</div>
+        <div class="title">rgpycrumbs.surfaces._base</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

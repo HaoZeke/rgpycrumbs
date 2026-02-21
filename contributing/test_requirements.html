@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -188,6 +200,11 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#development-environment">Development Environment</a><ul>
 <li><a class="reference internal" href="#initial-setup">Initial Setup</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#local-development-editable-installs">Local Development &amp; Editable Installs</a><ul>
+<li><a class="reference internal" href="#workflow-for-dependent-packages">Workflow for Dependent Packages</a></li>
+<li><a class="reference internal" href="#debugging-execution-with-verbose-mode">Debugging Execution with Verbose Mode</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#testing-guidelines">Testing Guidelines</a><ul>
@@ -276,6 +293,39 @@ failures and import-time crashes.</p>
 <section id="initial-setup">
 <h3>Initial Setup<a class="headerlink" href="#initial-setup" title="Link to this heading">¶</a></h3>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>install
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="local-development-editable-installs">
+<h2>Local Development &amp; Editable Installs<a class="headerlink" href="#local-development-editable-installs" title="Link to this heading">¶</a></h2>
+<p>By default, the <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> dispatcher runs scripts using <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code>. This enforces strict environment isolation by resolving and fetching a script’s PEP 723 inline dependencies on the fly.</p>
+<p>While excellent for reproducibility, this behavior bypasses your local Python environment. If you are actively developing a dependent package (e.g., you installed it locally via <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> or <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">add</span> <span class="pre">--editable</span></code>), <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code> will ignore your local edits and fetch the published version instead.</p>
+<p>To force <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> to use your active environment and respect your editable installs, use the <code class="docutils literal notranslate"><span class="pre">--dev</span></code> flag:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Standard execution (Isolated: uv resolves dependencies from scratch)</span>
+</span><span data-line="2">rgpycrumbs<span class="w"> </span>mygroup<span class="w"> </span>myscript
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Development execution (Active Env: uses sys.executable, respects editable installs)</span>
+</span><span data-line="5">rgpycrumbs<span class="w"> </span>--dev<span class="w"> </span>mygroup<span class="w"> </span>myscript
+</span></pre></div>
+</div>
+<section id="workflow-for-dependent-packages">
+<h3>Workflow for Dependent Packages<a class="headerlink" href="#workflow-for-dependent-packages" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Activate your desired <code class="docutils literal notranslate"><span class="pre">pixi</span></code> environment (e.g., <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">shell</span> <span class="pre">-e</span> <span class="pre">test</span></code>).</p></li>
+<li><p>Install your dependent package in editable mode if not already managed by pixi (e.g., <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">/path/to/local/dependency</span></code>).</p></li>
+<li><p>Run your script using the <code class="docutils literal notranslate"><span class="pre">--dev</span></code> flag to test your local package modifications: <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span> <span class="pre">--dev</span> <span class="pre">&lt;group&gt;</span> <span class="pre">&lt;script&gt;</span></code>.</p></li>
+</ol>
+</section>
+<section id="debugging-execution-with-verbose-mode">
+<h3>Debugging Execution with Verbose Mode<a class="headerlink" href="#debugging-execution-with-verbose-mode" title="Link to this heading">¶</a></h3>
+<p>Because the dispatcher dynamically resolves script paths and environment execution contexts (switching between <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">sys.executable</span></code>), it can occasionally be helpful to inspect the underlying commands.</p>
+<p>Pass the <code class="docutils literal notranslate"><span class="pre">--verbose</span></code> (or <code class="docutils literal notranslate"><span class="pre">-v</span></code>) flag to print the fully resolved path to the PEP 723 script and the exact command array being constructed before it is executed.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Check standard isolated execution</span>
+</span><span data-line="2">rgpycrumbs<span class="w"> </span>--verbose<span class="w"> </span>mygroup<span class="w"> </span>myscript
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Check local development execution</span>
+</span><span data-line="5">rgpycrumbs<span class="w"> </span>--dev<span class="w"> </span>-v<span class="w"> </span>mygroup<span class="w"> </span>myscript
 </span></pre></div>
 </div>
 </section>

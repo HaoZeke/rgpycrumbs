@@ -18,10 +18,51 @@ Initial Setup
 
     pixi install
 
+Local Development & Editable Installs
+-------------------------------------
+
+By default, the ``rgpycrumbs`` dispatcher runs scripts using ``uv run``. This enforces strict environment isolation by resolving and fetching a script's PEP 723 inline dependencies on the fly.
+
+While excellent for reproducibility, this behavior bypasses your local Python environment. If you are actively developing a dependent package (e.g., you installed it locally via ``pip install -e .`` or ``pixi add --editable``), ``uv run`` will ignore your local edits and fetch the published version instead.
+
+To force ``rgpycrumbs`` to use your active environment and respect your editable installs, use the ``--dev`` flag:
+
+.. code:: shell
+
+    # Standard execution (Isolated: uv resolves dependencies from scratch)
+    rgpycrumbs mygroup myscript
+
+    # Development execution (Active Env: uses sys.executable, respects editable installs)
+    rgpycrumbs --dev mygroup myscript
+
+Workflow for Dependent Packages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Activate your desired ``pixi`` environment (e.g., ``pixi shell -e test``).
+
+2. Install your dependent package in editable mode if not already managed by pixi (e.g., ``pip install -e /path/to/local/dependency``).
+
+3. Run your script using the ``--dev`` flag to test your local package modifications: ``rgpycrumbs --dev <group> <script>``.
+
+Debugging Execution with Verbose Mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Because the dispatcher dynamically resolves script paths and environment execution contexts (switching between ``uv run`` and ``sys.executable``), it can occasionally be helpful to inspect the underlying commands.
+
+Pass the ``--verbose`` (or ``-v``) flag to print the fully resolved path to the PEP 723 script and the exact command array being constructed before it is executed.
+
+.. code:: shell
+
+    # Check standard isolated execution
+    rgpycrumbs --verbose mygroup myscript
+
+    # Check local development execution
+    rgpycrumbs --dev -v mygroup myscript
+
 Testing Guidelines
 ------------------
 
-The test suite utilizes custom markers to scope tests to specific environments. 
+The test suite utilizes custom markers to scope tests to specific environments.
 This prevents ``ModuleNotFoundError`` during the ``pytest`` collection phase.
 
 Adding New Tests
@@ -30,12 +71,12 @@ Adding New Tests
 When creating a new test file, you must protect the collection phase:
 
 Define requirements
-    Add any required external modules to the 
+    Add any required external modules to the
     ``ENVIRONMENT_REQUIREMENTS`` dictionary in ``tests/conftest.py``.
 
 Guard imports
-    Call ``skip_if_not_env("marker_name")`` at the top of your test 
-    file. This must occur before you import any package modules that depend on 
+    Call ``skip_if_not_env("marker_name")`` at the top of your test
+    file. This must occur before you import any package modules that depend on
     external binaries.
 
 Mark your tests

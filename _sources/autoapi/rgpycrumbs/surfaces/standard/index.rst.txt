@@ -1,0 +1,167 @@
+rgpycrumbs.surfaces.standard
+============================
+
+.. py:module:: rgpycrumbs.surfaces.standard
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.standard.FastTPS
+   rgpycrumbs.surfaces.standard.FastMatern
+   rgpycrumbs.surfaces.standard.FastIMQ
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.standard.negative_mll_tps
+   rgpycrumbs.surfaces.standard._tps_solve
+   rgpycrumbs.surfaces.standard._tps_predict
+   rgpycrumbs.surfaces.standard._tps_var
+   rgpycrumbs.surfaces.standard.negative_mll_matern_std
+   rgpycrumbs.surfaces.standard._matern_solve
+   rgpycrumbs.surfaces.standard._matern_predict
+   rgpycrumbs.surfaces.standard._matern_var
+   rgpycrumbs.surfaces.standard.negative_mll_imq_std
+   rgpycrumbs.surfaces.standard._imq_solve
+   rgpycrumbs.surfaces.standard._imq_predict
+   rgpycrumbs.surfaces.standard._imq_var
+
+
+Module Contents
+---------------
+
+.. py:function:: negative_mll_tps(log_params, x, y)
+
+.. py:function:: _tps_solve(x, y, sm)
+
+.. py:function:: _tps_predict(x_query, x_obs, w, v)
+
+.. py:function:: _tps_var(x_query, x_obs, lhs_inv)
+
+.. py:class:: FastTPS(x_obs, y_obs, smoothing=0.001, optimize=True, **_kwargs)
+
+   Thin Plate Spline (TPS) surface implementation.
+   Includes a polynomial mean function and supports smoothing optimization.
+
+
+   .. py:attribute:: x_obs
+
+
+   .. py:attribute:: y_obs
+
+
+   .. py:attribute:: y_mean
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Predict values at query points using chunking.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Processing batch size.
+
+      Returns:
+          jnp.ndarray: Predicted values (M,).
+
+
+
+   .. py:method:: predict_var(x_query, chunk_size=500)
+
+      Predict posterior variance at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Processing batch size.
+
+      Returns:
+          jnp.ndarray: Predicted variances (M,).
+
+
+
+.. py:function:: negative_mll_matern_std(log_params, x, y)
+
+.. py:function:: _matern_solve(x, y, sm, length_scale)
+
+.. py:function:: _matern_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:function:: _matern_var(x_query, x_obs, K_inv, length_scale)
+
+.. py:class:: FastMatern(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseSurface`
+
+
+   Matérn 5/2 surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:function:: negative_mll_imq_std(log_params, x, y)
+
+.. py:function:: _imq_solve(x, y, sm, epsilon)
+
+.. py:function:: _imq_predict(x_query, x_obs, alpha, epsilon)
+
+.. py:function:: _imq_var(x_query, x_obs, K_inv, epsilon)
+
+.. py:class:: FastIMQ(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseSurface`
+
+
+   Inverse Multi-Quadratic (IMQ) surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+

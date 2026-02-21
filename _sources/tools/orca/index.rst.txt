@@ -1,0 +1,12 @@
+==========
+ORCA Tools
+==========
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+Tools for generating and managing ORCA calculations.
+
+.. toctree::
+   :maxdepth: 1
+
+   generate_orca_input

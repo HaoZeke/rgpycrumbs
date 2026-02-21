@@ -14,6 +14,10 @@ Libraries
     ``rgpycrumbs.basetypes``, ``rgpycrumbs.interpolation``, ``rgpycrumbs.surfaces``,
     and ``rgpycrumbs.parsers`` as core dependencies.
 
+`pychum <https://github.com/HaoZeke/pychum>`_
+    Input file generators for computational chemistry. Uses
+    ``rgpycrumbs`` for internal helpers and is dispatched via the CLI.
+
 Research Software
 -----------------
 
@@ -25,24 +29,24 @@ Research Software
 Reproducibility Packages
 ------------------------
 
-`nebmmf\ :sub:`repro`\ <https://github.com/HaoZeke/nebmmf_repro>`_
+`nebmmf\_repro <https://github.com/HaoZeke/nebmmf_repro>`_
     Reproduction package for NEB machine-learned force field
     work. Uses ``rgpycrumbs`` CLI for NEB plotting and the alignment API.
 
-`nebviz\ :sub:`repro`\ <https://github.com/HaoZeke/nebviz_repro>`_
+`nebviz\_repro <https://github.com/HaoZeke/nebviz_repro>`_
     Reproduction package for 2D NEB visualization methods. Imports
     ``rgpycrumbs.eon.helpers`` and runs the CLI for 2D landscape plots.
 
-`otgpd\ :sub:`repro`\ <https://github.com/TheochemUI/otgpd_repro>`_
+`otgpd\_repro <https://github.com/TheochemUI/otgpd_repro>`_
     Reproduction package for on-the-fly GP dimer searches. Imports
     ``rgpycrumbs._aux``, runs CLI for GP trajectory analysis and fragment detection.
 
-`gpr\ :sub:`sella`\ \ :sub:`repro`\ <https://github.com/TheochemUI/gpr_sella_repro>`_
+`gpr\_sella\_repro <https://github.com/TheochemUI/gpr_sella_repro>`_
     Reproduction package for GP-accelerated Sella saddle point
     searches (ChemPhysChem, doi: `10.1002/cphc.202500730 <https://doi.org/10.1002/cphc.202500730>`_). Uses ``rgpycrumbs`` for
     auxiliary helpers, parsers, and structure analysis.
 
-`brms\ :sub:`idrot`\ \ :sub:`repro`\ <https://github.com/HaoZeke/brms_idrot_repro>`_
+`brms\_idrot\_repro <https://github.com/HaoZeke/brms_idrot_repro>`_
     Bayesian reaction mechanism studies reproduction package.
     Uses both ``rgpycrumbs`` and ``chemparseplot`` for parsing and analysis.
 
@@ -68,6 +72,6 @@ Academic Work
   Uses ``rgpycrumbs`` throughout for NEB visualization, surface fitting,
   structure analysis, and fragment detection.
 
-`python\ :sub:`dissemination`\ \ :sub:`workbench`\ <https://github.com/HaoZeke/python_dissemination_workbench>`_
+`python\_dissemination\_workbench <https://github.com/HaoZeke/python_dissemination_workbench>`_
     Teaching materials referencing ``rgpycrumbs``
     as a helper utility example.

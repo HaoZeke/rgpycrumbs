@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -460,51 +472,52 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="155">    <span class="k">return</span> <span class="n">AlignmentResult</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="n">mobile_atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">AlignmentMethod</span><span class="o">.</span><span class="n">ASE_PROCRUSTES</span><span class="p">)</span></div>
 
 </span><span data-line="156">
+</span><span data-line="157">
 <div class="viewcode-block" id="calculate_rmsd_from_ref">
 <a class="viewcode-back" href="../../../../autoapi/rgpycrumbs/geom/api/alignment/index.html#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref">[docs]</a>
-</span><span data-line="157"><span class="k">def</span><span class="w"> </span><span class="nf">calculate_rmsd_from_ref</span><span class="p">(</span>
-</span><span data-line="158">    <span class="n">atoms_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Atoms</span><span class="p">],</span> <span class="n">ira_instance</span><span class="p">,</span> <span class="n">ref_atom</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">,</span> <span class="n">ira_kmax</span><span class="p">:</span> <span class="nb">float</span>
-</span><span data-line="159"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span data-line="160"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="161"><span class="sd">    Calculates the RMSD of each structure in a list relative to a reference.</span>
-</span><span data-line="162">
-</span><span data-line="163"><span class="sd">    The function first attempts the IRA algorithm to handle atom permutations.</span>
-</span><span data-line="164"><span class="sd">    If IRA fails or lacks the necessary library, the code falls back to</span>
-</span><span data-line="165"><span class="sd">    standard ASE Procrustes alignment via `align_structure_robust`.</span>
-</span><span data-line="166">
-</span><span data-line="167"><span class="sd">    :param atoms_list: A list of ASE Atoms objects.</span>
-</span><span data-line="168"><span class="sd">    :param ira_instance: An instantiated IRA object (or None).</span>
-</span><span data-line="169"><span class="sd">    :param ref_atom: The reference Atoms object to align against.</span>
-</span><span data-line="170"><span class="sd">    :param ira_kmax: kmax factor for IRA.</span>
-</span><span data-line="171"><span class="sd">    :return: An array of RMSD values.</span>
-</span><span data-line="172"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="173">    <span class="n">rmsd_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">))</span>
-</span><span data-line="174">    <span class="n">coords_ref</span> <span class="o">=</span> <span class="n">ref_atom</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
-</span><span data-line="175">
-</span><span data-line="176">    <span class="c1"># Configure IRA based on the presence of the instance</span>
-</span><span data-line="177">    <span class="n">config</span> <span class="o">=</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="p">(</span><span class="n">ira_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="n">kmax</span><span class="o">=</span><span class="n">ira_kmax</span><span class="p">)</span>
-</span><span data-line="178">
-</span><span data-line="179">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atom_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">):</span>
-</span><span data-line="180">        <span class="k">if</span> <span class="n">atom_i</span> <span class="ow">is</span> <span class="n">ref_atom</span><span class="p">:</span>
-</span><span data-line="181">            <span class="n">rmsd_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
-</span><span data-line="182">            <span class="k">continue</span>
-</span><span data-line="183">
-</span><span data-line="184">        <span class="c1"># Create a working copy to avoid mutating the original trajectory</span>
-</span><span data-line="185">        <span class="n">mobile_copy</span> <span class="o">=</span> <span class="n">atom_i</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span data-line="186">
-</span><span data-line="187">        <span class="n">align_structure_robust</span><span class="p">(</span>
-</span><span data-line="188">            <span class="n">ref_atom</span><span class="p">,</span>
-</span><span data-line="189">            <span class="n">mobile_copy</span><span class="p">,</span>
-</span><span data-line="190">            <span class="n">config</span><span class="p">,</span>
-</span><span data-line="191">        <span class="p">)</span>
-</span><span data-line="192">
-</span><span data-line="193">        <span class="c1"># Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$</span>
-</span><span data-line="194">        <span class="n">coords_aligned</span> <span class="o">=</span> <span class="n">mobile_copy</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
-</span><span data-line="195">        <span class="n">diff_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">coords_ref</span> <span class="o">-</span> <span class="n">coords_aligned</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-</span><span data-line="196">        <span class="n">rmsd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff_sq</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
-</span><span data-line="197">        <span class="n">rmsd_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rmsd</span>
-</span><span data-line="198">
-</span><span data-line="199">    <span class="k">return</span> <span class="n">rmsd_values</span></div>
+</span><span data-line="158"><span class="k">def</span><span class="w"> </span><span class="nf">calculate_rmsd_from_ref</span><span class="p">(</span>
+</span><span data-line="159">    <span class="n">atoms_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Atoms</span><span class="p">],</span> <span class="n">ira_instance</span><span class="p">,</span> <span class="n">ref_atom</span><span class="p">:</span> <span class="n">Atoms</span><span class="p">,</span> <span class="n">ira_kmax</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="160"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span data-line="161"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="162"><span class="sd">    Calculates the RMSD of each structure in a list relative to a reference.</span>
+</span><span data-line="163">
+</span><span data-line="164"><span class="sd">    The function first attempts the IRA algorithm to handle atom permutations.</span>
+</span><span data-line="165"><span class="sd">    If IRA fails or lacks the necessary library, the code falls back to</span>
+</span><span data-line="166"><span class="sd">    standard ASE Procrustes alignment via `align_structure_robust`.</span>
+</span><span data-line="167">
+</span><span data-line="168"><span class="sd">    :param atoms_list: A list of ASE Atoms objects.</span>
+</span><span data-line="169"><span class="sd">    :param ira_instance: An instantiated IRA object (or None).</span>
+</span><span data-line="170"><span class="sd">    :param ref_atom: The reference Atoms object to align against.</span>
+</span><span data-line="171"><span class="sd">    :param ira_kmax: kmax factor for IRA.</span>
+</span><span data-line="172"><span class="sd">    :return: An array of RMSD values.</span>
+</span><span data-line="173"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="174">    <span class="n">rmsd_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">))</span>
+</span><span data-line="175">    <span class="n">coords_ref</span> <span class="o">=</span> <span class="n">ref_atom</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+</span><span data-line="176">
+</span><span data-line="177">    <span class="c1"># Configure IRA based on the presence of the instance</span>
+</span><span data-line="178">    <span class="n">config</span> <span class="o">=</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="p">(</span><span class="n">ira_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="n">kmax</span><span class="o">=</span><span class="n">ira_kmax</span><span class="p">)</span>
+</span><span data-line="179">
+</span><span data-line="180">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atom_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">):</span>
+</span><span data-line="181">        <span class="k">if</span> <span class="n">atom_i</span> <span class="ow">is</span> <span class="n">ref_atom</span><span class="p">:</span>
+</span><span data-line="182">            <span class="n">rmsd_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span data-line="183">            <span class="k">continue</span>
+</span><span data-line="184">
+</span><span data-line="185">        <span class="c1"># Create a working copy to avoid mutating the original trajectory</span>
+</span><span data-line="186">        <span class="n">mobile_copy</span> <span class="o">=</span> <span class="n">atom_i</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span data-line="187">
+</span><span data-line="188">        <span class="n">align_structure_robust</span><span class="p">(</span>
+</span><span data-line="189">            <span class="n">ref_atom</span><span class="p">,</span>
+</span><span data-line="190">            <span class="n">mobile_copy</span><span class="p">,</span>
+</span><span data-line="191">            <span class="n">config</span><span class="p">,</span>
+</span><span data-line="192">        <span class="p">)</span>
+</span><span data-line="193">
+</span><span data-line="194">        <span class="c1"># Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$</span>
+</span><span data-line="195">        <span class="n">coords_aligned</span> <span class="o">=</span> <span class="n">mobile_copy</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+</span><span data-line="196">        <span class="n">diff_sq</span> <span class="o">=</span> <span class="p">(</span><span class="n">coords_ref</span> <span class="o">-</span> <span class="n">coords_aligned</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+</span><span data-line="197">        <span class="n">rmsd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff_sq</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+</span><span data-line="198">        <span class="n">rmsd_values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rmsd</span>
+</span><span data-line="199">
+</span><span data-line="200">    <span class="k">return</span> <span class="n">rmsd_values</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

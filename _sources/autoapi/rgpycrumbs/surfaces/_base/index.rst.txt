@@ -1,0 +1,213 @@
+rgpycrumbs.surfaces._base
+=========================
+
+.. py:module:: rgpycrumbs.surfaces._base
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces._base.BaseSurface
+   rgpycrumbs.surfaces._base.BaseGradientSurface
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces._base.safe_cholesky_solve
+   rgpycrumbs.surfaces._base.generic_negative_mll
+
+
+Module Contents
+---------------
+
+.. py:function:: safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3)
+
+   Retries Cholesky decomposition with increasing jitter if it fails.
+
+   Args:
+       K: Covariance matrix.
+       y: Observation vector.
+       noise_scalar: Initial noise level.
+       jitter_steps: Number of retry attempts with increasing jitter.
+
+   Returns:
+       tuple: (alpha, log_det) where alpha is the solution vector and
+              log_det is the log determinant of the jittered matrix.
+
+
+.. py:function:: generic_negative_mll(K, y, noise_scalar)
+
+   Calculates the negative Marginal Log-Likelihood (MLL).
+
+   Args:
+       K: Covariance matrix.
+       y: Observation vector.
+       noise_scalar: Noise level for regularization.
+
+   Returns:
+       float: The negative MLL value, or a high penalty if Cholesky fails.
+
+
+.. py:class:: BaseSurface(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
+
+   Abstract base class for standard (non-gradient) surface models.
+
+   Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
+
+
+   .. py:attribute:: x_obs
+
+
+   .. py:attribute:: y_obs
+
+
+   .. py:attribute:: y_mean
+
+
+   .. py:attribute:: y_centered
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+      :abstractmethod:
+
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+      :abstractmethod:
+
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Predict values at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch to avoid OOM.
+
+      Returns:
+          jnp.ndarray: Predicted values (M,).
+
+
+
+   .. py:method:: predict_var(x_query, chunk_size=500)
+
+      Predict posterior variance at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch.
+
+      Returns:
+          jnp.ndarray: Predicted variances (M,).
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: BaseGradientSurface(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Abstract base class for gradient-enhanced surface models.
+
+   Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
+   These models incorporate both values and their gradients into the fit.
+
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y_full
+
+
+   .. py:attribute:: e_mean
+
+
+   .. py:attribute:: y_flat
+
+
+   .. py:attribute:: D_plus_1
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+      :abstractmethod:
+
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+      :abstractmethod:
+
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Predict values at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch.
+
+      Returns:
+          jnp.ndarray: Predicted values (M,).
+
+
+
+   .. py:method:: predict_var(x_query, chunk_size=500)
+
+      Predict posterior variance at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch.
+
+      Returns:
+          jnp.ndarray: Predicted variances (M,).
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch variance.
+
+
+

@@ -9,6 +9,12 @@
 
 .. image:: ../../branding/logo/pycrumbs_logo.webp
 
+Ecosystem Overview
+------------------
+
+The ``rgpycrumbs`` suite consists of several interlinked projects designed to
+streamline computational chemistry workflows.
+
 Overview
 --------
 
@@ -70,6 +76,13 @@ Defect Identification
     generates complete input files compatible with eOn's ``SocketNWChemPot``,
     merging geometry data with calculation settings.
 
+ORCA
+~~~~
+
+Input Generation
+    :doc:`generate-orca-input <tools/orca/generate_orca_input>`
+    generates ORCA input files from TOML configurations, supporting NEB and single-point runs.
+
 PLUMED
 ~~~~~~
 
@@ -126,7 +139,9 @@ Tool Categories
      :caption: Tools
 
      tools/eon/index
+     tools/orca/index
      tools/geom/index
+     tools/surfaces
      tools/utils/index
      tools/prefix/index
 

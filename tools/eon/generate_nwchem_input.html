@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -187,7 +199,6 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#nwchem-input-generator">NWChem Input Generator</a><ul>
-<li><a class="reference internal" href="#rgpycrumbs-eon-generate-nwchem-input">rgpycrumbs eon generate-nwchem-input</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
@@ -266,48 +277,6 @@ data-aria-dark="Switch to auto color mode">
 <section id="nwchem-input-generator">
 <h2>NWChem Input Generator<a class="headerlink" href="#nwchem-input-generator" title="Link to this heading">¶</a></h2>
 <p>This tool generates a complete NWChem input file (<code class="docutils literal notranslate"><span class="pre">.nwi</span></code>) compatible with eOn’s <code class="docutils literal notranslate"><span class="pre">SocketNWChemPot</span></code>. It merges atom types from a geometry file (e.g., <code class="docutils literal notranslate"><span class="pre">.con</span></code>) with settings defined in an <code class="docutils literal notranslate"><span class="pre">eonclient</span></code> configuration file.</p>
-<section id="rgpycrumbs-eon-generate-nwchem-input">
-<h3>rgpycrumbs eon generate-nwchem-input<a class="headerlink" href="#rgpycrumbs-eon-generate-nwchem-input" title="Link to this heading">¶</a></h3>
-<p>Generate an NWChem input file for use with the eOn SocketNWChemPot.</p>
-<p class="rubric">Usage</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>generate-nwchem-input<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
-</span></pre></div>
-</div>
-<p class="rubric">Options</p>
-<dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-generate-nwchem-input-pos-file">
-<span class="sig-name descname"><span class="pre">--pos-file</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;pos_file&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-generate-nwchem-input-pos-file" title="Link to this definition">¶</a></dt>
-<dd><p>Path to the input geometry file (e.g., in eOn .con format).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Default<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">PosixPath('pos.con')</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-generate-nwchem-input-config">
-<span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-generate-nwchem-input-config" title="Link to this definition">¶</a></dt>
-<dd><p>Path to the eonclient config.ini file to read settings from.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Default<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">PosixPath('config.ini')</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-generate-nwchem-input-output">
-<span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-generate-nwchem-input-output" title="Link to this definition">¶</a></dt>
-<dd><p>Name of the final NWChem input file to be generated.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Default<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">PosixPath('nwchem_socket.nwi')</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">$ python -m rgpycrumbs.cli eon generate-nwchem-input --help

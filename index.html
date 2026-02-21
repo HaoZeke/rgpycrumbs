@@ -92,11 +92,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -163,7 +168,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -171,6 +182,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -185,10 +197,12 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#ecosystem-overview">Ecosystem Overview</a></li>
 <li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#advanced-neb-visualization">Advanced NEB Visualization</a></li>
 <li><a class="reference internal" href="#simulation-setup-analysis">Simulation Setup &amp; Analysis</a><ul>
 <li><a class="reference internal" href="#eon">eOn</a></li>
+<li><a class="reference internal" href="#orca">ORCA</a></li>
 <li><a class="reference internal" href="#plumed">PLUMED</a></li>
 </ul>
 </li>
@@ -270,6 +284,11 @@ data-aria-dark="Switch to auto color mode">
 </dd>
 </dl>
 <img alt="_images/pycrumbs_logo.webp" src="_images/pycrumbs_logo.webp" />
+<section id="ecosystem-overview">
+<h2>Ecosystem Overview<a class="headerlink" href="#ecosystem-overview" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> suite consists of several interlinked projects designed to
+streamline computational chemistry workflows.</p>
+</section>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> is a computational library and CLI toolkit for chemical physics
@@ -322,6 +341,14 @@ and index interstitial defects in crystalline systems.</p>
 <dt><code class="docutils literal notranslate"><span class="pre">NWChem</span></code> Input Generation</dt><dd><p><a class="reference internal" href="tools/eon/generate_nwchem_input.html"><span class="doc">generate-nwchem-input</span></a>
 generates complete input files compatible with eOn’s <code class="docutils literal notranslate"><span class="pre">SocketNWChemPot</span></code>,
 merging geometry data with calculation settings.</p>
+</dd>
+</dl>
+</section>
+<section id="orca">
+<h3>ORCA<a class="headerlink" href="#orca" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Input Generation</dt><dd><p><a class="reference internal" href="tools/orca/generate_orca_input.html"><span class="doc">generate-orca-input</span></a>
+generates ORCA input files from TOML configurations, supporting NEB and single-point runs.</p>
 </dd>
 </dl>
 </section>
@@ -385,11 +412,16 @@ and <code class="docutils literal notranslate"><span class="pre">chemparseplot</
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -422,6 +454,7 @@ and <code class="docutils literal notranslate"><span class="pre">chemparseplot</
 <li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/rgpycrumbs/index.html">rgpycrumbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>

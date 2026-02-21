@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -273,6 +285,9 @@ data-aria-dark="Switch to auto color mode">
 <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.basetypes</span></code>, <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.interpolation</span></code>, <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.surfaces</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.parsers</span></code> as core dependencies.</p>
 </dd>
+<dt><a class="reference external" href="https://github.com/HaoZeke/pychum">pychum</a></dt><dd><p>Input file generators for computational chemistry. Uses
+<code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> for internal helpers and is dispatched via the CLI.</p>
+</dd>
 </dl>
 </section>
 <section id="research-software">
@@ -287,20 +302,20 @@ and <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.pars
 <section id="reproducibility-packages">
 <h2>Reproducibility Packages<a class="headerlink" href="#reproducibility-packages" title="Link to this heading">¶</a></h2>
 <dl class="simple">
-<dt><cite>nebmmf:sub:`repro</cite>&lt;<a class="reference external" href="https://github.com/HaoZeke/nebmmf_repro">https://github.com/HaoZeke/nebmmf_repro</a>&gt;`_</dt><dd><p>Reproduction package for NEB machine-learned force field
+<dt><a class="reference external" href="https://github.com/HaoZeke/nebmmf_repro">nebmmf_repro</a></dt><dd><p>Reproduction package for NEB machine-learned force field
 work. Uses <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> CLI for NEB plotting and the alignment API.</p>
 </dd>
-<dt><cite>nebviz:sub:`repro</cite>&lt;<a class="reference external" href="https://github.com/HaoZeke/nebviz_repro">https://github.com/HaoZeke/nebviz_repro</a>&gt;`_</dt><dd><p>Reproduction package for 2D NEB visualization methods. Imports
+<dt><a class="reference external" href="https://github.com/HaoZeke/nebviz_repro">nebviz_repro</a></dt><dd><p>Reproduction package for 2D NEB visualization methods. Imports
 <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.eon.helpers</span></code> and runs the CLI for 2D landscape plots.</p>
 </dd>
-<dt><cite>otgpd:sub:`repro</cite>&lt;<a class="reference external" href="https://github.com/TheochemUI/otgpd_repro">https://github.com/TheochemUI/otgpd_repro</a>&gt;`_</dt><dd><p>Reproduction package for on-the-fly GP dimer searches. Imports
+<dt><a class="reference external" href="https://github.com/TheochemUI/otgpd_repro">otgpd_repro</a></dt><dd><p>Reproduction package for on-the-fly GP dimer searches. Imports
 <code class="docutils literal notranslate"><span class="pre">rgpycrumbs._aux</span></code>, runs CLI for GP trajectory analysis and fragment detection.</p>
 </dd>
-<dt><cite>gpr:sub:`sella</cite><sub>repro</sub>&lt;<a class="reference external" href="https://github.com/TheochemUI/gpr_sella_repro">https://github.com/TheochemUI/gpr_sella_repro</a>&gt;`_</dt><dd><p>Reproduction package for GP-accelerated Sella saddle point
+<dt><a class="reference external" href="https://github.com/TheochemUI/gpr_sella_repro">gpr_sella_repro</a></dt><dd><p>Reproduction package for GP-accelerated Sella saddle point
 searches (ChemPhysChem, doi: <a class="reference external" href="https://doi.org/10.1002/cphc.202500730">10.1002/cphc.202500730</a>). Uses <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> for
 auxiliary helpers, parsers, and structure analysis.</p>
 </dd>
-<dt><cite>brms:sub:`idrot</cite><sub>repro</sub>&lt;<a class="reference external" href="https://github.com/HaoZeke/brms_idrot_repro">https://github.com/HaoZeke/brms_idrot_repro</a>&gt;`_</dt><dd><p>Bayesian reaction mechanism studies reproduction package.
+<dt><a class="reference external" href="https://github.com/HaoZeke/brms_idrot_repro">brms_idrot_repro</a></dt><dd><p>Bayesian reaction mechanism studies reproduction package.
 Uses both <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> and <code class="docutils literal notranslate"><span class="pre">chemparseplot</span></code> for parsing and analysis.</p>
 </dd>
 </dl>
@@ -328,7 +343,7 @@ Uses <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</sp
 structure analysis, and fragment detection.</p></li>
 </ul>
 <dl class="simple">
-<dt><cite>python:sub:`dissemination</cite><sub>workbench</sub>&lt;<a class="reference external" href="https://github.com/HaoZeke/python_dissemination_workbench">https://github.com/HaoZeke/python_dissemination_workbench</a>&gt;`_</dt><dd><p>Teaching materials referencing <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code>
+<dt><a class="reference external" href="https://github.com/HaoZeke/python_dissemination_workbench">python_dissemination_workbench</a></dt><dd><p>Teaching materials referencing <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code>
 as a helper utility example.</p>
 </dd>
 </dl>

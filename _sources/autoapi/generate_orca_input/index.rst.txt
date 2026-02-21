@@ -1,0 +1,24 @@
+generate_orca_input
+===================
+
+.. py:module:: generate_orca_input
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   generate_orca_input.main
+
+
+Module Contents
+---------------
+
+.. py:function:: main(toml_path, output)
+
+   Render an Orca input file from a TOML configuration using pychum.
+
+   TOML_PATH is the path to the TOML configuration file.
+
+

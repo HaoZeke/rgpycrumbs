@@ -1,0 +1,74 @@
+rgpycrumbs.surfaces._kernels
+============================
+
+.. py:module:: rgpycrumbs.surfaces._kernels
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces._kernels.k_matrix_matern_grad_map
+   rgpycrumbs.surfaces._kernels.k_matrix_imq_grad_map
+   rgpycrumbs.surfaces._kernels.k_matrix_se_grad_map
+   rgpycrumbs.surfaces._kernels.k_matrix_rq_grad_map
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces._kernels._tps_kernel_matrix
+   rgpycrumbs.surfaces._kernels._matern_kernel_matrix
+   rgpycrumbs.surfaces._kernels.matern_kernel_elem
+   rgpycrumbs.surfaces._kernels.full_covariance_matern
+   rgpycrumbs.surfaces._kernels._imq_kernel_matrix
+   rgpycrumbs.surfaces._kernels.imq_kernel_elem
+   rgpycrumbs.surfaces._kernels.full_covariance_imq
+   rgpycrumbs.surfaces._kernels.se_kernel_elem
+   rgpycrumbs.surfaces._kernels.full_covariance_se
+   rgpycrumbs.surfaces._kernels.rq_kernel_base
+   rgpycrumbs.surfaces._kernels.rq_kernel_elem
+   rgpycrumbs.surfaces._kernels.full_covariance_rq
+
+
+Module Contents
+---------------
+
+.. py:function:: _tps_kernel_matrix(x)
+
+.. py:function:: _matern_kernel_matrix(x, length_scale)
+
+.. py:function:: matern_kernel_elem(x1, x2, length_scale=1.0)
+
+.. py:function:: full_covariance_matern(x1, x2, length_scale)
+
+.. py:data:: k_matrix_matern_grad_map
+
+.. py:function:: _imq_kernel_matrix(x, epsilon)
+
+.. py:function:: imq_kernel_elem(x1, x2, epsilon=1.0)
+
+.. py:function:: full_covariance_imq(x1, x2, epsilon)
+
+.. py:data:: k_matrix_imq_grad_map
+
+.. py:function:: se_kernel_elem(x1, x2, length_scale=1.0)
+
+.. py:function:: full_covariance_se(x1, x2, length_scale)
+
+.. py:data:: k_matrix_se_grad_map
+
+.. py:function:: rq_kernel_base(x1, x2, length_scale, alpha)
+
+   Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha
+
+
+.. py:function:: rq_kernel_elem(x1, x2, params)
+
+.. py:function:: full_covariance_rq(x1, x2, params)
+
+.. py:data:: k_matrix_rq_grad_map
+

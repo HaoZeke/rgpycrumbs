@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -328,207 +340,209 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="74">    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">ALL</span><span class="p">:</span>
 </span><span data-line="75">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Aligning [bold]all[/bold] images to reactant reference.&quot;</span><span class="p">)</span>
 </span><span data-line="76">        <span class="k">return</span> <span class="p">[</span><span class="n">ref</span><span class="o">.</span><span class="n">copy</span><span class="p">()]</span> <span class="o">+</span> <span class="p">[</span>
-</span><span data-line="77">            <span class="n">align_structure_robust</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">use_ira</span><span class="p">,</span> <span class="n">kmax</span><span class="p">))</span><span class="o">.</span><span class="n">atoms</span>
-</span><span data-line="78">            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-</span><span data-line="79">        <span class="p">]</span>
-</span><span data-line="80">
-</span><span data-line="81">    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">ENDPOINTS</span><span class="p">:</span>
-</span><span data-line="82">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Aligning [bold]endpoints[/bold] (product to reactant) only.&quot;</span><span class="p">)</span>
-</span><span data-line="83">        <span class="n">aligned_product</span> <span class="o">=</span> <span class="n">align_structure_robust</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">frames</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">iraconf</span><span class="p">)</span><span class="o">.</span><span class="n">atoms</span>
-</span><span data-line="84">        <span class="c1"># Intermediate frames remain unchanged in this specific mode logic,</span>
-</span><span data-line="85">        <span class="c1"># Usually, endpoint alignment implies ensuring the BCs match.</span>
-</span><span data-line="86">        <span class="n">new_frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">]</span>
-</span><span data-line="87">        <span class="n">new_frames</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">aligned_product</span>
-</span><span data-line="88">        <span class="k">return</span> <span class="n">new_frames</span>
-</span><span data-line="89">
-</span><span data-line="90">    <span class="k">return</span> <span class="n">frames</span></div>
-
+</span><span data-line="77">            <span class="n">align_structure_robust</span><span class="p">(</span>
+</span><span data-line="78">                <span class="n">ref</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">iraconf</span><span class="o">.</span><span class="n">use_ira</span><span class="p">,</span> <span class="n">iraconf</span><span class="o">.</span><span class="n">kmax</span><span class="p">)</span>
+</span><span data-line="79">            <span class="p">)</span><span class="o">.</span><span class="n">atoms</span>
+</span><span data-line="80">            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</span><span data-line="81">        <span class="p">]</span>
+</span><span data-line="82">
+</span><span data-line="83">    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">ENDPOINTS</span><span class="p">:</span>
+</span><span data-line="84">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Aligning [bold]endpoints[/bold] (product to reactant) only.&quot;</span><span class="p">)</span>
+</span><span data-line="85">        <span class="n">aligned_product</span> <span class="o">=</span> <span class="n">align_structure_robust</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">frames</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">iraconf</span><span class="p">)</span><span class="o">.</span><span class="n">atoms</span>
+</span><span data-line="86">        <span class="c1"># Intermediate frames remain unchanged in this specific mode logic,</span>
+</span><span data-line="87">        <span class="c1"># Usually, endpoint alignment implies ensuring the BCs match.</span>
+</span><span data-line="88">        <span class="n">new_frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">]</span>
+</span><span data-line="89">        <span class="n">new_frames</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">aligned_product</span>
+</span><span data-line="90">        <span class="k">return</span> <span class="n">new_frames</span>
 </span><span data-line="91">
-</span><span data-line="92">
-</span><span data-line="93"><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
-</span><span data-line="94"><span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span>
-</span><span data-line="95">    <span class="s2">&quot;neb_trajectory_file&quot;</span><span class="p">,</span>
-</span><span data-line="96">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">readable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
-</span><span data-line="97"><span class="p">)</span>
-</span><span data-line="98"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="99">    <span class="s2">&quot;--mode&quot;</span><span class="p">,</span>
-</span><span data-line="100">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">SplitMode</span><span class="p">]),</span>
-</span><span data-line="101">    <span class="n">default</span><span class="o">=</span><span class="n">SplitMode</span><span class="o">.</span><span class="n">FLEX</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-</span><span data-line="102">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Validation mode: &#39;neb&#39; (strict multiples) or &#39;normal&#39; (flexible).&quot;</span><span class="p">,</span>
-</span><span data-line="103"><span class="p">)</span>
-</span><span data-line="104"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="105">    <span class="s2">&quot;--output-dir&quot;</span><span class="p">,</span>
-</span><span data-line="106">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">file_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">writable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
-</span><span data-line="107">    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span data-line="108">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Directory to save output files. Defaults to the input filename stem.&quot;</span><span class="p">,</span>
-</span><span data-line="109"><span class="p">)</span>
-</span><span data-line="110"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="111">    <span class="s2">&quot;--images-per-path&quot;</span><span class="p">,</span>
-</span><span data-line="112">    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
-</span><span data-line="113">    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="114">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of images in a single NEB path (e.g., 7). [REQUIRED]&quot;</span><span class="p">,</span>
-</span><span data-line="115"><span class="p">)</span>
-</span><span data-line="116"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="117">    <span class="s2">&quot;--path-index&quot;</span><span class="p">,</span>
-</span><span data-line="118">    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
-</span><span data-line="119">    <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-</span><span data-line="120">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="121">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Index of the NEB path to extract (0-based). Use -1 for the last path.&quot;</span><span class="p">,</span>
-</span><span data-line="122"><span class="p">)</span>
-</span><span data-line="123"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="124">    <span class="s2">&quot;--center/--no-center&quot;</span><span class="p">,</span>
-</span><span data-line="125">    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="126">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Center the atomic coordinates around the origin.&quot;</span><span class="p">,</span>
-</span><span data-line="127"><span class="p">)</span>
-</span><span data-line="128"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="129">    <span class="s2">&quot;--box-diagonal&quot;</span><span class="p">,</span>
-</span><span data-line="130">    <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-</span><span data-line="131">    <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
-</span><span data-line="132">    <span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">),</span>
-</span><span data-line="133">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="134">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Override the unit cell dimensions (Å) during processing.&quot;</span><span class="p">,</span>
-</span><span data-line="135"><span class="p">)</span>
-</span><span data-line="136"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="137">    <span class="s2">&quot;--align-type&quot;</span><span class="p">,</span>
-</span><span data-line="138">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">AlignMode</span><span class="p">]),</span>
-</span><span data-line="139">    <span class="n">default</span><span class="o">=</span><span class="n">AlignMode</span><span class="o">.</span><span class="n">NONE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-</span><span data-line="140">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Alignment: &#39;all&#39; (every image), &#39;endpoints&#39; (reactant/product), or &#39;none&#39;.&quot;</span><span class="p">,</span>
-</span><span data-line="141"><span class="p">)</span>
-</span><span data-line="142"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="143">    <span class="s2">&quot;--use-ira&quot;</span><span class="p">,</span>
-</span><span data-line="144">    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="145">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Enable Iterative Reordering and Alignment (requires ira_mod).&quot;</span><span class="p">,</span>
-</span><span data-line="146"><span class="p">)</span>
-</span><span data-line="147"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="148">    <span class="s2">&quot;--ira-kmax&quot;</span><span class="p">,</span>
-</span><span data-line="149">    <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
-</span><span data-line="150">    <span class="n">default</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span>
-</span><span data-line="151">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;kmax factor for the IRA matching algorithm.&quot;</span><span class="p">,</span>
-</span><span data-line="152"><span class="p">)</span>
-</span><span data-line="153"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="154">    <span class="s2">&quot;--path-list-filename&quot;</span><span class="p">,</span>
-</span><span data-line="155">    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;ipath.dat&quot;</span><span class="p">,</span>
-</span><span data-line="156">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the file listing the generated .con absolute paths.&quot;</span><span class="p">,</span>
-</span><span data-line="157"><span class="p">)</span>
+</span><span data-line="92">    <span class="k">return</span> <span class="n">frames</span></div>
+
+</span><span data-line="93">
+</span><span data-line="94">
+</span><span data-line="95"><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+</span><span data-line="96"><span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span>
+</span><span data-line="97">    <span class="s2">&quot;neb_trajectory_file&quot;</span><span class="p">,</span>
+</span><span data-line="98">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">readable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+</span><span data-line="99"><span class="p">)</span>
+</span><span data-line="100"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="101">    <span class="s2">&quot;--mode&quot;</span><span class="p">,</span>
+</span><span data-line="102">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">SplitMode</span><span class="p">]),</span>
+</span><span data-line="103">    <span class="n">default</span><span class="o">=</span><span class="n">SplitMode</span><span class="o">.</span><span class="n">FLEX</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+</span><span data-line="104">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Validation mode: &#39;neb&#39; (strict multiples) or &#39;normal&#39; (flexible).&quot;</span><span class="p">,</span>
+</span><span data-line="105"><span class="p">)</span>
+</span><span data-line="106"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="107">    <span class="s2">&quot;--output-dir&quot;</span><span class="p">,</span>
+</span><span data-line="108">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">file_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">writable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+</span><span data-line="109">    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span data-line="110">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Directory to save output files. Defaults to the input filename stem.&quot;</span><span class="p">,</span>
+</span><span data-line="111"><span class="p">)</span>
+</span><span data-line="112"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="113">    <span class="s2">&quot;--images-per-path&quot;</span><span class="p">,</span>
+</span><span data-line="114">    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+</span><span data-line="115">    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="116">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Number of images in a single NEB path (e.g., 7). [REQUIRED]&quot;</span><span class="p">,</span>
+</span><span data-line="117"><span class="p">)</span>
+</span><span data-line="118"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="119">    <span class="s2">&quot;--path-index&quot;</span><span class="p">,</span>
+</span><span data-line="120">    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+</span><span data-line="121">    <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+</span><span data-line="122">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="123">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Index of the NEB path to extract (0-based). Use -1 for the last path.&quot;</span><span class="p">,</span>
+</span><span data-line="124"><span class="p">)</span>
+</span><span data-line="125"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="126">    <span class="s2">&quot;--center/--no-center&quot;</span><span class="p">,</span>
+</span><span data-line="127">    <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span data-line="128">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Center the atomic coordinates around the origin.&quot;</span><span class="p">,</span>
+</span><span data-line="129"><span class="p">)</span>
+</span><span data-line="130"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="131">    <span class="s2">&quot;--box-diagonal&quot;</span><span class="p">,</span>
+</span><span data-line="132">    <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+</span><span data-line="133">    <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
+</span><span data-line="134">    <span class="n">default</span><span class="o">=</span><span class="p">(</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">),</span>
+</span><span data-line="135">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="136">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Override the unit cell dimensions (Å) during processing.&quot;</span><span class="p">,</span>
+</span><span data-line="137"><span class="p">)</span>
+</span><span data-line="138"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="139">    <span class="s2">&quot;--align-type&quot;</span><span class="p">,</span>
+</span><span data-line="140">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">AlignMode</span><span class="p">]),</span>
+</span><span data-line="141">    <span class="n">default</span><span class="o">=</span><span class="n">AlignMode</span><span class="o">.</span><span class="n">NONE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+</span><span data-line="142">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Alignment: &#39;all&#39; (every image), &#39;endpoints&#39; (reactant/product), or &#39;none&#39;.&quot;</span><span class="p">,</span>
+</span><span data-line="143"><span class="p">)</span>
+</span><span data-line="144"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="145">    <span class="s2">&quot;--use-ira&quot;</span><span class="p">,</span>
+</span><span data-line="146">    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="147">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Enable Iterative Reordering and Alignment (requires ira_mod).&quot;</span><span class="p">,</span>
+</span><span data-line="148"><span class="p">)</span>
+</span><span data-line="149"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="150">    <span class="s2">&quot;--ira-kmax&quot;</span><span class="p">,</span>
+</span><span data-line="151">    <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+</span><span data-line="152">    <span class="n">default</span><span class="o">=</span><span class="mf">1.8</span><span class="p">,</span>
+</span><span data-line="153">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;kmax factor for the IRA matching algorithm.&quot;</span><span class="p">,</span>
+</span><span data-line="154"><span class="p">)</span>
+</span><span data-line="155"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="156">    <span class="s2">&quot;--path-list-filename&quot;</span><span class="p">,</span>
+</span><span data-line="157">    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;ipath.dat&quot;</span><span class="p">,</span>
+</span><span data-line="158">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the file listing the generated .con absolute paths.&quot;</span><span class="p">,</span>
+</span><span data-line="159"><span class="p">)</span>
 <div class="viewcode-block" id="con_splitter">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/eon/con_splitter/index.html#rgpycrumbs.eon.con_splitter.con_splitter">[docs]</a>
-</span><span data-line="158"><span class="k">def</span><span class="w"> </span><span class="nf">con_splitter</span><span class="p">(</span>
-</span><span data-line="159">    <span class="n">neb_trajectory_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-</span><span data-line="160">    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="161">    <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="162">    <span class="n">images_per_path</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-</span><span data-line="163">    <span class="n">path_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-</span><span data-line="164">    <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-</span><span data-line="165">    <span class="n">box_diagonal</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-</span><span data-line="166">    <span class="n">align_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="167">    <span class="n">use_ira</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-</span><span data-line="168">    <span class="n">ira_kmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-</span><span data-line="169">    <span class="n">path_list_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="170"><span class="p">):</span>
-</span><span data-line="171"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="172"><span class="sd">    Splits a multi-step trajectory file (.traj, .con, etc.) into</span>
-</span><span data-line="173"><span class="sd">    individual .con files for a *single* specified path.</span>
-</span><span data-line="174">
-</span><span data-line="175"><span class="sd">    This script reads a trajectory file, which may contain multiple NEB</span>
-</span><span data-line="176"><span class="sd">    optimization steps (paths), and extracts only the frames corresponding</span>
-</span><span data-line="177"><span class="sd">    to a single specified path.</span>
-</span><span data-line="178">
-</span><span data-line="179"><span class="sd">    It writes each frame of that path into a separate .con file</span>
-</span><span data-line="180"><span class="sd">    (e.g., ipath_000.con, ipath_001.con, ...).</span>
-</span><span data-line="181">
-</span><span data-line="182"><span class="sd">    It also generates a text file (default: &#39;ipath.dat&#39;) that lists the</span>
-</span><span data-line="183"><span class="sd">    absolute paths of all created .con files.</span>
-</span><span data-line="184">
-</span><span data-line="185"><span class="sd">    This utility extracts specific optimization steps and applies physical</span>
-</span><span data-line="186"><span class="sd">    chemistry refinements such as centering, cell overrides, and structural</span>
-</span><span data-line="187"><span class="sd">    alignment (RMSD minimization).</span>
-</span><span data-line="188"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="189">    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="190">        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">neb_trajectory_file</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
-</span><span data-line="191">
-</span><span data-line="192">    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="193">    <span class="n">CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold green]Processing </span><span class="si">{</span><span class="n">neb_trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">[/bold green]&quot;</span><span class="p">)</span>
-</span><span data-line="194">
-</span><span data-line="195">    <span class="k">if</span> <span class="n">images_per_path</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="196">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;--images-per-path must be a positive integer.&quot;</span><span class="p">)</span>
-</span><span data-line="197">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="198">
-</span><span data-line="199">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="200">        <span class="n">all_frames</span> <span class="o">=</span> <span class="n">aseread</span><span class="p">(</span><span class="n">neb_trajectory_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-</span><span data-line="201">        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_frames</span><span class="p">:</span>
-</span><span data-line="202">            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No frames found in input file.&quot;</span><span class="p">)</span>
-</span><span data-line="203">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="204">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="205">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read trajectory: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="206">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="207">
-</span><span data-line="208">    <span class="n">total_frames</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_frames</span><span class="p">)</span>
-</span><span data-line="209">    <span class="n">num_paths</span> <span class="o">=</span> <span class="n">total_frames</span> <span class="o">//</span> <span class="n">images_per_path</span>
-</span><span data-line="210">    <span class="n">remainder</span> <span class="o">=</span> <span class="n">total_frames</span> <span class="o">%</span> <span class="n">images_per_path</span>
-</span><span data-line="211">
-</span><span data-line="212">    <span class="c1"># Validation Logic based on Mode</span>
-</span><span data-line="213">    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">SplitMode</span><span class="o">.</span><span class="n">NEB</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="214">        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-</span><span data-line="215">            <span class="sa">f</span><span class="s2">&quot;Trajectory has </span><span class="si">{</span><span class="n">total_frames</span><span class="si">}</span><span class="s2"> frames,&quot;</span>
-</span><span data-line="216">            <span class="sa">f</span><span class="s2">&quot; which is not a multiple of </span><span class="si">{</span><span class="n">images_per_path</span><span class="si">}</span><span class="s2">. &quot;</span>
-</span><span data-line="217">            <span class="sa">f</span><span class="s2">&quot;This often indicates an interrupted NEB calculation.&quot;</span>
-</span><span data-line="218">        <span class="p">)</span>
-</span><span data-line="219">
-</span><span data-line="220">    <span class="k">if</span> <span class="n">total_frames</span> <span class="o">&lt;</span> <span class="n">images_per_path</span><span class="p">:</span>
-</span><span data-line="221">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-</span><span data-line="222">            <span class="sa">f</span><span class="s2">&quot;Total frames (</span><span class="si">{</span><span class="n">total_frames</span><span class="si">}</span><span class="s2">)&quot;</span>
-</span><span data-line="223">            <span class="sa">f</span><span class="s2">&quot; is less than images per path (</span><span class="si">{</span><span class="n">images_per_path</span><span class="si">}</span><span class="s2">).&quot;</span>
-</span><span data-line="224">        <span class="p">)</span>
-</span><span data-line="225">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="226">
-</span><span data-line="227">    <span class="n">target_idx</span> <span class="o">=</span> <span class="n">num_paths</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">path_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">path_index</span>
-</span><span data-line="228">    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">target_idx</span> <span class="o">&lt;</span> <span class="n">num_paths</span><span class="p">):</span>
-</span><span data-line="229">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
-</span><span data-line="230">            <span class="sa">f</span><span class="s2">&quot;Path index </span><span class="si">{</span><span class="n">target_idx</span><span class="si">}</span><span class="s2"> is out of bounds (0 to </span><span class="si">{</span><span class="n">num_paths</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">).&quot;</span>
-</span><span data-line="231">        <span class="p">)</span>
-</span><span data-line="232">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="233">
-</span><span data-line="234">    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">target_idx</span> <span class="o">*</span> <span class="n">images_per_path</span><span class="p">,</span> <span class="p">(</span><span class="n">target_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">images_per_path</span>
-</span><span data-line="235">    <span class="n">frames</span> <span class="o">=</span> <span class="n">all_frames</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
-</span><span data-line="236">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted [cyan]Path </span><span class="si">{</span><span class="n">target_idx</span><span class="si">}</span><span class="s2">[/cyan] with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> images.&quot;</span><span class="p">)</span>
-</span><span data-line="237">
-</span><span data-line="238">    <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
-</span><span data-line="239">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Centering structures...&quot;</span><span class="p">)</span>
-</span><span data-line="240">    <span class="k">if</span> <span class="n">box_diagonal</span><span class="p">:</span>
-</span><span data-line="241">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Overriding box...&quot;</span><span class="p">)</span>
-</span><span data-line="242">    <span class="k">if</span> <span class="n">center</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="243">        <span class="n">ref_atoms</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span data-line="244">        <span class="n">ref_center</span> <span class="o">=</span> <span class="n">ref_atoms</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">()</span>
-</span><span data-line="245">        <span class="n">box_center</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">/</span><span class="mf">2.0</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">box_diagonal</span><span class="p">]</span>
-</span><span data-line="246">        <span class="n">shift</span> <span class="o">=</span> <span class="n">box_center</span> <span class="o">-</span> <span class="n">ref_center</span>
-</span><span data-line="247">        <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
-</span><span data-line="248">            <span class="n">atoms</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">box_diagonal</span><span class="p">)</span>
-</span><span data-line="249">            <span class="n">atoms</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
-</span><span data-line="250">
-</span><span data-line="251">    <span class="n">align_strategy</span> <span class="o">=</span> <span class="n">AlignMode</span><span class="p">(</span><span class="n">align_type</span><span class="p">)</span>
-</span><span data-line="252">    <span class="k">if</span> <span class="n">align_strategy</span> <span class="o">!=</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
-</span><span data-line="253">        <span class="n">frames</span> <span class="o">=</span> <span class="n">align_path</span><span class="p">(</span>
-</span><span data-line="254">            <span class="n">frames</span><span class="p">,</span> <span class="n">align_strategy</span><span class="p">,</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="n">use_ira</span><span class="p">,</span> <span class="n">kmax</span><span class="o">=</span><span class="n">ira_kmax</span><span class="p">)</span>
-</span><span data-line="255">        <span class="p">)</span>
-</span><span data-line="256">
-</span><span data-line="257">    <span class="n">created_paths</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="258">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
-</span><span data-line="259">        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ipath_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.con&quot;</span>
-</span><span data-line="260">        <span class="n">dest</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">name</span>
-</span><span data-line="261">        <span class="n">asewrite</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
-</span><span data-line="262">        <span class="n">created_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="o">.</span><span class="n">resolve</span><span class="p">()))</span>
-</span><span data-line="263">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Saved [green]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">)</span>
-</span><span data-line="264">
-</span><span data-line="265">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">path_list_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="266">        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">created_paths</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="267">
-</span><span data-line="268">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path list saved to [magenta]</span><span class="si">{</span><span class="n">path_list_filename</span><span class="si">}</span><span class="s2">[/magenta]&quot;</span><span class="p">)</span>
-</span><span data-line="269">    <span class="n">CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="s2">&quot;[bold green]Complete[/bold green]&quot;</span><span class="p">)</span></div>
+</span><span data-line="160"><span class="k">def</span><span class="w"> </span><span class="nf">con_splitter</span><span class="p">(</span>
+</span><span data-line="161">    <span class="n">neb_trajectory_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+</span><span data-line="162">    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="163">    <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="164">    <span class="n">images_per_path</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span data-line="165">    <span class="n">path_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span data-line="166">    <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+</span><span data-line="167">    <span class="n">box_diagonal</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span data-line="168">    <span class="n">align_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="169">    <span class="n">use_ira</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+</span><span data-line="170">    <span class="n">ira_kmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+</span><span data-line="171">    <span class="n">path_list_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="172"><span class="p">):</span>
+</span><span data-line="173"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="174"><span class="sd">    Splits a multi-step trajectory file (.traj, .con, etc.) into</span>
+</span><span data-line="175"><span class="sd">    individual .con files for a *single* specified path.</span>
+</span><span data-line="176">
+</span><span data-line="177"><span class="sd">    This script reads a trajectory file, which may contain multiple NEB</span>
+</span><span data-line="178"><span class="sd">    optimization steps (paths), and extracts only the frames corresponding</span>
+</span><span data-line="179"><span class="sd">    to a single specified path.</span>
+</span><span data-line="180">
+</span><span data-line="181"><span class="sd">    It writes each frame of that path into a separate .con file</span>
+</span><span data-line="182"><span class="sd">    (e.g., ipath_000.con, ipath_001.con, ...).</span>
+</span><span data-line="183">
+</span><span data-line="184"><span class="sd">    It also generates a text file (default: &#39;ipath.dat&#39;) that lists the</span>
+</span><span data-line="185"><span class="sd">    absolute paths of all created .con files.</span>
+</span><span data-line="186">
+</span><span data-line="187"><span class="sd">    This utility extracts specific optimization steps and applies physical</span>
+</span><span data-line="188"><span class="sd">    chemistry refinements such as centering, cell overrides, and structural</span>
+</span><span data-line="189"><span class="sd">    alignment (RMSD minimization).</span>
+</span><span data-line="190"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="191">    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="192">        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">neb_trajectory_file</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+</span><span data-line="193">
+</span><span data-line="194">    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="195">    <span class="n">CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold green]Processing </span><span class="si">{</span><span class="n">neb_trajectory_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">[/bold green]&quot;</span><span class="p">)</span>
+</span><span data-line="196">
+</span><span data-line="197">    <span class="k">if</span> <span class="n">images_per_path</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="198">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;--images-per-path must be a positive integer.&quot;</span><span class="p">)</span>
+</span><span data-line="199">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="200">
+</span><span data-line="201">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="202">        <span class="n">all_frames</span> <span class="o">=</span> <span class="n">aseread</span><span class="p">(</span><span class="n">neb_trajectory_file</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+</span><span data-line="203">        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_frames</span><span class="p">:</span>
+</span><span data-line="204">            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No frames found in input file.&quot;</span><span class="p">)</span>
+</span><span data-line="205">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="206">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="207">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to read trajectory: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="208">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="209">
+</span><span data-line="210">    <span class="n">total_frames</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_frames</span><span class="p">)</span>
+</span><span data-line="211">    <span class="n">num_paths</span> <span class="o">=</span> <span class="n">total_frames</span> <span class="o">//</span> <span class="n">images_per_path</span>
+</span><span data-line="212">    <span class="n">remainder</span> <span class="o">=</span> <span class="n">total_frames</span> <span class="o">%</span> <span class="n">images_per_path</span>
+</span><span data-line="213">
+</span><span data-line="214">    <span class="c1"># Validation Logic based on Mode</span>
+</span><span data-line="215">    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">SplitMode</span><span class="o">.</span><span class="n">NEB</span><span class="o">.</span><span class="n">value</span> <span class="ow">and</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="216">        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+</span><span data-line="217">            <span class="sa">f</span><span class="s2">&quot;Trajectory has </span><span class="si">{</span><span class="n">total_frames</span><span class="si">}</span><span class="s2"> frames,&quot;</span>
+</span><span data-line="218">            <span class="sa">f</span><span class="s2">&quot; which is not a multiple of </span><span class="si">{</span><span class="n">images_per_path</span><span class="si">}</span><span class="s2">. &quot;</span>
+</span><span data-line="219">            <span class="sa">f</span><span class="s2">&quot;This often indicates an interrupted NEB calculation.&quot;</span>
+</span><span data-line="220">        <span class="p">)</span>
+</span><span data-line="221">
+</span><span data-line="222">    <span class="k">if</span> <span class="n">total_frames</span> <span class="o">&lt;</span> <span class="n">images_per_path</span><span class="p">:</span>
+</span><span data-line="223">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+</span><span data-line="224">            <span class="sa">f</span><span class="s2">&quot;Total frames (</span><span class="si">{</span><span class="n">total_frames</span><span class="si">}</span><span class="s2">)&quot;</span>
+</span><span data-line="225">            <span class="sa">f</span><span class="s2">&quot; is less than images per path (</span><span class="si">{</span><span class="n">images_per_path</span><span class="si">}</span><span class="s2">).&quot;</span>
+</span><span data-line="226">        <span class="p">)</span>
+</span><span data-line="227">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="228">
+</span><span data-line="229">    <span class="n">target_idx</span> <span class="o">=</span> <span class="n">num_paths</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">path_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">path_index</span>
+</span><span data-line="230">    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">target_idx</span> <span class="o">&lt;</span> <span class="n">num_paths</span><span class="p">):</span>
+</span><span data-line="231">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span>
+</span><span data-line="232">            <span class="sa">f</span><span class="s2">&quot;Path index </span><span class="si">{</span><span class="n">target_idx</span><span class="si">}</span><span class="s2"> is out of bounds (0 to </span><span class="si">{</span><span class="n">num_paths</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">).&quot;</span>
+</span><span data-line="233">        <span class="p">)</span>
+</span><span data-line="234">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="235">
+</span><span data-line="236">    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">target_idx</span> <span class="o">*</span> <span class="n">images_per_path</span><span class="p">,</span> <span class="p">(</span><span class="n">target_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">images_per_path</span>
+</span><span data-line="237">    <span class="n">frames</span> <span class="o">=</span> <span class="n">all_frames</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+</span><span data-line="238">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted [cyan]Path </span><span class="si">{</span><span class="n">target_idx</span><span class="si">}</span><span class="s2">[/cyan] with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> images.&quot;</span><span class="p">)</span>
+</span><span data-line="239">
+</span><span data-line="240">    <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
+</span><span data-line="241">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Centering structures...&quot;</span><span class="p">)</span>
+</span><span data-line="242">    <span class="k">if</span> <span class="n">box_diagonal</span><span class="p">:</span>
+</span><span data-line="243">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Overriding box...&quot;</span><span class="p">)</span>
+</span><span data-line="244">    <span class="k">if</span> <span class="n">center</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="245">        <span class="n">ref_atoms</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span data-line="246">        <span class="n">ref_center</span> <span class="o">=</span> <span class="n">ref_atoms</span><span class="o">.</span><span class="n">get_center_of_mass</span><span class="p">()</span>
+</span><span data-line="247">        <span class="n">box_center</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">box_diagonal</span><span class="p">]</span>
+</span><span data-line="248">        <span class="n">shift</span> <span class="o">=</span> <span class="n">box_center</span> <span class="o">-</span> <span class="n">ref_center</span>
+</span><span data-line="249">        <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+</span><span data-line="250">            <span class="n">atoms</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">box_diagonal</span><span class="p">)</span>
+</span><span data-line="251">            <span class="n">atoms</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+</span><span data-line="252">
+</span><span data-line="253">    <span class="n">align_strategy</span> <span class="o">=</span> <span class="n">AlignMode</span><span class="p">(</span><span class="n">align_type</span><span class="p">)</span>
+</span><span data-line="254">    <span class="k">if</span> <span class="n">align_strategy</span> <span class="o">!=</span> <span class="n">AlignMode</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+</span><span data-line="255">        <span class="n">frames</span> <span class="o">=</span> <span class="n">align_path</span><span class="p">(</span>
+</span><span data-line="256">            <span class="n">frames</span><span class="p">,</span> <span class="n">align_strategy</span><span class="p">,</span> <span class="n">IRAConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="n">use_ira</span><span class="p">,</span> <span class="n">kmax</span><span class="o">=</span><span class="n">ira_kmax</span><span class="p">)</span>
+</span><span data-line="257">        <span class="p">)</span>
+</span><span data-line="258">
+</span><span data-line="259">    <span class="n">created_paths</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="260">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">frames</span><span class="p">):</span>
+</span><span data-line="261">        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ipath_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.con&quot;</span>
+</span><span data-line="262">        <span class="n">dest</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">name</span>
+</span><span data-line="263">        <span class="n">asewrite</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
+</span><span data-line="264">        <span class="n">created_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dest</span><span class="o">.</span><span class="n">resolve</span><span class="p">()))</span>
+</span><span data-line="265">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - Saved [green]</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">)</span>
+</span><span data-line="266">
+</span><span data-line="267">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">path_list_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="268">        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">created_paths</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="269">
+</span><span data-line="270">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path list saved to [magenta]</span><span class="si">{</span><span class="n">path_list_filename</span><span class="si">}</span><span class="s2">[/magenta]&quot;</span><span class="p">)</span>
+</span><span data-line="271">    <span class="n">CONSOLE</span><span class="o">.</span><span class="n">rule</span><span class="p">(</span><span class="s2">&quot;[bold green]Complete[/bold green]&quot;</span><span class="p">)</span></div>
 
-</span><span data-line="270">
-</span><span data-line="271">
-</span><span data-line="272"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span><span data-line="273">    <span class="n">con_splitter</span><span class="p">()</span>
+</span><span data-line="272">
+</span><span data-line="273">
+</span><span data-line="274"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span data-line="275">    <span class="n">con_splitter</span><span class="p">()</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

@@ -104,7 +104,7 @@ Module Contents
 
 
    .. py:attribute:: tot_time
-      :type:  datetime.timedelta
+      :type:  float
 
 
    .. py:attribute:: saddle_energy

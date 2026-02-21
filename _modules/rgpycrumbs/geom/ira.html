@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -227,10 +239,10 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="2"><span class="c1"># PYTHONPATH export.. after that&#39;s cleared up this will probably be a dependency</span>
 </span><span data-line="3"><span class="c1"># [1]: https://github.com/mammasmias/IterativeRotationsAssignments</span>
 </span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
-</span><span data-line="5">
-</span><span data-line="6"><span class="kn">import</span><span class="w"> </span><span class="nn">ira_mod</span>
-</span><span data-line="7"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+</span><span data-line="5"><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="kn">import</span><span class="w"> </span><span class="nn">ira_mod</span>
+</span><span data-line="8"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 </span><span data-line="9">
 </span><span data-line="10">
 </span><span data-line="11"><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
@@ -316,15 +328,13 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="62"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates RMSD using do_ira.&quot;&quot;&quot;</span>
 </span><span data-line="63">    <span class="n">ira_comp</span> <span class="o">=</span> <span class="n">do_ira</span><span class="p">(</span><span class="n">atm1</span><span class="p">,</span> <span class="n">atm2</span><span class="p">,</span> <span class="n">k_factor</span><span class="p">)</span>
 </span><span data-line="64">    <span class="n">atm2_coords_permuted</span> <span class="o">=</span> <span class="n">atm2</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()[</span><span class="n">ira_comp</span><span class="o">.</span><span class="n">perm</span><span class="p">]</span>
-</span><span data-line="65">    <span class="n">atm2_coords_transformed</span> <span class="o">=</span> <span class="p">(</span>
-</span><span data-line="66">        <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">atm2_coords_permuted</span><span class="p">,</span> <span class="n">ira_comp</span><span class="o">.</span><span class="n">rot</span><span class="p">)</span> <span class="o">+</span> <span class="n">ira_comp</span><span class="o">.</span><span class="n">trans</span>
-</span><span data-line="67">    <span class="p">)</span>
-</span><span data-line="68">    <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atm1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">())</span>
-</span><span data-line="69">    <span class="n">squared_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-</span><span data-line="70">        <span class="p">(</span><span class="n">atm1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span> <span class="o">-</span> <span class="n">atm2_coords_transformed</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
-</span><span data-line="71">    <span class="p">)</span>
-</span><span data-line="72">    <span class="n">rmsd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">squared_distances</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="p">)</span>
-</span><span data-line="73">    <span class="k">return</span> <span class="n">rmsd</span></div>
+</span><span data-line="65">    <span class="n">atm2_coords_transformed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">atm2_coords_permuted</span><span class="p">,</span> <span class="n">ira_comp</span><span class="o">.</span><span class="n">rot</span><span class="p">)</span> <span class="o">+</span> <span class="n">ira_comp</span><span class="o">.</span><span class="n">trans</span>
+</span><span data-line="66">    <span class="n">n_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atm1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">())</span>
+</span><span data-line="67">    <span class="n">squared_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+</span><span data-line="68">        <span class="p">(</span><span class="n">atm1</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span> <span class="o">-</span> <span class="n">atm2_coords_transformed</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+</span><span data-line="69">    <span class="p">)</span>
+</span><span data-line="70">    <span class="n">rmsd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">squared_distances</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_atoms</span><span class="p">)</span>
+</span><span data-line="71">    <span class="k">return</span> <span class="n">rmsd</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

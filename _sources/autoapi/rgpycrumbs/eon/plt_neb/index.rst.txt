@@ -36,7 +36,6 @@ Attributes
    rgpycrumbs.eon.plt_neb.log
    rgpycrumbs.eon.plt_neb.DEFAULT_INPUT_PATTERN
    rgpycrumbs.eon.plt_neb.DEFAULT_PATH_PATTERN
-   rgpycrumbs.eon.plt_neb.ROUNDING_DF
    rgpycrumbs.eon.plt_neb.IRA_KMAX_DEFAULT
 
 
@@ -61,15 +60,11 @@ Module Contents
    :value: 'neb_path_*.con'
 
 
-.. py:data:: ROUNDING_DF
-   :value: 3
-
-
 .. py:data:: IRA_KMAX_DEFAULT
    :value: 1.8
 
 
-.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, plot_type, landscape_mode, landscape_path, rc_mode, plot_structures, rbf_smoothing, rounding, show_pts, plot_mode, surface_type, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, savgol_window, savgol_order, draw_reactant, draw_saddle, draw_product, show_legend, cache_file, force_recompute, ira_kmax, sp_file, augment_dat, augment_con)
+.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, plot_type, landscape_mode, landscape_path, project_path, rc_mode, plot_structures, rbf_smoothing, show_pts, plot_mode, surface_type, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, draw_reactant, draw_saddle, draw_product, show_legend, cache_file, force_recompute, ira_kmax, sp_file, augment_dat, augment_con)
 
    Main entry point for NEB plot script.
 

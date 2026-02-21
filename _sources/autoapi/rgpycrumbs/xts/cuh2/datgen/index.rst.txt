@@ -15,5 +15,5 @@ Functions
 Module Contents
 ---------------
 
-.. py:function:: get_from_gitroot_con(fname='cuh2.con', hh_range=cuh2slab.PltRange(low=-0.05, high=5), h2slab_range=cuh2slab.PltRange(low=-0.05, high=5), n_points=cuh2slab.PlotPoints(x_npt=40, y_npt=40))
+.. py:function:: get_from_gitroot_con(fname='cuh2.con', hh_range=None, h2slab_range=None, n_points=None)
 

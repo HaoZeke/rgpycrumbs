@@ -4,15 +4,16 @@ rgpycrumbs.surfaces
 .. py:module:: rgpycrumbs.surfaces
 
 
-Attributes
+Submodules
 ----------
 
-.. autoapisummary::
+.. toctree::
+   :maxdepth: 1
 
-   rgpycrumbs.surfaces.k_matrix_matern_grad_map
-   rgpycrumbs.surfaces.k_matrix_se_grad_map
-   rgpycrumbs.surfaces.k_matrix_imq_grad_map
-   rgpycrumbs.surfaces.k_matrix_rq_grad_map
+   /autoapi/rgpycrumbs/surfaces/_base/index
+   /autoapi/rgpycrumbs/surfaces/_kernels/index
+   /autoapi/rgpycrumbs/surfaces/gradient/index
+   /autoapi/rgpycrumbs/surfaces/standard/index
 
 
 Classes
@@ -20,13 +21,16 @@ Classes
 
 .. autoapisummary::
 
-   rgpycrumbs.surfaces.FastTPS
-   rgpycrumbs.surfaces.FastMatern
-   rgpycrumbs.surfaces.GradientMatern
-   rgpycrumbs.surfaces.FastIMQ
-   rgpycrumbs.surfaces.GradientSE
+   rgpycrumbs.surfaces.BaseGradientSurface
+   rgpycrumbs.surfaces.BaseSurface
    rgpycrumbs.surfaces.GradientIMQ
+   rgpycrumbs.surfaces.GradientMatern
    rgpycrumbs.surfaces.GradientRQ
+   rgpycrumbs.surfaces.GradientSE
+   rgpycrumbs.surfaces.NystromGradientIMQ
+   rgpycrumbs.surfaces.FastIMQ
+   rgpycrumbs.surfaces.FastMatern
+   rgpycrumbs.surfaces.FastTPS
 
 
 Functions
@@ -34,149 +38,448 @@ Functions
 
 .. autoapisummary::
 
-   rgpycrumbs.surfaces.safe_cholesky_solve
    rgpycrumbs.surfaces.generic_negative_mll
-   rgpycrumbs.surfaces._tps_kernel_matrix
-   rgpycrumbs.surfaces.negative_mll_tps
-   rgpycrumbs.surfaces._tps_solve
-   rgpycrumbs.surfaces._tps_predict
-   rgpycrumbs.surfaces._matern_kernel_matrix
-   rgpycrumbs.surfaces.negative_mll_matern_std
-   rgpycrumbs.surfaces._matern_solve
-   rgpycrumbs.surfaces._matern_predict
-   rgpycrumbs.surfaces.matern_kernel_elem
-   rgpycrumbs.surfaces.full_covariance_matern
-   rgpycrumbs.surfaces.negative_mll_matern_grad
-   rgpycrumbs.surfaces._grad_matern_solve
-   rgpycrumbs.surfaces._grad_matern_predict
+   rgpycrumbs.surfaces.safe_cholesky_solve
    rgpycrumbs.surfaces._imq_kernel_matrix
-   rgpycrumbs.surfaces.negative_mll_imq_std
-   rgpycrumbs.surfaces._imq_solve
-   rgpycrumbs.surfaces._imq_predict
-   rgpycrumbs.surfaces.se_kernel_elem
-   rgpycrumbs.surfaces.full_covariance_se
-   rgpycrumbs.surfaces.negative_mll_se_grad
-   rgpycrumbs.surfaces._grad_se_solve
-   rgpycrumbs.surfaces._grad_se_predict
-   rgpycrumbs.surfaces.imq_kernel_elem
-   rgpycrumbs.surfaces.full_covariance_imq
-   rgpycrumbs.surfaces.negative_mll_imq_grad
-   rgpycrumbs.surfaces.negative_mll_imq_map
-   rgpycrumbs.surfaces._grad_imq_solve
-   rgpycrumbs.surfaces._grad_imq_predict
-   rgpycrumbs.surfaces.rq_kernel_base
-   rgpycrumbs.surfaces.rq_kernel_elem
-   rgpycrumbs.surfaces.full_covariance_rq
-   rgpycrumbs.surfaces.negative_mll_rq_map
-   rgpycrumbs.surfaces._grad_rq_solve
-   rgpycrumbs.surfaces._grad_rq_predict
+   rgpycrumbs.surfaces._matern_kernel_matrix
+   rgpycrumbs.surfaces._tps_kernel_matrix
    rgpycrumbs.surfaces.get_surface_model
 
 
-Module Contents
----------------
+Package Contents
+----------------
 
-.. py:function:: safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3)
+.. py:class:: BaseGradientSurface(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
 
-   Retries Cholesky with increasing jitter if it fails.
+   Abstract base class for gradient-enhanced surface models.
+
+   Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
+   These models incorporate both values and their gradients into the fit.
+
+
+   .. py:attribute:: x
+
+
+   .. py:attribute:: y_full
+
+
+   .. py:attribute:: e_mean
+
+
+   .. py:attribute:: y_flat
+
+
+   .. py:attribute:: D_plus_1
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+      :abstractmethod:
+
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+      :abstractmethod:
+
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Predict values at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch.
+
+      Returns:
+          jnp.ndarray: Predicted values (M,).
+
+
+
+   .. py:method:: predict_var(x_query, chunk_size=500)
+
+      Predict posterior variance at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch.
+
+      Returns:
+          jnp.ndarray: Predicted variances (M,).
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: BaseSurface(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
+
+   Abstract base class for standard (non-gradient) surface models.
+
+   Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
+
+
+   .. py:attribute:: x_obs
+
+
+   .. py:attribute:: y_obs
+
+
+   .. py:attribute:: y_mean
+
+
+   .. py:attribute:: y_centered
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+      :abstractmethod:
+
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+      :abstractmethod:
+
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: __call__(x_query, chunk_size=500)
+
+      Predict values at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch to avoid OOM.
+
+      Returns:
+          jnp.ndarray: Predicted values (M,).
+
+
+
+   .. py:method:: predict_var(x_query, chunk_size=500)
+
+      Predict posterior variance at query points.
+
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Number of points to process per batch.
+
+      Returns:
+          jnp.ndarray: Predicted variances (M,).
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+      :abstractmethod:
+
+
+      Internal method for batch variance.
+
 
 
 .. py:function:: generic_negative_mll(K, y, noise_scalar)
 
-.. py:function:: _tps_kernel_matrix(x)
+   Calculates the negative Marginal Log-Likelihood (MLL).
 
-.. py:function:: negative_mll_tps(log_params, x, y)
+   Args:
+       K: Covariance matrix.
+       y: Observation vector.
+       noise_scalar: Noise level for regularization.
 
-.. py:function:: _tps_solve(x, y, sm)
-
-.. py:function:: _tps_predict(x_query, x_obs, w, v)
-
-.. py:class:: FastTPS(x_obs, y_obs, smoothing=0.001, optimize=True, **kwargs)
-
-   .. py:attribute:: x_obs
+   Returns:
+       float: The negative MLL value, or a high penalty if Cholesky fails.
 
 
-   .. py:attribute:: y_obs
+.. py:function:: safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3)
 
+   Retries Cholesky decomposition with increasing jitter if it fails.
 
-   .. py:attribute:: y_mean
+   Args:
+       K: Covariance matrix.
+       y: Observation vector.
+       noise_scalar: Initial noise level.
+       jitter_steps: Number of retry attempts with increasing jitter.
 
-
-   .. py:method:: __call__(x_query, chunk_size=500)
-
-      Batched prediction to prevent OOM errors on large grids.
-
-
-
-.. py:function:: _matern_kernel_matrix(x, length_scale)
-
-.. py:function:: negative_mll_matern_std(log_params, x, y)
-
-.. py:function:: _matern_solve(x, y, sm, length_scale)
-
-.. py:function:: _matern_predict(x_query, x_obs, alpha, length_scale)
-
-.. py:class:: FastMatern(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
-
-   .. py:attribute:: x_obs
-
-
-   .. py:attribute:: y_obs
-
-
-   .. py:attribute:: y_mean
-
-
-   .. py:attribute:: alpha
-
-
-   .. py:method:: __call__(x_query, chunk_size=500)
-
-      Batched prediction for Matern.
-
-
-
-.. py:function:: matern_kernel_elem(x1, x2, length_scale=1.0)
-
-.. py:function:: full_covariance_matern(x1, x2, length_scale)
-
-.. py:data:: k_matrix_matern_grad_map
-
-.. py:function:: negative_mll_matern_grad(log_params, x, y_flat, D_plus_1)
-
-.. py:function:: _grad_matern_solve(x, y_full, noise_scalar, length_scale)
-
-.. py:function:: _grad_matern_predict(x_query, x_obs, alpha, length_scale)
-
-.. py:class:: GradientMatern(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
-
-   .. py:attribute:: x
-
-
-   .. py:attribute:: y_full
-
-
-   .. py:attribute:: e_mean
-
-
-   .. py:attribute:: y_flat
-
-
-   .. py:attribute:: alpha
-
-
-   .. py:method:: __call__(x_query, chunk_size=500)
+   Returns:
+       tuple: (alpha, log_det) where alpha is the solution vector and
+              log_det is the log determinant of the jittered matrix.
 
 
 .. py:function:: _imq_kernel_matrix(x, epsilon)
 
-.. py:function:: negative_mll_imq_std(log_params, x, y)
+.. py:function:: _matern_kernel_matrix(x, length_scale)
 
-.. py:function:: _imq_solve(x, y, sm, epsilon)
+.. py:function:: _tps_kernel_matrix(x)
 
-.. py:function:: _imq_predict(x_query, x_obs, alpha, epsilon)
+.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
 
-.. py:class:: FastIMQ(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: GradientMatern(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Matérn 5/2 surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.
+
+
+   .. py:method:: _fit(_smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: GradientSE(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Squared Exponential (SE) surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: NystromGradientIMQ(x, y, gradients=None, n_inducing=300, nimags=None, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.
+
+
+   .. py:attribute:: n_inducing
+      :value: 300
+
+
+
+   .. py:attribute:: nimags
+      :value: None
+
+
+
+   .. py:method:: _fit(smoothing, length_scale, _optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: FastIMQ(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseSurface`
+
+
+   Inverse Multi-Quadratic (IMQ) surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: FastMatern(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseSurface`
+
+
+   Matérn 5/2 surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:class:: FastTPS(x_obs, y_obs, smoothing=0.001, optimize=True, **_kwargs)
+
+   Thin Plate Spline (TPS) surface implementation.
+   Includes a polynomial mean function and supports smoothing optimization.
+
 
    .. py:attribute:: x_obs
 
@@ -187,121 +490,40 @@ Module Contents
    .. py:attribute:: y_mean
 
 
-   .. py:attribute:: alpha
-
-
    .. py:method:: __call__(x_query, chunk_size=500)
 
+      Predict values at query points using chunking.
 
-.. py:function:: se_kernel_elem(x1, x2, length_scale=1.0)
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Processing batch size.
 
-.. py:function:: full_covariance_se(x1, x2, length_scale)
+      Returns:
+          jnp.ndarray: Predicted values (M,).
 
-.. py:data:: k_matrix_se_grad_map
 
-.. py:function:: negative_mll_se_grad(log_params, x, y_flat, D_plus_1)
 
-.. py:function:: _grad_se_solve(x, y_full, noise_scalar, length_scale)
+   .. py:method:: predict_var(x_query, chunk_size=500)
 
-.. py:function:: _grad_se_predict(x_query, x_obs, alpha, length_scale)
+      Predict posterior variance at query points.
 
-.. py:class:: GradientSE(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
+      Args:
+          x_query: Query inputs (M, D).
+          chunk_size: Processing batch size.
 
-   .. py:attribute:: x
+      Returns:
+          jnp.ndarray: Predicted variances (M,).
 
-
-   .. py:attribute:: y_full
-
-
-   .. py:attribute:: e_mean
-
-
-   .. py:attribute:: y_flat
-
-
-   .. py:attribute:: alpha
-
-
-   .. py:method:: __call__(x_query, chunk_size=500)
-
-
-.. py:function:: imq_kernel_elem(x1, x2, epsilon=1.0)
-
-.. py:function:: full_covariance_imq(x1, x2, epsilon)
-
-.. py:data:: k_matrix_imq_grad_map
-
-.. py:function:: negative_mll_imq_grad(log_params, x, y_flat, D_plus_1)
-
-.. py:function:: negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1)
-
-.. py:function:: _grad_imq_solve(x, y_full, noise_scalar, epsilon)
-
-.. py:function:: _grad_imq_predict(x_query, x_obs, alpha, epsilon)
-
-.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
-
-   .. py:attribute:: x
-
-
-   .. py:attribute:: y_full
-
-
-   .. py:attribute:: e_mean
-
-
-   .. py:attribute:: y_flat
-
-
-   .. py:attribute:: alpha
-
-
-   .. py:method:: __call__(x_query, chunk_size=500)
-
-
-.. py:function:: rq_kernel_base(x1, x2, length_scale, alpha)
-
-   Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha
-
-
-.. py:function:: rq_kernel_elem(x1, x2, params)
-
-   SYMMETRIC KERNEL TRICK: k_sym(x, x') = k(x, x') + k(swap(x), x')
-   Enforces f(r, p) = f(p, r) globally.
-
-
-.. py:function:: full_covariance_rq(x1, x2, params)
-
-.. py:data:: k_matrix_rq_grad_map
-
-.. py:function:: negative_mll_rq_map(log_params, x, y_flat, D_plus_1)
-
-.. py:function:: _grad_rq_solve(x, y_full, noise_scalar, params)
-
-.. py:function:: _grad_rq_predict(x_query, x_obs, alpha, params)
-
-.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **kwargs)
-
-   .. py:attribute:: x
-
-
-   .. py:attribute:: y_full
-
-
-   .. py:attribute:: e_mean
-
-
-   .. py:attribute:: y_flat
-
-
-   .. py:attribute:: params
-
-
-   .. py:attribute:: alpha
-
-
-   .. py:method:: __call__(x_query, chunk_size=500)
 
 
 .. py:function:: get_surface_model(name)
+
+   Factory function to retrieve surface model classes by name.
+
+   Args:
+       name: Model identifier (e.g., 'grad_matern', 'tps', 'imq').
+
+   Returns:
+       type: The model class. Defaults to GradientMatern.
+
 

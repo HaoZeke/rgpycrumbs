@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -187,9 +199,10 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#rgpycrumbs.parsers.bless.BLESS_LOG"><code class="docutils literal notranslate"><span class="pre">BLESS_LOG</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.parsers.bless.BLESS_TIME"><code class="docutils literal notranslate"><span class="pre">BLESS_TIME</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.bless.BLESS_TIME"><code class="docutils literal notranslate"><span class="pre">BLESS_TIME()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -279,7 +292,16 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.bless.BLESS_LOG" title="rgpycrumbs.parsers.bless.BLESS_LOG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BLESS_LOG</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.bless.BLESS_TIME" title="rgpycrumbs.parsers.bless.BLESS_TIME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BLESS_TIME</span></code></a></p></td>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.bless.BLESS_TIME" title="rgpycrumbs.parsers.bless.BLESS_TIME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BLESS_TIME</span></code></a>(→ datetime.datetime)</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -293,9 +315,9 @@ data-aria-dark="Switch to auto color mode">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.bless.</span></span><span class="sig-name descname"><span class="pre">BLESS_LOG</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/bless.html#BLESS_LOG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.bless.BLESS_LOG" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py data">
+<dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.parsers.bless.BLESS_TIME">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.bless.</span></span><span class="sig-name descname"><span class="pre">BLESS_TIME</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/bless.html#BLESS_TIME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.bless.BLESS_TIME" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.bless.</span></span><span class="sig-name descname"><span class="pre">BLESS_TIME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime.datetime</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/bless.html#BLESS_TIME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.bless.BLESS_TIME" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>

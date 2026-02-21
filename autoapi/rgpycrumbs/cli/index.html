@@ -93,11 +93,16 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/geom/index.html">Geometry Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
@@ -164,7 +169,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../surfaces/index.html">rgpycrumbs.surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../xts/index.html">rgpycrumbs.xts</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
@@ -172,6 +183,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../../generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
 </ul>
@@ -299,13 +311,13 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.cli._get_scripts_in_folder" title="rgpycrumbs.cli._get_scripts_in_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_scripts_in_folder</span></code></a>(→ list[str])</p></td>
 <td><p>Returns a sorted list of script names (without extension) in a folder.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.cli._dispatch" title="rgpycrumbs.cli._dispatch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_dispatch</span></code></a>(group, script_name, script_args)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.cli._dispatch" title="rgpycrumbs.cli._dispatch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_dispatch</span></code></a>(group, script_name, script_args[, is_dev, ...])</p></td>
 <td><p>Sets up the environment and runs the target script via 'uv run'.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.cli._make_script_command" title="rgpycrumbs.cli._make_script_command"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_make_script_command</span></code></a>(→ click.Command)</p></td>
 <td><p>Creates a click command that dispatches to a PEP 723 script.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.cli.main" title="rgpycrumbs.cli.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.cli.main" title="rgpycrumbs.cli.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(ctx, dev, verbose)</p></td>
 <td><p>A dispatcher that runs self-contained PEP 723 scripts using 'uv'.</p></td>
 </tr>
 </tbody>
@@ -327,7 +339,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.cli._dispatch">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.cli.</span></span><span class="sig-name descname"><span class="pre">_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/cli.html#_dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.cli._dispatch" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.cli.</span></span><span class="sig-name descname"><span class="pre">_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_dev</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/cli.html#_dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.cli._dispatch" title="Link to this definition">¶</a></dt>
 <dd><p>Sets up the environment and runs the target script via ‘uv run’.</p>
 </dd></dl>
 
@@ -339,7 +351,7 @@ data-aria-dark="Switch to auto color mode">
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.cli.main">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.cli.main" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.cli.main" title="Link to this definition">¶</a></dt>
 <dd><p>A dispatcher that runs self-contained PEP 723 scripts using ‘uv’.</p>
 </dd></dl>
 

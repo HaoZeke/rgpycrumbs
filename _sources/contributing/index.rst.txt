@@ -11,7 +11,7 @@ Communication and Conduct
 -------------------------
 
 We value a respectful and inclusive community. All contributors must follow our
-`Code of Conduct <https://rgpycrumbs.rgoswami.me/code_of_conduct.html>`_. 
+`Code of Conduct <https://rgpycrumbs.rgoswami.me/code_of_conduct.html>`_.
 
 Getting Started
 ---------------
@@ -19,12 +19,13 @@ Getting Started
 Please review the technical requirements before submitting a Pull Request:
 
 Development Environment
-    We use ``pixi`` for environment management. 
-    Read the `Testing & Environment Requirements <test_requirements.rst>`_ to understand how to handle 
-    conflicting dependencies.
+    We use ``pixi`` for environment management.
+    Read the `Testing & Environment Requirements <test_requirements.rst>`_ to understand how to handle
+    conflicting dependencies, and how to use the ``--dev`` flag when working
+    with local, editable installs of dependent packages.
 
 Code Style
-    We follow a "Dispatcher" pattern detailed in the `design and architecture notes <~/Git/Github/Python/rgpycrumbs/docs/orgmode/devnotes.rst>`_. Keep core logic in 
+    We follow a "Dispatcher" pattern detailed in the `design and architecture notes <~/Git/Github/Python/rgpycrumbs/docs/orgmode/devnotes.rst>`_. Keep core logic in
     independent scripts using PEP 723 metadata as per these `real python best practices <https://realpython.com/python-script-structure/>`_.
 
 Documentation

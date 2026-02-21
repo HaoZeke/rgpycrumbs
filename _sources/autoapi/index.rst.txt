@@ -8,5 +8,6 @@ This page contains auto-generated API reference documentation [#f1]_.
 
    /autoapi/helpers/index
    /autoapi/rgpycrumbs/index
+   /autoapi/generate_orca_input/index
 
 .. [#f1] Created with `sphinx-autoapi <https://github.com/readthedocs/sphinx-autoapi>`_

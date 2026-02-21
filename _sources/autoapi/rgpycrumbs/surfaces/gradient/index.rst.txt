@@ -1,0 +1,258 @@
+rgpycrumbs.surfaces.gradient
+============================
+
+.. py:module:: rgpycrumbs.surfaces.gradient
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient.GradientMatern
+   rgpycrumbs.surfaces.gradient.GradientSE
+   rgpycrumbs.surfaces.gradient.GradientIMQ
+   rgpycrumbs.surfaces.gradient.GradientRQ
+   rgpycrumbs.surfaces.gradient.NystromGradientIMQ
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient.negative_mll_matern_grad
+   rgpycrumbs.surfaces.gradient._grad_matern_solve
+   rgpycrumbs.surfaces.gradient._grad_matern_predict
+   rgpycrumbs.surfaces.gradient._grad_matern_var
+   rgpycrumbs.surfaces.gradient.negative_mll_se_grad
+   rgpycrumbs.surfaces.gradient._grad_se_solve
+   rgpycrumbs.surfaces.gradient._grad_se_predict
+   rgpycrumbs.surfaces.gradient._grad_se_var
+   rgpycrumbs.surfaces.gradient.negative_mll_imq_grad
+   rgpycrumbs.surfaces.gradient.negative_mll_imq_map
+   rgpycrumbs.surfaces.gradient._grad_imq_solve
+   rgpycrumbs.surfaces.gradient._grad_imq_predict
+   rgpycrumbs.surfaces.gradient._grad_imq_var
+   rgpycrumbs.surfaces.gradient.negative_mll_rq_map
+   rgpycrumbs.surfaces.gradient._grad_rq_solve
+   rgpycrumbs.surfaces.gradient._grad_rq_predict
+   rgpycrumbs.surfaces.gradient._grad_rq_var
+   rgpycrumbs.surfaces.gradient._stable_nystrom_grad_imq_solve
+   rgpycrumbs.surfaces.gradient._nystrom_grad_imq_predict
+   rgpycrumbs.surfaces.gradient._nystrom_grad_imq_var
+
+
+Module Contents
+---------------
+
+.. py:function:: negative_mll_matern_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_matern_solve(x, y_full, noise_scalar, length_scale)
+
+.. py:function:: _grad_matern_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:function:: _grad_matern_var(x_query, x_obs, K_inv, length_scale)
+
+.. py:class:: GradientMatern(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Matérn 5/2 surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:function:: negative_mll_se_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_se_solve(x, y_full, noise_scalar, length_scale)
+
+.. py:function:: _grad_se_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:function:: _grad_se_var(x_query, x_obs, K_inv, length_scale)
+
+.. py:class:: GradientSE(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Squared Exponential (SE) surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:function:: negative_mll_imq_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_imq_solve(x, y_full, noise_scalar, epsilon)
+
+.. py:function:: _grad_imq_predict(x_query, x_obs, alpha, epsilon)
+
+.. py:function:: _grad_imq_var(x_query, x_obs, K_inv, epsilon)
+
+.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:function:: negative_mll_rq_map(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_rq_solve(x, y_full, noise_scalar, params)
+
+.. py:function:: _grad_rq_predict(x_query, x_obs, alpha, params)
+
+.. py:function:: _grad_rq_var(x_query, x_obs, K_inv, params)
+
+.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.
+
+
+   .. py:method:: _fit(_smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
+.. py:function:: _stable_nystrom_grad_imq_solve(x, y_full, x_inducing, noise_scalar, epsilon)
+
+.. py:function:: _nystrom_grad_imq_predict(x_query, x_inducing, alpha_m, epsilon)
+
+.. py:function:: _nystrom_grad_imq_var(x_query, x_inducing, W, epsilon)
+
+.. py:class:: NystromGradientIMQ(x, y, gradients=None, n_inducing=300, nimags=None, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.
+
+
+   .. py:attribute:: n_inducing
+      :value: 300
+
+
+
+   .. py:attribute:: nimags
+      :value: None
+
+
+
+   .. py:method:: _fit(smoothing, length_scale, _optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+

@@ -1,0 +1,21 @@
+====================
+ORCA Input Generator
+====================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+
+ORCA Input Generator
+--------------------
+
+This tool generates a complete ORCA input file from a TOML configuration. It leverages the ``pychum`` library for templating and data structures.
+
+Usage
+~~~~~
+
+\.. command-output\:\: python -m rgpycrumbs.cli orca generate-orca-input --help
+
+Reference
+~~~~~~~~~
+
+:mod:`rgpycrumbs.orca.generate_orca_input`.
