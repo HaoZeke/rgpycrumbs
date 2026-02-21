@@ -23,6 +23,11 @@ The library side offers:
 
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + ~uv~.
 
+** Ecosystem Overview
+   ~rgpycrumbs~ is the central hub of an interlinked suite of libraries.
+
+[[file:branding/logo/ecosystem.png]]
+
 ** CLI Design Philosophy
 :PROPERTIES:
 :CUSTOM_ID: cli-how

@@ -10,6 +10,8 @@ The following projects use ~rgpycrumbs~ as a dependency or tool.
 - [[https://github.com/HaoZeke/chemparseplot][chemparseplot]] :: Parsers and plotting tools for computational chemistry. Uses
   ~rgpycrumbs.basetypes~, ~rgpycrumbs.interpolation~, ~rgpycrumbs.surfaces~,
   and ~rgpycrumbs.parsers~ as core dependencies.
+- [[https://github.com/HaoZeke/pychum][pychum]] :: Input file generators for computational chemistry. Uses
+  ~rgpycrumbs~ for internal helpers and is dispatched via the CLI.
 
 * Research Software
 

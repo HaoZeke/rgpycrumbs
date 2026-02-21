@@ -4,7 +4,7 @@ channels    = [ "conda-forge", "https://repo.prefix.dev/rg-forge" ]
 description = "A dispatcher-based analytical and visualization suite for chemical physics"
 name        = "pycrumbs"
 platforms   = [ "linux-64" ]
-version     = "0.0.7.dev"
+version     = "1.1.0"
 
 [tasks]
 
