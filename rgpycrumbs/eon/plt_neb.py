@@ -51,6 +51,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
+from chemparseplot.parse.chemgp.neb import (
+    load_trajectory,
+    trajectory_to_landscape_df,
+    trajectory_to_profile_dat,
+)
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -136,6 +141,18 @@ IRA_KMAX_DEFAULT = 1.8
     type=click.Path(exists=False, dir_okay=False, path_type=Path),
     default=Path("sp.con"),
     help="Path to explicit saddle point file (eOn sp.con).",
+)
+@click.option(
+    "--source",
+    type=click.Choice(["eon", "traj"]),
+    default="eon",
+    help="Data source: 'eon' for .dat/.con pairs, 'traj' for extxyz trajectory.",
+)
+@click.option(
+    "--input-traj",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Path to extxyz trajectory file (used with --source traj).",
 )
 @click.option(
     "--plot-type",
@@ -366,6 +383,9 @@ def main(
     input_path_pattern,
     con_file,
     additional_con,
+    # --- Data Source ---
+    source,
+    input_traj,
     # --- Plot Behavior ---
     plot_type,
     landscape_mode,
@@ -480,38 +500,53 @@ def main(
                 log.critical("Cannot proceed without structures. Exiting.")
                 sys.exit(1)
 
+    # --- Trajectory source: load once if applicable ---
+    traj_atoms_list = None
+    if source == "traj":
+        if not input_traj:
+            log.critical("--input-traj is required when --source traj is used.")
+            sys.exit(1)
+        traj_atoms_list = load_trajectory(str(input_traj))
+
     if plot_type == "landscape":
         # --- Landscape Plot ---
-        dat_paths = find_file_paths(input_dat_pattern)
-        con_paths = find_file_paths(str(input_path_pattern))
-
-        if not dat_paths:
-            log.critical(f"No data files found for pattern: {input_dat_pattern}")
-            sys.exit(1)
-
-        # Fallback if no path files found but main file exists
-        if not con_paths and con_file:
-            con_paths = [con_file]
-
-        y_col = 2 if plot_mode == "energy" else 4
         z_label = (
             "Relative Energy (eV)"
             if plot_mode == "energy"
             else r"Lowest Eigenvalue (eV/$\AA^2$)"
         )
 
-        df = aggregate_neb_landscape_data(
-            dat_paths,
-            con_paths,
-            y_col,
-            None,
-            cache_file,
-            force_recompute,
-            ira_kmax,
-            augment_dat=augment_dat,
-            augment_con=augment_con,
-            ref_atoms=atoms_list[0] if atoms_list else None,  # main reactant
-            prod_atoms=atoms_list[-1] if atoms_list else None,  # main product
+        if source == "traj":
+            df = trajectory_to_landscape_df(traj_atoms_list, ira_kmax=ira_kmax)
+            # Use traj structures for con_file features when not provided
+            if atoms_list is None:
+                atoms_list = traj_atoms_list
+        else:
+            dat_paths = find_file_paths(input_dat_pattern)
+            con_paths = find_file_paths(str(input_path_pattern))
+
+            if not dat_paths:
+                log.critical(f"No data files found for pattern: {input_dat_pattern}")
+                sys.exit(1)
+
+            # Fallback if no path files found but main file exists
+            if not con_paths and con_file:
+                con_paths = [con_file]
+
+            y_col = 2 if plot_mode == "energy" else 4
+
+            df = aggregate_neb_landscape_data(
+                dat_paths,
+                con_paths,
+                y_col,
+                None,
+                cache_file,
+                force_recompute,
+                ira_kmax,
+                augment_dat=augment_dat,
+                augment_con=augment_con,
+                ref_atoms=atoms_list[0] if atoms_list else None,  # main reactant
+                prod_atoms=atoms_list[-1] if atoms_list else None,  # main product
         )
 
         # Surface Generation
@@ -752,67 +787,25 @@ def main(
 
     else:
         # --- Profile Plot ---
-        dat_paths = find_file_paths(input_dat_pattern)
-        file_paths_to_plot = dat_paths[start:end]
+        if source == "traj":
+            # Trajectory source: single extxyz file -> one profile
+            data = trajectory_to_profile_dat(traj_atoms_list)
+            if atoms_list is None:
+                atoms_list = traj_atoms_list
 
-        if not file_paths_to_plot:
-            log.error("No files found in range.")
-            sys.exit(1)
-
-        # Optional: Load RMSD for X-axis
-        rmsd_rc = None
-        if rc_mode == "rmsd" and atoms_list:
-            df_rmsd = compute_profile_rmsd(
-                atoms_list, cache_file, force_recompute, ira_kmax
-            )
-            rmsd_rc = df_rmsd["r"].to_numpy()
-
-        # Plot Loop
-        cm = plt.get_cmap(active_theme.cmap_profile)
-        color_divisor = (
-            len(file_paths_to_plot) - 1 if len(file_paths_to_plot) > 1 else 1.0
-        )
-
-        y_col = 2 if plot_mode == "energy" else 4
-
-        for idx, fpath in enumerate(file_paths_to_plot):
-            try:
-                data = np.loadtxt(fpath, skiprows=1).T
-            except Exception as ex:
-                log.error(ex)
-                continue
-
-            # X-Axis Logic
-            if rc_mode == "rmsd" and rmsd_rc is not None:
-                if len(rmsd_rc) == data.shape[1]:
-                    data[1] = rmsd_rc
-            elif rc_mode == "index":
+            if rc_mode == "index":
                 data[1] = np.arange(data.shape[1])
             elif normalize_rc:
                 data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
 
-            # Style Logic
-            is_last = idx == len(file_paths_to_plot) - 1
-            if highlight_last and is_last:
-                color, alpha, zorder = active_theme.highlight_color, 1.0, 20
-            else:
-                color = cm(idx / color_divisor)
-                alpha = 1.0 if idx == 0 else 0.5
-                zorder = 10 if idx == 0 else 5
-
-            # Plot
+            y_col = 2 if plot_mode == "energy" else 4
+            color = active_theme.highlight_color
             plot_energy_path(
-                ax,
-                data[1],
-                data[y_col],
-                data[3],  # Forces
-                color,
-                alpha,
-                zorder,
+                ax, data[1], data[y_col], data[3], color, 1.0, 20,
                 method=spline_method,
             )
 
-            if highlight_last and is_last and atoms_list and plot_structures != "none":
+            if atoms_list and plot_structures != "none":
                 indices = (
                     list(range(len(atoms_list)))
                     if plot_structures == "all"
@@ -838,7 +831,6 @@ def main(
                         xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
                         rad = 0.1 if i % 2 == 0 else -0.1
 
-                    # Call library function
                     plot_structure_inset(
                         ax,
                         atoms_list[i],
@@ -849,6 +841,105 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                     )
+        else:
+            # eOn source: multiple .dat files
+            dat_paths = find_file_paths(input_dat_pattern)
+            file_paths_to_plot = dat_paths[start:end]
+
+            if not file_paths_to_plot:
+                log.error("No files found in range.")
+                sys.exit(1)
+
+            # Optional: Load RMSD for X-axis
+            rmsd_rc = None
+            if rc_mode == "rmsd" and atoms_list:
+                df_rmsd = compute_profile_rmsd(
+                    atoms_list, cache_file, force_recompute, ira_kmax
+                )
+                rmsd_rc = df_rmsd["r"].to_numpy()
+
+            # Plot Loop
+            cm = plt.get_cmap(active_theme.cmap_profile)
+            color_divisor = (
+                len(file_paths_to_plot) - 1 if len(file_paths_to_plot) > 1 else 1.0
+            )
+
+            y_col = 2 if plot_mode == "energy" else 4
+
+            for idx, fpath in enumerate(file_paths_to_plot):
+                try:
+                    data = np.loadtxt(fpath, skiprows=1).T
+                except Exception as ex:
+                    log.error(ex)
+                    continue
+
+                # X-Axis Logic
+                if rc_mode == "rmsd" and rmsd_rc is not None:
+                    if len(rmsd_rc) == data.shape[1]:
+                        data[1] = rmsd_rc
+                elif rc_mode == "index":
+                    data[1] = np.arange(data.shape[1])
+                elif normalize_rc:
+                    data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
+
+                # Style Logic
+                is_last = idx == len(file_paths_to_plot) - 1
+                if highlight_last and is_last:
+                    color, alpha, zorder = active_theme.highlight_color, 1.0, 20
+                else:
+                    color = cm(idx / color_divisor)
+                    alpha = 1.0 if idx == 0 else 0.5
+                    zorder = 10 if idx == 0 else 5
+
+                # Plot
+                plot_energy_path(
+                    ax,
+                    data[1],
+                    data[y_col],
+                    data[3],  # Forces
+                    color,
+                    alpha,
+                    zorder,
+                    method=spline_method,
+                )
+
+                if highlight_last and is_last and atoms_list and plot_structures != "none":
+                    indices = (
+                        list(range(len(atoms_list)))
+                        if plot_structures == "all"
+                        else sorted(
+                            {
+                                0,
+                                np.argmax(data[y_col][1:-1]) + 1
+                                if plot_mode == "energy"
+                                else np.argmin(data[y_col]),
+                                len(atoms_list) - 1,
+                            }
+                        )
+                    )
+                    for i in indices:
+                        if i == 0:
+                            xybox, rad = draw_reactant[:2], draw_reactant[2]
+                        elif i == len(atoms_list) - 1:
+                            xybox, rad = draw_product[:2], draw_product[2]
+                        else:
+                            xybox, rad = draw_saddle[:2], draw_saddle[2]
+
+                        if plot_structures == "all":
+                            xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
+                            rad = 0.1 if i % 2 == 0 else -0.1
+
+                        # Call library function
+                        plot_structure_inset(
+                            ax,
+                            atoms_list[i],
+                            data[1][i],
+                            data[y_col][i],
+                            xybox,
+                            rad,
+                            zoom=zoom_ratio,
+                            rotation=ase_rotation,
+                        )
 
         # --- Profile Additional Structures ---
         if additional_atoms_data and rc_mode == "rmsd":
