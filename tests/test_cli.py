@@ -66,3 +66,12 @@ def test_cli_verbose_output(mock_run, runner, mock_script_group):  # noqa: ARG00
     # Check that our verbose click.echo statements fired
     assert "VERBOSE: Resolved script path ->" in result.output
     assert "VERBOSE: Constructed command -> uv run" in result.output
+
+
+def test_plt_neb_strip_renderer_option(runner):
+    """Verify --strip-renderer appears in plt-neb help output."""
+    from rgpycrumbs.eon.plt_neb import main as plt_neb_main
+
+    result = runner.invoke(plt_neb_main, ["--help"])
+    assert result.exit_code == 0
+    assert "--strip-renderer" in result.output

@@ -13,7 +13,9 @@ from ase.build import molecule  # noqa: E402
 from rgpycrumbs.geom.api.alignment import (  # noqa: E402
     AlignmentMethod,
     IRAConfig,
+    _rmsd_single,
     align_structure_robust,
+    calculate_rmsd_from_ref,
     ira_mod,
 )
 
@@ -235,3 +237,104 @@ class TestStructuralAlignment:
         except ValueError:
             # If libira raises an error due to no congruent match found, that is also valid.
             pass
+
+
+class TestParallelRMSD:
+    """Tests for the parallelized RMSD calculation."""
+
+    @staticmethod
+    def _make_path(ref, n_images=6, max_disp=0.5):
+        """Build a synthetic NEB-like path by progressively distorting atom positions.
+
+        Uses internal distortions (not rigid-body transforms) so that
+        Procrustes alignment cannot remove the displacement.
+        """
+        path = [ref.copy()]
+        rng = np.random.default_rng(42)
+        # Fixed random direction per atom, scaled by image index
+        direction = rng.standard_normal(ref.positions.shape)
+        direction /= np.linalg.norm(direction)
+        for i in range(1, n_images):
+            img = ref.copy()
+            scale = max_disp * i / (n_images - 1)
+            img.positions += direction * scale
+            path.append(img)
+        return path
+
+    def test_reference_image_has_zero_rmsd(self, water_molecule):
+        """RMSD of the reference with itself must be exactly 0."""
+        path = self._make_path(water_molecule, n_images=5)
+        # ref_atom is the first element of path (same object)
+        rmsd = calculate_rmsd_from_ref(
+            path, ira_instance=None, ref_atom=path[0], ira_kmax=1.8
+        )
+        assert rmsd[0] == 0.0
+
+    def test_rmsd_values_non_negative(self, water_molecule):
+        """All RMSD values must be >= 0."""
+        path = self._make_path(water_molecule, n_images=8)
+        rmsd = calculate_rmsd_from_ref(
+            path, ira_instance=None, ref_atom=path[0], ira_kmax=1.8
+        )
+        assert np.all(rmsd >= 0.0)
+
+    def test_rmsd_increases_along_path(self, water_molecule):
+        """For a monotonically distorted path, RMSD from the first image should increase."""
+        path = self._make_path(water_molecule, n_images=6)
+        rmsd = calculate_rmsd_from_ref(
+            path, ira_instance=None, ref_atom=path[0], ira_kmax=1.8
+        )
+        # Each successive image has larger internal distortion, so RMSD grows
+        for i in range(1, len(rmsd)):
+            assert rmsd[i] > rmsd[i - 1], f"RMSD[{i}] not > RMSD[{i-1}]"
+
+    def test_parallel_matches_sequential(self, water_molecule):
+        """Parallel calculation must produce the same values as a sequential loop."""
+        path = self._make_path(water_molecule, n_images=10)
+        ref = path[0]
+        config = IRAConfig(enabled=False, kmax=1.8)
+        coords_ref = ref.get_positions()
+
+        # Sequential baseline
+        sequential = np.array([
+            _rmsd_single(ref, img, config, coords_ref) for img in path
+        ])
+
+        # Parallel via calculate_rmsd_from_ref
+        parallel = calculate_rmsd_from_ref(
+            path, ira_instance=None, ref_atom=ref, ira_kmax=1.8
+        )
+
+        np.testing.assert_allclose(parallel, sequential, atol=1e-12)
+
+    def test_single_image_path(self, water_molecule):
+        """Edge case: path with a single image (the reference itself)."""
+        path = [water_molecule.copy()]
+        rmsd = calculate_rmsd_from_ref(
+            path, ira_instance=None, ref_atom=path[0], ira_kmax=1.8
+        )
+        assert rmsd.shape == (1,)
+        assert rmsd[0] == 0.0
+
+    def test_product_reference(self, water_molecule):
+        """RMSD from the last image should be zero for that image, nonzero for others."""
+        path = self._make_path(water_molecule, n_images=6)
+        rmsd_p = calculate_rmsd_from_ref(
+            path, ira_instance=None, ref_atom=path[-1], ira_kmax=1.8
+        )
+        assert rmsd_p[-1] == 0.0
+        # All other images should have positive RMSD from product
+        assert np.all(rmsd_p[:-1] > 0.0)
+
+    @requires_ira
+    def test_parallel_with_ira(self, water_molecule):
+        """Parallel RMSD with IRA enabled should still produce consistent results."""
+        path = self._make_path(water_molecule, n_images=6)
+        ira_instance = ira_mod.IRA()
+
+        rmsd = calculate_rmsd_from_ref(
+            path, ira_instance=ira_instance, ref_atom=path[0], ira_kmax=1.8
+        )
+        assert rmsd[0] == 0.0
+        assert np.all(rmsd >= 0.0)
+        assert rmsd.shape == (6,)
