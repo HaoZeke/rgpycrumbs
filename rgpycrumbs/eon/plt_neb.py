@@ -52,17 +52,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
-from chemparseplot.parse.trajectory.hdf5 import (
-    history_to_landscape_df as hdf5_history_to_landscape_df,
-    history_to_profile_dats,
-    result_to_atoms_list,
-    result_to_profile_dat as hdf5_result_to_profile_dat,
-)
-from chemparseplot.parse.trajectory.neb import (
-    load_trajectory,
-    trajectory_to_landscape_df,
-    trajectory_to_profile_dat,
-)
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -72,6 +61,21 @@ from chemparseplot.parse.eon.neb import (
 
 # --- Library Imports ---
 from chemparseplot.parse.file_ import find_file_paths
+from chemparseplot.parse.trajectory.hdf5 import (
+    history_to_landscape_df as hdf5_history_to_landscape_df,
+)
+from chemparseplot.parse.trajectory.hdf5 import (
+    history_to_profile_dats,
+    result_to_atoms_list,
+)
+from chemparseplot.parse.trajectory.hdf5 import (
+    result_to_profile_dat as hdf5_result_to_profile_dat,
+)
+from chemparseplot.parse.trajectory.neb import (
+    load_trajectory,
+    trajectory_to_landscape_df,
+    trajectory_to_profile_dat,
+)
 from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
@@ -227,6 +231,12 @@ IRA_KMAX_DEFAULT = 1.8
     ),
     default="rbf",
     help="Interpolation method for the 2D surface.",
+)
+@click.option(
+    "--n-inducing",
+    type=int,
+    default=None,
+    help="Number of inducing points for Nystrom or RFF features. Defaults to 300 (Nystrom) or 500 (RFF).",
 )
 @click.option(
     "--show-pts/--no-show-pts",
@@ -411,6 +421,7 @@ def main(
     show_pts,
     plot_mode,
     surface_type,
+    n_inducing,
     # --- Output & Slicing ---
     output_file,
     start,
@@ -551,6 +562,7 @@ def main(
                 from chemparseplot.parse.trajectory.neb import (
                     trajectory_to_landscape_df as _traj_ldf,
                 )
+
                 hdf5_atoms = _r2a(h5_str)
                 df = _traj_ldf(hdf5_atoms, ira_kmax=ira_kmax)
             if atoms_list is None:
@@ -581,7 +593,7 @@ def main(
                 augment_con=augment_con,
                 ref_atoms=atoms_list[0] if atoms_list else None,  # main reactant
                 prod_atoms=atoms_list[-1] if atoms_list else None,  # main product
-        )
+            )
 
         # Surface Generation
         if landscape_mode == "surface":
@@ -627,6 +639,7 @@ def main(
                 variance_threshold=0.5,  # 50% uncertainty
                 project_path=project_path,
                 extra_points=extra_pts_arr,
+                n_inducing=n_inducing,
             )
 
         # Path Overlay (Final Step)
@@ -811,8 +824,8 @@ def main(
 
         # Labels
         if project_path:
-            final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
-            final_ylabel = ylabel or r"Orthogonal Deviation $d$ ($\AA$)"
+            final_xlabel = xlabel or r"Reaction progress $s$ ($\AA$)"
+            final_ylabel = ylabel or r"Orthogonal deviation $d$ ($\AA$)"
             final_title = "Reaction Valley Projection" if title == "NEB Path" else title
         else:
             final_xlabel = xlabel or r"RMSD from Reactant ($\AA$)"
@@ -843,7 +856,13 @@ def main(
             y_col = 2 if plot_mode == "energy" else 4
             color = active_theme.highlight_color
             plot_energy_path(
-                ax, data[1], data[y_col], data[3], color, 1.0, 20,
+                ax,
+                data[1],
+                data[y_col],
+                data[3],
+                color,
+                1.0,
+                20,
                 method=spline_method,
             )
         elif source == "traj":
@@ -860,7 +879,13 @@ def main(
             y_col = 2 if plot_mode == "energy" else 4
             color = active_theme.highlight_color
             plot_energy_path(
-                ax, data[1], data[y_col], data[3], color, 1.0, 20,
+                ax,
+                data[1],
+                data[y_col],
+                data[3],
+                color,
+                1.0,
+                20,
                 method=spline_method,
             )
 
@@ -962,7 +987,12 @@ def main(
                     method=spline_method,
                 )
 
-                if highlight_last and is_last and atoms_list and plot_structures != "none":
+                if (
+                    highlight_last
+                    and is_last
+                    and atoms_list
+                    and plot_structures != "none"
+                ):
                     indices = (
                         list(range(len(atoms_list)))
                         if plot_structures == "all"
@@ -1055,18 +1085,24 @@ def main(
     if plot_type == "landscape" and not aspect_ratio:
         ax.set_aspect("equal")
         if project_path:
-            # Force Y-axis to be symmetric and match the X-axis span
+            # Force Y-axis to be symmetric and match the X-axis span,
+            # but expand if additional structures fall outside
             x_min, x_max = ax.get_xlim()
             x_span = x_max - x_min
             half_span = x_span / 2
+            if additional_atoms_data:
+                for _, add_r, add_p, _ in additional_atoms_data:
+                    add_d = (add_r - r_start) * v_r + (add_p - p_start) * v_p
+                    half_span = max(half_span, abs(add_d) * 1.15)
             ax.set_ylim(-half_span, half_span)
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 
     if show_legend:
         ax.legend(
-            # Upper left is orthogonal to 0 distance from R, unlikely
-            # Lower left is near 0 w.r.t R and P, always spurious
-            loc="upper left" if project_path else "lower left",
+            # In (s,d) space markers can appear anywhere, so let
+            # matplotlib pick the least-overlapping corner.
+            # In raw RMSD-RMSD the lower left is always empty.
+            loc="best" if project_path else "lower left",
             borderaxespad=0.5,
             frameon=True,
             framealpha=1.0,
@@ -1075,16 +1111,18 @@ def main(
             fontsize=int(active_theme.font_size * 0.8),
         ).set_zorder(101)
 
+    plt.tight_layout(pad=0.5)
+
     if ax_strip:
         pos_main = ax.get_position()
         pos_strip = ax_strip.get_position()
 
-        # Force strip to match the main plot's Left and Width exactly
+        # Force strip to match the main plot's Left and Width exactly,
+        # and push it down slightly to avoid overlapping the xlabel
+        strip_y = pos_strip.y0 - 0.02
         ax_strip.set_position(
-            [pos_main.x0, pos_strip.y0, pos_main.width, pos_strip.height]
+            [pos_main.x0, strip_y, pos_main.width, pos_strip.height]
         )
-
-    plt.tight_layout(pad=0.5)
 
     if output_file:
         plt.savefig(output_file, transparent=False, bbox_inches="tight", dpi=dpi)
