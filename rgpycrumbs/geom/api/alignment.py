@@ -155,6 +155,17 @@ def align_structure_robust(
     return AlignmentResult(atoms=mobile_atoms, method=AlignmentMethod.ASE_PROCRUSTES)
 
 
+def _rmsd_single(ref_atom, atom_i, config, coords_ref):
+    """Align one image and return its RMSD (thread-safe on a copy)."""
+    if atom_i is ref_atom:
+        return 0.0
+    mobile_copy = atom_i.copy()
+    align_structure_robust(ref_atom, mobile_copy, config)
+    coords_aligned = mobile_copy.get_positions()
+    diff_sq = (coords_ref - coords_aligned) ** 2
+    return float(np.sqrt(np.mean(np.sum(diff_sq, axis=1))))
+
+
 def calculate_rmsd_from_ref(
     atoms_list: list[Atoms], ira_instance, ref_atom: Atoms, ira_kmax: float
 ) -> np.ndarray:
@@ -165,36 +176,28 @@ def calculate_rmsd_from_ref(
     If IRA fails or lacks the necessary library, the code falls back to
     standard ASE Procrustes alignment via `align_structure_robust`.
 
+    Alignment of individual images is parallelized over threads; the
+    IRA Fortran library and numpy both release the GIL.
+
     :param atoms_list: A list of ASE Atoms objects.
     :param ira_instance: An instantiated IRA object (or None).
     :param ref_atom: The reference Atoms object to align against.
     :param ira_kmax: kmax factor for IRA.
     :return: An array of RMSD values.
     """
-    rmsd_values = np.zeros(len(atoms_list))
-    coords_ref = ref_atom.get_positions()
+    import os
+    from concurrent.futures import ThreadPoolExecutor
 
-    # Configure IRA based on the presence of the instance
     config = IRAConfig(enabled=(ira_instance is not None), kmax=ira_kmax)
+    coords_ref = ref_atom.get_positions()
+    n = len(atoms_list)
+    workers = min(n, os.cpu_count() or 4)
 
-    for i, atom_i in enumerate(atoms_list):
-        if atom_i is ref_atom:
-            rmsd_values[i] = 0.0
-            continue
-
-        # Create a working copy to avoid mutating the original trajectory
-        mobile_copy = atom_i.copy()
-
-        align_structure_robust(
-            ref_atom,
-            mobile_copy,
-            config,
-        )
-
-        # Calculate RMSD: $\sqrt{\frac{1}{N} \sum (r_{ref} - r_{aligned})^2}$
-        coords_aligned = mobile_copy.get_positions()
-        diff_sq = (coords_ref - coords_aligned) ** 2
-        rmsd = np.sqrt(np.mean(np.sum(diff_sq, axis=1)))
-        rmsd_values[i] = rmsd
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = [
+            pool.submit(_rmsd_single, ref_atom, atoms_list[i], config, coords_ref)
+            for i in range(n)
+        ]
+        rmsd_values = np.array([f.result() for f in futures])
 
     return rmsd_values
