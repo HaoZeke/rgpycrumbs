@@ -35,6 +35,7 @@ https://realpython.com/python-script-structure/
 #   "rich",
 #   "ase",
 #   "polars",
+#   "h5py",
 #   "chemparseplot",
 #   "rgpycrumbs",
 # ]
@@ -51,6 +52,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
+from chemparseplot.parse.trajectory.hdf5 import (
+    history_to_landscape_df as hdf5_history_to_landscape_df,
+    history_to_profile_dats,
+    result_to_atoms_list,
+    result_to_profile_dat as hdf5_result_to_profile_dat,
+)
 from chemparseplot.parse.trajectory.neb import (
     load_trajectory,
     trajectory_to_landscape_df,
@@ -144,9 +151,15 @@ IRA_KMAX_DEFAULT = 1.8
 )
 @click.option(
     "--source",
-    type=click.Choice(["eon", "traj"]),
+    type=click.Choice(["eon", "traj", "hdf5"]),
     default="eon",
-    help="Data source: 'eon' for .dat/.con pairs, 'traj' for extxyz trajectory.",
+    help="Data source: 'eon' for .dat/.con pairs, 'traj' for extxyz, 'hdf5' for ChemGP HDF5.",
+)
+@click.option(
+    "--input-h5",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Path to ChemGP NEB HDF5 file (result or history).",
 )
 @click.option(
     "--input-traj",
@@ -386,6 +399,7 @@ def main(
     # --- Data Source ---
     source,
     input_traj,
+    input_h5,
     # --- Plot Behavior ---
     plot_type,
     landscape_mode,
@@ -521,6 +535,26 @@ def main(
             # Use traj structures for con_file features when not provided
             if atoms_list is None:
                 atoms_list = traj_atoms_list
+        elif source == "hdf5":
+            if not input_h5:
+                log.critical("--input-h5 is required when --source hdf5 is used.")
+                sys.exit(1)
+            h5_str = str(input_h5)
+            # Prefer history file for multi-step landscape
+            try:
+                df = hdf5_history_to_landscape_df(h5_str, ira_kmax=ira_kmax)
+            except Exception:
+                log.warning("History read failed, falling back to single-step result.")
+                from chemparseplot.parse.trajectory.hdf5 import (
+                    result_to_atoms_list as _r2a,
+                )
+                from chemparseplot.parse.trajectory.neb import (
+                    trajectory_to_landscape_df as _traj_ldf,
+                )
+                hdf5_atoms = _r2a(h5_str)
+                df = _traj_ldf(hdf5_atoms, ira_kmax=ira_kmax)
+            if atoms_list is None:
+                atoms_list = result_to_atoms_list(h5_str)
         else:
             dat_paths = find_file_paths(input_dat_pattern)
             con_paths = find_file_paths(str(input_path_pattern))
@@ -787,7 +821,32 @@ def main(
 
     else:
         # --- Profile Plot ---
-        if source == "traj":
+        if source == "hdf5":
+            if not input_h5:
+                log.critical("--input-h5 is required when --source hdf5 is used.")
+                sys.exit(1)
+            h5_str = str(input_h5)
+            # Use history final step if available, else result
+            try:
+                dats = history_to_profile_dats(h5_str)
+                data = dats[-1]
+            except Exception:
+                data = hdf5_result_to_profile_dat(h5_str)
+            if atoms_list is None:
+                atoms_list = result_to_atoms_list(h5_str)
+
+            if rc_mode == "index":
+                data[1] = np.arange(data.shape[1])
+            elif normalize_rc:
+                data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
+
+            y_col = 2 if plot_mode == "energy" else 4
+            color = active_theme.highlight_color
+            plot_energy_path(
+                ax, data[1], data[y_col], data[3], color, 1.0, 20,
+                method=spline_method,
+            )
+        elif source == "traj":
             # Trajectory source: single extxyz file -> one profile
             data = trajectory_to_profile_dat(traj_atoms_list)
             if atoms_list is None:
