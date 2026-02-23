@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""Generate NWChem input files from eOn configuration and structures.
+
+.. versionadded:: 0.0.2
+"""
+
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [

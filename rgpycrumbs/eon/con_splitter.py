@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Split multi-image .con files into per-image structures.
+
+.. versionadded:: 0.0.2
+"""
 
 # /// script
 # requires-python = ">=3.11"

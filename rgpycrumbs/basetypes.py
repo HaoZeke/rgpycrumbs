@@ -9,6 +9,8 @@ nebiter = namedtuple("nebiter", ["iteration", "nebpath"])
 """
 A namedtuple representing an iteration of a Nudged Elastic Band (NEB) calculation.
 
+.. versionadded:: 1.0.0
+
 Parameters
 ----------
 iteration : int
@@ -26,6 +28,8 @@ nebpath : Stores the normalized arclength, actual arclength, and energy data for
 nebpath = namedtuple("nebpath", ["norm_dist", "arc_dist", "energy"])
 """
 A namedtuple representing the NEB path data.
+
+.. versionadded:: 1.0.0
 
 Parameters
 ----------
@@ -50,6 +54,11 @@ detailed path information for each NEB iteration.
 
 @dataclass
 class DimerOpt:
+    """Configuration for a dimer-based saddle point search.
+
+    .. versionadded:: 1.0.0
+    """
+
     saddle: str = "dimer"
     rot: str = "lbfgs"
     trans: str = "lbfgs"
@@ -57,12 +66,22 @@ class DimerOpt:
 
 @dataclass
 class SpinID:
+    """Identifier combining molecule ID and spin state.
+
+    .. versionadded:: 1.0.0
+    """
+
     mol_id: int
     spin: str
 
 
 @dataclass
 class MolGeom:
+    """Container for molecular geometry with energy and forces.
+
+    .. versionadded:: 1.0.0
+    """
+
     pos: np.array
     energy: float
     forces: np.array
@@ -70,6 +89,11 @@ class MolGeom:
 
 @dataclass
 class SaddleMeasure:
+    """Aggregated measurements from a saddle point search.
+
+    .. versionadded:: 1.0.0
+    """
+
     pes_calls: int = 0
     iter_steps: int = 0
     tot_time: float = field(default_factory=lambda: datetime.timedelta(0).total_seconds())

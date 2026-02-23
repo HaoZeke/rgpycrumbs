@@ -70,7 +70,10 @@ def _grad_matern_var(x_query, x_obs, K_inv, length_scale):
 
 
 class GradientMatern(BaseGradientSurface):
-    """Gradient-enhanced Matérn 5/2 surface implementation."""
+    """Gradient-enhanced Matérn 5/2 surface implementation.
+
+    .. versionadded:: 1.0.0
+    """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
@@ -159,7 +162,10 @@ def _grad_se_var(x_query, x_obs, K_inv, length_scale):
 
 
 class GradientSE(BaseGradientSurface):
-    """Gradient-enhanced Squared Exponential (SE) surface implementation."""
+    """Gradient-enhanced Squared Exponential (SE) surface implementation.
+
+    .. versionadded:: 1.0.0
+    """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
@@ -266,7 +272,10 @@ def _grad_imq_var(x_query, x_obs, K_inv, epsilon):
 
 
 class GradientIMQ(BaseGradientSurface):
-    """Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation."""
+    """Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.
+
+    .. versionadded:: 1.0.0
+    """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
@@ -376,7 +385,10 @@ def _grad_rq_var(x_query, x_obs, K_inv, params):
 
 
 class GradientRQ(BaseGradientSurface):
-    """Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation."""
+    """Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.
+
+    .. versionadded:: 1.0.0
+    """
 
     def _fit(self, _smoothing, length_scale, optimize):
         init_ls = length_scale if length_scale is not None else 1.5
@@ -472,7 +484,10 @@ def _nystrom_grad_imq_var(x_query, x_inducing, W, epsilon):
 
 
 class NystromGradientIMQ(BaseGradientSurface):
-    """Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface."""
+    """Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.
+
+    .. versionadded:: 1.1.0
+    """
 
     def __init__(
         self,

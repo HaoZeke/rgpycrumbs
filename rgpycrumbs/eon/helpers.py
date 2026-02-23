@@ -9,6 +9,8 @@ from typing import Any
 def write_eon_config(path: str | Path, settings: dict[str, dict[str, Any]]) -> None:
     """
     Writes a config.ini file for eOn using a dictionary structure.
+
+    .. versionadded:: 0.1.0
     """
     config = configparser.ConfigParser()
     config.optionxform = str  # Preserve case sensitivity

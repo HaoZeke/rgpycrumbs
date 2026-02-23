@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""
-Plots Nudged Elastic Band (NEB) reaction paths and landscapes.
+"""Plots Nudged Elastic Band (NEB) reaction paths and landscapes.
+
+.. versionadded:: 0.0.2
 
 This script provides a command-line interface (CLI) to visualize data
 generated from NEB calculations. It can plot:

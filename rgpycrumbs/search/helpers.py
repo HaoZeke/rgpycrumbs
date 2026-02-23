@@ -7,6 +7,10 @@ from pathlib import Path
 # e.g. https://stackoverflow.com/a/76733254/1895378
 # XXX: Not good at all, doesn't even handle exponential search
 def tail(filename, n):
+    """Return the last *n* lines of a file (supports gzip).
+
+    .. versionadded:: 0.0.2
+    """
     file_path = Path(filename)
 
     if file_path.suffix == ".gz":
@@ -28,6 +32,8 @@ def tail(filename, n):
 def head_search(filename: Path, sstr: str, n=60):
     """
     Checks if the search string is found in the first n lines of a file.
+
+    .. versionadded:: 0.0.2
 
     Args:
         filename (Path): Path to the file.

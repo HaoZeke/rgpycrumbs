@@ -68,7 +68,10 @@ logging.basicConfig(
 
 
 class DetectionMethod(StrEnum):
-    """Available detection methodologies."""
+    """Available detection methodologies.
+
+    .. versionadded:: 0.0.6
+    """
 
     GEOMETRIC = "geometric"
     BOND_ORDER = "bond-order"
@@ -96,6 +99,10 @@ MIN_DIST_ATM = 1e-4
 def find_fragments_geometric(
     atoms: Atoms, bond_multiplier: float, radius_type: str = "natural"
 ) -> tuple[int, np.ndarray]:
+    """Detect molecular fragments using scaled covalent radii.
+
+    .. versionadded:: 0.0.6
+    """
     num_atoms = len(atoms)
     if num_atoms == 0:
         return 0, np.array([])
@@ -133,6 +140,8 @@ def find_fragments_bond_order(
     """
     Analyze connectivity via the Wiberg Bond Order (WBO) matrix.
     Calculate electronic structure using the specified xTB level.
+
+    .. versionadded:: 0.0.6
     """
     num_atoms = len(atoms)
     if num_atoms == 0:
@@ -175,6 +184,8 @@ def build_graph_and_find_components(
     """
     Identify connected components using direct CSR sparse matrix construction.
 
+    .. versionadded:: 0.0.6
+
     This function avoids Python list overhead by passing interaction indices
     directly to the SciPy sparse engine.
     """
@@ -200,7 +211,10 @@ def build_graph_and_find_components(
 def merge_fragments_by_distance(
     atoms: Atoms, n_components: int, labels: np.ndarray, min_dist: float
 ) -> tuple[int, np.ndarray]:
-    """Merges fragments with geometric centers closer than the specified distance."""
+    """Merges fragments with geometric centers closer than the specified distance.
+
+    .. versionadded:: 0.0.6
+    """
     if n_components <= 1:
         return n_components, labels
 
@@ -249,7 +263,10 @@ def visualize_with_pyvista(
     bond_threshold: float = 0.8,
     radius_type: str = "natural",
 ) -> None:
-    """Renders the molecular system with scalar-coded bond orders."""
+    """Renders the molecular system with scalar-coded bond orders.
+
+    .. versionadded:: 0.0.6
+    """
     plotter = pv.Plotter(window_size=[1200, 900])
     plotter.set_background("white")
 
@@ -396,7 +413,10 @@ def print_results(
     n_components: int,  # noqa: ARG001
     labels: np.ndarray,
 ) -> None:
-    """Displays analysis results in a structured table."""
+    """Displays analysis results in a structured table.
+
+    .. versionadded:: 0.0.6
+    """
     console.rule("[bold green]Analysis Summary[/]")
     table = Table(title="Detected Fragments")
     table.add_column("ID", justify="center")

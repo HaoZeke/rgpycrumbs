@@ -8,10 +8,18 @@ from pathlib import Path
 
 
 def getstrform(pathobj):
+    """Return the absolute path as a string.
+
+    .. versionadded:: 0.0.1
+    """
     return str(pathobj.absolute())
 
 
 def get_gitroot():
+    """Return the root of the current git repository as a Path.
+
+    .. versionadded:: 0.0.1
+    """
     git_path = shutil.which("git") or "git"
     gitroot = Path(
         subprocess.run(  # noqa: S603
@@ -28,6 +36,10 @@ def get_gitroot():
 
 @contextlib.contextmanager
 def switchdir(path):
+    """Context manager that temporarily changes the working directory.
+
+    .. versionadded:: 0.0.1
+    """
     curpath = Path.cwd()
     os.chdir(path)
     try:
