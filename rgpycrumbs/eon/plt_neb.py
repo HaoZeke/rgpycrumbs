@@ -51,7 +51,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
-from chemparseplot.parse.chemgp.neb import (
+from chemparseplot.parse.trajectory.neb import (
     load_trajectory,
     trajectory_to_landscape_df,
     trajectory_to_profile_dat,
