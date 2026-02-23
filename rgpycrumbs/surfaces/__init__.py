@@ -18,6 +18,19 @@ from rgpycrumbs.surfaces.gradient import (
 )
 from rgpycrumbs.surfaces.standard import FastIMQ, FastMatern, FastTPS
 
+NYSTROM_THRESHOLD = 1000
+NYSTROM_N_INDUCING_DEFAULT = 300
+
+
+def nystrom_paths_needed(n_inducing, images_per_step):
+    """Number of optimization steps the Nystrom approximation actually samples.
+
+    Mirrors the structured sampling in :class:`NystromGradientIMQ._fit`:
+    ``paths_to_sample = max(1, n_inducing // nimags)``, plus one buffer step.
+    """
+    return max(1, -(-n_inducing // images_per_step)) + 1  # ceil div + buffer
+
+
 __all__ = [
     "BaseGradientSurface",
     "BaseSurface",
@@ -28,12 +41,15 @@ __all__ = [
     "GradientMatern",
     "GradientRQ",
     "GradientSE",
+    "NYSTROM_N_INDUCING_DEFAULT",
+    "NYSTROM_THRESHOLD",
     "NystromGradientIMQ",
     "_imq_kernel_matrix",
     "_matern_kernel_matrix",
     "_tps_kernel_matrix",
     "generic_negative_mll",
     "get_surface_model",
+    "nystrom_paths_needed",
     "safe_cholesky_solve",
 ]
 

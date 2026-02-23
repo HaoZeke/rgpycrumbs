@@ -319,6 +319,13 @@ IRA_KMAX_DEFAULT = 1.8
     help="ASE rotation string.",
 )
 @click.option(
+    "--strip-renderer",
+    type=click.Choice(["ase", "xyzrender"]),
+    default="ase",
+    show_default=True,
+    help="Rendering backend for structure images.",
+)
+@click.option(
     "--arrow-head-length",
     type=float,
     default=0.2,
@@ -445,6 +452,7 @@ def main(
     dpi,
     zoom_ratio,
     ase_rotation,
+    strip_renderer,
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
@@ -792,6 +800,7 @@ def main(
                 zoom=zoom_ratio,
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
+                renderer=strip_renderer,
             )
 
             # Annotate Main Plot
@@ -924,6 +933,7 @@ def main(
                         rad,
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
+                        renderer=strip_renderer,
                     )
         else:
             # eOn source: multiple .dat files
@@ -1028,6 +1038,7 @@ def main(
                             rad,
                             zoom=zoom_ratio,
                             rotation=ase_rotation,
+                            renderer=strip_renderer,
                         )
 
         # --- Profile Additional Structures ---
@@ -1055,6 +1066,7 @@ def main(
                         rad=draw_saddle[2],
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
+                        renderer=strip_renderer,
                         arrow_props={
                             "arrowstyle": ArrowStyle.Fancy(
                                 head_length=arrow_head_length,
