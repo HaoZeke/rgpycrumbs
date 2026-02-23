@@ -7,6 +7,7 @@
 [[https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/refs/heads/main/branding/logo/pycrumbs_logo.webp]]
 #+begin_export markdown
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
+[![DOI](https://zenodo.org/badge/795596895.svg)](https://doi.org/10.5281/zenodo.18529798)
 #+end_export
 A *pure-python* computational library and CLI toolkit for chemical physics
 research. ~rgpycrumbs~ provides both importable library modules for
@@ -229,7 +230,7 @@ uvx twine upload dist/*
 :END:
 MIT. However, this is an academic resource, so *please cite* as much as possible
 via:
-- The Zenodo DOI for general use.
+- The [[https://doi.org/10.5281/zenodo.18529798][Zenodo DOI]] for general use.
 - The ~wailord~ paper for ORCA usage
 
 # ** Logo
