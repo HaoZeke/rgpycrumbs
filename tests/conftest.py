@@ -6,7 +6,7 @@ import pytest
 ENVIRONMENT_REQUIREMENTS = {
     "fragments": ["ase", "tblite"],
     "ptm": ["ase", "ovito"],
-    "eon": ["ase", "eon"],
+    "eon": ["ase", "eon", "polars", "chemparseplot"],
     "align": ["ase", "numpy"],
     "pure": ["numpy"],
     "interpolation": ["numpy", "scipy"],

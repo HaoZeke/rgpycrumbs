@@ -565,10 +565,10 @@ def main(
                 df = hdf5_history_to_landscape_df(h5_str, ira_kmax=ira_kmax)
             except Exception:
                 log.warning("History read failed, falling back to single-step result.")
-                from chemparseplot.parse.trajectory.hdf5 import (
+                from chemparseplot.parse.trajectory.hdf5 import (  # noqa: PLC0415
                     result_to_atoms_list as _r2a,
                 )
-                from chemparseplot.parse.trajectory.neb import (
+                from chemparseplot.parse.trajectory.neb import (  # noqa: PLC0415
                     trajectory_to_landscape_df as _traj_ldf,
                 )
 
@@ -1133,9 +1133,7 @@ def main(
         # Force strip to match the main plot's Left and Width exactly,
         # and push it down slightly to avoid overlapping the xlabel
         strip_y = pos_strip.y0 - 0.02
-        ax_strip.set_position(
-            [pos_main.x0, strip_y, pos_main.width, pos_strip.height]
-        )
+        ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, pos_strip.height])
 
     if output_file:
         plt.savefig(output_file, transparent=False, bbox_inches="tight", dpi=dpi)
