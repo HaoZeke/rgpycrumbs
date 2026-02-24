@@ -1,3 +1,0 @@
-Export Nystrom threshold, default inducing count, and ``nystrom_paths_needed``
-from ``rgpycrumbs.surfaces`` so callers can trim data before expensive
-RMSD/IRA aggregation.

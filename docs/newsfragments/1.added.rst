@@ -1,1 +1,0 @@
-Added --strip-renderer CLI option for selecting structure rendering backend.

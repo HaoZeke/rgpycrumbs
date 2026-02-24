@@ -1,1 +1,0 @@
-Added --n-inducing flag to eON surface-fitting CLI for controlling the Nystrom approximation inducing-point count.

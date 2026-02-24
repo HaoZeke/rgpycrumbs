@@ -1,3 +1,30 @@
+rgpycrumbs v1.2.0 (2026-02-24)
+==============================
+
+Added
+-----
+
+- Added --strip-renderer CLI option for selecting structure rendering backend. (#1)
+- Export Nystrom threshold, default inducing count, and ``nystrom_paths_needed``
+  from ``rgpycrumbs.surfaces`` so callers can trim data before expensive
+  RMSD/IRA aggregation. (#2)
+- Added --source traj support to plt_neb for loading NEB paths from ASE-readable trajectory files (extxyz, .traj, etc.). (#3)
+- Added --source hdf5 support to plt_neb for loading NEB paths from ChemGP HDF5 output files. (#4)
+- Added --n-inducing flag to eON surface-fitting CLI for controlling the Nystrom approximation inducing-point count. (#5)
+
+
+Developer
+---------
+
+- Added versionadded directives to all public API docstrings. (#7)
+
+
+Changed
+-------
+
+- Per-image RMSD alignment in rgpycrumbs.geom now runs in parallel over threads for improved performance on large NEB paths. (#6)
+
+
 rgpycrumbs v1.1.0 (2026-02-21)
 ==============================
 

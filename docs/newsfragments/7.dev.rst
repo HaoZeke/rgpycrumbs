@@ -1,1 +1,0 @@
-Added versionadded directives to all public API docstrings.
