@@ -1,3 +1,8 @@
+"""Regex patterns for parsing BLESS log files.
+
+.. versionadded:: 0.0.2
+"""
+
 import datetime
 import re
 

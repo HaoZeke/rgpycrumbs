@@ -108,6 +108,8 @@ def calculate_fes_from_hills(hills, imin=1, imax=None, xlim=None, ylim=None, npo
     """
     Calculates a 1D or 2D Free Energy Surface (FES) from a metadynamics hills file.
 
+    .. versionadded:: 0.0.3
+
     This is a Python/NumPy translation of the R function fes2.hillsfile.
 
     Args:
@@ -281,6 +283,8 @@ def calculate_fes_from_hills(hills, imin=1, imax=None, xlim=None, ylim=None, npo
 def find_fes_minima(fes_result, nbins=8):
     """
     Finds local minima on a Free Energy Surface by dividing it into bins.
+
+    .. versionadded:: 0.0.3
 
     This is a Python/Pandas translation of the R function fesminima.fes.
 

@@ -73,6 +73,8 @@ class FastTPS:
     """
     Thin Plate Spline (TPS) surface implementation.
     Includes a polynomial mean function and supports smoothing optimization.
+
+    .. versionadded:: 1.0.0
     """
 
     def __init__(self, x_obs, y_obs, smoothing=1e-3, optimize=True, **_kwargs):
@@ -132,6 +134,8 @@ class FastTPS:
     def predict_var(self, x_query, chunk_size=500):
         """
         Predict posterior variance at query points.
+
+        .. versionadded:: 1.1.0
 
         Args:
             x_query: Query inputs (M, D).
@@ -193,7 +197,10 @@ def _matern_var(x_query, x_obs, K_inv, length_scale):
 
 
 class FastMatern(BaseSurface):
-    """Matérn 5/2 surface implementation."""
+    """Matérn 5/2 surface implementation.
+
+    .. versionadded:: 1.0.0
+    """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
@@ -272,7 +279,10 @@ def _imq_var(x_query, x_obs, K_inv, epsilon):
 
 
 class FastIMQ(BaseSurface):
-    """Inverse Multi-Quadratic (IMQ) surface implementation."""
+    """Inverse Multi-Quadratic (IMQ) surface implementation.
+
+    .. versionadded:: 1.0.0
+    """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:

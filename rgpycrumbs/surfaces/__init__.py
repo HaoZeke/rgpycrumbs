@@ -1,22 +1,26 @@
-from rgpycrumbs.surfaces._base import (
-    BaseGradientSurface,
-    BaseSurface,
-    generic_negative_mll,
-    safe_cholesky_solve,
-)
-from rgpycrumbs.surfaces._kernels import (
-    _imq_kernel_matrix,
-    _matern_kernel_matrix,
-    _tps_kernel_matrix,
-)
-from rgpycrumbs.surfaces.gradient import (
-    GradientIMQ,
-    GradientMatern,
-    GradientRQ,
-    GradientSE,
-    NystromGradientIMQ,
-)
-from rgpycrumbs.surfaces.standard import FastIMQ, FastMatern, FastTPS
+import importlib
+
+_LAZY_IMPORTS = {
+    # _base
+    "BaseGradientSurface": "_base",
+    "BaseSurface": "_base",
+    "generic_negative_mll": "_base",
+    "safe_cholesky_solve": "_base",
+    # _kernels
+    "_imq_kernel_matrix": "_kernels",
+    "_matern_kernel_matrix": "_kernels",
+    "_tps_kernel_matrix": "_kernels",
+    # gradient (requires jax)
+    "GradientIMQ": "gradient",
+    "GradientMatern": "gradient",
+    "GradientRQ": "gradient",
+    "GradientSE": "gradient",
+    "NystromGradientIMQ": "gradient",
+    # standard (requires jax)
+    "FastIMQ": "standard",
+    "FastMatern": "standard",
+    "FastTPS": "standard",
+}
 
 NYSTROM_THRESHOLD = 1000
 NYSTROM_N_INDUCING_DEFAULT = 300
@@ -54,9 +58,18 @@ __all__ = [
 ]
 
 
+def __getattr__(name):
+    if name in _LAZY_IMPORTS:
+        submod = importlib.import_module(f"rgpycrumbs.surfaces.{_LAZY_IMPORTS[name]}")
+        return getattr(submod, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 def get_surface_model(name):
     """
     Factory function to retrieve surface model classes by name.
+
+    .. versionadded:: 1.0.0
 
     Args:
         name: Model identifier (e.g., 'grad_matern', 'tps', 'imq').
@@ -64,15 +77,16 @@ def get_surface_model(name):
     Returns:
         type: The model class. Defaults to GradientMatern.
     """
-    models = {
-        "grad_matern": GradientMatern,
-        "grad_rq": GradientRQ,
-        "grad_se": GradientSE,
-        "grad_imq": GradientIMQ,
-        "grad_imq_ny": NystromGradientIMQ,
-        "matern": FastMatern,
-        "imq": FastIMQ,
-        "tps": FastTPS,
-        "rbf": FastTPS,
+    _models = {
+        "grad_matern": "GradientMatern",
+        "grad_rq": "GradientRQ",
+        "grad_se": "GradientSE",
+        "grad_imq": "GradientIMQ",
+        "grad_imq_ny": "NystromGradientIMQ",
+        "matern": "FastMatern",
+        "imq": "FastIMQ",
+        "tps": "FastTPS",
+        "rbf": "FastTPS",
     }
-    return models.get(name, GradientMatern)
+    class_name = _models.get(name, "GradientMatern")
+    return __getattr__(class_name)

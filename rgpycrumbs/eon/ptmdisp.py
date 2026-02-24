@@ -10,7 +10,10 @@
 #   "rich",
 # ]
 # ///
-"""
+"""Identifies non-crystalline atoms using polyhedral template matching.
+
+.. versionadded:: 0.0.2
+
 Identifies atoms in a structure file that do not match a specified crystal
 structure (e.g., FCC) and prints their 0-based indices to standard output.
 By default, the script is quiet. Use --verbose for progress messages.

@@ -3,6 +3,10 @@ from scipy.interpolate import splev, splrep
 
 
 def spline_interp(x, y, num=100, knots=3):
+    """Interpolate using B-splines.
+
+    .. versionadded:: 1.0.0
+    """
     spl = splrep(x, y, k=knots)
     x_fine = np.linspace(x.min(), x.max(), num=num)
     y_fine = splev(x_fine, spl)

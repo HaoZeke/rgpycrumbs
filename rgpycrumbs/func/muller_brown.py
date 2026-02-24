@@ -8,6 +8,10 @@ import numpy as np
 
 
 def muller_brown(x):
+    """Evaluate the Muller-Brown potential at position *x*.
+
+    .. versionadded:: 0.0.1
+    """
     A = [-200, -100, -170, 15]
     a = [-1, -1, -6.5, 0.7]
     b = [0, 0, 11, 0.6]
@@ -26,6 +30,10 @@ def muller_brown(x):
 
 
 def muller_brown_gradient(x):
+    """Compute the analytical gradient of the Muller-Brown potential at *x*.
+
+    .. versionadded:: 0.0.1
+    """
     A = [-200, -100, -170, 15]
     a = [-1, -1, -6.5, 0.7]
     b = [0, 0, 11, 0.6]

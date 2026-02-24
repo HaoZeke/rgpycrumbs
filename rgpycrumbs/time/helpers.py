@@ -2,6 +2,10 @@ import datetime
 
 
 def one_day_tdelta(etime: str, stime: str, format_time: str = "%H:%M:%S"):
+    """Compute the timedelta between two times within the same day.
+
+    .. versionadded:: 0.0.2
+    """
     # Chain the timezone injection directly to creation
     start_datetime = datetime.datetime.strptime(stime, format_time).replace(
         tzinfo=datetime.UTC

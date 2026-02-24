@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""Log eOn results to MLflow for experiment tracking.
+
+.. versionadded:: 1.0.0
+"""
 
 # /// script
 # requires-python = ">=3.11"

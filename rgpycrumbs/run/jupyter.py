@@ -78,6 +78,8 @@ def run_command_or_exit(
     """
     Helper wrapper to run commands, stream output, and exit script/notebook
     cleanly on failure so sphinx-gallery sees the errors appropriately.
+
+    .. versionadded:: 0.1.0
     """
     try:
         return _run_command_live(cmd, check=True, capture=capture, timeout=timeout)

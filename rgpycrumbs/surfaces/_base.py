@@ -7,6 +7,8 @@ def safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3):
     """
     Retries Cholesky decomposition with increasing jitter if it fails.
 
+    .. versionadded:: 1.0.0
+
     Args:
         K: Covariance matrix.
         y: Observation vector.
@@ -39,6 +41,8 @@ def generic_negative_mll(K, y, noise_scalar):
     """
     Calculates the negative Marginal Log-Likelihood (MLL).
 
+    .. versionadded:: 1.0.0
+
     Args:
         K: Covariance matrix.
         y: Observation vector.
@@ -60,6 +64,8 @@ def generic_negative_mll(K, y, noise_scalar):
 class BaseSurface:
     """
     Abstract base class for standard (non-gradient) surface models.
+
+    .. versionadded:: 1.0.0
 
     Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
     """
@@ -117,6 +123,8 @@ class BaseSurface:
         """
         Predict posterior variance at query points.
 
+        .. versionadded:: 1.1.0
+
         Args:
             x_query: Query inputs (M, D).
             chunk_size: Number of points to process per batch.
@@ -143,6 +151,8 @@ class BaseSurface:
 class BaseGradientSurface:
     """
     Abstract base class for gradient-enhanced surface models.
+
+    .. versionadded:: 1.1.0
 
     Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
     These models incorporate both values and their gradients into the fit.
@@ -216,6 +226,8 @@ class BaseGradientSurface:
     def predict_var(self, x_query, chunk_size=500):
         """
         Predict posterior variance at query points.
+
+        .. versionadded:: 1.1.0
 
         Args:
             x_query: Query inputs (M, D).

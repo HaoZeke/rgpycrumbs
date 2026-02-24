@@ -10,6 +10,11 @@ import numpy as np
 
 @dataclasses.dataclass
 class IRAComp:
+    """Result of an IRA comparison (rotation, translation, permutation, Hausdorff distance).
+
+    .. versionadded:: 1.0.0
+    """
+
     rot: np.array
     trans: np.array
     perm: np.array
@@ -17,7 +22,10 @@ class IRAComp:
 
 
 class IncomparableStructuresError(ValueError):
-    """Custom exception raised for incompatible atomistic structures."""
+    """Custom exception raised for incompatible atomistic structures.
+
+    .. versionadded:: 1.0.0
+    """
 
     pass
 
@@ -44,7 +52,10 @@ def _perform_ira_match(atm1, atm2, k_factor=2.8):
 
 
 def is_ira_pair(atm1, atm2, hd_tol=1, k_factor=2.8):
-    """Checks if two atomistic structures are an IRA pair."""
+    """Checks if two atomistic structures are an IRA pair.
+
+    .. versionadded:: 1.0.0
+    """
     try:
         _, _, _, hd = _perform_ira_match(atm1, atm2, k_factor)
         return hd < hd_tol
@@ -53,13 +64,19 @@ def is_ira_pair(atm1, atm2, hd_tol=1, k_factor=2.8):
 
 
 def do_ira(atm1, atm2, k_factor=2.8):
-    """Performs IRA matching on two atomistic structures."""
+    """Performs IRA matching on two atomistic structures.
+
+    .. versionadded:: 1.0.0
+    """
     rotation, translation, perm, hd = _perform_ira_match(atm1, atm2, k_factor)
     return IRAComp(rot=rotation, trans=translation, perm=perm, hd=hd)
 
 
 def calculate_rmsd(atm1, atm2, k_factor=2.8):
-    """Calculates RMSD using do_ira."""
+    """Calculates RMSD using do_ira.
+
+    .. versionadded:: 1.0.0
+    """
     ira_comp = do_ira(atm1, atm2, k_factor)
     atm2_coords_permuted = atm2.get_positions()[ira_comp.perm]
     atm2_coords_transformed = np.dot(atm2_coords_permuted, ira_comp.rot) + ira_comp.trans

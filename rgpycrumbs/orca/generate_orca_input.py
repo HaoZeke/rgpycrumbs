@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""Generate ORCA input files from TOML configuration via pychum.
+
+.. versionadded:: 1.1.0
+"""
+
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [

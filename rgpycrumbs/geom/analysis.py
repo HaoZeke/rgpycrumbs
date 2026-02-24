@@ -18,6 +18,8 @@ def analyze_structure(
     Analyzes an ASE Atoms object to calculate the distance matrix, bond matrix,
     identify molecular fragments, and calculate inter-fragment distances.
 
+    .. versionadded:: 1.0.0
+
     Args:
         atoms: The ASE Atoms object to analyze.
         covalent_scale:  A scaling factor applied to the covalent radii to

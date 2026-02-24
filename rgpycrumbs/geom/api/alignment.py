@@ -17,7 +17,10 @@ except ImportError:
 
 @dataclass(frozen=True)
 class IRAMatchInputs:
-    """Encapsulates the raw arrays required for an IRA graph match."""
+    """Encapsulates the raw arrays required for an IRA graph match.
+
+    .. versionadded:: 0.1.0
+    """
 
     ref_count: int
     ref_numbers: np.ndarray
@@ -30,7 +33,10 @@ class IRAMatchInputs:
 
 @dataclass(frozen=True)
 class IRAMatchResults:
-    """Encapsulates the transformation outputs from the IRA algorithm."""
+    """Encapsulates the transformation outputs from the IRA algorithm.
+
+    .. versionadded:: 0.1.0
+    """
 
     rotation: np.ndarray  # $R$ matrix
     translation: np.ndarray  # $t$ vector
@@ -40,14 +46,20 @@ class IRAMatchResults:
 
 @dataclass(frozen=True)
 class IRAConfig:
-    """Configuration parameters for the Iterative Rotations and Alignment."""
+    """Configuration parameters for the Iterative Rotations and Alignment.
+
+    .. versionadded:: 0.1.0
+    """
 
     enabled: bool = False
     kmax: float = 1.8
 
 
 class AlignmentMethod(Enum):
-    """Tracks which algorithm was successfully applied."""
+    """Tracks which algorithm was successfully applied.
+
+    .. versionadded:: 0.1.0
+    """
 
     ASE_PROCRUSTES = auto()  # Standard rigid rotation/translation
     IRA_PERMUTATION = auto()  # Isomorphic mapping + alignment
@@ -58,6 +70,8 @@ class AlignmentMethod(Enum):
 class AlignmentResult:
     """
     Container for alignment outputs.
+
+    .. versionadded:: 0.1.0
 
     :param atoms: The aligned structure (modified in-place, but returned for chaining).
     :param method: The specific algorithm that was used.
@@ -131,6 +145,8 @@ def align_structure_robust(
     """
     Aligns a mobile structure to a reference using IRA with an ASE fallback.
 
+    .. versionadded:: 0.1.0
+
     This method minimizes the RMSD between the reference and mobile structures.
     It first attempts to solve the isomorphism problem (finding $P, R, t$)
     using IRA. If IRA fails or remains unavailable, it defaults to standard
@@ -171,6 +187,8 @@ def calculate_rmsd_from_ref(
 ) -> np.ndarray:
     """
     Calculates the RMSD of each structure in a list relative to a reference.
+
+    .. versionadded:: 1.0.0
 
     The function first attempts the IRA algorithm to handle atom permutations.
     If IRA fails or lacks the necessary library, the code falls back to
