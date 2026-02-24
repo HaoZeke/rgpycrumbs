@@ -1,0 +1,1 @@
+Added --source hdf5 support to plt_neb for loading NEB paths from ChemGP HDF5 output files.

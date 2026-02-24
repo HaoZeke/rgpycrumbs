@@ -1,0 +1,1 @@
+Added --source traj support to plt_neb for loading NEB paths from ASE-readable trajectory files (extxyz, .traj, etc.).

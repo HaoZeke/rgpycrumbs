@@ -1,0 +1,1 @@
+Per-image RMSD alignment in rgpycrumbs.geom now runs in parallel over threads for improved performance on large NEB paths.
