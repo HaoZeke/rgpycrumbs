@@ -36,6 +36,8 @@ def nystrom_paths_needed(n_inducing, images_per_step):
 
 
 __all__ = [
+    "NYSTROM_N_INDUCING_DEFAULT",
+    "NYSTROM_THRESHOLD",
     "BaseGradientSurface",
     "BaseSurface",
     "FastIMQ",
@@ -45,8 +47,6 @@ __all__ = [
     "GradientMatern",
     "GradientRQ",
     "GradientSE",
-    "NYSTROM_N_INDUCING_DEFAULT",
-    "NYSTROM_THRESHOLD",
     "NystromGradientIMQ",
     "_imq_kernel_matrix",
     "_matern_kernel_matrix",
