@@ -31,6 +31,7 @@ Functions
 
    rgpycrumbs.geom.api.alignment._apply_ira_alignment
    rgpycrumbs.geom.api.alignment.align_structure_robust
+   rgpycrumbs.geom.api.alignment._rmsd_single
    rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref
 
 
@@ -42,6 +43,8 @@ Module Contents
 .. py:class:: IRAMatchInputs
 
    Encapsulates the raw arrays required for an IRA graph match.
+
+   .. versionadded:: 0.1.0
 
 
    .. py:attribute:: ref_count
@@ -76,6 +79,8 @@ Module Contents
 
    Encapsulates the transformation outputs from the IRA algorithm.
 
+   .. versionadded:: 0.1.0
+
 
    .. py:attribute:: rotation
       :type:  numpy.ndarray
@@ -97,6 +102,8 @@ Module Contents
 
    Configuration parameters for the Iterative Rotations and Alignment.
 
+   .. versionadded:: 0.1.0
+
 
    .. py:attribute:: enabled
       :type:  bool
@@ -117,6 +124,8 @@ Module Contents
 
    Tracks which algorithm was successfully applied.
 
+   .. versionadded:: 0.1.0
+
 
    .. py:attribute:: ASE_PROCRUSTES
 
@@ -130,6 +139,8 @@ Module Contents
 .. py:class:: AlignmentResult
 
    Container for alignment outputs.
+
+   .. versionadded:: 0.1.0
 
    :param atoms: The aligned structure (modified in-place, but returned for chaining).
    :param method: The specific algorithm that was used.
@@ -163,6 +174,8 @@ Module Contents
 
    Aligns a mobile structure to a reference using IRA with an ASE fallback.
 
+   .. versionadded:: 0.1.0
+
    This method minimizes the RMSD between the reference and mobile structures.
    It first attempts to solve the isomorphism problem (finding $P, R, t$)
    using IRA. If IRA fails or remains unavailable, it defaults to standard
@@ -175,13 +188,23 @@ Module Contents
    :return: An AlignmentResult.
 
 
+.. py:function:: _rmsd_single(ref_atom, atom_i, config, coords_ref)
+
+   Align one image and return its RMSD (thread-safe on a copy).
+
+
 .. py:function:: calculate_rmsd_from_ref(atoms_list: list[ase.Atoms], ira_instance, ref_atom: ase.Atoms, ira_kmax: float) -> numpy.ndarray
 
    Calculates the RMSD of each structure in a list relative to a reference.
 
+   .. versionadded:: 1.0.0
+
    The function first attempts the IRA algorithm to handle atom permutations.
    If IRA fails or lacks the necessary library, the code falls back to
    standard ASE Procrustes alignment via `align_structure_robust`.
+
+   Alignment of individual images is parallelized over threads; the
+   IRA Fortran library and numpy both release the GIL.
 
    :param atoms_list: A list of ASE Atoms objects.
    :param ira_instance: An instantiated IRA object (or None).

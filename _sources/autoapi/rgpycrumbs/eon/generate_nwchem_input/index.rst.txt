@@ -3,6 +3,13 @@ rgpycrumbs.eon.generate_nwchem_input
 
 .. py:module:: rgpycrumbs.eon.generate_nwchem_input
 
+.. autoapi-nested-parse::
+
+   Generate NWChem input files from eOn configuration and structures.
+
+   .. versionadded:: 0.0.2
+
+
 
 Functions
 ---------

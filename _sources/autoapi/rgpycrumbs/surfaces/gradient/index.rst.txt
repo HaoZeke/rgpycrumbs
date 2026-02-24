@@ -61,6 +61,8 @@ Module Contents
 
    Gradient-enhanced Matérn 5/2 surface implementation.
 
+   .. versionadded:: 1.0.0
+
 
    .. py:method:: _fit(smoothing, length_scale, optimize)
 
@@ -100,6 +102,8 @@ Module Contents
 
 
    Gradient-enhanced Squared Exponential (SE) surface implementation.
+
+   .. versionadded:: 1.0.0
 
 
    .. py:method:: _fit(smoothing, length_scale, optimize)
@@ -143,6 +147,8 @@ Module Contents
 
    Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.
 
+   .. versionadded:: 1.0.0
+
 
    .. py:method:: _fit(smoothing, length_scale, optimize)
 
@@ -183,6 +189,8 @@ Module Contents
 
    Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.
 
+   .. versionadded:: 1.0.0
+
 
    .. py:method:: _fit(_smoothing, length_scale, optimize)
 
@@ -220,6 +228,8 @@ Module Contents
 
 
    Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.
+
+   .. versionadded:: 1.1.0
 
 
    .. py:attribute:: n_inducing

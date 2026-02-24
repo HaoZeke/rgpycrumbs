@@ -28,4 +28,6 @@ Module Contents
    Helper wrapper to run commands, stream output, and exit script/notebook
    cleanly on failure so sphinx-gallery sees the errors appropriately.
 
+   .. versionadded:: 0.1.0
+
 

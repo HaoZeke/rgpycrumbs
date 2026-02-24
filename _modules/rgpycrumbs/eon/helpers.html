@@ -248,20 +248,22 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="9"><span class="k">def</span><span class="w"> </span><span class="nf">write_eon_config</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span data-line="10"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="11"><span class="sd">    Writes a config.ini file for eOn using a dictionary structure.</span>
-</span><span data-line="12"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="13">    <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-</span><span data-line="14">    <span class="n">config</span><span class="o">.</span><span class="n">optionxform</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c1"># Preserve case sensitivity</span>
-</span><span data-line="15">
-</span><span data-line="16">    <span class="k">for</span> <span class="n">section</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span data-line="17">        <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span><span data-line="18">
-</span><span data-line="19">    <span class="n">out_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</span><span data-line="20">    <span class="k">if</span> <span class="n">out_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="21">        <span class="n">out_path</span> <span class="o">=</span> <span class="n">out_path</span> <span class="o">/</span> <span class="s2">&quot;config.ini&quot;</span>
-</span><span data-line="22">
-</span><span data-line="23">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="24">        <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-</span><span data-line="25">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrote eOn config to &#39;</span><span class="si">{</span><span class="n">out_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
+</span><span data-line="12">
+</span><span data-line="13"><span class="sd">    .. versionadded:: 0.1.0</span>
+</span><span data-line="14"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="15">    <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+</span><span data-line="16">    <span class="n">config</span><span class="o">.</span><span class="n">optionxform</span> <span class="o">=</span> <span class="nb">str</span>  <span class="c1"># Preserve case sensitivity</span>
+</span><span data-line="17">
+</span><span data-line="18">    <span class="k">for</span> <span class="n">section</span><span class="p">,</span> <span class="n">options</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="19">        <span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span data-line="20">
+</span><span data-line="21">    <span class="n">out_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span><span data-line="22">    <span class="k">if</span> <span class="n">out_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="23">        <span class="n">out_path</span> <span class="o">=</span> <span class="n">out_path</span> <span class="o">/</span> <span class="s2">&quot;config.ini&quot;</span>
+</span><span data-line="24">
+</span><span data-line="25">    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="26">        <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span data-line="27">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrote eOn config to &#39;</span><span class="si">{</span><span class="n">out_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

@@ -19,4 +19,6 @@ Module Contents
 
    Writes a config.ini file for eOn using a dictionary structure.
 
+   .. versionadded:: 0.1.0
+
 

@@ -20,9 +20,24 @@ Module Contents
 
 .. py:function:: getstrform(pathobj)
 
+   Return the absolute path as a string.
+
+   .. versionadded:: 0.0.1
+
+
 .. py:function:: get_gitroot()
 
+   Return the root of the current git repository as a Path.
+
+   .. versionadded:: 0.0.1
+
+
 .. py:function:: switchdir(path)
+
+   Context manager that temporarily changes the working directory.
+
+   .. versionadded:: 0.0.1
+
 
 .. py:function:: _import_from_parent_env(module_name: str)
 

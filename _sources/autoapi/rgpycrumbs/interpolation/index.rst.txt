@@ -17,3 +17,8 @@ Module Contents
 
 .. py:function:: spline_interp(x, y, num=100, knots=3)
 
+   Interpolate using B-splines.
+
+   .. versionadded:: 1.0.0
+
+

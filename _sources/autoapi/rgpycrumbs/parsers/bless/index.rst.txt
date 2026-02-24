@@ -3,6 +3,13 @@ rgpycrumbs.parsers.bless
 
 .. py:module:: rgpycrumbs.parsers.bless
 
+.. autoapi-nested-parse::
+
+   Regex patterns for parsing BLESS log files.
+
+   .. versionadded:: 0.0.2
+
+
 
 Attributes
 ----------

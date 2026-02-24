@@ -75,6 +75,8 @@ Module Contents
 
    Available detection methodologies.
 
+   .. versionadded:: 0.0.6
+
 
    .. py:attribute:: GEOMETRIC
       :value: 'geometric'
@@ -102,15 +104,24 @@ Module Contents
 
 .. py:function:: find_fragments_geometric(atoms: ase.atoms.Atoms, bond_multiplier: float, radius_type: str = 'natural') -> tuple[int, numpy.ndarray]
 
+   Detect molecular fragments using scaled covalent radii.
+
+   .. versionadded:: 0.0.6
+
+
 .. py:function:: find_fragments_bond_order(atoms: ase.atoms.Atoms, threshold: float, charge: int, multiplicity: int, method: str = 'GFN2-xTB') -> tuple[int, numpy.ndarray, numpy.ndarray, numpy.ndarray]
 
    Analyze connectivity via the Wiberg Bond Order (WBO) matrix.
    Calculate electronic structure using the specified xTB level.
 
+   .. versionadded:: 0.0.6
+
 
 .. py:function:: build_graph_and_find_components(num_atoms: int, row_indices: numpy.ndarray | list[int], col_indices: numpy.ndarray | list[int]) -> tuple[int, numpy.ndarray]
 
    Identify connected components using direct CSR sparse matrix construction.
+
+   .. versionadded:: 0.0.6
 
    This function avoids Python list overhead by passing interaction indices
    directly to the SciPy sparse engine.
@@ -120,15 +131,21 @@ Module Contents
 
    Merges fragments with geometric centers closer than the specified distance.
 
+   .. versionadded:: 0.0.6
+
 
 .. py:function:: visualize_with_pyvista(atoms: ase.atoms.Atoms, method: DetectionMethod, bond_data: float | numpy.ndarray, nonbond_cutoff: float = 0.05, bond_threshold: float = 0.8, radius_type: str = 'natural') -> None
 
    Renders the molecular system with scalar-coded bond orders.
 
+   .. versionadded:: 0.0.6
+
 
 .. py:function:: print_results(console: rich.console.Console, atoms: ase.atoms.Atoms, n_components: int, labels: numpy.ndarray) -> None
 
    Displays analysis results in a structured table.
+
+   .. versionadded:: 0.0.6
 
 
 .. py:function:: main()

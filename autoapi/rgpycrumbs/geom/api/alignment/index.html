@@ -239,6 +239,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment._apply_ira_alignment"><code class="docutils literal notranslate"><span class="pre">_apply_ira_alignment()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.align_structure_robust"><code class="docutils literal notranslate"><span class="pre">align_structure_robust()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment._rmsd_single"><code class="docutils literal notranslate"><span class="pre">_rmsd_single()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref"><code class="docutils literal notranslate"><span class="pre">calculate_rmsd_from_ref()</span></code></a></li>
 </ul>
 </li>
@@ -372,7 +373,10 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.align_structure_robust" title="rgpycrumbs.geom.api.alignment.align_structure_robust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">align_structure_robust</span></code></a>(→ AlignmentResult)</p></td>
 <td><p>Aligns a mobile structure to a reference using IRA with an ASE fallback.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref" title="rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_rmsd_from_ref</span></code></a>(→ numpy.ndarray)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.api.alignment._rmsd_single" title="rgpycrumbs.geom.api.alignment._rmsd_single"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_rmsd_single</span></code></a>(ref_atom, atom_i, config, coords_ref)</p></td>
+<td><p>Align one image and return its RMSD (thread-safe on a copy).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref" title="rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_rmsd_from_ref</span></code></a>(→ numpy.ndarray)</p></td>
 <td><p>Calculates the RMSD of each structure in a list relative to a reference.</p></td>
 </tr>
 </tbody>
@@ -390,6 +394,9 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.IRAMatchInputs">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">IRAMatchInputs</span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#IRAMatchInputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.IRAMatchInputs" title="Link to this definition">¶</a></dt>
 <dd><p>Encapsulates the raw arrays required for an IRA graph match.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.1.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.IRAMatchInputs.ref_count">
 <span class="sig-name descname"><span class="pre">ref_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#IRAMatchInputs.ref_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.IRAMatchInputs.ref_count" title="Link to this definition">¶</a></dt>
@@ -431,6 +438,9 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.IRAMatchResults">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">IRAMatchResults</span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#IRAMatchResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.IRAMatchResults" title="Link to this definition">¶</a></dt>
 <dd><p>Encapsulates the transformation outputs from the IRA algorithm.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.1.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.IRAMatchResults.rotation">
 <span class="sig-name descname"><span class="pre">rotation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#IRAMatchResults.rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.IRAMatchResults.rotation" title="Link to this definition">¶</a></dt>
@@ -457,6 +467,9 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.IRAConfig">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">IRAConfig</span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#IRAConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.IRAConfig" title="Link to this definition">¶</a></dt>
 <dd><p>Configuration parameters for the Iterative Rotations and Alignment.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.1.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.IRAConfig.enabled">
 <span class="sig-name descname"><span class="pre">enabled</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#IRAConfig.enabled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.IRAConfig.enabled" title="Link to this definition">¶</a></dt>
@@ -474,6 +487,9 @@ data-aria-dark="Switch to auto color mode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">AlignmentMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#AlignmentMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.AlignmentMethod" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.Enum</span></code></a></p>
 <p>Tracks which algorithm was successfully applied.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.1.0.</span></p>
+</div>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.AlignmentMethod.ASE_PROCRUSTES">
 <span class="sig-name descname"><span class="pre">ASE_PROCRUSTES</span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#AlignmentMethod.ASE_PROCRUSTES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.AlignmentMethod.ASE_PROCRUSTES" title="Link to this definition">¶</a></dt>
@@ -495,6 +511,9 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.AlignmentResult">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">AlignmentResult</span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#AlignmentResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.AlignmentResult" title="Link to this definition">¶</a></dt>
 <dd><p>Container for alignment outputs.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.1.0.</span></p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -533,6 +552,9 @@ alignment succeeds, or False if an error occurs or IRA remains unavailable.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.align_structure_robust">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">align_structure_robust</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mobile_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.IRAConfig" title="rgpycrumbs.geom.api.alignment.IRAConfig"><span class="pre">IRAConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rgpycrumbs.geom.api.alignment.AlignmentResult" title="rgpycrumbs.geom.api.alignment.AlignmentResult"><span class="pre">AlignmentResult</span></a></span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#align_structure_robust"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.align_structure_robust" title="Link to this definition">¶</a></dt>
 <dd><p>Aligns a mobile structure to a reference using IRA with an ASE fallback.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.1.0.</span></p>
+</div>
 <p>This method minimizes the RMSD between the reference and mobile structures.
 It first attempts to solve the isomorphism problem (finding $P, R, t$)
 using IRA. If IRA fails or remains unavailable, it defaults to standard
@@ -553,12 +575,23 @@ cutoff distance for IRA graph matching.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment._rmsd_single">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">_rmsd_single</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_atom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords_ref</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#_rmsd_single"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment._rmsd_single" title="Link to this definition">¶</a></dt>
+<dd><p>Align one image and return its RMSD (thread-safe on a copy).</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.api.alignment.</span></span><span class="sig-name descname"><span class="pre">calculate_rmsd_from_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ase.Atoms</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_atom</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_kmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="../../../../../_modules/rgpycrumbs/geom/api/alignment.html#calculate_rmsd_from_ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.api.alignment.calculate_rmsd_from_ref" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates the RMSD of each structure in a list relative to a reference.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 <p>The function first attempts the IRA algorithm to handle atom permutations.
 If IRA fails or lacks the necessary library, the code falls back to
 standard ASE Procrustes alignment via <cite>align_structure_robust</cite>.</p>
+<p>Alignment of individual images is parallelized over threads; the
+IRA Fortran library and numpy both release the GIL.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

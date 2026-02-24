@@ -3,6 +3,13 @@ rgpycrumbs.eon.to_mlflow
 
 .. py:module:: rgpycrumbs.eon.to_mlflow
 
+.. autoapi-nested-parse::
+
+   Log eOn results to MLflow for experiment tracking.
+
+   .. versionadded:: 1.0.0
+
+
 
 Attributes
 ----------

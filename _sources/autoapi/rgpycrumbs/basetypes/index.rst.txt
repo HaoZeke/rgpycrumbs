@@ -47,6 +47,11 @@ Module Contents
 
 .. py:class:: DimerOpt
 
+   Configuration for a dimer-based saddle point search.
+
+   .. versionadded:: 1.0.0
+
+
    .. py:attribute:: saddle
       :type:  str
       :value: 'dimer'
@@ -67,6 +72,11 @@ Module Contents
 
 .. py:class:: SpinID
 
+   Identifier combining molecule ID and spin state.
+
+   .. versionadded:: 1.0.0
+
+
    .. py:attribute:: mol_id
       :type:  int
 
@@ -76,6 +86,11 @@ Module Contents
 
 
 .. py:class:: MolGeom
+
+   Container for molecular geometry with energy and forces.
+
+   .. versionadded:: 1.0.0
+
 
    .. py:attribute:: pos
       :type:  numpy.array
@@ -90,6 +105,11 @@ Module Contents
 
 
 .. py:class:: SaddleMeasure
+
+   Aggregated measurements from a saddle point search.
+
+   .. versionadded:: 1.0.0
+
 
    .. py:attribute:: pes_calls
       :type:  int

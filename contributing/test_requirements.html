@@ -210,6 +210,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#testing-guidelines">Testing Guidelines</a><ul>
 <li><a class="reference internal" href="#adding-new-tests">Adding New Tests</a></li>
 <li><a class="reference internal" href="#example-test-structure">Example Test Structure</a></li>
+<li><a class="reference internal" href="#dispatcher-scripts-and-test-markers">Dispatcher Scripts and Test Markers</a></li>
 <li><a class="reference internal" href="#available-markers-environments">Available Markers &amp; Environments</a></li>
 <li><a class="reference internal" href="#running-tests">Running Tests</a></li>
 </ul>
@@ -365,6 +366,36 @@ external binaries.</p>
 </span></pre></div>
 </div>
 </section>
+<section id="dispatcher-scripts-and-test-markers">
+<h3>Dispatcher Scripts and Test Markers<a class="headerlink" href="#dispatcher-scripts-and-test-markers" title="Link to this heading">¶</a></h3>
+<p>Scripts under <code class="docutils literal notranslate"><span class="pre">rgpycrumbs/eon/</span></code> (and similar groups) declare their own
+dependencies via PEP 723 inline metadata. These scripts import heavy packages
+(polars, chemparseplot, ase, etc.) at the top level, because <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code> resolves
+those dependencies before execution.</p>
+<p>When writing tests that import these scripts directly (e.g., to test CLI
+<code class="docutils literal notranslate"><span class="pre">--help</span></code> output), the test file <strong>must</strong> use the corresponding marker (e.g.,
+<code class="docutils literal notranslate"><span class="pre">eon</span></code>, not <code class="docutils literal notranslate"><span class="pre">pure</span></code>) and the <code class="docutils literal notranslate"><span class="pre">skip_if_not_env</span></code> guard. Otherwise the top-level
+imports will fail during collection in environments that lack the script’s
+dependencies.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">tests.conftest</span><span class="w"> </span><span class="kn">import</span> <span class="n">skip_if_not_env</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">skip_if_not_env</span><span class="p">(</span><span class="s2">&quot;eon&quot;</span><span class="p">)</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs.eon.plt_neb</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">plt_neb_main</span>  <span class="c1"># noqa: E402</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="n">pytestmark</span> <span class="o">=</span> <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">eon</span>
+</span><span data-line="9">
+</span><span data-line="10">
+</span><span data-line="11"><span class="k">def</span><span class="w"> </span><span class="nf">test_plt_neb_help</span><span class="p">(</span><span class="n">runner</span><span class="p">):</span>
+</span><span data-line="12">    <span class="n">result</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">plt_neb_main</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">])</span>
+</span><span data-line="13">    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span>
+</span></pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">pure</span></code> marker is reserved for tests that depend only on core packages
+(numpy, click). Never place tests that import dispatcher scripts under the
+<code class="docutils literal notranslate"><span class="pre">pure</span></code> marker.</p>
+</section>
 <section id="available-markers-environments">
 <h3>Available Markers &amp; Environments<a class="headerlink" href="#available-markers-environments" title="Link to this heading">¶</a></h3>
 <p>The following markers and their corresponding <code class="docutils literal notranslate"><span class="pre">pixi</span></code> environments are available:</p>
@@ -405,8 +436,8 @@ external binaries.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">eon</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">eonmlflow</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ase</span></code>, <code class="docutils literal notranslate"><span class="pre">eon</span></code></p></td>
-<td><p>eOn integration</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ase</span></code>, <code class="docutils literal notranslate"><span class="pre">eon</span></code>, <code class="docutils literal notranslate"><span class="pre">polars</span></code>, <code class="docutils literal notranslate"><span class="pre">chemparseplot</span></code></p></td>
+<td><p>eOn integration, NEB CLI</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ira</span></code></p></td>
 <td><p>(requires <code class="docutils literal notranslate"><span class="pre">ira_mod</span></code>)</p></td>

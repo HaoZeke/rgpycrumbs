@@ -29,6 +29,8 @@ Module Contents
 
    Retries Cholesky decomposition with increasing jitter if it fails.
 
+   .. versionadded:: 1.0.0
+
    Args:
        K: Covariance matrix.
        y: Observation vector.
@@ -44,6 +46,8 @@ Module Contents
 
    Calculates the negative Marginal Log-Likelihood (MLL).
 
+   .. versionadded:: 1.0.0
+
    Args:
        K: Covariance matrix.
        y: Observation vector.
@@ -56,6 +60,8 @@ Module Contents
 .. py:class:: BaseSurface(x_obs, y_obs, smoothing=0.001, length_scale=None, optimize=True, **_kwargs)
 
    Abstract base class for standard (non-gradient) surface models.
+
+   .. versionadded:: 1.0.0
 
    Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
 
@@ -105,6 +111,8 @@ Module Contents
 
       Predict posterior variance at query points.
 
+      .. versionadded:: 1.1.0
+
       Args:
           x_query: Query inputs (M, D).
           chunk_size: Number of points to process per batch.
@@ -133,6 +141,8 @@ Module Contents
 .. py:class:: BaseGradientSurface(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
 
    Abstract base class for gradient-enhanced surface models.
+
+   .. versionadded:: 1.1.0
 
    Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
    These models incorporate both values and their gradients into the fit.
@@ -185,6 +195,8 @@ Module Contents
    .. py:method:: predict_var(x_query, chunk_size=500)
 
       Predict posterior variance at query points.
+
+      .. versionadded:: 1.1.0
 
       Args:
           x_query: Query inputs (M, D).

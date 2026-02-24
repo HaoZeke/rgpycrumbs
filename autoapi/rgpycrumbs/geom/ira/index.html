@@ -313,7 +313,7 @@ data-aria-dark="Switch to auto color mode">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.ira.IRAComp" title="rgpycrumbs.geom.ira.IRAComp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IRAComp</span></code></a></p></td>
-<td><p></p></td>
+<td><p>Result of an IRA comparison (rotation, translation, permutation, Hausdorff distance).</p></td>
 </tr>
 </tbody>
 </table>
@@ -345,7 +345,11 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py class">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.ira.IRAComp">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.ira.</span></span><span class="sig-name descname"><span class="pre">IRAComp</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/ira.html#IRAComp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.ira.IRAComp" title="Link to this definition">¶</a></dt>
-<dd><dl class="py attribute">
+<dd><p>Result of an IRA comparison (rotation, translation, permutation, Hausdorff distance).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.ira.IRAComp.rot">
 <span class="sig-name descname"><span class="pre">rot</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.array</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/ira.html#IRAComp.rot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.ira.IRAComp.rot" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -372,6 +376,9 @@ data-aria-dark="Switch to auto color mode">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.ira.</span></span><span class="sig-name descname"><span class="pre">IncomparableStructuresError</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/ira.html#IncomparableStructuresError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.ira.IncomparableStructuresError" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
 <p>Custom exception raised for incompatible atomistic structures.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -384,18 +391,27 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.ira.is_ira_pair">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.ira.</span></span><span class="sig-name descname"><span class="pre">is_ira_pair</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atm1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atm2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hd_tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/ira.html#is_ira_pair"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.ira.is_ira_pair" title="Link to this definition">¶</a></dt>
 <dd><p>Checks if two atomistic structures are an IRA pair.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.ira.do_ira">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.ira.</span></span><span class="sig-name descname"><span class="pre">do_ira</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atm1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atm2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/ira.html#do_ira"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.ira.do_ira" title="Link to this definition">¶</a></dt>
 <dd><p>Performs IRA matching on two atomistic structures.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.ira.calculate_rmsd">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.ira.</span></span><span class="sig-name descname"><span class="pre">calculate_rmsd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atm1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atm2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/ira.html#calculate_rmsd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.ira.calculate_rmsd" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates RMSD using do_ira.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 </dd></dl>
 
 </section>

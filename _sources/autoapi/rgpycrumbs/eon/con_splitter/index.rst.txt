@@ -3,6 +3,13 @@ rgpycrumbs.eon.con_splitter
 
 .. py:module:: rgpycrumbs.eon.con_splitter
 
+.. autoapi-nested-parse::
+
+   Split multi-image .con files into per-image structures.
+
+   .. versionadded:: 0.0.2
+
+
 
 Attributes
 ----------

@@ -18,5 +18,15 @@ Module Contents
 
 .. py:function:: muller_brown(x)
 
+   Evaluate the Muller-Brown potential at position *x*.
+
+   .. versionadded:: 0.0.1
+
+
 .. py:function:: muller_brown_gradient(x)
+
+   Compute the analytical gradient of the Muller-Brown potential at *x*.
+
+   .. versionadded:: 0.0.1
+
 

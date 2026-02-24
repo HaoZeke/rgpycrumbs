@@ -49,6 +49,8 @@ Module Contents
    Thin Plate Spline (TPS) surface implementation.
    Includes a polynomial mean function and supports smoothing optimization.
 
+   .. versionadded:: 1.0.0
+
 
    .. py:attribute:: x_obs
 
@@ -76,6 +78,8 @@ Module Contents
 
       Predict posterior variance at query points.
 
+      .. versionadded:: 1.1.0
+
       Args:
           x_query: Query inputs (M, D).
           chunk_size: Processing batch size.
@@ -99,6 +103,8 @@ Module Contents
 
 
    Matérn 5/2 surface implementation.
+
+   .. versionadded:: 1.0.0
 
 
    .. py:method:: _fit(smoothing, length_scale, optimize)
@@ -139,6 +145,8 @@ Module Contents
 
 
    Inverse Multi-Quadratic (IMQ) surface implementation.
+
+   .. versionadded:: 1.0.0
 
 
    .. py:method:: _fit(smoothing, length_scale, optimize)

@@ -256,7 +256,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="15">
 </span><span data-line="16">
 <div class="viewcode-block" id="negative_mll_tps">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.negative_mll_tps">[docs]</a>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.negative_mll_tps">[docs]</a>
 </span><span data-line="17"><span class="k">def</span><span class="w"> </span><span class="nf">negative_mll_tps</span><span class="p">(</span><span class="n">log_params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 </span><span data-line="18">    <span class="c1"># TPS only really has a smoothing parameter to tune in this context</span>
 </span><span data-line="19">    <span class="c1"># (Length scale is inherent to the radial basis).</span>
@@ -268,7 +268,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="24">
 </span><span data-line="25"><span class="nd">@jit</span>
 <div class="viewcode-block" id="_tps_solve">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._tps_solve">[docs]</a>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._tps_solve">[docs]</a>
 </span><span data-line="26"><span class="k">def</span><span class="w"> </span><span class="nf">_tps_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sm</span><span class="p">):</span>
 </span><span data-line="27">    <span class="n">K</span> <span class="o">=</span> <span class="n">_tps_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </span><span data-line="28">    <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">sm</span>
@@ -293,7 +293,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="46">
 </span><span data-line="47"><span class="nd">@jit</span>
 <div class="viewcode-block" id="_tps_predict">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._tps_predict">[docs]</a>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._tps_predict">[docs]</a>
 </span><span data-line="48"><span class="k">def</span><span class="w"> </span><span class="nf">_tps_predict</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
 </span><span data-line="49">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </span><span data-line="50">    <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
@@ -308,7 +308,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="58">
 </span><span data-line="59"><span class="nd">@jit</span>
 <div class="viewcode-block" id="_tps_var">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._tps_var">[docs]</a>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._tps_var">[docs]</a>
 </span><span data-line="60"><span class="k">def</span><span class="w"> </span><span class="nf">_tps_var</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">lhs_inv</span><span class="p">):</span>
 </span><span data-line="61">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </span><span data-line="62">    <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
@@ -323,312 +323,322 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="70">
 </span><span data-line="71">
 <div class="viewcode-block" id="FastTPS">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastTPS">[docs]</a>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastTPS">[docs]</a>
 </span><span data-line="72"><span class="k">class</span><span class="w"> </span><span class="nc">FastTPS</span><span class="p">:</span>
 </span><span data-line="73"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span data-line="74"><span class="sd">    Thin Plate Spline (TPS) surface implementation.</span>
 </span><span data-line="75"><span class="sd">    Includes a polynomial mean function and supports smoothing optimization.</span>
-</span><span data-line="76"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="77">
-</span><span data-line="78">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">):</span>
-</span><span data-line="79"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="80"><span class="sd">        Initializes the TPS model.</span>
-</span><span data-line="81">
-</span><span data-line="82"><span class="sd">        Args:</span>
-</span><span data-line="83"><span class="sd">            x_obs: Training inputs (N, D).</span>
-</span><span data-line="84"><span class="sd">            y_obs: Training observations (N,).</span>
-</span><span data-line="85"><span class="sd">            smoothing: Initial smoothing parameter.</span>
-</span><span data-line="86"><span class="sd">            optimize: Whether to optimize the smoothing parameter.</span>
-</span><span data-line="87"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span data-line="76">
+</span><span data-line="77"><span class="sd">    .. versionadded:: 1.0.0</span>
+</span><span data-line="78"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="79">
+</span><span data-line="80">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">):</span>
+</span><span data-line="81"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="82"><span class="sd">        Initializes the TPS model.</span>
+</span><span data-line="83">
+</span><span data-line="84"><span class="sd">        Args:</span>
+</span><span data-line="85"><span class="sd">            x_obs: Training inputs (N, D).</span>
+</span><span data-line="86"><span class="sd">            y_obs: Training observations (N,).</span>
+</span><span data-line="87"><span class="sd">            smoothing: Initial smoothing parameter.</span>
+</span><span data-line="88"><span class="sd">            optimize: Whether to optimize the smoothing parameter.</span>
+</span><span data-line="89"><span class="sd">        &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="FastTPS.x_obs">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastTPS.x_obs">[docs]</a>
-</span><span data-line="88">        <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastTPS.x_obs">[docs]</a>
+</span><span data-line="90">        <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FastTPS.y_obs">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastTPS.y_obs">[docs]</a>
-</span><span data-line="89">        <span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastTPS.y_obs">[docs]</a>
+</span><span data-line="91">        <span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y_obs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
 
-</span><span data-line="90">
-</span><span data-line="91">        <span class="c1"># TPS handles mean via polynomial, but centering helps optimization stability</span>
+</span><span data-line="92">
+</span><span data-line="93">        <span class="c1"># TPS handles mean via polynomial, but centering helps optimization stability</span>
 <div class="viewcode-block" id="FastTPS.y_mean">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastTPS.y_mean">[docs]</a>
-</span><span data-line="92">        <span class="bp">self</span><span class="o">.</span><span class="n">y_mean</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastTPS.y_mean">[docs]</a>
+</span><span data-line="94">        <span class="bp">self</span><span class="o">.</span><span class="n">y_mean</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span><span class="p">)</span></div>
 
-</span><span data-line="93">        <span class="n">y_centered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_mean</span>
-</span><span data-line="94">
-</span><span data-line="95">        <span class="n">init_sm</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothing</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
+</span><span data-line="95">        <span class="n">y_centered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_mean</span>
 </span><span data-line="96">
-</span><span data-line="97">        <span class="k">if</span> <span class="n">optimize</span><span class="p">:</span>
-</span><span data-line="98">            <span class="c1"># Optimize [log_smoothing]</span>
-</span><span data-line="99">            <span class="n">x0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_sm</span><span class="p">)])</span>
-</span><span data-line="100">
-</span><span data-line="101">            <span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">log_p</span><span class="p">):</span>
-</span><span data-line="102">                <span class="k">return</span> <span class="n">negative_mll_tps</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">y_centered</span><span class="p">)</span>
-</span><span data-line="103">
-</span><span data-line="104">            <span class="n">results</span> <span class="o">=</span> <span class="n">jopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</span><span data-line="97">        <span class="n">init_sm</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothing</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
+</span><span data-line="98">
+</span><span data-line="99">        <span class="k">if</span> <span class="n">optimize</span><span class="p">:</span>
+</span><span data-line="100">            <span class="c1"># Optimize [log_smoothing]</span>
+</span><span data-line="101">            <span class="n">x0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_sm</span><span class="p">)])</span>
+</span><span data-line="102">
+</span><span data-line="103">            <span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">log_p</span><span class="p">):</span>
+</span><span data-line="104">                <span class="k">return</span> <span class="n">negative_mll_tps</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">y_centered</span><span class="p">)</span>
 </span><span data-line="105">
-</span><span data-line="106">            <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-</span><span data-line="107">            <span class="k">if</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm</span><span class="p">):</span>
-</span><span data-line="108">                <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">init_sm</span>
-</span><span data-line="109">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="110">            <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">init_sm</span>
-</span><span data-line="111">
-</span><span data-line="112">        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span> <span class="o">=</span> <span class="n">_tps_solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm</span><span class="p">)</span>
+</span><span data-line="106">            <span class="n">results</span> <span class="o">=</span> <span class="n">jopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</span><span data-line="107">
+</span><span data-line="108">            <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</span><span data-line="109">            <span class="k">if</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sm</span><span class="p">):</span>
+</span><span data-line="110">                <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">init_sm</span>
+</span><span data-line="111">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="112">            <span class="bp">self</span><span class="o">.</span><span class="n">sm</span> <span class="o">=</span> <span class="n">init_sm</span>
 </span><span data-line="113">
+</span><span data-line="114">        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span> <span class="o">=</span> <span class="n">_tps_solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm</span><span class="p">)</span>
+</span><span data-line="115">
 <div class="viewcode-block" id="FastTPS.__call__">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastTPS.__call__">[docs]</a>
-</span><span data-line="114">    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_query</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-</span><span data-line="115"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="116"><span class="sd">        Predict values at query points using chunking.</span>
-</span><span data-line="117">
-</span><span data-line="118"><span class="sd">        Args:</span>
-</span><span data-line="119"><span class="sd">            x_query: Query inputs (M, D).</span>
-</span><span data-line="120"><span class="sd">            chunk_size: Processing batch size.</span>
-</span><span data-line="121">
-</span><span data-line="122"><span class="sd">        Returns:</span>
-</span><span data-line="123"><span class="sd">            jnp.ndarray: Predicted values (M,).</span>
-</span><span data-line="124"><span class="sd">        &quot;&quot;&quot;</span>
-</span><span data-line="125">        <span class="n">x_query</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-</span><span data-line="126">        <span class="n">preds</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="127">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_query</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_size</span><span class="p">):</span>
-</span><span data-line="128">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">x_query</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
-</span><span data-line="129">            <span class="n">preds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_tps_predict</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
-</span><span data-line="130">        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastTPS.__call__">[docs]</a>
+</span><span data-line="116">    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_query</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+</span><span data-line="117"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="118"><span class="sd">        Predict values at query points using chunking.</span>
+</span><span data-line="119">
+</span><span data-line="120"><span class="sd">        Args:</span>
+</span><span data-line="121"><span class="sd">            x_query: Query inputs (M, D).</span>
+</span><span data-line="122"><span class="sd">            chunk_size: Processing batch size.</span>
+</span><span data-line="123">
+</span><span data-line="124"><span class="sd">        Returns:</span>
+</span><span data-line="125"><span class="sd">            jnp.ndarray: Predicted values (M,).</span>
+</span><span data-line="126"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span data-line="127">        <span class="n">x_query</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span><span data-line="128">        <span class="n">preds</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="129">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_query</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_size</span><span class="p">):</span>
+</span><span data-line="130">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">x_query</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
+</span><span data-line="131">            <span class="n">preds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_tps_predict</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">))</span>
+</span><span data-line="132">        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
-</span><span data-line="131">
+</span><span data-line="133">
 <div class="viewcode-block" id="FastTPS.predict_var">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastTPS.predict_var">[docs]</a>
-</span><span data-line="132">    <span class="k">def</span><span class="w"> </span><span class="nf">predict_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_query</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-</span><span data-line="133"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="134"><span class="sd">        Predict posterior variance at query points.</span>
-</span><span data-line="135">
-</span><span data-line="136"><span class="sd">        Args:</span>
-</span><span data-line="137"><span class="sd">            x_query: Query inputs (M, D).</span>
-</span><span data-line="138"><span class="sd">            chunk_size: Processing batch size.</span>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastTPS.predict_var">[docs]</a>
+</span><span data-line="134">    <span class="k">def</span><span class="w"> </span><span class="nf">predict_var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_query</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+</span><span data-line="135"><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="136"><span class="sd">        Predict posterior variance at query points.</span>
+</span><span data-line="137">
+</span><span data-line="138"><span class="sd">        .. versionadded:: 1.1.0</span>
 </span><span data-line="139">
-</span><span data-line="140"><span class="sd">        Returns:</span>
-</span><span data-line="141"><span class="sd">            jnp.ndarray: Predicted variances (M,).</span>
-</span><span data-line="142"><span class="sd">        &quot;&quot;&quot;</span>
-</span><span data-line="143">        <span class="n">x_query</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-</span><span data-line="144">        <span class="n">vars_list</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="145">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_query</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_size</span><span class="p">):</span>
-</span><span data-line="146">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">x_query</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
-</span><span data-line="147">            <span class="n">vars_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_tps_var</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span><span class="p">))</span>
-</span><span data-line="148">        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">vars_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+</span><span data-line="140"><span class="sd">        Args:</span>
+</span><span data-line="141"><span class="sd">            x_query: Query inputs (M, D).</span>
+</span><span data-line="142"><span class="sd">            chunk_size: Processing batch size.</span>
+</span><span data-line="143">
+</span><span data-line="144"><span class="sd">        Returns:</span>
+</span><span data-line="145"><span class="sd">            jnp.ndarray: Predicted variances (M,).</span>
+</span><span data-line="146"><span class="sd">        &quot;&quot;&quot;</span>
+</span><span data-line="147">        <span class="n">x_query</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</span><span data-line="148">        <span class="n">vars_list</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="149">        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_query</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">chunk_size</span><span class="p">):</span>
+</span><span data-line="150">            <span class="n">chunk</span> <span class="o">=</span> <span class="n">x_query</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">chunk_size</span><span class="p">]</span>
+</span><span data-line="151">            <span class="n">vars_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_tps_var</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span><span class="p">))</span>
+</span><span data-line="152">        <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">vars_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 </div>
 
-</span><span data-line="149">
-</span><span data-line="150">
-</span><span data-line="151"><span class="c1"># ==============================================================================</span>
-</span><span data-line="152"><span class="c1"># MATERN 5/2</span>
-</span><span data-line="153"><span class="c1"># ==============================================================================</span>
+</span><span data-line="153">
 </span><span data-line="154">
-</span><span data-line="155">
+</span><span data-line="155"><span class="c1"># ==============================================================================</span>
+</span><span data-line="156"><span class="c1"># MATERN 5/2</span>
+</span><span data-line="157"><span class="c1"># ==============================================================================</span>
+</span><span data-line="158">
+</span><span data-line="159">
 <div class="viewcode-block" id="negative_mll_matern_std">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.negative_mll_matern_std">[docs]</a>
-</span><span data-line="156"><span class="k">def</span><span class="w"> </span><span class="nf">negative_mll_matern_std</span><span class="p">(</span><span class="n">log_params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-</span><span data-line="157">    <span class="n">length_scale</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span data-line="158">    <span class="n">noise_scalar</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</span><span data-line="159">    <span class="n">K</span> <span class="o">=</span> <span class="n">_matern_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">)</span>
-</span><span data-line="160">    <span class="k">return</span> <span class="n">generic_negative_mll</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise_scalar</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.negative_mll_matern_std">[docs]</a>
+</span><span data-line="160"><span class="k">def</span><span class="w"> </span><span class="nf">negative_mll_matern_std</span><span class="p">(</span><span class="n">log_params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+</span><span data-line="161">    <span class="n">length_scale</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span data-line="162">    <span class="n">noise_scalar</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span data-line="163">    <span class="n">K</span> <span class="o">=</span> <span class="n">_matern_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">)</span>
+</span><span data-line="164">    <span class="k">return</span> <span class="n">generic_negative_mll</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise_scalar</span><span class="p">)</span></div>
 
-</span><span data-line="161">
-</span><span data-line="162">
-</span><span data-line="163"><span class="nd">@jit</span>
+</span><span data-line="165">
+</span><span data-line="166">
+</span><span data-line="167"><span class="nd">@jit</span>
 <div class="viewcode-block" id="_matern_solve">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._matern_solve">[docs]</a>
-</span><span data-line="164"><span class="k">def</span><span class="w"> </span><span class="nf">_matern_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
-</span><span data-line="165">    <span class="n">K</span> <span class="o">=</span> <span class="n">_matern_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">)</span>
-</span><span data-line="166">    <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">sm</span>
-</span><span data-line="167">    <span class="n">L</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
-</span><span data-line="168">    <span class="n">alpha</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
-</span><span data-line="169">
-</span><span data-line="170">    <span class="n">eye</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span data-line="171">    <span class="n">L_inv</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">eye</span><span class="p">)</span>
-</span><span data-line="172">    <span class="n">K_inv</span> <span class="o">=</span> <span class="n">L_inv</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">L_inv</span>
-</span><span data-line="173">    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">K_inv</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._matern_solve">[docs]</a>
+</span><span data-line="168"><span class="k">def</span><span class="w"> </span><span class="nf">_matern_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
+</span><span data-line="169">    <span class="n">K</span> <span class="o">=</span> <span class="n">_matern_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">)</span>
+</span><span data-line="170">    <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">sm</span>
+</span><span data-line="171">    <span class="n">L</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+</span><span data-line="172">    <span class="n">alpha</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+</span><span data-line="173">
+</span><span data-line="174">    <span class="n">eye</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span data-line="175">    <span class="n">L_inv</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">eye</span><span class="p">)</span>
+</span><span data-line="176">    <span class="n">K_inv</span> <span class="o">=</span> <span class="n">L_inv</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">L_inv</span>
+</span><span data-line="177">    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">K_inv</span></div>
 
-</span><span data-line="174">
-</span><span data-line="175">
-</span><span data-line="176"><span class="nd">@jit</span>
+</span><span data-line="178">
+</span><span data-line="179">
+</span><span data-line="180"><span class="nd">@jit</span>
 <div class="viewcode-block" id="_matern_predict">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._matern_predict">[docs]</a>
-</span><span data-line="177"><span class="k">def</span><span class="w"> </span><span class="nf">_matern_predict</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
-</span><span data-line="178">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="179">    <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
-</span><span data-line="180">    <span class="n">sqrt5_r_l</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span> <span class="o">/</span> <span class="n">length_scale</span>
-</span><span data-line="181">    <span class="n">K_q</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">sqrt5_r_l</span> <span class="o">+</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">length_scale</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">sqrt5_r_l</span><span class="p">)</span>
-</span><span data-line="182">    <span class="k">return</span> <span class="n">K_q</span> <span class="o">@</span> <span class="n">alpha</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._matern_predict">[docs]</a>
+</span><span data-line="181"><span class="k">def</span><span class="w"> </span><span class="nf">_matern_predict</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
+</span><span data-line="182">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="183">    <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
+</span><span data-line="184">    <span class="n">sqrt5_r_l</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span> <span class="o">/</span> <span class="n">length_scale</span>
+</span><span data-line="185">    <span class="n">K_q</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">sqrt5_r_l</span> <span class="o">+</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">length_scale</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">sqrt5_r_l</span><span class="p">)</span>
+</span><span data-line="186">    <span class="k">return</span> <span class="n">K_q</span> <span class="o">@</span> <span class="n">alpha</span></div>
 
-</span><span data-line="183">
-</span><span data-line="184">
-</span><span data-line="185"><span class="nd">@jit</span>
+</span><span data-line="187">
+</span><span data-line="188">
+</span><span data-line="189"><span class="nd">@jit</span>
 <div class="viewcode-block" id="_matern_var">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._matern_var">[docs]</a>
-</span><span data-line="186"><span class="k">def</span><span class="w"> </span><span class="nf">_matern_var</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">K_inv</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
-</span><span data-line="187">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="188">    <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
-</span><span data-line="189">    <span class="n">sqrt5_r_l</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span> <span class="o">/</span> <span class="n">length_scale</span>
-</span><span data-line="190">    <span class="n">K_q</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">sqrt5_r_l</span> <span class="o">+</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">length_scale</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">sqrt5_r_l</span><span class="p">)</span>
-</span><span data-line="191">    <span class="n">var</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">K_q</span> <span class="o">@</span> <span class="n">K_inv</span><span class="p">)</span> <span class="o">*</span> <span class="n">K_q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="192">    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._matern_var">[docs]</a>
+</span><span data-line="190"><span class="k">def</span><span class="w"> </span><span class="nf">_matern_var</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">K_inv</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">):</span>
+</span><span data-line="191">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="192">    <span class="n">r</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="mf">1e-12</span><span class="p">)</span>
+</span><span data-line="193">    <span class="n">sqrt5_r_l</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span> <span class="o">/</span> <span class="n">length_scale</span>
+</span><span data-line="194">    <span class="n">K_q</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">sqrt5_r_l</span> <span class="o">+</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">length_scale</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">sqrt5_r_l</span><span class="p">)</span>
+</span><span data-line="195">    <span class="n">var</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">K_q</span> <span class="o">@</span> <span class="n">K_inv</span><span class="p">)</span> <span class="o">*</span> <span class="n">K_q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="196">    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
 
-</span><span data-line="193">
-</span><span data-line="194">
-<div class="viewcode-block" id="FastMatern">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastMatern">[docs]</a>
-</span><span data-line="195"><span class="k">class</span><span class="w"> </span><span class="nc">FastMatern</span><span class="p">(</span><span class="n">BaseSurface</span><span class="p">):</span>
-</span><span data-line="196"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Matérn 5/2 surface implementation.&quot;&quot;&quot;</span>
 </span><span data-line="197">
-<div class="viewcode-block" id="FastMatern._fit">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastMatern._fit">[docs]</a>
-</span><span data-line="198">    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">,</span> <span class="n">optimize</span><span class="p">):</span>
-</span><span data-line="199">        <span class="k">if</span> <span class="n">length_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="200">            <span class="n">span</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="201">            <span class="n">init_ls</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">span</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.2</span>
-</span><span data-line="202">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="203">            <span class="n">init_ls</span> <span class="o">=</span> <span class="n">length_scale</span>
+</span><span data-line="198">
+<div class="viewcode-block" id="FastMatern">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastMatern">[docs]</a>
+</span><span data-line="199"><span class="k">class</span><span class="w"> </span><span class="nc">FastMatern</span><span class="p">(</span><span class="n">BaseSurface</span><span class="p">):</span>
+</span><span data-line="200"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Matérn 5/2 surface implementation.</span>
+</span><span data-line="201">
+</span><span data-line="202"><span class="sd">    .. versionadded:: 1.0.0</span>
+</span><span data-line="203"><span class="sd">    &quot;&quot;&quot;</span>
 </span><span data-line="204">
-</span><span data-line="205">        <span class="n">init_noise</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothing</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
-</span><span data-line="206">
-</span><span data-line="207">        <span class="k">if</span> <span class="n">optimize</span><span class="p">:</span>
-</span><span data-line="208">            <span class="n">x0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_ls</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_noise</span><span class="p">)])</span>
-</span><span data-line="209">
-</span><span data-line="210">            <span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">log_p</span><span class="p">):</span>
-</span><span data-line="211">                <span class="k">return</span> <span class="n">negative_mll_matern_std</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">)</span>
-</span><span data-line="212">
-</span><span data-line="213">            <span class="n">results</span> <span class="o">=</span> <span class="n">jopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-</span><span data-line="214">            <span class="bp">self</span><span class="o">.</span><span class="n">ls</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-</span><span data-line="215">            <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+<div class="viewcode-block" id="FastMatern._fit">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastMatern._fit">[docs]</a>
+</span><span data-line="205">    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">,</span> <span class="n">optimize</span><span class="p">):</span>
+</span><span data-line="206">        <span class="k">if</span> <span class="n">length_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="207">            <span class="n">span</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</span><span data-line="208">            <span class="n">init_ls</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">span</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.2</span>
+</span><span data-line="209">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="210">            <span class="n">init_ls</span> <span class="o">=</span> <span class="n">length_scale</span>
+</span><span data-line="211">
+</span><span data-line="212">        <span class="n">init_noise</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothing</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
+</span><span data-line="213">
+</span><span data-line="214">        <span class="k">if</span> <span class="n">optimize</span><span class="p">:</span>
+</span><span data-line="215">            <span class="n">x0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_ls</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_noise</span><span class="p">)])</span>
 </span><span data-line="216">
-</span><span data-line="217">            <span class="k">if</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span> <span class="ow">or</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">):</span>
-</span><span data-line="218">                <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_ls</span><span class="p">,</span> <span class="n">init_noise</span>
-</span><span data-line="219">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="220">            <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_ls</span><span class="p">,</span> <span class="n">init_noise</span></div>
+</span><span data-line="217">            <span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">log_p</span><span class="p">):</span>
+</span><span data-line="218">                <span class="k">return</span> <span class="n">negative_mll_matern_std</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">)</span>
+</span><span data-line="219">
+</span><span data-line="220">            <span class="n">results</span> <span class="o">=</span> <span class="n">jopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</span><span data-line="221">            <span class="bp">self</span><span class="o">.</span><span class="n">ls</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</span><span data-line="222">            <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</span><span data-line="223">
+</span><span data-line="224">            <span class="k">if</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span> <span class="ow">or</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">):</span>
+</span><span data-line="225">                <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_ls</span><span class="p">,</span> <span class="n">init_noise</span>
+</span><span data-line="226">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="227">            <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_ls</span><span class="p">,</span> <span class="n">init_noise</span></div>
 
-</span><span data-line="221">
+</span><span data-line="228">
 <div class="viewcode-block" id="FastMatern._solve">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastMatern._solve">[docs]</a>
-</span><span data-line="222">    <span class="k">def</span><span class="w"> </span><span class="nf">_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span data-line="223">        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span> <span class="o">=</span> <span class="n">_matern_solve</span><span class="p">(</span>
-</span><span data-line="224">            <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span>
-</span><span data-line="225">        <span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastMatern._solve">[docs]</a>
+</span><span data-line="229">    <span class="k">def</span><span class="w"> </span><span class="nf">_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="230">        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span> <span class="o">=</span> <span class="n">_matern_solve</span><span class="p">(</span>
+</span><span data-line="231">            <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span>
+</span><span data-line="232">        <span class="p">)</span></div>
 
-</span><span data-line="226">
+</span><span data-line="233">
 <div class="viewcode-block" id="FastMatern._predict_chunk">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastMatern._predict_chunk">[docs]</a>
-</span><span data-line="227">    <span class="k">def</span><span class="w"> </span><span class="nf">_predict_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
-</span><span data-line="228">        <span class="k">return</span> <span class="n">_matern_predict</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastMatern._predict_chunk">[docs]</a>
+</span><span data-line="234">    <span class="k">def</span><span class="w"> </span><span class="nf">_predict_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+</span><span data-line="235">        <span class="k">return</span> <span class="n">_matern_predict</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span></div>
 
-</span><span data-line="229">
+</span><span data-line="236">
 <div class="viewcode-block" id="FastMatern._var_chunk">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastMatern._var_chunk">[docs]</a>
-</span><span data-line="230">    <span class="k">def</span><span class="w"> </span><span class="nf">_var_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
-</span><span data-line="231">        <span class="k">return</span> <span class="n">_matern_var</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastMatern._var_chunk">[docs]</a>
+</span><span data-line="237">    <span class="k">def</span><span class="w"> </span><span class="nf">_var_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+</span><span data-line="238">        <span class="k">return</span> <span class="n">_matern_var</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ls</span><span class="p">)</span></div>
 </div>
 
-</span><span data-line="232">
-</span><span data-line="233">
-</span><span data-line="234"><span class="c1"># ==============================================================================</span>
-</span><span data-line="235"><span class="c1"># STANDARD IMQ (Optimizable)</span>
-</span><span data-line="236"><span class="c1"># ==============================================================================</span>
-</span><span data-line="237">
-</span><span data-line="238">
-<div class="viewcode-block" id="negative_mll_imq_std">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.negative_mll_imq_std">[docs]</a>
-</span><span data-line="239"><span class="k">def</span><span class="w"> </span><span class="nf">negative_mll_imq_std</span><span class="p">(</span><span class="n">log_params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-</span><span data-line="240">    <span class="n">epsilon</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span data-line="241">    <span class="n">noise_scalar</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</span><span data-line="242">    <span class="n">K</span> <span class="o">=</span> <span class="n">_imq_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
-</span><span data-line="243">    <span class="k">return</span> <span class="n">generic_negative_mll</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise_scalar</span><span class="p">)</span></div>
-
+</span><span data-line="239">
+</span><span data-line="240">
+</span><span data-line="241"><span class="c1"># ==============================================================================</span>
+</span><span data-line="242"><span class="c1"># STANDARD IMQ (Optimizable)</span>
+</span><span data-line="243"><span class="c1"># ==============================================================================</span>
 </span><span data-line="244">
 </span><span data-line="245">
-</span><span data-line="246"><span class="nd">@jit</span>
-<div class="viewcode-block" id="_imq_solve">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._imq_solve">[docs]</a>
-</span><span data-line="247"><span class="k">def</span><span class="w"> </span><span class="nf">_imq_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-</span><span data-line="248">    <span class="n">K</span> <span class="o">=</span> <span class="n">_imq_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
-</span><span data-line="249">    <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">sm</span>
-</span><span data-line="250">    <span class="n">L</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
-</span><span data-line="251">    <span class="n">alpha</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
-</span><span data-line="252">
-</span><span data-line="253">    <span class="n">eye</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span data-line="254">    <span class="n">L_inv</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">eye</span><span class="p">)</span>
-</span><span data-line="255">    <span class="n">K_inv</span> <span class="o">=</span> <span class="n">L_inv</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">L_inv</span>
-</span><span data-line="256">    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">K_inv</span></div>
+<div class="viewcode-block" id="negative_mll_imq_std">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.negative_mll_imq_std">[docs]</a>
+</span><span data-line="246"><span class="k">def</span><span class="w"> </span><span class="nf">negative_mll_imq_std</span><span class="p">(</span><span class="n">log_params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+</span><span data-line="247">    <span class="n">epsilon</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span data-line="248">    <span class="n">noise_scalar</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</span><span data-line="249">    <span class="n">K</span> <span class="o">=</span> <span class="n">_imq_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+</span><span data-line="250">    <span class="k">return</span> <span class="n">generic_negative_mll</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise_scalar</span><span class="p">)</span></div>
 
-</span><span data-line="257">
-</span><span data-line="258">
-</span><span data-line="259"><span class="nd">@jit</span>
-<div class="viewcode-block" id="_imq_predict">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._imq_predict">[docs]</a>
-</span><span data-line="260"><span class="k">def</span><span class="w"> </span><span class="nf">_imq_predict</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
-</span><span data-line="261">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="262">    <span class="n">K_q</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="n">epsilon</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="263">    <span class="k">return</span> <span class="n">K_q</span> <span class="o">@</span> <span class="n">alpha</span></div>
+</span><span data-line="251">
+</span><span data-line="252">
+</span><span data-line="253"><span class="nd">@jit</span>
+<div class="viewcode-block" id="_imq_solve">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._imq_solve">[docs]</a>
+</span><span data-line="254"><span class="k">def</span><span class="w"> </span><span class="nf">_imq_solve</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+</span><span data-line="255">    <span class="n">K</span> <span class="o">=</span> <span class="n">_imq_kernel_matrix</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+</span><span data-line="256">    <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">sm</span>
+</span><span data-line="257">    <span class="n">L</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+</span><span data-line="258">    <span class="n">alpha</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+</span><span data-line="259">
+</span><span data-line="260">    <span class="n">eye</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span data-line="261">    <span class="n">L_inv</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">eye</span><span class="p">)</span>
+</span><span data-line="262">    <span class="n">K_inv</span> <span class="o">=</span> <span class="n">L_inv</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">L_inv</span>
+</span><span data-line="263">    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">K_inv</span></div>
 
 </span><span data-line="264">
 </span><span data-line="265">
 </span><span data-line="266"><span class="nd">@jit</span>
-<div class="viewcode-block" id="_imq_var">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces._imq_var">[docs]</a>
-</span><span data-line="267"><span class="k">def</span><span class="w"> </span><span class="nf">_imq_var</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">K_inv</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+<div class="viewcode-block" id="_imq_predict">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._imq_predict">[docs]</a>
+</span><span data-line="267"><span class="k">def</span><span class="w"> </span><span class="nf">_imq_predict</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
 </span><span data-line="268">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </span><span data-line="269">    <span class="n">K_q</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="n">epsilon</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="270">    <span class="n">var</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">K_q</span> <span class="o">@</span> <span class="n">K_inv</span><span class="p">)</span> <span class="o">*</span> <span class="n">K_q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="271">    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+</span><span data-line="270">    <span class="k">return</span> <span class="n">K_q</span> <span class="o">@</span> <span class="n">alpha</span></div>
 
+</span><span data-line="271">
 </span><span data-line="272">
-</span><span data-line="273">
+</span><span data-line="273"><span class="nd">@jit</span>
+<div class="viewcode-block" id="_imq_var">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard._imq_var">[docs]</a>
+</span><span data-line="274"><span class="k">def</span><span class="w"> </span><span class="nf">_imq_var</span><span class="p">(</span><span class="n">x_query</span><span class="p">,</span> <span class="n">x_obs</span><span class="p">,</span> <span class="n">K_inv</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+</span><span data-line="275">    <span class="n">d2</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x_query</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">x_obs</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="276">    <span class="n">K_q</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d2</span> <span class="o">+</span> <span class="n">epsilon</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="277">    <span class="n">var</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">K_q</span> <span class="o">@</span> <span class="n">K_inv</span><span class="p">)</span> <span class="o">*</span> <span class="n">K_q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="278">    <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
+</span><span data-line="279">
+</span><span data-line="280">
 <div class="viewcode-block" id="FastIMQ">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastIMQ">[docs]</a>
-</span><span data-line="274"><span class="k">class</span><span class="w"> </span><span class="nc">FastIMQ</span><span class="p">(</span><span class="n">BaseSurface</span><span class="p">):</span>
-</span><span data-line="275"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse Multi-Quadratic (IMQ) surface implementation.&quot;&quot;&quot;</span>
-</span><span data-line="276">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastIMQ">[docs]</a>
+</span><span data-line="281"><span class="k">class</span><span class="w"> </span><span class="nc">FastIMQ</span><span class="p">(</span><span class="n">BaseSurface</span><span class="p">):</span>
+</span><span data-line="282"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Inverse Multi-Quadratic (IMQ) surface implementation.</span>
+</span><span data-line="283">
+</span><span data-line="284"><span class="sd">    .. versionadded:: 1.0.0</span>
+</span><span data-line="285"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="286">
 <div class="viewcode-block" id="FastIMQ._fit">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastIMQ._fit">[docs]</a>
-</span><span data-line="277">    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">,</span> <span class="n">optimize</span><span class="p">):</span>
-</span><span data-line="278">        <span class="k">if</span> <span class="n">length_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="279">            <span class="n">span</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span data-line="280">            <span class="n">init_eps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">span</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span>
-</span><span data-line="281">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="282">            <span class="n">init_eps</span> <span class="o">=</span> <span class="n">length_scale</span>
-</span><span data-line="283">        <span class="n">init_noise</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothing</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
-</span><span data-line="284">
-</span><span data-line="285">        <span class="k">if</span> <span class="n">optimize</span><span class="p">:</span>
-</span><span data-line="286">            <span class="n">x0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_eps</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_noise</span><span class="p">)])</span>
-</span><span data-line="287">
-</span><span data-line="288">            <span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">log_p</span><span class="p">):</span>
-</span><span data-line="289">                <span class="k">return</span> <span class="n">negative_mll_imq_std</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">)</span>
-</span><span data-line="290">
-</span><span data-line="291">            <span class="n">results</span> <span class="o">=</span> <span class="n">jopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-</span><span data-line="292">            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-</span><span data-line="293">            <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-</span><span data-line="294">            <span class="k">if</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span> <span class="ow">or</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">):</span>
-</span><span data-line="295">                <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_eps</span><span class="p">,</span> <span class="n">init_noise</span>
-</span><span data-line="296">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="297">            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_eps</span><span class="p">,</span> <span class="n">init_noise</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastIMQ._fit">[docs]</a>
+</span><span data-line="287">    <span class="k">def</span><span class="w"> </span><span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smoothing</span><span class="p">,</span> <span class="n">length_scale</span><span class="p">,</span> <span class="n">optimize</span><span class="p">):</span>
+</span><span data-line="288">        <span class="k">if</span> <span class="n">length_scale</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="289">            <span class="n">span</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">jnp</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</span><span data-line="290">            <span class="n">init_eps</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">span</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.8</span>
+</span><span data-line="291">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="292">            <span class="n">init_eps</span> <span class="o">=</span> <span class="n">length_scale</span>
+</span><span data-line="293">        <span class="n">init_noise</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">smoothing</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">)</span>
+</span><span data-line="294">
+</span><span data-line="295">        <span class="k">if</span> <span class="n">optimize</span><span class="p">:</span>
+</span><span data-line="296">            <span class="n">x0</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_eps</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">init_noise</span><span class="p">)])</span>
+</span><span data-line="297">
+</span><span data-line="298">            <span class="k">def</span><span class="w"> </span><span class="nf">loss_fn</span><span class="p">(</span><span class="n">log_p</span><span class="p">):</span>
+</span><span data-line="299">                <span class="k">return</span> <span class="n">negative_mll_imq_std</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">)</span>
+</span><span data-line="300">
+</span><span data-line="301">            <span class="n">results</span> <span class="o">=</span> <span class="n">jopt</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;BFGS&quot;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</span><span data-line="302">            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</span><span data-line="303">            <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</span><span data-line="304">            <span class="k">if</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span> <span class="ow">or</span> <span class="n">jnp</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">):</span>
+</span><span data-line="305">                <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_eps</span><span class="p">,</span> <span class="n">init_noise</span>
+</span><span data-line="306">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="307">            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span> <span class="o">=</span> <span class="n">init_eps</span><span class="p">,</span> <span class="n">init_noise</span></div>
 
-</span><span data-line="298">
+</span><span data-line="308">
 <div class="viewcode-block" id="FastIMQ._solve">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastIMQ._solve">[docs]</a>
-</span><span data-line="299">    <span class="k">def</span><span class="w"> </span><span class="nf">_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span data-line="300">        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span> <span class="o">=</span> <span class="n">_imq_solve</span><span class="p">(</span>
-</span><span data-line="301">            <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
-</span><span data-line="302">        <span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastIMQ._solve">[docs]</a>
+</span><span data-line="309">    <span class="k">def</span><span class="w"> </span><span class="nf">_solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="310">        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span> <span class="o">=</span> <span class="n">_imq_solve</span><span class="p">(</span>
+</span><span data-line="311">            <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_centered</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+</span><span data-line="312">        <span class="p">)</span></div>
 
-</span><span data-line="303">
+</span><span data-line="313">
 <div class="viewcode-block" id="FastIMQ._predict_chunk">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastIMQ._predict_chunk">[docs]</a>
-</span><span data-line="304">    <span class="k">def</span><span class="w"> </span><span class="nf">_predict_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
-</span><span data-line="305">        <span class="k">return</span> <span class="n">_imq_predict</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastIMQ._predict_chunk">[docs]</a>
+</span><span data-line="314">    <span class="k">def</span><span class="w"> </span><span class="nf">_predict_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+</span><span data-line="315">        <span class="k">return</span> <span class="n">_imq_predict</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span></div>
 
-</span><span data-line="306">
+</span><span data-line="316">
 <div class="viewcode-block" id="FastIMQ._var_chunk">
-<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.FastIMQ._var_chunk">[docs]</a>
-</span><span data-line="307">    <span class="k">def</span><span class="w"> </span><span class="nf">_var_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
-</span><span data-line="308">        <span class="k">return</span> <span class="n">_imq_var</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span></div>
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/surfaces/standard/index.html#rgpycrumbs.surfaces.standard.FastIMQ._var_chunk">[docs]</a>
+</span><span data-line="317">    <span class="k">def</span><span class="w"> </span><span class="nf">_var_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">):</span>
+</span><span data-line="318">        <span class="k">return</span> <span class="n">_imq_var</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">K_inv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">)</span></div>
 </div>
 
 </span></pre></div>

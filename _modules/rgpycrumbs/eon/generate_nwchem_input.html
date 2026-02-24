@@ -236,118 +236,123 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <h1>Source code for rgpycrumbs.eon.generate_nwchem_input</h1><div class="highlight"><pre>
 <span></span><span data-line="1"><span class="ch">#!/usr/bin/env python3</span>
-</span><span data-line="2"><span class="c1"># /// script</span>
-</span><span data-line="3"><span class="c1"># requires-python = &quot;&gt;=3.11&quot;</span>
-</span><span data-line="4"><span class="c1"># dependencies = [</span>
-</span><span data-line="5"><span class="c1">#   &quot;ase&gt;=3.25&quot;,</span>
-</span><span data-line="6"><span class="c1">#   &quot;click&gt;=8.2.1&quot;,</span>
-</span><span data-line="7"><span class="c1">#   &quot;rich&quot;,</span>
-</span><span data-line="8"><span class="c1">#   &quot;pychum&quot;,</span>
-</span><span data-line="9"><span class="c1"># ]</span>
-</span><span data-line="10"><span class="c1"># ///</span>
-</span><span data-line="11">
-</span><span data-line="12"><span class="kn">import</span><span class="w"> </span><span class="nn">configparser</span>
-</span><span data-line="13"><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-</span><span data-line="14"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2"><span class="sd">&quot;&quot;&quot;Generate NWChem input files from eOn configuration and structures.</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="sd">.. versionadded:: 0.0.2</span>
+</span><span data-line="5"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># /// script</span>
+</span><span data-line="8"><span class="c1"># requires-python = &quot;&gt;=3.11&quot;</span>
+</span><span data-line="9"><span class="c1"># dependencies = [</span>
+</span><span data-line="10"><span class="c1">#   &quot;ase&gt;=3.25&quot;,</span>
+</span><span data-line="11"><span class="c1">#   &quot;click&gt;=8.2.1&quot;,</span>
+</span><span data-line="12"><span class="c1">#   &quot;rich&quot;,</span>
+</span><span data-line="13"><span class="c1">#   &quot;pychum&quot;,</span>
+</span><span data-line="14"><span class="c1"># ]</span>
+</span><span data-line="15"><span class="c1"># ///</span>
 </span><span data-line="16">
-</span><span data-line="17"><span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
-</span><span data-line="18"><span class="kn">from</span><span class="w"> </span><span class="nn">pychum</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_nwchem</span>
-</span><span data-line="19"><span class="kn">from</span><span class="w"> </span><span class="nn">rich.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">RichHandler</span>
-</span><span data-line="20">
-</span><span data-line="21"><span class="c1"># --- Logging Configuration ---</span>
-</span><span data-line="22"><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
-</span><span data-line="23">    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-</span><span data-line="24">    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="25">    <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;[</span><span class="si">%X</span><span class="s2">]&quot;</span><span class="p">,</span>
-</span><span data-line="26">    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">RichHandler</span><span class="p">(</span><span class="n">rich_tracebacks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
-</span><span data-line="27"><span class="p">)</span>
-</span><span data-line="28">
-</span><span data-line="29">
-</span><span data-line="30"><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">context_settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;help_option_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">]})</span>
-</span><span data-line="31"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="32">    <span class="s2">&quot;--pos-file&quot;</span><span class="p">,</span>
-</span><span data-line="33">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
-</span><span data-line="34">    <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;pos.con&quot;</span><span class="p">),</span>
-</span><span data-line="35">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="36">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to the input geometry file (e.g., in eOn .con format).&quot;</span><span class="p">,</span>
-</span><span data-line="37"><span class="p">)</span>
-</span><span data-line="38"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="39">    <span class="s2">&quot;--config&quot;</span><span class="p">,</span>
-</span><span data-line="40">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
-</span><span data-line="41">    <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;config.ini&quot;</span><span class="p">),</span>
-</span><span data-line="42">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="43">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to the eonclient config.ini file to read settings from.&quot;</span><span class="p">,</span>
-</span><span data-line="44"><span class="p">)</span>
-</span><span data-line="45"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="46">    <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
-</span><span data-line="47">    <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
-</span><span data-line="48">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
-</span><span data-line="49">    <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;nwchem_socket.nwi&quot;</span><span class="p">),</span>
-</span><span data-line="50">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="51">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the final NWChem input file to be generated.&quot;</span><span class="p">,</span>
-</span><span data-line="52"><span class="p">)</span>
+</span><span data-line="17"><span class="kn">import</span><span class="w"> </span><span class="nn">configparser</span>
+</span><span data-line="18"><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span data-line="19"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="20"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="21">
+</span><span data-line="22"><span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
+</span><span data-line="23"><span class="kn">from</span><span class="w"> </span><span class="nn">pychum</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_nwchem</span>
+</span><span data-line="24"><span class="kn">from</span><span class="w"> </span><span class="nn">rich.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">RichHandler</span>
+</span><span data-line="25">
+</span><span data-line="26"><span class="c1"># --- Logging Configuration ---</span>
+</span><span data-line="27"><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+</span><span data-line="28">    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+</span><span data-line="29">    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="30">    <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;[</span><span class="si">%X</span><span class="s2">]&quot;</span><span class="p">,</span>
+</span><span data-line="31">    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">RichHandler</span><span class="p">(</span><span class="n">rich_tracebacks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+</span><span data-line="32"><span class="p">)</span>
+</span><span data-line="33">
+</span><span data-line="34">
+</span><span data-line="35"><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">context_settings</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;help_option_names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">]})</span>
+</span><span data-line="36"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="37">    <span class="s2">&quot;--pos-file&quot;</span><span class="p">,</span>
+</span><span data-line="38">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+</span><span data-line="39">    <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;pos.con&quot;</span><span class="p">),</span>
+</span><span data-line="40">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="41">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to the input geometry file (e.g., in eOn .con format).&quot;</span><span class="p">,</span>
+</span><span data-line="42"><span class="p">)</span>
+</span><span data-line="43"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="44">    <span class="s2">&quot;--config&quot;</span><span class="p">,</span>
+</span><span data-line="45">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dir_okay</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+</span><span data-line="46">    <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;config.ini&quot;</span><span class="p">),</span>
+</span><span data-line="47">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="48">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to the eonclient config.ini file to read settings from.&quot;</span><span class="p">,</span>
+</span><span data-line="49"><span class="p">)</span>
+</span><span data-line="50"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="51">    <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+</span><span data-line="52">    <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+</span><span data-line="53">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path_type</span><span class="o">=</span><span class="n">Path</span><span class="p">),</span>
+</span><span data-line="54">    <span class="n">default</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;nwchem_socket.nwi&quot;</span><span class="p">),</span>
+</span><span data-line="55">    <span class="n">show_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="56">    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of the final NWChem input file to be generated.&quot;</span><span class="p">,</span>
+</span><span data-line="57"><span class="p">)</span>
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html#rgpycrumbs.eon.generate_nwchem_input.main">[docs]</a>
-</span><span data-line="53"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">pos_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-</span><span data-line="54"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate an NWChem input file for use with the eOn SocketNWChemPot.&quot;&quot;&quot;</span>
-</span><span data-line="55">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading settings from [cyan]</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">[/cyan]&quot;</span><span class="p">)</span>
-</span><span data-line="56">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="57">        <span class="n">ini_parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-</span><span data-line="58">        <span class="n">ini_parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-</span><span data-line="59">
-</span><span data-line="60">        <span class="n">settings_section</span> <span class="o">=</span> <span class="s2">&quot;SocketNWChemPot&quot;</span>
-</span><span data-line="61">
-</span><span data-line="62">        <span class="c1"># Read all required settings, providing the same defaults as the C++ code.</span>
-</span><span data-line="63">        <span class="n">settings_path_str</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-</span><span data-line="64">            <span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;nwchem_settings&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;nwchem_settings.nwi&quot;</span>
-</span><span data-line="65">        <span class="p">)</span>
-</span><span data-line="66">        <span class="n">settings_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">settings_path_str</span><span class="p">)</span>
-</span><span data-line="67">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using NWChem settings file: [yellow]</span><span class="si">{</span><span class="n">settings_path</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span><span class="p">)</span>
-</span><span data-line="68">
-</span><span data-line="69">        <span class="n">mem_in_gb</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">getint</span><span class="p">(</span><span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;mem_in_gb&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="70">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Setting memory to: [yellow]</span><span class="si">{</span><span class="n">mem_in_gb</span><span class="si">}</span><span class="s2"> GB[/yellow]&quot;</span><span class="p">)</span>
-</span><span data-line="71">
-</span><span data-line="72">        <span class="n">is_unix_mode</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span>
-</span><span data-line="73">            <span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;unix_socket_mode&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">False</span>
-</span><span data-line="74">        <span class="p">)</span>
-</span><span data-line="75">
-</span><span data-line="76">        <span class="k">if</span> <span class="n">is_unix_mode</span><span class="p">:</span>
-</span><span data-line="77">            <span class="n">socket_address</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-</span><span data-line="78">                <span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;unix_socket_path&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;eon_nwchem&quot;</span>
-</span><span data-line="79">            <span class="p">)</span>
-</span><span data-line="80">            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-</span><span data-line="81">                <span class="sa">f</span><span class="s2">&quot;Mode: [yellow]UNIX[/yellow], Socket Name: [yellow]</span><span class="si">{</span><span class="n">socket_address</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span>
-</span><span data-line="82">            <span class="p">)</span>
-</span><span data-line="83">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="84">            <span class="n">host</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;host&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)</span>
-</span><span data-line="85">            <span class="n">port</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;9999&quot;</span><span class="p">)</span>
-</span><span data-line="86">            <span class="n">socket_address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="87">            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-</span><span data-line="88">                <span class="sa">f</span><span class="s2">&quot;Mode: [yellow]TCP/IP[/yellow], Address: [yellow]</span><span class="si">{</span><span class="n">socket_address</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span>
-</span><span data-line="89">            <span class="p">)</span>
-</span><span data-line="90">
-</span><span data-line="91">        <span class="n">rendered_output</span> <span class="o">=</span> <span class="n">render_nwchem</span><span class="p">(</span>
-</span><span data-line="92">            <span class="n">pos_file</span><span class="o">=</span><span class="n">pos_file</span><span class="p">,</span>
-</span><span data-line="93">            <span class="n">settings_path</span><span class="o">=</span><span class="n">settings_path</span><span class="p">,</span>
-</span><span data-line="94">            <span class="n">socket_address</span><span class="o">=</span><span class="n">socket_address</span><span class="p">,</span>
-</span><span data-line="95">            <span class="n">unix_mode</span><span class="o">=</span><span class="n">is_unix_mode</span><span class="p">,</span>
-</span><span data-line="96">            <span class="n">mem_in_gb</span><span class="o">=</span><span class="n">mem_in_gb</span><span class="p">,</span>
-</span><span data-line="97">        <span class="p">)</span>
-</span><span data-line="98">
-</span><span data-line="99">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span data-line="100">            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rendered_output</span><span class="p">)</span>
-</span><span data-line="101">
-</span><span data-line="102">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[bold green]Success![/bold green] NWChem input file generated.&quot;</span><span class="p">)</span>
+</span><span data-line="58"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">pos_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+</span><span data-line="59"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate an NWChem input file for use with the eOn SocketNWChemPot.&quot;&quot;&quot;</span>
+</span><span data-line="60">    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading settings from [cyan]</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">[/cyan]&quot;</span><span class="p">)</span>
+</span><span data-line="61">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="62">        <span class="n">ini_parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+</span><span data-line="63">        <span class="n">ini_parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</span><span data-line="64">
+</span><span data-line="65">        <span class="n">settings_section</span> <span class="o">=</span> <span class="s2">&quot;SocketNWChemPot&quot;</span>
+</span><span data-line="66">
+</span><span data-line="67">        <span class="c1"># Read all required settings, providing the same defaults as the C++ code.</span>
+</span><span data-line="68">        <span class="n">settings_path_str</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span data-line="69">            <span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;nwchem_settings&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;nwchem_settings.nwi&quot;</span>
+</span><span data-line="70">        <span class="p">)</span>
+</span><span data-line="71">        <span class="n">settings_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">settings_path_str</span><span class="p">)</span>
+</span><span data-line="72">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using NWChem settings file: [yellow]</span><span class="si">{</span><span class="n">settings_path</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span><span class="p">)</span>
+</span><span data-line="73">
+</span><span data-line="74">        <span class="n">mem_in_gb</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">getint</span><span class="p">(</span><span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;mem_in_gb&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="75">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Setting memory to: [yellow]</span><span class="si">{</span><span class="n">mem_in_gb</span><span class="si">}</span><span class="s2"> GB[/yellow]&quot;</span><span class="p">)</span>
+</span><span data-line="76">
+</span><span data-line="77">        <span class="n">is_unix_mode</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span>
+</span><span data-line="78">            <span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;unix_socket_mode&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="kc">False</span>
+</span><span data-line="79">        <span class="p">)</span>
+</span><span data-line="80">
+</span><span data-line="81">        <span class="k">if</span> <span class="n">is_unix_mode</span><span class="p">:</span>
+</span><span data-line="82">            <span class="n">socket_address</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span data-line="83">                <span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;unix_socket_path&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;eon_nwchem&quot;</span>
+</span><span data-line="84">            <span class="p">)</span>
+</span><span data-line="85">            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span data-line="86">                <span class="sa">f</span><span class="s2">&quot;Mode: [yellow]UNIX[/yellow], Socket Name: [yellow]</span><span class="si">{</span><span class="n">socket_address</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span>
+</span><span data-line="87">            <span class="p">)</span>
+</span><span data-line="88">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="89">            <span class="n">host</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;host&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)</span>
+</span><span data-line="90">            <span class="n">port</span> <span class="o">=</span> <span class="n">ini_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">settings_section</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="s2">&quot;9999&quot;</span><span class="p">)</span>
+</span><span data-line="91">            <span class="n">socket_address</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="92">            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span data-line="93">                <span class="sa">f</span><span class="s2">&quot;Mode: [yellow]TCP/IP[/yellow], Address: [yellow]</span><span class="si">{</span><span class="n">socket_address</span><span class="si">}</span><span class="s2">[/yellow]&quot;</span>
+</span><span data-line="94">            <span class="p">)</span>
+</span><span data-line="95">
+</span><span data-line="96">        <span class="n">rendered_output</span> <span class="o">=</span> <span class="n">render_nwchem</span><span class="p">(</span>
+</span><span data-line="97">            <span class="n">pos_file</span><span class="o">=</span><span class="n">pos_file</span><span class="p">,</span>
+</span><span data-line="98">            <span class="n">settings_path</span><span class="o">=</span><span class="n">settings_path</span><span class="p">,</span>
+</span><span data-line="99">            <span class="n">socket_address</span><span class="o">=</span><span class="n">socket_address</span><span class="p">,</span>
+</span><span data-line="100">            <span class="n">unix_mode</span><span class="o">=</span><span class="n">is_unix_mode</span><span class="p">,</span>
+</span><span data-line="101">            <span class="n">mem_in_gb</span><span class="o">=</span><span class="n">mem_in_gb</span><span class="p">,</span>
+</span><span data-line="102">        <span class="p">)</span>
 </span><span data-line="103">
-</span><span data-line="104">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="105">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error generating NWChem input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="106">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
-
-</span><span data-line="107">
+</span><span data-line="104">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="105">            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rendered_output</span><span class="p">)</span>
+</span><span data-line="106">
+</span><span data-line="107">        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[bold green]Success![/bold green] NWChem input file generated.&quot;</span><span class="p">)</span>
 </span><span data-line="108">
-</span><span data-line="109"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span><span data-line="110">    <span class="n">main</span><span class="p">()</span>
+</span><span data-line="109">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="110">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error generating NWChem input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="111">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+</span><span data-line="112">
+</span><span data-line="113">
+</span><span data-line="114"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span data-line="115">    <span class="n">main</span><span class="p">()</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

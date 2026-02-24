@@ -341,6 +341,9 @@ FES(x, y) = - sum_{i} [ H_i * exp( - (dx_i^2 / (2*sx_i^2)) - (dy_i^2 / (2*sy_i^2
 <dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">calculate_fes_from_hills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hills</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#calculate_fes_from_hills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates a 1D or 2D Free Energy Surface (FES) from a metadynamics hills file.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.0.3.</span></p>
+</div>
 <p>This is a Python/NumPy translation of the R function fes2.hillsfile.</p>
 <dl>
 <dt>Args:</dt><dd><dl>
@@ -386,6 +389,9 @@ time, cv1, (cv2), sigma_cv1, (sigma_cv2), height, …</p>
 <dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction.find_fes_minima">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">find_fes_minima</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fes_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#find_fes_minima"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction.find_fes_minima" title="Link to this definition">¶</a></dt>
 <dd><p>Finds local minima on a Free Energy Surface by dividing it into bins.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 0.0.3.</span></p>
+</div>
 <p>This is a Python/Pandas translation of the R function fesminima.fes.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>fes_result (dict): The output dictionary from calculate_fes_from_hills.

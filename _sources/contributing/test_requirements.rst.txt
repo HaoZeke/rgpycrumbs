@@ -99,6 +99,40 @@ Example Test Structure
     def test_feature_execution():
         assert core_feature() is True
 
+Dispatcher Scripts and Test Markers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Scripts under ``rgpycrumbs/eon/`` (and similar groups) declare their own
+dependencies via PEP 723 inline metadata. These scripts import heavy packages
+(polars, chemparseplot, ase, etc.) at the top level, because ``uv run`` resolves
+those dependencies before execution.
+
+When writing tests that import these scripts directly (e.g., to test CLI
+``--help`` output), the test file **must** use the corresponding marker (e.g.,
+``eon``, not ``pure``) and the ``skip_if_not_env`` guard. Otherwise the top-level
+imports will fail during collection in environments that lack the script's
+dependencies.
+
+.. code:: python
+
+    import pytest
+    from tests.conftest import skip_if_not_env
+
+    skip_if_not_env("eon")
+
+    from rgpycrumbs.eon.plt_neb import main as plt_neb_main  # noqa: E402
+
+    pytestmark = pytest.mark.eon
+
+
+    def test_plt_neb_help(runner):
+        result = runner.invoke(plt_neb_main, ["--help"])
+        assert result.exit_code == 0
+
+The ``pure`` marker is reserved for tests that depend only on core packages
+(numpy, click). Never place tests that import dispatcher scripts under the
+``pure`` marker.
+
 Available Markers & Environments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -106,23 +140,23 @@ The following markers and their corresponding ``pixi`` environments are availabl
 
 .. table::
 
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | Marker        | Environment            | Dependencies        | What it tests                            |
-    +===============+========================+=====================+==========================================+
-    | ``pure``      | ``test``               | ``numpy``           | Core utilities, basetypes, interpolation |
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | ``align``     | ``test``               | ``ase``, ``numpy``  | Structure analysis, alignment            |
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | ``fragments`` | ``fragments``          | ``ase``, ``tblite`` | Fragment detection with tight-binding    |
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | ``surfaces``  | ``surfaces``           | ``jax``             | Surface fitting kernels and models       |
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | ``ptm``       | ``ptm``                | ``ase``, ``ovito``  | Polyhedral template matching             |
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | ``eon``       | ``eonmlflow``          | ``ase``, ``eon``    | eOn integration                          |
-    +---------------+------------------------+---------------------+------------------------------------------+
-    | ``ira``       | (requires ``ira_mod``) | ``ira_mod``         | IRA matching and RMSD comparison         |
-    +---------------+------------------------+---------------------+------------------------------------------+
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | Marker        | Environment            | Dependencies                                    | What it tests                            |
+    +===============+========================+=================================================+==========================================+
+    | ``pure``      | ``test``               | ``numpy``                                       | Core utilities, basetypes, interpolation |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | ``align``     | ``test``               | ``ase``, ``numpy``                              | Structure analysis, alignment            |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | ``fragments`` | ``fragments``          | ``ase``, ``tblite``                             | Fragment detection with tight-binding    |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | ``surfaces``  | ``surfaces``           | ``jax``                                         | Surface fitting kernels and models       |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | ``ptm``       | ``ptm``                | ``ase``, ``ovito``                              | Polyhedral template matching             |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | ``eon``       | ``eonmlflow``          | ``ase``, ``eon``, ``polars``, ``chemparseplot`` | eOn integration, NEB CLI                 |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    | ``ira``       | (requires ``ira_mod``) | ``ira_mod``                                     | IRA matching and RMSD comparison         |
+    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
 
 Running Tests
 ~~~~~~~~~~~~~

@@ -3,6 +3,13 @@ generate_orca_input
 
 .. py:module:: generate_orca_input
 
+.. autoapi-nested-parse::
+
+   Generate ORCA input files from TOML configuration via pychum.
+
+   .. versionadded:: 1.1.0
+
+
 
 Functions
 ---------

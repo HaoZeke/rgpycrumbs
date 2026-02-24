@@ -232,68 +232,73 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue" role="main">
           <h1>Source code for generate_orca_input</h1><div class="highlight"><pre>
 <span></span><span data-line="1"><span class="ch">#!/usr/bin/env python3</span>
-</span><span data-line="2"><span class="c1"># /// script</span>
-</span><span data-line="3"><span class="c1"># requires-python = &quot;&gt;=3.11&quot;</span>
-</span><span data-line="4"><span class="c1"># dependencies = [</span>
-</span><span data-line="5"><span class="c1">#   &quot;click&quot;,</span>
-</span><span data-line="6"><span class="c1">#   &quot;rich&quot;,</span>
-</span><span data-line="7"><span class="c1">#   &quot;pychum&quot;,</span>
-</span><span data-line="8"><span class="c1"># ]</span>
-</span><span data-line="9"><span class="c1"># ///</span>
-</span><span data-line="10">
-</span><span data-line="11"><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-</span><span data-line="12"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span data-line="13"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="14">
-</span><span data-line="15"><span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
-</span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">pychum</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_orca</span>
-</span><span data-line="17"><span class="kn">from</span><span class="w"> </span><span class="nn">rich.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">RichHandler</span>
-</span><span data-line="18">
-</span><span data-line="19"><span class="c1"># --- Logging Configuration ---</span>
-</span><span data-line="20"><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
-</span><span data-line="21">    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-</span><span data-line="22">    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
-</span><span data-line="23">    <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;[</span><span class="si">%X</span><span class="s2">]&quot;</span><span class="p">,</span>
-</span><span data-line="24">    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">RichHandler</span><span class="p">(</span><span class="n">rich_tracebacks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
-</span><span data-line="25"><span class="p">)</span>
-</span><span data-line="26">
-</span><span data-line="27">
-</span><span data-line="28"><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
-</span><span data-line="29"><span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;toml_path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</span><span data-line="30"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-</span><span data-line="31">    <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
-</span><span data-line="32">    <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
-</span><span data-line="33">    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-</span><span data-line="34">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(),</span>
-</span><span data-line="35">    <span class="n">is_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span data-line="36">    <span class="n">flag_value</span><span class="o">=</span><span class="s2">&quot;orca.inp&quot;</span><span class="p">,</span>
-</span><span data-line="37">    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output file name (default is &quot;orca.inp&quot;).&#39;</span><span class="p">,</span>
-</span><span data-line="38"><span class="p">)</span>
+</span><span data-line="2"><span class="sd">&quot;&quot;&quot;Generate ORCA input files from TOML configuration via pychum.</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="sd">.. versionadded:: 1.1.0</span>
+</span><span data-line="5"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># /// script</span>
+</span><span data-line="8"><span class="c1"># requires-python = &quot;&gt;=3.11&quot;</span>
+</span><span data-line="9"><span class="c1"># dependencies = [</span>
+</span><span data-line="10"><span class="c1">#   &quot;click&quot;,</span>
+</span><span data-line="11"><span class="c1">#   &quot;rich&quot;,</span>
+</span><span data-line="12"><span class="c1">#   &quot;pychum&quot;,</span>
+</span><span data-line="13"><span class="c1"># ]</span>
+</span><span data-line="14"><span class="c1"># ///</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span data-line="17"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="18"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="19">
+</span><span data-line="20"><span class="kn">import</span><span class="w"> </span><span class="nn">click</span>
+</span><span data-line="21"><span class="kn">from</span><span class="w"> </span><span class="nn">pychum</span><span class="w"> </span><span class="kn">import</span> <span class="n">render_orca</span>
+</span><span data-line="22"><span class="kn">from</span><span class="w"> </span><span class="nn">rich.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">RichHandler</span>
+</span><span data-line="23">
+</span><span data-line="24"><span class="c1"># --- Logging Configuration ---</span>
+</span><span data-line="25"><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+</span><span data-line="26">    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+</span><span data-line="27">    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span data-line="28">    <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;[</span><span class="si">%X</span><span class="s2">]&quot;</span><span class="p">,</span>
+</span><span data-line="29">    <span class="n">handlers</span><span class="o">=</span><span class="p">[</span><span class="n">RichHandler</span><span class="p">(</span><span class="n">rich_tracebacks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="kc">True</span><span class="p">)],</span>
+</span><span data-line="30"><span class="p">)</span>
+</span><span data-line="31">
+</span><span data-line="32">
+</span><span data-line="33"><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+</span><span data-line="34"><span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;toml_path&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</span><span data-line="35"><span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+</span><span data-line="36">    <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+</span><span data-line="37">    <span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+</span><span data-line="38">    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span data-line="39">    <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(),</span>
+</span><span data-line="40">    <span class="n">is_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span data-line="41">    <span class="n">flag_value</span><span class="o">=</span><span class="s2">&quot;orca.inp&quot;</span><span class="p">,</span>
+</span><span data-line="42">    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output file name (default is &quot;orca.inp&quot;).&#39;</span><span class="p">,</span>
+</span><span data-line="43"><span class="p">)</span>
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../autoapi/generate_orca_input/index.html#generate_orca_input.main">[docs]</a>
-</span><span data-line="39"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">toml_path</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
-</span><span data-line="40"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="41"><span class="sd">    Render an Orca input file from a TOML configuration using pychum.</span>
-</span><span data-line="42">
-</span><span data-line="43"><span class="sd">    TOML_PATH is the path to the TOML configuration file.</span>
-</span><span data-line="44"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="45">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="46">        <span class="n">rendered_output</span> <span class="o">=</span> <span class="n">render_orca</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">toml_path</span><span class="p">))</span>
+</span><span data-line="44"><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">toml_path</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+</span><span data-line="45"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="46"><span class="sd">    Render an Orca input file from a TOML configuration using pychum.</span>
 </span><span data-line="47">
-</span><span data-line="48">        <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="49">            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-</span><span data-line="50">                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rendered_output</span><span class="p">)</span>
-</span><span data-line="51">            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rendered ORCA input file written to &#39;</span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-</span><span data-line="52">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="53">            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">rendered_output</span><span class="p">)</span>
-</span><span data-line="54">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="55">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error rendering ORCA input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span data-line="56">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+</span><span data-line="48"><span class="sd">    TOML_PATH is the path to the TOML configuration file.</span>
+</span><span data-line="49"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="50">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="51">        <span class="n">rendered_output</span> <span class="o">=</span> <span class="n">render_orca</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">toml_path</span><span class="p">))</span>
+</span><span data-line="52">
+</span><span data-line="53">        <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="54">            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+</span><span data-line="55">                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rendered_output</span><span class="p">)</span>
+</span><span data-line="56">            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Rendered ORCA input file written to &#39;</span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+</span><span data-line="57">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="58">            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">rendered_output</span><span class="p">)</span>
+</span><span data-line="59">    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="60">        <span class="n">logging</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error rendering ORCA input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="61">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
 
-</span><span data-line="57">
-</span><span data-line="58">
-</span><span data-line="59"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span><span data-line="60">    <span class="n">main</span><span class="p">()</span>
+</span><span data-line="62">
+</span><span data-line="63">
+</span><span data-line="64"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span data-line="65">    <span class="n">main</span><span class="p">()</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

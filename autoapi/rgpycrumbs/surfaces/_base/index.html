@@ -347,6 +347,9 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.safe_cholesky_solve">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._base.</span></span><span class="sig-name descname"><span class="pre">safe_cholesky_solve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_base.html#safe_cholesky_solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._base.safe_cholesky_solve" title="Link to this definition">¶</a></dt>
 <dd><p>Retries Cholesky decomposition with increasing jitter if it fails.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 <dl class="simple">
 <dt>Args:</dt><dd><p>K: Covariance matrix.
 y: Observation vector.
@@ -365,6 +368,9 @@ jitter_steps: Number of retry attempts with increasing jitter.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.generic_negative_mll">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._base.</span></span><span class="sig-name descname"><span class="pre">generic_negative_mll</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_scalar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_base.html#generic_negative_mll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._base.generic_negative_mll" title="Link to this definition">¶</a></dt>
 <dd><p>Calculates the negative Marginal Log-Likelihood (MLL).</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 <dl class="simple">
 <dt>Args:</dt><dd><p>K: Covariance matrix.
 y: Observation vector.
@@ -379,6 +385,9 @@ noise_scalar: Noise level for regularization.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.BaseSurface">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._base.</span></span><span class="sig-name descname"><span class="pre">BaseSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._base.BaseSurface" title="Link to this definition">¶</a></dt>
 <dd><p>Abstract base class for standard (non-gradient) surface models.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 <p>Derived classes must implement <cite>_fit</cite>, <cite>_solve</cite>, <cite>_predict_chunk</cite>, and <cite>_var_chunk</cite>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.BaseSurface.x_obs">
@@ -429,6 +438,9 @@ chunk_size: Number of points to process per batch to avoid OOM.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.BaseSurface.predict_var">
 <span class="sig-name descname"><span class="pre">predict_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_base.html#BaseSurface.predict_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._base.BaseSurface.predict_var" title="Link to this definition">¶</a></dt>
 <dd><p>Predict posterior variance at query points.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
 <dl class="simple">
 <dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
 chunk_size: Number of points to process per batch.</p>
@@ -456,6 +468,9 @@ chunk_size: Number of points to process per batch.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.BaseGradientSurface">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._base.</span></span><span class="sig-name descname"><span class="pre">BaseGradientSurface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._base.BaseGradientSurface" title="Link to this definition">¶</a></dt>
 <dd><p>Abstract base class for gradient-enhanced surface models.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
 <p>Derived classes must implement <cite>_fit</cite>, <cite>_solve</cite>, <cite>_predict_chunk</cite>, and <cite>_var_chunk</cite>.
 These models incorporate both values and their gradients into the fit.</p>
 <dl class="py attribute">
@@ -512,6 +527,9 @@ chunk_size: Number of points to process per batch.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._base.BaseGradientSurface.predict_var">
 <span class="sig-name descname"><span class="pre">predict_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_base.html#BaseGradientSurface.predict_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._base.BaseGradientSurface.predict_var" title="Link to this definition">¶</a></dt>
 <dd><p>Predict posterior variance at query points.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
 <dl class="simple">
 <dt>Args:</dt><dd><p>x_query: Query inputs (M, D).
 chunk_size: Number of points to process per batch.</p>

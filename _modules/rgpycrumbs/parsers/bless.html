@@ -235,29 +235,34 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
           <h1>Source code for rgpycrumbs.parsers.bless</h1><div class="highlight"><pre>
-<span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-</span><span data-line="3">
+<span></span><span data-line="1"><span class="sd">&quot;&quot;&quot;Regex patterns for parsing BLESS log files.</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="sd">.. versionadded:: 0.0.2</span>
+</span><span data-line="4"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+</span><span data-line="7"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span data-line="8">
 <div class="viewcode-block" id="BLESS_LOG">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/parsers/bless/index.html#rgpycrumbs.parsers.bless.BLESS_LOG">[docs]</a>
-</span><span data-line="4"><span class="n">BLESS_LOG</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-</span><span data-line="5"><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="6"><span class="sd">\[(?P&lt;timestamp&gt;.*?)\]  # Capture timestamp in a named group</span>
-</span><span data-line="7"><span class="sd">\s                      # Match a whitespace character</span>
-</span><span data-line="8"><span class="sd">(?P&lt;logdata&gt;.*)         # Capture the rest of the log data in a named group</span>
-</span><span data-line="9"><span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
-</span><span data-line="10">    <span class="n">re</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
-</span><span data-line="11"><span class="p">)</span></div>
+</span><span data-line="9"><span class="n">BLESS_LOG</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+</span><span data-line="10"><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="11"><span class="sd">\[(?P&lt;timestamp&gt;.*?)\]  # Capture timestamp in a named group</span>
+</span><span data-line="12"><span class="sd">\s                      # Match a whitespace character</span>
+</span><span data-line="13"><span class="sd">(?P&lt;logdata&gt;.*)         # Capture the rest of the log data in a named group</span>
+</span><span data-line="14"><span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
+</span><span data-line="15">    <span class="n">re</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+</span><span data-line="16"><span class="p">)</span></div>
 
-</span><span data-line="12">
-</span><span data-line="13">
-</span><span data-line="14"><span class="c1"># Usage: mktime(&#39;2024-10-28T18:58:24Z&#39;) - mktime(&#39;2024-10-28T18:58:21Z&#39;)</span>
+</span><span data-line="17">
+</span><span data-line="18">
+</span><span data-line="19"><span class="c1"># Usage: mktime(&#39;2024-10-28T18:58:24Z&#39;) - mktime(&#39;2024-10-28T18:58:21Z&#39;)</span>
 <div class="viewcode-block" id="BLESS_TIME">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/parsers/bless/index.html#rgpycrumbs.parsers.bless.BLESS_TIME">[docs]</a>
-</span><span data-line="15"><span class="k">def</span><span class="w"> </span><span class="nf">BLESS_TIME</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
-</span><span data-line="16">    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">T%H:%M:%SZ&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-</span><span data-line="17">        <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span>
-</span><span data-line="18">    <span class="p">)</span></div>
+</span><span data-line="20"><span class="k">def</span><span class="w"> </span><span class="nf">BLESS_TIME</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span>  <span class="c1"># noqa: N802</span>
+</span><span data-line="21">    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">T%H:%M:%SZ&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+</span><span data-line="22">        <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span>
+</span><span data-line="23">    <span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
