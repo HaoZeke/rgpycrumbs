@@ -79,6 +79,17 @@ Academic Work
    for NEB visualization, surface fitting, structure analysis, and
    fragment detection.
 
+.. admonition:: Journal Article
+   :class: tip
+
+   R. Goswami and H. Jonsson,
+   *Adaptive Pruning for Increased Robustness and Reduced Computational
+   Overhead in Gaussian Process Accelerated Saddle Point Searches*,
+   ChemPhysChem, Nov. 2025.
+
+   | DOI: `10.1002/cphc.202500730 <https://doi.org/10.1002/cphc.202500730>`_
+   | Reproduction: `gpr_sella_repro <https://github.com/TheochemUI/gpr_sella_repro>`_
+
 `python\_dissemination\_workbench <https://github.com/HaoZeke/python_dissemination_workbench>`_
     Teaching materials referencing ``rgpycrumbs``
     as a helper utility example.
