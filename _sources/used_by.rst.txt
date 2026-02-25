@@ -79,16 +79,6 @@ Academic Work
    for NEB visualization, surface fitting, structure analysis, and
    fragment detection.
 
-.. admonition:: Journal Article
-   :class: tip
-
-   R. Goswami, S. Leang, A. Bieri, and H. Jonsson,
-   *Gaussian Process Regression Accelerated Sella Saddle Point Searches*,
-   ChemPhysChem, 2025.
-
-   | DOI: `10.1002/cphc.202500730 <https://doi.org/10.1002/cphc.202500730>`_
-   | Reproduction: `gpr_sella_repro <https://github.com/TheochemUI/gpr_sella_repro>`_
-
 `python\_dissemination\_workbench <https://github.com/HaoZeke/python_dissemination_workbench>`_
     Teaching materials referencing ``rgpycrumbs``
     as a helper utility example.
