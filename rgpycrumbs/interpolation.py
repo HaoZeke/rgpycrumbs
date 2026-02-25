@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.interpolate import splev, splrep
 
 
 def spline_interp(x, y, num=100, knots=3):
@@ -23,7 +22,10 @@ def spline_interp(x, y, num=100, knots=3):
 
     .. versionadded:: 1.0.0
     """
-    spl = splrep(x, y, k=knots)
+    from rgpycrumbs._aux import ensure_import
+
+    scipy_interp = ensure_import("scipy.interpolate")
+    spl = scipy_interp.splrep(x, y, k=knots)
     x_fine = np.linspace(x.min(), x.max(), num=num)
-    y_fine = splev(x_fine, spl)
+    y_fine = scipy_interp.splev(x_fine, spl)
     return x_fine, y_fine

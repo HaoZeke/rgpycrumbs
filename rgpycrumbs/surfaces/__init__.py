@@ -22,6 +22,9 @@ _LAZY_IMPORTS = {
     "FastTPS": "standard",
 }
 
+# Submodules that require jax at import time
+_JAX_SUBMODULES = frozenset({"gradient", "standard", "_kernels"})
+
 NYSTROM_THRESHOLD = 1000
 NYSTROM_N_INDUCING_DEFAULT = 300
 
@@ -60,7 +63,12 @@ __all__ = [
 
 def __getattr__(name):
     if name in _LAZY_IMPORTS:
-        submod = importlib.import_module(f"rgpycrumbs.surfaces.{_LAZY_IMPORTS[name]}")
+        target = _LAZY_IMPORTS[name]
+        if target in _JAX_SUBMODULES:
+            from rgpycrumbs._aux import ensure_import
+
+            ensure_import("jax")
+        submod = importlib.import_module(f"rgpycrumbs.surfaces.{target}")
         return getattr(submod, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

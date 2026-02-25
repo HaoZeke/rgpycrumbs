@@ -1,12 +1,8 @@
-import ase
 import numpy as np
-from ase.data import covalent_radii
-from ase.neighborlist import NeighborList
-from scipy.spatial.distance import cdist
 
 
 def analyze_structure(
-    atoms: ase.Atoms, covalent_scale: float = 1.2
+    atoms, covalent_scale: float = 1.2
 ) -> tuple[
     np.ndarray,
     np.ndarray,
@@ -42,6 +38,15 @@ def analyze_structure(
           (min_dist, symbol_i, symbol_j, covrad_sum, corrected_dist)
           for each pair of fragments.
     """
+    from rgpycrumbs._aux import ensure_import
+
+    ase = ensure_import("ase")
+    ase_data = ensure_import("ase.data")
+    ase_neighborlist = ensure_import("ase.neighborlist")
+    scipy_cdist = ensure_import("scipy.spatial.distance")
+
+    covalent_radii = ase_data.covalent_radii
+    NeighborList = ase_neighborlist.NeighborList
 
     num_atoms = len(atoms)
 
@@ -110,7 +115,9 @@ def analyze_structure(
                 centroid_distances[i, j] = centroid_distances[j, i] = centroid_dist
 
                 # Find closest pair of atoms and calculate corrected distance
-                all_distances = cdist(frag_i_positions, frag_j_positions)
+                all_distances = scipy_cdist.cdist(
+                    frag_i_positions, frag_j_positions
+                )
                 min_dist = np.min(all_distances)
                 min_index_i, min_index_j = np.unravel_index(
                     np.argmin(all_distances), all_distances.shape

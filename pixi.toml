@@ -40,11 +40,10 @@ surfaces  = { features = [ "surfaces", "test" ] }
 test      = { features = [ "test" ] }
 
 [pypi-options]
-# TODO(rg): only if the CPU version is needed
-# set these on the command line instead
-# export UV_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
-# export PIP_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu"
-extra-index-urls = [ "https://download.pytorch.org/whl/cpu" ]
+# GPU/CPU resolution is handled by rgpycrumbs._aux._has_cuda() at import
+# time; no need for a hardcoded PyTorch CPU index here. If your shell sets
+# UV_EXTRA_INDEX_URL or PIP_EXTRA_INDEX_URL, unset them to avoid pulling
+# incompatible wheels from the PyTorch index for non-torch packages.
 
 [feature.eonmlflow.dependencies]
 eon    = ">=2.8.2,<3"
