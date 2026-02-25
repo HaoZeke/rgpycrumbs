@@ -1,0 +1,67 @@
+digraph architecture {
+    rankdir=LR;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled"];
+    edge [fontname="Helvetica", fontsize=9];
+    compound=true;
+    newrank=true;
+
+    subgraph cluster_library {
+        label="Library Modules";
+        style="filled,rounded";
+        fillcolor="#f0f4f8";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        surfaces [label="surfaces\n(JAX kernels:\nMatern, IMQ, RQ, SE,\nTPS, RBF + gradients)", fillcolor="#a8d8ea"];
+        geom [label="geom\n(RMSD, IRA alignment,\nfragment detection,\nbond matrices)", fillcolor="#a8d8ea"];
+        interp [label="interpolation\n(Hermite splines,\nforce-consistent)", fillcolor="#a8d8ea"];
+        basetypes [label="basetypes\n(NEBPath, SaddleMeasure,\ndata structures)", fillcolor="#a8d8ea"];
+
+        basetypes -> surfaces [style=dashed, color="#888888", arrowsize=0.6];
+        basetypes -> geom [style=dashed, color="#888888", arrowsize=0.6];
+        basetypes -> interp [style=dashed, color="#888888", arrowsize=0.6];
+    }
+
+    subgraph cluster_dispatcher {
+        label="PEP 723 Dispatcher";
+        style="filled,rounded";
+        fillcolor="#fff3e0";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        cli [label="rgpycrumbs.cli\n(dispatcher)", fillcolor="#ffe2a8"];
+
+        subgraph cluster_scripts {
+            label="Isolated Scripts";
+            style="dashed,rounded";
+            fillcolor="#fffde7";
+
+            plt_neb [label="plt_neb\n(NEB plotting)", fillcolor="#fcbad3"];
+            con_split [label="con_splitter\n(trajectory split)", fillcolor="#fcbad3"];
+            plt_frag [label="plt_fragments\n(fragment analysis)", fillcolor="#fcbad3"];
+        }
+
+        cli -> plt_neb [label="uv run", fontsize=8];
+        cli -> con_split [label="uv run", fontsize=8];
+        cli -> plt_frag [label="uv run", fontsize=8];
+    }
+
+    // Cross-cluster edges
+    plt_neb -> surfaces [lhead=cluster_library, label="imports", style=dashed, color="#555555"];
+
+    // External
+    subgraph cluster_companion {
+        label="Companion Packages";
+        style="filled,rounded";
+        fillcolor="#f3e5f5";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        chemparseplot [label="chemparseplot\n(parsing + plotting)", fillcolor="#e1bee7"];
+        pychum [label="pychum\n(input generation)", fillcolor="#e1bee7"];
+    }
+
+    chemparseplot -> surfaces [label="depends on", color="#555555"];
+    chemparseplot -> geom [label="depends on", color="#555555"];
+}

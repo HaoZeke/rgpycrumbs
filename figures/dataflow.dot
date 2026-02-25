@@ -1,0 +1,86 @@
+digraph dataflow {
+    rankdir=TB;
+    fontname="Helvetica";
+    node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled"];
+    edge [fontname="Helvetica", fontsize=9];
+
+    // Input layer
+    subgraph cluster_inputs {
+        label="Raw Data Sources";
+        style="filled,rounded";
+        fillcolor="#e8f5e9";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        eon_dat [label="eOn\n.dat / .con", fillcolor="#c8e6c9", shape=note];
+        orca_out [label="ORCA\noutput", fillcolor="#c8e6c9", shape=note];
+        chemgp_h5 [label="ChemGP\n.h5 (HDF5)", fillcolor="#c8e6c9", shape=note];
+        traj_xyz [label="ASE trajectory\n.extxyz / .traj", fillcolor="#c8e6c9", shape=note];
+    }
+
+    // Parsing layer
+    subgraph cluster_parse {
+        label="chemparseplot (parsing)";
+        style="filled,rounded";
+        fillcolor="#fce4ec";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        parse_eon [label="parse.eon.neb", fillcolor="#f8bbd0"];
+        parse_orca [label="parse.orca.geomscan", fillcolor="#f8bbd0"];
+        parse_hdf5 [label="parse.trajectory.hdf5", fillcolor="#f8bbd0"];
+        parse_traj [label="parse.trajectory.neb", fillcolor="#f8bbd0"];
+    }
+
+    eon_dat -> parse_eon;
+    orca_out -> parse_orca;
+    chemgp_h5 -> parse_hdf5;
+    traj_xyz -> parse_traj;
+
+    // Intermediate data
+    atoms [label="ASE Atoms\n+ energies, forces", shape=parallelogram, fillcolor="#fff9c4"];
+    profile [label="Profile arrays\n(5, N): idx, rc, E, f_para, 0", shape=parallelogram, fillcolor="#fff9c4"];
+
+    parse_eon -> atoms;
+    parse_eon -> profile;
+    parse_hdf5 -> atoms;
+    parse_hdf5 -> profile;
+    parse_traj -> atoms;
+    parse_traj -> profile;
+
+    // Computation layer
+    subgraph cluster_compute {
+        label="rgpycrumbs (computation)";
+        style="filled,rounded";
+        fillcolor="#e3f2fd";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        rmsd_calc [label="geom.api.alignment\nRMSD(R), RMSD(P)\ncoordinates", fillcolor="#bbdefb"];
+        synth_grad [label="neb_utils\nsynthetic gradient\nprojection", fillcolor="#bbdefb"];
+        surface_fit [label="surfaces\nkernel interpolation\n(gradient-enhanced)", fillcolor="#bbdefb"];
+        hermite [label="interpolation\nHermite spline\n(force-consistent)", fillcolor="#bbdefb"];
+    }
+
+    atoms -> rmsd_calc [label="positions"];
+    profile -> synth_grad [label="f_para"];
+    rmsd_calc -> synth_grad [label="RMSD-R, RMSD-P"];
+
+    synth_grad -> surface_fit [label="r, p, grad_r, grad_p, z"];
+    profile -> hermite [label="rc, E, f_para"];
+
+    // Output layer
+    subgraph cluster_output {
+        label="Visualization";
+        style="filled,rounded";
+        fillcolor="#f3e5f5";
+        fontsize=11;
+        fontname="Helvetica-Bold";
+
+        landscape [label="2D Energy\nLandscape", fillcolor="#e1bee7"];
+        profile_plot [label="1D Energy\nProfile", fillcolor="#e1bee7"];
+    }
+
+    surface_fit -> landscape;
+    hermite -> profile_plot;
+}
