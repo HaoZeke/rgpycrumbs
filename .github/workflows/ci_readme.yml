@@ -25,11 +25,16 @@ jobs:
         run: |
           bash scripts/org_to_md.sh readme_src.org README.md
 
-      - name: Commit and push if changed
+      - name: Deploy README to readme branch
         run: |
-          git diff --quiet README.md && exit 0
+          cp README.md /tmp/README.md
+          cp -r branding /tmp/branding
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git commit -m "doc: regenerate README.md from readme_src.org [skip ci]"
-          git push
+          git checkout --orphan readme-stage
+          git rm -rf .
+          cp /tmp/README.md .
+          cp -r /tmp/branding .
+          git add README.md branding/
+          git commit -m "doc: regenerate README.md from readme_src.org"
+          git push -f origin readme-stage:readme

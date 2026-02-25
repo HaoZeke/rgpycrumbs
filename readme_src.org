@@ -192,6 +192,12 @@ uv run pytest -m pure
 uv run --extra interpolation pytest -m interpolation
 #+end_src
 
+*** Branch Structure
+
+Development happens on the ~main~ branch. The ~readme~ branch is an
+auto-generated orphan containing only the rendered ~README.md~ and branding
+assets; it is the GitHub default branch.
+
 *** When is pixi needed?
 
 [[https://prefix.dev/][Pixi]] is only needed for features that require *conda-only* packages (not
