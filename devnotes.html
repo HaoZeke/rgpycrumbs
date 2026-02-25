@@ -227,6 +227,13 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#philosophy">Philosophy</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#dynamic-dependency-resolution">Dynamic Dependency Resolution</a><ul>
+<li><a class="reference internal" href="#priority-chain">Priority Chain</a></li>
+<li><a class="reference internal" href="#cuda-aware-resolution">CUDA-aware Resolution</a></li>
+<li><a class="reference internal" href="#dependency-registry">Dependency Registry</a></li>
+<li><a class="reference internal" href="#cache-location">Cache Location</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#library-modules">Library Modules</a><ul>
 <li><a class="reference internal" href="#module-structure">Module Structure</a></li>
 <li><a class="reference internal" href="#lazy-loading">Lazy Loading</a></li>
@@ -382,8 +389,10 @@ between different tools in the collection.</p>
 <dt>Lightweight Core, On-Demand Dependencies</dt><dd><p>The installable <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code>
 package has minimal core dependencies (<code class="docutils literal notranslate"><span class="pre">click</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code>). Heavy scientific
 libraries are available as optional extras (e.g. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">rgpycrumbs[surfaces]</span></code> for JAX). For CLI tools, dependencies are fetched by
-<code class="docutils literal notranslate"><span class="pre">uv</span></code> only when a script that needs them is executed, keeping the base
-installation lightweight.</p>
+<code class="docutils literal notranslate"><span class="pre">uv</span></code> only when a script that needs them is executed. For library modules,
+<code class="docutils literal notranslate"><span class="pre">ensure_import</span></code> resolves dependencies at first use when <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code>
+is set, with CUDA-aware resolution. The base installation stays lightweight
+either way.</p>
 </dd>
 <dt>Modular &amp; Extensible Tooling</dt><dd><p>Each utility is an independent script. This
 modularity simplifies development, testing, and maintenance, as changes to one
@@ -392,6 +401,53 @@ collection without modifying the core dispatcher logic, making the system
 easily extensible.</p>
 </dd>
 </dl>
+</section>
+</section>
+<section id="dynamic-dependency-resolution">
+<span id="dynamic-deps"></span><h2>Dynamic Dependency Resolution<a class="headerlink" href="#dynamic-dependency-resolution" title="Link to this heading">¶</a></h2>
+<p>The library extends the PEP 723 dispatcher philosophy to the import surface.
+CLI scripts resolve deps via <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">run</span></code>; library modules resolve deps via
+<code class="docutils literal notranslate"><span class="pre">ensure_import</span></code> at first use. Same principle (lightweight core, on-demand
+resolution), two execution modes.</p>
+<section id="priority-chain">
+<h3>Priority Chain<a class="headerlink" href="#priority-chain" title="Link to this heading">¶</a></h3>
+<p>Every call to <code class="docutils literal notranslate"><span class="pre">ensure_import(module_name)</span></code> walks a 5-step chain:</p>
+<ol class="arabic simple">
+<li><p><strong>Current environment</strong> – <code class="docutils literal notranslate"><span class="pre">importlib.import_module()</span></code>, zero overhead when installed.</p></li>
+<li><p><strong>Parent environment</strong> – <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_PARENT_SITE_PACKAGES</span></code> path fallback.</p></li>
+<li><p><strong>uv cache</strong> – <code class="docutils literal notranslate"><span class="pre">sys.path</span></code> lookup in <code class="docutils literal notranslate"><span class="pre">$XDG_CACHE_HOME/rgpycrumbs/deps/</span></code>.</p></li>
+<li><p><strong>uv install</strong> – <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--target</span> <span class="pre">&lt;cache_dir&gt;</span></code> then retry import.
+Gated by <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code> (opt-in).</p></li>
+<li><p><strong>Fallback</strong> – <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> with an actionable message suggesting the right
+extra or pixi.</p></li>
+</ol>
+</section>
+<section id="cuda-aware-resolution">
+<h3>CUDA-aware Resolution<a class="headerlink" href="#cuda-aware-resolution" title="Link to this heading">¶</a></h3>
+<p>When auto-installing packages with GPU backends (currently jax), the resolver
+probes for <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> to detect whether CUDA is available. On CPU-only
+machines it substitutes CPU-only install specs (e.g. <code class="docutils literal notranslate"><span class="pre">jax[cpu]&gt;=0.4</span></code>) to avoid
+pulling hundreds of megabytes of unused CUDA libraries.</p>
+</section>
+<section id="dependency-registry">
+<h3>Dependency Registry<a class="headerlink" href="#dependency-registry" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">_DEPENDENCY_MAP</span></code> in <code class="docutils literal notranslate"><span class="pre">rgpycrumbs/_aux.py</span></code> maps importable module names to their
+pip install spec and the corresponding optional extra:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">_DEPENDENCY_MAP</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="2">    <span class="s2">&quot;jax&quot;</span><span class="p">:</span>              <span class="p">(</span><span class="s2">&quot;jax&gt;=0.4&quot;</span><span class="p">,</span>    <span class="s2">&quot;surfaces&quot;</span><span class="p">),</span>
+</span><span data-line="3">    <span class="s2">&quot;scipy&quot;</span><span class="p">:</span>            <span class="p">(</span><span class="s2">&quot;scipy&gt;=1.11&quot;</span><span class="p">,</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">),</span>
+</span><span data-line="4">    <span class="s2">&quot;ase&quot;</span><span class="p">:</span>              <span class="p">(</span><span class="s2">&quot;ase&gt;=3.22&quot;</span><span class="p">,</span>   <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="5"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Conda-only dependencies (ira<sub>mod</sub>, tblite, ovito) are NOT in this map.
+They fall through to step 5 with a message pointing to pixi.</p>
+</section>
+<section id="cache-location">
+<h3>Cache Location<a class="headerlink" href="#cache-location" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">$XDG_CACHE_HOME/rgpycrumbs/deps/</span></code> (default <code class="docutils literal notranslate"><span class="pre">\~/.cache/rgpycrumbs/deps/</span></code>).
+uv installs with <code class="docutils literal notranslate"><span class="pre">--target</span></code> into this directory. It persists across sessions
+and can be cleared with <code class="docutils literal notranslate"><span class="pre">rm</span> <span class="pre">-rf</span></code>.</p>
 </section>
 </section>
 <section id="library-modules">

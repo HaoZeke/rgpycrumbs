@@ -219,7 +219,13 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#core-only-deps-resolve-on-first-use">Core only (deps resolve on first use)</a></li>
+<li><a class="reference internal" href="#pre-install-pip-available-extras">Pre-install pip-available extras</a></li>
+<li><a class="reference internal" href="#full-stack-including-conda-only-deps">Full stack (including conda-only deps)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
 <li><a class="reference internal" href="#surface-fitting">Surface Fitting</a></li>
 <li><a class="reference internal" href="#spline-interpolation">Spline Interpolation</a></li>
 <li><a class="reference internal" href="#data-types">Data Types</a></li>
@@ -322,11 +328,25 @@ data-aria-dark="Switch to auto color mode">
 examples.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<p>The base package (data types, CLI dispatcher) has minimal dependencies:</p>
+<p>There are three installation modes depending on your needs.</p>
+<section id="core-only-deps-resolve-on-first-use">
+<h3>Core only (deps resolve on first use)<a class="headerlink" href="#core-only-deps-resolve-on-first-use" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>rgpycrumbs
 </span></pre></div>
 </div>
-<p>Optional extras pull in heavier libraries:</p>
+<p>This gives you the full import surface. Optional dependencies (jax, scipy,
+ase) are resolved on demand when you first use a module that needs them,
+provided <code class="docutils literal notranslate"><span class="pre">uv</span></code> is on PATH and auto-resolution is enabled:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nb">export</span><span class="w"> </span><span class="nv">RGPYCRUMBS_AUTO_DEPS</span><span class="o">=</span><span class="m">1</span>
+</span><span data-line="2">python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from rgpycrumbs.surfaces import FastTPS&quot;</span><span class="w">  </span><span class="c1"># jax installed automatically</span>
+</span></pre></div>
+</div>
+<p>The resolver is CUDA-aware: on machines without an NVIDIA GPU it installs
+CPU-only variants (e.g. <code class="docutils literal notranslate"><span class="pre">jax[cpu]</span></code>) to avoid pulling hundreds of megabytes of
+unused CUDA libraries.</p>
+</section>
+<section id="pre-install-pip-available-extras">
+<h3>Pre-install pip-available extras<a class="headerlink" href="#pre-install-pip-available-extras" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Surface fitting (JAX)</span>
 </span><span data-line="2">pip<span class="w"> </span>install<span class="w"> </span>rgpycrumbs<span class="o">[</span>surfaces<span class="o">]</span>
 </span><span data-line="3">
@@ -336,9 +356,40 @@ examples.</p>
 </span><span data-line="7"><span class="c1"># Structure analysis (ASE + SciPy)</span>
 </span><span data-line="8">pip<span class="w"> </span>install<span class="w"> </span>rgpycrumbs<span class="o">[</span>analysis<span class="o">]</span>
 </span><span data-line="9">
-</span><span data-line="10"><span class="c1"># Everything at once</span>
+</span><span data-line="10"><span class="c1"># Everything pip-installable at once</span>
 </span><span data-line="11">pip<span class="w"> </span>install<span class="w"> </span>rgpycrumbs<span class="o">[</span>all<span class="o">]</span>
 </span></pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">[all]</span></code> extra pre-installs <code class="docutils literal notranslate"><span class="pre">ase</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, and <code class="docutils literal notranslate"><span class="pre">jax[cpu]</span></code>. Conda-only
+packages (<code class="docutils literal notranslate"><span class="pre">tblite</span></code>, <code class="docutils literal notranslate"><span class="pre">ovito</span></code>, <code class="docutils literal notranslate"><span class="pre">ira_mod</span></code>) are not included; use pixi for those.</p>
+</section>
+<section id="full-stack-including-conda-only-deps">
+<h3>Full stack (including conda-only deps)<a class="headerlink" href="#full-stack-including-conda-only-deps" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pixi<span class="w"> </span>install
+</span></pre></div>
+</div>
+<p>This resolves everything including conda-only packages like <code class="docutils literal notranslate"><span class="pre">tblite</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ira_mod</span></code>, and <code class="docutils literal notranslate"><span class="pre">ovito</span></code> that are not available on PyPI.</p>
+</section>
+</section>
+<section id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code></p></td>
+<td><p>Enable on-demand dependency installation via uv/pip</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_PARENT_SITE_PACKAGES</span></code></p></td>
+<td><p>Colon-separated paths to parent env site-packages</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </section>
 <section id="surface-fitting">

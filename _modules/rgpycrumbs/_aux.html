@@ -279,99 +279,358 @@ data-aria-dark="Switch to auto color mode">
           <h1>Source code for rgpycrumbs._aux</h1><div class="highlight"><pre>
 <span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 </span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
-</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-</span><span data-line="6"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="8">
+</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+</span><span data-line="6"><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+</span><span data-line="7"><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="9">
+<div class="viewcode-block" id="logger">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux.logger">[docs]</a>
+</span><span data-line="10"><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+</span><span data-line="11">
+</span><span data-line="12"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="13"><span class="c1"># Dependency registry</span>
+</span><span data-line="14"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="15"><span class="c1"># Maps importable module names to (pip_spec, extra_name).</span>
+</span><span data-line="16"><span class="c1"># Conda-only deps (ira_mod, tblite, ovito) are intentionally absent;</span>
+</span><span data-line="17"><span class="c1"># they fall through to a helpful error suggesting pixi.</span>
+<div class="viewcode-block" id="_DEPENDENCY_MAP">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._DEPENDENCY_MAP">[docs]</a>
+</span><span data-line="18"><span class="n">_DEPENDENCY_MAP</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="19">    <span class="s2">&quot;jax&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;jax&gt;=0.4&quot;</span><span class="p">,</span> <span class="s2">&quot;surfaces&quot;</span><span class="p">),</span>
+</span><span data-line="20">    <span class="s2">&quot;jaxlib&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;jax&gt;=0.4&quot;</span><span class="p">,</span> <span class="s2">&quot;surfaces&quot;</span><span class="p">),</span>
+</span><span data-line="21">    <span class="s2">&quot;scipy&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;scipy&gt;=1.11&quot;</span><span class="p">,</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">),</span>
+</span><span data-line="22">    <span class="s2">&quot;scipy.interpolate&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;scipy&gt;=1.11&quot;</span><span class="p">,</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">),</span>
+</span><span data-line="23">    <span class="s2">&quot;scipy.spatial&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;scipy&gt;=1.11&quot;</span><span class="p">,</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="24">    <span class="s2">&quot;scipy.spatial.distance&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;scipy&gt;=1.11&quot;</span><span class="p">,</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="25">    <span class="s2">&quot;ase&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;ase&gt;=3.22&quot;</span><span class="p">,</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="26">    <span class="s2">&quot;ase.data&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;ase&gt;=3.22&quot;</span><span class="p">,</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="27">    <span class="s2">&quot;ase.neighborlist&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;ase&gt;=3.22&quot;</span><span class="p">,</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="28"><span class="p">}</span></div>
+
+</span><span data-line="29">
+</span><span data-line="30"><span class="c1"># CPU-only pip spec overrides for packages with heavy GPU backends.</span>
+</span><span data-line="31"><span class="c1"># Applied when no CUDA device is detected to avoid pulling hundreds of</span>
+</span><span data-line="32"><span class="c1"># megabytes of CUDA libraries.</span>
+<div class="viewcode-block" id="_CPU_OVERRIDES">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._CPU_OVERRIDES">[docs]</a>
+</span><span data-line="33"><span class="n">_CPU_OVERRIDES</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="34">    <span class="s2">&quot;jax&quot;</span><span class="p">:</span> <span class="s2">&quot;jax[cpu]&gt;=0.4&quot;</span><span class="p">,</span>
+</span><span data-line="35">    <span class="s2">&quot;jaxlib&quot;</span><span class="p">:</span> <span class="s2">&quot;jax[cpu]&gt;=0.4&quot;</span><span class="p">,</span>
+</span><span data-line="36"><span class="p">}</span></div>
+
+</span><span data-line="37">
+</span><span data-line="38"><span class="c1"># Cache the result of the CUDA probe so it runs at most once per process.</span>
+<div class="viewcode-block" id="_cuda_available">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._cuda_available">[docs]</a>
+</span><span data-line="39"><span class="n">_cuda_available</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+</span><span data-line="40">
+</span><span data-line="41">
+<div class="viewcode-block" id="_has_cuda">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._has_cuda">[docs]</a>
+</span><span data-line="42"><span class="k">def</span><span class="w"> </span><span class="nf">_has_cuda</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="43"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return True when a usable NVIDIA GPU is present.</span>
+</span><span data-line="44">
+</span><span data-line="45"><span class="sd">    Checks for ``nvidia-smi`` on PATH and verifies it exits cleanly. The</span>
+</span><span data-line="46"><span class="sd">    result is cached for the lifetime of the process.</span>
+</span><span data-line="47"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="48">    <span class="k">global</span> <span class="n">_cuda_available</span>
+</span><span data-line="49">    <span class="k">if</span> <span class="n">_cuda_available</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="50">        <span class="k">return</span> <span class="n">_cuda_available</span>
+</span><span data-line="51">    <span class="n">nvsmi</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;nvidia-smi&quot;</span><span class="p">)</span>
+</span><span data-line="52">    <span class="k">if</span> <span class="n">nvsmi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="53">        <span class="n">_cuda_available</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="54">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="55">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="56">        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>  <span class="c1"># noqa: S603</span>
+</span><span data-line="57">            <span class="p">[</span><span class="n">nvsmi</span><span class="p">],</span>
+</span><span data-line="58">            <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="59">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="60">            <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+</span><span data-line="61">        <span class="p">)</span>
+</span><span data-line="62">        <span class="n">_cuda_available</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="63">    <span class="k">except</span> <span class="p">(</span><span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
+</span><span data-line="64">        <span class="n">_cuda_available</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="65">    <span class="k">return</span> <span class="n">_cuda_available</span></div>
+
+</span><span data-line="66">
+</span><span data-line="67">
+<div class="viewcode-block" id="_get_dep_cache_dir">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._get_dep_cache_dir">[docs]</a>
+</span><span data-line="68"><span class="k">def</span><span class="w"> </span><span class="nf">_get_dep_cache_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span><span data-line="69"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the per-user dependency cache directory.</span>
+</span><span data-line="70">
+</span><span data-line="71"><span class="sd">    Defaults to ``$XDG_CACHE_HOME/rgpycrumbs/deps/``</span>
+</span><span data-line="72"><span class="sd">    (typically ``~/.cache/rgpycrumbs/deps/``).</span>
+</span><span data-line="73"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="74">    <span class="n">xdg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;XDG_CACHE_HOME&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="75">    <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">xdg</span><span class="p">)</span> <span class="k">if</span> <span class="n">xdg</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.cache&quot;</span>
+</span><span data-line="76">    <span class="k">return</span> <span class="n">base</span> <span class="o">/</span> <span class="s2">&quot;rgpycrumbs&quot;</span> <span class="o">/</span> <span class="s2">&quot;deps&quot;</span></div>
+
+</span><span data-line="77">
+</span><span data-line="78">
+<div class="viewcode-block" id="_resolve_pip_spec">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._resolve_pip_spec">[docs]</a>
+</span><span data-line="79"><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_pip_spec</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="80"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the pip install spec for *module_name*, respecting CUDA.</span>
+</span><span data-line="81">
+</span><span data-line="82"><span class="sd">    If the host lacks a CUDA device and a CPU-only override exists, the</span>
+</span><span data-line="83"><span class="sd">    override is returned instead of the default spec.</span>
+</span><span data-line="84"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="85">    <span class="n">spec</span><span class="p">,</span> <span class="n">_extra</span> <span class="o">=</span> <span class="n">_DEPENDENCY_MAP</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span>
+</span><span data-line="86">    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_cuda</span><span class="p">():</span>
+</span><span data-line="87">        <span class="n">base_pkg</span> <span class="o">=</span> <span class="n">module_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="88">        <span class="n">spec</span> <span class="o">=</span> <span class="n">_CPU_OVERRIDES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_pkg</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+</span><span data-line="89">    <span class="k">return</span> <span class="n">spec</span></div>
+
+</span><span data-line="90">
+</span><span data-line="91">
+<div class="viewcode-block" id="_uv_install">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._uv_install">[docs]</a>
+</span><span data-line="92"><span class="k">def</span><span class="w"> </span><span class="nf">_uv_install</span><span class="p">(</span><span class="n">package_spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="93"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Install *package_spec* into *target* using uv (falling back to pip).</span>
+</span><span data-line="94">
+</span><span data-line="95"><span class="sd">    Raises ``RuntimeError`` if both installers fail.</span>
+</span><span data-line="96"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="97">    <span class="n">target</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="98">    <span class="k">for</span> <span class="n">installer</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;uv&quot;</span><span class="p">,</span> <span class="s2">&quot;pip&quot;</span><span class="p">):</span>
+</span><span data-line="99">        <span class="n">exe</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">installer</span><span class="p">)</span>
+</span><span data-line="100">        <span class="k">if</span> <span class="n">exe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="101">            <span class="k">continue</span>
+</span><span data-line="102">        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">exe</span><span class="p">,</span> <span class="s2">&quot;pip&quot;</span><span class="p">,</span> <span class="s2">&quot;install&quot;</span><span class="p">,</span> <span class="s2">&quot;--target&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="n">package_spec</span><span class="p">]</span>
+</span><span data-line="103">        <span class="k">if</span> <span class="n">installer</span> <span class="o">==</span> <span class="s2">&quot;pip&quot;</span><span class="p">:</span>
+</span><span data-line="104">            <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">exe</span><span class="p">,</span> <span class="s2">&quot;install&quot;</span><span class="p">,</span> <span class="s2">&quot;--target&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="n">package_spec</span><span class="p">]</span>
+</span><span data-line="105">        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;rgpycrumbs: installing </span><span class="si">%s</span><span class="s2"> via </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">package_spec</span><span class="p">,</span> <span class="n">installer</span><span class="p">)</span>
+</span><span data-line="106">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="107">            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>  <span class="c1"># noqa: S603</span>
+</span><span data-line="108">                <span class="n">cmd</span><span class="p">,</span>
+</span><span data-line="109">                <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="110">                <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="111">            <span class="p">)</span>
+</span><span data-line="112">            <span class="k">return</span>
+</span><span data-line="113">        <span class="k">except</span> <span class="p">(</span><span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span data-line="114">            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> install failed: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">installer</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+</span><span data-line="115">            <span class="k">continue</span>
+</span><span data-line="116">    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Failed to install </span><span class="si">{</span><span class="n">package_spec</span><span class="si">}</span><span class="s2">. Ensure uv or pip is available on PATH.&quot;</span>
+</span><span data-line="117">    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+</span><span data-line="118">
+</span><span data-line="119">
+<div class="viewcode-block" id="ensure_import">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux.ensure_import">[docs]</a>
+</span><span data-line="120"><span class="k">def</span><span class="w"> </span><span class="nf">ensure_import</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="121"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Import *module_name* through a 5-step priority chain.</span>
+</span><span data-line="122">
+</span><span data-line="123"><span class="sd">    1. Current environment (importlib)</span>
+</span><span data-line="124"><span class="sd">    2. Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)</span>
+</span><span data-line="125"><span class="sd">    3. uv cache directory on sys.path</span>
+</span><span data-line="126"><span class="sd">    4. uv/pip install into cache (opt-in via RGPYCRUMBS_AUTO_DEPS=1)</span>
+</span><span data-line="127"><span class="sd">    5. Raise ImportError with an actionable message</span>
+</span><span data-line="128">
+</span><span data-line="129"><span class="sd">    Returns the imported module object.</span>
+</span><span data-line="130">
+</span><span data-line="131"><span class="sd">    .. versionadded:: 1.3.0</span>
+</span><span data-line="132"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="133">    <span class="c1"># Step 1: current env</span>
+</span><span data-line="134">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="135">        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="136">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="137">        <span class="k">pass</span>
+</span><span data-line="138">
+</span><span data-line="139">    <span class="c1"># Step 2: parent env</span>
+</span><span data-line="140">    <span class="n">mod</span> <span class="o">=</span> <span class="n">_import_from_parent_env</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="141">    <span class="k">if</span> <span class="n">mod</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="142">        <span class="k">return</span> <span class="n">mod</span>
+</span><span data-line="143">
+</span><span data-line="144">    <span class="c1"># Step 3: check uv cache</span>
+</span><span data-line="145">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">_get_dep_cache_dir</span><span class="p">()</span>
+</span><span data-line="146">    <span class="n">cache_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+</span><span data-line="147">    <span class="k">if</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">cache_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+</span><span data-line="148">        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cache_str</span><span class="p">)</span>
+</span><span data-line="149">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="150">            <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="151">        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="152">            <span class="k">pass</span>
+</span><span data-line="153">
+</span><span data-line="154">    <span class="c1"># Step 4: auto-install (opt-in)</span>
+</span><span data-line="155">    <span class="n">auto</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RGPYCRUMBS_AUTO_DEPS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="156">    <span class="k">if</span> <span class="n">auto</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span> <span class="ow">and</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="n">_DEPENDENCY_MAP</span><span class="p">:</span>
+</span><span data-line="157">        <span class="n">spec</span> <span class="o">=</span> <span class="n">_resolve_pip_spec</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="158">        <span class="n">_uv_install</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">cache_dir</span><span class="p">)</span>
+</span><span data-line="159">        <span class="k">if</span> <span class="n">cache_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+</span><span data-line="160">            <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cache_str</span><span class="p">)</span>
+</span><span data-line="161">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="162">            <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="163">        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="164">            <span class="k">pass</span>
+</span><span data-line="165">
+</span><span data-line="166">    <span class="c1"># Step 5: actionable error</span>
+</span><span data-line="167">    <span class="k">if</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="n">_DEPENDENCY_MAP</span><span class="p">:</span>
+</span><span data-line="168">        <span class="n">_spec</span><span class="p">,</span> <span class="n">extra</span> <span class="o">=</span> <span class="n">_DEPENDENCY_MAP</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span>
+</span><span data-line="169">        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="170">            <span class="sa">f</span><span class="s2">&quot;Module &#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&#39; is not installed. Options:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span data-line="171">            <span class="sa">f</span><span class="s2">&quot;  pip install rgpycrumbs[</span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span data-line="172">            <span class="sa">f</span><span class="s2">&quot;  RGPYCRUMBS_AUTO_DEPS=1 to auto-resolve via uv&quot;</span>
+</span><span data-line="173">        <span class="p">)</span>
+</span><span data-line="174">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="175">        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="176">            <span class="sa">f</span><span class="s2">&quot;Module &#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&#39; is not installed and is not a &quot;</span>
+</span><span data-line="177">            <span class="s2">&quot;pip-installable dependency of rgpycrumbs. &quot;</span>
+</span><span data-line="178">            <span class="s2">&quot;For conda-only packages (ira_mod, tblite, ovito), &quot;</span>
+</span><span data-line="179">            <span class="s2">&quot;use pixi: pixi install&quot;</span>
+</span><span data-line="180">        <span class="p">)</span>
+</span><span data-line="181">    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+</span><span data-line="182">
+</span><span data-line="183">
+<div class="viewcode-block" id="_LazyModule">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._LazyModule">[docs]</a>
+</span><span data-line="184"><span class="k">class</span><span class="w"> </span><span class="nc">_LazyModule</span><span class="p">:</span>
+</span><span data-line="185"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Proxy that defers ``ensure_import`` until first attribute access.</span>
+</span><span data-line="186">
+</span><span data-line="187"><span class="sd">    After resolution the proxy replaces its own ``__dict__`` with the real</span>
+</span><span data-line="188"><span class="sd">    module&#39;s attributes so subsequent access carries zero overhead.</span>
+</span><span data-line="189">
+</span><span data-line="190"><span class="sd">    .. versionadded:: 1.3.0</span>
+</span><span data-line="191"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="192">
+</span><span data-line="193">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="194">        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module_name&quot;</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="195">        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span data-line="196">
+<div class="viewcode-block" id="_LazyModule._resolve">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._LazyModule._resolve">[docs]</a>
+</span><span data-line="197">    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="198">        <span class="n">mod</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module&quot;</span><span class="p">)</span>
+</span><span data-line="199">        <span class="k">if</span> <span class="n">mod</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="200">            <span class="n">name</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module_name&quot;</span><span class="p">)</span>
+</span><span data-line="201">            <span class="n">mod</span> <span class="o">=</span> <span class="n">ensure_import</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="202">            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module&quot;</span><span class="p">,</span> <span class="n">mod</span><span class="p">)</span>
+</span><span data-line="203">        <span class="k">return</span> <span class="n">mod</span></div>
+
+</span><span data-line="204">
+<div class="viewcode-block" id="_LazyModule.__getattr__">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._LazyModule.__getattr__">[docs]</a>
+</span><span data-line="205">    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+</span><span data-line="206">        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resolve</span><span class="p">(),</span> <span class="n">attr</span><span class="p">)</span></div>
+
+</span><span data-line="207">
+<div class="viewcode-block" id="_LazyModule.__repr__">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._LazyModule.__repr__">[docs]</a>
+</span><span data-line="208">    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span data-line="209">        <span class="n">name</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module_name&quot;</span><span class="p">)</span>
+</span><span data-line="210">        <span class="n">mod</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_module&quot;</span><span class="p">)</span>
+</span><span data-line="211">        <span class="k">if</span> <span class="n">mod</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="212">            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;LazyModule &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; (unresolved)&gt;&quot;</span>
+</span><span data-line="213">        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span></div>
+</div>
+
+</span><span data-line="214">
+</span><span data-line="215">
+<div class="viewcode-block" id="lazy_import">
+<a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux.lazy_import">[docs]</a>
+</span><span data-line="216"><span class="k">def</span><span class="w"> </span><span class="nf">lazy_import</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_LazyModule</span><span class="p">:</span>
+</span><span data-line="217"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a lazy proxy for *module_name*.</span>
+</span><span data-line="218">
+</span><span data-line="219"><span class="sd">    The actual import (via :func:`ensure_import`) is deferred until the</span>
+</span><span data-line="220"><span class="sd">    first attribute access on the returned object.</span>
+</span><span data-line="221">
+</span><span data-line="222"><span class="sd">    .. versionadded:: 1.3.0</span>
+</span><span data-line="223"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="224">    <span class="k">return</span> <span class="n">_LazyModule</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span></div>
+
+</span><span data-line="225">
+</span><span data-line="226">
 <div class="viewcode-block" id="getstrform">
 <a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux.getstrform">[docs]</a>
-</span><span data-line="10"><span class="k">def</span><span class="w"> </span><span class="nf">getstrform</span><span class="p">(</span><span class="n">pathobj</span><span class="p">):</span>
-</span><span data-line="11"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the absolute path as a string.</span>
-</span><span data-line="12">
-</span><span data-line="13"><span class="sd">    .. versionadded:: 0.0.1</span>
-</span><span data-line="14"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="15">    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">pathobj</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span></div>
+</span><span data-line="227"><span class="k">def</span><span class="w"> </span><span class="nf">getstrform</span><span class="p">(</span><span class="n">pathobj</span><span class="p">):</span>
+</span><span data-line="228"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the absolute path as a string.</span>
+</span><span data-line="229">
+</span><span data-line="230"><span class="sd">    .. versionadded:: 0.0.1</span>
+</span><span data-line="231"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="232">    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">pathobj</span><span class="o">.</span><span class="n">absolute</span><span class="p">())</span></div>
 
-</span><span data-line="16">
-</span><span data-line="17">
+</span><span data-line="233">
+</span><span data-line="234">
 <div class="viewcode-block" id="get_gitroot">
 <a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux.get_gitroot">[docs]</a>
-</span><span data-line="18"><span class="k">def</span><span class="w"> </span><span class="nf">get_gitroot</span><span class="p">():</span>
-</span><span data-line="19"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the root of the current git repository as a Path.</span>
-</span><span data-line="20">
-</span><span data-line="21"><span class="sd">    .. versionadded:: 0.0.1</span>
-</span><span data-line="22"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="23">    <span class="n">git_path</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;git&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;git&quot;</span>
-</span><span data-line="24">    <span class="n">gitroot</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
-</span><span data-line="25">        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>  <span class="c1"># noqa: S603</span>
-</span><span data-line="26">            <span class="p">[</span><span class="n">git_path</span><span class="p">,</span> <span class="s2">&quot;rev-parse&quot;</span><span class="p">,</span> <span class="s2">&quot;--show-toplevel&quot;</span><span class="p">],</span>
-</span><span data-line="27">            <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="28">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="29">            <span class="n">cwd</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">(),</span>
-</span><span data-line="30">        <span class="p">)</span>
-</span><span data-line="31">        <span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-</span><span data-line="32">        <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="33">    <span class="p">)</span>
-</span><span data-line="34">    <span class="k">return</span> <span class="n">gitroot</span></div>
+</span><span data-line="235"><span class="k">def</span><span class="w"> </span><span class="nf">get_gitroot</span><span class="p">():</span>
+</span><span data-line="236"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the root of the current git repository as a Path.</span>
+</span><span data-line="237">
+</span><span data-line="238"><span class="sd">    .. versionadded:: 0.0.1</span>
+</span><span data-line="239"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="240">    <span class="n">git_path</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">&quot;git&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;git&quot;</span>
+</span><span data-line="241">    <span class="n">gitroot</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+</span><span data-line="242">        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>  <span class="c1"># noqa: S603</span>
+</span><span data-line="243">            <span class="p">[</span><span class="n">git_path</span><span class="p">,</span> <span class="s2">&quot;rev-parse&quot;</span><span class="p">,</span> <span class="s2">&quot;--show-toplevel&quot;</span><span class="p">],</span>
+</span><span data-line="244">            <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="245">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="246">            <span class="n">cwd</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">(),</span>
+</span><span data-line="247">        <span class="p">)</span>
+</span><span data-line="248">        <span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+</span><span data-line="249">        <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="250">    <span class="p">)</span>
+</span><span data-line="251">    <span class="k">return</span> <span class="n">gitroot</span></div>
 
-</span><span data-line="35">
-</span><span data-line="36">
-</span><span data-line="37"><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+</span><span data-line="252">
+</span><span data-line="253">
+</span><span data-line="254"><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
 <div class="viewcode-block" id="switchdir">
 <a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux.switchdir">[docs]</a>
-</span><span data-line="38"><span class="k">def</span><span class="w"> </span><span class="nf">switchdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-</span><span data-line="39"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager that temporarily changes the working directory.</span>
-</span><span data-line="40">
-</span><span data-line="41"><span class="sd">    .. versionadded:: 0.0.1</span>
-</span><span data-line="42"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="43">    <span class="n">curpath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
-</span><span data-line="44">    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</span><span data-line="45">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="46">        <span class="k">yield</span>
-</span><span data-line="47">    <span class="k">finally</span><span class="p">:</span>
-</span><span data-line="48">        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curpath</span><span class="p">)</span></div>
+</span><span data-line="255"><span class="k">def</span><span class="w"> </span><span class="nf">switchdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+</span><span data-line="256"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager that temporarily changes the working directory.</span>
+</span><span data-line="257">
+</span><span data-line="258"><span class="sd">    .. versionadded:: 0.0.1</span>
+</span><span data-line="259"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="260">    <span class="n">curpath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+</span><span data-line="261">    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span><span data-line="262">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="263">        <span class="k">yield</span>
+</span><span data-line="264">    <span class="k">finally</span><span class="p">:</span>
+</span><span data-line="265">        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">curpath</span><span class="p">)</span></div>
 
-</span><span data-line="49">
-</span><span data-line="50">
+</span><span data-line="266">
+</span><span data-line="267">
 <div class="viewcode-block" id="_import_from_parent_env">
 <a class="viewcode-back" href="../../autoapi/rgpycrumbs/_aux/index.html#rgpycrumbs._aux._import_from_parent_env">[docs]</a>
-</span><span data-line="51"><span class="k">def</span><span class="w"> </span><span class="nf">_import_from_parent_env</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="52"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="53"><span class="sd">    Import a module from parent interpreter&#39;s site-packages as a fallback.</span>
-</span><span data-line="54"><span class="sd">    Uses importlib to correctly handle nested modules (e.g. &#39;tblite.interface&#39;).</span>
-</span><span data-line="55"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="56">    <span class="c1"># 1. Try current environment</span>
-</span><span data-line="57">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="58">        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
-</span><span data-line="59">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-</span><span data-line="60">        <span class="k">pass</span>
-</span><span data-line="61">
-</span><span data-line="62">    <span class="c1"># 2. Check parent environment</span>
-</span><span data-line="63">    <span class="n">parent_paths</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RGPYCRUMBS_PARENT_SITE_PACKAGES&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-</span><span data-line="64">    <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_paths</span><span class="p">:</span>
-</span><span data-line="65">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="66">
-</span><span data-line="67">    <span class="c1"># 3. Temporarily extend sys.path</span>
-</span><span data-line="68">    <span class="c1"># Filter out empty strings and paths already in sys.path</span>
-</span><span data-line="69">    <span class="n">paths_to_add</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parent_paths</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">and</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">]</span>
-</span><span data-line="70">    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">paths_to_add</span><span class="p">)</span>
-</span><span data-line="71">
-</span><span data-line="72">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="73">        <span class="c1"># importlib.import_module returns the actual leaf module (interface)</span>
-</span><span data-line="74">        <span class="c1"># __import__ would have returned the top-level package (tblite)</span>
-</span><span data-line="75">        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
-</span><span data-line="76">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-</span><span data-line="77">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="78">    <span class="k">finally</span><span class="p">:</span>
-</span><span data-line="79">        <span class="c1"># Clean up sys.path</span>
-</span><span data-line="80">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths_to_add</span><span class="p">:</span>
-</span><span data-line="81">            <span class="k">try</span><span class="p">:</span>
-</span><span data-line="82">                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-</span><span data-line="83">            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="84">                <span class="k">pass</span></div>
+</span><span data-line="268"><span class="k">def</span><span class="w"> </span><span class="nf">_import_from_parent_env</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="269"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="270"><span class="sd">    Import a module from parent interpreter&#39;s site-packages as a fallback.</span>
+</span><span data-line="271"><span class="sd">    Uses importlib to correctly handle nested modules (e.g. &#39;tblite.interface&#39;).</span>
+</span><span data-line="272"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="273">    <span class="c1"># 1. Try current environment</span>
+</span><span data-line="274">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="275">        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="276">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="277">        <span class="k">pass</span>
+</span><span data-line="278">
+</span><span data-line="279">    <span class="c1"># 2. Check parent environment</span>
+</span><span data-line="280">    <span class="n">parent_paths</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RGPYCRUMBS_PARENT_SITE_PACKAGES&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span data-line="281">    <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_paths</span><span class="p">:</span>
+</span><span data-line="282">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="283">
+</span><span data-line="284">    <span class="c1"># 3. Temporarily extend sys.path</span>
+</span><span data-line="285">    <span class="c1"># Filter out empty strings and paths already in sys.path</span>
+</span><span data-line="286">    <span class="n">paths_to_add</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parent_paths</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">and</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">]</span>
+</span><span data-line="287">    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">paths_to_add</span><span class="p">)</span>
+</span><span data-line="288">
+</span><span data-line="289">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="290">        <span class="c1"># importlib.import_module returns the actual leaf module (interface)</span>
+</span><span data-line="291">        <span class="c1"># __import__ would have returned the top-level package (tblite)</span>
+</span><span data-line="292">        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="293">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="294">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="295">    <span class="k">finally</span><span class="p">:</span>
+</span><span data-line="296">        <span class="c1"># Clean up sys.path</span>
+</span><span data-line="297">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths_to_add</span><span class="p">:</span>
+</span><span data-line="298">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="299">                <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</span><span data-line="300">            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="301">                <span class="k">pass</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

@@ -15,7 +15,7 @@ Functions
 Module Contents
 ---------------
 
-.. py:function:: analyze_structure(atoms: ase.Atoms, covalent_scale: float = 1.2) -> tuple[numpy.ndarray, numpy.ndarray, list[list[int]], numpy.ndarray, list[tuple[float, str, str, float, float]]]
+.. py:function:: analyze_structure(atoms, covalent_scale: float = 1.2) -> tuple[numpy.ndarray, numpy.ndarray, list[list[int]], numpy.ndarray, list[tuple[float, str, str, float, float]]]
 
    Analyzes an ASE Atoms object to calculate the distance matrix, bond matrix,
    identify molecular fragments, and calculate inter-fragment distances.

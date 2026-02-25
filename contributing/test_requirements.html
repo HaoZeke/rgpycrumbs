@@ -437,8 +437,12 @@ dependencies.</p>
 </span></pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">pure</span></code> marker is reserved for tests that depend only on core packages
-(numpy, click). Never place tests that import dispatcher scripts under the
-<code class="docutils literal notranslate"><span class="pre">pure</span></code> marker.</p>
+(numpy, click). The <code class="docutils literal notranslate"><span class="pre">ensure_import</span></code> and <code class="docutils literal notranslate"><span class="pre">lazy_import</span></code> tests also run under
+<code class="docutils literal notranslate"><span class="pre">pure</span></code> since they mock all optional dependencies. Never place tests that import
+dispatcher scripts under the <code class="docutils literal notranslate"><span class="pre">pure</span></code> marker.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">[all]</span></code> is a best-effort convenience extra covering pip-installable
+optional dependencies only. Conda-only packages (<code class="docutils literal notranslate"><span class="pre">tblite</span></code>, <code class="docutils literal notranslate"><span class="pre">ovito</span></code>, <code class="docutils literal notranslate"><span class="pre">ira_mod</span></code>)
+require pixi.</p>
 </section>
 <section id="available-markers-environments">
 <h3>Available Markers &amp; Environments<a class="headerlink" href="#available-markers-environments" title="Link to this heading">¶</a></h3>
@@ -456,7 +460,7 @@ dependencies.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pure</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code></p></td>
-<td><p>Core utilities, basetypes, interpolation</p></td>
+<td><p>Core utilities, basetypes, ensure<sub>import</sub></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">align</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">test</span></code></p></td>

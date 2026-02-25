@@ -278,36 +278,38 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue dark-code" role="main">
           <h1>Source code for rgpycrumbs.interpolation</h1><div class="highlight"><pre>
 <span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">splev</span><span class="p">,</span> <span class="n">splrep</span>
+</span><span data-line="2">
 </span><span data-line="3">
-</span><span data-line="4">
 <div class="viewcode-block" id="spline_interp">
 <a class="viewcode-back" href="../../autoapi/rgpycrumbs/interpolation/index.html#rgpycrumbs.interpolation.spline_interp">[docs]</a>
-</span><span data-line="5"><span class="k">def</span><span class="w"> </span><span class="nf">spline_interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">knots</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-</span><span data-line="6"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate using B-splines.</span>
-</span><span data-line="7">
-</span><span data-line="8"><span class="sd">    Fits a B-spline representation to the data ``(x, y)`` and evaluates it on</span>
-</span><span data-line="9"><span class="sd">    a uniformly spaced grid.</span>
-</span><span data-line="10">
-</span><span data-line="11"><span class="sd">    Args:</span>
-</span><span data-line="12"><span class="sd">        x: Independent variable values (1D array, must be monotonically</span>
-</span><span data-line="13"><span class="sd">            increasing).</span>
-</span><span data-line="14"><span class="sd">        y: Dependent variable values (same length as *x*).</span>
-</span><span data-line="15"><span class="sd">        num: Number of evaluation points on the output grid.</span>
-</span><span data-line="16"><span class="sd">        knots: Degree of the spline (passed as ``k`` to</span>
-</span><span data-line="17"><span class="sd">            ``scipy.interpolate.splrep``).</span>
-</span><span data-line="18">
-</span><span data-line="19"><span class="sd">    Returns:</span>
-</span><span data-line="20"><span class="sd">        tuple: ``(x_fine, y_fine)`` where *x_fine* is a uniform grid of length</span>
-</span><span data-line="21"><span class="sd">        *num* spanning ``[x.min(), x.max()]`` and *y_fine* is the spline</span>
-</span><span data-line="22"><span class="sd">        evaluated on that grid.</span>
-</span><span data-line="23">
-</span><span data-line="24"><span class="sd">    .. versionadded:: 1.0.0</span>
-</span><span data-line="25"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="26">    <span class="n">spl</span> <span class="o">=</span> <span class="n">splrep</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">knots</span><span class="p">)</span>
-</span><span data-line="27">    <span class="n">x_fine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
-</span><span data-line="28">    <span class="n">y_fine</span> <span class="o">=</span> <span class="n">splev</span><span class="p">(</span><span class="n">x_fine</span><span class="p">,</span> <span class="n">spl</span><span class="p">)</span>
-</span><span data-line="29">    <span class="k">return</span> <span class="n">x_fine</span><span class="p">,</span> <span class="n">y_fine</span></div>
+</span><span data-line="4"><span class="k">def</span><span class="w"> </span><span class="nf">spline_interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">knots</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+</span><span data-line="5"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate using B-splines.</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="sd">    Fits a B-spline representation to the data ``(x, y)`` and evaluates it on</span>
+</span><span data-line="8"><span class="sd">    a uniformly spaced grid.</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="sd">    Args:</span>
+</span><span data-line="11"><span class="sd">        x: Independent variable values (1D array, must be monotonically</span>
+</span><span data-line="12"><span class="sd">            increasing).</span>
+</span><span data-line="13"><span class="sd">        y: Dependent variable values (same length as *x*).</span>
+</span><span data-line="14"><span class="sd">        num: Number of evaluation points on the output grid.</span>
+</span><span data-line="15"><span class="sd">        knots: Degree of the spline (passed as ``k`` to</span>
+</span><span data-line="16"><span class="sd">            ``scipy.interpolate.splrep``).</span>
+</span><span data-line="17">
+</span><span data-line="18"><span class="sd">    Returns:</span>
+</span><span data-line="19"><span class="sd">        tuple: ``(x_fine, y_fine)`` where *x_fine* is a uniform grid of length</span>
+</span><span data-line="20"><span class="sd">        *num* spanning ``[x.min(), x.max()]`` and *y_fine* is the spline</span>
+</span><span data-line="21"><span class="sd">        evaluated on that grid.</span>
+</span><span data-line="22">
+</span><span data-line="23"><span class="sd">    .. versionadded:: 1.0.0</span>
+</span><span data-line="24"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="25">    <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_import</span>
+</span><span data-line="26">
+</span><span data-line="27">    <span class="n">scipy_interp</span> <span class="o">=</span> <span class="n">ensure_import</span><span class="p">(</span><span class="s2">&quot;scipy.interpolate&quot;</span><span class="p">)</span>
+</span><span data-line="28">    <span class="n">spl</span> <span class="o">=</span> <span class="n">scipy_interp</span><span class="o">.</span><span class="n">splrep</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">knots</span><span class="p">)</span>
+</span><span data-line="29">    <span class="n">x_fine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">)</span>
+</span><span data-line="30">    <span class="n">y_fine</span> <span class="o">=</span> <span class="n">scipy_interp</span><span class="o">.</span><span class="n">splev</span><span class="p">(</span><span class="n">x_fine</span><span class="p">,</span> <span class="n">spl</span><span class="p">)</span>
+</span><span data-line="31">    <span class="k">return</span> <span class="n">x_fine</span><span class="p">,</span> <span class="n">y_fine</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

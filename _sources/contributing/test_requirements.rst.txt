@@ -130,8 +130,13 @@ dependencies.
         assert result.exit_code == 0
 
 The ``pure`` marker is reserved for tests that depend only on core packages
-(numpy, click). Never place tests that import dispatcher scripts under the
-``pure`` marker.
+(numpy, click). The ``ensure_import`` and ``lazy_import`` tests also run under
+``pure`` since they mock all optional dependencies. Never place tests that import
+dispatcher scripts under the ``pure`` marker.
+
+Note that ``[all]`` is a best-effort convenience extra covering pip-installable
+optional dependencies only. Conda-only packages (``tblite``, ``ovito``, ``ira_mod``)
+require pixi.
 
 Available Markers & Environments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,23 +145,23 @@ The following markers and their corresponding ``pixi`` environments are availabl
 
 .. table::
 
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | Marker        | Environment            | Dependencies                                    | What it tests                            |
-    +===============+========================+=================================================+==========================================+
-    | ``pure``      | ``test``               | ``numpy``                                       | Core utilities, basetypes, interpolation |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | ``align``     | ``test``               | ``ase``, ``numpy``                              | Structure analysis, alignment            |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | ``fragments`` | ``fragments``          | ``ase``, ``tblite``                             | Fragment detection with tight-binding    |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | ``surfaces``  | ``surfaces``           | ``jax``                                         | Surface fitting kernels and models       |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | ``ptm``       | ``ptm``                | ``ase``, ``ovito``                              | Polyhedral template matching             |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | ``eon``       | ``eonmlflow``          | ``ase``, ``eon``, ``polars``, ``chemparseplot`` | eOn integration, NEB CLI                 |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
-    | ``ira``       | (requires ``ira_mod``) | ``ira_mod``                                     | IRA matching and RMSD comparison         |
-    +---------------+------------------------+-------------------------------------------------+------------------------------------------+
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | Marker        | Environment            | Dependencies                                    | What it tests                                     |
+    +===============+========================+=================================================+===================================================+
+    | ``pure``      | ``test``               | ``numpy``                                       | Core utilities, basetypes, ensure\ :sub:`import`\ |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | ``align``     | ``test``               | ``ase``, ``numpy``                              | Structure analysis, alignment                     |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | ``fragments`` | ``fragments``          | ``ase``, ``tblite``                             | Fragment detection with tight-binding             |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | ``surfaces``  | ``surfaces``           | ``jax``                                         | Surface fitting kernels and models                |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | ``ptm``       | ``ptm``                | ``ase``, ``ovito``                              | Polyhedral template matching                      |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | ``eon``       | ``eonmlflow``          | ``ase``, ``eon``, ``polars``, ``chemparseplot`` | eOn integration, NEB CLI                          |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
+    | ``ira``       | (requires ``ira_mod``) | ``ira_mod``                                     | IRA matching and RMSD comparison                  |
+    +---------------+------------------------+-------------------------------------------------+---------------------------------------------------+
 
 Running Tests
 ~~~~~~~~~~~~~

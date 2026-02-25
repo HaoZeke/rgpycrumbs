@@ -278,19 +278,33 @@ data-aria-dark="Switch to auto color mode">
 <a class="viewcode-back" href="../autoapi/rgpycrumbs/index.html#rgpycrumbs.__getattr__">[docs]</a>
 </span><span data-line="7"><span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
 </span><span data-line="8">    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;surfaces&quot;</span><span class="p">:</span>
-</span><span data-line="9">        <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">surfaces</span>
-</span><span data-line="10">
-</span><span data-line="11">        <span class="k">return</span> <span class="n">surfaces</span>
-</span><span data-line="12">    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;basetypes&quot;</span><span class="p">:</span>
-</span><span data-line="13">        <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">basetypes</span>
-</span><span data-line="14">
-</span><span data-line="15">        <span class="k">return</span> <span class="n">basetypes</span>
-</span><span data-line="16">    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">:</span>
-</span><span data-line="17">        <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolation</span>
-</span><span data-line="18">
-</span><span data-line="19">        <span class="k">return</span> <span class="n">interpolation</span>
-</span><span data-line="20">    <span class="n">aerr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;module &#39;rgpycrumbs&#39; has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="21">    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">aerr</span><span class="p">)</span></div>
+</span><span data-line="9">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="10">            <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">surfaces</span>
+</span><span data-line="11">        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span data-line="12">            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="13">                <span class="s2">&quot;rgpycrumbs.surfaces requires jax. Install with:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span data-line="14">                <span class="s2">&quot;  pip install rgpycrumbs[surfaces]</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span data-line="15">                <span class="s2">&quot;Or set RGPYCRUMBS_AUTO_DEPS=1 to auto-resolve via uv.&quot;</span>
+</span><span data-line="16">            <span class="p">)</span>
+</span><span data-line="17">            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+</span><span data-line="18">        <span class="k">return</span> <span class="n">surfaces</span>
+</span><span data-line="19">    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;basetypes&quot;</span><span class="p">:</span>
+</span><span data-line="20">        <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">basetypes</span>
+</span><span data-line="21">
+</span><span data-line="22">        <span class="k">return</span> <span class="n">basetypes</span>
+</span><span data-line="23">    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">:</span>
+</span><span data-line="24">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="25">            <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">interpolation</span>
+</span><span data-line="26">        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span data-line="27">            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="28">                <span class="s2">&quot;rgpycrumbs.interpolation requires scipy. Install with:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span data-line="29">                <span class="s2">&quot;  pip install rgpycrumbs[interpolation]</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span data-line="30">                <span class="s2">&quot;Or set RGPYCRUMBS_AUTO_DEPS=1 to auto-resolve via uv.&quot;</span>
+</span><span data-line="31">            <span class="p">)</span>
+</span><span data-line="32">            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+</span><span data-line="33">        <span class="k">return</span> <span class="n">interpolation</span>
+</span><span data-line="34">    <span class="n">aerr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;module &#39;rgpycrumbs&#39; has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="35">    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">aerr</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

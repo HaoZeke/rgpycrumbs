@@ -4,11 +4,36 @@ rgpycrumbs._aux
 .. py:module:: rgpycrumbs._aux
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs._aux.logger
+   rgpycrumbs._aux._DEPENDENCY_MAP
+   rgpycrumbs._aux._CPU_OVERRIDES
+   rgpycrumbs._aux._cuda_available
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs._aux._LazyModule
+
+
 Functions
 ---------
 
 .. autoapisummary::
 
+   rgpycrumbs._aux._has_cuda
+   rgpycrumbs._aux._get_dep_cache_dir
+   rgpycrumbs._aux._resolve_pip_spec
+   rgpycrumbs._aux._uv_install
+   rgpycrumbs._aux.ensure_import
+   rgpycrumbs._aux.lazy_import
    rgpycrumbs._aux.getstrform
    rgpycrumbs._aux.get_gitroot
    rgpycrumbs._aux.switchdir
@@ -17,6 +42,94 @@ Functions
 
 Module Contents
 ---------------
+
+.. py:data:: logger
+
+.. py:data:: _DEPENDENCY_MAP
+   :type:  dict[str, tuple[str, str]]
+
+.. py:data:: _CPU_OVERRIDES
+   :type:  dict[str, str]
+
+.. py:data:: _cuda_available
+   :type:  bool | None
+   :value: None
+
+
+.. py:function:: _has_cuda() -> bool
+
+   Return True when a usable NVIDIA GPU is present.
+
+   Checks for ``nvidia-smi`` on PATH and verifies it exits cleanly. The
+   result is cached for the lifetime of the process.
+
+
+.. py:function:: _get_dep_cache_dir() -> pathlib.Path
+
+   Return the per-user dependency cache directory.
+
+   Defaults to ``$XDG_CACHE_HOME/rgpycrumbs/deps/``
+   (typically ``~/.cache/rgpycrumbs/deps/``).
+
+
+.. py:function:: _resolve_pip_spec(module_name: str) -> str
+
+   Return the pip install spec for *module_name*, respecting CUDA.
+
+   If the host lacks a CUDA device and a CPU-only override exists, the
+   override is returned instead of the default spec.
+
+
+.. py:function:: _uv_install(package_spec: str, target: pathlib.Path) -> None
+
+   Install *package_spec* into *target* using uv (falling back to pip).
+
+   Raises ``RuntimeError`` if both installers fail.
+
+
+.. py:function:: ensure_import(module_name: str)
+
+   Import *module_name* through a 5-step priority chain.
+
+   1. Current environment (importlib)
+   2. Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)
+   3. uv cache directory on sys.path
+   4. uv/pip install into cache (opt-in via RGPYCRUMBS_AUTO_DEPS=1)
+   5. Raise ImportError with an actionable message
+
+   Returns the imported module object.
+
+   .. versionadded:: 1.3.0
+
+
+.. py:class:: _LazyModule(module_name: str)
+
+   Proxy that defers ``ensure_import`` until first attribute access.
+
+   After resolution the proxy replaces its own ``__dict__`` with the real
+   module's attributes so subsequent access carries zero overhead.
+
+   .. versionadded:: 1.3.0
+
+
+   .. py:method:: _resolve()
+
+
+   .. py:method:: __getattr__(attr)
+
+
+   .. py:method:: __repr__()
+
+
+.. py:function:: lazy_import(module_name: str) -> _LazyModule
+
+   Return a lazy proxy for *module_name*.
+
+   The actual import (via :func:`ensure_import`) is deferred until the
+   first attribute access on the returned object.
+
+   .. versionadded:: 1.3.0
+
 
 .. py:function:: getstrform(pathobj)
 

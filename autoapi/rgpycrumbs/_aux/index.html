@@ -219,8 +219,26 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#attributes">Attributes</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs._aux.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._DEPENDENCY_MAP"><code class="docutils literal notranslate"><span class="pre">_DEPENDENCY_MAP</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._CPU_OVERRIDES"><code class="docutils literal notranslate"><span class="pre">_CPU_OVERRIDES</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._cuda_available"><code class="docutils literal notranslate"><span class="pre">_cuda_available</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._has_cuda"><code class="docutils literal notranslate"><span class="pre">_has_cuda()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._get_dep_cache_dir"><code class="docutils literal notranslate"><span class="pre">_get_dep_cache_dir()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._resolve_pip_spec"><code class="docutils literal notranslate"><span class="pre">_resolve_pip_spec()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._uv_install"><code class="docutils literal notranslate"><span class="pre">_uv_install()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux.ensure_import"><code class="docutils literal notranslate"><span class="pre">ensure_import()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._LazyModule"><code class="docutils literal notranslate"><span class="pre">_LazyModule</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs._aux._LazyModule._resolve"><code class="docutils literal notranslate">_resolve()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._LazyModule.__getattr__"><code class="docutils literal notranslate">__getattr__()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs._aux._LazyModule.__repr__"><code class="docutils literal notranslate">__repr__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs._aux.lazy_import"><code class="docutils literal notranslate"><span class="pre">lazy_import()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs._aux.getstrform"><code class="docutils literal notranslate"><span class="pre">getstrform()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs._aux.get_gitroot"><code class="docutils literal notranslate"><span class="pre">get_gitroot()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs._aux.switchdir"><code class="docutils literal notranslate"><span class="pre">switchdir()</span></code></a></li>
@@ -325,11 +343,62 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="module-rgpycrumbs._aux">
 <span id="rgpycrumbs-aux"></span><h1>rgpycrumbs._aux<a class="headerlink" href="#module-rgpycrumbs._aux" title="Link to this heading">¶</a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux.logger" title="rgpycrumbs._aux.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs._aux._DEPENDENCY_MAP" title="rgpycrumbs._aux._DEPENDENCY_MAP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_DEPENDENCY_MAP</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux._CPU_OVERRIDES" title="rgpycrumbs._aux._CPU_OVERRIDES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_CPU_OVERRIDES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs._aux._cuda_available" title="rgpycrumbs._aux._cuda_available"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_cuda_available</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux._LazyModule" title="rgpycrumbs._aux._LazyModule"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_LazyModule</span></code></a></p></td>
+<td><p>Proxy that defers <code class="docutils literal notranslate"><span class="pre">ensure_import</span></code> until first attribute access.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux._has_cuda" title="rgpycrumbs._aux._has_cuda"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_has_cuda</span></code></a>(→ bool)</p></td>
+<td><p>Return True when a usable NVIDIA GPU is present.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs._aux._get_dep_cache_dir" title="rgpycrumbs._aux._get_dep_cache_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_dep_cache_dir</span></code></a>(→ pathlib.Path)</p></td>
+<td><p>Return the per-user dependency cache directory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux._resolve_pip_spec" title="rgpycrumbs._aux._resolve_pip_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_resolve_pip_spec</span></code></a>(→ str)</p></td>
+<td><p>Return the pip install spec for <em>module_name</em>, respecting CUDA.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs._aux._uv_install" title="rgpycrumbs._aux._uv_install"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_uv_install</span></code></a>(→ None)</p></td>
+<td><p>Install <em>package_spec</em> into <em>target</em> using uv (falling back to pip).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux.ensure_import" title="rgpycrumbs._aux.ensure_import"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ensure_import</span></code></a>(module_name)</p></td>
+<td><p>Import <em>module_name</em> through a 5-step priority chain.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs._aux.lazy_import" title="rgpycrumbs._aux.lazy_import"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lazy_import</span></code></a>(→ _LazyModule)</p></td>
+<td><p>Return a lazy proxy for <em>module_name</em>.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs._aux.getstrform" title="rgpycrumbs._aux.getstrform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">getstrform</span></code></a>(pathobj)</p></td>
 <td><p>Return the absolute path as a string.</p></td>
 </tr>
@@ -348,6 +417,111 @@ data-aria-dark="Switch to auto color mode">
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs._aux.logger">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux.logger" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._DEPENDENCY_MAP">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_DEPENDENCY_MAP</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_DEPENDENCY_MAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._DEPENDENCY_MAP" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._CPU_OVERRIDES">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_CPU_OVERRIDES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_CPU_OVERRIDES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._CPU_OVERRIDES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._cuda_available">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_cuda_available</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_cuda_available"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._cuda_available" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._has_cuda">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_has_cuda</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_has_cuda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._has_cuda" title="Link to this definition">¶</a></dt>
+<dd><p>Return True when a usable NVIDIA GPU is present.</p>
+<p>Checks for <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> on PATH and verifies it exits cleanly. The
+result is cached for the lifetime of the process.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._get_dep_cache_dir">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_get_dep_cache_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_get_dep_cache_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._get_dep_cache_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Return the per-user dependency cache directory.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">$XDG_CACHE_HOME/rgpycrumbs/deps/</span></code>
+(typically <code class="docutils literal notranslate"><span class="pre">~/.cache/rgpycrumbs/deps/</span></code>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._resolve_pip_spec">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_resolve_pip_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_resolve_pip_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._resolve_pip_spec" title="Link to this definition">¶</a></dt>
+<dd><p>Return the pip install spec for <em>module_name</em>, respecting CUDA.</p>
+<p>If the host lacks a CUDA device and a CPU-only override exists, the
+override is returned instead of the default spec.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._uv_install">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_uv_install</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_uv_install"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._uv_install" title="Link to this definition">¶</a></dt>
+<dd><p>Install <em>package_spec</em> into <em>target</em> using uv (falling back to pip).</p>
+<p>Raises <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> if both installers fail.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs._aux.ensure_import">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">ensure_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#ensure_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux.ensure_import" title="Link to this definition">¶</a></dt>
+<dd><p>Import <em>module_name</em> through a 5-step priority chain.</p>
+<ol class="arabic simple">
+<li><p>Current environment (importlib)</p></li>
+<li><p>Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)</p></li>
+<li><p>uv cache directory on sys.path</p></li>
+<li><p>uv/pip install into cache (opt-in via RGPYCRUMBS_AUTO_DEPS=1)</p></li>
+<li><p>Raise ImportError with an actionable message</p></li>
+</ol>
+<p>Returns the imported module object.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.0.</span></p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._LazyModule">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">_LazyModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_LazyModule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._LazyModule" title="Link to this definition">¶</a></dt>
+<dd><p>Proxy that defers <code class="docutils literal notranslate"><span class="pre">ensure_import</span></code> until first attribute access.</p>
+<p>After resolution the proxy replaces its own <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> with the real
+module’s attributes so subsequent access carries zero overhead.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.0.</span></p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._LazyModule._resolve">
+<span class="sig-name descname"><span class="pre">_resolve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_LazyModule._resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._LazyModule._resolve" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._LazyModule.__getattr__">
+<span class="sig-name descname"><span class="pre">__getattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_LazyModule.__getattr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._LazyModule.__getattr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rgpycrumbs._aux._LazyModule.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#_LazyModule.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux._LazyModule.__repr__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs._aux.lazy_import">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">lazy_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rgpycrumbs._aux._LazyModule" title="rgpycrumbs._aux._LazyModule"><span class="pre">_LazyModule</span></a></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#lazy_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux.lazy_import" title="Link to this definition">¶</a></dt>
+<dd><p>Return a lazy proxy for <em>module_name</em>.</p>
+<p>The actual import (via <a class="reference internal" href="#rgpycrumbs._aux.ensure_import" title="rgpycrumbs._aux.ensure_import"><code class="xref py py-func docutils literal notranslate"><span class="pre">ensure_import()</span></code></a>) is deferred until the
+first attribute access on the returned object.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.0.</span></p>
+</div>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs._aux.getstrform">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs._aux.</span></span><span class="sig-name descname"><span class="pre">getstrform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathobj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/_aux.html#getstrform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs._aux.getstrform" title="Link to this definition">¶</a></dt>

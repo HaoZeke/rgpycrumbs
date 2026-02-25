@@ -79,8 +79,10 @@ Lightweight Core, On-Demand Dependencies
     The installable ``rgpycrumbs``
     package has minimal core dependencies (``click``, ``numpy``). Heavy scientific
     libraries are available as optional extras (e.g. ``pip install rgpycrumbs[surfaces]`` for JAX). For CLI tools, dependencies are fetched by
-    ``uv`` only when a script that needs them is executed, keeping the base
-    installation lightweight.
+    ``uv`` only when a script that needs them is executed. For library modules,
+    ``ensure_import`` resolves dependencies at first use when ``RGPYCRUMBS_AUTO_DEPS=1``
+    is set, with CUDA-aware resolution. The base installation stays lightweight
+    either way.
 
 Modular & Extensible Tooling
     Each utility is an independent script. This
@@ -88,6 +90,65 @@ Modular & Extensible Tooling
     tool cannot inadvertently affect another. New tools can be added to the
     collection without modifying the core dispatcher logic, making the system
     easily extensible.
+
+.. _dynamic-deps:
+
+Dynamic Dependency Resolution
+-----------------------------
+
+The library extends the PEP 723 dispatcher philosophy to the import surface.
+CLI scripts resolve deps via ``uv run``; library modules resolve deps via
+``ensure_import`` at first use. Same principle (lightweight core, on-demand
+resolution), two execution modes.
+
+Priority Chain
+~~~~~~~~~~~~~~
+
+Every call to ``ensure_import(module_name)`` walks a 5-step chain:
+
+1. **Current environment** -- ``importlib.import_module()``, zero overhead when installed.
+
+2. **Parent environment** -- ``RGPYCRUMBS_PARENT_SITE_PACKAGES`` path fallback.
+
+3. **uv cache** -- ``sys.path`` lookup in ``$XDG_CACHE_HOME/rgpycrumbs/deps/``.
+
+4. **uv install** -- ``uv pip install --target <cache_dir>`` then retry import.
+   Gated by ``RGPYCRUMBS_AUTO_DEPS=1`` (opt-in).
+
+5. **Fallback** -- ``ImportError`` with an actionable message suggesting the right
+   extra or pixi.
+
+CUDA-aware Resolution
+~~~~~~~~~~~~~~~~~~~~~
+
+When auto-installing packages with GPU backends (currently jax), the resolver
+probes for ``nvidia-smi`` to detect whether CUDA is available. On CPU-only
+machines it substitutes CPU-only install specs (e.g. ``jax[cpu]>=0.4``) to avoid
+pulling hundreds of megabytes of unused CUDA libraries.
+
+Dependency Registry
+~~~~~~~~~~~~~~~~~~~
+
+``_DEPENDENCY_MAP`` in ``rgpycrumbs/_aux.py`` maps importable module names to their
+pip install spec and the corresponding optional extra:
+
+.. code:: python
+
+    _DEPENDENCY_MAP = {
+        "jax":              ("jax>=0.4",    "surfaces"),
+        "scipy":            ("scipy>=1.11", "interpolation"),
+        "ase":              ("ase>=3.22",   "analysis"),
+    }
+
+Conda-only dependencies (ira\ :sub:`mod`\, tblite, ovito) are NOT in this map.
+They fall through to step 5 with a message pointing to pixi.
+
+Cache Location
+~~~~~~~~~~~~~~
+
+``$XDG_CACHE_HOME/rgpycrumbs/deps/`` (default ``\~/.cache/rgpycrumbs/deps/``).
+uv installs with ``--target`` into this directory. It persists across sessions
+and can be cleared with ``rm -rf``.
 
 .. _library-modules:
 
