@@ -55,4 +55,4 @@ Gradient-enhanced models use auto-differentiation (via ``jax.grad`` and ``jax.ja
 API Reference
 ~~~~~~~~~~~~~
 
-For detailed method signatures, see the :doc:\`Surfaces API Reference <../../autoapi/rgpycrumbs/surfaces/index>\`.
+For detailed method signatures, see the :doc:`Surfaces API Reference <../../autoapi/rgpycrumbs/surfaces/index>`.

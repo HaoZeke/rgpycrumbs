@@ -469,9 +469,9 @@ intermediate images as optimized.</p>
 <section id="iterative-reordering-and-alignment-ira">
 <h4>Iterative Reordering and Alignment (IRA)<a class="headerlink" href="#iterative-reordering-and-alignment-ira" title="Link to this heading">¶</a></h4>
 <p>When using <code class="docutils literal notranslate"><span class="pre">--use-ira</span></code>, the script handles atom index permutations. In complex
-NEB optimizations—especially those involving surface diffusion or molecular
-dissociations—atom indices in the output trajectory may not match the reactant’s
-order. IRA finds the optimal mapping and alignment simultaneously, ensuring that
+NEB optimizations (especially those involving surface diffusion or molecular
+dissociations), atom indices in the output trajectory may not match the reactant’s
+order. IRA finds the optimal mapping and alignment simultaneously so that
 the resulting <code class="docutils literal notranslate"><span class="pre">.con</span></code> files maintain a consistent atom numbering scheme across
 the entire path.</p>
 </section>

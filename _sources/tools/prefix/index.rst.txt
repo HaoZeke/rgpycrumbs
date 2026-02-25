@@ -14,8 +14,8 @@ Tools for managing `prefix.dev <https://prefix.dev>`_ channels and packages.
 API Reference
 ~~~~~~~~~~~~~
 
-For developer details, see the :doc:\`Prefix Helper Reference
-<../../autoapi/rgpycrumbs/prefix/index>\` [1]_ .
+For developer details, see the :doc:`Prefix Helper Reference
+<../../autoapi/rgpycrumbs/prefix/index>` [1]_ .
 
 
 .. [1]  Also linked in each section.

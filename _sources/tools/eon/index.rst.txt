@@ -18,8 +18,8 @@ These tools work with `eOn output files <https://eondocs.org>`_.
 API Reference
 ~~~~~~~~~~~~~
 
-For developer details, see the :doc:\`eOn Helper Reference
-<../../autoapi/rgpycrumbs/eon/index>\` [1]_ .
+For developer details, see the :doc:`eOn Helper Reference
+<../../autoapi/rgpycrumbs/eon/index>` [1]_ .
 
 
 .. [1]  Also linked in each section.

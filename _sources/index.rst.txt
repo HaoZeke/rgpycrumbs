@@ -30,8 +30,8 @@ Library Modules
 
 CLI Dispatcher
     A unified command-line interface that employs `PEP 723 <https://peps.python.org/pep-0723/>`_
-    metadata to isolate dependencies per script via ``uv``, ensuring conflict-free
-    and reproducible execution.
+    metadata to isolate dependencies per script via ``uv`` for conflict-free,
+    reproducible execution.
 
 Broadly speaking, the tooling here assists with computational methods to find
 reaction pathways, along with packaging helpers.
@@ -94,7 +94,7 @@ Infrastructure & Maintenance
 ----------------------------
 
 Prefix.dev Management
-    ``delete_packages`` helps maintain  custom Conda/Pixi
+    ``delete_packages`` helps maintain custom Conda/Pixi
     channels by automating the cleanup of old or specific package versions on
     `prefix.dev <https://prefix.dev>`_.
 
@@ -124,6 +124,27 @@ Beyond the CLI tools, ``rgpycrumbs`` provides importable library modules:
     Shared data structures (``nebiter``, ``nebpath``,
     ``SaddleMeasure``, ``DimerOpt``, ``MolGeom``, ``SpinID``) used across ``rgpycrumbs``
     and ``chemparseplot``. No extra dependencies required.
+
+On-Demand Dependency Resolution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A bare ``pip install rgpycrumbs`` gives access to the full API surface. Heavy
+optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use
+through a five-step priority chain:
+
+1. Current Python environment
+
+2. Parent environment (via ``RGPYCRUMBS_PARENT_SITE_PACKAGES``)
+
+3. Shared cache (``$XDG_CACHE_HOME/rgpycrumbs/deps/``)
+
+4. Automatic ``uv`` installation into the cache (opt-in: ``RGPYCRUMBS_AUTO_DEPS=1``)
+
+5. Actionable error message with install instructions
+
+CUDA-aware resolution selects CPU-only package variants (e.g. ``jax[cpu]``) on
+machines without a GPU, avoiding large downloads. See the
+:doc:`quickstart <quickstart>` for configuration details.
 
 Utility Functions
 -----------------

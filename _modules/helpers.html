@@ -273,31 +273,69 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue dark-code" role="main">
           <h1>Source code for helpers</h1><div class="highlight"><pre>
-<span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-</span><span data-line="2">
-</span><span data-line="3">
-<div class="viewcode-block" id="one_day_tdelta">
-<a class="viewcode-back" href="../autoapi/helpers/index.html#helpers.one_day_tdelta">[docs]</a>
-</span><span data-line="4"><span class="k">def</span><span class="w"> </span><span class="nf">one_day_tdelta</span><span class="p">(</span><span class="n">etime</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stime</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">format_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">):</span>
-</span><span data-line="5"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the timedelta between two times within the same day.</span>
-</span><span data-line="6">
-</span><span data-line="7"><span class="sd">    .. versionadded:: 0.0.2</span>
-</span><span data-line="8"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="9">    <span class="c1"># Chain the timezone injection directly to creation</span>
-</span><span data-line="10">    <span class="n">start_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">stime</span><span class="p">,</span> <span class="n">format_time</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-</span><span data-line="11">        <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span>
-</span><span data-line="12">    <span class="p">)</span>
-</span><span data-line="13">    <span class="n">end_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">etime</span><span class="p">,</span> <span class="n">format_time</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-</span><span data-line="14">        <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">UTC</span>
-</span><span data-line="15">    <span class="p">)</span>
-</span><span data-line="16">
-</span><span data-line="17">    <span class="n">delta</span> <span class="o">=</span> <span class="n">end_datetime</span> <span class="o">-</span> <span class="n">start_datetime</span>
-</span><span data-line="18">
-</span><span data-line="19">    <span class="c1"># Handle the midnight wrap-around</span>
-</span><span data-line="20">    <span class="k">if</span> <span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="21">        <span class="n">delta</span> <span class="o">+=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="22">
-</span><span data-line="23">    <span class="k">return</span> <span class="n">delta</span></div>
+<span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">gzip</span>
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="4">
+</span><span data-line="5">
+</span><span data-line="6"><span class="c1"># Kanged from here and there</span>
+</span><span data-line="7"><span class="c1"># e.g. https://stackoverflow.com/a/76733254/1895378</span>
+</span><span data-line="8"><span class="c1"># XXX: Not good at all, doesn&#39;t even handle exponential search</span>
+<div class="viewcode-block" id="tail">
+<a class="viewcode-back" href="../autoapi/helpers/index.html#helpers.tail">[docs]</a>
+</span><span data-line="9"><span class="k">def</span><span class="w"> </span><span class="nf">tail</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+</span><span data-line="10"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the last *n* lines of a file (supports gzip).</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="sd">    .. versionadded:: 0.0.2</span>
+</span><span data-line="13"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="14">    <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span data-line="15">
+</span><span data-line="16">    <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.gz&quot;</span><span class="p">:</span>
+</span><span data-line="17">        <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="18">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="19">                <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">n</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+</span><span data-line="20">                <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span>
+</span><span data-line="21">                <span class="k">return</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
+</span><span data-line="22">            <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
+</span><span data-line="23">                <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+</span><span data-line="24">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="25">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="26">            <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="n">n</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+</span><span data-line="27">            <span class="n">lines</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span>
+</span><span data-line="28">            <span class="k">return</span> <span class="n">lines</span></div>
+
+</span><span data-line="29">
+</span><span data-line="30">
+</span><span data-line="31"><span class="c1"># XXX: Another hack</span>
+<div class="viewcode-block" id="head_search">
+<a class="viewcode-back" href="../autoapi/helpers/index.html#helpers.head_search">[docs]</a>
+</span><span data-line="32"><span class="k">def</span><span class="w"> </span><span class="nf">head_search</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">sstr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+</span><span data-line="33"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="34"><span class="sd">    Checks if the search string is found in the first n lines of a file.</span>
+</span><span data-line="35">
+</span><span data-line="36"><span class="sd">    .. versionadded:: 0.0.2</span>
+</span><span data-line="37">
+</span><span data-line="38"><span class="sd">    Args:</span>
+</span><span data-line="39"><span class="sd">        filename (Path): Path to the file.</span>
+</span><span data-line="40"><span class="sd">        sstr (str): The search string.</span>
+</span><span data-line="41"><span class="sd">        n (int, optional): Number of lines to read. Defaults to 60.</span>
+</span><span data-line="42">
+</span><span data-line="43"><span class="sd">    Returns:</span>
+</span><span data-line="44"><span class="sd">        bool: True if the search string is found, False otherwise.</span>
+</span><span data-line="45"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="46">
+</span><span data-line="47">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="48">        <span class="k">with</span> <span class="p">(</span>
+</span><span data-line="49">            <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.gz&quot;</span> <span class="k">else</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span data-line="50">        <span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span data-line="51">            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+</span><span data-line="52">                <span class="n">line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="53">                <span class="k">if</span> <span class="n">sstr</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+</span><span data-line="54">                    <span class="k">return</span> <span class="kc">True</span>
+</span><span data-line="55">            <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="56">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="57">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="58">        <span class="k">return</span> <span class="kc">False</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

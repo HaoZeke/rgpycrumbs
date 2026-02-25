@@ -326,13 +326,13 @@ data-aria-dark="Switch to auto color mode">
 <h1>Release Management<a class="headerlink" href="#release-management" title="Link to this heading">¶</a></h1>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-<p>We use <code class="docutils literal notranslate"><span class="pre">towncrier</span></code> to manage release notes, ensuring that  every
-modification receives proper categorization without merge conflicts.</p>
+<p>We use <code class="docutils literal notranslate"><span class="pre">towncrier</span></code> to manage release notes. Every modification receives
+proper categorization without merge conflicts.</p>
 <p>The <a class="reference external" href="doc_builds.rst">documentation page</a> describes generating <code class="docutils literal notranslate"><span class="pre">newsfragments</span></code>.</p>
 </section>
 <section id="the-release-workflow">
 <h2>The Release Workflow<a class="headerlink" href="#the-release-workflow" title="Link to this heading">¶</a></h2>
-<p>We avoid automated CI-driven releases to PyPI. A maintainer must perform  final
+<p>We avoid automated CI-driven releases to PyPI. A maintainer must perform final
 checks locally before public distribution.</p>
 <section id="building-the-changelog">
 <h3>Building the Changelog<a class="headerlink" href="#building-the-changelog" title="Link to this heading">¶</a></h3>
@@ -355,8 +355,8 @@ identifies the version and date.</p>
 </section>
 <section id="atomic-commits-and-tagging">
 <h3>Atomic Commits and Tagging<a class="headerlink" href="#atomic-commits-and-tagging" title="Link to this heading">¶</a></h3>
-<p>The build process generates a single commit. This commit includes the  updated
-changelog and the deletion of the processed fragments. Following  this atomic
+<p>The build process generates a single commit. This commit includes the updated
+changelog and the deletion of the processed fragments. Following this atomic
 commit, the maintainer applies a Git tag.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v0.0.5<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Release v0.0.5&quot;</span>
 </span><span data-line="2">git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span>--tags
@@ -365,7 +365,7 @@ commit, the maintainer applies a Git tag.</p>
 </section>
 <section id="distribution">
 <h3>Distribution<a class="headerlink" href="#distribution" title="Link to this heading">¶</a></h3>
-<p>After tagging, the maintainer builds the distribution packages and uploads  them
+<p>After tagging, the maintainer builds the distribution packages and uploads them
 to PyPI using <code class="docutils literal notranslate"><span class="pre">twine</span></code> via <code class="docutils literal notranslate"><span class="pre">uvx</span></code>.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">uv<span class="w"> </span>build
 </span><span data-line="2">uvx<span class="w"> </span>twine<span class="w"> </span>upload<span class="w"> </span>dist/*

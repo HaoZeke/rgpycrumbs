@@ -334,8 +334,8 @@ notebooks (like those in the Atomistic Cookbook).</p>
 <section id="subprocess-management">
 <h3>Subprocess Management<a class="headerlink" href="#subprocess-management" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">run_command_or_exit</span></code> function streams <code class="docutils literal notranslate"><span class="pre">stdout</span></code> and <code class="docutils literal notranslate"><span class="pre">stderr</span></code> in real-time
-to the notebook cell output, ensuring long-running simulation jobs (like
-<code class="docutils literal notranslate"><span class="pre">eonclient</span></code>) don’t appear to hang.</p>
+to the notebook cell output so that long-running simulation jobs (like
+<code class="docutils literal notranslate"><span class="pre">eonclient</span></code>) do not appear to hang.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs.run.jupyter</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_command_or_exit</span>
 </span><span data-line="2">
 </span><span data-line="3"><span class="c1"># Runs &#39;eonclient&#39;, streams output, and raises SystemExit on failure</span>

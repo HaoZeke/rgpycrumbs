@@ -20,8 +20,8 @@ Subprocess Management
 ~~~~~~~~~~~~~~~~~~~~~
 
 The ``run_command_or_exit`` function streams ``stdout`` and ``stderr`` in real-time
-to the notebook cell output, ensuring long-running simulation jobs (like
-``eonclient``) don't appear to hang.
+to the notebook cell output so that long-running simulation jobs (like
+``eonclient``) do not appear to hang.
 
 .. code:: python
 

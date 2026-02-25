@@ -228,7 +228,10 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li><a class="reference internal" href="#infrastructure-maintenance">Infrastructure &amp; Maintenance</a></li>
-<li><a class="reference internal" href="#library-api">Library API</a></li>
+<li><a class="reference internal" href="#library-api">Library API</a><ul>
+<li><a class="reference internal" href="#on-demand-dependency-resolution">On-Demand Dependency Resolution</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 <li><a class="reference internal" href="#getting-started">Getting Started</a></li>
 <li><a class="reference internal" href="#tool-categories">Tool Categories</a></li>
@@ -346,8 +349,8 @@ IRA matching (RMSD-based structure comparison), spline interpolation, and
 shared data types for NEB paths and saddle searches.</p>
 </dd>
 <dt>CLI Dispatcher</dt><dd><p>A unified command-line interface that employs <a class="reference external" href="https://peps.python.org/pep-0723/">PEP 723</a>
-metadata to isolate dependencies per script via <code class="docutils literal notranslate"><span class="pre">uv</span></code>, ensuring conflict-free
-and reproducible execution.</p>
+metadata to isolate dependencies per script via <code class="docutils literal notranslate"><span class="pre">uv</span></code> for conflict-free,
+reproducible execution.</p>
 </dd>
 </dl>
 <p>Broadly speaking, the tooling here assists with computational methods to find
@@ -409,7 +412,7 @@ bias potentials from PLUMED hills files.</p>
 <section id="infrastructure-maintenance">
 <h2>Infrastructure &amp; Maintenance<a class="headerlink" href="#infrastructure-maintenance" title="Link to this heading">¶</a></h2>
 <dl class="simple">
-<dt>Prefix.dev Management</dt><dd><p><code class="docutils literal notranslate"><span class="pre">delete_packages</span></code> helps maintain  custom Conda/Pixi
+<dt>Prefix.dev Management</dt><dd><p><code class="docutils literal notranslate"><span class="pre">delete_packages</span></code> helps maintain custom Conda/Pixi
 channels by automating the cleanup of old or specific package versions on
 <a class="reference external" href="https://prefix.dev">prefix.dev</a>.</p>
 </dd>
@@ -437,6 +440,22 @@ Install with <code class="docutils literal notranslate"><span class="pre">pip</s
 and <code class="docutils literal notranslate"><span class="pre">chemparseplot</span></code>. No extra dependencies required.</p>
 </dd>
 </dl>
+<section id="on-demand-dependency-resolution">
+<h3>On-Demand Dependency Resolution<a class="headerlink" href="#on-demand-dependency-resolution" title="Link to this heading">¶</a></h3>
+<p>A bare <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">rgpycrumbs</span></code> gives access to the full API surface. Heavy
+optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use
+through a five-step priority chain:</p>
+<ol class="arabic simple">
+<li><p>Current Python environment</p></li>
+<li><p>Parent environment (via <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_PARENT_SITE_PACKAGES</span></code>)</p></li>
+<li><p>Shared cache (<code class="docutils literal notranslate"><span class="pre">$XDG_CACHE_HOME/rgpycrumbs/deps/</span></code>)</p></li>
+<li><p>Automatic <code class="docutils literal notranslate"><span class="pre">uv</span></code> installation into the cache (opt-in: <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code>)</p></li>
+<li><p>Actionable error message with install instructions</p></li>
+</ol>
+<p>CUDA-aware resolution selects CPU-only package variants (e.g. <code class="docutils literal notranslate"><span class="pre">jax[cpu]</span></code>) on
+machines without a GPU, avoiding large downloads. See the
+<a class="reference internal" href="quickstart.html"><span class="doc">quickstart</span></a> for configuration details.</p>
+</section>
 </section>
 <section id="utility-functions">
 <h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Link to this heading">¶</a></h2>
