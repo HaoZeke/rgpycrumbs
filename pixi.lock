@@ -8221,12 +8221,15 @@ packages:
   timestamp: 1766926974520
 - pypi: ./
   name: rgpycrumbs
-  version: 1.0.2.dev20+gd833374c0.d20260221
-  sha256: 447e31514bb753ef10ff148402d1c02d6d6765023961d0163578ce277ef3b002
+  version: 1.2.1.dev0+ge963e12d8.d20260224
+  sha256: 65e429e6b2040e22a01ad3775605e85587936b83a4c71bc85f0291c430cf451e
   requires_dist:
   - click>=8.1
   - numpy>=1.24
   - rich>=13.0
+  - ase>=3.22 ; extra == 'all'
+  - jax>=0.4 ; extra == 'all'
+  - scipy>=1.11 ; extra == 'all'
   - ase>=3.22 ; extra == 'analysis'
   - scipy>=1.11 ; extra == 'analysis'
   - scipy>=1.11 ; extra == 'interpolation'

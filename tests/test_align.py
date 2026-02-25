@@ -286,7 +286,7 @@ class TestParallelRMSD:
         )
         # Each successive image has larger internal distortion, so RMSD grows
         for i in range(1, len(rmsd)):
-            assert rmsd[i] > rmsd[i - 1], f"RMSD[{i}] not > RMSD[{i-1}]"
+            assert rmsd[i] > rmsd[i - 1], f"RMSD[{i}] not > RMSD[{i - 1}]"
 
     def test_parallel_matches_sequential(self, water_molecule):
         """Parallel calculation must produce the same values as a sequential loop."""
@@ -296,9 +296,9 @@ class TestParallelRMSD:
         coords_ref = ref.get_positions()
 
         # Sequential baseline
-        sequential = np.array([
-            _rmsd_single(ref, img, config, coords_ref) for img in path
-        ])
+        sequential = np.array(
+            [_rmsd_single(ref, img, config, coords_ref) for img in path]
+        )
 
         # Parallel via calculate_rmsd_from_ref
         parallel = calculate_rmsd_from_ref(
