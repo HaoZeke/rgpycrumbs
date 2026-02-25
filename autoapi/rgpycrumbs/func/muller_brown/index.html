@@ -83,7 +83,11 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
@@ -304,6 +308,18 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.func.muller_brown.muller_brown">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.func.muller_brown.</span></span><span class="sig-name descname"><span class="pre">muller_brown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/func/muller_brown.html#muller_brown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.func.muller_brown.muller_brown" title="Link to this definition">¶</a></dt>
 <dd><p>Evaluate the Muller-Brown potential at position <em>x</em>.</p>
+<p>The Muller-Brown surface is a standard 2D test potential with three minima
+and two saddle points, commonly used for benchmarking path-finding and
+optimization algorithms.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x: Position as a 2-element sequence <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y]</span></code>.  Each element may be a</dt><dd><p>scalar or an array (for vectorized evaluation over a meshgrid).</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>Potential energy value(s) at the given position(s).</p>
+</dd>
+</dl>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 0.0.1.</span></p>
 </div>
@@ -313,6 +329,12 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.func.muller_brown.muller_brown_gradient">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.func.muller_brown.</span></span><span class="sig-name descname"><span class="pre">muller_brown_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/func/muller_brown.html#muller_brown_gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.func.muller_brown.muller_brown_gradient" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the analytical gradient of the Muller-Brown potential at <em>x</em>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x: Position as a 2-element array <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y]</span></code>.</p>
+</dd>
+<dt>Returns:</dt><dd><p>numpy.ndarray: Gradient vector <code class="docutils literal notranslate"><span class="pre">[dV/dx,</span> <span class="pre">dV/dy]</span></code>.</p>
+</dd>
+</dl>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 0.0.1.</span></p>
 </div>

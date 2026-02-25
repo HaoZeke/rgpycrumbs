@@ -20,12 +20,29 @@ Module Contents
 
    Evaluate the Muller-Brown potential at position *x*.
 
+   The Muller-Brown surface is a standard 2D test potential with three minima
+   and two saddle points, commonly used for benchmarking path-finding and
+   optimization algorithms.
+
+   Args:
+       x: Position as a 2-element sequence ``[x, y]``.  Each element may be a
+           scalar or an array (for vectorized evaluation over a meshgrid).
+
+   Returns:
+       Potential energy value(s) at the given position(s).
+
    .. versionadded:: 0.0.1
 
 
 .. py:function:: muller_brown_gradient(x)
 
    Compute the analytical gradient of the Muller-Brown potential at *x*.
+
+   Args:
+       x: Position as a 2-element array ``[x, y]``.
+
+   Returns:
+       numpy.ndarray: Gradient vector ``[dV/dx, dV/dy]``.
 
    .. versionadded:: 0.0.1
 

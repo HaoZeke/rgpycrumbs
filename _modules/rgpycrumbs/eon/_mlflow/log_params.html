@@ -83,7 +83,11 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
@@ -235,95 +239,110 @@ data-aria-dark="Switch to auto color mode">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
   <article class="yue" role="main">
           <h1>Source code for rgpycrumbs.eon._mlflow.log_params</h1><div class="highlight"><pre>
-<span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">configparser</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">mlflow</span>
-</span><span data-line="5">
-</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">_import_from_parent_env</span>
-</span><span data-line="7">
-</span><span data-line="8"><span class="c1"># Access the legacy eOn config module</span>
+<span></span><span data-line="1"><span class="sd">&quot;&quot;&quot;Logging of eOn configuration parameters to MLflow.</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="sd">Performs a three-way merge between the eOn schema, hydrated defaults, and</span>
+</span><span data-line="4"><span class="sd">user-provided ``config.ini`` overrides, then logs every parameter to MLflow</span>
+</span><span data-line="5"><span class="sd">for full provenance tracking.</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="sd">.. versionadded:: 1.1.0</span>
+</span><span data-line="8"><span class="sd">&quot;&quot;&quot;</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="kn">import</span><span class="w"> </span><span class="nn">configparser</span>
+</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="kn">import</span><span class="w"> </span><span class="nn">mlflow</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">_import_from_parent_env</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="c1"># Access the legacy eOn config module</span>
 <div class="viewcode-block" id="eon_config">
 <a class="viewcode-back" href="../../../../autoapi/rgpycrumbs/eon/_mlflow/log_params/index.html#rgpycrumbs.eon._mlflow.log_params.eon_config">[docs]</a>
-</span><span data-line="9"><span class="n">eon_config</span> <span class="o">=</span> <span class="n">_import_from_parent_env</span><span class="p">(</span><span class="s2">&quot;eon.config&quot;</span><span class="p">)</span></div>
+</span><span data-line="18"><span class="n">eon_config</span> <span class="o">=</span> <span class="n">_import_from_parent_env</span><span class="p">(</span><span class="s2">&quot;eon.config&quot;</span><span class="p">)</span></div>
 
-</span><span data-line="10">
-</span><span data-line="11">
+</span><span data-line="19">
+</span><span data-line="20">
 <div class="viewcode-block" id="log_config_ini">
 <a class="viewcode-back" href="../../../../autoapi/rgpycrumbs/eon/_mlflow/log_params/index.html#rgpycrumbs.eon._mlflow.log_params.log_config_ini">[docs]</a>
-</span><span data-line="12"><span class="k">def</span><span class="w"> </span><span class="nf">log_config_ini</span><span class="p">(</span>
-</span><span data-line="13">    <span class="n">conf_ini</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;config.ini&quot;</span><span class="p">),</span>
-</span><span data-line="14">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="15">    <span class="n">w_artifact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span data-line="16">    <span class="n">track_overrides</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="17"><span class="p">):</span>
-</span><span data-line="18"><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span data-line="19"><span class="sd">    Logs the hydrated eOn configuration and highlights user-provided overrides.</span>
-</span><span data-line="20">
-</span><span data-line="21"><span class="sd">    This function performs a three-way merge between the eOn schema, the</span>
-</span><span data-line="22"><span class="sd">    hydrated defaults, and the user-provided config.ini. It ensures that</span>
-</span><span data-line="23"><span class="sd">    scientific provenance remains intact while providing a focused view of</span>
-</span><span data-line="24"><span class="sd">    modified hyperparameters.</span>
-</span><span data-line="25"><span class="sd">    &quot;&quot;&quot;</span>
-</span><span data-line="26">    <span class="n">econf</span> <span class="o">=</span> <span class="n">eon_config</span><span class="o">.</span><span class="n">ConfigClass</span><span class="p">()</span>
-</span><span data-line="27">
-</span><span data-line="28">    <span class="c1"># Build a local parser to hold the hydrated state</span>
-</span><span data-line="29">    <span class="c1"># This emulates the logic inside econf.init but preserves the parser object</span>
-</span><span data-line="30">    <span class="n">hydrated_parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-</span><span data-line="31">    <span class="n">user_parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+</span><span data-line="21"><span class="k">def</span><span class="w"> </span><span class="nf">log_config_ini</span><span class="p">(</span>
+</span><span data-line="22">    <span class="n">conf_ini</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;config.ini&quot;</span><span class="p">),</span>
+</span><span data-line="23">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="24">    <span class="n">w_artifact</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span data-line="25">    <span class="n">track_overrides</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="26"><span class="p">):</span>
+</span><span data-line="27"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Log the hydrated eOn configuration to MLflow.</span>
+</span><span data-line="28">
+</span><span data-line="29"><span class="sd">    Performs a three-way merge between the eOn schema, the hydrated defaults,</span>
+</span><span data-line="30"><span class="sd">    and the user-provided ``config.ini``.  Every parameter is logged for full</span>
+</span><span data-line="31"><span class="sd">    provenance; user-provided overrides can optionally be tagged separately.</span>
 </span><span data-line="32">
-</span><span data-line="33">    <span class="c1"># Populate hydrated state with defaults from schema</span>
-</span><span data-line="34">    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">econf</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>
-</span><span data-line="35">        <span class="k">if</span> <span class="ow">not</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">has_section</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-</span><span data-line="36">            <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="37">        <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
-</span><span data-line="38">            <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">config_key</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">config_key</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
-</span><span data-line="39">
-</span><span data-line="40">    <span class="c1"># Read user overrides if they exist</span>
-</span><span data-line="41">    <span class="k">if</span> <span class="n">conf_ini</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="42">        <span class="n">user_parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">conf_ini</span><span class="o">.</span><span class="n">absolute</span><span class="p">()))</span>
-</span><span data-line="43">        <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">conf_ini</span><span class="o">.</span><span class="n">absolute</span><span class="p">()))</span>
-</span><span data-line="44">
-</span><span data-line="45">    <span class="c1"># Map &#39;kind&#39; strings to ConfigParser getters for type-safe logging</span>
-</span><span data-line="46">    <span class="n">type_getters</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="47">        <span class="s2">&quot;int&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">getint</span><span class="p">,</span>
-</span><span data-line="48">        <span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">getfloat</span><span class="p">,</span>
-</span><span data-line="49">        <span class="s2">&quot;boolean&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">getboolean</span><span class="p">,</span>
-</span><span data-line="50">        <span class="s2">&quot;string&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">get</span><span class="p">,</span>
-</span><span data-line="51">    <span class="p">}</span>
-</span><span data-line="52">
-</span><span data-line="53">    <span class="c1"># Log all parameters and focus on overrides</span>
-</span><span data-line="54">    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">econf</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>
-</span><span data-line="55">        <span class="n">section_name</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span>
-</span><span data-line="56">        <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
-</span><span data-line="57">            <span class="n">key_name</span> <span class="o">=</span> <span class="n">config_key</span><span class="o">.</span><span class="n">name</span>
-</span><span data-line="58">            <span class="n">full_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">section_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key_name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span data-line="59">            <span class="n">getter</span> <span class="o">=</span> <span class="n">type_getters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config_key</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
-</span><span data-line="60">
-</span><span data-line="61">            <span class="k">try</span><span class="p">:</span>
-</span><span data-line="62">                <span class="c1"># Always log the hydrated value for the full record</span>
-</span><span data-line="63">                <span class="n">val</span> <span class="o">=</span> <span class="n">getter</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span>
-</span><span data-line="64">                <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="n">full_key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
-</span><span data-line="65">
-</span><span data-line="66">                <span class="k">if</span> <span class="n">track_overrides</span><span class="p">:</span>
-</span><span data-line="67">                    <span class="c1"># Focused logging: If the user explicitly provided this in the INI</span>
-</span><span data-line="68">                    <span class="k">if</span> <span class="n">user_parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">):</span>
-</span><span data-line="69">                        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overrides/</span><span class="si">{</span><span class="n">full_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
-</span><span data-line="70">
-</span><span data-line="71">            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">configparser</span><span class="o">.</span><span class="n">Error</span><span class="p">):</span>
-</span><span data-line="72">                <span class="n">raw_val</span> <span class="o">=</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span>
-</span><span data-line="73">                <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="n">full_key</span><span class="p">,</span> <span class="n">raw_val</span><span class="p">)</span>
-</span><span data-line="74">                <span class="k">if</span> <span class="n">track_overrides</span><span class="p">:</span>
-</span><span data-line="75">                    <span class="k">if</span> <span class="n">user_parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">):</span>
-</span><span data-line="76">                        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overrides/</span><span class="si">{</span><span class="n">full_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">raw_val</span><span class="p">)</span>
-</span><span data-line="77">
-</span><span data-line="78">    <span class="c1"># Tag the run for easy filtering of specific overrides</span>
-</span><span data-line="79">    <span class="k">if</span> <span class="n">conf_ini</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="80">        <span class="n">overridden_sections</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_parser</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span>
-</span><span data-line="81">        <span class="n">mlflow</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;config.overridden_sections&quot;</span><span class="p">,</span> <span class="n">overridden_sections</span><span class="p">)</span>
-</span><span data-line="82">
-</span><span data-line="83">    <span class="k">if</span> <span class="n">w_artifact</span><span class="p">:</span>
-</span><span data-line="84">        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_artifact</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">conf_ini</span><span class="o">.</span><span class="n">absolute</span><span class="p">()),</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span></div>
+</span><span data-line="33"><span class="sd">    Args:</span>
+</span><span data-line="34"><span class="sd">        conf_ini: Path to the eOn ``config.ini`` file.</span>
+</span><span data-line="35"><span class="sd">        w_artifact: Whether to log the config file as an MLflow artifact.</span>
+</span><span data-line="36"><span class="sd">        track_overrides: Whether to separately log parameters that the user</span>
+</span><span data-line="37"><span class="sd">            explicitly set (i.e. values that differ from schema defaults).</span>
+</span><span data-line="38">
+</span><span data-line="39"><span class="sd">    .. versionadded:: 1.1.0</span>
+</span><span data-line="40"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="41">    <span class="n">econf</span> <span class="o">=</span> <span class="n">eon_config</span><span class="o">.</span><span class="n">ConfigClass</span><span class="p">()</span>
+</span><span data-line="42">
+</span><span data-line="43">    <span class="c1"># Build a local parser to hold the hydrated state</span>
+</span><span data-line="44">    <span class="c1"># This emulates the logic inside econf.init but preserves the parser object</span>
+</span><span data-line="45">    <span class="n">hydrated_parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+</span><span data-line="46">    <span class="n">user_parser</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+</span><span data-line="47">
+</span><span data-line="48">    <span class="c1"># Populate hydrated state with defaults from schema</span>
+</span><span data-line="49">    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">econf</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>
+</span><span data-line="50">        <span class="k">if</span> <span class="ow">not</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">has_section</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+</span><span data-line="51">            <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="52">        <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
+</span><span data-line="53">            <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">config_key</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">config_key</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
+</span><span data-line="54">
+</span><span data-line="55">    <span class="c1"># Read user overrides if they exist</span>
+</span><span data-line="56">    <span class="k">if</span> <span class="n">conf_ini</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="57">        <span class="n">user_parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">conf_ini</span><span class="o">.</span><span class="n">absolute</span><span class="p">()))</span>
+</span><span data-line="58">        <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">conf_ini</span><span class="o">.</span><span class="n">absolute</span><span class="p">()))</span>
+</span><span data-line="59">
+</span><span data-line="60">    <span class="c1"># Map &#39;kind&#39; strings to ConfigParser getters for type-safe logging</span>
+</span><span data-line="61">    <span class="n">type_getters</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="62">        <span class="s2">&quot;int&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">getint</span><span class="p">,</span>
+</span><span data-line="63">        <span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">getfloat</span><span class="p">,</span>
+</span><span data-line="64">        <span class="s2">&quot;boolean&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">getboolean</span><span class="p">,</span>
+</span><span data-line="65">        <span class="s2">&quot;string&quot;</span><span class="p">:</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">get</span><span class="p">,</span>
+</span><span data-line="66">    <span class="p">}</span>
+</span><span data-line="67">
+</span><span data-line="68">    <span class="c1"># Log all parameters and focus on overrides</span>
+</span><span data-line="69">    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">econf</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>
+</span><span data-line="70">        <span class="n">section_name</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span>
+</span><span data-line="71">        <span class="k">for</span> <span class="n">config_key</span> <span class="ow">in</span> <span class="n">section</span><span class="o">.</span><span class="n">keys</span><span class="p">:</span>
+</span><span data-line="72">            <span class="n">key_name</span> <span class="o">=</span> <span class="n">config_key</span><span class="o">.</span><span class="n">name</span>
+</span><span data-line="73">            <span class="n">full_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">section_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key_name</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span data-line="74">            <span class="n">getter</span> <span class="o">=</span> <span class="n">type_getters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config_key</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+</span><span data-line="75">
+</span><span data-line="76">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="77">                <span class="c1"># Always log the hydrated value for the full record</span>
+</span><span data-line="78">                <span class="n">val</span> <span class="o">=</span> <span class="n">getter</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span>
+</span><span data-line="79">                <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="n">full_key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+</span><span data-line="80">
+</span><span data-line="81">                <span class="k">if</span> <span class="n">track_overrides</span><span class="p">:</span>
+</span><span data-line="82">                    <span class="c1"># Focused logging: If the user explicitly provided this in the INI</span>
+</span><span data-line="83">                    <span class="k">if</span> <span class="n">user_parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">):</span>
+</span><span data-line="84">                        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overrides/</span><span class="si">{</span><span class="n">full_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+</span><span data-line="85">
+</span><span data-line="86">            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">configparser</span><span class="o">.</span><span class="n">Error</span><span class="p">):</span>
+</span><span data-line="87">                <span class="n">raw_val</span> <span class="o">=</span> <span class="n">hydrated_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">)</span>
+</span><span data-line="88">                <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="n">full_key</span><span class="p">,</span> <span class="n">raw_val</span><span class="p">)</span>
+</span><span data-line="89">                <span class="k">if</span> <span class="n">track_overrides</span><span class="p">:</span>
+</span><span data-line="90">                    <span class="k">if</span> <span class="n">user_parser</span><span class="o">.</span><span class="n">has_option</span><span class="p">(</span><span class="n">section_name</span><span class="p">,</span> <span class="n">key_name</span><span class="p">):</span>
+</span><span data-line="91">                        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_param</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overrides/</span><span class="si">{</span><span class="n">full_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">raw_val</span><span class="p">)</span>
+</span><span data-line="92">
+</span><span data-line="93">    <span class="c1"># Tag the run for easy filtering of specific overrides</span>
+</span><span data-line="94">    <span class="k">if</span> <span class="n">conf_ini</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="95">        <span class="n">overridden_sections</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">user_parser</span><span class="o">.</span><span class="n">sections</span><span class="p">())</span>
+</span><span data-line="96">        <span class="n">mlflow</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s2">&quot;config.overridden_sections&quot;</span><span class="p">,</span> <span class="n">overridden_sections</span><span class="p">)</span>
+</span><span data-line="97">
+</span><span data-line="98">    <span class="k">if</span> <span class="n">w_artifact</span><span class="p">:</span>
+</span><span data-line="99">        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_artifact</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">conf_ini</span><span class="o">.</span><span class="n">absolute</span><span class="p">()),</span> <span class="s2">&quot;inputs&quot;</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">

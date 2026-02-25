@@ -83,7 +83,11 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
@@ -352,7 +356,7 @@ data-aria-dark="Switch to auto color mode">
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.standard.negative_mll_matern_std" title="rgpycrumbs.surfaces.standard.negative_mll_matern_std"><code class="xref py py-obj docutils literal notranslate"><span class="pre">negative_mll_matern_std</span></code></a>(log_params, x, y)</p></td>
-<td><p></p></td>
+<td><p>Negative marginal log-likelihood for the standard Matern 5/2 model.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces.standard._matern_solve" title="rgpycrumbs.surfaces.standard._matern_solve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_matern_solve</span></code></a>(x, y, sm, length_scale)</p></td>
 <td><p></p></td>
@@ -458,7 +462,21 @@ chunk_size: Processing batch size.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces.standard.negative_mll_matern_std">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces.standard.</span></span><span class="sig-name descname"><span class="pre">negative_mll_matern_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/standard.html#negative_mll_matern_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces.standard.negative_mll_matern_std" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Negative marginal log-likelihood for the standard Matern 5/2 model.</p>
+<p>Used as the objective function during hyperparameter optimization.  The
+parameters are passed in log-space for unconstrained optimization.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>log_params: Array of <code class="docutils literal notranslate"><span class="pre">[log(length_scale),</span> <span class="pre">log(noise)]</span></code>.
+x: Training inputs, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">D)</span></code>.
+y: Training observations (centered), shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Scalar negative MLL value.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces.standard._matern_solve">

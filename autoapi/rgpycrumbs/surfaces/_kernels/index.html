@@ -83,7 +83,11 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
@@ -298,6 +302,15 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue" role="main">
           <section id="module-rgpycrumbs.surfaces._kernels">
 <span id="rgpycrumbs-surfaces-kernels"></span><h1>rgpycrumbs.surfaces._kernels<a class="headerlink" href="#module-rgpycrumbs.surfaces._kernels" title="Link to this heading">¶</a></h1>
+<p>Kernel functions for Gaussian process surface fitting.</p>
+<p>Provides element-wise and matrix kernel functions for Matern 5/2, inverse
+multiquadric (IMQ), squared exponential (SE), rational quadratic (RQ), and
+thin-plate spline (TPS) kernels.  Each kernel family includes a <code class="docutils literal notranslate"><span class="pre">full_covariance_*</span></code>
+function that builds the gradient-enhanced covariance block
+<code class="docutils literal notranslate"><span class="pre">[[k,</span> <span class="pre">dk/dx2],</span> <span class="pre">[dk/dx1,</span> <span class="pre">d2k/dx1dx2]]</span></code> via JAX automatic differentiation.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
 <section id="attributes">
 <h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
@@ -325,40 +338,40 @@ data-aria-dark="Switch to auto color mode">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels._tps_kernel_matrix" title="rgpycrumbs.surfaces._kernels._tps_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_tps_kernel_matrix</span></code></a>(x)</p></td>
-<td><p></p></td>
+<td><p>Compute the thin-plate spline kernel matrix.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels._matern_kernel_matrix" title="rgpycrumbs.surfaces._kernels._matern_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_matern_kernel_matrix</span></code></a>(x, length_scale)</p></td>
-<td><p></p></td>
+<td><p>Compute the Matern 5/2 kernel matrix.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.matern_kernel_elem" title="rgpycrumbs.surfaces._kernels.matern_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matern_kernel_elem</span></code></a>(x1, x2[, length_scale])</p></td>
-<td><p></p></td>
+<td><p>Evaluate the Matern 5/2 kernel for a single pair of points.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.full_covariance_matern" title="rgpycrumbs.surfaces._kernels.full_covariance_matern"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_matern</span></code></a>(x1, x2, length_scale)</p></td>
-<td><p></p></td>
+<td><p>Build the gradient-enhanced covariance block for the Matern 5/2 kernel.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels._imq_kernel_matrix" title="rgpycrumbs.surfaces._kernels._imq_kernel_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_imq_kernel_matrix</span></code></a>(x, epsilon)</p></td>
-<td><p></p></td>
+<td><p>Compute the inverse multiquadric (IMQ) kernel matrix.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.imq_kernel_elem" title="rgpycrumbs.surfaces._kernels.imq_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imq_kernel_elem</span></code></a>(x1, x2[, epsilon])</p></td>
-<td><p></p></td>
+<td><p>Evaluate the IMQ kernel for a single pair of points.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.full_covariance_imq" title="rgpycrumbs.surfaces._kernels.full_covariance_imq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_imq</span></code></a>(x1, x2, epsilon)</p></td>
-<td><p></p></td>
+<td><p>Build the gradient-enhanced covariance block for the IMQ kernel.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.se_kernel_elem" title="rgpycrumbs.surfaces._kernels.se_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">se_kernel_elem</span></code></a>(x1, x2[, length_scale])</p></td>
-<td><p></p></td>
+<td><p>Evaluate the squared exponential (SE) kernel for a single pair of points.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.full_covariance_se" title="rgpycrumbs.surfaces._kernels.full_covariance_se"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_se</span></code></a>(x1, x2, length_scale)</p></td>
-<td><p></p></td>
+<td><p>Build the gradient-enhanced covariance block for the SE kernel.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.rq_kernel_base" title="rgpycrumbs.surfaces._kernels.rq_kernel_base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rq_kernel_base</span></code></a>(x1, x2, length_scale, alpha)</p></td>
-<td><p>Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha</p></td>
+<td><p>Evaluate the rational quadratic (RQ) base kernel.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.rq_kernel_elem" title="rgpycrumbs.surfaces._kernels.rq_kernel_elem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rq_kernel_elem</span></code></a>(x1, x2, params)</p></td>
-<td><p></p></td>
+<td><p>Evaluate the RQ kernel with mirror symmetry for a single pair.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.surfaces._kernels.full_covariance_rq" title="rgpycrumbs.surfaces._kernels.full_covariance_rq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_covariance_rq</span></code></a>(x1, x2, params)</p></td>
-<td><p></p></td>
+<td><p>Build the gradient-enhanced covariance block for the RQ kernel.</p></td>
 </tr>
 </tbody>
 </table>
@@ -369,22 +382,73 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels._tps_kernel_matrix">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">_tps_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#_tps_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels._tps_kernel_matrix" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Compute the thin-plate spline kernel matrix.</p>
+<p>Evaluates <code class="docutils literal notranslate"><span class="pre">K_{ij}</span> <span class="pre">=</span> <span class="pre">r_{ij}^2</span> <span class="pre">*</span> <span class="pre">log(r_{ij})</span></code> where <code class="docutils literal notranslate"><span class="pre">r_{ij}</span></code> is the
+Euclidean distance between points <code class="docutils literal notranslate"><span class="pre">x_i</span></code> and <code class="docutils literal notranslate"><span class="pre">x_j</span></code>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x: Input points, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">D)</span></code>.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Kernel matrix, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">N)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels._matern_kernel_matrix">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">_matern_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#_matern_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels._matern_kernel_matrix" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Compute the Matern 5/2 kernel matrix.</p>
+<p>Evaluates k(r) = (1 + sqrt(5)*r/l + 5*r^2/(3*l^2)) * exp(-sqrt(5)*r/l).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x: Input points, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">D)</span></code>.
+length_scale: Kernel length scale parameter.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Kernel matrix, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">N)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.matern_kernel_elem">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">matern_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#matern_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.matern_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Evaluate the Matern 5/2 kernel for a single pair of points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+length_scale: Kernel length scale parameter.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Scalar kernel value.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.full_covariance_matern">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">full_covariance_matern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#full_covariance_matern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.full_covariance_matern" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Build the gradient-enhanced covariance block for the Matern 5/2 kernel.</p>
+<p>Constructs a <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code> matrix containing the energy-energy,
+energy-gradient, gradient-energy, and gradient-gradient covariance entries
+using JAX automatic differentiation.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+length_scale: Kernel length scale parameter.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Covariance block, shape <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.k_matrix_matern_grad_map">
@@ -394,17 +458,55 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels._imq_kernel_matrix">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">_imq_kernel_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#_imq_kernel_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels._imq_kernel_matrix" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Compute the inverse multiquadric (IMQ) kernel matrix.</p>
+<p>Evaluates k(r) = 1 / sqrt(r^2 + epsilon^2).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x: Input points, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">D)</span></code>.
+epsilon: Shape parameter controlling kernel width.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Kernel matrix, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">N)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.imq_kernel_elem">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">imq_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#imq_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.imq_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Evaluate the IMQ kernel for a single pair of points.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+epsilon: Shape parameter controlling kernel width.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Scalar kernel value.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.full_covariance_imq">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">full_covariance_imq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#full_covariance_imq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.full_covariance_imq" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Build the gradient-enhanced covariance block for the IMQ kernel.</p>
+<p>Constructs a <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code> matrix containing energy-energy,
+energy-gradient, gradient-energy, and gradient-gradient covariance entries.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+epsilon: Shape parameter controlling kernel width.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Covariance block, shape <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.k_matrix_imq_grad_map">
@@ -414,12 +516,39 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.se_kernel_elem">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">se_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#se_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.se_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Evaluate the squared exponential (SE) kernel for a single pair of points.</p>
+<p>Computes k(r) = exp(-r^2 / (2 * l^2)).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+length_scale: Kernel length scale parameter.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Scalar kernel value.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.0.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.full_covariance_se">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">full_covariance_se</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#full_covariance_se"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.full_covariance_se" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Build the gradient-enhanced covariance block for the SE kernel.</p>
+<p>Constructs a <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code> matrix containing energy-energy,
+energy-gradient, gradient-energy, and gradient-gradient covariance entries.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+length_scale: Kernel length scale parameter.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Covariance block, shape <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.k_matrix_se_grad_map">
@@ -429,18 +558,59 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.rq_kernel_base">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">rq_kernel_base</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#rq_kernel_base"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.rq_kernel_base" title="Link to this definition">¶</a></dt>
-<dd><p>Standard RQ Kernel: (1 + r^2 / (2*alpha*l^2))^-alpha</p>
+<dd><p>Evaluate the rational quadratic (RQ) base kernel.</p>
+<p>Computes k(r) = (1 + r^2 / (2 * alpha * l^2))^(-alpha).</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+length_scale: Kernel length scale parameter.
+alpha: Shape parameter controlling the mixture of length scales.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Scalar kernel value.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.rq_kernel_elem">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">rq_kernel_elem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#rq_kernel_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.rq_kernel_elem" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Evaluate the RQ kernel with mirror symmetry for a single pair.</p>
+<p>Computes k(x1, x2) + k(flip(x1), x2) to enforce symmetry under
+coordinate reversal.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+params: Array of <code class="docutils literal notranslate"><span class="pre">[length_scale,</span> <span class="pre">alpha]</span></code>.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Scalar kernel value (sum of direct and mirrored terms).</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.full_covariance_rq">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.surfaces._kernels.</span></span><span class="sig-name descname"><span class="pre">full_covariance_rq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/surfaces/_kernels.html#full_covariance_rq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.surfaces._kernels.full_covariance_rq" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Build the gradient-enhanced covariance block for the RQ kernel.</p>
+<p>Constructs a <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code> matrix containing energy-energy,
+energy-gradient, gradient-energy, and gradient-gradient covariance entries.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x1: First point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+x2: Second point, shape <code class="docutils literal notranslate"><span class="pre">(D,)</span></code>.
+params: Array of <code class="docutils literal notranslate"><span class="pre">[length_scale,</span> <span class="pre">alpha]</span></code>.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Covariance block, shape <code class="docutils literal notranslate"><span class="pre">(D+1,</span> <span class="pre">D+1)</span></code>.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.1.0.</span></p>
+</div>
+</dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.surfaces._kernels.k_matrix_rq_grad_map">

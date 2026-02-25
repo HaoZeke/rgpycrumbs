@@ -131,6 +131,15 @@ Utility Functions
 The package also includes **pure-python** helpers for parsing logs like those from
 `bless <https://crates.io/crates/bless>`_ and managing data structures in Jupyter notebooks.
 
+Getting Started
+---------------
+
+  .. toctree::
+     :maxdepth: 1
+     :caption: Getting Started
+
+     quickstart
+
 Tool Categories
 ---------------
 

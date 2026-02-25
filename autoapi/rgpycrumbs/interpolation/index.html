@@ -83,7 +83,11 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
@@ -296,6 +300,25 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.interpolation.spline_interp">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.interpolation.</span></span><span class="sig-name descname"><span class="pre">spline_interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/rgpycrumbs/interpolation.html#spline_interp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.interpolation.spline_interp" title="Link to this definition">¶</a></dt>
 <dd><p>Interpolate using B-splines.</p>
+<p>Fits a B-spline representation to the data <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y)</span></code> and evaluates it on
+a uniformly spaced grid.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>x: Independent variable values (1D array, must be monotonically</dt><dd><p>increasing).</p>
+</dd>
+</dl>
+<p>y: Dependent variable values (same length as <em>x</em>).
+num: Number of evaluation points on the output grid.
+knots: Degree of the spline (passed as <code class="docutils literal notranslate"><span class="pre">k</span></code> to</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">scipy.interpolate.splrep</span></code>).</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>tuple: <code class="docutils literal notranslate"><span class="pre">(x_fine,</span> <span class="pre">y_fine)</span></code> where <em>x_fine</em> is a uniform grid of length
+<em>num</em> spanning <code class="docutils literal notranslate"><span class="pre">[x.min(),</span> <span class="pre">x.max()]</span></code> and <em>y_fine</em> is the spline
+evaluated on that grid.</p>
+</dd>
+</dl>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.0.0.</span></p>
 </div>

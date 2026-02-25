@@ -1,0 +1,140 @@
+
+==========
+Quickstart
+==========
+
+This page walks through the main features of ``rgpycrumbs`` with minimal
+examples.
+
+Installation
+------------
+
+The base package (data types, CLI dispatcher) has minimal dependencies:
+
+.. code:: bash
+
+    pip install rgpycrumbs
+
+Optional extras pull in heavier libraries:
+
+.. code:: bash
+
+    # Surface fitting (JAX)
+    pip install rgpycrumbs[surfaces]
+
+    # Spline interpolation (SciPy)
+    pip install rgpycrumbs[interpolation]
+
+    # Structure analysis (ASE + SciPy)
+    pip install rgpycrumbs[analysis]
+
+    # Everything at once
+    pip install rgpycrumbs[all]
+
+Surface Fitting
+---------------
+
+The ``surfaces`` module provides JAX-based kernel methods for fitting energy
+landscapes from sparse data.  The factory function ``get_surface_model`` returns
+the appropriate class.
+
+.. code:: python
+
+    import numpy as np
+    from rgpycrumbs.surfaces import get_surface_model
+
+    # Generate sample 2D data
+    rng = np.random.default_rng(42)
+    x_train = rng.uniform(-2, 2, size=(30, 2))
+    y_train = np.sin(x_train[:, 0]) * np.cos(x_train[:, 1])
+
+    # Fit a thin-plate spline surface
+    TPS = get_surface_model("tps")
+    model = TPS(x_train, y_train)
+
+    # Predict on a grid
+    x_grid = np.mgrid[-2:2:50j, -2:2:50j].reshape(2, -1).T
+    y_pred = model(x_grid)
+
+    # Posterior variance (uncertainty estimate)
+    y_var = model.predict_var(x_grid)
+
+Other available models include ``"matern"``, ``"imq"`` (standard kernels) and
+``"grad_matern"``, ``"grad_se"``, ``"grad_imq"``, ``"grad_rq"`` (gradient-enhanced
+kernels that incorporate force data for smoother interpolation from fewer
+points).
+
+Spline Interpolation
+--------------------
+
+For 1D energy profiles (e.g. along a reaction coordinate), ``spline_interp``
+provides a quick B-spline fit:
+
+.. code:: python
+
+    import numpy as np
+    from rgpycrumbs.interpolation import spline_interp
+
+    # Coarse energy profile along a reaction coordinate
+    rc = np.linspace(0, 1, 10)
+    energy = np.array([0.0, -0.3, -0.8, -1.0, -0.5, 0.2, 0.8, 0.5, -0.1, 0.0])
+
+    # Interpolate to 200 points
+    rc_fine, energy_fine = spline_interp(rc, energy, num=200)
+
+Data Types
+----------
+
+The ``basetypes`` module provides lightweight containers used across ``rgpycrumbs``
+and ``chemparseplot`` for NEB paths and saddle search results:
+
+.. code:: python
+
+    from rgpycrumbs.basetypes import nebpath, SaddleMeasure
+
+    # Store a NEB path snapshot
+    path = nebpath(
+        norm_dist=[0.0, 0.25, 0.5, 0.75, 1.0],
+        arc_dist=[0.0, 1.2, 2.4, 3.6, 4.8],
+        energy=[0.0, -0.5, 0.3, -0.2, 0.0],
+    )
+
+    # Track saddle search results
+    result = SaddleMeasure(
+        pes_calls=142,
+        success=True,
+        barrier=0.35,
+        method="gprdimer",
+    )
+
+CLI Dispatcher
+--------------
+
+The CLI uses a PEP 723 dispatcher that runs each script in an isolated ``uv``
+environment.  List available commands with:
+
+.. code:: bash
+
+    rgpycrumbs --help
+
+Plotting NEB paths (eOn)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    # Plot NEB energy profiles from eOn .dat files (iterations 100-150)
+    rgpycrumbs eon plt-neb --start 100 --end 150 -o neb_profile.pdf
+
+    # Interactive plot of the latest iterations
+    rgpycrumbs eon plt-neb --start 280
+
+Splitting trajectory files
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    # Split a multi-image .con trajectory into individual frames
+    rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
+
+This creates ``initial_images/ipath_000.con``, ``ipath_001.con``, etc., suitable
+for initializing a new NEB calculation (e.g. with IDPP via ASE).
