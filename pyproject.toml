@@ -30,6 +30,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
+all           = [ "ase>=3.22", "scipy>=1.11", "jax>=0.4" ]
 analysis      = [ "ase>=3.22", "scipy>=1.11" ]
 interpolation = [ "scipy>=1.11" ]
 surfaces      = [ "jax>=0.4" ]
@@ -41,7 +42,7 @@ test = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pychum", "chemparseplot" ]
 rgpycrumbs = "rgpycrumbs.cli:main"
 
 [project.urls]
-Documentation = "https://github.com/HaoZeke/rgpycrumbs#readme"
+Documentation = "https://rgpycrumbs.rgoswami.me"
 Issues        = "https://github.com/HaoZeke/rgpycrumbs/issues"
 Source        = "https://github.com/HaoZeke/rgpycrumbs"
 
