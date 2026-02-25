@@ -1,3 +1,12 @@
+"""Logging of eOn configuration parameters to MLflow.
+
+Performs a three-way merge between the eOn schema, hydrated defaults, and
+user-provided ``config.ini`` overrides, then logs every parameter to MLflow
+for full provenance tracking.
+
+.. versionadded:: 1.1.0
+"""
+
 import configparser
 from pathlib import Path
 
@@ -15,13 +24,19 @@ def log_config_ini(
     w_artifact: bool = True,
     track_overrides: bool = False,
 ):
-    """
-    Logs the hydrated eOn configuration and highlights user-provided overrides.
+    """Log the hydrated eOn configuration to MLflow.
 
-    This function performs a three-way merge between the eOn schema, the
-    hydrated defaults, and the user-provided config.ini. It ensures that
-    scientific provenance remains intact while providing a focused view of
-    modified hyperparameters.
+    Performs a three-way merge between the eOn schema, the hydrated defaults,
+    and the user-provided ``config.ini``.  Every parameter is logged for full
+    provenance; user-provided overrides can optionally be tagged separately.
+
+    Args:
+        conf_ini: Path to the eOn ``config.ini`` file.
+        w_artifact: Whether to log the config file as an MLflow artifact.
+        track_overrides: Whether to separately log parameters that the user
+            explicitly set (i.e. values that differ from schema defaults).
+
+    .. versionadded:: 1.1.0
     """
     econf = eon_config.ConfigClass()
 

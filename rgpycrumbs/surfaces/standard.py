@@ -158,6 +158,21 @@ class FastTPS:
 
 
 def negative_mll_matern_std(log_params, x, y):
+    """Negative marginal log-likelihood for the standard Matern 5/2 model.
+
+    Used as the objective function during hyperparameter optimization.  The
+    parameters are passed in log-space for unconstrained optimization.
+
+    Args:
+        log_params: Array of ``[log(length_scale), log(noise)]``.
+        x: Training inputs, shape ``(N, D)``.
+        y: Training observations (centered), shape ``(N,)``.
+
+    Returns:
+        Scalar negative MLL value.
+
+    .. versionadded:: 1.0.0
+    """
     length_scale = jnp.exp(log_params[0])
     noise_scalar = jnp.exp(log_params[1])
     K = _matern_kernel_matrix(x, length_scale)
