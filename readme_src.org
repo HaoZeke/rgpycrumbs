@@ -60,8 +60,10 @@ The library is designed with the following principles in mind:
   package has minimal core dependencies (~click~, ~numpy~). Heavy scientific
   libraries are available as optional extras (e.g. ~pip install
   rgpycrumbs[surfaces]~ for JAX). For CLI tools, dependencies are fetched by
-  ~uv~ only when a script that needs them is executed, keeping the base
-  installation lightweight.
+  ~uv~ only when a script that needs them is executed. For library modules,
+  ~ensure_import~ resolves dependencies at first use when ~RGPYCRUMBS_AUTO_DEPS=1~
+  is set, with CUDA-aware resolution that avoids pulling GPU libraries on
+  CPU-only machines. The base installation stays lightweight either way.
 
 - Modular & Extensible Tooling :: Each utility is an independent script. This
   modularity simplifies development, testing, and maintenance, as changes to one
@@ -76,7 +78,10 @@ The library is designed with the following principles in mind:
 :PROPERTIES:
 :CUSTOM_ID: library-api
 :END:
-The library modules can be imported directly:
+The library modules can be imported directly. Dependencies resolve
+automatically when ~RGPYCRUMBS_AUTO_DEPS=1~ is set (requires ~uv~ on PATH),
+or install extras explicitly:
+
 #+BEGIN_SRC python
 # Surface fitting (requires jax: pip install rgpycrumbs[surfaces])
 from rgpycrumbs.surfaces import get_surface_model

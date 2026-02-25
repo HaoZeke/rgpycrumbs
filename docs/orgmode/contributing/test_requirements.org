@@ -101,15 +101,20 @@ def test_plt_neb_help(runner):
 #+END_SRC
 
 The ~pure~ marker is reserved for tests that depend only on core packages
-(numpy, click). Never place tests that import dispatcher scripts under the
-~pure~ marker.
+(numpy, click). The ~ensure_import~ and ~lazy_import~ tests also run under
+~pure~ since they mock all optional dependencies. Never place tests that import
+dispatcher scripts under the ~pure~ marker.
+
+Note that ~[all]~ is a best-effort convenience extra covering pip-installable
+optional dependencies only. Conda-only packages (~tblite~, ~ovito~, ~ira_mod~)
+require pixi.
 
 ** Available Markers & Environments
 The following markers and their corresponding ~pixi~ environments are available:
 
 | Marker | Environment | Dependencies | What it tests |
 |------------+-------------+--------------------+---------------------------------------|
-| ~pure~ | ~test~ | ~numpy~ | Core utilities, basetypes, interpolation |
+| ~pure~ | ~test~ | ~numpy~ | Core utilities, basetypes, ensure_import |
 | ~align~ | ~test~ | ~ase~, ~numpy~ | Structure analysis, alignment |
 | ~fragments~ | ~fragments~ | ~ase~, ~tblite~ | Fragment detection with tight-binding |
 | ~surfaces~ | ~surfaces~ | ~jax~ | Surface fitting kernels and models |

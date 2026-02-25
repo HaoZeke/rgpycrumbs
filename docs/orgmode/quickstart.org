@@ -12,13 +12,28 @@ examples.
 
 * Installation
 
-The base package (data types, CLI dispatcher) has minimal dependencies:
+There are three installation modes depending on your needs.
+
+** Core only (deps resolve on first use)
 
 #+begin_src bash
 pip install rgpycrumbs
 #+end_src
 
-Optional extras pull in heavier libraries:
+This gives you the full import surface. Optional dependencies (jax, scipy,
+ase) are resolved on demand when you first use a module that needs them,
+provided ~uv~ is on PATH and auto-resolution is enabled:
+
+#+begin_src bash
+export RGPYCRUMBS_AUTO_DEPS=1
+python -c "from rgpycrumbs.surfaces import FastTPS"  # jax installed automatically
+#+end_src
+
+The resolver is CUDA-aware: on machines without an NVIDIA GPU it installs
+CPU-only variants (e.g. ~jax[cpu]~) to avoid pulling hundreds of megabytes of
+unused CUDA libraries.
+
+** Pre-install pip-available extras
 
 #+begin_src bash
 # Surface fitting (JAX)
@@ -30,9 +45,28 @@ pip install rgpycrumbs[interpolation]
 # Structure analysis (ASE + SciPy)
 pip install rgpycrumbs[analysis]
 
-# Everything at once
+# Everything pip-installable at once
 pip install rgpycrumbs[all]
 #+end_src
+
+The ~[all]~ extra pre-installs ~ase~, ~scipy~, and ~jax[cpu]~. Conda-only
+packages (~tblite~, ~ovito~, ~ira_mod~) are not included; use pixi for those.
+
+** Full stack (including conda-only deps)
+
+#+begin_src bash
+pixi install
+#+end_src
+
+This resolves everything including conda-only packages like ~tblite~,
+~ira_mod~, and ~ovito~ that are not available on PyPI.
+
+* Environment Variables
+
+| Variable | Effect |
+|-------------------------------------+------------------------------------------------------|
+| ~RGPYCRUMBS_AUTO_DEPS=1~ | Enable on-demand dependency installation via uv/pip |
+| ~RGPYCRUMBS_PARENT_SITE_PACKAGES~ | Colon-separated paths to parent env site-packages |
 
 * Surface Fitting
 
