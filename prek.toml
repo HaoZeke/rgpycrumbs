@@ -49,3 +49,8 @@ rev   = "v0.9.3"
 hooks = [ { id = "codespell", args = [ "--skip=*.lock,*.csv,*.bib" ] } ]
 repo  = "https://github.com/codespell-project/codespell"
 rev   = "v2.4.1"
+[[repos]]
+hooks = [
+  { id = "gen-readme", name = "Generate README.md from readme_src.org", entry = "bash scripts/gen_readme.sh", language = "system", files = "readme_src\\.org$", pass_filenames = false },
+]
+repo = "local"

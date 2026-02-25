@@ -9,14 +9,14 @@
   .. versionadded:: 0.1.0
   #+END_EXPORT
 
-  The `rgpycrumbs.run.jupyter` module provides clean abstractions for subprocess
+  The ~rgpycrumbs.run.jupyter~ module provides clean abstractions for subprocess
   management and configuration generation, designed specifically for tutorial
   notebooks (like those in the Atomistic Cookbook).
 
 ** Subprocess Management
-   The ~run_command_or_exit~ function streams `stdout` and `stderr` in real-time
+   The ~run_command_or_exit~ function streams ~stdout~ and ~stderr~ in real-time
    to the notebook cell output, ensuring long-running simulation jobs (like
-   `eonclient`) don't appear to hang.
+   ~eonclient~) don't appear to hang.
 
    #+BEGIN_SRC python
    from rgpycrumbs.run.jupyter import run_command_or_exit
@@ -27,7 +27,7 @@
    #+END_SRC
 
 ** Configuration Generation
-   Instead of writing `config.ini` files using fragile f-strings, use
+   Instead of writing ~config.ini~ files using fragile f-strings, use
    ~write_eon_config~ to generate them from Python dictionaries.
 
    #+BEGIN_SRC python
