@@ -6,7 +6,10 @@
   This tool generates a complete ORCA input file from a TOML configuration. It leverages the ~pychum~ library for templating and data structures.
 
 ** Usage
-   .. command-output:: python -m rgpycrumbs.cli orca generate-orca-input --help
+#+BEGIN_EXPORT rst
+.. command-output:: python -m rgpycrumbs.cli orca generate-orca-input --help
+   :cwd: ../../
+#+END_EXPORT
 
 ** Reference
    @@rst::mod:`rgpycrumbs.orca.generate_orca_input`@@.

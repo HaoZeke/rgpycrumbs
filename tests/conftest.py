@@ -33,6 +33,7 @@ _GUARDED_IMPORTS = {
     "test_detect_fragments.py": "rgpycrumbs.geom.detect_fragments",
     "test_eon_cli.py": "rgpycrumbs.eon.plt_neb",
     "test_ptmdisp.py": "rgpycrumbs.eon.ptmdisp",
+    "test_ira.py": "rgpycrumbs.geom.ira",
 }
 
 collect_ignore = [f for f, mod in _GUARDED_IMPORTS.items() if not _try_import(mod)]
