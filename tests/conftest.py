@@ -18,9 +18,16 @@ ENVIRONMENT_REQUIREMENTS = {
 def check_missing_modules(marker_name):
     """
     Returns a list of missing modules for a given marker.
+    Uses actual import rather than find_spec to catch broken installs.
     """
     modules = ENVIRONMENT_REQUIREMENTS.get(marker_name, [])
-    return [mod for mod in modules if importlib.util.find_spec(mod) is None]
+    missing = []
+    for mod in modules:
+        try:
+            importlib.import_module(mod)
+        except (ImportError, ModuleNotFoundError):
+            missing.append(mod)
+    return missing
 
 
 def skip_if_not_env(marker_name):

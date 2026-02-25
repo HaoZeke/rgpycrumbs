@@ -3,7 +3,8 @@ exclude = """(?x)(
     ^\\.uv/|
     ^docs/build/|
     ^docs/source/_static/favicons/site\\.webmanifest$|
-    ^.*.svg$
+    ^.*.svg$|
+    ^README\\.md$
 )"""
 
 # Prek implements these directly.
