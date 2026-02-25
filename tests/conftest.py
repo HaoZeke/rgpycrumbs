@@ -1,4 +1,5 @@
 import importlib
+import importlib.util
 
 import pytest
 
@@ -13,6 +14,28 @@ ENVIRONMENT_REQUIREMENTS = {
     "surfaces": ["jax"],
     "ira": ["ira_mod"],
 }
+
+
+def _try_import(module_name):
+    """Return True if *module_name* can actually be imported."""
+    try:
+        importlib.import_module(module_name)
+        return True
+    except Exception:
+        return False
+
+
+# Test files that import PEP 723 dispatcher modules with heavy or
+# conda-only dependencies.  Prevent pytest collection when the source
+# module itself cannot import (regardless of what find_spec reports for
+# individual package names).
+_GUARDED_IMPORTS = {
+    "test_detect_fragments.py": "rgpycrumbs.geom.detect_fragments",
+    "test_eon_cli.py": "rgpycrumbs.eon.plt_neb",
+    "test_ptmdisp.py": "rgpycrumbs.eon.ptmdisp",
+}
+
+collect_ignore = [f for f, mod in _GUARDED_IMPORTS.items() if not _try_import(mod)]
 
 
 def check_missing_modules(marker_name):
