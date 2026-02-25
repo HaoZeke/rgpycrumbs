@@ -43,11 +43,33 @@ The following projects use ~rgpycrumbs~ as a dependency or tool.
 
 * Academic Work
 
-- Rohit Goswami, /Efficient Exploration of Chemical Kinetics/, Doctoral
-  dissertation, University of Iceland, 2025.
-  arXiv: [[https://arxiv.org/abs/2510.21368][2510.21368]],
-  doi: [[https://doi.org/10.48550/arXiv.2510.21368][10.48550/arXiv.2510.21368]].
-  Uses ~rgpycrumbs~ throughout for NEB visualization, surface fitting,
-  structure analysis, and fragment detection.
+#+BEGIN_EXPORT rst
+.. admonition:: Dissertation
+   :class: tip
+
+   R. Goswami, *Efficient Exploration of Chemical Kinetics*,
+   Doctoral dissertation, University of Iceland, 2025.
+
+   | arXiv: `2510.21368 <https://arxiv.org/abs/2510.21368>`_
+   | DOI: `10.48550/arXiv.2510.21368 <https://doi.org/10.48550/arXiv.2510.21368>`_
+
+   Uses :mod:`rgpycrumbs.surfaces`, :mod:`rgpycrumbs.geom`,
+   :mod:`rgpycrumbs.interpolation`, and the CLI dispatcher throughout
+   for NEB visualization, surface fitting, structure analysis, and
+   fragment detection.
+
+.. admonition:: Journal Article
+   :class: tip
+
+   R. Goswami and H. Jonsson,
+   *Adaptive Pruning for Increased Robustness and Reduced Computational
+   Overhead in Gaussian Process Accelerated Saddle Point Searches*,
+   ChemPhysChem, Nov. 2025.
+
+   | DOI: `10.1002/cphc.202500730 <https://doi.org/10.1002/cphc.202500730>`_
+   | Reproduction: `gpr_sella_repro <https://github.com/TheochemUI/gpr_sella_repro>`_
+
+#+END_EXPORT
+
 - [[https://github.com/HaoZeke/python_dissemination_workbench][python_dissemination_workbench]] :: Teaching materials referencing ~rgpycrumbs~
   as a helper utility example.

@@ -59,12 +59,57 @@ autodoc_mock_imports = [
 html_theme = "shibuya"
 html_static_path = ["_static"]
 
-# Shibuya theme specific options
+html_context = {
+    "source_type": "github",
+    "source_user": "HaoZeke",
+    "source_repo": "rgpycrumbs",
+    "source_version": "main",
+    "source_docs_path": "/docs/source/",
+}
+
 html_theme_options = {
-    "github_url": "https://github.com/Haozeke/rgpycrumbs",
-    # "nav_links": [
-    #     {"title": "eOn Tools", "url": "eon_tools"},
-    # ],
+    "github_url": "https://github.com/HaoZeke/rgpycrumbs",
+    "accent_color": "teal",
+    "dark_code": True,
+    "globaltoc_expand_depth": 1,
+    "nav_links": [
+        {
+            "title": "Ecosystem",
+            "children": [
+                {
+                    "title": "chemparseplot",
+                    "url": "https://chemparseplot.rgoswami.me",
+                    "summary": "Parsing and plotting for computational chemistry",
+                    "external": True,
+                },
+                {
+                    "title": "eOn",
+                    "url": "https://eon.theochemui.org",
+                    "summary": "Long-timescale molecular dynamics",
+                    "external": True,
+                },
+                {
+                    "title": "pychum",
+                    "url": "https://github.com/HaoZeke/pychum",
+                    "summary": "Input file generation for ORCA and NWChem",
+                    "external": True,
+                },
+            ],
+        },
+        {
+            "title": "PyPI",
+            "url": "https://pypi.org/project/rgpycrumbs/",
+            "external": True,
+        },
+    ],
+}
+
+html_sidebars = {
+    "**": [
+        "sidebars/localtoc.html",
+        "sidebars/repo-stats.html",
+        "sidebars/edit-this-page.html",
+    ],
 }
 
 autoapi_dirs = ["../../rgpycrumbs"]
