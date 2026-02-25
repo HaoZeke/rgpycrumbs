@@ -65,12 +65,29 @@ External Projects
 Academic Work
 -------------
 
-- Rohit Goswami, *Efficient Exploration of Chemical Kinetics*, Doctoral
-  dissertation, University of Iceland, 2025.
-  arXiv: `2510.21368 <https://arxiv.org/abs/2510.21368>`_,
-  doi: `10.48550/arXiv.2510.21368 <https://doi.org/10.48550/arXiv.2510.21368>`_.
-  Uses ``rgpycrumbs`` throughout for NEB visualization, surface fitting,
-  structure analysis, and fragment detection.
+.. admonition:: Dissertation
+   :class: tip
+
+   R. Goswami, *Efficient Exploration of Chemical Kinetics*,
+   Doctoral dissertation, University of Iceland, 2025.
+
+   | arXiv: `2510.21368 <https://arxiv.org/abs/2510.21368>`_
+   | DOI: `10.48550/arXiv.2510.21368 <https://doi.org/10.48550/arXiv.2510.21368>`_
+
+   Uses :mod:`rgpycrumbs.surfaces`, :mod:`rgpycrumbs.geom`,
+   :mod:`rgpycrumbs.interpolation`, and the CLI dispatcher throughout
+   for NEB visualization, surface fitting, structure analysis, and
+   fragment detection.
+
+.. admonition:: Journal Article
+   :class: tip
+
+   R. Goswami, S. Leang, A. Bieri, and H. Jonsson,
+   *Gaussian Process Regression Accelerated Sella Saddle Point Searches*,
+   ChemPhysChem, 2025.
+
+   | DOI: `10.1002/cphc.202500730 <https://doi.org/10.1002/cphc.202500730>`_
+   | Reproduction: `gpr_sella_repro <https://github.com/TheochemUI/gpr_sella_repro>`_
 
 `python\_dissemination\_workbench <https://github.com/HaoZeke/python_dissemination_workbench>`_
     Teaching materials referencing ``rgpycrumbs``

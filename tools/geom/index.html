@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="violet" data-content_root="../../">
+<html lang="en" data-accent-color="teal" data-content_root="../../">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Geometry Helpers - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Robust Structural Alignment" href="alignment.html" /><link rel="prev" title="ORCA Input Generator" href="../orca/generate_orca_input.html" />
@@ -55,12 +55,30 @@
       <strong>rgpycrumbs</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"></nav>
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://chemparseplot.rgoswami.me">
+                <span>chemparseplot</span>
+                <small>Parsing and plotting for computational chemistry</small>
+              </a></li><li><a href="https://eon.theochemui.org">
+                <span>eOn</span>
+                <small>Long-timescale molecular dynamics</small>
+              </a></li><li><a href="https://github.com/HaoZeke/pychum">
+                <span>pychum</span>
+                <small>Input file generation for ORCA and NWChem</small>
+              </a></li></ul>
+      </li><li class="link">
+          <a href="https://pypi.org/project/rgpycrumbs/">
+            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+        </li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
 </form><div class="sy-head-socials">
-  <a href="https://github.com/Haozeke/rgpycrumbs" aria-label="GitHub">
+  <a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
     <iconify-icon icon="simple-icons:github"></iconify-icon>
   </a></div></div>
     </div>
@@ -83,13 +101,13 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="0"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html">Generators for NWChem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for eOn</a></li>
@@ -97,7 +115,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../orca/generate_orca_input.html">ORCA Input Generator</a></li>
 </ul>
 </li>
@@ -106,29 +124,29 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="detect_fragments.html">Fragment Detection</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../used_by.html">Used By</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
@@ -191,7 +209,6 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 </ul>
-
         </div>
       </div>
     </div>
@@ -205,7 +222,30 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#library-modules">Library Modules</a></li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
-</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/HaoZeke/rgpycrumbs"
+  data-type="github" data-user="HaoZeke" data-repo="rgpycrumbs">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>rgpycrumbs</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/HaoZeke/rgpycrumbs/blob/main/docs/source/tools/geom/index.rst">Edit this page</a>
+</div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
   <main class="sy-main w-full max-sm:max-w-full print:pt-6">
@@ -268,7 +308,7 @@ data-aria-dark="Switch to auto color mode">
         </a></div>
     </div>
   </div>
-</div><article class="yue" role="main">
+</div><article class="yue dark-code" role="main">
           <section id="geometry-helpers">
 <h1>Geometry Helpers<a class="headerlink" href="#geometry-helpers" title="Link to this heading">¶</a></h1>
 <p>These tools provide visualization and bonding analysis.</p>
@@ -481,7 +521,7 @@ and <code class="docutils literal notranslate"><span class="pre">is_ira_pair()</
     <a href="https://shibuya.lepture.com">Shibuya theme</a>.
   </p>
 </div> <div class="sy-foot-socials">
-<a href="https://github.com/Haozeke/rgpycrumbs" aria-label="GitHub">
+<a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
   <iconify-icon icon="simple-icons:github"></iconify-icon>
 </a></div>
     </div>
