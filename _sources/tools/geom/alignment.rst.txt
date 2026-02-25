@@ -12,18 +12,21 @@ structures.
 
   .. versionadded:: 0.1.0
 
-It solves the "permutation-inversion" problem using the ****Iterative Rotations and Alignment (IRA)**** algorithm when available.
-If the \`ira\` library is missing or fails, it gracefully falls back to standard
-RMSD minimization (Procrustes analysis) via \`ase\`.
+It solves the "permutation-inversion" problem using the **Iterative Rotations and Alignment (IRA)** algorithm when available.
+If the ``ira`` library is missing or fails, it gracefully falls back to standard
+RMSD minimization (Procrustes analysis) via ``ase``.
 
 Key Features
 ~~~~~~~~~~~~
 
-- ****Permutation Invariance****: Correctly aligns molecules even if atom indices are scrambled (e.g., swapping two Hydrogens).
+**Permutation Invariance**
+    Correctly aligns molecules even if atom indices are scrambled (e.g., swapping two Hydrogens).
 
-- ****Hybrid Backend****: Prioritizes \`libira\` for graph-matching but defaults to \`ase.build.minimize\ :sub:`rotation`\ \ :sub:`and`\ \ :sub:`translation`\\` for simple rigid rotations.
+**Hybrid Backend**
+    Prioritizes ``libira`` for graph-matching but defaults to ``ase.build.minimize_rotation_and_translation`` for simple rigid rotations.
 
-- ****In-Place Modification****: Modifies the target (mobile) \`Atoms\` object directly to match the reference.
+**In-Place Modification**
+    Modifies the target (mobile) ``Atoms`` object directly to match the reference.
 
 Usage Example
 ~~~~~~~~~~~~~

@@ -12,16 +12,16 @@ notebooks can often lead to verbose and "scary" boilerplate code.
 
   .. versionadded:: 0.1.0
 
-The \`rgpycrumbs.run.jupyter\` module provides clean abstractions for subprocess
+The ``rgpycrumbs.run.jupyter`` module provides clean abstractions for subprocess
 management and configuration generation, designed specifically for tutorial
 notebooks (like those in the Atomistic Cookbook).
 
 Subprocess Management
 ~~~~~~~~~~~~~~~~~~~~~
 
-The ``run_command_or_exit`` function streams \`stdout\` and \`stderr\` in real-time
+The ``run_command_or_exit`` function streams ``stdout`` and ``stderr`` in real-time
 to the notebook cell output, ensuring long-running simulation jobs (like
-\`eonclient\`) don't appear to hang.
+``eonclient``) don't appear to hang.
 
 .. code:: python
 
@@ -34,7 +34,7 @@ to the notebook cell output, ensuring long-running simulation jobs (like
 Configuration Generation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Instead of writing \`config.ini\` files using fragile f-strings, use
+Instead of writing ``config.ini`` files using fragile f-strings, use
 ``write_eon_config`` to generate them from Python dictionaries.
 
 .. code:: python

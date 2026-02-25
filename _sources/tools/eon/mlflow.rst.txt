@@ -12,17 +12,20 @@ parameters used is critical for reproducibility.
 
   .. versionadded:: 0.1.0
 
-The \`rgpycrumbs.eon.\ :sub:`mlflow`\\` module provides helpers to log hydrated eOn
+The ``rgpycrumbs.eon._mlflow`` module provides helpers to log hydrated eOn
 configurations to an MLFlow tracking server.
 
 Features
 ~~~~~~~~
 
-- ****Hydration****: Merges the eOn schema defaults with the user's \`config.ini\`.
+**Hydration**
+    Merges the eOn schema defaults with the user's ``config.ini``.
 
-- ****Override Tracking****: Distinctly logs parameters that the user explicitly changed, separating them from default values.
+**Override Tracking**
+    Distinctly logs parameters that the user explicitly changed, separating them from default values.
 
-- ****Artifact Storage****: Uploads the raw \`config.ini\` as an artifact.
+**Artifact Storage**
+    Uploads the raw ``config.ini`` as an artifact.
 
 Usage
 ~~~~~

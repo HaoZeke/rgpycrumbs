@@ -84,8 +84,8 @@ to ensure your Org-mode syntax translates correctly to Sphinx.
 Pull Request Previews
 ~~~~~~~~~~~~~~~~~~~~~
 
-Every Pull Request triggers an automated build. Once completed, a bot posts  a
-comment with a link to a ****live preview****.
+Every Pull Request triggers an automated build. Once completed, a bot posts a
+comment with a link to a **live preview**.
 
 Review checklist
     You must check this preview before requesting a  review.
@@ -112,6 +112,29 @@ For a clean rebuild:
 .. code:: bash
 
     pixi run r docdel
+
+README and Branch Structure
+---------------------------
+
+The ``README.md`` is generated from ``readme_src.org`` via Emacs batch export.
+
+Pre-commit hook
+    A ``prek`` hook (``gen-readme``) regenerates ``README.md``
+    whenever ``readme_src.org`` is staged. Requires ``emacs``; skips silently if
+    unavailable.
+
+CI workflow
+    The ``Generate README`` workflow pushes the rendered
+    ``README.md`` and ``branding/`` assets to the orphan ``readme`` branch on every
+    push to ``main`` that touches ``readme_src.org``.
+
+Authoritative copy
+    The ``readme`` branch is the GitHub default and always
+    holds the latest rendered README. The copy on ``main`` is a local convenience;
+    the ``readme`` branch is the source of truth for what GitHub displays.
+
+All source code and development happens on ``main``. The ``readme`` branch should
+never be edited directly.
 
 Release notes and changelog
 ---------------------------

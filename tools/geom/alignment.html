@@ -288,16 +288,19 @@ structures.</p>
 <p><span class="versionmodified added">Added in version 0.1.0.</span></p>
 </div>
 </div></blockquote>
-<p>It solves the “permutation-inversion” problem using the <strong>**Iterative Rotations and Alignment (IRA)**</strong> algorithm when available.
-If the `ira` library is missing or fails, it gracefully falls back to standard
-RMSD minimization (Procrustes analysis) via `ase`.</p>
+<p>It solves the “permutation-inversion” problem using the <strong>Iterative Rotations and Alignment (IRA)</strong> algorithm when available.
+If the <code class="docutils literal notranslate"><span class="pre">ira</span></code> library is missing or fails, it gracefully falls back to standard
+RMSD minimization (Procrustes analysis) via <code class="docutils literal notranslate"><span class="pre">ase</span></code>.</p>
 <section id="key-features">
 <h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p><strong>**Permutation Invariance**</strong>: Correctly aligns molecules even if atom indices are scrambled (e.g., swapping two Hydrogens).</p></li>
-<li><p><strong>**Hybrid Backend**</strong>: Prioritizes `libira` for graph-matching but defaults to `ase.build.minimize<sub>rotation</sub><sub>and</sub><sub>translation</sub>\` for simple rigid rotations.</p></li>
-<li><p><strong>**In-Place Modification**</strong>: Modifies the target (mobile) `Atoms` object directly to match the reference.</p></li>
-</ul>
+<dl class="simple">
+<dt><strong>Permutation Invariance</strong></dt><dd><p>Correctly aligns molecules even if atom indices are scrambled (e.g., swapping two Hydrogens).</p>
+</dd>
+<dt><strong>Hybrid Backend</strong></dt><dd><p>Prioritizes <code class="docutils literal notranslate"><span class="pre">libira</span></code> for graph-matching but defaults to <code class="docutils literal notranslate"><span class="pre">ase.build.minimize_rotation_and_translation</span></code> for simple rigid rotations.</p>
+</dd>
+<dt><strong>In-Place Modification</strong></dt><dd><p>Modifies the target (mobile) <code class="docutils literal notranslate"><span class="pre">Atoms</span></code> object directly to match the reference.</p>
+</dd>
+</dl>
 </section>
 <section id="usage-example">
 <h3>Usage Example<a class="headerlink" href="#usage-example" title="Link to this heading">¶</a></h3>

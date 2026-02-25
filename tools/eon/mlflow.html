@@ -288,15 +288,18 @@ parameters used is critical for reproducibility.</p>
 <p><span class="versionmodified added">Added in version 0.1.0.</span></p>
 </div>
 </div></blockquote>
-<p>The `rgpycrumbs.eon.<sub>mlflow</sub>\` module provides helpers to log hydrated eOn
+<p>The <code class="docutils literal notranslate"><span class="pre">rgpycrumbs.eon._mlflow</span></code> module provides helpers to log hydrated eOn
 configurations to an MLFlow tracking server.</p>
 <section id="features">
 <h3>Features<a class="headerlink" href="#features" title="Link to this heading">¶</a></h3>
-<ul class="simple">
-<li><p><strong>**Hydration**</strong>: Merges the eOn schema defaults with the user’s `config.ini`.</p></li>
-<li><p><strong>**Override Tracking**</strong>: Distinctly logs parameters that the user explicitly changed, separating them from default values.</p></li>
-<li><p><strong>**Artifact Storage**</strong>: Uploads the raw `config.ini` as an artifact.</p></li>
-</ul>
+<dl class="simple">
+<dt><strong>Hydration</strong></dt><dd><p>Merges the eOn schema defaults with the user’s <code class="docutils literal notranslate"><span class="pre">config.ini</span></code>.</p>
+</dd>
+<dt><strong>Override Tracking</strong></dt><dd><p>Distinctly logs parameters that the user explicitly changed, separating them from default values.</p>
+</dd>
+<dt><strong>Artifact Storage</strong></dt><dd><p>Uploads the raw <code class="docutils literal notranslate"><span class="pre">config.ini</span></code> as an artifact.</p>
+</dd>
+</dl>
 </section>
 <section id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>

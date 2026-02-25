@@ -213,6 +213,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#local-build">Local Build</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#readme-and-branch-structure">README and Branch Structure</a></li>
 <li><a class="reference internal" href="#release-notes-and-changelog">Release notes and changelog</a><ul>
 <li><a class="reference internal" href="#news-fragments">News fragments</a></li>
 <li><a class="reference internal" href="#creating-a-fragment">Creating a Fragment</a></li>
@@ -357,8 +358,8 @@ intersphinx links (e.g., pointing to the eOn schema).</p>
 to ensure your Org-mode syntax translates correctly to Sphinx.</p>
 <section id="pull-request-previews">
 <h3>Pull Request Previews<a class="headerlink" href="#pull-request-previews" title="Link to this heading">¶</a></h3>
-<p>Every Pull Request triggers an automated build. Once completed, a bot posts  a
-comment with a link to a <strong>**live preview**</strong>.</p>
+<p>Every Pull Request triggers an automated build. Once completed, a bot posts a
+comment with a link to a <strong>live preview</strong>.</p>
 <dl class="simple">
 <dt>Review checklist</dt><dd><p>You must check this preview before requesting a  review.
 Pay close attention to cross-references and table rendering.</p>
@@ -381,6 +382,26 @@ Pay close attention to cross-references and table rendering.</p>
 </span></pre></div>
 </div>
 </section>
+</section>
+<section id="readme-and-branch-structure">
+<h2>README and Branch Structure<a class="headerlink" href="#readme-and-branch-structure" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">README.md</span></code> is generated from <code class="docutils literal notranslate"><span class="pre">readme_src.org</span></code> via Emacs batch export.</p>
+<dl class="simple">
+<dt>Pre-commit hook</dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">prek</span></code> hook (<code class="docutils literal notranslate"><span class="pre">gen-readme</span></code>) regenerates <code class="docutils literal notranslate"><span class="pre">README.md</span></code>
+whenever <code class="docutils literal notranslate"><span class="pre">readme_src.org</span></code> is staged. Requires <code class="docutils literal notranslate"><span class="pre">emacs</span></code>; skips silently if
+unavailable.</p>
+</dd>
+<dt>CI workflow</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">Generate</span> <span class="pre">README</span></code> workflow pushes the rendered
+<code class="docutils literal notranslate"><span class="pre">README.md</span></code> and <code class="docutils literal notranslate"><span class="pre">branding/</span></code> assets to the orphan <code class="docutils literal notranslate"><span class="pre">readme</span></code> branch on every
+push to <code class="docutils literal notranslate"><span class="pre">main</span></code> that touches <code class="docutils literal notranslate"><span class="pre">readme_src.org</span></code>.</p>
+</dd>
+<dt>Authoritative copy</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">readme</span></code> branch is the GitHub default and always
+holds the latest rendered README. The copy on <code class="docutils literal notranslate"><span class="pre">main</span></code> is a local convenience;
+the <code class="docutils literal notranslate"><span class="pre">readme</span></code> branch is the source of truth for what GitHub displays.</p>
+</dd>
+</dl>
+<p>All source code and development happens on <code class="docutils literal notranslate"><span class="pre">main</span></code>. The <code class="docutils literal notranslate"><span class="pre">readme</span></code> branch should
+never be edited directly.</p>
 </section>
 <section id="release-notes-and-changelog">
 <h2>Release notes and changelog<a class="headerlink" href="#release-notes-and-changelog" title="Link to this heading">¶</a></h2>
