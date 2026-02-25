@@ -117,6 +117,15 @@ Beyond the CLI tools, ~rgpycrumbs~ provides importable library modules:
 * Utility Functions
 The package also includes *pure-python* helpers for parsing logs like those from
 [[https://crates.io/crates/bless][bless]] and managing data structures in Jupyter notebooks.
+* Getting Started
+#+BEGIN_EXPORT rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Getting Started
+
+     quickstart
+#+END_EXPORT
+
 * Tool Categories
 #+BEGIN_EXPORT rst
   .. toctree::
