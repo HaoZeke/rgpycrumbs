@@ -2,7 +2,7 @@
 # Table of Contents
 
 -   [About](#about)
-    -   [Ecosystem Overview](#org48c8709)
+    -   [Ecosystem Overview](#orgb9907fb)
     -   [CLI Design Philosophy](#cli-how)
 -   [Usage](#usage)
     -   [Library API](#library-api)
@@ -10,9 +10,9 @@
         -   [eOn](#cli-eon)
 -   [Contributing](#contributing)
     -   [Development](#development)
-        -   [Branch Structure](#org7cea3ee)
-        -   [When is pixi needed?](#orgdf03eb7)
-        -   [Versioning](#org941a64a)
+        -   [Branch Structure](#orga37ba8b)
+        -   [When is pixi needed?](#org7059db1)
+        -   [Versioning](#orge82aa0e)
     -   [Release Process](#release-notes)
 -   [License](#license)
 
@@ -50,7 +50,7 @@ The library side offers:
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`.
 
 
-<a id="org48c8709"></a>
+<a id="orgb9907fb"></a>
 
 ## Ecosystem Overview
 
@@ -82,8 +82,10 @@ The library is designed with the following principles in mind:
     package has minimal core dependencies (`click`, `numpy`). Heavy scientific
     libraries are available as optional extras (e.g. `pip install
       rgpycrumbs[surfaces]` for JAX). For CLI tools, dependencies are fetched by
-    `uv` only when a script that needs them is executed, keeping the base
-    installation lightweight.
+    `uv` only when a script that needs them is executed. For library modules,
+    `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1`
+    is set, with CUDA-aware resolution that avoids pulling GPU libraries on
+    CPU-only machines. The base installation stays lightweight either way.
 
 -   **Modular & Extensible Tooling:** Each utility is an independent script. This
     modularity simplifies development, testing, and maintenance, as changes to one
@@ -101,7 +103,9 @@ The library is designed with the following principles in mind:
 
 ## Library API
 
-The library modules can be imported directly:
+The library modules can be imported directly. Dependencies resolve
+automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH),
+or install extras explicitly:
 
     # Surface fitting (requires jax: pip install rgpycrumbs[surfaces])
     from rgpycrumbs.surfaces import get_surface_model
@@ -209,7 +213,7 @@ This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development 
     uv run --extra interpolation pytest -m interpolation
 
 
-<a id="org7cea3ee"></a>
+<a id="orga37ba8b"></a>
 
 ### Branch Structure
 
@@ -218,7 +222,7 @@ auto-generated orphan containing only the rendered `README.md` and branding
 assets; it is the GitHub default branch.
 
 
-<a id="orgdf03eb7"></a>
+<a id="org7059db1"></a>
 
 ### When is pixi needed?
 
@@ -231,7 +235,7 @@ available on PyPI):
 For everything else, `uv` is sufficient.
 
 
-<a id="org941a64a"></a>
+<a id="orge82aa0e"></a>
 
 ### Versioning
 

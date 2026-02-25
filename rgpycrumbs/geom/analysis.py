@@ -115,9 +115,7 @@ def analyze_structure(
                 centroid_distances[i, j] = centroid_distances[j, i] = centroid_dist
 
                 # Find closest pair of atoms and calculate corrected distance
-                all_distances = scipy_cdist.cdist(
-                    frag_i_positions, frag_j_positions
-                )
+                all_distances = scipy_cdist.cdist(frag_i_positions, frag_j_positions)
                 min_dist = np.min(all_distances)
                 min_index_i, min_index_j = np.unravel_index(
                     np.argmin(all_distances), all_distances.shape

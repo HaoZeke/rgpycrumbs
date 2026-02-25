@@ -144,9 +144,7 @@ class TestEnsureImport:
 
         cache_dir = tmp_path / "rgpycrumbs" / "deps"
         cache_dir.mkdir(parents=True)
-        monkeypatch.setattr(
-            "rgpycrumbs._aux._get_dep_cache_dir", lambda: cache_dir
-        )
+        monkeypatch.setattr("rgpycrumbs._aux._get_dep_cache_dir", lambda: cache_dir)
 
         fake_mod = types.ModuleType("jax")
         # step 1 fails, _import_from_parent_env returns None (no env var),
@@ -172,9 +170,7 @@ class TestEnsureImport:
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
 
         cache_dir = tmp_path / "rgpycrumbs" / "deps"
-        monkeypatch.setattr(
-            "rgpycrumbs._aux._get_dep_cache_dir", lambda: cache_dir
-        )
+        monkeypatch.setattr("rgpycrumbs._aux._get_dep_cache_dir", lambda: cache_dir)
 
         uv_called_with = []
         original_import = importlib.import_module
@@ -278,13 +274,14 @@ class TestLazyModule:
 # Dependency map consistency
 # ---------------------------------------------------------------------------
 class TestDependencyMap:
+    @pytest.mark.skipif(
+        sys.version_info < (3, 11), reason="tomllib requires Python 3.11+"
+    )
     def test_all_extras_match_pyproject(self):
         """Every extra name in _DEPENDENCY_MAP must exist in pyproject.toml."""
         import tomllib
 
-        pyproject = (
-            Path(__file__).resolve().parent.parent / "pyproject.toml"
-        )
+        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
         with open(pyproject, "rb") as f:
             data = tomllib.load(f)
 

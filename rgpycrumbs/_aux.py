@@ -113,10 +113,7 @@ def _uv_install(package_spec: str, target: Path) -> None:
         except (subprocess.CalledProcessError, OSError) as exc:
             logger.debug("%s install failed: %s", installer, exc)
             continue
-    msg = (
-        f"Failed to install {package_spec}. "
-        "Ensure uv or pip is available on PATH."
-    )
+    msg = f"Failed to install {package_spec}. Ensure uv or pip is available on PATH."
     raise RuntimeError(msg)
 
 

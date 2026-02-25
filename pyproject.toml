@@ -129,15 +129,19 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and local/unused relative imports
-"__init__.py" = [ "F401", "PLC0415" ]        # __init__.py can import without use
-"rgpycrumbs/_aux.py" = [ "PLW0603" ]                 # global for _cuda_available cache
-"rgpycrumbs/interpolation.py" = [ "PLC0415" ]        # deferred imports for ensure_import
-"rgpycrumbs/geom/analysis.py" = [ "PLC0415" ]        # deferred imports for ensure_import
+"__init__.py" = [ "F401", "PLC0415" ] # __init__.py can import without use
 "docs/source/conf.py" = [ "A001" ] # Sphinx requires 'copyright' variable
+"rgpycrumbs/_aux.py" = [ "PLW0603" ] # global for _cuda_available cache
 "rgpycrumbs/eon/ptmdisp.py" = [
   "E402",    # Module level import not at top (for warnings suppression)
   "PLC0415", # Local import (for the Viewport GUI)
 ]
+"rgpycrumbs/geom/analysis.py" = [
+  "PLC0415",
+] # deferred imports for ensure_import
+"rgpycrumbs/interpolation.py" = [
+  "PLC0415",
+] # deferred imports for ensure_import
 "surfaces.py" = [ "ARG001", "ARG002" ] # Jax seems to like this
 "tests/**/*" = [ "PLR2004", "S101", "TID252", "PLC0415" ]
 
