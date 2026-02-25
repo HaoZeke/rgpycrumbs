@@ -1,0 +1,27 @@
+[workspace]
+authors     = ["Rohit Goswami <rgoswami[at]ieee[dot]org>"]
+channels    = ["conda-forge"]
+description = "JOSS paper build for rgpycrumbs"
+name        = "rgpycrumbs-paper"
+platforms   = ["linux-64"]
+version     = "0.1.0"
+
+[dependencies]
+emacs  = ">=30.2,<31"
+python = ">=3.10"
+
+[tasks.export]
+cmd = 'emacs --batch --eval "(progn (find-file \"paper.org\") (org-md-export-to-markdown))"'
+
+[tasks.check]
+cmd = """
+python -c "
+import pathlib, sys
+org = pathlib.Path('paper.org').stat().st_mtime
+md  = pathlib.Path('paper.md').stat().st_mtime
+if org > md:
+    print('paper.md is stale; run: pixi run export')
+    sys.exit(1)
+print('paper.md is up to date')
+"
+"""

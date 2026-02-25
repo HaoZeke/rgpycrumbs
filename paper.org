@@ -196,16 +196,30 @@ of 2D free energy surfaces from PLUMED metadynamics hills files.
 *Test potentials* (~rgpycrumbs.func~). Muller-Brown and other analytical
 surfaces for algorithm validation.
 
-** PEP 723 dispatcher
+** On-demand dependency resolution
 
 Research workflows in computational chemistry require tools with mutually
 exclusive binary dependencies. OVITO (crystal defect analysis) and tblite
 (tight-binding electronic structure) cannot coexist in a single Python
-environment; JAX and PyTorch builds may also conflict. The ~rgpycrumbs.cli~
-dispatcher invokes each script in an isolated subprocess via ~uv~, using PEP
-723 inline metadata to declare per-script dependencies. The fragment detection
-script, for instance, declares ~tblite~, ~pyvista~, and ~ase~ as its
-dependencies and runs in a fresh environment without polluting the host.
+environment; JAX and PyTorch builds may also conflict.
+
+The package addresses this through two complementary mechanisms that share the
+same philosophy: a lightweight core with dependencies resolved on demand.
+
+For CLI scripts, the ~rgpycrumbs.cli~ dispatcher invokes each script in an
+isolated subprocess via ~uv~, using PEP 723 inline metadata to declare
+per-script dependencies. The fragment detection script, for instance, declares
+~tblite~, ~pyvista~, and ~ase~ as its dependencies and runs in a fresh
+environment without polluting the host.
+
+For library modules, ~ensure_import~ resolves dependencies at first use through
+a priority chain: current environment, parent environment fallback, XDG cache
+lookup, and (when opted in via ~RGPYCRUMBS_AUTO_DEPS=1~) automatic installation
+via ~uv pip install --target~ into a persistent cache directory. The resolver
+detects CUDA availability and selects CPU-only package variants when no GPU is
+present, avoiding unnecessary downloads of GPU-specific binary dependencies.
+This means ~pip install rgpycrumbs~ provides the full import surface; heavy
+dependencies materialize only when first accessed.
 
 #+begin_src dot :file figures/dataflow.pdf :exports none
 digraph dataflow {
