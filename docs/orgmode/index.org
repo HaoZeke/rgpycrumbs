@@ -61,8 +61,8 @@ digraph G {
   IRA matching (RMSD-based structure comparison), spline interpolation, and
   shared data types for NEB paths and saddle searches.
 - CLI Dispatcher :: A unified command-line interface that employs [[https://peps.python.org/pep-0723/][PEP 723]]
-  metadata to isolate dependencies per script via ~uv~, ensuring conflict-free
-  and reproducible execution.
+  metadata to isolate dependencies per script via ~uv~ for conflict-free,
+  reproducible execution.
 
 Broadly speaking, the tooling here assists with computational methods to find
 reaction pathways, along with packaging helpers.
@@ -94,7 +94,7 @@ capabilities for Nudged Elastic Band calculations:
 - Free Energy Reconstruction :: Pure-python implementations for reconstructing
   bias potentials from PLUMED hills files.
 * Infrastructure & Maintenance
-- Prefix.dev Management :: ~delete_packages~ helps maintain  custom Conda/Pixi
+- Prefix.dev Management :: ~delete_packages~ helps maintain custom Conda/Pixi
   channels by automating the cleanup of old or specific package versions on
   [[https://prefix.dev][prefix.dev]].
 * Library API
@@ -113,6 +113,21 @@ Beyond the CLI tools, ~rgpycrumbs~ provides importable library modules:
 - ~rgpycrumbs.basetypes~ :: Shared data structures (~nebiter~, ~nebpath~,
   ~SaddleMeasure~, ~DimerOpt~, ~MolGeom~, ~SpinID~) used across ~rgpycrumbs~
   and ~chemparseplot~. No extra dependencies required.
+
+** On-Demand Dependency Resolution
+A bare ~pip install rgpycrumbs~ gives access to the full API surface. Heavy
+optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use
+through a five-step priority chain:
+
+1. Current Python environment
+2. Parent environment (via ~RGPYCRUMBS_PARENT_SITE_PACKAGES~)
+3. Shared cache (~$XDG_CACHE_HOME/rgpycrumbs/deps/~)
+4. Automatic ~uv~ installation into the cache (opt-in: ~RGPYCRUMBS_AUTO_DEPS=1~)
+5. Actionable error message with install instructions
+
+CUDA-aware resolution selects CPU-only package variants (e.g. ~jax[cpu]~) on
+machines without a GPU, avoiding large downloads. See the
+@@rst::doc:`quickstart <quickstart>`@@ for configuration details.
 
 * Utility Functions
 The package also includes *pure-python* helpers for parsing logs like those from

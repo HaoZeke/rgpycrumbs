@@ -2,7 +2,7 @@
 # Table of Contents
 
 -   [About](#about)
-    -   [Ecosystem Overview](#orgb9907fb)
+    -   [Ecosystem Overview](#orgfc84e04)
     -   [CLI Design Philosophy](#cli-how)
 -   [Usage](#usage)
     -   [Library API](#library-api)
@@ -10,9 +10,9 @@
         -   [eOn](#cli-eon)
 -   [Contributing](#contributing)
     -   [Development](#development)
-        -   [Branch Structure](#orga37ba8b)
-        -   [When is pixi needed?](#org7059db1)
-        -   [Versioning](#orge82aa0e)
+        -   [Branch Structure](#orgb2b015b)
+        -   [When is pixi needed?](#org0b360de)
+        -   [Versioning](#org96e7cad)
     -   [Release Process](#release-notes)
 -   [License](#license)
 
@@ -39,6 +39,12 @@ research. `rgpycrumbs` provides both importable library modules for
 computational tasks (surface fitting, structure analysis, interpolation) and a
 dispatcher-based CLI for running self-contained research scripts.
 
+Heavy optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use.
+A bare `pip install rgpycrumbs` gives the full API surface; the actual backend
+libraries load on demand from the current environment, a shared cache, or (with
+`RGPYCRUMBS_AUTO_DEPS=1`) via automatic `uv` installation. CUDA-aware
+resolution avoids pulling GPU libraries on CPU-only machines.
+
 The library side offers:
 
 -   **Surface fitting** (`rgpycrumbs.surfaces`) &#x2013; JAX-based kernel methods (TPS, RBF, Matern, SE, IMQ) with gradient-enhanced variants for energy landscape interpolation
@@ -50,7 +56,7 @@ The library side offers:
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`.
 
 
-<a id="orgb9907fb"></a>
+<a id="orgfc84e04"></a>
 
 ## Ecosystem Overview
 
@@ -213,7 +219,7 @@ This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development 
     uv run --extra interpolation pytest -m interpolation
 
 
-<a id="orga37ba8b"></a>
+<a id="orgb2b015b"></a>
 
 ### Branch Structure
 
@@ -222,7 +228,7 @@ auto-generated orphan containing only the rendered `README.md` and branding
 assets; it is the GitHub default branch.
 
 
-<a id="org7059db1"></a>
+<a id="org0b360de"></a>
 
 ### When is pixi needed?
 
@@ -235,7 +241,7 @@ available on PyPI):
 For everything else, `uv` is sufficient.
 
 
-<a id="orge82aa0e"></a>
+<a id="org96e7cad"></a>
 
 ### Versioning
 

@@ -13,5 +13,5 @@
 #+END_EXPORT
 
 ** API Reference
-For developer details, see the :doc:`Prefix Helper Reference
-<../../autoapi/rgpycrumbs/prefix/index>`[fn:: Also linked in each section.].
+For developer details, see the @@rst::doc:`Prefix Helper Reference
+<../../autoapi/rgpycrumbs/prefix/index>`@@[fn:: Also linked in each section.].

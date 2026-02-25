@@ -33,4 +33,4 @@
    - *Float Precision*: By default, models use ~float32~ for performance and compatibility with visualization backends, but ~jax_enable_x64~ can be toggled if higher precision is required.
 
 ** API Reference
-   For detailed method signatures, see the :doc:`Surfaces API Reference <../../autoapi/rgpycrumbs/surfaces/index>`.
+   For detailed method signatures, see the @@rst::doc:`Surfaces API Reference <../../autoapi/rgpycrumbs/surfaces/index>`@@.

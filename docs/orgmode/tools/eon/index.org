@@ -17,5 +17,5 @@
 #+END_EXPORT
 
 ** API Reference
-For developer details, see the :doc:`eOn Helper Reference
-<../../autoapi/rgpycrumbs/eon/index>`[fn:: Also linked in each section.].
+For developer details, see the @@rst::doc:`eOn Helper Reference
+<../../autoapi/rgpycrumbs/eon/index>`@@[fn:: Also linked in each section.].
