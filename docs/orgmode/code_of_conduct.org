@@ -3,6 +3,7 @@
 #+EMAIL: rgoswami@ieee.org
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t ^:nil
 
+# Generate this in docbld via pandoc
 #+begin_export rst
-.. include:: ../../CODE_OF_CONDUCT.md
+.. include:: ../../CODE_OF_CONDUCT.rst
 #+end_export
