@@ -105,8 +105,8 @@ depends-on = [ { task = "mkrst", environment = "docs" } ]
 
 [feature.docs.tasks.mkrst]
 cmd = """
+pandoc CODE_OF_CONDUCT.md -o CODE_OF_CONDUCT.rst && \
 emacs --batch --load export.el
-pandoc CODE_OF_CONDUCT.md -o CODE_OF_CONDUCT.rst
 """
 cwd = "docs"
 
