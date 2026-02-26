@@ -38,6 +38,9 @@ The library side offers:
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + ~uv~.
 
 ** Ecosystem Overview
+:PROPERTIES:
+:CUSTOM_ID: ecosys
+:END:
    ~rgpycrumbs~ is the central hub of an interlinked suite of libraries.
 
 [[file:branding/logo/ecosystem.png]]
@@ -204,12 +207,18 @@ uv run --extra interpolation pytest -m interpolation
 #+end_src
 
 *** Branch Structure
+:PROPERTIES:
+:CUSTOM_ID: dev:branch
+:END:
 
 Development happens on the ~main~ branch. The ~readme~ branch is an
 auto-generated orphan containing only the rendered ~README.md~ and branding
 assets; it is the GitHub default branch.
 
 *** When is pixi needed?
+:PROPERTIES:
+:CUSTOM_ID: dev:whypixi
+:END:
 
 [[https://prefix.dev/][Pixi]] is only needed for features that require *conda-only* packages (not
 available on PyPI):
@@ -220,6 +229,9 @@ available on PyPI):
 For everything else, ~uv~ is sufficient.
 
 *** Versioning
+:PROPERTIES:
+:CUSTOM_ID: dev:versions
+:END:
 
 Versions are derived automatically from *git tags* via ~hatch-vcs~
 (setuptools-scm). There is no manual version field; the version is the latest
