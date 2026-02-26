@@ -4,4 +4,4 @@ Code of Conduct
 
     :Author: `Rohit Goswami <https://rgoswami.me>`_
 
-.. include:: ../../CODE_OF_CONDUCT.md
+.. include:: ../../CODE_OF_CONDUCT.rst
