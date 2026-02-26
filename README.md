@@ -2,7 +2,7 @@
 # Table of Contents
 
 -   [About](#about)
-    -   [Ecosystem Overview](#orgce9c0a5)
+    -   [Ecosystem Overview](#org00807f4)
     -   [CLI Design Philosophy](#cli-how)
 -   [Usage](#usage)
     -   [Library API](#library-api)
@@ -10,9 +10,9 @@
         -   [eOn](#cli-eon)
 -   [Contributing](#contributing)
     -   [Development](#development)
-        -   [Branch Structure](#org720972e)
-        -   [When is pixi needed?](#orgfc947aa)
-        -   [Versioning](#org96b3e56)
+        -   [Branch Structure](#org423b501)
+        -   [When is pixi needed?](#orga97709b)
+        -   [Versioning](#org4fa9f1a)
     -   [Release Process](#release-notes)
 -   [License](#license)
 
@@ -56,7 +56,7 @@ The library side offers:
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`.
 
 
-<a id="orgce9c0a5"></a>
+<a id="org00807f4"></a>
 
 ## Ecosystem Overview
 
@@ -219,7 +219,7 @@ This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development 
     uv run --extra interpolation pytest -m interpolation
 
 
-<a id="org720972e"></a>
+<a id="org423b501"></a>
 
 ### Branch Structure
 
@@ -228,7 +228,7 @@ auto-generated orphan containing only the rendered `README.md` and branding
 assets; it is the GitHub default branch.
 
 
-<a id="orgfc947aa"></a>
+<a id="orga97709b"></a>
 
 ### When is pixi needed?
 
@@ -241,7 +241,7 @@ available on PyPI):
 For everything else, `uv` is sufficient.
 
 
-<a id="org96b3e56"></a>
+<a id="org4fa9f1a"></a>
 
 ### Versioning
 

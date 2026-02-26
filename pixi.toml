@@ -23,6 +23,8 @@ sphinx-favicon = ">=1.0.1,<2"
 
 [feature.docs.pypi-dependencies]
 autodoc-pydantic            = ">=2.2.0, <3"
+chemparseplot               = ">=1.2.0, <2"
+pychum                      = ">=0.1.0, <0.2"
 rgpycrumbs                  = { path = ".", editable = true }
 shibuya                     = ">=2025.12.13, <2026"
 sphinx                      = ">=9.0.4, <10"
