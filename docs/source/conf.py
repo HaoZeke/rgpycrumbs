@@ -84,8 +84,8 @@ html_theme_options = {
                 },
                 {
                     "title": "eOn",
-                    "url": "https://eon.theochemui.org",
-                    "summary": "Long-timescale molecular dynamics",
+                    "url": "https://eondocs.org",
+                    "summary": "Long-timescale molecular dynamics engine, primary consumer",
                     "external": True,
                 },
                 {
