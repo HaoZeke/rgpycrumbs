@@ -18,8 +18,8 @@ emacs          = ">=30.2,<31"
 mlflow         = ">=3.8.1,<4"
 nodejs         = ">=25.2.1,<25.3"
 numpy          = ">=2.4.1,<3"
+pandoc         = ">=3.9,<4"
 sphinx-favicon = ">=1.0.1,<2"
-pandoc = ">=3.9,<4"
 
 [feature.docs.pypi-dependencies]
 autodoc-pydantic            = ">=2.2.0, <3"
@@ -106,7 +106,7 @@ depends-on = [ { task = "mkrst", environment = "docs" } ]
 
 [feature.docs.tasks.mkrst]
 cmd = """
-pandoc CODE_OF_CONDUCT.md -o CODE_OF_CONDUCT.rst && \
+pandoc ../CODE_OF_CONDUCT.md -o ../CODE_OF_CONDUCT.rst && \
 emacs --batch --load export.el
 """
 cwd = "docs"
