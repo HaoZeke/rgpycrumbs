@@ -40,6 +40,7 @@ eonmlflow = { features = [ "eonmlflow", "test" ] }
 fragments = { features = [ "fragments", "test" ] }
 ptm       = { features = [ "ptm", "test" ] }
 surfaces  = { features = [ "surfaces", "test" ] }
+bench     = { features = [ "bench", "surfaces", "test" ], solve-group = "default" }
 test      = { features = [ "test" ] }
 
 [pypi-options]
@@ -83,6 +84,13 @@ ovito = "*"
 [feature.ptm.pypi-dependencies]
 ase   = ">=3.26.0, <4"
 ovito = ">=3.14.1, <4"
+
+[feature.bench.dependencies]
+pip = "*"
+
+[feature.bench.pypi-dependencies]
+asv        = ">=0.6"
+rgpycrumbs = { path = ".", editable = true }
 
 [feature.docs.tasks.minify]
 cmd = """
