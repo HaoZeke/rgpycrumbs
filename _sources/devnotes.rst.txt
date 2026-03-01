@@ -193,3 +193,78 @@ The top-level ``rgpycrumbs/__init__.py`` uses ``__getattr__`` for lazy imports, 
 modules with heavy optional dependencies (like JAX) are only loaded when
 accessed. This keeps ``import rgpycrumbs`` fast regardless of which extras are
 installed.
+
+.. _benchmarks:
+
+Benchmarks
+----------
+
+Performance benchmarks use `ASV (Airspeed Velocity) <https://asv.readthedocs.io>`_ with results posted on PRs
+via `asv-perch <https://github.com/HaoZeke/asv-perch>`_. The benchmark suite covers all three computational domains:
+
+**Surfaces** (``benchmarks/bench_surfaces.py``)
+    JAX kernel matrix construction,
+    ``GradientMatern`` fit/predict cycles, and prediction-only scaling. Uses manual
+    JIT warmup in ``setup()`` and ``block_until_ready()`` for accurate timing.
+
+**Interpolation** (``benchmarks/bench_interpolation.py``)
+    SciPy B-spline
+    interpolation via ``spline_interp``, parameterized by input size.
+
+**Geometry** (``benchmarks/bench_geometry.py``)
+    ASE ``analyze_structure`` on
+    water clusters, parameterized by molecule count.
+
+Running Locally
+~~~~~~~~~~~~~~~
+
+The ``bench`` pixi environment composes the ``surfaces`` and ``test`` features,
+providing JAX, SciPy, ASE, and ASV:
+
+.. code:: bash
+
+    # Validate that all benchmarks parse correctly
+    pixi run -e bench asv check
+
+    # Quick single-pass run (good for smoke testing)
+    pixi run -e bench asv run \
+      -E "existing:$(pixi run -e bench which python)" \
+      --quick
+
+    # Full run with sample recording
+    pixi run -e bench asv run \
+      -E "existing:$(pixi run -e bench which python)" \
+      --record-samples
+
+The ``-E "existing:..."`` flag tells ASV to use the pixi-managed Python
+rather than building its own virtualenv. Results land in ``.asv/results/``
+(gitignored).
+
+CI Workflow
+~~~~~~~~~~~
+
+Two workflows implement the `fork-safe split pattern <https://asv-perch.rgoswami.me/explanation/fork_security.html>`_:
+
+1. ``ci_benchmark.yml`` (``pull_request`` trigger, read-only) \:\: Runs benchmarks
+   for the base and PR commits in a matrix. Stashes ``benchmarks/``,
+   ``asv.conf.json``, ``pixi.toml``, and ``pixi.lock`` before each ``git checkout``
+   so the PR's benchmark code and environment definition apply to both
+   commits. Uploads ``.asv/results/`` as artifacts.
+
+2. ``ci_bench_commenter.yml`` (``workflow_run`` trigger, write access) \:\: Downloads
+   the combined artifact and calls ``HaoZeke/asv-perch@v1`` with
+   ``comparison-text-file`` mode to post a formatted table on the PR.
+
+Writing New Benchmarks
+~~~~~~~~~~~~~~~~~~~~~~
+
+Follow the ASV class convention. Key JAX considerations:
+
+- Always call ``block_until_ready()`` in the timing body to force synchronous
+  completion of JAX async dispatch.
+
+- Warm up JIT-compiled code paths in ``setup()`` with a throwaway call, then set
+  ``warmup_time = 0`` so ASV does not double-count compilation.
+
+- Use ``optimize=False`` for surface-fitting benchmarks to measure kernel math
+  rather than BFGS optimizer convergence variance.

@@ -239,6 +239,12 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#lazy-loading">Lazy Loading</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#benchmarks">Benchmarks</a><ul>
+<li><a class="reference internal" href="#running-locally">Running Locally</a></li>
+<li><a class="reference internal" href="#ci-workflow">CI Workflow</a></li>
+<li><a class="reference internal" href="#writing-new-benchmarks">Writing New Benchmarks</a></li>
+</ul>
+</li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/HaoZeke/rgpycrumbs"
   data-type="github" data-user="HaoZeke" data-repo="rgpycrumbs">
@@ -485,6 +491,71 @@ dependencies.</p>
 modules with heavy optional dependencies (like JAX) are only loaded when
 accessed. This keeps <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">rgpycrumbs</span></code> fast regardless of which extras are
 installed.</p>
+</section>
+</section>
+<section id="benchmarks">
+<span id="id3"></span><h2>Benchmarks<a class="headerlink" href="#benchmarks" title="Link to this heading">¶</a></h2>
+<p>Performance benchmarks use <a class="reference external" href="https://asv.readthedocs.io">ASV (Airspeed Velocity)</a> with results posted on PRs
+via <a class="reference external" href="https://github.com/HaoZeke/asv-perch">asv-perch</a>. The benchmark suite covers all three computational domains:</p>
+<dl class="simple">
+<dt><strong>Surfaces</strong> (<code class="docutils literal notranslate"><span class="pre">benchmarks/bench_surfaces.py</span></code>)</dt><dd><p>JAX kernel matrix construction,
+<code class="docutils literal notranslate"><span class="pre">GradientMatern</span></code> fit/predict cycles, and prediction-only scaling. Uses manual
+JIT warmup in <code class="docutils literal notranslate"><span class="pre">setup()</span></code> and <code class="docutils literal notranslate"><span class="pre">block_until_ready()</span></code> for accurate timing.</p>
+</dd>
+<dt><strong>Interpolation</strong> (<code class="docutils literal notranslate"><span class="pre">benchmarks/bench_interpolation.py</span></code>)</dt><dd><p>SciPy B-spline
+interpolation via <code class="docutils literal notranslate"><span class="pre">spline_interp</span></code>, parameterized by input size.</p>
+</dd>
+<dt><strong>Geometry</strong> (<code class="docutils literal notranslate"><span class="pre">benchmarks/bench_geometry.py</span></code>)</dt><dd><p>ASE <code class="docutils literal notranslate"><span class="pre">analyze_structure</span></code> on
+water clusters, parameterized by molecule count.</p>
+</dd>
+</dl>
+<section id="running-locally">
+<h3>Running Locally<a class="headerlink" href="#running-locally" title="Link to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">bench</span></code> pixi environment composes the <code class="docutils literal notranslate"><span class="pre">surfaces</span></code> and <code class="docutils literal notranslate"><span class="pre">test</span></code> features,
+providing JAX, SciPy, ASE, and ASV:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Validate that all benchmarks parse correctly</span>
+</span><span data-line="2">pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>bench<span class="w"> </span>asv<span class="w"> </span>check
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Quick single-pass run (good for smoke testing)</span>
+</span><span data-line="5">pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>bench<span class="w"> </span>asv<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+</span><span data-line="6"><span class="w">  </span>-E<span class="w"> </span><span class="s2">&quot;existing:</span><span class="k">$(</span>pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>bench<span class="w"> </span>which<span class="w"> </span>python<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span data-line="7"><span class="w">  </span>--quick
+</span><span data-line="8">
+</span><span data-line="9"><span class="c1"># Full run with sample recording</span>
+</span><span data-line="10">pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>bench<span class="w"> </span>asv<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+</span><span data-line="11"><span class="w">  </span>-E<span class="w"> </span><span class="s2">&quot;existing:</span><span class="k">$(</span>pixi<span class="w"> </span>run<span class="w"> </span>-e<span class="w"> </span>bench<span class="w"> </span>which<span class="w"> </span>python<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span data-line="12"><span class="w">  </span>--record-samples
+</span></pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">-E</span> <span class="pre">&quot;existing:...&quot;</span></code> flag tells ASV to use the pixi-managed Python
+rather than building its own virtualenv. Results land in <code class="docutils literal notranslate"><span class="pre">.asv/results/</span></code>
+(gitignored).</p>
+</section>
+<section id="ci-workflow">
+<h3>CI Workflow<a class="headerlink" href="#ci-workflow" title="Link to this heading">¶</a></h3>
+<p>Two workflows implement the <a class="reference external" href="https://asv-perch.rgoswami.me/explanation/fork_security.html">fork-safe split pattern</a>:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ci_benchmark.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger, read-only) :: Runs benchmarks
+for the base and PR commits in a matrix. Stashes <code class="docutils literal notranslate"><span class="pre">benchmarks/</span></code>,
+<code class="docutils literal notranslate"><span class="pre">asv.conf.json</span></code>, <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code>, and <code class="docutils literal notranslate"><span class="pre">pixi.lock</span></code> before each <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span></code>
+so the PR’s benchmark code and environment definition apply to both
+commits. Uploads <code class="docutils literal notranslate"><span class="pre">.asv/results/</span></code> as artifacts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ci_bench_commenter.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger, write access) :: Downloads
+the combined artifact and calls <code class="docutils literal notranslate"><span class="pre">HaoZeke/asv-perch&#64;v1</span></code> with
+<code class="docutils literal notranslate"><span class="pre">comparison-text-file</span></code> mode to post a formatted table on the PR.</p></li>
+</ol>
+</section>
+<section id="writing-new-benchmarks">
+<h3>Writing New Benchmarks<a class="headerlink" href="#writing-new-benchmarks" title="Link to this heading">¶</a></h3>
+<p>Follow the ASV class convention. Key JAX considerations:</p>
+<ul class="simple">
+<li><p>Always call <code class="docutils literal notranslate"><span class="pre">block_until_ready()</span></code> in the timing body to force synchronous
+completion of JAX async dispatch.</p></li>
+<li><p>Warm up JIT-compiled code paths in <code class="docutils literal notranslate"><span class="pre">setup()</span></code> with a throwaway call, then set
+<code class="docutils literal notranslate"><span class="pre">warmup_time</span> <span class="pre">=</span> <span class="pre">0</span></code> so ASV does not double-count compilation.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">optimize=False</span></code> for surface-fitting benchmarks to measure kernel math
+rather than BFGS optimizer convergence variance.</p></li>
+</ul>
 </section>
 </section>
 </section>
