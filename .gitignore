@@ -228,3 +228,6 @@ flycheck_*.el
 .pixi
 *.egg-info
 *-SAVE-ERROR
+
+# ASV benchmark results
+.asv/
