@@ -17,3 +17,9 @@ inline_table_expand   = true
 reorder_arrays        = false
 reorder_keys          = true
 trailing_newline      = true
+
+# pixi.toml key order matters for lockfile stability
+[[rule]]
+include = [ "pixi.toml" ]
+[rule.formatting]
+reorder_keys = false
