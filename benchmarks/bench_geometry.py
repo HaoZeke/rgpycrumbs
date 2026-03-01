@@ -15,11 +15,13 @@ def _make_water_cluster(n_molecules, spacing=3.0):
     for i in range(n_molecules):
         ox = i * spacing
         # O at center, H offset by ~0.96 A at 104.5 degree angle
-        positions.extend([
-            [ox, 0.0, 0.0],           # O
-            [ox + 0.76, 0.59, 0.0],   # H
-            [ox + 0.76, -0.59, 0.0],  # H
-        ])
+        positions.extend(
+            [
+                [ox, 0.0, 0.0],  # O
+                [ox + 0.76, 0.59, 0.0],  # H
+                [ox + 0.76, -0.59, 0.0],  # H
+            ]
+        )
         symbols.extend(["O", "H", "H"])
     return Atoms(symbols=symbols, positions=np.array(positions), cell=[50, 50, 50])
 

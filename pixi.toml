@@ -35,12 +35,12 @@ sphinxcontrib-programoutput = ">=0.18, <0.19"
 sphobjinv                   = ">=2.3.1.3, <3"
 
 [environments]
+bench     = { features = [ "bench", "surfaces", "test" ], solve-group = "default" }
 docs      = { features = [ "docs" ] }
 eonmlflow = { features = [ "eonmlflow", "test" ] }
 fragments = { features = [ "fragments", "test" ] }
 ptm       = { features = [ "ptm", "test" ] }
 surfaces  = { features = [ "surfaces", "test" ] }
-bench     = { features = [ "bench", "surfaces", "test" ], solve-group = "default" }
 test      = { features = [ "test" ] }
 
 [pypi-options]

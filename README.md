@@ -31,6 +31,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/rgpycrumbs)](https://pypi.org/project/rgpycrumbs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![One Good Tutorial docs checklist v1: adopted](https://onegoodtutorial.org/badge/adopted-v1.svg)](https://onegoodtutorial.org/about/badge/?v=1)
+[![Benchmarks](https://img.shields.io/badge/benchmarks-asv--perch-orange)](https://github.com/HaoZeke/asv-perch)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 [![DOI](https://zenodo.org/badge/795596895.svg)](https://doi.org/10.5281/zenodo.18529798)
 

@@ -130,6 +130,11 @@ ban-relative-imports = "all"
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and local/unused relative imports
 "__init__.py" = [ "F401", "PLC0415" ] # __init__.py can import without use
+"benchmarks/**/*" = [
+  "RUF012",
+  "ARG002",
+  "PLC0415",
+] # ASV convention: mutable class attrs, framework-injected args, deferred imports
 "docs/source/conf.py" = [ "A001" ] # Sphinx requires 'copyright' variable
 "rgpycrumbs/_aux.py" = [ "PLW0603" ] # global for _cuda_available cache
 "rgpycrumbs/eon/ptmdisp.py" = [

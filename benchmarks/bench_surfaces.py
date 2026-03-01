@@ -1,7 +1,6 @@
 """ASV benchmarks for rgpycrumbs.surfaces (JAX kernel regression)."""
 
 import jax
-import jax.numpy as jnp
 
 from rgpycrumbs.surfaces import GradientMatern
 from rgpycrumbs.surfaces._kernels import _matern_kernel_matrix
@@ -40,15 +39,19 @@ class TimeGradientMaternFitPredict:
         self.x_query = jax.random.normal(k4, (20, D))
         # JIT warmup: throwaway fit/predict
         model = GradientMatern(
-            self.x_train, self.y_train,
-            gradients=self.grads_train, optimize=False,
+            self.x_train,
+            self.y_train,
+            gradients=self.grads_train,
+            optimize=False,
         )
         model(self.x_query).block_until_ready()
 
     def time_fit_predict(self):
         model = GradientMatern(
-            self.x_train, self.y_train,
-            gradients=self.grads_train, optimize=False,
+            self.x_train,
+            self.y_train,
+            gradients=self.grads_train,
+            optimize=False,
         )
         model(self.x_query).block_until_ready()
 
@@ -68,7 +71,10 @@ class TimeGradientMaternPredict:
         y_train = jax.random.normal(k2, (N,))
         grads_train = jax.random.normal(k3, (N, D))
         self.model = GradientMatern(
-            x_train, y_train, gradients=grads_train, optimize=False,
+            x_train,
+            y_train,
+            gradients=grads_train,
+            optimize=False,
         )
         self.x_query = jax.random.normal(k4, (n_predict, D))
         # JIT warmup
