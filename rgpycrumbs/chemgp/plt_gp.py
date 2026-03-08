@@ -22,7 +22,7 @@ HDF5 layout (mirrors Julia common_plot.jl helpers):
 # dependencies = [
 #   "click",
 #   "h5py",
-#   "polars",
+#   "pandas",
 #   "plotnine",
 #   "chemparseplot",
 #   "rgpycrumbs",
@@ -36,18 +36,18 @@ from pathlib import Path
 import click
 import h5py
 import numpy as np
-import polars as pl
+import pandas as pd
 from chemparseplot.plot.chemgp import (
-    plot_convergence,
-    plot_fps,
-    plot_nll,
-    plot_profile,
-    plot_quality,
-    plot_rff,
-    plot_sensitivity,
-    plot_surface,
-    plot_trust,
-    plot_variance,
+    plot_convergence_curve,
+    plot_energy_profile,
+    plot_fps_projection,
+    plot_gp_progression,
+    plot_hyperparameter_sensitivity,
+    plot_nll_landscape,
+    plot_rff_quality,
+    plot_surface_contour,
+    plot_trust_region,
+    plot_variance_overlay,
 )
 
 # --- Logging ---
@@ -62,7 +62,7 @@ log = logging.getLogger(__name__)
 # --- HDF5 helpers ---
 
 
-def h5_read_table(f: h5py.File, name: str = "table") -> pl.DataFrame:
+def h5_read_table(f: h5py.File, name: str = "table") -> pd.DataFrame:
     """Read a group of same-length vectors as a DataFrame."""
     g = f[name]
     cols = {}
@@ -72,7 +72,7 @@ def h5_read_table(f: h5py.File, name: str = "table") -> pl.DataFrame:
             cols[k] = arr.astype(str).tolist()
         else:
             cols[k] = arr.tolist()
-    return pl.DataFrame(cols)
+    return pd.DataFrame(cols)
 
 
 def h5_read_grid(
@@ -115,9 +115,16 @@ def h5_read_metadata(f: h5py.File) -> dict:
 
 
 def save_plot(fig, output: Path, dpi: int) -> None:
-    """Save a figure to PDF, creating parent dirs."""
+    """Save a plotnine ggplot or matplotlib Figure to PDF."""
+    import matplotlib.pyplot as plt  # noqa: PLC0415
+
     output.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
+    if isinstance(fig, plt.Figure):
+        fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
+        plt.close(fig)
+    else:
+        # plotnine ggplot
+        fig.save(str(output), dpi=dpi, verbose=False)
     log.info("Saved: %s", output)
 
 
@@ -190,7 +197,24 @@ def convergence(
     with h5py.File(input_path, "r") as f:
         df = h5_read_table(f, "table")
         meta = h5_read_metadata(f)
-    fig = plot_convergence(df, meta, width=width, height=height)
+
+    # Detect y column: prefer ci_force > max_fatom > max_force > force_norm
+    y_col = "force_norm"
+    for candidate in ["ci_force", "max_fatom", "max_force"]:
+        if candidate in df.columns:
+            y_col = candidate
+            break
+
+    conv_tol = meta.get("conv_tol", None)
+    fig = plot_convergence_curve(
+        df,
+        x="oracle_calls",
+        y=y_col,
+        color="method",
+        conv_tol=float(conv_tol) if conv_tol is not None else None,
+        width=width,
+        height=height,
+    )
     save_plot(fig, output_path, dpi)
 
 
@@ -232,20 +256,39 @@ def surface(
     """
     with h5py.File(input_path, "r") as f:
         data, xc, yc = h5_read_grid(f, grid_name)
-        path = None
-        if "paths" in f and "neb" in f["paths"]:
-            path = h5_read_path(f, "neb")
-        endpoints = None
-        if "points" in f and "endpoints" in f["points"]:
-            endpoints = h5_read_points(f, "endpoints")
-        meta = h5_read_metadata(f)
-    fig = plot_surface(
+
+        # Collect paths
+        paths = None
+        if "paths" in f:
+            paths = {}
+            for pname in f["paths"].keys():
+                pdata = h5_read_path(f, pname)
+                # paths have x,y or rAB,rBC
+                keys = list(pdata.keys())
+                paths[pname] = (pdata[keys[0]], pdata[keys[1]])
+
+        # Collect points
+        points = None
+        if "points" in f:
+            points = {}
+            for pname in f["points"].keys():
+                pdata = h5_read_points(f, pname)
+                keys = list(pdata.keys())
+                points[pname] = (pdata[keys[0]], pdata[keys[1]])
+
+    # Build meshgrid from coordinates
+    if xc is not None and yc is not None:
+        gx, gy = np.meshgrid(xc, yc)
+    else:
+        ny, nx = data.shape
+        gx, gy = np.meshgrid(np.arange(nx), np.arange(ny))
+
+    fig = plot_surface_contour(
+        gx,
+        gy,
         data,
-        xc,
-        yc,
-        path=path,
-        endpoints=endpoints,
-        meta=meta,
+        paths=paths,
+        points=points,
         clamp_lo=clamp_lo,
         clamp_hi=clamp_hi,
         width=width,
@@ -260,7 +303,7 @@ def surface(
     "--n-points",
     multiple=True,
     type=int,
-    default=[3, 8, 15, 30],
+    default=None,
     help="Training set sizes for panel grid.",
 )
 def quality(
@@ -269,31 +312,31 @@ def quality(
     width: float,
     height: float,
     dpi: int,
-    n_points: tuple[int, ...],
+    n_points: tuple[int, ...] | None,
 ):
     """GP surrogate quality progression (multi-panel).
 
     Reads grids/true_energy, grids/gp_mean_N<n>, and
     points/train_N<n> for each n in --n-points.
     """
-    panels = []
     with h5py.File(input_path, "r") as f:
         true_e, xc, yc = h5_read_grid(f, "true_energy")
+
+        # Auto-detect n values from grid names if not specified
+        if not n_points:
+            grid_names = [k for k in f["grids"].keys() if k.startswith("gp_mean_N")]
+            n_points = sorted(int(k.replace("gp_mean_N", "")) for k in grid_names)
+
+        grids = {}
         for n in n_points:
             gp_e, _, _ = h5_read_grid(f, f"gp_mean_N{n}")
-            train = h5_read_points(f, f"train_N{n}")
-            panels.append(
-                {
-                    "n": n,
-                    "gp_e": gp_e,
-                    "train": train,
-                }
-            )
-    fig = plot_quality(
+            grids[n] = {"gp_mean": gp_e}
+
+    fig = plot_gp_progression(
+        grids,
         true_e,
         xc,
         yc,
-        panels=panels,
         width=width,
         height=height,
     )
@@ -317,7 +360,28 @@ def rff(
     with h5py.File(input_path, "r") as f:
         df = h5_read_table(f, "table")
         meta = h5_read_metadata(f)
-    fig = plot_rff(df, meta, width=width, height=height)
+
+    # Rename columns to match chemparseplot API
+    rename_map = {}
+    if "energy_mae_vs_gp" in df.columns:
+        rename_map["energy_mae_vs_gp"] = "energy_mae"
+    if "gradient_mae_vs_gp" in df.columns:
+        rename_map["gradient_mae_vs_gp"] = "gradient_mae"
+    if "D_rff" in df.columns:
+        rename_map["D_rff"] = "d_rff"
+    if rename_map:
+        df = df.rename(columns=rename_map)
+
+    exact_e = float(meta.get("gp_e_mae", 0.0))
+    exact_g = float(meta.get("gp_g_mae", 0.0))
+
+    fig = plot_rff_quality(
+        df,
+        exact_e_mae=exact_e,
+        exact_g_mae=exact_g,
+        width=width,
+        height=height,
+    )
     save_plot(fig, output_path, dpi)
 
 
@@ -332,21 +396,27 @@ def nll(
 ):
     """MAP-NLL landscape in hyperparameter space.
 
-    Reads grids/nll, grids/grad_norm, and
-    points/optimum.
+    Reads grids/nll and points/optimum.
     """
     with h5py.File(input_path, "r") as f:
         nll_data, xc, yc = h5_read_grid(f, "nll")
-        grad_data, _, _ = h5_read_grid(f, "grad_norm")
-        optimum = h5_read_points(f, "optimum")
-        meta = h5_read_metadata(f)
-    fig = plot_nll(
+        opt = h5_read_points(f, "optimum")
+
+    if xc is not None and yc is not None:
+        gx, gy = np.meshgrid(xc, yc)
+    else:
+        ny, nx = nll_data.shape
+        gx, gy = np.meshgrid(np.arange(nx), np.arange(ny))
+
+    optimum = None
+    if "log_sigma2" in opt and "log_theta" in opt:
+        optimum = (float(opt["log_sigma2"][0]), float(opt["log_theta"][0]))
+
+    fig = plot_nll_landscape(
+        gx,
+        gy,
         nll_data,
-        grad_data,
-        xc,
-        yc,
         optimum=optimum,
-        meta=meta,
         width=width,
         height=height,
     )
@@ -364,24 +434,39 @@ def sensitivity(
 ):
     """Hyperparameter sensitivity grid (3x3).
 
-    Reads table/slice (x), table/true_surface (E_true),
-    and table/gp_ls<j>_sv<i> for each panel.
+    Reads slice/x, true_surface/E_true, and gp_ls<j>_sv<i>
+    for each panel.
     """
     with h5py.File(input_path, "r") as f:
         slice_df = h5_read_table(f, "slice")
         true_df = h5_read_table(f, "true_surface")
-        panels = {}
+        x_vals = slice_df["x"].to_numpy()
+        y_true = true_df["E_true"].to_numpy()
+
+        # Build long-form DataFrame for faceted plot
+        rows = []
         for j in range(1, 4):
             for i in range(1, 4):
                 name = f"gp_ls{j}_sv{i}"
                 if name in f:
-                    panels[(j, i)] = h5_read_table(f, name)
-        meta = h5_read_metadata(f)
-    fig = plot_sensitivity(
-        slice_df,
-        true_df,
-        panels=panels,
-        meta=meta,
+                    gp_df = h5_read_table(f, name)
+                    y_pred = gp_df["E_pred"].to_numpy()
+                    for k in range(len(x_vals)):
+                        rows.append(
+                            {
+                                "x": x_vals[k],
+                                "y_true": y_true[k],
+                                "y_pred": y_pred[k],
+                                "y_lower": 0.0,
+                                "y_upper": 0.0,
+                                "ell": f"ell={j}",
+                                "sigma_f": f"sv={i}",
+                            }
+                        )
+
+    df = pd.DataFrame(rows)
+    fig = plot_hyperparameter_sensitivity(
+        df,
         width=width,
         height=height,
     )
@@ -399,17 +484,30 @@ def trust(
 ):
     """Trust region illustration (1D slice).
 
-    Reads table/slice with x, E_true, E_pred, E_std,
+    Reads slice/ with x, E_true, E_pred, E_std,
     in_trust columns and points/training.
     """
     with h5py.File(input_path, "r") as f:
-        df = h5_read_table(f, "slice")
+        slice_df = h5_read_table(f, "slice")
         training = h5_read_points(f, "training")
-        meta = h5_read_metadata(f)
-    fig = plot_trust(
+
+    # Build DataFrame with columns the plot function expects
+    df = slice_df.rename(columns={"E_pred": "y_pred"})
+    # Compute confidence bounds
+    if "E_std" in slice_df.columns:
+        std = slice_df["E_std"]
+        df["y_lower"] = df["y_pred"] - 2 * std
+        df["y_upper"] = df["y_pred"] + 2 * std
+
+    train_pts = None
+    if "x" in training and "y" in training:
+        train_pts = (training["x"], training["y"])
+    elif "x" in training and "E" in training:
+        train_pts = (training["x"], training["E"])
+
+    fig = plot_trust_region(
         df,
-        training,
-        meta=meta,
+        train_points=train_pts,
         width=width,
         height=height,
     )
@@ -425,10 +523,10 @@ def variance(
     height: float,
     dpi: int,
 ):
-    """GP variance overlaid on PES contour.
+    """GP variance overlaid on PES.
 
     Reads grids/energy, grids/variance, points/training,
-    points/minima, points/saddles, and root metadata.
+    optional points/minima, points/saddles.
     """
     with h5py.File(input_path, "r") as f:
         energy, xc, yc = h5_read_grid(f, "energy")
@@ -440,16 +538,42 @@ def variance(
         saddles = None
         if "points" in f and "saddles" in f["points"]:
             saddles = h5_read_points(f, "saddles")
-        meta = h5_read_metadata(f)
-    fig = plot_variance(
+
+    if xc is not None and yc is not None:
+        gx, gy = np.meshgrid(xc, yc)
+    else:
+        ny, nx = energy.shape
+        gx, gy = np.meshgrid(np.arange(nx), np.arange(ny))
+
+    # Build stationary points dict for the plot function
+    stationary = {}
+    if minima is not None:
+        keys = list(minima.keys())
+        for idx in range(len(minima[keys[0]])):
+            stationary[f"min{idx}"] = (
+                float(minima[keys[0]][idx]),
+                float(minima[keys[1]][idx]),
+            )
+    if saddles is not None:
+        keys = list(saddles.keys())
+        for idx in range(len(saddles[keys[0]])):
+            stationary[f"saddle{idx}"] = (
+                float(saddles[keys[0]][idx]),
+                float(saddles[keys[1]][idx]),
+            )
+
+    train_pts = None
+    if training:
+        keys = list(training.keys())
+        train_pts = (training[keys[0]], training[keys[1]])
+
+    fig = plot_variance_overlay(
+        gx,
+        gy,
         energy,
         var_data,
-        xc,
-        yc,
-        training=training,
-        minima=minima,
-        saddles=saddles,
-        meta=meta,
+        train_points=train_pts,
+        stationary=stationary if stationary else None,
         width=width,
         height=height,
     )
@@ -473,11 +597,12 @@ def fps(
     with h5py.File(input_path, "r") as f:
         selected = h5_read_points(f, "selected")
         pruned = h5_read_points(f, "pruned")
-        meta = h5_read_metadata(f)
-    fig = plot_fps(
-        selected,
-        pruned,
-        meta=meta,
+
+    fig = plot_fps_projection(
+        selected["pc1"],
+        selected["pc2"],
+        pruned["pc1"],
+        pruned["pc2"],
         width=width,
         height=height,
     )
@@ -499,8 +624,15 @@ def profile(
     """
     with h5py.File(input_path, "r") as f:
         df = h5_read_table(f, "table")
-        meta = h5_read_metadata(f)
-    fig = plot_profile(df, meta, width=width, height=height)
+
+    fig = plot_energy_profile(
+        df,
+        x="image",
+        y="energy",
+        color="method",
+        width=width,
+        height=height,
+    )
     save_plot(fig, output_path, dpi)
 
 
@@ -536,6 +668,10 @@ def batch(
 
     Config format::
 
+        [defaults]
+        input_dir = "output"
+        output_dir = "output"
+
         [[plots]]
         input = "leps_minimize.h5"
         output = "leps_minimize_convergence.pdf"
@@ -554,6 +690,10 @@ def batch(
 
     if base_dir is None:
         base_dir = config_path.parent
+
+    defaults = cfg.get("defaults", {})
+    input_dir = base_dir / defaults.get("input_dir", ".")
+    output_dir = base_dir / defaults.get("output_dir", ".")
 
     plots = cfg.get("plots", [])
     if not plots:
@@ -586,8 +726,8 @@ def batch(
             n_fail += 1
             continue
 
-        inp = base_dir / entry["input"]
-        out = base_dir / entry["output"]
+        inp = input_dir / entry["input"]
+        out = output_dir / entry["output"]
         w = entry.get("width", 7.0)
         h = entry.get("height", 5.0)
         d = entry.get("dpi", dpi)
