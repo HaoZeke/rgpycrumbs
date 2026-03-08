@@ -30,6 +30,7 @@ HDF5 layout (mirrors Julia common_plot.jl helpers):
 # ///
 
 import logging
+import subprocess
 import sys
 from pathlib import Path
 
@@ -128,6 +129,24 @@ def save_plot(fig, output: Path, dpi: int) -> None:
     log.info("Saved: %s", output)
 
 
+# --- Auto-detect clamping from filename ---
+
+# MB surfaces need [-200, 50], LEPS need [-5, 5]
+_CLAMP_PRESETS = {
+    "mb": (-200.0, 50.0, 25.0),  # (lo, hi, contour_step)
+    "leps": (-5.0, 5.0, 0.5),
+}
+
+
+def _detect_clamp(filename: str) -> tuple[float | None, float | None, float | None]:
+    """Detect energy clamping preset from filename."""
+    stem = filename.lower()
+    for prefix, (lo, hi, step) in _CLAMP_PRESETS.items():
+        if prefix in stem:
+            return lo, hi, step
+    return None, None, None
+
+
 # --- Common click options ---
 
 
@@ -189,11 +208,7 @@ def convergence(
     height: float,
     dpi: int,
 ):
-    """Force/energy convergence vs oracle calls.
-
-    Reads table/ group with oracle_calls, method, and
-    max_fatom or force_norm columns.
-    """
+    """Force/energy convergence vs oracle calls."""
     with h5py.File(input_path, "r") as f:
         df = h5_read_table(f, "table")
         meta = h5_read_metadata(f)
@@ -220,42 +235,26 @@ def convergence(
 
 @cli.command()
 @common_options
-@click.option(
-    "--grid",
-    "-g",
-    "grid_name",
-    default="energy",
-    help="Grid dataset name under grids/.",
-)
-@click.option(
-    "--clamp-lo",
-    default=None,
-    type=float,
-    help="Clamp grid values below this.",
-)
-@click.option(
-    "--clamp-hi",
-    default=None,
-    type=float,
-    help="Clamp grid values above this.",
-)
+@click.option("--clamp-lo", default=None, type=float)
+@click.option("--clamp-hi", default=None, type=float)
+@click.option("--contour-step", default=None, type=float)
 def surface(
     input_path: Path,
     output_path: Path,
     width: float,
     height: float,
     dpi: int,
-    grid_name: str,
     clamp_lo: float | None,
     clamp_hi: float | None,
+    contour_step: float | None,
 ):
-    """2D PES contour plot.
+    """2D PES contour plot."""
+    # Auto-detect clamping from filename if not specified
+    if clamp_lo is None and clamp_hi is None:
+        clamp_lo, clamp_hi, contour_step = _detect_clamp(input_path.name)
 
-    Reads grids/<grid_name>, optional paths/neb and
-    points/endpoints.
-    """
     with h5py.File(input_path, "r") as f:
-        data, xc, yc = h5_read_grid(f, grid_name)
+        data, xc, yc = h5_read_grid(f, "energy")
 
         # Collect paths
         paths = None
@@ -263,7 +262,6 @@ def surface(
             paths = {}
             for pname in f["paths"].keys():
                 pdata = h5_read_path(f, pname)
-                # paths have x,y or rAB,rBC
                 keys = list(pdata.keys())
                 paths[pname] = (pdata[keys[0]], pdata[keys[1]])
 
@@ -283,6 +281,11 @@ def surface(
         ny, nx = data.shape
         gx, gy = np.meshgrid(np.arange(nx), np.arange(ny))
 
+    # Build explicit levels if clamping specified
+    levels = None
+    if clamp_lo is not None and clamp_hi is not None:
+        levels = np.linspace(clamp_lo, clamp_hi, 25)
+
     fig = plot_surface_contour(
         gx,
         gy,
@@ -291,6 +294,8 @@ def surface(
         points=points,
         clamp_lo=clamp_lo,
         clamp_hi=clamp_hi,
+        levels=levels,
+        contour_step=contour_step,
         width=width,
         height=height,
     )
@@ -299,13 +304,7 @@ def surface(
 
 @cli.command()
 @common_options
-@click.option(
-    "--n-points",
-    multiple=True,
-    type=int,
-    default=None,
-    help="Training set sizes for panel grid.",
-)
+@click.option("--n-points", multiple=True, type=int, default=None)
 def quality(
     input_path: Path,
     output_path: Path,
@@ -314,11 +313,14 @@ def quality(
     dpi: int,
     n_points: tuple[int, ...] | None,
 ):
-    """GP surrogate quality progression (multi-panel).
+    """GP surrogate quality progression (multi-panel)."""
+    # Auto-detect clamping from filename
+    clamp_lo, clamp_hi, _ = _detect_clamp(input_path.name)
+    if clamp_lo is None:
+        clamp_lo = -200.0
+    if clamp_hi is None:
+        clamp_hi = 50.0
 
-    Reads grids/true_energy, grids/gp_mean_N<n>, and
-    points/train_N<n> for each n in --n-points.
-    """
     with h5py.File(input_path, "r") as f:
         true_e, xc, yc = h5_read_grid(f, "true_energy")
 
@@ -330,13 +332,25 @@ def quality(
         grids = {}
         for n in n_points:
             gp_e, _, _ = h5_read_grid(f, f"gp_mean_N{n}")
-            grids[n] = {"gp_mean": gp_e}
+            entry = {"gp_mean": gp_e}
+
+            # Read training points if available
+            pts_name = f"train_N{n}"
+            if "points" in f and pts_name in f["points"]:
+                pts = h5_read_points(f, pts_name)
+                keys = list(pts.keys())
+                entry["train_x"] = pts[keys[0]]
+                entry["train_y"] = pts[keys[1]]
+
+            grids[n] = entry
 
     fig = plot_gp_progression(
         grids,
         true_e,
         xc,
         yc,
+        clamp_lo=clamp_lo,
+        clamp_hi=clamp_hi,
         width=width,
         height=height,
     )
@@ -352,16 +366,11 @@ def rff(
     height: float,
     dpi: int,
 ):
-    """RFF approximation quality vs exact GP.
-
-    Reads table/ with D_rff, energy/gradient MAE columns,
-    and root attrs for exact GP baselines.
-    """
+    """RFF approximation quality vs exact GP."""
     with h5py.File(input_path, "r") as f:
         df = h5_read_table(f, "table")
         meta = h5_read_metadata(f)
 
-    # Rename columns to match chemparseplot API
     rename_map = {}
     if "energy_mae_vs_gp" in df.columns:
         rename_map["energy_mae_vs_gp"] = "energy_mae"
@@ -394,13 +403,15 @@ def nll(
     height: float,
     dpi: int,
 ):
-    """MAP-NLL landscape in hyperparameter space.
-
-    Reads grids/nll and points/optimum.
-    """
+    """MAP-NLL landscape in hyperparameter space."""
     with h5py.File(input_path, "r") as f:
         nll_data, xc, yc = h5_read_grid(f, "nll")
         opt = h5_read_points(f, "optimum")
+
+        # Read gradient norm grid if available
+        grad_norm = None
+        if "grids" in f and "grad_norm" in f["grids"]:
+            grad_norm, _, _ = h5_read_grid(f, "grad_norm")
 
     if xc is not None and yc is not None:
         gx, gy = np.meshgrid(xc, yc)
@@ -416,6 +427,7 @@ def nll(
         gx,
         gy,
         nll_data,
+        grid_grad_norm=grad_norm,
         optimum=optimum,
         width=width,
         height=height,
@@ -432,41 +444,28 @@ def sensitivity(
     height: float,
     dpi: int,
 ):
-    """Hyperparameter sensitivity grid (3x3).
-
-    Reads slice/x, true_surface/E_true, and gp_ls<j>_sv<i>
-    for each panel.
-    """
+    """Hyperparameter sensitivity grid (3x3)."""
     with h5py.File(input_path, "r") as f:
         slice_df = h5_read_table(f, "slice")
         true_df = h5_read_table(f, "true_surface")
         x_vals = slice_df["x"].to_numpy()
         y_true = true_df["E_true"].to_numpy()
 
-        # Build long-form DataFrame for faceted plot
-        rows = []
+        panels = {}
         for j in range(1, 4):
             for i in range(1, 4):
                 name = f"gp_ls{j}_sv{i}"
                 if name in f:
                     gp_df = h5_read_table(f, name)
-                    y_pred = gp_df["E_pred"].to_numpy()
-                    for k in range(len(x_vals)):
-                        rows.append(
-                            {
-                                "x": x_vals[k],
-                                "y_true": y_true[k],
-                                "y_pred": y_pred[k],
-                                "y_lower": 0.0,
-                                "y_upper": 0.0,
-                                "ell": f"ell={j}",
-                                "sigma_f": f"sv={i}",
-                            }
-                        )
+                    panels[name] = {
+                        "E_pred": gp_df["E_pred"].to_numpy(),
+                        "E_std": gp_df["E_std"].to_numpy(),
+                    }
 
-    df = pd.DataFrame(rows)
     fig = plot_hyperparameter_sensitivity(
-        df,
+        x_vals,
+        y_true,
+        panels,
         width=width,
         height=height,
     )
@@ -482,32 +481,36 @@ def trust(
     height: float,
     dpi: int,
 ):
-    """Trust region illustration (1D slice).
-
-    Reads slice/ with x, E_true, E_pred, E_std,
-    in_trust columns and points/training.
-    """
+    """Trust region illustration (1D slice)."""
     with h5py.File(input_path, "r") as f:
         slice_df = h5_read_table(f, "slice")
         training = h5_read_points(f, "training")
+        meta = h5_read_metadata(f)
 
-    # Build DataFrame with columns the plot function expects
-    df = slice_df.rename(columns={"E_pred": "y_pred"})
-    # Compute confidence bounds
-    if "E_std" in slice_df.columns:
-        std = slice_df["E_std"]
-        df["y_lower"] = df["y_pred"] - 2 * std
-        df["y_upper"] = df["y_pred"] + 2 * std
+    x_slice = slice_df["x"].to_numpy()
+    e_true = slice_df["E_true"].to_numpy()
+    e_pred = slice_df["E_pred"].to_numpy()
+    e_std = slice_df["E_std"].to_numpy()
+    in_trust = slice_df["in_trust"].to_numpy()
 
-    train_pts = None
-    if "x" in training and "y" in training:
-        train_pts = (training["x"], training["y"])
-    elif "x" in training and "E" in training:
-        train_pts = (training["x"], training["E"])
+    # Training x coordinates (filter to nearby slice)
+    y_slice = float(meta.get("y_slice", 0.5))
+    train_x = training.get("x", np.array([]))
+    train_y = training.get("y", np.array([]))
+    # Keep only training points near the slice
+    if len(train_x) > 0 and len(train_y) > 0:
+        mask = np.abs(train_y - y_slice) < 0.3
+        train_x = train_x[mask]
+    else:
+        train_x = None
 
     fig = plot_trust_region(
-        df,
-        train_points=train_pts,
+        x_slice,
+        e_true,
+        e_pred,
+        e_std,
+        in_trust,
+        train_x=train_x,
         width=width,
         height=height,
     )
@@ -523,11 +526,14 @@ def variance(
     height: float,
     dpi: int,
 ):
-    """GP variance overlaid on PES.
+    """GP variance overlaid on PES."""
+    # Auto-detect clamping from filename
+    clamp_lo, clamp_hi, _ = _detect_clamp(input_path.name)
+    if clamp_lo is None:
+        clamp_lo = -200.0
+    if clamp_hi is None:
+        clamp_hi = 50.0
 
-    Reads grids/energy, grids/variance, points/training,
-    optional points/minima, points/saddles.
-    """
     with h5py.File(input_path, "r") as f:
         energy, xc, yc = h5_read_grid(f, "energy")
         var_data, _, _ = h5_read_grid(f, "variance")
@@ -545,7 +551,7 @@ def variance(
         ny, nx = energy.shape
         gx, gy = np.meshgrid(np.arange(nx), np.arange(ny))
 
-    # Build stationary points dict for the plot function
+    # Build stationary points dict
     stationary = {}
     if minima is not None:
         keys = list(minima.keys())
@@ -574,6 +580,8 @@ def variance(
         var_data,
         train_points=train_pts,
         stationary=stationary if stationary else None,
+        clamp_lo=clamp_lo,
+        clamp_hi=clamp_hi,
         width=width,
         height=height,
     )
@@ -589,11 +597,7 @@ def fps(
     height: float,
     dpi: int,
 ):
-    """FPS subset visualization (PCA scatter).
-
-    Reads points/selected and points/pruned with
-    pc1, pc2 datasets.
-    """
+    """FPS subset visualization (PCA scatter)."""
     with h5py.File(input_path, "r") as f:
         selected = h5_read_points(f, "selected")
         pruned = h5_read_points(f, "pruned")
@@ -618,10 +622,7 @@ def profile(
     height: float,
     dpi: int,
 ):
-    """NEB energy profile (image index vs delta E).
-
-    Reads table/ with image, energy, method columns.
-    """
+    """NEB energy profile (image index vs delta E)."""
     with h5py.File(input_path, "r") as f:
         df = h5_read_table(f, "table")
 
@@ -634,6 +635,105 @@ def profile(
         height=height,
     )
     save_plot(fig, output_path, dpi)
+
+
+@cli.command()
+@click.option(
+    "--dat-pattern",
+    default=None,
+    type=str,
+    help="Glob pattern for .dat files (eON format).",
+)
+@click.option(
+    "--con-pattern",
+    default=None,
+    type=str,
+    help="Glob pattern for .con path files (eON format).",
+)
+@click.option(
+    "--source-dir",
+    "-d",
+    default=".",
+    type=click.Path(exists=True, path_type=Path),
+    help="Directory containing .dat/.con files.",
+)
+@click.option(
+    "--output",
+    "-o",
+    "output_path",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Output PDF path.",
+)
+@click.option("--width", "-W", default=7.0, type=float)
+@click.option("--height", "-H", default=5.0, type=float)
+@click.option("--dpi", default=300, type=int)
+@click.option(
+    "--surface-type",
+    default="grad_imq",
+    type=str,
+    help="Surface interpolation method for plt-neb.",
+)
+@click.option(
+    "--landscape-mode",
+    default="surface",
+    type=click.Choice(["path", "surface"]),
+)
+@click.option("--plot-structures", default="none", type=str)
+@click.option("--project-path", is_flag=True, default=False)
+def landscape(
+    dat_pattern: str | None,
+    con_pattern: str | None,
+    source_dir: Path,
+    output_path: Path,
+    width: float,
+    height: float,
+    dpi: int,
+    surface_type: str,
+    landscape_mode: str,
+    plot_structures: str,
+    project_path: bool,
+):
+    """2D NEB reaction landscape via plt-neb (RMSD coordinates)."""
+    # Delegate to plt-neb which has the full landscape pipeline
+    plt_neb_script = Path(__file__).parent.parent / "eon" / "plt_neb.py"
+    cmd = [
+        sys.executable,
+        str(plt_neb_script),
+        "--source",
+        "eon",
+        "--plot-type",
+        "landscape",
+        "--landscape-mode",
+        landscape_mode,
+        "--surface-type",
+        surface_type,
+        "--plot-structures",
+        plot_structures,
+        "--figsize",
+        str(width),
+        str(height),
+        "--dpi",
+        str(dpi),
+        "--output-file",
+        str(output_path),
+    ]
+
+    if dat_pattern:
+        cmd.extend(["--input-dat-pattern", dat_pattern])
+    if con_pattern:
+        cmd.extend(["--input-path-pattern", con_pattern])
+    if project_path:
+        cmd.append("--project-path")
+
+    log.info("Delegating to plt-neb: %s", " ".join(cmd))
+    result = subprocess.run(  # noqa: S603
+        cmd, cwd=str(source_dir), capture_output=True, text=True, check=False
+    )
+    if result.returncode != 0:
+        log.error("plt-neb failed:\n%s\n%s", result.stdout, result.stderr)
+        raise click.ClickException("plt-neb landscape generation failed")
+    log.info("Saved: %s", output_path)
 
 
 @cli.command()
@@ -653,33 +753,13 @@ def profile(
     type=click.Path(path_type=Path),
     help="Base directory for relative paths in config.",
 )
-@click.option(
-    "--dpi",
-    default=300,
-    type=int,
-    help="Output resolution.",
-)
+@click.option("--dpi", default=300, type=int, help="Output resolution.")
 def batch(
     config_path: Path,
     base_dir: Path | None,
     dpi: int,
 ):
-    """Generate multiple plots from a TOML config.
-
-    Config format::
-
-        [defaults]
-        input_dir = "output"
-        output_dir = "output"
-
-        [[plots]]
-        input = "leps_minimize.h5"
-        output = "leps_minimize_convergence.pdf"
-        type = "convergence"
-
-    Optional per-plot keys: width, height, and any
-    subcommand-specific options.
-    """
+    """Generate multiple plots from a TOML config."""
     try:
         import tomllib  # noqa: PLC0415
     except ImportError:
@@ -711,6 +791,7 @@ def batch(
         "variance": variance,
         "fps": fps,
         "profile": profile,
+        "landscape": landscape,
     }
 
     n_ok = 0
@@ -718,43 +799,49 @@ def batch(
     for idx, entry in enumerate(plots):
         plot_type = entry.get("type")
         if plot_type not in cmds:
-            log.error(
-                "Plot %d: unknown type %r, skipping",
-                idx,
-                plot_type,
-            )
+            log.error("Plot %d: unknown type %r, skipping", idx, plot_type)
             n_fail += 1
             continue
 
-        inp = input_dir / entry["input"]
         out = output_dir / entry["output"]
         w = entry.get("width", 7.0)
         h = entry.get("height", 5.0)
         d = entry.get("dpi", dpi)
 
-        # Build args for the click command
-        args = [
-            "--input",
-            str(inp),
-            "--output",
-            str(out),
-            "--width",
-            str(w),
-            "--height",
-            str(h),
-            "--dpi",
-            str(d),
-        ]
+        # Landscape type uses source_dir instead of input HDF5
+        if plot_type == "landscape":
+            src_dir = base_dir / entry.get("source_dir", ".")
+            inp_name = entry.get("source_dir", ".")
+            args = [
+                "--source-dir",
+                str(src_dir),
+                "--output",
+                str(out),
+                "--width",
+                str(w),
+                "--height",
+                str(h),
+                "--dpi",
+                str(d),
+            ]
+        else:
+            inp = input_dir / entry["input"]
+            inp_name = inp.name
+            args = [
+                "--input",
+                str(inp),
+                "--output",
+                str(out),
+                "--width",
+                str(w),
+                "--height",
+                str(h),
+                "--dpi",
+                str(d),
+            ]
 
         # Forward extra keys as CLI options
-        skip = {
-            "type",
-            "input",
-            "output",
-            "width",
-            "height",
-            "dpi",
-        }
+        skip = {"type", "input", "output", "width", "height", "dpi", "source_dir"}
         for k, v in entry.items():
             if k in skip:
                 continue
@@ -773,16 +860,13 @@ def batch(
             idx + 1,
             len(plots),
             plot_type,
-            inp.name,
+            inp_name,
             out.name,
         )
         try:
             ctx = click.Context(cmds[plot_type])
             cmds[plot_type].parse_args(ctx, args)
-            ctx.invoke(
-                cmds[plot_type].callback,
-                **ctx.params,
-            )
+            ctx.invoke(cmds[plot_type].callback, **ctx.params)
             n_ok += 1
         except Exception:
             log.exception("Plot %d (%s) failed", idx, plot_type)
