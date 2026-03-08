@@ -595,9 +595,9 @@ def main(
                 con_paths,
                 y_col,
                 None,
-                cache_file,
-                force_recompute,
-                ira_kmax,
+                cache_file=cache_file,
+                force_recompute=force_recompute,
+                ira_kmax=ira_kmax,
                 augment_dat=augment_dat,
                 augment_con=augment_con,
                 ref_atoms=atoms_list[0] if atoms_list else None,  # main reactant
