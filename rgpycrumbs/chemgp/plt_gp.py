@@ -221,6 +221,7 @@ def convergence(
             break
 
     conv_tol = meta.get("conv_tol", None)
+
     fig = plot_convergence_curve(
         df,
         x="oracle_calls",
@@ -680,7 +681,18 @@ def profile(
     type=click.Choice(["path", "surface"]),
 )
 @click.option("--plot-structures", default="none", type=str)
-@click.option("--project-path", is_flag=True, default=False)
+@click.option("--project-path/--no-project-path", is_flag=True, default=None)
+@click.option(
+    "--additional-con",
+    type=(str, str),
+    multiple=True,
+    default=None,
+    help="(path, label) pairs for extra path overlays.",
+)
+@click.option("--augment-dat", type=str, default=None, help="Glob for extra .dat surface data.")
+@click.option("--augment-con", type=str, default=None, help="Glob for extra .con surface data.")
+@click.option("--zoom-ratio", type=float, default=None, help="Structure image zoom ratio.")
+@click.option("--ase-rotation", type=str, default=None, help="ASE rotation string for structures.")
 def landscape(
     dat_pattern: str | None,
     con_pattern: str | None,
@@ -693,6 +705,11 @@ def landscape(
     landscape_mode: str,
     plot_structures: str,
     project_path: bool,
+    additional_con: tuple | None,
+    augment_dat: str | None,
+    augment_con: str | None,
+    zoom_ratio: float | None,
+    ase_rotation: str | None,
 ):
     """2D NEB reaction landscape via plt-neb (RMSD coordinates)."""
     # Delegate to plt-neb which has the full landscape pipeline
@@ -723,8 +740,23 @@ def landscape(
         cmd.extend(["--input-dat-pattern", dat_pattern])
     if con_pattern:
         cmd.extend(["--input-path-pattern", con_pattern])
+        cmd.extend(["--con-file", con_pattern])
     if project_path:
         cmd.append("--project-path")
+    elif project_path is not None:
+        cmd.append("--no-project-path")
+    if additional_con:
+        cmd.append("--show-legend")
+        for con_path, con_label in additional_con:
+            cmd.extend(["--additional-con", con_path, con_label])
+    if augment_dat:
+        cmd.extend(["--augment-dat", augment_dat])
+    if augment_con:
+        cmd.extend(["--augment-con", augment_con])
+    if zoom_ratio is not None:
+        cmd.extend(["--zoom-ratio", str(zoom_ratio)])
+    if ase_rotation is not None:
+        cmd.extend(["--ase-rotation", ase_rotation])
 
     log.info("Delegating to plt-neb: %s", " ".join(cmd))
     result = subprocess.run(  # noqa: S603
@@ -856,7 +888,12 @@ def batch(
                     args.append(flag)
             elif isinstance(v, list):
                 for item in v:
-                    args.extend([flag, str(item)])
+                    if isinstance(item, list):
+                        # Nested list: e.g. additional_con = [["path", "label"], ...]
+                        args.append(flag)
+                        args.extend(str(x) for x in item)
+                    else:
+                        args.extend([flag, str(item)])
             else:
                 args.extend([flag, str(v)])
 
