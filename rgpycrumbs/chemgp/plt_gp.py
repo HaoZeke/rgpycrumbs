@@ -796,6 +796,7 @@ def batch(
 
     n_ok = 0
     n_fail = 0
+    n_skip = 0
     for idx, entry in enumerate(plots):
         plot_type = entry.get("type")
         if plot_type not in cmds:
@@ -827,6 +828,10 @@ def batch(
         else:
             inp = input_dir / entry["input"]
             inp_name = inp.name
+            if not inp.exists():
+                log.warning("Skipping %s: input %s not found", entry["output"], inp)
+                n_skip += 1
+                continue
             args = [
                 "--input",
                 str(inp),
@@ -872,7 +877,7 @@ def batch(
             log.exception("Plot %d (%s) failed", idx, plot_type)
             n_fail += 1
 
-    log.info("Batch complete: %d ok, %d failed", n_ok, n_fail)
+    log.info("Batch complete: %d ok, %d skipped, %d failed", n_ok, n_skip, n_fail)
     if n_fail > 0:
         sys.exit(1)
 
