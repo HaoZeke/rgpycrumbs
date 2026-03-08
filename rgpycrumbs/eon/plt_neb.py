@@ -804,14 +804,18 @@ def main(
                 renderer=strip_renderer,
             )
 
-            # Annotate Main Plot
+            # Annotate Main Plot -- only label R, SP, P (not additional con;
+            # those are identified by the legend markers instead)
             main_plot_texts = []
+            main_labels = {"R", "SP", "P"}
             for d in strip_payload:
+                if d["label"] not in main_labels:
+                    continue
                 t = ax.text(
                     d["x"],
                     d["y"],
                     d["label"],
-                    fontsize=12,
+                    fontsize=11,
                     fontweight="bold",
                     color="white",
                     ha="center",
@@ -827,9 +831,10 @@ def main(
                 adjust_text(
                     main_plot_texts,
                     ax=ax,
-                    arrowprops={"arrowstyle": "-", "color": "white", "lw": 1.5},
-                    expand_points=(1.5, 1.5),
-                    force_text=0.5,
+                    arrowprops={"arrowstyle": "-", "color": "white", "lw": 1.0},
+                    expand_points=(2.0, 2.0),
+                    force_text=(1.0, 2.0),
+                    force_points=(1.0, 2.0),
                 )
 
         # Labels
