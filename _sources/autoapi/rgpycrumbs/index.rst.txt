@@ -12,6 +12,7 @@ Submodules
 
    /autoapi/rgpycrumbs/_aux/index
    /autoapi/rgpycrumbs/basetypes/index
+   /autoapi/rgpycrumbs/chemgp/index
    /autoapi/rgpycrumbs/cli/index
    /autoapi/rgpycrumbs/eon/index
    /autoapi/rgpycrumbs/func/index

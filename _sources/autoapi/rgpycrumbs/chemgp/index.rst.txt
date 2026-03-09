@@ -1,0 +1,15 @@
+rgpycrumbs.chemgp
+=================
+
+.. py:module:: rgpycrumbs.chemgp
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/rgpycrumbs/chemgp/plt_gp/index
+
+

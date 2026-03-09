@@ -168,6 +168,7 @@ Tool Categories
      :maxdepth: 2
      :caption: Tools
 
+     tools/chemgp/index
      tools/eon/index
      tools/orca/index
      tools/geom/index

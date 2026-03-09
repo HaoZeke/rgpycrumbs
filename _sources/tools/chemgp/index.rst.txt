@@ -1,0 +1,22 @@
+
+
+ChemGP Plotting
+---------------
+
+These tools generate publication figures from
+`ChemGP <https://github.com/HaoZeke/ChemGP>`_ HDF5 output files, using
+`chemparseplot <https://chemparseplot.rgoswami.me>`_ for visualization.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: CLI Tools
+
+   plt_gp
+   batch_tutorial
+   hdf5_schema
+
+API Reference
+~~~~~~~~~~~~~
+
+For developer details, see the :doc:`ChemGP Helper Reference
+<../../autoapi/rgpycrumbs/chemgp/index>`.

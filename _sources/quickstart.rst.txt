@@ -171,6 +171,21 @@ Plotting NEB paths (eOn)
     # Interactive plot of the latest iterations
     rgpycrumbs eon plt-neb --start 280
 
+Plotting ChemGP figures
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    # Single convergence plot from an HDF5 file
+    rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+
+    # Batch generation from a TOML config
+    rgpycrumbs chemgp plt-gp batch --config figures.toml
+
+See :doc:`tools/chemgp/plt_gp` for the full CLI reference and
+:doc:`tools/chemgp/batch_tutorial` for a tutorial on batch figure
+generation.
+
 Splitting trajectory files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.parsers.chemgp - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.parsers.common" href="../common/index.html" /><link rel="prev" title="rgpycrumbs.parsers.bless" href="../bless/index.html" />
+      <link rel="canonical" href="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/parsers/chemgp/" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/parsers/chemgp/"/>
+  <meta property="og:title" content="rgpycrumbs.parsers.chemgp"/>
+    <meta name="twitter:card" content="summary"/>
+  <!-- Manual favicon handling with favicon.io -->
+<!-- since sphinx-favicon doesn't work with shibuya -->
+<link rel="icon" type="image/png" sizes="16x16" href="../../../../_static/favicons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../../_static/favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../../../../_static/favicons/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../../../_static/favicons/android-chrome-512x512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../../../_static/favicons/apple-touch-icon.png">
+<link rel="shortcut icon" href="../../../../_static/favicons/favicon.ico">
+<link rel="manifest" href="../../../../_static/favicons/site.webmanifest">
+<!-- Plausible injection -->
+<script
+  defer
+  data-domain="rgpycrumbs.rgoswami.me"
+  src="https://analytics.turtletech.us/js/script.hash.outbound-links.js"
+></script>
+<script>
+  window.plausible =
+    window.plausible ||
+    function () {
+      (window.plausible.q = window.plausible.q || []).push(arguments);
+    };
+</script></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../../index.html">
+      <img class="light-logo" src="../../../../_static/pycrumbs_notext.svg" alt="rgpycrumbs" height="28" loading="lazy" />
+      <img class="dark-logo" src="../../../../_static/pycrumbs_notext.svg" alt="rgpycrumbs" height="28" loading="lazy" />
+      <strong>rgpycrumbs</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://chemparseplot.rgoswami.me">
+                <span>chemparseplot</span>
+                <small>Parsing and plotting for computational chemistry</small>
+              </a></li><li><a href="https://eondocs.org">
+                <span>eOn</span>
+                <small>Long-timescale molecular dynamics engine, primary consumer</small>
+              </a></li><li><a href="https://github.com/HaoZeke/pychum">
+                <span>pychum</span>
+                <small>Input file generation for ORCA and NWChem</small>
+              </a></li></ul>
+      </li><li class="link">
+          <a href="https://pypi.org/project/rgpycrumbs/">
+            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/mlflow.html">MLFlow Logging for eOn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/plt_neb.html">Plotting NEB paths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/alignment.html">Robust Structural Alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/prefix/index.html">Prefix Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../used_by.html">Used By</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../helpers/index.html">helpers</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">rgpycrumbs</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../basetypes/index.html">rgpycrumbs.basetypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../chemgp/index.html">rgpycrumbs.chemgp</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../eon/index.html">rgpycrumbs.eon</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../func/index.html">rgpycrumbs.func</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../func/muller_brown/index.html">rgpycrumbs.func.muller_brown</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/api/index.html">rgpycrumbs.geom.api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../interpolation/index.html">rgpycrumbs.interpolation</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">rgpycrumbs.parsers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../bless/index.html">rgpycrumbs.parsers.bless</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">rgpycrumbs.parsers.chemgp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../common/index.html">rgpycrumbs.parsers.common</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../plumed/index.html">rgpycrumbs.plumed</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../plumed/direct_reconstruction/index.html">rgpycrumbs.plumed.direct_reconstruction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../prefix/index.html">rgpycrumbs.prefix</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../xts/index.html">rgpycrumbs.xts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generate_orca_input/index.html">generate_orca_input</a></li>
+</ul>
+</li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace"><code class="docutils literal notranslate"><span class="pre">OptimizerTrace</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.method"><code class="docutils literal notranslate">method</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.steps"><code class="docutils literal notranslate">steps</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.oracle_calls"><code class="docutils literal notranslate">oracle_calls</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.energies"><code class="docutils literal notranslate">energies</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.forces"><code class="docutils literal notranslate">forces</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.ComparisonData"><code class="docutils literal notranslate"><span class="pre">ComparisonData</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.ComparisonData.traces"><code class="docutils literal notranslate">traces</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.ComparisonData.summary"><code class="docutils literal notranslate">summary</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.parse_comparison_jsonl"><code class="docutils literal notranslate"><span class="pre">parse_comparison_jsonl()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData"><code class="docutils literal notranslate"><span class="pre">RFFQualityData</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.exact_energy_mae"><code class="docutils literal notranslate">exact_energy_mae</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.exact_gradient_mae"><code class="docutils literal notranslate">exact_gradient_mae</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.d_rff_values"><code class="docutils literal notranslate">d_rff_values</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.energy_mae_vs_true"><code class="docutils literal notranslate">energy_mae_vs_true</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.gradient_mae_vs_true"><code class="docutils literal notranslate">gradient_mae_vs_true</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.energy_mae_vs_gp"><code class="docutils literal notranslate">energy_mae_vs_gp</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.gradient_mae_vs_gp"><code class="docutils literal notranslate">gradient_mae_vs_gp</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.parse_rff_quality_jsonl"><code class="docutils literal notranslate"><span class="pre">parse_rff_quality_jsonl()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid"><code class="docutils literal notranslate"><span class="pre">GPQualityGrid</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.n_train"><code class="docutils literal notranslate">n_train</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.nx"><code class="docutils literal notranslate">nx</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.ny"><code class="docutils literal notranslate">ny</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.x"><code class="docutils literal notranslate">x</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.y"><code class="docutils literal notranslate">y</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.true_e"><code class="docutils literal notranslate">true_e</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.gp_e"><code class="docutils literal notranslate">gp_e</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.gp_var"><code class="docutils literal notranslate">gp_var</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.train_x"><code class="docutils literal notranslate">train_x</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.train_y"><code class="docutils literal notranslate">train_y</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.train_e"><code class="docutils literal notranslate">train_e</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint"><code class="docutils literal notranslate"><span class="pre">StationaryPoint</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.kind"><code class="docutils literal notranslate">kind</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.id"><code class="docutils literal notranslate">id</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.x"><code class="docutils literal notranslate">x</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.y"><code class="docutils literal notranslate">y</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.energy"><code class="docutils literal notranslate">energy</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityData"><code class="docutils literal notranslate"><span class="pre">GPQualityData</span></code></a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityData.meta"><code class="docutils literal notranslate">meta</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityData.stationary"><code class="docutils literal notranslate">stationary</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityData.grids"><code class="docutils literal notranslate">grids</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.parse_gp_quality_jsonl"><code class="docutils literal notranslate"><span class="pre">parse_gp_quality_jsonl()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/HaoZeke/rgpycrumbs"
+  data-type="github" data-user="HaoZeke" data-repo="rgpycrumbs">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>rgpycrumbs</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/HaoZeke/rgpycrumbs/blob/main/docs/source/autoapi/rgpycrumbs/parsers/chemgp/index.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../../index.html"><span itemprop="name">rgpycrumbs</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">API Reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">rgpycrumbs</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">rgpycrumbs.parsers</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="4" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">rgpycrumbs.parsers.chemgp</strong>
+        <meta itemprop="position" content="5" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="rgpycrumbs.rgoswami.me/_sources/autoapi/rgpycrumbs/parsers/chemgp/index.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="rgpycrumbs.rgoswami.me/_sources/autoapi/rgpycrumbs/parsers/chemgp/index.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="rgpycrumbs.rgoswami.me/_sources/autoapi/rgpycrumbs/parsers/chemgp/index.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20rgpycrumbs.rgoswami.me/_sources/autoapi/rgpycrumbs/parsers/chemgp/index.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20rgpycrumbs.rgoswami.me/_sources/autoapi/rgpycrumbs/parsers/chemgp/index.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="module-rgpycrumbs.parsers.chemgp">
+<span id="rgpycrumbs-parsers-chemgp"></span><h1>rgpycrumbs.parsers.chemgp<a class="headerlink" href="#module-rgpycrumbs.parsers.chemgp" title="Link to this heading">¶</a></h1>
+<p>Parsers for ChemGP JSONL output formats.</p>
+<p>ChemGP Rust examples produce JSONL files with method comparison data,
+GP quality grids, and RFF approximation benchmarks. This module provides
+structured parsing into typed containers for downstream plotting.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace" title="rgpycrumbs.parsers.chemgp.OptimizerTrace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OptimizerTrace</span></code></a></p></td>
+<td><p>Single optimizer trace from a comparison JSONL.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.ComparisonData" title="rgpycrumbs.parsers.chemgp.ComparisonData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ComparisonData</span></code></a></p></td>
+<td><p>Parsed optimizer comparison from a single JSONL file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData" title="rgpycrumbs.parsers.chemgp.RFFQualityData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RFFQualityData</span></code></a></p></td>
+<td><p>Parsed RFF approximation quality data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid" title="rgpycrumbs.parsers.chemgp.GPQualityGrid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GPQualityGrid</span></code></a></p></td>
+<td><p>GP quality grid data for a single training set size.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint" title="rgpycrumbs.parsers.chemgp.StationaryPoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StationaryPoint</span></code></a></p></td>
+<td><p>A stationary point (minimum or saddle) on the PES.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityData" title="rgpycrumbs.parsers.chemgp.GPQualityData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GPQualityData</span></code></a></p></td>
+<td><p>Complete GP quality data from mb_gp_quality.jsonl.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.parse_comparison_jsonl" title="rgpycrumbs.parsers.chemgp.parse_comparison_jsonl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_comparison_jsonl</span></code></a>(→ ComparisonData)</p></td>
+<td><p>Parse a ChemGP optimizer comparison JSONL file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.parse_rff_quality_jsonl" title="rgpycrumbs.parsers.chemgp.parse_rff_quality_jsonl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_rff_quality_jsonl</span></code></a>(→ RFFQualityData)</p></td>
+<td><p>Parse a ChemGP RFF quality JSONL file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.parse_gp_quality_jsonl" title="rgpycrumbs.parsers.chemgp.parse_gp_quality_jsonl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_gp_quality_jsonl</span></code></a>(→ GPQualityData)</p></td>
+<td><p>Parse a ChemGP GP quality JSONL file.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.OptimizerTrace">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">OptimizerTrace</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#OptimizerTrace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace" title="Link to this definition">¶</a></dt>
+<dd><p>Single optimizer trace from a comparison JSONL.</p>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>method<span class="classifier">str</span></dt><dd><p>Optimizer name (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;gp_minimize&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;neb&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;otgpd&quot;</span></code>).</p>
+</dd>
+<dt>steps<span class="classifier">list[int]</span></dt><dd><p>Step indices.</p>
+</dd>
+<dt>oracle_calls<span class="classifier">list[int]</span></dt><dd><p>Cumulative oracle call counts.</p>
+</dd>
+<dt>energies<span class="classifier">list[float] | None</span></dt><dd><p>Energy at each step (minimize, dimer).</p>
+</dd>
+<dt>forces<span class="classifier">list[float] | None</span></dt><dd><p>Force norm at each step (dimer: <code class="docutils literal notranslate"><span class="pre">force</span></code>, NEB: <code class="docutils literal notranslate"><span class="pre">max_force</span></code>).</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.OptimizerTrace.method">
+<span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#OptimizerTrace.method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.method" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.OptimizerTrace.steps">
+<span class="sig-name descname"><span class="pre">steps</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#OptimizerTrace.steps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.steps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.OptimizerTrace.oracle_calls">
+<span class="sig-name descname"><span class="pre">oracle_calls</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#OptimizerTrace.oracle_calls"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.oracle_calls" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.OptimizerTrace.energies">
+<span class="sig-name descname"><span class="pre">energies</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#OptimizerTrace.energies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.energies" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.OptimizerTrace.forces">
+<span class="sig-name descname"><span class="pre">forces</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#OptimizerTrace.forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace.forces" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.ComparisonData">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">ComparisonData</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#ComparisonData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.ComparisonData" title="Link to this definition">¶</a></dt>
+<dd><p>Parsed optimizer comparison from a single JSONL file.</p>
+<section id="id1">
+<h3>Attributes<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>traces<span class="classifier">dict[str, OptimizerTrace]</span></dt><dd><p>Keyed by method name.</p>
+</dd>
+<dt>summary<span class="classifier">dict | None</span></dt><dd><p>Summary record if present.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.ComparisonData.traces">
+<span class="sig-name descname"><span class="pre">traces</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.OptimizerTrace" title="rgpycrumbs.parsers.chemgp.OptimizerTrace"><span class="pre">OptimizerTrace</span></a><span class="p"><span class="pre">]</span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#ComparisonData.traces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.ComparisonData.traces" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.ComparisonData.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#ComparisonData.summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.ComparisonData.summary" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.parse_comparison_jsonl">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">parse_comparison_jsonl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.ComparisonData" title="rgpycrumbs.parsers.chemgp.ComparisonData"><span class="pre">ComparisonData</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#parse_comparison_jsonl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.parse_comparison_jsonl" title="Link to this definition">¶</a></dt>
+<dd><p>Parse a ChemGP optimizer comparison JSONL file.</p>
+<p>Handles minimize, dimer, and NEB comparison formats. Each line is a
+JSON object with a <code class="docutils literal notranslate"><span class="pre">method</span></code> field (or <code class="docutils literal notranslate"><span class="pre">summary:</span> <span class="pre">true</span></code>).</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>path</dt><dd><p>Path to the JSONL file.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>ComparisonData</dt><dd><p>Parsed traces keyed by method name.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">RFFQualityData</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData" title="Link to this definition">¶</a></dt>
+<dd><p>Parsed RFF approximation quality data.</p>
+<section id="id2">
+<h3>Attributes<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>exact_energy_mae<span class="classifier">float</span></dt><dd><p>Exact GP energy MAE vs true surface.</p>
+</dd>
+<dt>exact_gradient_mae<span class="classifier">float</span></dt><dd><p>Exact GP gradient MAE vs true surface.</p>
+</dd>
+<dt>d_rff_values<span class="classifier">list[int]</span></dt><dd><p>RFF feature counts tested.</p>
+</dd>
+<dt>energy_mae_vs_true<span class="classifier">list[float]</span></dt><dd><p>RFF energy MAE vs true surface.</p>
+</dd>
+<dt>gradient_mae_vs_true<span class="classifier">list[float]</span></dt><dd><p>RFF gradient MAE vs true surface.</p>
+</dd>
+<dt>energy_mae_vs_gp<span class="classifier">list[float]</span></dt><dd><p>RFF energy MAE vs exact GP.</p>
+</dd>
+<dt>gradient_mae_vs_gp<span class="classifier">list[float]</span></dt><dd><p>RFF gradient MAE vs exact GP.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.exact_energy_mae">
+<span class="sig-name descname"><span class="pre">exact_energy_mae</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.exact_energy_mae"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.exact_energy_mae" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.exact_gradient_mae">
+<span class="sig-name descname"><span class="pre">exact_gradient_mae</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.exact_gradient_mae"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.exact_gradient_mae" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.d_rff_values">
+<span class="sig-name descname"><span class="pre">d_rff_values</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.d_rff_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.d_rff_values" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.energy_mae_vs_true">
+<span class="sig-name descname"><span class="pre">energy_mae_vs_true</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.energy_mae_vs_true"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.energy_mae_vs_true" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.gradient_mae_vs_true">
+<span class="sig-name descname"><span class="pre">gradient_mae_vs_true</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.gradient_mae_vs_true"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.gradient_mae_vs_true" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.energy_mae_vs_gp">
+<span class="sig-name descname"><span class="pre">energy_mae_vs_gp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.energy_mae_vs_gp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.energy_mae_vs_gp" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.RFFQualityData.gradient_mae_vs_gp">
+<span class="sig-name descname"><span class="pre">gradient_mae_vs_gp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#RFFQualityData.gradient_mae_vs_gp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.RFFQualityData.gradient_mae_vs_gp" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.parse_rff_quality_jsonl">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">parse_rff_quality_jsonl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.RFFQualityData" title="rgpycrumbs.parsers.chemgp.RFFQualityData"><span class="pre">RFFQualityData</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#parse_rff_quality_jsonl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.parse_rff_quality_jsonl" title="Link to this definition">¶</a></dt>
+<dd><p>Parse a ChemGP RFF quality JSONL file.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>path</dt><dd><p>Path to the JSONL file.</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>RFFQualityData</dt><dd><p>Parsed exact GP and RFF metrics.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">GPQualityGrid</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid" title="Link to this definition">¶</a></dt>
+<dd><p>GP quality grid data for a single training set size.</p>
+<section id="id5">
+<h3>Attributes<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>n_train<span class="classifier">int</span></dt><dd><p>Number of training points.</p>
+</dd>
+<dt>nx<span class="classifier">int</span></dt><dd><p>Grid x resolution.</p>
+</dd>
+<dt>ny<span class="classifier">int</span></dt><dd><p>Grid y resolution.</p>
+</dd>
+<dt>x<span class="classifier">list[list[float]]</span></dt><dd><p>Grid x coordinates (ny x nx).</p>
+</dd>
+<dt>y<span class="classifier">list[list[float]]</span></dt><dd><p>Grid y coordinates (ny x nx).</p>
+</dd>
+<dt>true_e<span class="classifier">list[list[float]]</span></dt><dd><p>True energy on grid.</p>
+</dd>
+<dt>gp_e<span class="classifier">list[list[float]]</span></dt><dd><p>GP predicted energy on grid.</p>
+</dd>
+<dt>gp_var<span class="classifier">list[list[float]]</span></dt><dd><p>GP variance on grid.</p>
+</dd>
+<dt>train_x<span class="classifier">list[float]</span></dt><dd><p>Training point x coordinates.</p>
+</dd>
+<dt>train_y<span class="classifier">list[float]</span></dt><dd><p>Training point y coordinates.</p>
+</dd>
+<dt>train_e<span class="classifier">list[float]</span></dt><dd><p>Training point energies.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.n_train">
+<span class="sig-name descname"><span class="pre">n_train</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.n_train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.n_train" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.nx">
+<span class="sig-name descname"><span class="pre">nx</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.nx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.nx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.ny">
+<span class="sig-name descname"><span class="pre">ny</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.ny"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.ny" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.x">
+<span class="sig-name descname"><span class="pre">x</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.x" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.y">
+<span class="sig-name descname"><span class="pre">y</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.y" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.true_e">
+<span class="sig-name descname"><span class="pre">true_e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.true_e"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.true_e" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.gp_e">
+<span class="sig-name descname"><span class="pre">gp_e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.gp_e"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.gp_e" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.gp_var">
+<span class="sig-name descname"><span class="pre">gp_var</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.gp_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.gp_var" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.train_x">
+<span class="sig-name descname"><span class="pre">train_x</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.train_x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.train_x" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.train_y">
+<span class="sig-name descname"><span class="pre">train_y</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.train_y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.train_y" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityGrid.train_e">
+<span class="sig-name descname"><span class="pre">train_e</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityGrid.train_e"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid.train_e" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.StationaryPoint">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">StationaryPoint</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#StationaryPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.StationaryPoint" title="Link to this definition">¶</a></dt>
+<dd><p>A stationary point (minimum or saddle) on the PES.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.StationaryPoint.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#StationaryPoint.kind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.kind" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.StationaryPoint.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#StationaryPoint.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.StationaryPoint.x">
+<span class="sig-name descname"><span class="pre">x</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#StationaryPoint.x"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.x" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.StationaryPoint.y">
+<span class="sig-name descname"><span class="pre">y</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#StationaryPoint.y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.y" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.StationaryPoint.energy">
+<span class="sig-name descname"><span class="pre">energy</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#StationaryPoint.energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.StationaryPoint.energy" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityData">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">GPQualityData</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityData" title="Link to this definition">¶</a></dt>
+<dd><p>Complete GP quality data from mb_gp_quality.jsonl.</p>
+<section id="id6">
+<h3>Attributes<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>meta<span class="classifier">dict</span></dt><dd><p>Grid metadata (nx, ny, x_min, x_max, y_min, y_max).</p>
+</dd>
+<dt>stationary<span class="classifier">list[StationaryPoint]</span></dt><dd><p>Minima and saddle points.</p>
+</dd>
+<dt>grids<span class="classifier">dict[int, GPQualityGrid]</span></dt><dd><p>Grid data keyed by n_train.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityData.meta">
+<span class="sig-name descname"><span class="pre">meta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityData.meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityData.meta" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityData.stationary">
+<span class="sig-name descname"><span class="pre">stationary</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.StationaryPoint" title="rgpycrumbs.parsers.chemgp.StationaryPoint"><span class="pre">StationaryPoint</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityData.stationary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityData.stationary" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.GPQualityData.grids">
+<span class="sig-name descname"><span class="pre">grids</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityGrid" title="rgpycrumbs.parsers.chemgp.GPQualityGrid"><span class="pre">GPQualityGrid</span></a><span class="p"><span class="pre">]</span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#GPQualityData.grids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.GPQualityData.grids" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.parsers.chemgp.parse_gp_quality_jsonl">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.parsers.chemgp.</span></span><span class="sig-name descname"><span class="pre">parse_gp_quality_jsonl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">pathlib.Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#rgpycrumbs.parsers.chemgp.GPQualityData" title="rgpycrumbs.parsers.chemgp.GPQualityData"><span class="pre">GPQualityData</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/parsers/chemgp.html#parse_gp_quality_jsonl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.parsers.chemgp.parse_gp_quality_jsonl" title="Link to this definition">¶</a></dt>
+<dd><p>Parse a ChemGP GP quality JSONL file.</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>path</dt><dd><p>Path to the JSONL file (e.g. <code class="docutils literal notranslate"><span class="pre">mb_gp_quality.jsonl</span></code>).</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>GPQualityData</dt><dd><p>Structured grid data with metadata and stationary points.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="../bless/index.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">rgpycrumbs.parsers.bless</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="../common/index.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">rgpycrumbs.parsers.common</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://plausible.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Plausible</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, Rohit Goswami</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/shibuya.js?v=cac61aee"></script></body>
+</html>
