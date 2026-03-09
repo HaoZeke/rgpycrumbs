@@ -7,16 +7,6 @@
 <link rel="apple-touch-icon" sizes="180x180" href="{{ pathto('_static/favicons/apple-touch-icon.png', 1) }}">
 <link rel="shortcut icon" href="{{ pathto('_static/favicons/favicon.ico', 1) }}">
 <link rel="manifest" href="{{ pathto('_static/favicons/site.webmanifest', 1) }}">
-<!-- Plausible injection -->
-<script
-  defer
-  data-domain="rgpycrumbs.rgoswami.me"
-  src="https://analytics.turtletech.us/js/script.hash.outbound-links.js"
-></script>
-<script>
-  window.plausible =
-    window.plausible ||
-    function () {
-      (window.plausible.q = window.plausible.q || []).push(arguments);
-    };
-</script>
+<!-- Umami analytics -->
+<script defer src="https://analytics.turtletech.us/script.js" data-website-id="f6ae7643-2047-4413-8611-07690030edca"></script>
+<script>window.umami=window.umami||{track:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)umami.track('Outbound Link',{url:a.href})});</script>
