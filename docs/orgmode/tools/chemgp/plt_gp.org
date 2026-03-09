@@ -1,0 +1,82 @@
+#+TITLE: Plotting ChemGP figures
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* CLI Reference
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.chemgp.plt_gp:cli
+   :prog: rgpycrumbs chemgp plt-gp
+   :nested: full
+#+END_EXPORT
+
+* Overview
+
+~plt-gp~ reads HDF5 files produced by ChemGP (the Rust crate ~chemgp-core~) and
+generates publication-quality PDF figures via ~chemparseplot~.
+
+| Subcommand | Plot type | Backend |
+|---------------+-----------------------------------------+------------|
+| convergence | Oracle calls vs force/energy | plotnine |
+| surface | 2D PES contour + NEB path overlay | matplotlib |
+| quality | GP surrogate progression (multi-panel) | matplotlib |
+| rff | RFF vs exact GP error (two-panel) | plotnine |
+| nll | MAP-NLL landscape in hyperparameter space | matplotlib |
+| sensitivity | 3x3 hyperparameter sensitivity grid | matplotlib |
+| trust | Trust region illustration (1D slice) | matplotlib |
+| variance | GP variance hatching on PES | matplotlib |
+| fps | FPS subset PCA scatter | plotnine |
+| profile | NEB energy profile across images | plotnine |
+| landscape | 2D NEB landscape (delegates to plt-neb) | matplotlib |
+| batch | TOML-driven batch figure generation | (all) |
+
+* Common Options
+
+All single-plot subcommands accept:
+
+- ~--input~ / ~-i~ :: Path to the HDF5 file (required)
+- ~--output~ / ~-o~ :: Output PDF/PNG path (required)
+- ~--width~ :: Figure width in inches (default varies by type)
+- ~--height~ :: Figure height in inches (default varies by type)
+- ~--dpi~ :: Resolution (default 300)
+
+* Single-Plot Usage
+
+#+begin_src bash
+# Convergence curve from a minimize run
+rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+
+# 2D surface with NEB path overlay
+rgpycrumbs chemgp plt-gp surface -i output/leps_neb.h5 -o surface.pdf
+
+# NLL landscape
+rgpycrumbs chemgp plt-gp nll -i output/leps_nll.h5 -o nll.pdf
+#+end_src
+
+* Batch Mode
+
+Define a TOML config listing all plots, then generate them in one command:
+
+#+begin_src bash
+rgpycrumbs chemgp plt-gp batch --config figures.toml
+#+end_src
+
+See the @@rst::doc:`batch tutorial <batch_tutorial>`@@ for a worked example with
+a full TOML config.
+
+* Energy Clamping
+
+Surface and quality plots auto-detect clamping ranges from the filename:
+
+- Files containing ~mb~ use ~[-200, 50]~
+- Files containing ~leps~ use ~[-5, 5]~
+
+Override with ~--clamp-lo~ and ~--clamp-hi~ flags on the subcommand, or
+~clamp_lo~ / ~clamp_hi~ keys in the TOML config.
+
+* API Reference
+
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.chemgp.plt_gp`@@.
+
+The plotting functions themselves live in
+[[https://chemparseplot.rgoswami.me][chemparseplot]] at
+~chemparseplot.plot.chemgp~.

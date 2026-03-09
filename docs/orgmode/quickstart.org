@@ -160,6 +160,20 @@ rgpycrumbs eon plt-neb --start 100 --end 150 -o neb_profile.pdf
 rgpycrumbs eon plt-neb --start 280
 #+end_src
 
+** Plotting ChemGP figures
+
+#+begin_src bash
+# Single convergence plot from an HDF5 file
+rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+
+# Batch generation from a TOML config
+rgpycrumbs chemgp plt-gp batch --config figures.toml
+#+end_src
+
+See @@rst::doc:`tools/chemgp/plt_gp`@@ for the full CLI reference and
+@@rst::doc:`tools/chemgp/batch_tutorial`@@ for a tutorial on batch figure
+generation.
+
 ** Splitting trajectory files
 
 #+begin_src bash
