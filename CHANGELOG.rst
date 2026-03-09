@@ -1,3 +1,36 @@
+rgpycrumbs v1.3.0 (2026-03-09)
+==============================
+
+Added
+-----
+
+- ``[all]`` optional dependency extra combining plot, eon, and other extras. (all-extra)
+- ASV benchmark infrastructure with asv-perch CI integration. (asv-benchmarks)
+- ChemGP JSONL parsers for optimization logs, convergence data, and GP diagnostics (``rgpycrumbs.parsers.chemgp``). (chemgp-parsers)
+- Dynamic dependency resolution via ``ensure_import`` for optional packages. (ensure-import)
+- ``plt-gp`` PEP 723 CLI script for ChemGP figure generation with batch mode and landscape subcommand. (plt-gp-cli)
+
+
+Developer
+---------
+
+- ASV benchmark infrastructure, prek linting, taplo formatting, codespell configuration. (dev-infra)
+
+
+Changed
+-------
+
+- Documentation overhaul: Shibuya theme, quickstart page, Google-style docstrings, CI/PyPI badges, and README generation from Org source. (docs-overhaul)
+
+
+Fixed
+-----
+
+- Skip missing H5 inputs in batch mode instead of failing. (batch-skip)
+- Fix ``plt-neb`` keyword arguments for ``compute_profile_rmsd`` call. (plt-neb-kwargs)
+- CI formatting and py3.10 compatibility fixes. (ci-py310)
+
+
 rgpycrumbs v1.2.0 (2026-02-24)
 ==============================
 
