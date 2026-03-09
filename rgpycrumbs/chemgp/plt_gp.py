@@ -689,10 +689,18 @@ def profile(
     default=None,
     help="(path, label) pairs for extra path overlays.",
 )
-@click.option("--augment-dat", type=str, default=None, help="Glob for extra .dat surface data.")
-@click.option("--augment-con", type=str, default=None, help="Glob for extra .con surface data.")
-@click.option("--zoom-ratio", type=float, default=None, help="Structure image zoom ratio.")
-@click.option("--ase-rotation", type=str, default=None, help="ASE rotation string for structures.")
+@click.option(
+    "--augment-dat", type=str, default=None, help="Glob for extra .dat surface data."
+)
+@click.option(
+    "--augment-con", type=str, default=None, help="Glob for extra .con surface data."
+)
+@click.option(
+    "--zoom-ratio", type=float, default=None, help="Structure image zoom ratio."
+)
+@click.option(
+    "--ase-rotation", type=str, default=None, help="ASE rotation string for structures."
+)
 def landscape(
     dat_pattern: str | None,
     con_pattern: str | None,
