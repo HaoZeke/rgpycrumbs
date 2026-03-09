@@ -53,6 +53,12 @@ autodoc_mock_imports = [
     "pypotlib",
     "pyprotochemgp",
     "click",
+    "h5py",
+    "pandas",
+    "plotnine",
+    "chemparseplot",
+    "tomllib",
+    "tomli",
 ]
 
 # -- Options for HTML output -------------------------------------------------

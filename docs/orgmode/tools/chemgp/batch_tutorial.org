@@ -1,0 +1,106 @@
+#+TITLE: Batch Figure Generation Tutorial
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* What You Will Build
+
+Three publication-quality PDF figures from a single command:
+
+1. A convergence plot (oracle calls vs force)
+2. A 2D PES contour with NEB path overlay
+3. An RFF quality comparison (two-panel)
+
+All from one TOML config file and pre-existing HDF5 data.
+
+* Prerequisites
+
+#+begin_src bash
+pip install rgpycrumbs chemparseplot h5py plotnine
+#+end_src
+
+You need HDF5 files produced by ~chemgp-core~ examples. The default pipeline
+stores them in an ~output/~ directory.
+
+* Write the TOML Config
+
+Create a file ~my_figures.toml~:
+
+#+begin_src toml
+[defaults]
+input_dir = "output"
+output_dir = "output"
+
+[[plots]]
+input = "leps_minimize.h5"
+output = "leps_convergence.pdf"
+type = "convergence"
+
+[[plots]]
+input = "leps_neb.h5"
+output = "leps_surface.pdf"
+type = "surface"
+
+[[plots]]
+input = "leps_rff.h5"
+output = "leps_rff_quality.pdf"
+type = "rff"
+#+end_src
+
+Each ~[[plots]]~ entry maps one HDF5 input to one PDF output. The ~type~ field
+selects the plt-gp subcommand (convergence, surface, rff, etc.).
+
+Paths in ~input~ and ~output~ resolve relative to ~input_dir~ and ~output_dir~
+respectively. Both default to the directory containing the TOML file.
+
+* Generate the Figures
+
+#+begin_src bash
+rgpycrumbs chemgp plt-gp batch --config my_figures.toml
+#+end_src
+
+Output:
+
+#+begin_example
+INFO - [1/3] convergence: output/leps_minimize.h5 -> output/leps_convergence.pdf
+INFO - [2/3] surface: output/leps_neb.h5 -> output/leps_surface.pdf
+INFO - [3/3] rff: output/leps_rff.h5 -> output/leps_rff_quality.pdf
+INFO - Done: 3 ok, 0 skipped, 0 failed
+#+end_example
+
+* Customizing Entries
+
+Extra keys in a ~[[plots]]~ entry pass through as CLI flags. For example, to
+override figure dimensions and energy clamping:
+
+#+begin_src toml
+[[plots]]
+input = "mb_neb.h5"
+output = "mb_surface.pdf"
+type = "surface"
+width = 10.0
+height = 8.0
+clamp_lo = -200
+clamp_hi = 50
+#+end_src
+
+Any key that matches a CLI option on the corresponding subcommand (with
+underscores replacing hyphens) works here.
+
+* Landscape Entries
+
+The ~landscape~ type uses ~source_dir~ instead of ~input~, because it reads .con
+and .dat files rather than HDF5:
+
+#+begin_src toml
+[[plots]]
+source_dir = "output"
+output = "leps_landscape.pdf"
+type = "landscape"
+#+end_src
+
+This delegates to ~rgpycrumbs chemgp plt-neb~ under the hood.
+
+* Next Steps
+
+- @@rst::doc:`plt_gp`@@ -- full CLI reference for all 11 subcommands
+- @@rst::doc:`hdf5_schema`@@ -- HDF5 layout that plt-gp expects
+- [[https://chemparseplot.rgoswami.me/tutorials/chemgp/index.html][chemparseplot ChemGP tutorials]] -- using the plotting functions directly from Python

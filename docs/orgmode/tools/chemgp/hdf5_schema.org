@@ -1,0 +1,83 @@
+#+TITLE: HDF5 Schema for ChemGP Plots
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* HDF5 Layout
+
+ChemGP Rust examples write HDF5 files with a fixed layout. The ~plt-gp~
+subcommands each read specific groups and attributes from this schema.
+
+** Top-Level Groups
+
+| Group | Contents |
+|-------------------+--------------------------------------------------------------|
+| ~grids/<name>~ | 2D arrays with attrs ~x_range~, ~y_range~, ~x_length~, ~y_length~ |
+| ~table/<name>~ | Group of same-length 1D arrays (DataFrame columns) |
+| ~paths/<name>~ | Ordered point sequences (~x~, ~y~ or ~rAB~, ~rBC~) |
+| ~points/<name>~ | Point sets (~x~, ~y~ or ~pc1~, ~pc2~) |
+| Root attrs | Metadata scalars (~conv_tol~, ~gp_e_mae~, etc.) |
+
+** Group Details
+
+*** ~grids~
+
+Each grid is a 2D ~float64~ dataset. Attributes store axis info:
+
+- ~x_range~ :: ~[x_min, x_max]~ (float64[2])
+- ~y_range~ :: ~[y_min, y_max]~ (float64[2])
+- ~x_length~ :: Number of x grid points (int)
+- ~y_length~ :: Number of y grid points (int)
+
+Named grids: ~energy~ (true PES), ~gp_mean_N~ (GP at N training points),
+~variance~, ~nll~, ~gradient_norm~.
+
+*** ~table~
+
+A group whose children are same-length 1D arrays, analogous to DataFrame
+columns. Common columns:
+
+- ~oracle_calls~ :: Cumulative oracle evaluations
+- ~max_fatom~, ~max_force~, ~force_norm~, ~ci_force~ :: Force convergence metrics
+- ~energy~ :: Total energy at each step
+- ~method~ :: String array identifying the optimizer
+- ~d_rff~, ~energy_mae~, ~gradient_mae~ :: RFF sweep data
+
+*** ~paths~
+
+Each path is a group with ~x~ and ~y~ (or ~rAB~ and ~rBC~) arrays tracing a
+reaction path on the 2D surface.
+
+*** ~points~
+
+Each point set is a group with coordinate arrays:
+
+- ~x~, ~y~ :: Cartesian coordinates
+- ~pc1~, ~pc2~ :: PCA projections (for FPS scatter)
+
+Named sets: ~minima~, ~saddles~, ~endpoints~, ~training~, ~selected~, ~pruned~.
+
+* Schema per Plot Type
+
+| Subcommand | Required groups/attrs |
+|---------------+-----------------------------------------------------------|
+| convergence | ~table/convergence~ (oracle_calls, force metric, method); root ~conv_tol~ |
+| surface | ~grids/energy~; optional ~paths/*~, ~points/*~ |
+| quality | ~grids/gp_mean_N*~ + ~points/training_N*~; ~grids/energy~ |
+| rff | ~table/rff~ (d_rff, energy_mae, gradient_mae); root ~gp_e_mae~, ~gp_g_mae~ |
+| nll | ~grids/nll~; optional ~grids/gradient_norm~; root ~log_sigma2~, ~log_theta~ |
+| sensitivity | ~table/slice~ (x), ~table/true_surface~ (E); 9x ~table/gp_ls{j}_sv{i}~ (E_pred, E_std) |
+| trust | ~table/slice~ (x, E_true, E_pred, E_std, in_trust); optional ~points/training~ |
+| variance | ~grids/energy~, ~grids/variance~; optional ~points/training~, stationary root attrs |
+| fps | ~points/selected~ (pc1, pc2), ~points/pruned~ (pc1, pc2) |
+| profile | ~table/profile~ (image, energy, method) |
+| landscape | .con files in ~source_dir~ (not HDF5; delegates to plt-neb) |
+
+* Filename Conventions
+
+The ~surface~ and ~quality~ subcommands auto-detect energy clamping from the
+input filename:
+
+| Pattern in filename | ~clamp_lo~ | ~clamp_hi~ |
+|---------------------+------------+------------|
+| ~mb~ | -200 | 50 |
+| ~leps~ | -5 | 5 |
+| (other) | data min | data max |

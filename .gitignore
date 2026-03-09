@@ -1,4 +1,6 @@
 # Added
+CLAUDE.md
+.claude/
 flycheck_*.el
 apidocs/*
 uv.lock

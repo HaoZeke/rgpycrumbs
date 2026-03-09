@@ -147,6 +147,7 @@ The package also includes *pure-python* helpers for parsing logs like those from
      :maxdepth: 2
      :caption: Tools
 
+     tools/chemgp/index
      tools/eon/index
      tools/orca/index
      tools/geom/index
