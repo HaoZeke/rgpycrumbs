@@ -3,6 +3,21 @@ rgpycrumbs._aux
 
 .. py:module:: rgpycrumbs._aux
 
+.. autoapi-nested-parse::
+
+   Dependency management utilities for optional imports.
+
+   This module provides infrastructure for lazy loading and optional dependency
+   resolution. It supports a 5-step import chain with auto-install capability.
+
+   .. versionadded:: 1.3.0
+       ensure_import, lazy_import, _LazyModule
+
+   .. versionchanged:: 1.7.0
+       Removed dead code (getstrform, get_gitroot, switchdir) and script logic.
+       Dependency management infrastructure only.
+
+
 
 Attributes
 ----------
@@ -34,9 +49,6 @@ Functions
    rgpycrumbs._aux._uv_install
    rgpycrumbs._aux.ensure_import
    rgpycrumbs._aux.lazy_import
-   rgpycrumbs._aux.getstrform
-   rgpycrumbs._aux.get_gitroot
-   rgpycrumbs._aux.switchdir
    rgpycrumbs._aux._import_from_parent_env
 
 
@@ -131,30 +143,12 @@ Module Contents
    .. versionadded:: 1.3.0
 
 
-.. py:function:: getstrform(pathobj)
-
-   Return the absolute path as a string.
-
-   .. versionadded:: 0.0.1
-
-
-.. py:function:: get_gitroot()
-
-   Return the root of the current git repository as a Path.
-
-   .. versionadded:: 0.0.1
-
-
-.. py:function:: switchdir(path)
-
-   Context manager that temporarily changes the working directory.
-
-   .. versionadded:: 0.0.1
-
-
 .. py:function:: _import_from_parent_env(module_name: str)
 
    Import a module from parent interpreter's site-packages as a fallback.
+
    Uses importlib to correctly handle nested modules (e.g. 'tblite.interface').
+
+   .. versionadded:: 1.3.0
 
 

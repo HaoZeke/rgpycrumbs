@@ -10,6 +10,7 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
+   /autoapi/rgpycrumbs/chemgp/cli_match_atoms/index
    /autoapi/rgpycrumbs/chemgp/plt_gp/index
 
 
