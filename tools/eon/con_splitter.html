@@ -94,8 +94,6 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/first-project.html">First Project</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
@@ -232,14 +230,6 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li><a class="reference internal" href="#initial-path-generation-from-generic-files">Initial Path Generation from Generic Files</a></li>
-<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
-<li><a class="reference internal" href="#no-images-found-in-input-file">&#8220;No images found in input file&#8221;</a></li>
-<li><a class="reference internal" href="#atom-count-mismatch-between-images">&#8220;Atom count mismatch between images&#8221;</a></li>
-<li><a class="reference internal" href="#ira-alignment-fails">IRA alignment fails</a></li>
-<li><a class="reference internal" href="#output-images-have-wrong-box-size">Output images have wrong box size</a></li>
-<li><a class="reference internal" href="#eon-reports-initialpath-innot-found">eOn reports &#8220;initial<sub>path.in</sub>not found&#8221;</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </li>
@@ -504,75 +494,6 @@ while fixing coordinate and mapping issues:</p>
 </div>
 <p>This approach ensures that the reactant and product share an identical vacuum
 box, center of mass, and atom indexing before the NEB optimization begins.</p>
-</section>
-<section id="troubleshooting">
-<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h3>
-<section id="no-images-found-in-input-file">
-<h4>“No images found in input file”<a class="headerlink" href="#no-images-found-in-input-file" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The script reports no structures in the input trajectory.</p>
-<p><strong>**Solution:**</strong></p>
-<ol class="arabic">
-<li><p>Verify the input file format is valid:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">head<span class="w"> </span>-20<span class="w"> </span>input.con
-</span></pre></div>
-</div>
-</li>
-<li><p>Check that the file contains multiple images (look for repeated headers)</p></li>
-<li><p>For .xyz files, ensure the first line is the atom count</p></li>
-</ol>
-</section>
-<section id="atom-count-mismatch-between-images">
-<h4>“Atom count mismatch between images”<a class="headerlink" href="#atom-count-mismatch-between-images" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> Different images have different numbers of atoms.</p>
-<p><strong>**Solution:**</strong></p>
-<ol class="arabic simple">
-<li><p>Verify all images in the trajectory have the same atom count</p></li>
-<li><p>If using IRA (<code class="docutils literal notranslate"><span class="pre">--use-ira</span></code>), ensure <code class="docutils literal notranslate"><span class="pre">--ira-kmax</span></code> is appropriate for your system</p></li>
-<li><p>Check for missing atoms in the input file</p></li>
-</ol>
-</section>
-<section id="ira-alignment-fails">
-<h4>IRA alignment fails<a class="headerlink" href="#ira-alignment-fails" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The IRA algorithm cannot find a consistent atom mapping.</p>
-<p><strong>**Solution:**</strong></p>
-<ol class="arabic simple">
-<li><p>Increase <code class="docutils literal notranslate"><span class="pre">--ira-kmax</span></code> (default 1.8) for more flexible matching</p></li>
-<li><p>Try <code class="docutils literal notranslate"><span class="pre">--align-type</span> <span class="pre">endpoints</span></code> instead of <code class="docutils literal notranslate"><span class="pre">all</span></code></p></li>
-<li><p>For surface systems, ensure the slab atoms are in consistent order</p></li>
-</ol>
-</section>
-<section id="output-images-have-wrong-box-size">
-<h4>Output images have wrong box size<a class="headerlink" href="#output-images-have-wrong-box-size" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> Generated .con files have incorrect unit cell dimensions.</p>
-<p><strong>**Solution:**</strong></p>
-<ol class="arabic">
-<li><p>Use <code class="docutils literal notranslate"><span class="pre">--box-diagonal</span></code> to explicitly set cell dimensions:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>con-splitter<span class="w"> </span>input.con<span class="w"> </span>--box-diagonal<span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">25</span>
-</span></pre></div>
-</div>
-</li>
-<li><p>Check that the input trajectory has valid cell information</p></li>
-</ol>
-</section>
-<section id="eon-reports-initialpath-innot-found">
-<h4>eOn reports “initial<sub>path.in</sub>not found”<a class="headerlink" href="#eon-reports-initialpath-innot-found" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> eOn cannot find the generated path file.</p>
-<p><strong>**Solution:**</strong></p>
-<ol class="arabic">
-<li><p>Verify the output directory was created:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">ls<span class="w"> </span>-la<span class="w"> </span>initial_images/
-</span></pre></div>
-</div>
-</li>
-<li><p>Check that <code class="docutils literal notranslate"><span class="pre">ipath.dat</span></code> exists and contains valid paths</p></li>
-<li><p>Ensure the eOn input file references the correct path:</p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">[Nudged Elastic Band]</span>
-</span><span data-line="2"><span class="na">initial_path_in</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">initial_images/ipath.dat</span>
-</span></pre></div>
-</div>
-</li>
-</ol>
-</section>
 </section>
 <section id="api-reference">
 <h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h3>

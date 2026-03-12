@@ -160,9 +160,6 @@ Getting Started
      :caption: Getting Started
 
      quickstart
-     tutorials/first-project
-
-     quickstart
 
 Tool Categories
 ---------------
