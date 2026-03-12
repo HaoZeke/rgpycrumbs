@@ -1,0 +1,124 @@
+rgpycrumbs.chemgp.hdf5_io
+=========================
+
+.. py:module:: rgpycrumbs.chemgp.hdf5_io
+
+.. autoapi-nested-parse::
+
+   HDF5 file I/O utilities for ChemGP data.
+
+   This module provides functions for reading structured data from ChemGP HDF5
+   output files. The HDF5 layout mirrors the Julia common_plot.jl helpers.
+
+   HDF5 Layout
+   -----------
+   - ``grids/<name>``: 2D arrays with attrs x_range, y_range, x_length, y_length
+   - ``table/<name>``: group of same-length 1D arrays
+   - ``paths/<name>``: point sequences (x, y or rAB, rBC)
+   - ``points/<name>``: point sets (x, y or pc1, pc2)
+   - Root attrs: metadata scalars
+
+   .. versionadded:: 1.7.0
+       Extracted from chemgp.plt_gp to standalone module.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.chemgp.hdf5_io.read_h5_table
+   rgpycrumbs.chemgp.hdf5_io.read_h5_grid
+   rgpycrumbs.chemgp.hdf5_io.read_h5_path
+   rgpycrumbs.chemgp.hdf5_io.read_h5_points
+   rgpycrumbs.chemgp.hdf5_io.read_h5_metadata
+
+
+Module Contents
+---------------
+
+.. py:function:: read_h5_table(f: h5py.File, name: str = 'table') -> pandas.DataFrame
+
+   Read a group of same-length vectors as a DataFrame.
+
+   Parameters
+   ----------
+   f
+       Open HDF5 file object
+   name
+       Name of the table group (default: "table")
+
+   Returns
+   -------
+   pd.DataFrame
+       DataFrame with columns from the HDF5 group
+
+
+.. py:function:: read_h5_grid(f: h5py.File, name: str) -> tuple[numpy.ndarray, numpy.ndarray | None, numpy.ndarray | None]
+
+   Read a 2D grid with optional axis ranges.
+
+   Parameters
+   ----------
+   f
+       Open HDF5 file object
+   name
+       Name of the grid dataset
+
+   Returns
+   -------
+   tuple
+       (data, x_coords, y_coords) where x_coords and y_coords may be None
+       if axis range attributes are not present
+
+
+.. py:function:: read_h5_path(f: h5py.File, name: str) -> dict[str, numpy.ndarray]
+
+   Read a path (ordered point sequence).
+
+   Parameters
+   ----------
+   f
+       Open HDF5 file object
+   name
+       Name of the path dataset
+
+   Returns
+   -------
+   dict[str, np.ndarray]
+       Dictionary mapping coordinate names to arrays
+
+
+.. py:function:: read_h5_points(f: h5py.File, name: str) -> dict[str, numpy.ndarray]
+
+   Read a point set.
+
+   Parameters
+   ----------
+   f
+       Open HDF5 file object
+   name
+       Name of the points dataset
+
+   Returns
+   -------
+   dict[str, np.ndarray]
+       Dictionary mapping coordinate names to arrays
+
+
+.. py:function:: read_h5_metadata(f: h5py.File) -> dict
+
+   Read root-level metadata attributes.
+
+   Parameters
+   ----------
+   f
+       Open HDF5 file object
+
+   Returns
+   -------
+   dict
+       Dictionary of metadata attributes
+
+
