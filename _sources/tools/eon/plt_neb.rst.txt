@@ -22,6 +22,69 @@ To show the plot interactively without saving:
 
     python -m rgpycrumbs.cli eon plt-neb --start 280
 
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+"No .dat files found" error
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** The script reports no input files matching the pattern.
+
+****Solution:****
+
+1. Verify the input pattern matches your files:
+
+   .. code:: shell
+
+       ls neb_*.dat
+
+2. Use the ``--input-pattern`` flag to specify a custom pattern:
+
+   .. code:: shell
+
+       python -m rgpycrumbs.cli eon plt-neb --input-pattern "path/to/neb_*.dat"
+
+"Index out of range" error
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** The ``--start`` or ``--end`` indices are outside the available data range.
+
+****Solution:****
+
+1. Check available iterations:
+
+   .. code:: shell
+
+       ls -1 neb_*.dat | wc -l
+
+2. Adjust indices to be within range (0 to N-1 where N is the number of files)
+
+Plot appears empty
+^^^^^^^^^^^^^^^^^^
+
+****Problem:**** The plot window opens but shows no data.
+
+****Solution:****
+
+1. Verify the .dat files contain valid energy data (column 2)
+
+2. Check that the energy values are not all identical
+
+3. Try with a smaller range first: ``--start 0 --end 5``
+
+Force-corrected interpolation fails
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** Hermite spline interpolation produces warnings or errors.
+
+****Solution:****
+
+1. Ensure you have at least 3 data points
+
+2. Check that force data (column 4 in .dat) is present
+
+3. The script falls back to raw lines if spline fails - this is expected behavior
+
 API Reference
 ~~~~~~~~~~~~~
 

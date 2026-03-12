@@ -80,6 +80,89 @@ while fixing coordinate and mapping issues:
 This approach ensures that the reactant and product share an identical vacuum
 box, center of mass, and atom indexing before the NEB optimization begins.
 
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+"No images found in input file"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** The script reports no structures in the input trajectory.
+
+****Solution:****
+
+1. Verify the input file format is valid:
+
+   .. code:: shell
+
+       head -20 input.con
+
+2. Check that the file contains multiple images (look for repeated headers)
+
+3. For .xyz files, ensure the first line is the atom count
+
+"Atom count mismatch between images"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** Different images have different numbers of atoms.
+
+****Solution:****
+
+1. Verify all images in the trajectory have the same atom count
+
+2. If using IRA (``--use-ira``), ensure ``--ira-kmax`` is appropriate for your system
+
+3. Check for missing atoms in the input file
+
+IRA alignment fails
+^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** The IRA algorithm cannot find a consistent atom mapping.
+
+****Solution:****
+
+1. Increase ``--ira-kmax`` (default 1.8) for more flexible matching
+
+2. Try ``--align-type endpoints`` instead of ``all``
+
+3. For surface systems, ensure the slab atoms are in consistent order
+
+Output images have wrong box size
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** Generated .con files have incorrect unit cell dimensions.
+
+****Solution:****
+
+1. Use ``--box-diagonal`` to explicitly set cell dimensions:
+
+   .. code:: shell
+
+       rgpycrumbs eon con-splitter input.con --box-diagonal 25 25 25
+
+2. Check that the input trajectory has valid cell information
+
+eOn reports "initial\ :sub:`path.in`\ not found"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Problem:**** eOn cannot find the generated path file.
+
+****Solution:****
+
+1. Verify the output directory was created:
+
+   .. code:: shell
+
+       ls -la initial_images/
+
+2. Check that ``ipath.dat`` exists and contains valid paths
+
+3. Ensure the eOn input file references the correct path:
+
+   .. code:: ini
+
+       [Nudged Elastic Band]
+       initial_path_in = initial_images/ipath.dat
+
 API Reference
 ~~~~~~~~~~~~~
 

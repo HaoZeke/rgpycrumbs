@@ -94,6 +94,8 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
@@ -223,6 +225,13 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#visualizing-path-trajectories">Visualizing path trajectories</a><ul>
 <li><a class="reference internal" href="#rgpycrumbs-eon-plt-neb">rgpycrumbs eon plt-neb</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li><a class="reference internal" href="#no-dat-files-found-error">&#8220;No .dat files found&#8221; error</a></li>
+<li><a class="reference internal" href="#index-out-of-range-error">&#8220;Index out of range&#8221; error</a></li>
+<li><a class="reference internal" href="#plot-appears-empty">Plot appears empty</a></li>
+<li><a class="reference internal" href="#force-corrected-interpolation-fails">Force-corrected interpolation fails</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </li>
@@ -753,6 +762,59 @@ data-aria-dark="Switch to auto color mode">
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-m<span class="w"> </span>rgpycrumbs.cli<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span>--start<span class="w"> </span><span class="m">280</span>
 </span></pre></div>
 </div>
+</section>
+<section id="troubleshooting">
+<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h3>
+<section id="no-dat-files-found-error">
+<h4>“No .dat files found” error<a class="headerlink" href="#no-dat-files-found-error" title="Link to this heading">¶</a></h4>
+<p><strong>**Problem:**</strong> The script reports no input files matching the pattern.</p>
+<p><strong>**Solution:**</strong></p>
+<ol class="arabic">
+<li><p>Verify the input pattern matches your files:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">ls<span class="w"> </span>neb_*.dat
+</span></pre></div>
+</div>
+</li>
+<li><p>Use the <code class="docutils literal notranslate"><span class="pre">--input-pattern</span></code> flag to specify a custom pattern:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-m<span class="w"> </span>rgpycrumbs.cli<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span>--input-pattern<span class="w"> </span><span class="s2">&quot;path/to/neb_*.dat&quot;</span>
+</span></pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="index-out-of-range-error">
+<h4>“Index out of range” error<a class="headerlink" href="#index-out-of-range-error" title="Link to this heading">¶</a></h4>
+<p><strong>**Problem:**</strong> The <code class="docutils literal notranslate"><span class="pre">--start</span></code> or <code class="docutils literal notranslate"><span class="pre">--end</span></code> indices are outside the available data range.</p>
+<p><strong>**Solution:**</strong></p>
+<ol class="arabic">
+<li><p>Check available iterations:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">ls<span class="w"> </span>-1<span class="w"> </span>neb_*.dat<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
+</span></pre></div>
+</div>
+</li>
+<li><p>Adjust indices to be within range (0 to N-1 where N is the number of files)</p></li>
+</ol>
+</section>
+<section id="plot-appears-empty">
+<h4>Plot appears empty<a class="headerlink" href="#plot-appears-empty" title="Link to this heading">¶</a></h4>
+<p><strong>**Problem:**</strong> The plot window opens but shows no data.</p>
+<p><strong>**Solution:**</strong></p>
+<ol class="arabic simple">
+<li><p>Verify the .dat files contain valid energy data (column 2)</p></li>
+<li><p>Check that the energy values are not all identical</p></li>
+<li><p>Try with a smaller range first: <code class="docutils literal notranslate"><span class="pre">--start</span> <span class="pre">0</span> <span class="pre">--end</span> <span class="pre">5</span></code></p></li>
+</ol>
+</section>
+<section id="force-corrected-interpolation-fails">
+<h4>Force-corrected interpolation fails<a class="headerlink" href="#force-corrected-interpolation-fails" title="Link to this heading">¶</a></h4>
+<p><strong>**Problem:**</strong> Hermite spline interpolation produces warnings or errors.</p>
+<p><strong>**Solution:**</strong></p>
+<ol class="arabic simple">
+<li><p>Ensure you have at least 3 data points</p></li>
+<li><p>Check that force data (column 4 in .dat) is present</p></li>
+<li><p>The script falls back to raw lines if spline fails - this is expected behavior</p></li>
+</ol>
+</section>
 </section>
 <section id="api-reference">
 <h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h3>
