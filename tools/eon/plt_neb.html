@@ -148,10 +148,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/cli_match_atoms/index.html">rgpycrumbs.chemgp.cli_match_atoms</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/cli_plot_gp/index.html">rgpycrumbs.chemgp.cli_plot_gp</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/hdf5_io/index.html">rgpycrumbs.chemgp.hdf5_io</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/plotting/index.html">rgpycrumbs.chemgp.plotting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
@@ -327,8 +324,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>Visualizing path trajectories<a class="headerlink" href="#visualizing-path-trajectories" title="Link to this heading">¶</a></h2>
 <section id="rgpycrumbs-eon-plt-neb">
 <h3>rgpycrumbs eon plt-neb<a class="headerlink" href="#rgpycrumbs-eon-plt-neb" title="Link to this heading">¶</a></h3>
-<p>NEB reaction path and landscape plotting.</p>
-<p>Delegates to chemparseplot for parsing and plotting.</p>
+<p>Main entry point for NEB plot script.</p>
 <p class="rubric">Usage</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </span></pre></div>
@@ -353,9 +349,33 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-additional-con">
+<span class="sig-name descname"><span class="pre">--additional-con</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;additional_con&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-additional-con" title="Link to this definition">¶</a></dt>
+<dd><p>Path(s) to additional .con file(s) and label.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-augment-dat">
+<span class="sig-name descname"><span class="pre">--augment-dat</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;augment_dat&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-augment-dat" title="Link to this definition">¶</a></dt>
+<dd><p>Glob pattern for extra .dat files for surface fitting.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-augment-con">
+<span class="sig-name descname"><span class="pre">--augment-con</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;augment_con&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-augment-con" title="Link to this definition">¶</a></dt>
+<dd><p>Glob pattern for extra .con files for surface fitting.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-sp-file">
+<span class="sig-name descname"><span class="pre">--sp-file</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;sp_file&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-sp-file" title="Link to this definition">¶</a></dt>
+<dd><p>Path to explicit saddle point file (eOn sp.con).</p>
+</dd></dl>
+
+<dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-source">
 <span class="sig-name descname"><span class="pre">--source</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;source&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-source" title="Link to this definition">¶</a></dt>
-<dd><p>Data source.</p>
+<dd><p>Data source: ‘eon’ for .dat/.con pairs, ‘traj’ for extxyz, ‘hdf5’ for ChemGP HDF5.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options<span class="colon">:</span></dt>
 <dd class="field-odd"><p>eon | traj | hdf5</p>
@@ -366,13 +386,13 @@ data-aria-dark="Switch to auto color mode">
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-input-h5">
 <span class="sig-name descname"><span class="pre">--input-h5</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_h5&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-input-h5" title="Link to this definition">¶</a></dt>
-<dd><p>Path to ChemGP NEB HDF5 file.</p>
+<dd><p>Path to ChemGP NEB HDF5 file (result or history).</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-input-traj">
 <span class="sig-name descname"><span class="pre">--input-traj</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_traj&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-input-traj" title="Link to this definition">¶</a></dt>
-<dd><p>Path to extxyz trajectory file.</p>
+<dd><p>Path to extxyz trajectory file (used with –source traj).</p>
 </dd></dl>
 
 <dl class="std option">
@@ -387,9 +407,15 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-rbf-smoothing">
+<span class="sig-name descname"><span class="pre">--rbf-smoothing</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;rbf_smoothing&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-rbf-smoothing" title="Link to this definition">¶</a></dt>
+<dd><p>Smoothing term for 2D RBF.</p>
+</dd></dl>
+
+<dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-landscape-mode">
 <span class="sig-name descname"><span class="pre">--landscape-mode</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;landscape_mode&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-landscape-mode" title="Link to this definition">¶</a></dt>
-<dd><p>For landscape plot.</p>
+<dd><p>For landscape plot: ‘path’ or ‘surface’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options<span class="colon">:</span></dt>
 <dd class="field-odd"><p>path | surface</p>
@@ -398,18 +424,74 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-landscape-path">
+<span class="sig-name descname"><span class="pre">--landscape-path</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;landscape_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-landscape-path" title="Link to this definition">¶</a></dt>
+<dd><p>Last uses an interpolation only on the last path, otherwise use all points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>last | all</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-project-path">
 <span id="cmdoption-rgpycrumbs-eon-plt-neb-no-project-path"></span><span class="sig-name descname"><span class="pre">--project-path</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-project-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-project-path" title="Link to this definition">¶</a></dt>
-<dd><p>Project landscape coordinates.</p>
+<dd><p>Project landscape coordinates into the reaction valley (s, d).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-rc-mode">
+<span class="sig-name descname"><span class="pre">--rc-mode</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;rc_mode&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-rc-mode" title="Link to this definition">¶</a></dt>
+<dd><p>Reaction coordinate for profile plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path | rmsd | index</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-plot-structures">
 <span class="sig-name descname"><span class="pre">--plot-structures</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;plot_structures&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-plot-structures" title="Link to this definition">¶</a></dt>
-<dd><p>Structures to render.</p>
+<dd><p>Structures to render on the path. Requires –con-file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options<span class="colon">:</span></dt>
 <dd class="field-odd"><p>none | all | crit_points</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-surface-type">
+<span class="sig-name descname"><span class="pre">--surface-type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;surface_type&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-surface-type" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolation method for the 2D surface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>grid | rbf | grad_matern | grad_imq | grad_imq_ny | matern | imq | grad_rq | grad_se</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-n-inducing">
+<span class="sig-name descname"><span class="pre">--n-inducing</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;n_inducing&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-n-inducing" title="Link to this definition">¶</a></dt>
+<dd><p>Number of inducing points for Nystrom or RFF features. Defaults to 300 (Nystrom) or 500 (RFF).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-show-pts">
+<span id="cmdoption-rgpycrumbs-eon-plt-neb-no-show-pts"></span><span class="sig-name descname"><span class="pre">--show-pts</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-show-pts</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-show-pts" title="Link to this definition">¶</a></dt>
+<dd><p>Show all paths from the optimization on the RMSD 2D plot.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-plot-mode">
+<span class="sig-name descname"><span class="pre">--plot-mode</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;plot_mode&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-plot-mode" title="Link to this definition">¶</a></dt>
+<dd><p>Quantity to plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>energy | eigenvalue</p>
 </dd>
 </dl>
 </dd></dl>
@@ -421,15 +503,21 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-figsize">
-<span class="sig-name descname"><span class="pre">--figsize</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;figsize&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-figsize" title="Link to this definition">¶</a></dt>
-<dd><p>Figure width, height in inches.</p>
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-start">
+<span class="sig-name descname"><span class="pre">--start</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;start&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-start" title="Link to this definition">¶</a></dt>
+<dd><p>Start file index for profile plot.</p>
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-dpi">
-<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-dpi" title="Link to this definition">¶</a></dt>
-<dd><p>Resolution in DPI.</p>
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-end">
+<span class="sig-name descname"><span class="pre">--end</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;end&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-end" title="Link to this definition">¶</a></dt>
+<dd><p>End file index for profile plot.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-normalize-rc">
+<span class="sig-name descname"><span class="pre">--normalize-rc</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-normalize-rc" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize reaction coordinate.</p>
 </dd></dl>
 
 <dl class="std option">
@@ -439,9 +527,198 @@ data-aria-dark="Switch to auto color mode">
 </dd></dl>
 
 <dl class="std option">
-<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-ira-kmax">
-<span class="sig-name descname"><span class="pre">--ira-kmax</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ira_kmax&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-ira-kmax" title="Link to this definition">¶</a></dt>
-<dd><p>kmax factor for IRA.</p>
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-xlabel">
+<span class="sig-name descname"><span class="pre">--xlabel</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;xlabel&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-xlabel" title="Link to this definition">¶</a></dt>
+<dd><p>X-axis label.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-ylabel">
+<span class="sig-name descname"><span class="pre">--ylabel</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ylabel&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-ylabel" title="Link to this definition">¶</a></dt>
+<dd><p>Y-axis label.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-theme">
+<span class="sig-name descname"><span class="pre">--theme</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;theme&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-theme" title="Link to this definition">¶</a></dt>
+<dd><p>The plotting theme to use.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-cmap-profile">
+<span class="sig-name descname"><span class="pre">--cmap-profile</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cmap_profile&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-cmap-profile" title="Link to this definition">¶</a></dt>
+<dd><p>Colormap for profile plot.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-cmap-landscape">
+<span class="sig-name descname"><span class="pre">--cmap-landscape</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cmap_landscape&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-cmap-landscape" title="Link to this definition">¶</a></dt>
+<dd><p>Colormap for landscape plot.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-facecolor">
+<span class="sig-name descname"><span class="pre">--facecolor</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;facecolor&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-facecolor" title="Link to this definition">¶</a></dt>
+<dd><p>Background color.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-fontsize-base">
+<span class="sig-name descname"><span class="pre">--fontsize-base</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;fontsize_base&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-fontsize-base" title="Link to this definition">¶</a></dt>
+<dd><p>Base font size.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-figsize">
+<span class="sig-name descname"><span class="pre">--figsize</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;figsize&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-figsize" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width, height in inches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">5.37,</span> <span class="pre">5.37</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-fig-height">
+<span class="sig-name descname"><span class="pre">--fig-height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;fig_height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-fig-height" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-aspect-ratio">
+<span class="sig-name descname"><span class="pre">--aspect-ratio</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;aspect_ratio&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-aspect-ratio" title="Link to this definition">¶</a></dt>
+<dd><p>Figure aspect ratio.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Resolution in Dots Per Inch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">200</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-zoom-ratio">
+<span class="sig-name descname"><span class="pre">--zoom-ratio</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;zoom_ratio&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-zoom-ratio" title="Link to this definition">¶</a></dt>
+<dd><p>Scale the inset image.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">0.4</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-ase-rotation">
+<span class="sig-name descname"><span class="pre">--ase-rotation</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ase_rotation&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-ase-rotation" title="Link to this definition">¶</a></dt>
+<dd><p>ASE rotation string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">'0x,</span> <span class="pre">90y,</span> <span class="pre">0z'</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-strip-renderer">
+<span class="sig-name descname"><span class="pre">--strip-renderer</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;strip_renderer&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-strip-renderer" title="Link to this definition">¶</a></dt>
+<dd><p>Rendering backend for structure images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">'ase'</span></code></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p>ase | xyzrender</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-arrow-head-length">
+<span class="sig-name descname"><span class="pre">--arrow-head-length</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;arrow_head_length&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-arrow-head-length" title="Link to this definition">¶</a></dt>
+<dd><p>Arrow head length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-arrow-head-width">
+<span class="sig-name descname"><span class="pre">--arrow-head-width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;arrow_head_width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-arrow-head-width" title="Link to this definition">¶</a></dt>
+<dd><p>Arrow head width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">0.3</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-arrow-tail-width">
+<span class="sig-name descname"><span class="pre">--arrow-tail-width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;arrow_tail_width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-arrow-tail-width" title="Link to this definition">¶</a></dt>
+<dd><p>Arrow tail width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">0.1</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-highlight-last">
+<span id="cmdoption-rgpycrumbs-eon-plt-neb-no-highlight-last"></span><span class="sig-name descname"><span class="pre">--highlight-last</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-highlight-last</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-highlight-last" title="Link to this definition">¶</a></dt>
+<dd><p>Highlight last path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-spline-method">
+<span class="sig-name descname"><span class="pre">--spline-method</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;spline_method&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-spline-method" title="Link to this definition">¶</a></dt>
+<dd><p>Spline interpolation method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>hermite | spline</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-draw-reactant">
+<span class="sig-name descname"><span class="pre">--draw-reactant</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;draw_reactant&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-draw-reactant" title="Link to this definition">¶</a></dt>
+<dd><p>Reactant inset pos (x, y, rad).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">15,</span> <span class="pre">60,</span> <span class="pre">0.1</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-draw-saddle">
+<span class="sig-name descname"><span class="pre">--draw-saddle</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;draw_saddle&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-draw-saddle" title="Link to this definition">¶</a></dt>
+<dd><p>Saddle inset pos (x, y, rad).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">15,</span> <span class="pre">60,</span> <span class="pre">0.1</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-draw-product">
+<span class="sig-name descname"><span class="pre">--draw-product</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;draw_product&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-draw-product" title="Link to this definition">¶</a></dt>
+<dd><p>Product inset pos (x, y, rad).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">15,</span> <span class="pre">60,</span> <span class="pre">0.1</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="std option">
@@ -454,6 +731,18 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-force-recompute">
 <span class="sig-name descname"><span class="pre">--force-recompute</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-force-recompute" title="Link to this definition">¶</a></dt>
 <dd><p>Force re-calculation of RMSD.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-show-legend">
+<span class="sig-name descname"><span class="pre">--show-legend</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-show-legend" title="Link to this definition">¶</a></dt>
+<dd><p>Show the legends.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-eon-plt-neb-ira-kmax">
+<span class="sig-name descname"><span class="pre">--ira-kmax</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ira_kmax&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-eon-plt-neb-ira-kmax" title="Link to this definition">¶</a></dt>
+<dd><p>kmax factor for IRA.</p>
 </dd></dl>
 
 </section>

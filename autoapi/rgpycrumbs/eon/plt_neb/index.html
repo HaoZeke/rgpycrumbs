@@ -148,10 +148,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/cli_match_atoms/index.html">rgpycrumbs.chemgp.cli_match_atoms</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/cli_plot_gp/index.html">rgpycrumbs.chemgp.cli_plot_gp</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/hdf5_io/index.html">rgpycrumbs.chemgp.hdf5_io</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/plotting/index.html">rgpycrumbs.chemgp.plotting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
@@ -226,13 +223,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#attributes">Attributes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._adjust_text"><code class="docutils literal notranslate"><span class="pre">_adjust_text</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._mpl"><code class="docutils literal notranslate"><span class="pre">_mpl</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._plt"><code class="docutils literal notranslate"><span class="pre">_plt</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._pl"><code class="docutils literal notranslate"><span class="pre">_pl</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._get_adjust_text"><code class="docutils literal notranslate"><span class="pre">_get_adjust_text()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._get_mpl"><code class="docutils literal notranslate"><span class="pre">_get_mpl()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._get_polars"><code class="docutils literal notranslate"><span class="pre">_get_polars()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb.log"><code class="docutils literal notranslate"><span class="pre">log</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb.DEFAULT_INPUT_PATTERN"><code class="docutils literal notranslate"><span class="pre">DEFAULT_INPUT_PATTERN</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.eon.plt_neb.DEFAULT_PATH_PATTERN"><code class="docutils literal notranslate"><span class="pre">DEFAULT_PATH_PATTERN</span></code></a></li>
@@ -342,29 +332,31 @@ data-aria-dark="Switch to auto color mode">
 </div><article class="yue dark-code" role="main">
           <section id="module-rgpycrumbs.eon.plt_neb">
 <span id="rgpycrumbs-eon-plt-neb"></span><h1>rgpycrumbs.eon.plt_neb<a class="headerlink" href="#module-rgpycrumbs.eon.plt_neb" title="Link to this heading">¶</a></h1>
-<p>EON CLI - NEB plotting from .dat/.con files or HDF5 trajectories.</p>
-<p>Thin CLI wrapper that delegates to chemparseplot for parsing and plotting.
-All heavy lifting done by chemparseplot modules.</p>
+<p>Plots Nudged Elastic Band (NEB) reaction paths and landscapes.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">Added in version 1.7.0: </span>Refactored from monolithic plt_neb.py to thin CLI wrapper.</p>
+<p><span class="versionmodified added">Added in version 0.0.2.</span></p>
 </div>
+<p>This script provides a command-line interface (CLI) to visualize data
+generated from NEB calculations. It can plot:</p>
+<ol class="arabic simple">
+<li><p><strong>Energy/Eigenvalue Profiles:</strong> Shows the evolution of the energy or
+lowest eigenvalue along the reaction coordinate. It can overlay multiple
+paths (e.g., from different optimization steps) and use a
+physically-motivated Hermite spline interpolation using force data.</p></li>
+<li><p><strong>2D Reaction Landscapes:</strong> Plots the path on a 2D coordinate system
+defined by the Root Mean Square Deviation (RMSD) from the reactant
+and product structures. This requires the ‘ira_mod’ library.
+It can also interpolate and display the 2D energy/eigenvalue surface.</p></li>
+</ol>
+<p>The script can also render atomic structures from a .con file as insets
+on the plots for key points (reactant, saddle, product).</p>
+<p>This script follows the guidelines laid out here:
+<a class="reference external" href="https://realpython.com/python-script-structure/">https://realpython.com/python-script-structure/</a></p>
 <section id="attributes">
 <h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._adjust_text" title="rgpycrumbs.eon.plt_neb._adjust_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_adjust_text</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._mpl" title="rgpycrumbs.eon.plt_neb._mpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_mpl</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._plt" title="rgpycrumbs.eon.plt_neb._plt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_plt</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._pl" title="rgpycrumbs.eon.plt_neb._pl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_pl</span></code></a></p></td>
-<td><p></p></td>
-</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb.log" title="rgpycrumbs.eon.plt_neb.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code></a></p></td>
 <td><p></p></td>
 </tr>
@@ -386,17 +378,8 @@ All heavy lifting done by chemparseplot modules.</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._get_adjust_text" title="rgpycrumbs.eon.plt_neb._get_adjust_text"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_adjust_text</span></code></a>()</p></td>
-<td><p>Get adjustText module.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._get_mpl" title="rgpycrumbs.eon.plt_neb._get_mpl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_mpl</span></code></a>()</p></td>
-<td><p>Get matplotlib modules.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb._get_polars" title="rgpycrumbs.eon.plt_neb._get_polars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_polars</span></code></a>()</p></td>
-<td><p>Get polars module.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb.main" title="rgpycrumbs.eon.plt_neb.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(input_dat_pattern, input_path_pattern, con_file, ...)</p></td>
-<td><p>NEB reaction path and landscape plotting.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.eon.plt_neb.main" title="rgpycrumbs.eon.plt_neb.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>(input_dat_pattern, input_path_pattern, con_file, ...)</p></td>
+<td><p>Main entry point for NEB plot script.</p></td>
 </tr>
 </tbody>
 </table>
@@ -404,44 +387,6 @@ All heavy lifting done by chemparseplot modules.</p>
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._adjust_text">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_adjust_text</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_adjust_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._adjust_text" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._mpl">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_mpl</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._mpl" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._plt">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_plt</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_plt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._plt" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._pl">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_pl</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_pl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._pl" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._get_adjust_text">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_get_adjust_text</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_get_adjust_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._get_adjust_text" title="Link to this definition">¶</a></dt>
-<dd><p>Get adjustText module.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._get_mpl">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_get_mpl</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_get_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._get_mpl" title="Link to this definition">¶</a></dt>
-<dd><p>Get matplotlib modules.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb._get_polars">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">_get_polars</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#_get_polars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb._get_polars" title="Link to this definition">¶</a></dt>
-<dd><p>Get polars module.</p>
-</dd></dl>
-
 <dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb.log">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">log</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb.log" title="Link to this definition">¶</a></dt>
@@ -464,9 +409,8 @@ All heavy lifting done by chemparseplot modules.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.eon.plt_neb.main">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dat_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_h5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landscape_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_structures</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_kmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_recompute</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb.main" title="Link to this definition">¶</a></dt>
-<dd><p>NEB reaction path and landscape plotting.</p>
-<p>Delegates to chemparseplot for parsing and plotting.</p>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.eon.plt_neb.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_dat_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_path_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">con_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_con</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_traj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_h5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landscape_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landscape_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rc_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_structures</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbf_smoothing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_inducing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_rc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_last</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theme</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap_profile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap_landscape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facecolor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_rotation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strip_renderer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_head_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_head_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrow_tail_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spline_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw_reactant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw_saddle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw_product</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_legend</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_recompute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ira_kmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sp_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">augment_dat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">augment_con</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/eon/plt_neb.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.eon.plt_neb.main" title="Link to this definition">¶</a></dt>
+<dd><p>Main entry point for NEB plot script.</p>
 </dd></dl>
 
 </section>

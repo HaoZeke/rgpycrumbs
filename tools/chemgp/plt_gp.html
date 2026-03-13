@@ -148,10 +148,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/cli_match_atoms/index.html">rgpycrumbs.chemgp.cli_match_atoms</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/cli_plot_gp/index.html">rgpycrumbs.chemgp.cli_plot_gp</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/hdf5_io/index.html">rgpycrumbs.chemgp.hdf5_io</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/plotting/index.html">rgpycrumbs.chemgp.plotting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
@@ -223,7 +220,24 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#cli-reference">CLI Reference</a></li>
+<li><a class="reference internal" href="#cli-reference">CLI Reference</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp">rgpycrumbs chemgp plt-gp</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-batch">batch</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-convergence">convergence</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-fps">fps</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-landscape">landscape</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-nll">nll</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-profile">profile</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-quality">quality</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-rff">rff</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-sensitivity">sensitivity</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-surface">surface</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-trust">trust</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-chemgp-plt-gp-variance">variance</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#common-options">Common Options</a></li>
 <li><a class="reference internal" href="#single-plot-usage">Single-Plot Usage</a></li>
@@ -326,6 +340,555 @@ data-aria-dark="Switch to auto color mode">
 <h1>Plotting ChemGP figures<a class="headerlink" href="#plotting-chemgp-figures" title="Link to this heading">¶</a></h1>
 <section id="cli-reference">
 <h2>CLI Reference<a class="headerlink" href="#cli-reference" title="Link to this heading">¶</a></h2>
+<section id="rgpycrumbs-chemgp-plt-gp">
+<h3>rgpycrumbs chemgp plt-gp<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp" title="Link to this heading">¶</a></h3>
+<p>ChemGP figure generation from HDF5 data.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</span></pre></div>
+</div>
+<section id="rgpycrumbs-chemgp-plt-gp-batch">
+<h4>batch<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-batch" title="Link to this heading">¶</a></h4>
+<p>Generate multiple plots from a TOML config.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>batch<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-batch-c">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-batch-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-batch-c" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> TOML config listing plots to generate.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-batch-b">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-batch-base-dir"></span><span class="sig-name descname"><span class="pre">-b</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--base-dir</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;base_dir&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-batch-b" title="Link to this definition">¶</a></dt>
+<dd><p>Base directory for relative paths in config.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-batch-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-batch-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-convergence">
+<h4>convergence<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-convergence" title="Link to this heading">¶</a></h4>
+<p>Force/energy convergence vs oracle calls.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>convergence<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-convergence-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-fps">
+<h4>fps<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-fps" title="Link to this heading">¶</a></h4>
+<p>FPS subset visualization (PCA scatter).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>fps<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-fps-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-fps-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-fps-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-fps-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-fps-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-fps-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-landscape">
+<h4>landscape<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-landscape" title="Link to this heading">¶</a></h4>
+<p>2D NEB reaction landscape via plt-neb (RMSD coordinates).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>landscape<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-dat-pattern">
+<span class="sig-name descname"><span class="pre">--dat-pattern</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dat_pattern&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-dat-pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Glob pattern for .dat files (eON format).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-con-pattern">
+<span class="sig-name descname"><span class="pre">--con-pattern</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;con_pattern&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-con-pattern" title="Link to this definition">¶</a></dt>
+<dd><p>Glob pattern for .con path files (eON format).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-d">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-source-dir"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--source-dir</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;source_dir&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-d" title="Link to this definition">¶</a></dt>
+<dd><p>Directory containing .dat/.con files.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-W" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-H" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-dpi" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-surface-type">
+<span class="sig-name descname"><span class="pre">--surface-type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;surface_type&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-surface-type" title="Link to this definition">¶</a></dt>
+<dd><p>Surface interpolation method for plt-neb.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-landscape-mode">
+<span class="sig-name descname"><span class="pre">--landscape-mode</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;landscape_mode&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-landscape-mode" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path | surface</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-plot-structures">
+<span class="sig-name descname"><span class="pre">--plot-structures</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;plot_structures&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-plot-structures" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-project-path">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-no-project-path"></span><span class="sig-name descname"><span class="pre">--project-path</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-project-path</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-project-path" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-additional-con">
+<span class="sig-name descname"><span class="pre">--additional-con</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;additional_con&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-additional-con" title="Link to this definition">¶</a></dt>
+<dd><p>(path, label) pairs for extra path overlays.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-augment-dat">
+<span class="sig-name descname"><span class="pre">--augment-dat</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;augment_dat&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-augment-dat" title="Link to this definition">¶</a></dt>
+<dd><p>Glob for extra .dat surface data.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-augment-con">
+<span class="sig-name descname"><span class="pre">--augment-con</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;augment_con&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-augment-con" title="Link to this definition">¶</a></dt>
+<dd><p>Glob for extra .con surface data.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-zoom-ratio">
+<span class="sig-name descname"><span class="pre">--zoom-ratio</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;zoom_ratio&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-zoom-ratio" title="Link to this definition">¶</a></dt>
+<dd><p>Structure image zoom ratio.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-ase-rotation">
+<span class="sig-name descname"><span class="pre">--ase-rotation</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ase_rotation&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-landscape-ase-rotation" title="Link to this definition">¶</a></dt>
+<dd><p>ASE rotation string for structures.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-nll">
+<h4>nll<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-nll" title="Link to this heading">¶</a></h4>
+<p>MAP-NLL landscape in hyperparameter space.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>nll<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-nll-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-nll-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-nll-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-nll-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-nll-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-nll-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-profile">
+<h4>profile<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-profile" title="Link to this heading">¶</a></h4>
+<p>NEB energy profile (image index vs delta E).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>profile<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-profile-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-profile-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-profile-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-profile-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-profile-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-profile-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-quality">
+<h4>quality<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-quality" title="Link to this heading">¶</a></h4>
+<p>GP surrogate quality progression (multi-panel).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>quality<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-quality-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-quality-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-quality-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-quality-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-quality-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-quality-n-points">
+<span class="sig-name descname"><span class="pre">--n-points</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;n_points&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-quality-n-points" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-rff">
+<h4>rff<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-rff" title="Link to this heading">¶</a></h4>
+<p>RFF approximation quality vs exact GP.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>rff<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-rff-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-rff-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-rff-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-rff-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-rff-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-rff-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-sensitivity">
+<h4>sensitivity<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-sensitivity" title="Link to this heading">¶</a></h4>
+<p>Hyperparameter sensitivity grid (3x3).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>sensitivity<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-sensitivity-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-surface">
+<h4>surface<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-surface" title="Link to this heading">¶</a></h4>
+<p>2D PES contour plot.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>surface<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-clamp-lo">
+<span class="sig-name descname"><span class="pre">--clamp-lo</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;clamp_lo&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-clamp-lo" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-clamp-hi">
+<span class="sig-name descname"><span class="pre">--clamp-hi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;clamp_hi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-clamp-hi" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-surface-contour-step">
+<span class="sig-name descname"><span class="pre">--contour-step</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;contour_step&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-surface-contour-step" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-trust">
+<h4>trust<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-trust" title="Link to this heading">¶</a></h4>
+<p>Trust region illustration (1D slice).</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>trust<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-trust-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-trust-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-trust-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-trust-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-trust-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-trust-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+<section id="rgpycrumbs-chemgp-plt-gp-variance">
+<h4>variance<a class="headerlink" href="#rgpycrumbs-chemgp-plt-gp-variance" title="Link to this heading">¶</a></h4>
+<p>GP variance overlaid on PES.</p>
+<p class="rubric">Usage</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>plt-gp<span class="w"> </span>variance<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</span></pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-dpi">
+<span class="sig-name descname"><span class="pre">--dpi</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dpi&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-variance-dpi" title="Link to this definition">¶</a></dt>
+<dd><p>Output resolution.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-H">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-height"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--height</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;height&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-variance-H" title="Link to this definition">¶</a></dt>
+<dd><p>Figure height in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-W">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-width"></span><span class="sig-name descname"><span class="pre">-W</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--width</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;width&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-variance-W" title="Link to this definition">¶</a></dt>
+<dd><p>Figure width in inches.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-o">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-variance-o" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Output PDF path.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-i">
+<span id="cmdoption-rgpycrumbs-chemgp-plt-gp-variance-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;input_path&gt;</span></span><a class="headerlink" href="#cmdoption-rgpycrumbs-chemgp-plt-gp-variance-i" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> HDF5 data file.</p>
+</dd></dl>
+
+</section>
+</section>
 </section>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
@@ -443,7 +1006,7 @@ a full TOML config.</p>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h2>
 <p>For developer details and source code see
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">rgpycrumbs.chemgp.plt_gp</span></code>.</p>
+<a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/plt_gp/index.html#module-rgpycrumbs.chemgp.plt_gp" title="rgpycrumbs.chemgp.plt_gp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rgpycrumbs.chemgp.plt_gp</span></code></a>.</p>
 <p>The plotting functions themselves live in
 <a class="reference external" href="https://chemparseplot.rgoswami.me">chemparseplot</a> at
 <code class="docutils literal notranslate"><span class="pre">chemparseplot.plot.chemgp</span></code>.</p>
