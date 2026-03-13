@@ -157,6 +157,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../eon/index.html">rgpycrumbs.eon</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../eon/cli_plt_neb/index.html">rgpycrumbs.eon.cli_plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
@@ -224,8 +225,13 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#hdf5-layout">HDF5 Layout</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._pd"><code class="docutils literal notranslate"><span class="pre">_pd</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._h5py"><code class="docutils literal notranslate"><span class="pre">_h5py</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._get_pd"><code class="docutils literal notranslate"><span class="pre">_get_pd()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._get_h5py"><code class="docutils literal notranslate"><span class="pre">_get_h5py()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_table"><code class="docutils literal notranslate"><span class="pre">read_h5_table()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_grid"><code class="docutils literal notranslate"><span class="pre">read_h5_grid()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_path"><code class="docutils literal notranslate"><span class="pre">read_h5_path()</span></code></a></li>
@@ -351,24 +357,45 @@ output files. The HDF5 layout mirrors the Julia common_plot.jl helpers.</p>
 <p><span class="versionmodified added">Added in version 1.7.0: </span>Extracted from chemgp.plt_gp to standalone module.</p>
 </div>
 </section>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._pd" title="rgpycrumbs.chemgp.hdf5_io._pd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_pd</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._h5py" title="rgpycrumbs.chemgp.hdf5_io._h5py"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_h5py</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_table" title="rgpycrumbs.chemgp.hdf5_io.read_h5_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_table</span></code></a>(→ pandas.DataFrame)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._get_pd" title="rgpycrumbs.chemgp.hdf5_io._get_pd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_pd</span></code></a>()</p></td>
+<td><p>Get pandas module, installing if needed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io._get_h5py" title="rgpycrumbs.chemgp.hdf5_io._get_h5py"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_h5py</span></code></a>()</p></td>
+<td><p>Get h5py module, installing if needed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_table" title="rgpycrumbs.chemgp.hdf5_io.read_h5_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_table</span></code></a>(f[, name])</p></td>
 <td><p>Read a group of same-length vectors as a DataFrame.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_grid" title="rgpycrumbs.chemgp.hdf5_io.read_h5_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_grid</span></code></a>(→ tuple[numpy.ndarray, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_grid" title="rgpycrumbs.chemgp.hdf5_io.read_h5_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_grid</span></code></a>(f, name)</p></td>
 <td><p>Read a 2D grid with optional axis ranges.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_path" title="rgpycrumbs.chemgp.hdf5_io.read_h5_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_path</span></code></a>(→ dict[str, numpy.ndarray])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_path" title="rgpycrumbs.chemgp.hdf5_io.read_h5_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_path</span></code></a>(f, name)</p></td>
 <td><p>Read a path (ordered point sequence).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_points" title="rgpycrumbs.chemgp.hdf5_io.read_h5_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_points</span></code></a>(→ dict[str, numpy.ndarray])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_points" title="rgpycrumbs.chemgp.hdf5_io.read_h5_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_points</span></code></a>(f, name)</p></td>
 <td><p>Read a point set.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata" title="rgpycrumbs.chemgp.hdf5_io.read_h5_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_metadata</span></code></a>(→ dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata" title="rgpycrumbs.chemgp.hdf5_io.read_h5_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_metadata</span></code></a>(f)</p></td>
 <td><p>Read root-level metadata attributes.</p></td>
 </tr>
 </tbody>
@@ -377,9 +404,31 @@ output files. The HDF5 layout mirrors the Julia common_plot.jl helpers.</p>
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io._pd">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">_pd</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#_pd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io._pd" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io._h5py">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">_h5py</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#_h5py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io._h5py" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io._get_pd">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">_get_pd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#_get_pd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io._get_pd" title="Link to this definition">¶</a></dt>
+<dd><p>Get pandas module, installing if needed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io._get_h5py">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">_get_h5py</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#_get_h5py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io._get_h5py" title="Link to this definition">¶</a></dt>
+<dd><p>Get h5py module, installing if needed.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io.read_h5_table">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">h5py.File</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'table'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_table" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'table'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_table" title="Link to this definition">¶</a></dt>
 <dd><p>Read a group of same-length vectors as a DataFrame.</p>
 <section id="parameters">
 <h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h3>
@@ -393,7 +442,7 @@ output files. The HDF5 layout mirrors the Julia common_plot.jl helpers.</p>
 <section id="returns">
 <h3>Returns<a class="headerlink" href="#returns" title="Link to this heading">¶</a></h3>
 <dl class="simple">
-<dt>pd.DataFrame</dt><dd><p>DataFrame with columns from the HDF5 group</p>
+<dt>DataFrame</dt><dd><p>DataFrame with columns from the HDF5 group</p>
 </dd>
 </dl>
 </section>
@@ -401,7 +450,7 @@ output files. The HDF5 layout mirrors the Julia common_plot.jl helpers.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io.read_h5_grid">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">h5py.File</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_grid" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_grid" title="Link to this definition">¶</a></dt>
 <dd><p>Read a 2D grid with optional axis ranges.</p>
 <section id="id1">
 <h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
@@ -424,7 +473,7 @@ if axis range attributes are not present</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io.read_h5_path">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">h5py.File</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_path" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_path" title="Link to this definition">¶</a></dt>
 <dd><p>Read a path (ordered point sequence).</p>
 <section id="id3">
 <h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
@@ -438,7 +487,7 @@ if axis range attributes are not present</p>
 <section id="id4">
 <h3>Returns<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <dl class="simple">
-<dt>dict[str, np.ndarray]</dt><dd><p>Dictionary mapping coordinate names to arrays</p>
+<dt>dict</dt><dd><p>Dictionary mapping coordinate names to arrays</p>
 </dd>
 </dl>
 </section>
@@ -446,7 +495,7 @@ if axis range attributes are not present</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io.read_h5_points">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">h5py.File</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_points" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_points" title="Link to this definition">¶</a></dt>
 <dd><p>Read a point set.</p>
 <section id="id5">
 <h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
@@ -460,7 +509,7 @@ if axis range attributes are not present</p>
 <section id="id6">
 <h3>Returns<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <dl class="simple">
-<dt>dict[str, np.ndarray]</dt><dd><p>Dictionary mapping coordinate names to arrays</p>
+<dt>dict</dt><dd><p>Dictionary mapping coordinate names to arrays</p>
 </dd>
 </dl>
 </section>
@@ -468,7 +517,7 @@ if axis range attributes are not present</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io.read_h5_metadata">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">h5py.File</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">read_h5_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#read_h5_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata" title="Link to this definition">¶</a></dt>
 <dd><p>Read root-level metadata attributes.</p>
 <section id="id7">
 <h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>

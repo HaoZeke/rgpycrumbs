@@ -23,11 +23,22 @@ rgpycrumbs.chemgp.hdf5_io
 
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.chemgp.hdf5_io._pd
+   rgpycrumbs.chemgp.hdf5_io._h5py
+
+
 Functions
 ---------
 
 .. autoapisummary::
 
+   rgpycrumbs.chemgp.hdf5_io._get_pd
+   rgpycrumbs.chemgp.hdf5_io._get_h5py
    rgpycrumbs.chemgp.hdf5_io.read_h5_table
    rgpycrumbs.chemgp.hdf5_io.read_h5_grid
    rgpycrumbs.chemgp.hdf5_io.read_h5_path
@@ -38,7 +49,25 @@ Functions
 Module Contents
 ---------------
 
-.. py:function:: read_h5_table(f: h5py.File, name: str = 'table') -> pandas.DataFrame
+.. py:data:: _pd
+   :value: None
+
+
+.. py:data:: _h5py
+   :value: None
+
+
+.. py:function:: _get_pd()
+
+   Get pandas module, installing if needed.
+
+
+.. py:function:: _get_h5py()
+
+   Get h5py module, installing if needed.
+
+
+.. py:function:: read_h5_table(f, name: str = 'table')
 
    Read a group of same-length vectors as a DataFrame.
 
@@ -51,11 +80,11 @@ Module Contents
 
    Returns
    -------
-   pd.DataFrame
+   DataFrame
        DataFrame with columns from the HDF5 group
 
 
-.. py:function:: read_h5_grid(f: h5py.File, name: str) -> tuple[numpy.ndarray, numpy.ndarray | None, numpy.ndarray | None]
+.. py:function:: read_h5_grid(f, name: str)
 
    Read a 2D grid with optional axis ranges.
 
@@ -73,7 +102,7 @@ Module Contents
        if axis range attributes are not present
 
 
-.. py:function:: read_h5_path(f: h5py.File, name: str) -> dict[str, numpy.ndarray]
+.. py:function:: read_h5_path(f, name: str)
 
    Read a path (ordered point sequence).
 
@@ -86,11 +115,11 @@ Module Contents
 
    Returns
    -------
-   dict[str, np.ndarray]
+   dict
        Dictionary mapping coordinate names to arrays
 
 
-.. py:function:: read_h5_points(f: h5py.File, name: str) -> dict[str, numpy.ndarray]
+.. py:function:: read_h5_points(f, name: str)
 
    Read a point set.
 
@@ -103,11 +132,11 @@ Module Contents
 
    Returns
    -------
-   dict[str, np.ndarray]
+   dict
        Dictionary mapping coordinate names to arrays
 
 
-.. py:function:: read_h5_metadata(f: h5py.File) -> dict
+.. py:function:: read_h5_metadata(f)
 
    Read root-level metadata attributes.
 

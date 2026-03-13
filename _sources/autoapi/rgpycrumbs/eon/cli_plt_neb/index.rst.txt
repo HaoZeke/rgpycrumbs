@@ -1,0 +1,80 @@
+rgpycrumbs.eon.cli_plt_neb
+==========================
+
+.. py:module:: rgpycrumbs.eon.cli_plt_neb
+
+.. autoapi-nested-parse::
+
+   EON CLI - NEB plotting from .dat/.con files or HDF5 trajectories.
+
+   Thin CLI wrapper around chemparseplot and eon.plotting functions.
+   All plotting logic delegated to pure functions.
+
+   .. versionadded:: 1.7.0
+       Refactored from eon.plt_neb to thin CLI wrapper.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.cli_plt_neb.log
+   rgpycrumbs.eon.cli_plt_neb.DEFAULT_INPUT_PATTERN
+   rgpycrumbs.eon.cli_plt_neb.DEFAULT_PATH_PATTERN
+   rgpycrumbs.eon.cli_plt_neb.IRA_KMAX_DEFAULT
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.eon.cli_plt_neb.create_figure
+   rgpycrumbs.eon.cli_plt_neb.load_neb_data
+   rgpycrumbs.eon.cli_plt_neb.main
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:data:: DEFAULT_INPUT_PATTERN
+   :value: 'neb_*.dat'
+
+
+.. py:data:: DEFAULT_PATH_PATTERN
+   :value: 'neb_path_*.con'
+
+
+.. py:data:: IRA_KMAX_DEFAULT
+   :value: 1.8
+
+
+.. py:function:: create_figure(figsize, dpi, plot_structures, plot_type, additional_con)
+
+   Create figure with appropriate layout.
+
+   Returns
+   -------
+   tuple
+       (fig, ax, ax_strip, has_strip)
+
+
+.. py:function:: load_neb_data(source, input_dat_pattern, input_path_pattern, input_h5, input_traj, cache_file, force_recompute, ira_kmax, augment_dat, augment_con, atoms_list, plot_mode)
+
+   Load NEB data from various sources.
+
+   Returns
+   -------
+   tuple
+       (df, atoms_list)
+
+
+.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, source, input_h5, input_traj, plot_type, landscape_mode, project_path, plot_structures, output_file, figsize, dpi, zoom_ratio, ase_rotation, title, ira_kmax, cache_file, force_recompute, augment_dat, augment_con)
+
+   NEB reaction path and landscape plotting.
+
+
