@@ -5,28 +5,13 @@ rgpycrumbs.eon.plt_neb
 
 .. autoapi-nested-parse::
 
-   Plots Nudged Elastic Band (NEB) reaction paths and landscapes.
+   EON CLI - NEB plotting from .dat/.con files or HDF5 trajectories.
 
-   .. versionadded:: 0.0.2
+   Thin CLI wrapper that delegates to chemparseplot for parsing and plotting.
+   All heavy lifting done by chemparseplot modules.
 
-   This script provides a command-line interface (CLI) to visualize data
-   generated from NEB calculations. It can plot:
-
-   1.  **Energy/Eigenvalue Profiles:** Shows the evolution of the energy or
-       lowest eigenvalue along the reaction coordinate. It can overlay multiple
-       paths (e.g., from different optimization steps) and use a
-       physically-motivated Hermite spline interpolation using force data.
-
-   2.  **2D Reaction Landscapes:** Plots the path on a 2D coordinate system
-       defined by the Root Mean Square Deviation (RMSD) from the reactant
-       and product structures. This requires the 'ira_mod' library.
-       It can also interpolate and display the 2D energy/eigenvalue surface.
-
-   The script can also render atomic structures from a .con file as insets
-   on the plots for key points (reactant, saddle, product).
-
-   This script follows the guidelines laid out here:
-   https://realpython.com/python-script-structure/
+   .. versionadded:: 1.7.0
+       Refactored from monolithic plt_neb.py to thin CLI wrapper.
 
 
 
@@ -35,6 +20,10 @@ Attributes
 
 .. autoapisummary::
 
+   rgpycrumbs.eon.plt_neb._adjust_text
+   rgpycrumbs.eon.plt_neb._mpl
+   rgpycrumbs.eon.plt_neb._plt
+   rgpycrumbs.eon.plt_neb._pl
    rgpycrumbs.eon.plt_neb.log
    rgpycrumbs.eon.plt_neb.DEFAULT_INPUT_PATTERN
    rgpycrumbs.eon.plt_neb.DEFAULT_PATH_PATTERN
@@ -46,11 +35,45 @@ Functions
 
 .. autoapisummary::
 
+   rgpycrumbs.eon.plt_neb._get_adjust_text
+   rgpycrumbs.eon.plt_neb._get_mpl
+   rgpycrumbs.eon.plt_neb._get_polars
    rgpycrumbs.eon.plt_neb.main
 
 
 Module Contents
 ---------------
+
+.. py:data:: _adjust_text
+   :value: None
+
+
+.. py:data:: _mpl
+   :value: None
+
+
+.. py:data:: _plt
+   :value: None
+
+
+.. py:data:: _pl
+   :value: None
+
+
+.. py:function:: _get_adjust_text()
+
+   Get adjustText module.
+
+
+.. py:function:: _get_mpl()
+
+   Get matplotlib modules.
+
+
+.. py:function:: _get_polars()
+
+   Get polars module.
+
 
 .. py:data:: log
 
@@ -66,8 +89,10 @@ Module Contents
    :value: 1.8
 
 
-.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, source, input_traj, input_h5, plot_type, landscape_mode, landscape_path, project_path, rc_mode, plot_structures, rbf_smoothing, show_pts, plot_mode, surface_type, n_inducing, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, strip_renderer, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, draw_reactant, draw_saddle, draw_product, show_legend, cache_file, force_recompute, ira_kmax, sp_file, augment_dat, augment_con)
+.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, source, input_h5, input_traj, plot_type, landscape_mode, project_path, plot_structures, output_file, figsize, dpi, title, ira_kmax, cache_file, force_recompute)
 
-   Main entry point for NEB plot script.
+   NEB reaction path and landscape plotting.
+
+   Delegates to chemparseplot for parsing and plotting.
 
 
