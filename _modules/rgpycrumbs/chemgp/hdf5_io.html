@@ -341,7 +341,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="46">
 <div class="viewcode-block" id="read_h5_table">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/chemgp/index.html#rgpycrumbs.chemgp.hdf5_io.read_h5_table">[docs]</a>
-</span><span data-line="47"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_table</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;table&quot;</span><span class="p">):</span>
+</span><span data-line="47"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_table</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;table&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 </span><span data-line="48"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a group of same-length vectors as a DataFrame.</span>
 </span><span data-line="49">
 </span><span data-line="50"><span class="sd">    Parameters</span>
@@ -371,7 +371,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="73">
 <div class="viewcode-block" id="read_h5_grid">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/chemgp/index.html#rgpycrumbs.chemgp.hdf5_io.read_h5_grid">[docs]</a>
-</span><span data-line="74"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_grid</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="74"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_grid</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 </span><span data-line="75"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a 2D grid with optional axis ranges.</span>
 </span><span data-line="76">
 </span><span data-line="77"><span class="sd">    Parameters</span>
@@ -409,7 +409,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="108">
 <div class="viewcode-block" id="read_h5_path">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/chemgp/index.html#rgpycrumbs.chemgp.hdf5_io.read_h5_path">[docs]</a>
-</span><span data-line="109"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_path</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="109"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_path</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 </span><span data-line="110"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a path (ordered point sequence).</span>
 </span><span data-line="111">
 </span><span data-line="112"><span class="sd">    Parameters</span>
@@ -432,7 +432,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="128">
 <div class="viewcode-block" id="read_h5_points">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/chemgp/index.html#rgpycrumbs.chemgp.hdf5_io.read_h5_points">[docs]</a>
-</span><span data-line="129"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_points</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="129"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_points</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 </span><span data-line="130"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a point set.</span>
 </span><span data-line="131">
 </span><span data-line="132"><span class="sd">    Parameters</span>
@@ -455,7 +455,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="148">
 <div class="viewcode-block" id="read_h5_metadata">
 <a class="viewcode-back" href="../../../autoapi/rgpycrumbs/chemgp/index.html#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata">[docs]</a>
-</span><span data-line="149"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_metadata</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+</span><span data-line="149"><span class="k">def</span><span class="w"> </span><span class="nf">read_h5_metadata</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 </span><span data-line="150"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Read root-level metadata attributes.</span>
 </span><span data-line="151">
 </span><span data-line="152"><span class="sd">    Parameters</span>

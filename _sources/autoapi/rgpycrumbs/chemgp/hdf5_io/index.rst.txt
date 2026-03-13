@@ -67,7 +67,7 @@ Module Contents
    Get h5py module, installing if needed.
 
 
-.. py:function:: read_h5_table(f, name: str = 'table')
+.. py:function:: read_h5_table(f: h5py.File, name: str = 'table') -> Any
 
    Read a group of same-length vectors as a DataFrame.
 
@@ -84,7 +84,7 @@ Module Contents
        DataFrame with columns from the HDF5 group
 
 
-.. py:function:: read_h5_grid(f, name: str)
+.. py:function:: read_h5_grid(f: h5py.File, name: str) -> tuple[numpy.ndarray, numpy.ndarray | None, numpy.ndarray | None]
 
    Read a 2D grid with optional axis ranges.
 
@@ -102,7 +102,7 @@ Module Contents
        if axis range attributes are not present
 
 
-.. py:function:: read_h5_path(f, name: str)
+.. py:function:: read_h5_path(f: h5py.File, name: str) -> dict[str, numpy.ndarray]
 
    Read a path (ordered point sequence).
 
@@ -119,7 +119,7 @@ Module Contents
        Dictionary mapping coordinate names to arrays
 
 
-.. py:function:: read_h5_points(f, name: str)
+.. py:function:: read_h5_points(f: h5py.File, name: str) -> dict[str, numpy.ndarray]
 
    Read a point set.
 
@@ -136,7 +136,7 @@ Module Contents
        Dictionary mapping coordinate names to arrays
 
 
-.. py:function:: read_h5_metadata(f)
+.. py:function:: read_h5_metadata(f: h5py.File) -> dict[str, Any]
 
    Read root-level metadata attributes.
 
