@@ -470,6 +470,40 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="161"><span class="sd">    &quot;&quot;&quot;</span>
 </span><span data-line="162">    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
 
+</span><span data-line="163">
+</span><span data-line="164">
+<div class="viewcode-block" id="validate_hdf5_structure">
+<a class="viewcode-back" href="../../../autoapi/rgpycrumbs/chemgp/hdf5_io/index.html#rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure">[docs]</a>
+</span><span data-line="165"><span class="k">def</span><span class="w"> </span><span class="nf">validate_hdf5_structure</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">required_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="166"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate HDF5 file has expected structure.</span>
+</span><span data-line="167"><span class="sd">    </span>
+</span><span data-line="168"><span class="sd">    Parameters</span>
+</span><span data-line="169"><span class="sd">    ----------</span>
+</span><span data-line="170"><span class="sd">    f</span>
+</span><span data-line="171"><span class="sd">        Open HDF5 file object</span>
+</span><span data-line="172"><span class="sd">    required_groups</span>
+</span><span data-line="173"><span class="sd">        List of required group names (default: [&quot;grids&quot;, &quot;table&quot;])</span>
+</span><span data-line="174"><span class="sd">    </span>
+</span><span data-line="175"><span class="sd">    Returns</span>
+</span><span data-line="176"><span class="sd">    -------</span>
+</span><span data-line="177"><span class="sd">    list[str]</span>
+</span><span data-line="178"><span class="sd">        List of missing groups (empty if all present)</span>
+</span><span data-line="179"><span class="sd">    </span>
+</span><span data-line="180"><span class="sd">    Raises</span>
+</span><span data-line="181"><span class="sd">    ------</span>
+</span><span data-line="182"><span class="sd">    ValueError</span>
+</span><span data-line="183"><span class="sd">        If required groups are missing</span>
+</span><span data-line="184"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="185">    <span class="k">if</span> <span class="n">required_groups</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="186">        <span class="n">required_groups</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;grids&quot;</span><span class="p">,</span> <span class="s2">&quot;table&quot;</span><span class="p">]</span>
+</span><span data-line="187">    
+</span><span data-line="188">    <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">required_groups</span> <span class="k">if</span> <span class="n">g</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+</span><span data-line="189">    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+</span><span data-line="190">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid HDF5 structure. Missing groups: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span data-line="191">    <span class="k">return</span> <span class="n">missing</span></div>
+
+</span><span data-line="192">
+</span><span data-line="193">
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

@@ -35,6 +35,7 @@ Functions
    rgpycrumbs.chemgp.plotting._get_pd
    rgpycrumbs.chemgp.plotting._get_plt
    rgpycrumbs.chemgp.plotting._get_chemparseplot_plot_chemgp
+   rgpycrumbs.chemgp.plotting.safe_plot
    rgpycrumbs.chemgp.plotting.detect_clamp
    rgpycrumbs.chemgp.plotting.save_plot
    rgpycrumbs.chemgp.plotting.plot_convergence
@@ -77,6 +78,13 @@ Module Contents
 .. py:function:: _get_chemparseplot_plot_chemgp()
 
    Get chemparseplot.plot.chemgp module.
+
+
+.. py:function:: safe_plot(func)
+
+   Decorator for graceful error handling in plot generation.
+
+   Catches common errors and logs helpful messages.
 
 
 .. py:data:: _CLAMP_PRESETS

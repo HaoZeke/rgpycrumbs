@@ -44,6 +44,7 @@ Functions
    rgpycrumbs.chemgp.hdf5_io.read_h5_path
    rgpycrumbs.chemgp.hdf5_io.read_h5_points
    rgpycrumbs.chemgp.hdf5_io.read_h5_metadata
+   rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure
 
 
 Module Contents
@@ -149,5 +150,27 @@ Module Contents
    -------
    dict
        Dictionary of metadata attributes
+
+
+.. py:function:: validate_hdf5_structure(f: h5py.File, required_groups: list[str] | None = None) -> list[str]
+
+   Validate HDF5 file has expected structure.
+
+   Parameters
+   ----------
+   f
+       Open HDF5 file object
+   required_groups
+       List of required group names (default: ["grids", "table"])
+
+   Returns
+   -------
+   list[str]
+       List of missing groups (empty if all present)
+
+   Raises
+   ------
+   ValueError
+       If required groups are missing
 
 

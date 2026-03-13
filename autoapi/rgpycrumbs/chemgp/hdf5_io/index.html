@@ -236,6 +236,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_path"><code class="docutils literal notranslate"><span class="pre">read_h5_path()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_points"><code class="docutils literal notranslate"><span class="pre">read_h5_points()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata"><code class="docutils literal notranslate"><span class="pre">read_h5_metadata()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure"><code class="docutils literal notranslate"><span class="pre">validate_hdf5_structure()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -397,6 +398,9 @@ output files. The HDF5 layout mirrors the Julia common_plot.jl helpers.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.read_h5_metadata" title="rgpycrumbs.chemgp.hdf5_io.read_h5_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_h5_metadata</span></code></a>(→ dict[str, Any])</p></td>
 <td><p>Read root-level metadata attributes.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure" title="rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_hdf5_structure</span></code></a>(→ list[str])</p></td>
+<td><p>Validate HDF5 file has expected structure.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -529,6 +533,35 @@ if axis range attributes are not present</p>
 <h3>Returns<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <dl class="simple">
 <dt>dict</dt><dd><p>Dictionary of metadata attributes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.hdf5_io.</span></span><span class="sig-name descname"><span class="pre">validate_hdf5_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">h5py.File</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/hdf5_io.html#validate_hdf5_structure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.hdf5_io.validate_hdf5_structure" title="Link to this definition">¶</a></dt>
+<dd><p>Validate HDF5 file has expected structure.</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>f</dt><dd><p>Open HDF5 file object</p>
+</dd>
+<dt>required_groups</dt><dd><p>List of required group names (default: [“grids”, “table”])</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>list[str]</dt><dd><p>List of missing groups (empty if all present)</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If required groups are missing</p>
 </dd>
 </dl>
 </section>

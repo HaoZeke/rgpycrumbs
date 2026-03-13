@@ -232,6 +232,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting._get_pd"><code class="docutils literal notranslate"><span class="pre">_get_pd()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting._get_plt"><code class="docutils literal notranslate"><span class="pre">_get_plt()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting._get_chemparseplot_plot_chemgp"><code class="docutils literal notranslate"><span class="pre">_get_chemparseplot_plot_chemgp()</span></code></a></li>
+<li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.safe_plot"><code class="docutils literal notranslate"><span class="pre">safe_plot()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting._CLAMP_PRESETS"><code class="docutils literal notranslate"><span class="pre">_CLAMP_PRESETS</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.detect_clamp"><code class="docutils literal notranslate"><span class="pre">detect_clamp()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.save_plot"><code class="docutils literal notranslate"><span class="pre">save_plot()</span></code></a></li>
@@ -391,40 +392,43 @@ plotting. No file I/O, no CLI logic - pure functions only.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting._get_chemparseplot_plot_chemgp" title="rgpycrumbs.chemgp.plotting._get_chemparseplot_plot_chemgp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_chemparseplot_plot_chemgp</span></code></a>()</p></td>
 <td><p>Get chemparseplot.plot.chemgp module.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.detect_clamp" title="rgpycrumbs.chemgp.plotting.detect_clamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_clamp</span></code></a>(filename)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.safe_plot" title="rgpycrumbs.chemgp.plotting.safe_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_plot</span></code></a>(func)</p></td>
+<td><p>Decorator for graceful error handling in plot generation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.detect_clamp" title="rgpycrumbs.chemgp.plotting.detect_clamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detect_clamp</span></code></a>(filename)</p></td>
 <td><p>Detect energy clamping preset from filename.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.save_plot" title="rgpycrumbs.chemgp.plotting.save_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_plot</span></code></a>(→ None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.save_plot" title="rgpycrumbs.chemgp.plotting.save_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_plot</span></code></a>(→ None)</p></td>
 <td><p>Save a plotnine ggplot or matplotlib Figure to file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_convergence" title="rgpycrumbs.chemgp.plotting.plot_convergence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_convergence</span></code></a>(→ None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_convergence" title="rgpycrumbs.chemgp.plotting.plot_convergence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_convergence</span></code></a>(→ None)</p></td>
 <td><p>Plot force/energy convergence vs oracle calls.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_surface" title="rgpycrumbs.chemgp.plotting.plot_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code></a>(→ None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_surface" title="rgpycrumbs.chemgp.plotting.plot_surface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_surface</span></code></a>(→ None)</p></td>
 <td><p>Plot 2D PES contour.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_gp_quality" title="rgpycrumbs.chemgp.plotting.plot_gp_quality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gp_quality</span></code></a>(→ None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_gp_quality" title="rgpycrumbs.chemgp.plotting.plot_gp_quality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_gp_quality</span></code></a>(→ None)</p></td>
 <td><p>Plot GP surrogate quality progression.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_rff" title="rgpycrumbs.chemgp.plotting.plot_rff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rff</span></code></a>(→ None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_rff" title="rgpycrumbs.chemgp.plotting.plot_rff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_rff</span></code></a>(→ None)</p></td>
 <td><p>Plot RFF approximation quality vs exact GP.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_nll" title="rgpycrumbs.chemgp.plotting.plot_nll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_nll</span></code></a>(→ None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_nll" title="rgpycrumbs.chemgp.plotting.plot_nll"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_nll</span></code></a>(→ None)</p></td>
 <td><p>Plot MAP-NLL landscape.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_sensitivity" title="rgpycrumbs.chemgp.plotting.plot_sensitivity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_sensitivity</span></code></a>(→ None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_sensitivity" title="rgpycrumbs.chemgp.plotting.plot_sensitivity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_sensitivity</span></code></a>(→ None)</p></td>
 <td><p>Plot hyperparameter sensitivity grid.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_trust" title="rgpycrumbs.chemgp.plotting.plot_trust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_trust</span></code></a>(→ None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_trust" title="rgpycrumbs.chemgp.plotting.plot_trust"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_trust</span></code></a>(→ None)</p></td>
 <td><p>Plot trust region illustration.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_variance" title="rgpycrumbs.chemgp.plotting.plot_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_variance</span></code></a>(→ None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_variance" title="rgpycrumbs.chemgp.plotting.plot_variance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_variance</span></code></a>(→ None)</p></td>
 <td><p>Plot GP variance overlaid on PES.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_fps" title="rgpycrumbs.chemgp.plotting.plot_fps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_fps</span></code></a>(→ None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_fps" title="rgpycrumbs.chemgp.plotting.plot_fps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_fps</span></code></a>(→ None)</p></td>
 <td><p>Plot FPS subset visualization.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_profile" title="rgpycrumbs.chemgp.plotting.plot_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profile</span></code></a>(→ None)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.chemgp.plotting.plot_profile" title="rgpycrumbs.chemgp.plotting.plot_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_profile</span></code></a>(→ None)</p></td>
 <td><p>Plot NEB energy profile.</p></td>
 </tr>
 </tbody>
@@ -464,6 +468,13 @@ plotting. No file I/O, no CLI logic - pure functions only.</p>
 <dt class="sig sig-object py" id="rgpycrumbs.chemgp.plotting._get_chemparseplot_plot_chemgp">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.plotting.</span></span><span class="sig-name descname"><span class="pre">_get_chemparseplot_plot_chemgp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/plotting.html#_get_chemparseplot_plot_chemgp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.plotting._get_chemparseplot_plot_chemgp" title="Link to this definition">¶</a></dt>
 <dd><p>Get chemparseplot.plot.chemgp module.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="rgpycrumbs.chemgp.plotting.safe_plot">
+<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.chemgp.plotting.</span></span><span class="sig-name descname"><span class="pre">safe_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/chemgp/plotting.html#safe_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.chemgp.plotting.safe_plot" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator for graceful error handling in plot generation.</p>
+<p>Catches common errors and logs helpful messages.</p>
 </dd></dl>
 
 <dl class="py data">
