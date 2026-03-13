@@ -40,6 +40,7 @@ Functions
    rgpycrumbs.chemgp.cli_plot_gp.variance
    rgpycrumbs.chemgp.cli_plot_gp.fps
    rgpycrumbs.chemgp.cli_plot_gp.profile
+   rgpycrumbs.chemgp.cli_plot_gp.batch
    rgpycrumbs.chemgp.cli_plot_gp.main
 
 
@@ -106,6 +107,11 @@ Module Contents
 .. py:function:: profile(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
 
    NEB energy profile (image index vs delta E).
+
+
+.. py:function:: batch(config_path: pathlib.Path, base_dir: pathlib.Path | None, dpi: int, parallel: int)
+
+   Generate multiple plots from a TOML config.
 
 
 .. py:function:: main()
