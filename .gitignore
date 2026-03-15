@@ -233,3 +233,12 @@ flycheck_*.el
 
 # ASV benchmark results
 .asv/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
+
+# Lychee link checker cache
+.lycheecache
+.beads/
+.fastembed_cache/

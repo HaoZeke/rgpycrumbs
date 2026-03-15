@@ -1,0 +1,21 @@
+name: Doctest Tutorials
+
+on:
+  push:
+    branches: [main, docs/tutorial-improvements]
+  pull_request:
+    branches: [main]
+
+jobs:
+  doctest:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run tutorial doctests
+        run: |
+          uv run --extra test python3 scripts/run_org_doctests.py \
+            docs/orgmode/tutorials/*.org
