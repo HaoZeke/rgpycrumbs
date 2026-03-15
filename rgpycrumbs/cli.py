@@ -15,11 +15,32 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 
 def _get_scripts_in_folder(folder_name: str) -> list[str]:
-    """Returns a sorted list of script names (without extension) in a folder."""
+    """Returns a sorted list of CLI script names (without extension) in a folder.
+    
+    Excludes library modules (hdf5_io, plotting) and internal files (__init__, _*).
+    Includes actual CLI entry point scripts.
+    """
     folder_path = PACKAGE_ROOT / folder_name
     if not folder_path.is_dir():
         return []
-    return sorted(f.stem for f in folder_path.glob("*.py") if not f.name.startswith("_"))
+    
+    # Library modules to exclude
+    library_modules = {"hdf5_io", "plotting", "utils", "helpers"}
+    
+    scripts = []
+    for f in folder_path.glob("*.py"):
+        if f.name.startswith("_"):
+            continue
+        stem = f.stem
+        # Skip library modules and __init__
+        if stem in library_modules or stem == "__init__":
+            continue
+        # Strip 'cli_' prefix if present for cleaner command names
+        if stem.startswith("cli_"):
+            stem = stem[4:]
+        scripts.append(stem)
+    
+    return sorted(scripts)
 
 
 def _dispatch(
@@ -78,18 +99,36 @@ def _dispatch(
 
 
 def _make_script_command(group_name: str, script_stem: str) -> click.Command:
-    """Creates a click command that dispatches to a PEP 723 script."""
+    """Creates a click command that dispatches to a PEP 723 script.
+    
+    For full option help, run the script directly:
+        python -m rgpycrumbs.<group>.<script> --help
+    """
     display_name = script_stem.replace("_", "-")
 
     @click.command(
         name=display_name,
         context_settings={"ignore_unknown_options": True, "allow_extra_args": True},
+        add_help_option=False,  # Pass --help to underlying script
     )
     @click.pass_context
     def cmd(ctx):
         # Retrieve the dev flag safely from the parent context
         is_dev = ctx.obj.get("is_dev", False) if ctx.obj else False
         is_verbose = ctx.obj.get("is_verbose", False) if ctx.obj else False
+        
+        # Pass through --help to underlying script
+        if "--help" in ctx.args or "-h" in ctx.args:
+            # Run script with --help to show actual options
+            _dispatch(
+                group_name,
+                display_name,
+                tuple(ctx.args),
+                is_dev=is_dev,
+                is_verbose=False,  # Don't add verbose noise to help output
+            )
+            return
+        
         _dispatch(
             group_name,
             display_name,
@@ -98,7 +137,14 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
             is_verbose=is_verbose,
         )
 
-    cmd.help = f"Run the {display_name} script."
+    cmd.help = f"""Run the {display_name} script.
+
+For full option documentation, run:
+    python -m rgpycrumbs.{group_name}.{display_name} --help
+
+Or use --help flag which will be passed to the script:
+    rgpycrumbs {group_name} {display_name} --help
+"""
     return cmd
 
 
