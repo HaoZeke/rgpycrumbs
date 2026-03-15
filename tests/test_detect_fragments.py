@@ -5,7 +5,7 @@ skip_if_not_env("fragments")
 import pytest  # noqa: E402
 from ase.atoms import Atoms  # noqa: E402
 
-from rgpycrumbs.geom.detect_fragments import (  # noqa: E402
+from rgpycrumbs.geom.fragments import (  # noqa: E402
     build_graph_and_find_components,
     find_fragments_bond_order,
     find_fragments_geometric,
