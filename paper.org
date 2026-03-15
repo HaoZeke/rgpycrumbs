@@ -22,7 +22,7 @@ affiliations:
     index: 1
   - name: "EPFL - Ecole Polytechnique Federale de Lausanne, Switzerland"
     index: 2
-date: 23 February 2026
+date: 15 March 2026
 bibliography: paper.bib
 ---
 #+end_export
@@ -129,18 +129,18 @@ digraph architecture {
             fillcolor="#fffde7";
             color="#004D40";
 
-            plt_neb [label="plt_neb\n(NEB plotting)", fillcolor="#FF655D", fontcolor="white"];
             con_split [label="con_splitter\n(trajectory split)", fillcolor="#FF655D", fontcolor="white"];
-            plt_frag [label="plt_fragments\n(fragment analysis)", fillcolor="#FF655D", fontcolor="white"];
+            plt_frag [label="detect_fragments\n(fragment analysis)", fillcolor="#FF655D", fontcolor="white"];
+            match_atoms [label="match_atoms\n(structure matching)", fillcolor="#FF655D", fontcolor="white"];
         }
 
-        cli -> plt_neb [label="uv run", fontsize=10];
         cli -> con_split [label="uv run", fontsize=10];
         cli -> plt_frag [label="uv run", fontsize=10];
+        cli -> match_atoms [label="uv run", fontsize=10];
     }
 
     // Cross-cluster edges
-    plt_neb -> surfaces [lhead=cluster_library, label="imports", style=dashed, color="#004D40"];
+    plt_frag -> geom [lhead=cluster_library, label="imports", style=dashed, color="#004D40"];
 
     // External
     subgraph cluster_companion {
@@ -190,8 +190,11 @@ using both energy and force data for 1D profiles along reaction coordinates.
 *Data types* (~rgpycrumbs.basetypes~). Shared structures for NEB paths,
 saddle point measures, and molecular geometries.
 
-*PLUMED integration* (~rgpycrumbs.plumed~). Direct summation reconstruction
-of 2D free energy surfaces from PLUMED metadynamics hills files.
+*PLUMED integration* (~rgpycrumbs.plumed~). A CLI for free energy surface
+reconstruction from metadynamics simulations. The HILLS file parsing and FES
+kernel summation are provided by ~chemparseplot.parse.plumed~; ~rgpycrumbs~
+retains the reconstruction workflow that chains parsing, minima detection, and
+visualization into a single script.
 
 *Test potentials* (~rgpycrumbs.func~). Muller-Brown and other analytical
 surfaces for algorithm validation.
@@ -239,8 +242,9 @@ digraph dataflow {
 
         eon_dat [label="eOn\n.dat / .con", fillcolor="#c8e6c9", shape=note];
         orca_out [label="ORCA\noutput", fillcolor="#c8e6c9", shape=note];
-        chemgp_h5 [label="ChemGP\n.h5 (HDF5)", fillcolor="#c8e6c9", shape=note];
+        chemgp_h5 [label="ChemGP\n.h5 / .jsonl", fillcolor="#c8e6c9", shape=note];
         traj_xyz [label="ASE trajectory\n.extxyz / .traj", fillcolor="#c8e6c9", shape=note];
+        plumed_hills [label="PLUMED\nHILLS", fillcolor="#c8e6c9", shape=note];
     }
 
     // Parsing layer
@@ -253,15 +257,17 @@ digraph dataflow {
         color="#004D40";
 
         parse_eon [label="parse.eon.neb", fillcolor="#f8bbd0"];
-        parse_orca [label="parse.orca.geomscan", fillcolor="#f8bbd0"];
-        parse_hdf5 [label="parse.trajectory.hdf5", fillcolor="#f8bbd0"];
-        parse_traj [label="parse.trajectory.neb", fillcolor="#f8bbd0"];
+        parse_orca [label="parse.orca", fillcolor="#f8bbd0"];
+        parse_hdf5 [label="parse.chemgp_hdf5\nparse.chemgp_jsonl", fillcolor="#f8bbd0"];
+        parse_traj [label="parse.trajectory", fillcolor="#f8bbd0"];
+        parse_plumed [label="parse.plumed", fillcolor="#f8bbd0"];
     }
 
     eon_dat -> parse_eon;
     orca_out -> parse_orca;
     chemgp_h5 -> parse_hdf5;
     traj_xyz -> parse_traj;
+    plumed_hills -> parse_plumed;
 
     // Intermediate data
     atoms [label="ASE Atoms\n+ energies, forces", shape=parallelogram, fillcolor="#F1DB4B"];
@@ -322,10 +328,15 @@ computation (`rgpycrumbs`) to visualization.](figures/dataflow.pdf){width="100%"
 ** Companion libraries
 
 ~chemparseplot~ {{{cite(@chemparseplot)}}} handles file parsing (eOn ~.dat~ / ~.con~, ORCA
-output, ChemGP HDF5, ASE trajectory formats) and plotting, delegating
-computation to ~rgpycrumbs~. ~pychum~ generates input files for ORCA and
-NWChem. The three packages form a pipeline from input generation through
-computation to visualization.
+output, ChemGP HDF5 and JSONL, PLUMED HILLS, ASE trajectory formats) and
+plotting, including publication-quality NEB landscape and energy profile CLIs.
+The separation follows a clear boundary: ~rgpycrumbs~ provides computational
+kernels (surface fitting, alignment, interpolation) and ~chemparseplot~
+provides I/O, visualization, and format-specific logic. ~pychum~ generates
+input files for ORCA and eOn. The three packages form a pipeline from input
+generation through computation to visualization, with ChemGP
+{{{cite(@chemgp)}}} providing the GP-accelerated optimization loop that produces
+the data these tools analyze.
 
 * State of the field
 
@@ -353,7 +364,11 @@ The library and its predecessor scripts have been used in:
   package ~gpr_sella_repro~
 - On-the-fly GP dimer calculations (~otgpd_repro~)
 - NEB with machine-learned force fields (~nebmmf_repro~)
-- 2D NEB visualization methods (~nebviz_repro~)
+- 2D NEB visualization via RMSD projection {{{cite(@goswami2026nebviz)}}}, with
+  reproduction package ~nebviz_repro~
+- ChemGP {{{cite(@chemgp)}}}, a Rust-based GP-accelerated optimizer for saddle point
+  searches and NEB calculations, which uses ~rgpycrumbs~ kernels for surface
+  fitting and ~chemparseplot~ for figure generation
 - The doctoral dissertation {{{cite(@goswami_thesis)}}}
 
 External adoption includes the atomistic-cookbook {{{cite(@atomistic_cookbook)}}}

@@ -17,7 +17,7 @@ affiliations:
     index: 1
   - name: "EPFL - Ecole Polytechnique Federale de Lausanne, Switzerland"
     index: 2
-date: 23 February 2026
+date: 15 March 2026
 bibliography: paper.bib
 ---
 
@@ -112,8 +112,11 @@ using both energy and force data for 1D profiles along reaction coordinates.
 **Data types** (`rgpycrumbs.basetypes`). Shared structures for NEB paths,
 saddle point measures, and molecular geometries.
 
-**PLUMED integration** (`rgpycrumbs.plumed`). Direct summation reconstruction
-of 2D free energy surfaces from PLUMED metadynamics hills files.
+**PLUMED integration** (`rgpycrumbs.plumed`). A CLI for free energy surface
+reconstruction from metadynamics simulations. The HILLS file parsing and FES
+kernel summation are provided by `chemparseplot.parse.plumed`; `rgpycrumbs`
+retains the reconstruction workflow that chains parsing, minima detection, and
+visualization into a single script.
 
 **Test potentials** (`rgpycrumbs.func`). Muller-Brown and other analytical
 surfaces for algorithm validation.
@@ -151,10 +154,15 @@ computation (`rgpycrumbs`) to visualization.](figures/dataflow.pdf){width="100%"
 ## Companion libraries
 
 `chemparseplot` handles file parsing (eOn `.dat` / `.con`, ORCA
-output, ChemGP HDF5, ASE trajectory formats) and plotting, delegating
-computation to `rgpycrumbs`. `pychum` generates input files for ORCA and
-NWChem. The three packages form a pipeline from input generation through
-computation to visualization.
+output, ChemGP HDF5 and JSONL, PLUMED HILLS, ASE trajectory formats) and
+plotting, including publication-quality NEB landscape and energy profile CLIs.
+The separation follows a clear boundary: `rgpycrumbs` provides computational
+kernels (surface fitting, alignment, interpolation) and `chemparseplot`
+provides I/O, visualization, and format-specific logic. `pychum` generates
+input files for ORCA and eOn. The three packages form a pipeline from input
+generation through computation to visualization, with ChemGP
+providing the GP-accelerated optimization loop that produces
+the data these tools analyze.
 
 
 # State of the field
@@ -184,7 +192,11 @@ The library and its predecessor scripts have been used in:
     package `gpr_sella_repro`
 -   On-the-fly GP dimer calculations (`otgpd_repro`)
 -   NEB with machine-learned force fields (`nebmmf_repro`)
--   2D NEB visualization methods (`nebviz_repro`)
+-   2D NEB visualization via RMSD projection , with
+    reproduction package `nebviz_repro`
+-   ChemGP , a Rust-based GP-accelerated optimizer for saddle point
+    searches and NEB calculations, which uses `rgpycrumbs` kernels for surface
+    fitting and `chemparseplot` for figure generation
 -   The doctoral dissertation
 
 External adoption includes the atomistic-cookbook 
