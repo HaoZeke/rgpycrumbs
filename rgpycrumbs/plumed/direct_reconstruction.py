@@ -8,7 +8,6 @@
 import sys
 
 import numpy as np
-
 from chemparseplot.parse.plumed import calculate_fes_from_hills, find_fes_minima
 
 # --- Example Usage ---
