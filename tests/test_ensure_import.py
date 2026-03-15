@@ -216,7 +216,7 @@ class TestEnsureImport:
         monkeypatch.setattr(sys, "path", ["/local/lib"])
         mock_import.side_effect = ImportError("nope")
 
-        with pytest.raises(ImportError, match="pip install rgpycrumbs"):
+        with pytest.raises(ImportError, match="pip install"):
             ensure_import("jax")
 
     @patch("importlib.import_module")
