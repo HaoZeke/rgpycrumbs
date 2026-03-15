@@ -10,12 +10,12 @@ _LAZY_IMPORTS = {
     "_imq_kernel_matrix": "_kernels",
     "_matern_kernel_matrix": "_kernels",
     "_tps_kernel_matrix": "_kernels",
-    # gradient (requires jax)
-    "GradientIMQ": "gradient",
-    "GradientMatern": "gradient",
-    "GradientRQ": "gradient",
-    "GradientSE": "gradient",
-    "NystromGradientIMQ": "gradient",
+    # gradient (requires jax) -- per-kernel modules
+    "GradientIMQ": "gradient_imq",
+    "GradientMatern": "gradient_matern",
+    "GradientRQ": "gradient_rq",
+    "GradientSE": "gradient_se",
+    "NystromGradientIMQ": "gradient_nystrom",
     # standard (requires jax)
     "FastIMQ": "standard",
     "FastMatern": "standard",
@@ -23,7 +23,16 @@ _LAZY_IMPORTS = {
 }
 
 # Submodules that require jax at import time
-_JAX_SUBMODULES = frozenset({"gradient", "standard", "_kernels"})
+_JAX_SUBMODULES = frozenset({
+    "gradient",
+    "gradient_imq",
+    "gradient_matern",
+    "gradient_nystrom",
+    "gradient_rq",
+    "gradient_se",
+    "standard",
+    "_kernels",
+})
 
 NYSTROM_THRESHOLD = 1000
 NYSTROM_N_INDUCING_DEFAULT = 300
