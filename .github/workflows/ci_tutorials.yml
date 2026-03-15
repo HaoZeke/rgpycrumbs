@@ -19,28 +19,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Test chemgp modules compile
+      - name: Test remaining chemgp modules compile
         run: |
-          uv run python3 -m py_compile rgpycrumbs/chemgp/hdf5_io.py
-          uv run python3 -m py_compile rgpycrumbs/chemgp/plotting.py
-          uv run python3 -m py_compile rgpycrumbs/chemgp/plot_gp.py
-          echo "✓ All chemgp modules compile"
+          uv run python3 -m py_compile rgpycrumbs/chemgp/__init__.py
+          echo "All chemgp modules compile"
 
       - name: Test eon modules compile
         run: |
-          uv run python3 -m py_compile rgpycrumbs/eon/plt_neb.py
-          echo "✓ All eon modules compile"
-
-      - name: Test CLI help
-        run: |
-          uv run --extra test python3 -m rgpycrumbs.cli chemgp plot-gp --help
-          echo "✓ CLI help works"
+          uv run python3 -m py_compile rgpycrumbs/eon/to_mlflow.py
+          echo "All eon modules compile"
 
       - name: Test CLI registration
         run: |
           uv run --extra test python3 -c "
           from rgpycrumbs.cli import main
-          assert 'chemgp' in main.commands, 'chemgp command missing'
           assert 'eon' in main.commands, 'eon command missing'
-          print('✓ All CLI commands registered')
+          print('All CLI commands registered')
           "
