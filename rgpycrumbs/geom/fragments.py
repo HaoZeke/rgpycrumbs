@@ -8,7 +8,15 @@ fragment detection, plus distance-based fragment merging.
 """
 
 import logging
-from enum import StrEnum
+import sys
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        """Backport for Python 3.10."""
 
 import numpy as np
 from ase.atoms import Atoms

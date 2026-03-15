@@ -173,7 +173,7 @@ n-points = [50, 100, 200, 400]
 
 The batch command continues processing remaining plots if one fails:
 
-#+begin_src
+#+begin_src text
 [OK] reaction1_surface.pdf
 [FAIL] reaction2_convergence.pdf: Input not found: ./data/reaction2.h5
 [OK] reaction3_quality.pdf
