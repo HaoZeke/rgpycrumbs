@@ -1,0 +1,67 @@
+#+TITLE: Frequently Asked Questions
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:t num:nil
+
+* Frequently Asked Questions
+
+** Installation
+
+*** How do I install rgpycrumbs?
+
+#+begin_src bash
+pip install rgpycrumbs
+pip install "rgpycrumbs[surfaces]"  # With JAX
+#+end_src
+
+*** How do I enable auto-install?
+
+#+begin_src bash
+export RGPYCRUMBS_AUTO_DEPS=1
+#+end_src
+
+** Usage
+
+*** How do I use the batch command?
+
+#+begin_src bash
+rgpycrumbs chemgp batch -c config.toml -j 4
+#+end_src
+
+*** How do I match atoms to target coordinates?
+
+#+begin_src bash
+rgpycrumbs chemgp match-atoms -s pos.con -t targets.txt
+#+end_src
+
+** Errors
+
+*** "ModuleNotFoundError: No module named 'jax'"
+
+Install surfaces extra:
+
+#+begin_src bash
+pip install "rgpycrumbs[surfaces]"
+#+end_src
+
+Or enable auto-install:
+
+#+begin_src bash
+RGPYCRUMBS_AUTO_DEPS=1 rgpycrumbs chemgp ...
+#+end_src
+
+** Performance
+
+*** How can I speed up batch plotting?
+
+Use parallel processing:
+
+#+begin_src bash
+rgpycrumbs chemgp batch -c config.toml -j 8
+#+end_src
+
+** See Also
+
+- [[file:install.org][Installation Guide]]
+- [[file:../reference/glossary.org][Glossary]]
+- [[file:troubleshooting.org][Troubleshooting]]

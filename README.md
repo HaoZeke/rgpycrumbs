@@ -156,30 +156,177 @@ You can see the list of available command groups:
 
 -   Plotting NEB Paths (`plt-neb`)
 
-    This script visualizes the energy profile of Nudged Elastic Band (NEB) calculations over optimization steps.
+    This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations,
+    generating 2D surface plots with optional structure rendering.
     
-    To see the help text for this specific script:
+    The default `grad_imq` method uses gradient-enhanced Inverse Multiquadric interpolation
+    on 2D RMSD projections [1]. The approach projects high-dimensional structures onto
+    2D coordinates (reactant distance `r` vs product distance `p`) and fits a smooth
+    surface using energy values and their gradients.
     
-        $ python -m rgpycrumbs eon plt-neb --help
-        --> Dispatching to: uv run /path/to/rgpycrumbs/eon/plt_neb.py --help
-        Usage: plt_neb.py [OPTIONS]
+    [1] R. Goswami, "Two-dimensional RMSD projections for reaction path visualization
+    and validation," *MethodsX*, p. 103851, Mar. 2026,
+    doi: [10.1016/j.mex.2026.103851](https://doi.org/10.1016/j.mex.2026.103851).
+    generating 2D surface plots with optional structure rendering.
+    
+    -   Basic Usage
+    
+            python -m rgpycrumbs eon plt-neb --con-file trajectory.con --plot-type landscape -o neb_landscape.png
+    
+    -   Key Options
+    
+        <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
         
-          Plots a series of NEB energy paths from .dat files.
-        ...
-        Options:
-          --input-pattern TEXT      Glob pattern for input data files.
-          -o, --output-file PATH    Output file name.
-          --start INTEGER           Starting file index to plot (inclusive).
-          --end INTEGER             Ending file index to plot (exclusive).
-          --help                    Show this message and exit.
+        
+        <colgroup>
+        <col  class="org-left" />
+        
+        <col  class="org-left" />
+        
+        <col  class="org-left" />
+        </colgroup>
+        <thead>
+        <tr>
+        <th scope="col" class="org-left">Option</th>
+        <th scope="col" class="org-left">Description</th>
+        <th scope="col" class="org-left">Default</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td class="org-left"><code>--con-file PATH</code></td>
+        <td class="org-left">Trajectory file with NEB images</td>
+        <td class="org-left">None</td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--plot-type</code></td>
+        <td class="org-left"><code>landscape</code> (2D surface) or <code>profile</code></td>
+        <td class="org-left"><code>profile</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--surface-type</code></td>
+        <td class="org-left">Surface method: <code>grad_imq</code>, <code>grad_matern</code>, <code>grad_imq_ny</code>, <code>rbf</code></td>
+        <td class="org-left"><code>grad_imq</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--project-path</code> / <code>--no-project-path</code></td>
+        <td class="org-left">Project to reaction valley coordinates</td>
+        <td class="org-left"><code>--project-path</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--plot-structures</code></td>
+        <td class="org-left">Structure strip: <code>none</code>, <code>all</code>, <code>crit_points</code></td>
+        <td class="org-left"><code>none</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--show-legend</code></td>
+        <td class="org-left">Show colorbar legend</td>
+        <td class="org-left">Off</td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--show-pts</code> / <code>--no-show-pts</code></td>
+        <td class="org-left">Show data points on surface</td>
+        <td class="org-left"><code>--show-pts</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--landscape-path</code></td>
+        <td class="org-left">Path overlay: <code>final</code>, <code>all</code>, <code>none</code></td>
+        <td class="org-left"><code>final</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--ira-kmax</code></td>
+        <td class="org-left">kmax factor for IRA RMSD calculation</td>
+        <td class="org-left">1.8</td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>-o PATH</code></td>
+        <td class="org-left">Output image filename</td>
+        <td class="org-left">None (display)</td>
+        </tr>
+        </tbody>
+        </table>
+        
+        Use `--landscape-path all` to overlay all optimization steps and visualize convergence.
+        This shows the full trajectory from initial guess to final path [1].
+        
+        <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+        
+        
+        <colgroup>
+        <col  class="org-left" />
+        
+        <col  class="org-left" />
+        
+        <col  class="org-left" />
+        </colgroup>
+        <tbody>
+        <tr>
+        <td class="org-left"><code>--show-pts</code> / <code>--no-show-pts</code></td>
+        <td class="org-left">Show data points on surface</td>
+        <td class="org-left"><code>--show-pts</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--ira-kmax</code></td>
+        <td class="org-left">kmax factor for IRA RMSD calculation</td>
+        <td class="org-left">1.8</td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>-o PATH</code></td>
+        <td class="org-left">Output image filename</td>
+        <td class="org-left">None (display)</td>
+        </tr>
+        </tbody>
+        </table>
     
-    To plot a specific range of `neb_*.dat` files and save the output:
+    -   Examples
     
-        python -m rgpycrumbs eon plt-neb --start 100 --end 150 -o final_path.pdf
+        Full landscape with gradient-enhanced IMQ surface and critical point structures:
+        
+            python -m rgpycrumbs eon plt-neb \
+              --con-file neb.con \
+              --plot-type landscape \
+              --project-path \
+              --plot-structures crit_points \
+              --surface-type grad_imq \
+              --ira-kmax 14 \
+              --show-legend \
+              -o neb_landscape.png
+        
+        Surface-only plot without structure strip:
+        
+            python -m rgpycrumbs eon plt-neb \
+              --plot-type landscape \
+              --surface-type grad_matern \
+              --no-show-pts \
+              -o surface.png
+        
+        Convergence visualization with all optimization steps:
+        
+            python -m rgpycrumbs eon plt-neb \
+              --con-file neb.con \
+              --plot-type landscape \
+              --landscape-path all \
+              --surface-type grad_imq \
+              --show-legend \
+              -o neb_convergence.png
     
-    To show the plot interactively without saving:
+    -   Surface Methods
     
-        python -m rgpycrumbs eon plt-neb --start 280
+        -   **`grad_imq`:** Gradient-enhanced Inverse Multiquadric (recommended, uses energy + gradients)
+        -   **`grad_matern`:** Gradient-enhanced Matérn 5/2 (uses energy + gradients)
+        -   **`grad_imq_ny`:** Nystrom-approximated grad<sub>imq</sub> for large datasets (>1000 points)
+        -   **`rbf`:** Radial Basis Function / Thin Plate Spline (fast, no gradients)
 
 -   Splitting CON files (`con-splitter`)
 
@@ -283,3 +430,29 @@ via:
 -   The [Zenodo DOI](https://doi.org/10.5281/zenodo.18529798) for general use.
 -   The `wailord` paper for ORCA usage
 
+
+## Optional Dependencies
+
+rgpycrumbs uses lazy imports for optional dependencies. Install features as needed:
+
+```bash
+# Surface fitting (JAX)
+pip install "rgpycrumbs[surfaces]"
+
+# Interpolation (scipy)
+pip install "rgpycrumbs[interpolation]"
+
+# All optional dependencies
+pip install "rgpycrumbs[all]"
+```
+
+### Automatic Installation
+
+Enable on-demand installation with environment variable:
+
+```bash
+export RGPYCRUMBS_AUTO_DEPS=1
+```
+
+When enabled, missing optional dependencies are automatically installed on first use.
+See [[file:docs/orgmode/howto/install.org][Installation Guide]] for details.

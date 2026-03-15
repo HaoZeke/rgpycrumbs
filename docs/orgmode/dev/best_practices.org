@@ -1,0 +1,73 @@
+#+TITLE: Best Practices
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil
+
+* Best Practices for rgpycrumbs
+
+** Lazy Imports
+
+Always use lazy imports for optional dependencies:
+
+#+begin_src python
+from rgpycrumbs._aux import ensure_import
+
+_jax = None
+
+def _get_jax():
+    global _jax
+    if _jax is None:
+        _jax = ensure_import("jax")
+    return _jax
+#+end_src
+
+** Error Handling
+
+Catch specific exceptions:
+
+#+begin_src python
+try:
+    module = ensure_import("jax")
+except ImportError as e:
+    print(f"Install with: pip install rgpycrumbs[surfaces]")
+#+end_src
+
+** CLI Design
+
+Use click for CLI commands:
+
+#+begin_src python
+import click
+
+@click.command()
+@click.option("--input", "-i", required=True)
+def my_command(input):
+    """My CLI command."""
+    ...
+#+end_src
+
+** Testing
+
+Test with mock data:
+
+#+begin_src python
+def test_ensure_import():
+    np = ensure_import("numpy")
+    assert hasattr(np, "array")
+#+end_src
+
+** Performance
+
+Use parallel processing for batches:
+
+#+begin_src python
+from concurrent.futures import ThreadPoolExecutor
+
+with ThreadPoolExecutor(max_workers=4) as executor:
+    futures = [executor.submit(func, item) for item in items]
+#+end_src
+
+** See Also
+
+- [[file:contributing.org][Contributing Guidelines]]
+- [[file:../howto/index.org][How-to Guides]]

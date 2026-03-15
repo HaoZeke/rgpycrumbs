@@ -1,0 +1,229 @@
+#+TITLE: Lazy Import Pattern
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil
+
+* Lazy Import Pattern
+
+This document explains the lazy import pattern used throughout rgpycrumbs for optional dependencies.
+
+* Problem
+
+** Hard Dependencies**
+
+Making all dependencies hard requirements:
+- Increases installation size
+- Forces users to install unused packages
+- Breaks minimal installations
+- Complicates dependency resolution
+
+** Example: JAX for Surface Fitting**
+
+#+begin_src python
+# BAD: Hard dependency
+import jax
+import jax.numpy as jnp
+
+def fit_surface(data):
+    # Uses JAX
+    ...
+#+end_src
+
+Problem: Users who only need basic plotting must install JAX (hundreds of MBs with CUDA).
+
+* Solution: Lazy Imports
+
+** Pattern**
+
+#+begin_src python
+from rgpycrumbs._aux import ensure_import
+
+# Module-level cache
+_jax = None
+
+def _get_jax():
+    """Get JAX module, installing if needed."""
+    global _jax
+    if _jax is None:
+        _jax = ensure_import("jax")
+    return _jax
+
+def fit_surface(data):
+    """Fit surface using JAX (lazy-loaded)."""
+    jnp = _get_jax()
+    # Now use JAX
+    ...
+#+end_src
+
+** How It Works**
+
+1. Module imports without loading optional dependency
+2. First function call triggers =ensure_import()=
+3. =ensure_import()= checks 5-step priority chain:
+   1. Current environment
+   2. Parent environment (=RGPYCRUMBS_PARENT_SITE_PACKAGES=)
+   3. uv cache directory
+   4. Auto-install via uv/pip (if =RGPYCRUMBS_AUTO_DEPS=1=)
+   5. Raise ImportError with helpful message
+4. Module cached for subsequent calls
+
+* Implementation
+
+** ensure_import() Function**
+
+Location: =rgpycrumbs/_aux.py=
+
+#+begin_src python
+def ensure_import(module_name: str):
+    """Import module through 5-step priority chain.
+    
+    1. Current environment (importlib)
+    2. Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)
+    3. uv cache directory on sys.path
+    4. uv/pip install into cache (opt-in via RGPYCRUMBS_AUTO_DEPS=1)
+    5. Raise ImportError with actionable message
+    """
+    # Step 1: current env
+    try:
+        return importlib.import_module(module_name)
+    except ImportError:
+        pass
+    
+    # Step 2: parent env
+    mod = _import_from_parent_env(module_name)
+    if mod is not None:
+        return mod
+    
+    # Step 3: check uv cache
+    cache_dir = _get_dep_cache_dir()
+    cache_str = str(cache_dir)
+    if cache_dir.is_dir() and cache_str not in sys.path:
+        sys.path.insert(0, cache_str)
+        try:
+            return importlib.import_module(module_name)
+        except ImportError:
+            pass
+    
+    # Step 4: auto-install (opt-in)
+    auto = os.environ.get("RGPYCRUMBS_AUTO_DEPS", "").strip()
+    if auto == "1" and module_name in _DEPENDENCY_MAP:
+        spec = _resolve_pip_spec(module_name)
+        _uv_install(spec, cache_dir)
+        # ... retry import
+    
+    # Step 5: actionable error
+    raise ImportError(f"Module '{module_name}' is not installed...")
+#+end_src
+
+** Dependency Map**
+
+#+begin_src python
+_DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
+    "jax": ("jax>=0.4", "surfaces"),
+    "scipy": ("scipy>=1.11", "interpolation"),
+    "ase": ("ase>=3.22", "analysis"),
+    # ...
+}
+#+end_src
+
+Maps module names to:
+- pip install specification
+- rgpycrumbs extra name
+
+* Usage Examples
+
+** Basic Lazy Import**
+
+#+begin_src python
+# rgpycrumbs/interpolation.py
+from rgpycrumbs._aux import ensure_import
+
+_scipy = None
+
+def _get_scipy():
+    global _scipy
+    if _scipy is None:
+        _scipy = ensure_import("scipy")
+    return _scipy
+
+def spline_interp(x, y, num=100):
+    """Interpolate using B-splines."""
+    scipy_interp = _get_scipy().interpolate
+    spl = scipy_interp.splrep(x, y, k=3)
+    # ...
+#+end_src
+
+** With CUDA Override**
+
+#+begin_src python
+# rgpycrumbs/_aux.py
+_CPU_OVERRIDES: dict[str, str] = {
+    "jax": "jax[cpu]>=0.4",
+    "jaxlib": "jax[cpu]>=0.4",
+}
+
+def _resolve_pip_spec(module_name: str) -> str:
+    """Return pip spec, respecting CUDA availability."""
+    spec, _extra = _DEPENDENCY_MAP[module_name]
+    if not _has_cuda():
+        base_pkg = module_name.split(".", maxsplit=1)[0]
+        spec = _CPU_OVERRIDES.get(base_pkg, spec)
+    return spec
+#+end_src
+
+Automatically uses CPU-only JAX if no GPU detected.
+
+* Benefits
+
+1. **Smaller installations** - Users only install what they need
+2. **Graceful degradation** - Features unavailable if deps missing, but core works
+3. **Auto-install option** - =RGPYCRUMBS_AUTO_DEPS=1= for convenience
+4. **Clear error messages** - Users told exactly how to install missing deps
+5. **CUDA-aware** - Automatically uses CPU-only packages if no GPU
+
+* Trade-offs
+
+**Pros:**
+- [OK] Smaller default installation
+- [OK] Flexible dependency management
+- [OK] Better user experience for minimal users
+
+**Cons:**
+- [FAIL] Runtime errors instead of import errors
+- [FAIL] Slight overhead on first call
+- [FAIL] More complex code structure
+
+* Testing
+
+**Test Lazy Imports**
+
+#+begin_src python
+# tests/test_ensure_import.py
+def test_lazy_import():
+    """Test that lazy imports work correctly."""
+    from rgpycrumbs._aux import ensure_import
+    
+    # Should work for installed packages
+    np = ensure_import("numpy")
+    assert hasattr(np, "array")
+    
+    # Should raise clear error for missing packages
+    with pytest.raises(ImportError, match="pip install"):
+        ensure_import("nonexistent_package_xyz")
+#+end_src
+
+**Test Auto-Install**
+
+#+begin_src bash
+# Test with auto-install enabled
+RGPYCRUMBS_AUTO_DEPS=1 uv run python -c "
+from rgpycrumbs.interpolation import spline_interp
+# Should auto-install scipy if missing
+"
+#+end_src
+
+* Related
+
+- [[file:cli_architecture.org][CLI Architecture]] - How lazy imports work in PEP 723 scripts
+- [[file:../contributing/test_requirements.org][Test Requirements]] - Testing optional dependencies
+- [[file:../tools/index.org][Tools Documentation]] - Tools using lazy imports

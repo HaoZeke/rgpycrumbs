@@ -1,0 +1,72 @@
+#+TITLE: How to Cite rgpycrumbs
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil
+#+BIBLIOGRAPHY: ~/Documents/zotLib.bib
+
+* How to Cite rgpycrumbs
+
+If you use rgpycrumbs in your research, please cite the relevant papers based on functionality used.
+
+** Software Citation
+
+cite:[goswami2024rgpycrumbs]
+
+** Visualization Methods
+
+When using 2D reaction valley projection (landscape visualization, =grad_imq=, =grad_matern=, Nystrom approximation):
+
+cite:[goswami2026valley]
+
+The method maps NEB trajectories onto a two-dimensional projection defined by
+permutation-corrected RMSD from reactant and product configurations, with a
+rotated coordinate frame decomposing into reaction progress (=s=) and orthogonal
+deviation (=d=).
+
+** NEB Methods
+
+When using NEB orchestration or enhanced CI-NEB:
+
+cite:[goswami2026neb]
+
+Enhanced Climbing Image NEB method with Hessian eigenmode alignment.
+
+** Gaussian Process Methods
+
+When using surface fitting, GP models, or saddle search acceleration:
+
+cite:[goswami2025gpr goswami2025pruning]
+
+- GPR-accelerated saddle point searches (JCTC 2025)
+- Adaptive pruning for robustness (ChemPhysChem 2025)
+
+** Statistical Analysis
+
+When using Bayesian hierarchical models for performance analysis:
+
+cite:[goswami2025bayesian]
+
+** Combined Citation
+
+cite:[goswami2024rgpycrumbs goswami2026valley goswami2026neb goswami2025gpr goswami2025pruning goswami2025bayesian]
+
+** Acknowledgments
+
+#+begin_src text
+Computational workflows used rgpycrumbs (https://github.com/HaoZeke/rgpycrumbs).
+Surface fitting employed the 2D reaction valley projection method [cite:@goswami2026valley].
+NEB calculations used enhanced CI-NEB [cite:@goswami2026neb]. Gaussian process
+acceleration followed [cite:@goswami2025gpr @goswami2025pruning].
+#+end_src
+
+** Related Software
+
+*** metatensor/metatomic
+
+cite:[bigiMetatensorMetatomicFoundational2026]
+
+** See Also
+
+- [[file:../reference/index.org][Reference]]
+- [[file:../tutorials/index.org][Tutorials]]
+- [[file:dev/lazy_imports.org][Lazy Import Pattern]]
