@@ -12,7 +12,6 @@ excluded from the map and tested separately.
 """
 
 import ast
-import sys
 from pathlib import Path
 
 import pytest

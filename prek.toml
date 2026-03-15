@@ -1,6 +1,7 @@
 exclude = """(?x)(
     ^\\.pixi/|
     ^\\.uv/|
+    ^\\.venv/|
     ^docs/build/|
     ^docs/source/_static/favicons/site\\.webmanifest$|
     ^.*.svg$|
