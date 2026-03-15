@@ -24,8 +24,6 @@ import click
 import numpy as np
 from ase.io import read
 
-from rgpycrumbs._aux import _import_from_parent_env
-
 # --- Logging ---
 logging.basicConfig(
     level=logging.INFO,

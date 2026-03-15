@@ -137,9 +137,23 @@ ban-relative-imports = "all"
 ] # ASV convention: mutable class attrs, framework-injected args, deferred imports
 "docs/source/conf.py" = [ "A001" ] # Sphinx requires 'copyright' variable
 "rgpycrumbs/_aux.py" = [ "PLW0603" ] # global for _cuda_available cache
+"rgpycrumbs/chemgp/hdf5_io.py" = [ "PLW0603" ] # global for lazy-loaded modules
+"rgpycrumbs/chemgp/match_atoms.py" = [ "PLC0415" ] # deferred import
 "rgpycrumbs/chemgp/plot_gp.py" = [
   "PLC0415",
 ] # PEP 723 CLI script, late imports for tomllib/rich/click.testing
+"rgpycrumbs/chemgp/plotting.py" = [
+  "PLW0603",
+  "PLC0415",
+  "PLR2004",
+] # lazy loading pattern
+"rgpycrumbs/eon/plt_neb.py" = [
+  "ARG001",  # unused title param kept for CLI API
+  "PLW0603", # global for lazy-loaded modules
+  "PLC0415", # deferred imports for ensure_import
+  "PLR2004", # magic values for plot layout
+  "N806",    # uppercase variable names for math
+] # NEB plotting with lazy deps
 "rgpycrumbs/eon/ptmdisp.py" = [
   "E402",    # Module level import not at top (for warnings suppression)
   "PLC0415", # Local import (for the Viewport GUI)

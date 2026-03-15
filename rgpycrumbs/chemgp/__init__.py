@@ -34,24 +34,24 @@ from rgpycrumbs.chemgp.plotting import (
 )
 
 __all__ = [
-    # HDF5 I/O
-    "read_h5_table",
-    "read_h5_grid",
-    "read_h5_path",
-    "read_h5_points",
-    "read_h5_metadata",
-    # Plotting functions
-    "plot_convergence",
-    "plot_surface",
-    "plot_gp_quality",
-    "plot_rff",
-    "plot_nll",
-    "plot_sensitivity",
-    "plot_trust",
-    "plot_variance",
-    "plot_fps",
-    "plot_profile",
     # Utilities
     "detect_clamp",
+    # Plotting functions
+    "plot_convergence",
+    "plot_fps",
+    "plot_gp_quality",
+    "plot_nll",
+    "plot_profile",
+    "plot_rff",
+    "plot_sensitivity",
+    "plot_surface",
+    "plot_trust",
+    "plot_variance",
+    "read_h5_grid",
+    "read_h5_metadata",
+    "read_h5_path",
+    "read_h5_points",
+    # HDF5 I/O
+    "read_h5_table",
     "save_plot",
 ]

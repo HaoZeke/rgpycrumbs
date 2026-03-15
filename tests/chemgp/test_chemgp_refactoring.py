@@ -171,7 +171,7 @@ class TestCLIRegistration:
 
     def test_plot_gp_commands_registered(self) -> None:
         """Test that chemgp CLI commands are registered."""
-        click = pytest.importorskip("click")
+        pytest.importorskip("click")
         from click.testing import CliRunner
 
         from rgpycrumbs.chemgp.plot_gp import cli
@@ -193,7 +193,7 @@ class TestCLIRegistration:
 
     def test_cli_command_help(self) -> None:
         """Test that individual CLI commands have help."""
-        click = pytest.importorskip("click")
+        pytest.importorskip("click")
         from click.testing import CliRunner
 
         from rgpycrumbs.chemgp.plot_gp import cli

@@ -12,12 +12,16 @@ plotting. No file I/O, no CLI logic - pure functions only.
     Extracted from chemgp.plt_gp to standalone module.
 """
 
+import logging
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from rgpycrumbs._aux import ensure_import
+
+log = logging.getLogger(__name__)
 
 # Lazy imports for optional dependencies
 _pd = None
@@ -47,9 +51,6 @@ def _get_chemparseplot_plot_chemgp():
     if _chemparseplot is None:
         _chemparseplot = ensure_import("chemparseplot.plot.chemgp")
     return _chemparseplot
-
-
-from functools import lru_cache
 
 
 def safe_plot(func):
