@@ -1,0 +1,120 @@
+=====================
+Troubleshooting Guide
+=====================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Troubleshooting Guide
+---------------------
+
+Common problems and solutions for rgpycrumbs.
+
+Installation
+~~~~~~~~~~~~
+
+Problem: "ModuleNotFoundError: No module named 'rgpycrumbs'"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** Not installed in current Python environment.
+
+****Solution:****
+
+.. code:: bash
+
+    python -m pip install rgpycrumbs
+
+Problem: "Module 'jax' is not installed"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** JAX required for surface fitting.
+
+****Solution:****
+
+.. code:: bash
+
+    pip install "rgpycrumbs[surfaces]"
+    # Or enable auto-install
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+CLI Issues
+~~~~~~~~~~
+
+Problem: "Error: Script not found"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** CLI script missing or not discovered.
+
+****Solution:****
+
+.. code:: bash
+
+    # Check available commands
+    rgpycrumbs --help
+
+    # Reinstall if needed
+    pip install -e .
+
+Problem: "uv command not found"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** uv not installed (required for PEP 723 scripts).
+
+****Solution:****
+
+.. code:: bash
+
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+Batch Processing
+~~~~~~~~~~~~~~~~
+
+Problem: Batch command not found
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** chemgp module not installed.
+
+****Solution:****
+
+.. code:: bash
+
+    pip install "rgpycrumbs[analysis]"
+
+Problem: Parallel processing not working
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** Too many workers or memory issues.
+
+****Solution:****
+
+.. code:: bash
+
+    # Reduce number of workers
+    rgpycrumbs chemgp batch -c config.toml -j 2
+
+Performance
+~~~~~~~~~~~
+
+Problem: Slow plotting
+^^^^^^^^^^^^^^^^^^^^^^
+
+****Cause:**** Large datasets or complex surfaces.
+
+****Solution:****
+
+1. Use parallel processing
+
+2. Downsample data
+
+3. Use simpler interpolation methods
+
+Getting Help
+~~~~~~~~~~~~
+
+- `FAQ <faq.rst>`_ - Common questions
+
+- `Glossary <../reference/glossary.rst>`_ - Term definitions
+
+- `GitHub Issues <https://github.com/HaoZeke/rgpycrumbs/issues>`_ - Report bugs

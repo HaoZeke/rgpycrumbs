@@ -1,0 +1,176 @@
+========
+Glossary
+========
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Glossary of Computational Chemistry Terms
+-----------------------------------------
+
+A
+~
+
+ASE
+^^^
+
+Atomic Simulation Environment. Python library for atomistic simulations.
+
+Auto-install
+^^^^^^^^^^^^
+
+Feature that automatically installs optional dependencies. Enabled via ``RGPYCRUMBS_AUTO_DEPS=1``.
+
+B
+~
+
+Batch Command
+^^^^^^^^^^^^^
+
+CLI command that generates multiple plots from TOML configuration with optional parallel processing.
+
+C
+~
+
+chemgp
+^^^^^^
+
+ChemGP (Chemistry Gaussian Process) tool for plotting GP surrogate model outputs.
+
+D
+~
+
+Diataxis
+^^^^^^^^
+
+Documentation framework with four types: tutorials, how-to guides, reference, explanation.
+
+E
+~
+
+eOn
+^^^
+
+Python framework for automated saddle point searches.
+
+G
+~
+
+GBW
+^^^
+
+Gaussian Basis Wavefunction. ORCA binary wavefunction file.
+
+H
+~
+
+HDF5
+^^^^
+
+Hierarchical Data Format version 5. Used by ChemGP for output storage.
+
+I
+~
+
+Image
+^^^^^
+
+In NEB context, a replica of the system along reaction path.
+
+J
+~
+
+JAX
+^^^
+
+High-performance numerical computing library. Used for GP surface fitting.
+
+L
+~
+
+Landscape
+^^^^^^^^^
+
+2D plot of energy surface in RMSD coordinates.
+
+Lazy Import
+^^^^^^^^^^^
+
+Pattern that defers module import until first use via ``ensure_import()``.
+
+N
+~
+
+NEB
+^^^
+
+Nudged Elastic Band. Method for finding minimum energy path.
+
+Nystrom
+^^^^^^^
+
+Approximation method for Gaussian Processes using inducing points.
+
+O
+~
+
+OPI
+^^^
+
+ORCA Python Interface. Official Python library for ORCA 6.1+.
+
+ORCA
+^^^^
+
+Quantum chemistry software package.
+
+P
+~
+
+PEP 723
+^^^^^^^
+
+Python Enhancement Proposal for inline script metadata. Used for CLI dependencies.
+
+R
+~
+
+RMSD
+^^^^
+
+Root Mean Square Deviation. Measure of structural difference.
+
+S
+~
+
+Saddle Point
+^^^^^^^^^^^^
+
+First-order saddle point on PES. Maximum along reaction coordinate.
+
+T
+~
+
+ThreadPoolExecutor
+^^^^^^^^^^^^^^^^^^
+
+Python module for parallel execution. Used in batch command.
+
+U
+~
+
+Unit Registry
+^^^^^^^^^^^^^
+
+Pint object for unit-aware calculations.
+
+See Also
+~~~~~~~~
+
+- `FAQ <../howto/faq.rst>`_
+
+- `Tutorials <../tutorials/index.rst>`_
+
+- `Lazy Import Pattern <../dev/lazy_imports.rst>`_

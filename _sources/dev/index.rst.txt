@@ -1,0 +1,95 @@
+=======================
+Developer Documentation
+=======================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Developer Documentation
+-----------------------
+
+This section contains technical documentation for developers working on rgpycrumbs.
+
+Architecture
+~~~~~~~~~~~~
+
+.. table::
+
+    +--------------------------------------------+--------------------------------------------------------------+
+    | Document                                   | Description                                                  |
+    +============================================+==============================================================+
+    | `Lazy Import Pattern <lazy_imports.rst>`_  | How ensure\ :sub:`import`\() works for optional dependencies |
+    +--------------------------------------------+--------------------------------------------------------------+
+    | `CLI Architecture <cli_architecture.rst>`_ | Dispatcher pattern for PEP 723 scripts                       |
+    +--------------------------------------------+--------------------------------------------------------------+
+    | `Modular Design <modular_design.rst>`_     | Separation of CLI, I/O, and plotting logic                   |
+    +--------------------------------------------+--------------------------------------------------------------+
+
+Patterns
+~~~~~~~~
+
+.. table::
+
+    +------------------------------------------+-----------------------------------------------------+
+    | Pattern                                  | Description                                         |
+    +==========================================+=====================================================+
+    | `Lazy Imports <lazy_imports.rst>`_       | Defer optional dependency loading until first use   |
+    +------------------------------------------+-----------------------------------------------------+
+    | `PEP 723 Scripts <pep723_scripts.rst>`_  | Self-contained CLI scripts with inline dependencies |
+    +------------------------------------------+-----------------------------------------------------+
+    | `Testing Pattern <testing_pattern.rst>`_ | How to write tests for CLI and plotting code        |
+    +------------------------------------------+-----------------------------------------------------+
+
+Contributing
+~~~~~~~~~~~~
+
+- `Contributing Guidelines <../contributing/index.rst>`_
+
+- `Release Process <../contributing/release.rst>`_
+
+- `Test Requirements <../contributing/test_requirements.rst>`_
+
+Quick Start for Developers
+--------------------------
+
+Setup Development Environment\*\*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    git clone https://github.com/HaoZeke/rgpycrumbs
+    cd rgpycrumbs
+    uv sync --all-extras
+
+Run Tests\*\*
+~~~~~~~~~~~~~
+
+.. code:: bash
+
+    uv run pytest -m pure  # Pure Python tests
+    uv run pytest -m interpolation  # Tests requiring scipy
+    uv run pytest -m surfaces  # Tests requiring jax
+
+Add New CLI Command\*\*
+~~~~~~~~~~~~~~~~~~~~~~~
+
+1. Create script in ``rgpycrumbs/<module>/cli_<name>.py``
+
+2. Add PEP 723 header with dependencies
+
+3. Use click for CLI interface
+
+4. Delegate to plotting functions in ``rgpycrumbs/<module>/plotting.py``
+
+See `CLI Architecture <cli_architecture.rst>`_ for details.
+
+Related
+-------
+
+- `Main Documentation <../index.rst>`_
+
+- `Tools Documentation <../tools/index.rst>`_
+
+- `GitHub Repository <https://github.com/HaoZeke/rgpycrumbs>`_

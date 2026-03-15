@@ -32,7 +32,10 @@ Module Contents
 
 .. py:function:: _get_scripts_in_folder(folder_name: str) -> list[str]
 
-   Returns a sorted list of script names (without extension) in a folder.
+   Returns a sorted list of CLI script names (without extension) in a folder.
+
+   Excludes library modules (hdf5_io, plotting) and internal files (__init__, _*).
+   Includes actual CLI entry point scripts.
 
 
 .. py:function:: _dispatch(group: str, script_name: str, script_args: tuple, is_dev: bool = False, is_verbose: bool = False)
@@ -43,6 +46,9 @@ Module Contents
 .. py:function:: _make_script_command(group_name: str, script_stem: str) -> click.Command
 
    Creates a click command that dispatches to a PEP 723 script.
+
+   For full option help, run the script directly:
+       python -m rgpycrumbs.<group>.<script> --help
 
 
 .. py:function:: main(ctx, dev, verbose)

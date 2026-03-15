@@ -1,0 +1,85 @@
+==========================
+Frequently Asked Questions
+==========================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Frequently Asked Questions
+--------------------------
+
+Installation
+~~~~~~~~~~~~
+
+How do I install rgpycrumbs?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    pip install rgpycrumbs
+    pip install "rgpycrumbs[surfaces]"  # With JAX
+
+How do I enable auto-install?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+Usage
+~~~~~
+
+How do I use the batch command?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    rgpycrumbs chemgp batch -c config.toml -j 4
+
+How do I match atoms to target coordinates?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    rgpycrumbs chemgp match-atoms -s pos.con -t targets.txt
+
+Errors
+~~~~~~
+
+"ModuleNotFoundError: No module named 'jax'"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Install surfaces extra:
+
+.. code:: bash
+
+    pip install "rgpycrumbs[surfaces]"
+
+Or enable auto-install:
+
+.. code:: bash
+
+    RGPYCRUMBS_AUTO_DEPS=1 rgpycrumbs chemgp ...
+
+Performance
+~~~~~~~~~~~
+
+How can I speed up batch plotting?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use parallel processing:
+
+.. code:: bash
+
+    rgpycrumbs chemgp batch -c config.toml -j 8
+
+See Also
+~~~~~~~~
+
+- `Installation Guide <install.rst>`_
+
+- `Glossary <../reference/glossary.rst>`_
+
+- `Troubleshooting <troubleshooting.rst>`_

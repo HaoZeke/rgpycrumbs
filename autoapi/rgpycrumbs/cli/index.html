@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.cli - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="rgpycrumbs.eon" href="../eon/index.html" /><link rel="prev" title="rgpycrumbs.chemgp.plt_gp" href="../chemgp/plt_gp/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.cli - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="rgpycrumbs.eon" href="../eon/index.html" /><link rel="prev" title="rgpycrumbs.chemgp.match_atoms" href="../chemgp/match_atoms/index.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/cli/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -94,15 +94,19 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../tools/chemgp/index.html">ChemGP Plotting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tools/chemgp/batch_command.html">Batch Plot Generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../tools/chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
@@ -148,7 +152,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../chemgp/match_atoms/index.html">rgpycrumbs.chemgp.match_atoms</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">rgpycrumbs.cli</a></li>
@@ -157,7 +161,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -170,13 +173,14 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../geom/fragment_visualization/index.html">rgpycrumbs.geom.fragment_visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../geom/fragments/index.html">rgpycrumbs.geom.fragments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../parsers/chemgp/index.html">rgpycrumbs.parsers.chemgp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
 </ul>
 </li>
@@ -195,7 +199,11 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient_imq/index.html">rgpycrumbs.surfaces.gradient_imq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient_matern/index.html">rgpycrumbs.surfaces.gradient_matern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient_nystrom/index.html">rgpycrumbs.surfaces.gradient_nystrom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient_rq/index.html">rgpycrumbs.surfaces.gradient_rq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../surfaces/gradient_se/index.html">rgpycrumbs.surfaces.gradient_se</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
 </ul>
 </li>
@@ -354,7 +362,7 @@ data-aria-dark="Switch to auto color mode">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.cli._get_scripts_in_folder" title="rgpycrumbs.cli._get_scripts_in_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_scripts_in_folder</span></code></a>(→ list[str])</p></td>
-<td><p>Returns a sorted list of script names (without extension) in a folder.</p></td>
+<td><p>Returns a sorted list of CLI script names (without extension) in a folder.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.cli._dispatch" title="rgpycrumbs.cli._dispatch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_dispatch</span></code></a>(group, script_name, script_args[, is_dev, ...])</p></td>
 <td><p>Sets up the environment and runs the target script via 'uv run'.</p></td>
@@ -379,7 +387,9 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.cli._get_scripts_in_folder">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.cli.</span></span><span class="sig-name descname"><span class="pre">_get_scripts_in_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/cli.html#_get_scripts_in_folder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.cli._get_scripts_in_folder" title="Link to this definition">¶</a></dt>
-<dd><p>Returns a sorted list of script names (without extension) in a folder.</p>
+<dd><p>Returns a sorted list of CLI script names (without extension) in a folder.</p>
+<p>Excludes library modules (hdf5_io, plotting) and internal files (__init__, _*).
+Includes actual CLI entry point scripts.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -392,6 +402,10 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="rgpycrumbs.cli._make_script_command">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.cli.</span></span><span class="sig-name descname"><span class="pre">_make_script_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_stem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">click.Command</span></span></span><a class="reference internal" href="../../../_modules/rgpycrumbs/cli.html#_make_script_command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.cli._make_script_command" title="Link to this definition">¶</a></dt>
 <dd><p>Creates a click command that dispatches to a PEP 723 script.</p>
+<dl class="simple">
+<dt>For full option help, run the script directly:</dt><dd><p>python -m rgpycrumbs.&lt;group&gt;.&lt;script&gt; –help</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -419,10 +433,10 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="../chemgp/plt_gp/index.html">
+    <a href="../chemgp/match_atoms/index.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">rgpycrumbs.chemgp.plt_gp</div></div>
+        <span>Previous</span><div class="title">rgpycrumbs.chemgp.match_atoms</div></div>
     </a>
   </div><div class="navigation-next">
     <a href="../eon/index.html">
@@ -474,14 +488,12 @@ data-aria-dark="Switch to auto color mode">
           </svg>
           <span
             >Analytics by
-            <a
-              href="https://umami.is/"
+<a
+              href="https://analytics.turtletech.us/"
               target="_blank"
               rel="noopener noreferrer"
               style="color: inherit; text-decoration: underline"
               >Umami</a
-            ></span
-          >
         </span>
 
         

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Lazy Import Pattern - rgpycrumbs documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+      <link rel="canonical" href="rgpycrumbs.rgoswami.me/dev/lazy_imports.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="rgpycrumbs.rgoswami.me/dev/lazy_imports.html"/>
+  <meta property="og:title" content="Lazy Import Pattern"/>
+    <meta name="twitter:card" content="summary"/>
+  <!-- Manual favicon handling with favicon.io -->
+<!-- since sphinx-favicon doesn't work with shibuya -->
+<link rel="icon" type="image/png" sizes="16x16" href="../_static/favicons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../_static/favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../_static/favicons/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../_static/favicons/android-chrome-512x512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../_static/favicons/apple-touch-icon.png">
+<link rel="shortcut icon" href="../_static/favicons/favicon.ico">
+<link rel="manifest" href="../_static/favicons/site.webmanifest">
+<!-- Umami analytics -->
+<script defer src="https://analytics.turtletech.us/script.js" data-website-id="f6ae7643-2047-4413-8611-07690030edca"></script>
+<script>window.umami=window.umami||{track:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)umami.track('Outbound Link',{url:a.href})});</script></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      <img class="light-logo" src="../_static/pycrumbs_notext.svg" alt="rgpycrumbs" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/pycrumbs_notext.svg" alt="rgpycrumbs" height="28" loading="lazy" />
+      <strong>rgpycrumbs</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://chemparseplot.rgoswami.me">
+                <span>chemparseplot</span>
+                <small>Parsing and plotting for computational chemistry</small>
+              </a></li><li><a href="https://eondocs.org">
+                <span>eOn</span>
+                <small>Long-timescale molecular dynamics engine, primary consumer</small>
+              </a></li><li><a href="https://github.com/HaoZeke/pychum">
+                <span>pychum</span>
+                <small>Input file generation for ORCA and NWChem</small>
+              </a></li></ul>
+      </li><li class="link">
+          <a href="https://pypi.org/project/rgpycrumbs/">
+            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/chemgp/batch_command.html">Batch Plot Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/eon/mlflow.html">MLFlow Logging for eOn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/eon/plt_neb.html">Plotting NEB paths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/geom/alignment.html">Robust Structural Alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tools/geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tools/prefix/index.html">Prefix Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tools/prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../used_by.html">Used By</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/helpers/index.html">helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/basetypes/index.html">rgpycrumbs.basetypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/chemgp/index.html">rgpycrumbs.chemgp</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/chemgp/match_atoms/index.html">rgpycrumbs.chemgp.match_atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/index.html">rgpycrumbs.eon</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/func/index.html">rgpycrumbs.func</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/func/muller_brown/index.html">rgpycrumbs.func.muller_brown</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/api/index.html">rgpycrumbs.geom.api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/fragment_visualization/index.html">rgpycrumbs.geom.fragment_visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/fragments/index.html">rgpycrumbs.geom.fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/interpolation/index.html">rgpycrumbs.interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/parsers/index.html">rgpycrumbs.parsers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/plumed/index.html">rgpycrumbs.plumed</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/plumed/direct_reconstruction/index.html">rgpycrumbs.plumed.direct_reconstruction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/prefix/index.html">rgpycrumbs.prefix</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/gradient_imq/index.html">rgpycrumbs.surfaces.gradient_imq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/gradient_matern/index.html">rgpycrumbs.surfaces.gradient_matern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/gradient_nystrom/index.html">rgpycrumbs.surfaces.gradient_nystrom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/gradient_rq/index.html">rgpycrumbs.surfaces.gradient_rq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/gradient_se/index.html">rgpycrumbs.surfaces.gradient_se</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
+</ul>
+</li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#id1">Lazy Import Pattern</a></li>
+<li><a class="reference internal" href="#problem">Problem</a><ul>
+<li><a class="reference internal" href="#hard-dependencies">Hard Dependencies**</a></li>
+<li><a class="reference internal" href="#example-jax-for-surface-fitting">Example: JAX for Surface Fitting**</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#solution-lazy-imports">Solution: Lazy Imports</a><ul>
+<li><a class="reference internal" href="#pattern">Pattern**</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works**</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li><a class="reference internal" href="#ensureimport-function">ensure<sub>import</sub>() Function**</a></li>
+<li><a class="reference internal" href="#dependency-map">Dependency Map**</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#usage-examples">Usage Examples</a><ul>
+<li><a class="reference internal" href="#basic-lazy-import">Basic Lazy Import**</a></li>
+<li><a class="reference internal" href="#with-cuda-override">With CUDA Override**</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#maintaining-the-dependency-map">Maintaining the Dependency Map</a><ul>
+<li><a class="reference internal" href="#adding-a-new-entry">Adding a new entry</a></li>
+<li><a class="reference internal" href="#conda-only-deps">Conda-only deps</a></li>
+<li><a class="reference internal" href="#ci-enforcement">CI enforcement</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#benefits">Benefits</a></li>
+<li><a class="reference internal" href="#trade-offs">Trade-offs</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#related">Related</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/HaoZeke/rgpycrumbs"
+  data-type="github" data-user="HaoZeke" data-repo="rgpycrumbs">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>rgpycrumbs</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/HaoZeke/rgpycrumbs/blob/main/docs/source/dev/lazy_imports.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">rgpycrumbs</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Lazy Import Pattern</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="rgpycrumbs.rgoswami.me/_sources/dev/lazy_imports.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="rgpycrumbs.rgoswami.me/_sources/dev/lazy_imports.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="rgpycrumbs.rgoswami.me/_sources/dev/lazy_imports.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20rgpycrumbs.rgoswami.me/_sources/dev/lazy_imports.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20rgpycrumbs.rgoswami.me/_sources/dev/lazy_imports.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="lazy-import-pattern">
+<h1>Lazy Import Pattern<a class="headerlink" href="#lazy-import-pattern" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://rgoswami.me">Rohit Goswami</a></p>
+</dd>
+</dl>
+</div></blockquote>
+<section id="id1">
+<h2>Lazy Import Pattern<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>This document explains the lazy import pattern used throughout rgpycrumbs for optional dependencies.</p>
+</section>
+<section id="problem">
+<h2>Problem<a class="headerlink" href="#problem" title="Link to this heading">¶</a></h2>
+<section id="hard-dependencies">
+<h3>Hard Dependencies**<a class="headerlink" href="#hard-dependencies" title="Link to this heading">¶</a></h3>
+<p>Making all dependencies hard requirements:</p>
+<ul class="simple">
+<li><p>Increases installation size</p></li>
+<li><p>Forces users to install unused packages</p></li>
+<li><p>Breaks minimal installations</p></li>
+<li><p>Complicates dependency resolution</p></li>
+</ul>
+</section>
+<section id="example-jax-for-surface-fitting">
+<h3>Example: JAX for Surface Fitting**<a class="headerlink" href="#example-jax-for-surface-fitting" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># BAD: Hard dependency</span>
+</span><span data-line="2"><span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="k">def</span><span class="w"> </span><span class="nf">fit_surface</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+</span><span data-line="6">    <span class="c1"># Uses JAX</span>
+</span><span data-line="7">    <span class="o">...</span>
+</span></pre></div>
+</div>
+<p>Problem: Users who only need basic plotting must install JAX (hundreds of MBs with CUDA).</p>
+</section>
+</section>
+<section id="solution-lazy-imports">
+<h2>Solution: Lazy Imports<a class="headerlink" href="#solution-lazy-imports" title="Link to this heading">¶</a></h2>
+<section id="pattern">
+<h3>Pattern**<a class="headerlink" href="#pattern" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_import</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="c1"># Module-level cache</span>
+</span><span data-line="4"><span class="n">_jax</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="k">def</span><span class="w"> </span><span class="nf">_get_jax</span><span class="p">():</span>
+</span><span data-line="7"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get JAX module, installing if needed.&quot;&quot;&quot;</span>
+</span><span data-line="8">    <span class="k">global</span> <span class="n">_jax</span>
+</span><span data-line="9">    <span class="k">if</span> <span class="n">_jax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="10">        <span class="n">_jax</span> <span class="o">=</span> <span class="n">ensure_import</span><span class="p">(</span><span class="s2">&quot;jax&quot;</span><span class="p">)</span>
+</span><span data-line="11">    <span class="k">return</span> <span class="n">_jax</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="k">def</span><span class="w"> </span><span class="nf">fit_surface</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+</span><span data-line="14"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fit surface using JAX (lazy-loaded).&quot;&quot;&quot;</span>
+</span><span data-line="15">    <span class="n">jnp</span> <span class="o">=</span> <span class="n">_get_jax</span><span class="p">()</span>
+</span><span data-line="16">    <span class="c1"># Now use JAX</span>
+</span><span data-line="17">    <span class="o">...</span>
+</span></pre></div>
+</div>
+</section>
+<section id="how-it-works">
+<h3>How It Works**<a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Module imports without loading optional dependency</p></li>
+<li><p>First function call triggers <code class="docutils literal notranslate"><span class="pre">ensure_import()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ensure_import()</span></code> checks 5-step priority chain:</p>
+<ol class="arabic simple">
+<li><p>Current environment</p></li>
+<li><p>Parent environment (<code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_PARENT_SITE_PACKAGES</span></code>)</p></li>
+<li><p>uv cache directory</p></li>
+<li><p>Auto-install via uv/pip (if <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code>)</p></li>
+<li><p>Raise ImportError with helpful message</p></li>
+</ol>
+</li>
+<li><p>Module cached for subsequent calls</p></li>
+</ol>
+</section>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<section id="ensureimport-function">
+<h3>ensure<sub>import</sub>() Function**<a class="headerlink" href="#ensureimport-function" title="Link to this heading">¶</a></h3>
+<p>Location: <code class="docutils literal notranslate"><span class="pre">rgpycrumbs/_aux.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">def</span><span class="w"> </span><span class="nf">ensure_import</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="2"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Import module through 5-step priority chain.</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="sd">    1. Current environment (importlib)</span>
+</span><span data-line="5"><span class="sd">    2. Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)</span>
+</span><span data-line="6"><span class="sd">    3. uv cache directory on sys.path</span>
+</span><span data-line="7"><span class="sd">    4. uv/pip install into cache (opt-in via RGPYCRUMBS_AUTO_DEPS=1)</span>
+</span><span data-line="8"><span class="sd">    5. Raise ImportError with actionable message</span>
+</span><span data-line="9"><span class="sd">    &quot;&quot;&quot;</span>
+</span><span data-line="10">    <span class="c1"># Step 1: current env</span>
+</span><span data-line="11">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="12">        <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="13">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="14">        <span class="k">pass</span>
+</span><span data-line="15">
+</span><span data-line="16">    <span class="c1"># Step 2: parent env</span>
+</span><span data-line="17">    <span class="n">mod</span> <span class="o">=</span> <span class="n">_import_from_parent_env</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="18">    <span class="k">if</span> <span class="n">mod</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="19">        <span class="k">return</span> <span class="n">mod</span>
+</span><span data-line="20">
+</span><span data-line="21">    <span class="c1"># Step 3: check uv cache</span>
+</span><span data-line="22">    <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">_get_dep_cache_dir</span><span class="p">()</span>
+</span><span data-line="23">    <span class="n">cache_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+</span><span data-line="24">    <span class="k">if</span> <span class="n">cache_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">cache_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+</span><span data-line="25">        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cache_str</span><span class="p">)</span>
+</span><span data-line="26">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="27">            <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="28">        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span data-line="29">            <span class="k">pass</span>
+</span><span data-line="30">
+</span><span data-line="31">    <span class="c1"># Step 4: auto-install (opt-in)</span>
+</span><span data-line="32">    <span class="n">auto</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RGPYCRUMBS_AUTO_DEPS&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="33">    <span class="k">if</span> <span class="n">auto</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span> <span class="ow">and</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="n">_DEPENDENCY_MAP</span><span class="p">:</span>
+</span><span data-line="34">        <span class="n">spec</span> <span class="o">=</span> <span class="n">_resolve_pip_spec</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+</span><span data-line="35">        <span class="n">_uv_install</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">cache_dir</span><span class="p">)</span>
+</span><span data-line="36">        <span class="c1"># ... retry import</span>
+</span><span data-line="37">
+</span><span data-line="38">    <span class="c1"># Step 5: actionable error</span>
+</span><span data-line="39">    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Module &#39;</span><span class="si">{</span><span class="n">module_name</span><span class="si">}</span><span class="s2">&#39; is not installed...&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="dependency-map">
+<h3>Dependency Map**<a class="headerlink" href="#dependency-map" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">_DEPENDENCY_MAP</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="2">    <span class="s2">&quot;jax&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;jax&gt;=0.4&quot;</span><span class="p">,</span> <span class="s2">&quot;surfaces&quot;</span><span class="p">),</span>
+</span><span data-line="3">    <span class="s2">&quot;scipy&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;scipy&gt;=1.11&quot;</span><span class="p">,</span> <span class="s2">&quot;interpolation&quot;</span><span class="p">),</span>
+</span><span data-line="4">    <span class="s2">&quot;ase&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;ase&gt;=3.22&quot;</span><span class="p">,</span> <span class="s2">&quot;analysis&quot;</span><span class="p">),</span>
+</span><span data-line="5">    <span class="c1"># ...</span>
+</span><span data-line="6"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>Maps module names to:</p>
+<ul class="simple">
+<li><p>pip install specification</p></li>
+<li><p>rgpycrumbs extra name</p></li>
+</ul>
+</section>
+</section>
+<section id="usage-examples">
+<h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">¶</a></h2>
+<section id="basic-lazy-import">
+<h3>Basic Lazy Import**<a class="headerlink" href="#basic-lazy-import" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># rgpycrumbs/interpolation.py</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_import</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="n">_scipy</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="5">
+</span><span data-line="6"><span class="k">def</span><span class="w"> </span><span class="nf">_get_scipy</span><span class="p">():</span>
+</span><span data-line="7">    <span class="k">global</span> <span class="n">_scipy</span>
+</span><span data-line="8">    <span class="k">if</span> <span class="n">_scipy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="9">        <span class="n">_scipy</span> <span class="o">=</span> <span class="n">ensure_import</span><span class="p">(</span><span class="s2">&quot;scipy&quot;</span><span class="p">)</span>
+</span><span data-line="10">    <span class="k">return</span> <span class="n">_scipy</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="k">def</span><span class="w"> </span><span class="nf">spline_interp</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+</span><span data-line="13"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate using B-splines.&quot;&quot;&quot;</span>
+</span><span data-line="14">    <span class="n">scipy_interp</span> <span class="o">=</span> <span class="n">_get_scipy</span><span class="p">()</span><span class="o">.</span><span class="n">interpolate</span>
+</span><span data-line="15">    <span class="n">spl</span> <span class="o">=</span> <span class="n">scipy_interp</span><span class="o">.</span><span class="n">splrep</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span data-line="16">    <span class="c1"># ...</span>
+</span></pre></div>
+</div>
+</section>
+<section id="with-cuda-override">
+<h3>With CUDA Override**<a class="headerlink" href="#with-cuda-override" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># rgpycrumbs/_aux.py</span>
+</span><span data-line="2"><span class="n">_CPU_OVERRIDES</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="3">    <span class="s2">&quot;jax&quot;</span><span class="p">:</span> <span class="s2">&quot;jax[cpu]&gt;=0.4&quot;</span><span class="p">,</span>
+</span><span data-line="4">    <span class="s2">&quot;jaxlib&quot;</span><span class="p">:</span> <span class="s2">&quot;jax[cpu]&gt;=0.4&quot;</span><span class="p">,</span>
+</span><span data-line="5"><span class="p">}</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="k">def</span><span class="w"> </span><span class="nf">_resolve_pip_spec</span><span class="p">(</span><span class="n">module_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="8"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return pip spec, respecting CUDA availability.&quot;&quot;&quot;</span>
+</span><span data-line="9">    <span class="n">spec</span><span class="p">,</span> <span class="n">_extra</span> <span class="o">=</span> <span class="n">_DEPENDENCY_MAP</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span>
+</span><span data-line="10">    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_cuda</span><span class="p">():</span>
+</span><span data-line="11">        <span class="n">base_pkg</span> <span class="o">=</span> <span class="n">module_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="12">        <span class="n">spec</span> <span class="o">=</span> <span class="n">_CPU_OVERRIDES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base_pkg</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+</span><span data-line="13">    <span class="k">return</span> <span class="n">spec</span>
+</span></pre></div>
+</div>
+<p>Automatically uses CPU-only JAX if no GPU detected.</p>
+</section>
+</section>
+<section id="maintaining-the-dependency-map">
+<h2>Maintaining the Dependency Map<a class="headerlink" href="#maintaining-the-dependency-map" title="Link to this heading">¶</a></h2>
+<p>When adding a new <code class="docutils literal notranslate"><span class="pre">ensure_import(&quot;X&quot;)</span></code> call, you must also add <code class="docutils literal notranslate"><span class="pre">X</span></code> to
+<code class="docutils literal notranslate"><span class="pre">_DEPENDENCY_MAP</span></code> in <code class="docutils literal notranslate"><span class="pre">rgpycrumbs/_aux.py</span></code>. Without a map entry,
+<code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code> cannot resolve the pip spec and falls through
+to an ImportError.</p>
+<section id="adding-a-new-entry">
+<h3>Adding a new entry<a class="headerlink" href="#adding-a-new-entry" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">_DEPENDENCY_MAP</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="2">    <span class="c1"># ...</span>
+</span><span data-line="3">    <span class="s2">&quot;newpkg&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;newpkg&gt;=1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;extra_name&quot;</span><span class="p">),</span>
+</span><span data-line="4">    <span class="s2">&quot;newpkg.submod&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;newpkg&gt;=1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;extra_name&quot;</span><span class="p">),</span>
+</span><span data-line="5"><span class="p">}</span>
+</span></pre></div>
+</div>
+<p>The tuple fields:</p>
+<ul class="simple">
+<li><p>First: pip install spec (with version constraint)</p></li>
+<li><p>Second: the pyproject.toml optional extra that includes this dep</p></li>
+</ul>
+<p>If the module is a submodule (e.g. <code class="docutils literal notranslate"><span class="pre">scipy.interpolate</span></code>), add both the
+submodule and the top-level package to the map. Both must point to the
+same pip package.</p>
+</section>
+<section id="conda-only-deps">
+<h3>Conda-only deps<a class="headerlink" href="#conda-only-deps" title="Link to this heading">¶</a></h3>
+<p>Packages without a PyPI distribution (ira<sub>mod</sub>, tblite, ovito) should
+NOT be added to the map. They fall through to a helpful error message
+suggesting <code class="docutils literal notranslate"><span class="pre">pixi</span></code> installation.</p>
+</section>
+<section id="ci-enforcement">
+<h3>CI enforcement<a class="headerlink" href="#ci-enforcement" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">tests/test_lazy_import_coverage.py</span></code> uses AST parsing to find all
+<code class="docutils literal notranslate"><span class="pre">ensure_import(&quot;X&quot;)</span></code> calls and verifies each has a matching map entry.
+The test fails if you add a new <code class="docutils literal notranslate"><span class="pre">ensure_import</span></code> call without updating
+the map. Run with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_lazy_import_coverage.py<span class="w"> </span>-m<span class="w"> </span>pure
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="benefits">
+<h2>Benefits<a class="headerlink" href="#benefits" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>**Smaller installations**</strong> - Users only install what they need</p></li>
+<li><p><strong>**Graceful degradation**</strong> - Features unavailable if deps missing, but core works</p></li>
+<li><p><strong>**Auto-install option**</strong> - <code class="docutils literal notranslate"><span class="pre">RGPYCRUMBS_AUTO_DEPS=1</span></code> for convenience</p></li>
+<li><p><strong>**Clear error messages**</strong> - Users told exactly how to install missing deps</p></li>
+<li><p><strong>**CUDA-aware**</strong> - Automatically uses CPU-only packages if no GPU</p></li>
+</ol>
+</section>
+<section id="trade-offs">
+<h2>Trade-offs<a class="headerlink" href="#trade-offs" title="Link to this heading">¶</a></h2>
+<p><strong>**Pros:**</strong></p>
+<ul class="simple">
+<li><p>[OK] Smaller default installation</p></li>
+<li><p>[OK] Flexible dependency management</p></li>
+<li><p>[OK] Better user experience for minimal users</p></li>
+</ul>
+<p><strong>**Cons:**</strong></p>
+<ul class="simple">
+<li><p>[FAIL] Runtime errors instead of import errors</p></li>
+<li><p>[FAIL] Slight overhead on first call</p></li>
+<li><p>[FAIL] More complex code structure</p></li>
+</ul>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p><strong>**Test Lazy Imports**</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># tests/test_ensure_import.py</span>
+</span><span data-line="2"><span class="k">def</span><span class="w"> </span><span class="nf">test_lazy_import</span><span class="p">():</span>
+</span><span data-line="3"><span class="w">    </span><span class="sd">&quot;&quot;&quot;Test that lazy imports work correctly.&quot;&quot;&quot;</span>
+</span><span data-line="4">    <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_import</span>
+</span><span data-line="5">
+</span><span data-line="6">    <span class="c1"># Should work for installed packages</span>
+</span><span data-line="7">    <span class="n">np</span> <span class="o">=</span> <span class="n">ensure_import</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span>
+</span><span data-line="8">    <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">np</span><span class="p">,</span> <span class="s2">&quot;array&quot;</span><span class="p">)</span>
+</span><span data-line="9">
+</span><span data-line="10">    <span class="c1"># Should raise clear error for missing packages</span>
+</span><span data-line="11">    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s2">&quot;pip install&quot;</span><span class="p">):</span>
+</span><span data-line="12">        <span class="n">ensure_import</span><span class="p">(</span><span class="s2">&quot;nonexistent_package_xyz&quot;</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p><strong>**Test Auto-Install**</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Test with auto-install enabled</span>
+</span><span data-line="2"><span class="nv">RGPYCRUMBS_AUTO_DEPS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span data-line="3"><span class="s2">from rgpycrumbs.interpolation import spline_interp</span>
+</span><span data-line="4"><span class="s2"># Should auto-install scipy if missing</span>
+</span><span data-line="5"><span class="s2">&quot;</span>
+</span></pre></div>
+</div>
+</section>
+<section id="related">
+<h2>Related<a class="headerlink" href="#related" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="cli_architecture.rst">CLI Architecture</a> - How lazy imports work in PEP 723 scripts</p></li>
+<li><p><a class="reference external" href="../contributing/test_requirements.rst">Test Requirements</a> - Testing optional dependencies</p></li>
+<li><p><a class="reference external" href="../tools/index.rst">Tools Documentation</a> - Tools using lazy imports</p></li>
+</ul>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+<a
+              href="https://analytics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Umami</a
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, Rohit Goswami</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

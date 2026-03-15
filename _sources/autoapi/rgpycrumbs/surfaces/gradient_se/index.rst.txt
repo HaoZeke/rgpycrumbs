@@ -1,0 +1,70 @@
+rgpycrumbs.surfaces.gradient_se
+===============================
+
+.. py:module:: rgpycrumbs.surfaces.gradient_se
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_se.GradientSE
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_se.negative_mll_se_grad
+   rgpycrumbs.surfaces.gradient_se._grad_se_solve
+   rgpycrumbs.surfaces.gradient_se._grad_se_predict
+   rgpycrumbs.surfaces.gradient_se._grad_se_var
+
+
+Module Contents
+---------------
+
+.. py:function:: negative_mll_se_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_se_solve(x, y_full, noise_scalar, length_scale)
+
+.. py:function:: _grad_se_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:function:: _grad_se_var(x_query, x_obs, K_inv, length_scale)
+
+.. py:class:: GradientSE(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Squared Exponential (SE) surface implementation.
+
+   .. versionadded:: 1.0.0
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+

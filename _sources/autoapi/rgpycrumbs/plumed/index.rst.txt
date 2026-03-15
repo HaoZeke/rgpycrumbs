@@ -3,6 +3,11 @@ rgpycrumbs.plumed
 
 .. py:module:: rgpycrumbs.plumed
 
+.. autoapi-nested-parse::
+
+   PLUMED utilities (parsing moved to chemparseplot.parse.plumed).
+
+
 
 Submodules
 ----------

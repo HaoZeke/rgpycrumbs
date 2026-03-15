@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../../../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.geom.detect_fragments - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.geom.ira" href="../ira/index.html" /><link rel="prev" title="rgpycrumbs.geom.api.alignment" href="../api/alignment/index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>rgpycrumbs.geom.detect_fragments - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="rgpycrumbs.geom.fragment_visualization" href="../fragment_visualization/index.html" /><link rel="prev" title="rgpycrumbs.geom.api.alignment" href="../api/alignment/index.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/autoapi/rgpycrumbs/geom/detect_fragments/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -94,15 +94,19 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html">ChemGP Plotting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_command.html">Batch Plot Generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
@@ -148,7 +152,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../chemgp/match_atoms/index.html">rgpycrumbs.chemgp.match_atoms</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
@@ -157,7 +161,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -170,13 +173,14 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fragment_visualization/index.html">rgpycrumbs.geom.fragment_visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fragments/index.html">rgpycrumbs.geom.fragments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../parsers/chemgp/index.html">rgpycrumbs.parsers.chemgp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
 </ul>
 </li>
@@ -195,7 +199,11 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_imq/index.html">rgpycrumbs.surfaces.gradient_imq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_matern/index.html">rgpycrumbs.surfaces.gradient_matern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_nystrom/index.html">rgpycrumbs.surfaces.gradient_nystrom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_rq/index.html">rgpycrumbs.surfaces.gradient_rq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_se/index.html">rgpycrumbs.surfaces.gradient_se</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
 </ul>
 </li>
@@ -220,26 +228,8 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#attributes">Attributes</a></li>
-<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.cmap_name"><code class="docutils literal notranslate"><span class="pre">cmap_name</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.tbliteinterface"><code class="docutils literal notranslate"><span class="pre">tbliteinterface</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod"><code class="docutils literal notranslate"><span class="pre">DetectionMethod</span></code></a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod.GEOMETRIC"><code class="docutils literal notranslate">GEOMETRIC</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod.BOND_ORDER"><code class="docutils literal notranslate">BOND_ORDER</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_MULTIPLIER"><code class="docutils literal notranslate"><span class="pre">DEFAULT_BOND_MULTIPLIER</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_ORDER_THRESHOLD"><code class="docutils literal notranslate"><span class="pre">DEFAULT_BOND_ORDER_THRESHOLD</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.SCALAR_BAR_ARGS"><code class="docutils literal notranslate"><span class="pre">SCALAR_BAR_ARGS</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.MIN_DIST_ATM"><code class="docutils literal notranslate"><span class="pre">MIN_DIST_ATM</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.find_fragments_geometric"><code class="docutils literal notranslate"><span class="pre">find_fragments_geometric()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.find_fragments_bond_order"><code class="docutils literal notranslate"><span class="pre">find_fragments_bond_order()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.build_graph_and_find_components"><code class="docutils literal notranslate"><span class="pre">build_graph_and_find_components()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.merge_fragments_by_distance"><code class="docutils literal notranslate"><span class="pre">merge_fragments_by_distance()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.visualize_with_pyvista"><code class="docutils literal notranslate"><span class="pre">visualize_with_pyvista()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.print_results"><code class="docutils literal notranslate"><span class="pre">print_results()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.geometric"><code class="docutils literal notranslate"><span class="pre">geometric()</span></code></a></li>
@@ -359,78 +349,24 @@ uv run python detect_fragments.py geometric your_file.xyz –multiplier 1.1
 uv run python detect_fragments.py bond-order your_file.xyz –threshold 0.7 –min-dist 4.0</p>
 <p>Usage for a directory (batch mode):
 uv run python detect_fragments.py batch ./your_folder/ –method geometric –min-dist 3.5</p>
-<section id="attributes">
-<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.cmap_name" title="rgpycrumbs.geom.detect_fragments.cmap_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cmap_name</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.tbliteinterface" title="rgpycrumbs.geom.detect_fragments.tbliteinterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tbliteinterface</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_MULTIPLIER" title="rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_MULTIPLIER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_BOND_MULTIPLIER</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_ORDER_THRESHOLD" title="rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_ORDER_THRESHOLD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_BOND_ORDER_THRESHOLD</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.SCALAR_BAR_ARGS" title="rgpycrumbs.geom.detect_fragments.SCALAR_BAR_ARGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SCALAR_BAR_ARGS</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.MIN_DIST_ATM" title="rgpycrumbs.geom.detect_fragments.MIN_DIST_ATM"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MIN_DIST_ATM</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<section id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod" title="rgpycrumbs.geom.detect_fragments.DetectionMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DetectionMethod</span></code></a></p></td>
-<td><p>Available detection methodologies.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.find_fragments_geometric" title="rgpycrumbs.geom.detect_fragments.find_fragments_geometric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_fragments_geometric</span></code></a>(→ tuple[int, numpy.ndarray])</p></td>
-<td><p>Detect molecular fragments using scaled covalent radii.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.find_fragments_bond_order" title="rgpycrumbs.geom.detect_fragments.find_fragments_bond_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_fragments_bond_order</span></code></a>(→ tuple[int, numpy.ndarray, ...)</p></td>
-<td><p>Analyze connectivity via the Wiberg Bond Order (WBO) matrix.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.build_graph_and_find_components" title="rgpycrumbs.geom.detect_fragments.build_graph_and_find_components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_graph_and_find_components</span></code></a>(→ tuple[int, ...)</p></td>
-<td><p>Identify connected components using direct CSR sparse matrix construction.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.merge_fragments_by_distance" title="rgpycrumbs.geom.detect_fragments.merge_fragments_by_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_fragments_by_distance</span></code></a>(→ tuple[int, numpy.ndarray])</p></td>
-<td><p>Merges fragments with geometric centers closer than the specified distance.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.visualize_with_pyvista" title="rgpycrumbs.geom.detect_fragments.visualize_with_pyvista"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize_with_pyvista</span></code></a>(→ None)</p></td>
-<td><p>Renders the molecular system with scalar-coded bond orders.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.print_results" title="rgpycrumbs.geom.detect_fragments.print_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_results</span></code></a>(→ None)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.print_results" title="rgpycrumbs.geom.detect_fragments.print_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_results</span></code></a>(→ None)</p></td>
 <td><p>Displays analysis results in a structured table.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.main" title="rgpycrumbs.geom.detect_fragments.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.main" title="rgpycrumbs.geom.detect_fragments.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
 <td><p>Fragment detection suite for physical chemistry simulations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.geometric" title="rgpycrumbs.geom.detect_fragments.geometric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geometric</span></code></a>(filename, multiplier, radius_type, min_dist, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.geometric" title="rgpycrumbs.geom.detect_fragments.geometric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geometric</span></code></a>(filename, multiplier, radius_type, min_dist, ...)</p></td>
 <td><p>Executes geometric fragment detection.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.bond_order" title="rgpycrumbs.geom.detect_fragments.bond_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bond_order</span></code></a>(filename, method, threshold, charge, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.bond_order" title="rgpycrumbs.geom.detect_fragments.bond_order"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bond_order</span></code></a>(filename, method, threshold, charge, ...)</p></td>
 <td><p>Execute fragment detection using quantum mechanical bond orders.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.batch" title="rgpycrumbs.geom.detect_fragments.batch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch</span></code></a>(directory, method, pattern, output, min_dist)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.batch" title="rgpycrumbs.geom.detect_fragments.batch"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch</span></code></a>(directory, method, pattern, output, min_dist)</p></td>
 <td><p>Processes directories and outputs CSV summaries.</p></td>
 </tr>
 </tbody>
@@ -439,104 +375,6 @@ uv run python detect_fragments.py batch ./your_folder/ –method geometric –mi
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.cmap_name">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">cmap_name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'batlow'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#cmap_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.cmap_name" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.tbliteinterface">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">tbliteinterface</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#tbliteinterface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.tbliteinterface" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.DetectionMethod">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">DetectionMethod</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#DetectionMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a></p>
-<p>Available detection methodologies.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.6.</span></p>
-</div>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.DetectionMethod.GEOMETRIC">
-<span class="sig-name descname"><span class="pre">GEOMETRIC</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'geometric'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#DetectionMethod.GEOMETRIC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod.GEOMETRIC" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.DetectionMethod.BOND_ORDER">
-<span class="sig-name descname"><span class="pre">BOND_ORDER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'bond-order'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#DetectionMethod.BOND_ORDER"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod.BOND_ORDER" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_MULTIPLIER">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_BOND_MULTIPLIER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.2</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#DEFAULT_BOND_MULTIPLIER"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_MULTIPLIER" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_ORDER_THRESHOLD">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_BOND_ORDER_THRESHOLD</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.8</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#DEFAULT_BOND_ORDER_THRESHOLD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.DEFAULT_BOND_ORDER_THRESHOLD" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.SCALAR_BAR_ARGS">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">SCALAR_BAR_ARGS</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#SCALAR_BAR_ARGS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.SCALAR_BAR_ARGS" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.MIN_DIST_ATM">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">MIN_DIST_ATM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0001</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#MIN_DIST_ATM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.MIN_DIST_ATM" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.find_fragments_geometric">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">find_fragments_geometric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.atoms.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_multiplier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'natural'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#find_fragments_geometric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.find_fragments_geometric" title="Link to this definition">¶</a></dt>
-<dd><p>Detect molecular fragments using scaled covalent radii.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.6.</span></p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.find_fragments_bond_order">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">find_fragments_bond_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.atoms.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">charge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplicity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'GFN2-xTB'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#find_fragments_bond_order"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.find_fragments_bond_order" title="Link to this definition">¶</a></dt>
-<dd><p>Analyze connectivity via the Wiberg Bond Order (WBO) matrix.
-Calculate electronic structure using the specified xTB level.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.6.</span></p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.build_graph_and_find_components">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">build_graph_and_find_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">row_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#build_graph_and_find_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.build_graph_and_find_components" title="Link to this definition">¶</a></dt>
-<dd><p>Identify connected components using direct CSR sparse matrix construction.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.6.</span></p>
-</div>
-<p>This function avoids Python list overhead by passing interaction indices
-directly to the SciPy sparse engine.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.merge_fragments_by_distance">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">merge_fragments_by_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.atoms.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_dist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#merge_fragments_by_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.merge_fragments_by_distance" title="Link to this definition">¶</a></dt>
-<dd><p>Merges fragments with geometric centers closer than the specified distance.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.6.</span></p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.visualize_with_pyvista">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">visualize_with_pyvista</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.atoms.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#rgpycrumbs.geom.detect_fragments.DetectionMethod" title="rgpycrumbs.geom.detect_fragments.DetectionMethod"><span class="pre">DetectionMethod</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonbond_cutoff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bond_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'natural'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#visualize_with_pyvista"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.visualize_with_pyvista" title="Link to this definition">¶</a></dt>
-<dd><p>Renders the molecular system with scalar-coded bond orders.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.6.</span></p>
-</div>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="rgpycrumbs.geom.detect_fragments.print_results">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.geom.detect_fragments.</span></span><span class="sig-name descname"><span class="pre">print_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">console</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rich.console.Console</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ase.atoms.Atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_components</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/geom/detect_fragments.html#print_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.geom.detect_fragments.print_results" title="Link to this definition">¶</a></dt>
@@ -585,10 +423,10 @@ directly to the SciPy sparse engine.</p>
         <span>Previous</span><div class="title">rgpycrumbs.geom.api.alignment</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="../ira/index.html">
+    <a href="../fragment_visualization/index.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">rgpycrumbs.geom.ira</div>
+        <div class="title">rgpycrumbs.geom.fragment_visualization</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -634,14 +472,12 @@ directly to the SciPy sparse engine.</p>
           </svg>
           <span
             >Analytics by
-            <a
-              href="https://umami.is/"
+<a
+              href="https://analytics.turtletech.us/"
               target="_blank"
               rel="noopener noreferrer"
               style="color: inherit; text-decoration: underline"
               >Umami</a
-            ></span
-          >
         </span>
 
         

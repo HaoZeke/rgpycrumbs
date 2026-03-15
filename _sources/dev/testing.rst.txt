@@ -1,0 +1,95 @@
+=======
+Testing
+=======
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Running Tests
+-------------
+
+Pure tests (no optional deps)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    uv run --extra test pytest -m pure
+
+All tests with extras
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    uv run --extra test --extra analysis pytest -m "pure or analysis"
+
+Feature verification script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    uv run scripts/test_all_features.py
+
+With auto-install enabled:
+
+.. code:: bash
+
+    RGPYCRUMBS_AUTO_DEPS=1 uv run scripts/test_all_features.py
+
+Test Categories
+---------------
+
+.. table::
+
+    +-------------------+--------------------------------------------------+-----------------------------+
+    | Marker            | What it tests                                    | Required extras             |
+    +===================+==================================================+=============================+
+    | ``pure``          | Core modules, CLI registration, no optional deps | ``test``                    |
+    +-------------------+--------------------------------------------------+-----------------------------+
+    | ``analysis``      | Fragment detection, RMSD alignment               | ``test``, ``analysis``      |
+    +-------------------+--------------------------------------------------+-----------------------------+
+    | ``surfaces``      | JAX-based surface fitting                        | ``test``, ``surfaces``      |
+    +-------------------+--------------------------------------------------+-----------------------------+
+    | ``interpolation`` | Scipy spline interpolation                       | ``test``, ``interpolation`` |
+    +-------------------+--------------------------------------------------+-----------------------------+
+    | ``eon``           | eOn integration (con files, NEB)                 | ``test``, ``analysis``      |
+    +-------------------+--------------------------------------------------+-----------------------------+
+    | ``fragments``     | Fragment detection with tblite                   | pixi (tblite is conda-only) |
+    +-------------------+--------------------------------------------------+-----------------------------+
+
+CI Workflows
+------------
+
+.. table::
+
+    +----------------------+--------------------------------------------------+------------------+
+    | Workflow             | Runs                                             | Trigger          |
+    +======================+==================================================+==================+
+    | ``ci_test.yml``      | ``pytest -m pure`` on py3.10-3.12                | push, PR         |
+    +----------------------+--------------------------------------------------+------------------+
+    | ``ci_tutorials.yml`` | Module compile checks, CLI help                  | push, PR         |
+    +----------------------+--------------------------------------------------+------------------+
+    | ``ci_doctest.yml``   | Extract and run Python blocks from org tutorials | push, PR         |
+    +----------------------+--------------------------------------------------+------------------+
+    | ``ci_prek.yml``      | ruff, codespell, lychee link checker             | push, PR         |
+    +----------------------+--------------------------------------------------+------------------+
+    | ``ci_docs.yml``      | Sphinx doc build (org -> RST -> HTML)            | push to main, PR |
+    +----------------------+--------------------------------------------------+------------------+
+
+Adding Tests
+------------
+
+Place test files in ``tests/`` mirroring the package structure:
+
+.. code:: text
+
+    tests/
+      chemgp/test_chemgp_refactoring.py
+      eon/test_eon_cli.py
+      test_detect_fragments.py
+      test_ensure_import.py
+      test_lazy_import_coverage.py
+
+Mark tests with the appropriate pytest marker. Use ``pytest.importorskip`` for
+optional dependencies so tests skip gracefully when deps are absent.

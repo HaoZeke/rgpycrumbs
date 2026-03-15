@@ -13,6 +13,99 @@ Submodules
    /autoapi/rgpycrumbs/geom/analysis/index
    /autoapi/rgpycrumbs/geom/api/index
    /autoapi/rgpycrumbs/geom/detect_fragments/index
+   /autoapi/rgpycrumbs/geom/fragment_visualization/index
+   /autoapi/rgpycrumbs/geom/fragments/index
    /autoapi/rgpycrumbs/geom/ira/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.DEFAULT_BOND_MULTIPLIER
+   rgpycrumbs.geom.DEFAULT_BOND_ORDER_THRESHOLD
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.DetectionMethod
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.build_graph_and_find_components
+   rgpycrumbs.geom.find_fragments_bond_order
+   rgpycrumbs.geom.find_fragments_geometric
+   rgpycrumbs.geom.merge_fragments_by_distance
+
+
+Package Contents
+----------------
+
+.. py:data:: DEFAULT_BOND_MULTIPLIER
+   :value: 1.2
+
+
+.. py:data:: DEFAULT_BOND_ORDER_THRESHOLD
+   :value: 0.8
+
+
+.. py:class:: DetectionMethod
+
+   Bases: :py:obj:`enum.StrEnum`
+
+
+   Available detection methodologies.
+
+   .. versionadded:: 0.0.6
+
+
+   .. py:attribute:: GEOMETRIC
+      :value: 'geometric'
+
+
+
+   .. py:attribute:: BOND_ORDER
+      :value: 'bond-order'
+
+
+
+.. py:function:: build_graph_and_find_components(num_atoms: int, row_indices: numpy.ndarray | list[int], col_indices: numpy.ndarray | list[int]) -> tuple[int, numpy.ndarray]
+
+   Identify connected components using direct CSR sparse matrix construction.
+
+   .. versionadded:: 0.0.6
+
+   This function avoids Python list overhead by passing interaction indices
+   directly to the SciPy sparse engine.
+
+
+.. py:function:: find_fragments_bond_order(atoms: ase.atoms.Atoms, threshold: float, charge: int, multiplicity: int, method: str = 'GFN2-xTB') -> tuple[int, numpy.ndarray, numpy.ndarray, numpy.ndarray]
+
+   Analyze connectivity via the Wiberg Bond Order (WBO) matrix.
+   Calculate electronic structure using the specified xTB level.
+
+   .. versionadded:: 0.0.6
+
+
+.. py:function:: find_fragments_geometric(atoms: ase.atoms.Atoms, bond_multiplier: float, radius_type: str = 'natural') -> tuple[int, numpy.ndarray]
+
+   Detect molecular fragments using scaled covalent radii.
+
+   .. versionadded:: 0.0.6
+
+
+.. py:function:: merge_fragments_by_distance(atoms: ase.atoms.Atoms, n_components: int, labels: numpy.ndarray, min_dist: float) -> tuple[int, numpy.ndarray]
+
+   Merges fragments with geometric centers closer than the specified distance.
+
+   .. versionadded:: 0.0.6
 
 

@@ -1,0 +1,70 @@
+rgpycrumbs.surfaces.gradient_matern
+===================================
+
+.. py:module:: rgpycrumbs.surfaces.gradient_matern
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_matern.GradientMatern
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_matern.negative_mll_matern_grad
+   rgpycrumbs.surfaces.gradient_matern._grad_matern_solve
+   rgpycrumbs.surfaces.gradient_matern._grad_matern_predict
+   rgpycrumbs.surfaces.gradient_matern._grad_matern_var
+
+
+Module Contents
+---------------
+
+.. py:function:: negative_mll_matern_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_matern_solve(x, y_full, noise_scalar, length_scale)
+
+.. py:function:: _grad_matern_predict(x_query, x_obs, alpha, length_scale)
+
+.. py:function:: _grad_matern_var(x_query, x_obs, K_inv, length_scale)
+
+.. py:class:: GradientMatern(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Matern 5/2 surface implementation.
+
+   .. versionadded:: 1.0.0
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+

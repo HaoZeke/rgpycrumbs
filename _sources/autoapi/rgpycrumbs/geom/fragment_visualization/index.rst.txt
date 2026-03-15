@@ -1,0 +1,54 @@
+rgpycrumbs.geom.fragment_visualization
+======================================
+
+.. py:module:: rgpycrumbs.geom.fragment_visualization
+
+.. autoapi-nested-parse::
+
+   PyVista-based visualization for molecular fragment analysis.
+
+   Renders molecular systems with scalar-coded bond orders using CPK coloring
+   and the batlow colormap from cmcrameri.
+
+   .. versionadded:: 0.0.6
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.fragment_visualization.cmap_name
+   rgpycrumbs.geom.fragment_visualization.SCALAR_BAR_ARGS
+   rgpycrumbs.geom.fragment_visualization.MIN_DIST_ATM
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.geom.fragment_visualization.visualize_with_pyvista
+
+
+Module Contents
+---------------
+
+.. py:data:: cmap_name
+   :value: 'batlow'
+
+
+.. py:data:: SCALAR_BAR_ARGS
+
+.. py:data:: MIN_DIST_ATM
+   :value: 0.0001
+
+
+.. py:function:: visualize_with_pyvista(atoms: ase.atoms.Atoms, method: rgpycrumbs.geom.fragments.DetectionMethod, bond_data: float | numpy.ndarray, nonbond_cutoff: float = 0.05, bond_threshold: float = 0.8, radius_type: str = 'natural') -> None
+
+   Renders the molecular system with scalar-coded bond orders.
+
+   .. versionadded:: 0.0.6
+
+

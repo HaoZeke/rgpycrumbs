@@ -29,6 +29,7 @@ Classes
 
 .. autoapisummary::
 
+   rgpycrumbs.eon.ptmdisp.StrEnum
    rgpycrumbs.eon.ptmdisp.CrystalStructure
 
 
@@ -43,6 +44,14 @@ Functions
 
 Module Contents
 ---------------
+
+.. py:class:: StrEnum
+
+   Bases: :py:obj:`str`, :py:obj:`enum.Enum`
+
+
+   Backport for Python 3.10.
+
 
 .. py:data:: log
 

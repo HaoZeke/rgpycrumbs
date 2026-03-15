@@ -1,0 +1,73 @@
+rgpycrumbs.surfaces.gradient_imq
+================================
+
+.. py:module:: rgpycrumbs.surfaces.gradient_imq
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_imq.GradientIMQ
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_imq.negative_mll_imq_grad
+   rgpycrumbs.surfaces.gradient_imq.negative_mll_imq_map
+   rgpycrumbs.surfaces.gradient_imq._grad_imq_solve
+   rgpycrumbs.surfaces.gradient_imq._grad_imq_predict
+   rgpycrumbs.surfaces.gradient_imq._grad_imq_var
+
+
+Module Contents
+---------------
+
+.. py:function:: negative_mll_imq_grad(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_imq_solve(x, y_full, noise_scalar, epsilon)
+
+.. py:function:: _grad_imq_predict(x_query, x_obs, alpha, epsilon)
+
+.. py:function:: _grad_imq_var(x_query, x_obs, K_inv, epsilon)
+
+.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.
+
+   .. versionadded:: 1.0.0
+
+
+   .. py:method:: _fit(smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+

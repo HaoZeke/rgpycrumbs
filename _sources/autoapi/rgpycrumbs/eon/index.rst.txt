@@ -3,6 +3,17 @@ rgpycrumbs.eon
 
 .. py:module:: rgpycrumbs.eon
 
+.. autoapi-nested-parse::
+
+   EON NEB plotting utilities.
+
+   This module provides CLI tools for visualizing Nudged Elastic Band (NEB)
+   calculations from eOn, trajectories, or ChemGP HDF5 outputs.
+
+   .. versionadded:: 1.7.0
+       Refactored from monolithic plt_neb.py to modular structure.
+
+
 
 Submodules
 ----------
@@ -14,7 +25,6 @@ Submodules
    /autoapi/rgpycrumbs/eon/con_splitter/index
    /autoapi/rgpycrumbs/eon/generate_nwchem_input/index
    /autoapi/rgpycrumbs/eon/helpers/index
-   /autoapi/rgpycrumbs/eon/plt_neb/index
    /autoapi/rgpycrumbs/eon/ptmdisp/index
    /autoapi/rgpycrumbs/eon/to_mlflow/index
 

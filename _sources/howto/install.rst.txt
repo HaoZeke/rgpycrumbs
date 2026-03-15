@@ -1,0 +1,269 @@
+==================
+Installation Guide
+==================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Installation Guide
+------------------
+
+Quick Install
+~~~~~~~~~~~~~
+
+.. code:: bash
+
+    pip install rgpycrumbs
+
+Optional Dependencies
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
+    # Surface fitting (JAX)
+    pip install "rgpycrumbs[surfaces]"
+
+    # Interpolation (scipy)
+    pip install "rgpycrumbs[interpolation]"
+
+    # All optional
+    pip install "rgpycrumbs[all]"
+
+Auto-Install
+~~~~~~~~~~~~
+
+Enable automatic dependency installation:
+
+.. code:: bash
+
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+Platform Notes
+~~~~~~~~~~~~~~
+
+- Linux: Full support
+
+- macOS: Full support
+
+- Windows: Most features work
+
+Verification
+~~~~~~~~~~~~
+
+.. code:: bash
+
+    python -c "import rgpycrumbs; print(rgpycrumbs.__version__)"
+
+See Also
+~~~~~~~~
+
+- `FAQ <faq.rst>`_
+
+- `Glossary <../reference/glossary.rst>`_
+
+Surface Fitting (JAX)
+~~~~~~~~~~~~~~~~~~~~~
+
+For Gaussian Process surface fitting and landscape visualization:
+
+.. code:: bash
+
+    # Recommended: Install with surfaces extra
+    pip install "rgpycrumbs[surfaces]"
+
+    # Or with uv
+    uv pip install "rgpycrumbs[surfaces]"
+
+    # Or enable auto-install (installs on first use)
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+GPU Support
+^^^^^^^^^^^
+
+For GPU-accelerated surface fitting:
+
+.. code:: bash
+
+    # CUDA 12
+    pip install "jax[cuda12]"
+
+    # CUDA 11
+    pip install "jax[cuda11]"
+
+See: `JAX Installation Guide <https://jax.readthedocs.io/en/latest/installation.html>`_
+
+Testing Installation
+^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    python3 -c "from rgpycrumbs.surfaces import FastTPS; print('JAX working!')"
+
+Automatic Dependency Installation
+---------------------------------
+
+rgpycrumbs supports automatic installation of optional dependencies on first use.
+This is useful for:
+
+- Trying features without pre-installing all dependencies
+
+- Reducing initial installation size
+
+- CI/CD pipelines where you want minimal setup
+
+- Users who only need specific features occasionally
+
+Enabling Auto-Install
+~~~~~~~~~~~~~~~~~~~~~
+
+Temporary (Current Session)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    export RGPYCRUMBS_AUTO_DEPS=1
+    python3 -c "from rgpycrumbs.surfaces import FastTPS"  # Auto-installs JAX
+
+Permanent (All Sessions)
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Add to your shell configuration file:
+
+.. code:: bash
+
+    # ~/.bashrc or ~/.zshrc
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+One-Command
+^^^^^^^^^^^
+
+Prefix any command:
+
+.. code:: bash
+
+    RGPYCRUMBS_AUTO_DEPS=1 python3 my_script.py
+
+How It Works
+~~~~~~~~~~~~
+
+When ``RGPYCRUMBS_AUTO_DEPS=1`` is set:
+
+1. Module import is attempted normally
+
+2. If module is missing, rgpycrumbs checks if it's an optional dependency
+
+3. If yes, ``uv pip install`` is run automatically
+
+4. Module is imported after installation
+
+5. Subsequent imports use cached installation
+
+Supported Optional Dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. table::
+
+    +--------+---------------+----------------+-------------------------------------+
+    | Module | Extra         | Auto-Installed | Use Case                            |
+    +========+===============+================+=====================================+
+    | jax    | surfaces      | ✓              | GP surface fitting, landscape plots |
+    +--------+---------------+----------------+-------------------------------------+
+    | scipy  | interpolation | ✓              | Spline interpolation                |
+    +--------+---------------+----------------+-------------------------------------+
+    | ase    | analysis      | ✓              | Structure analysis, RMSD            |
+    +--------+---------------+----------------+-------------------------------------+
+
+Cache Location
+~~~~~~~~~~~~~~
+
+Auto-installed packages are cached in:
+
+.. code:: bash
+
+    ~/.cache/rgpycrumbs/deps/
+
+This cache is shared across all Python environments.
+
+Disabling Auto-Install
+~~~~~~~~~~~~~~~~~~~~~~
+
+To disable:
+
+.. code:: bash
+
+    export RGPYCRUMBS_AUTO_DEPS=0
+    # Or unset
+    unset RGPYCRUMBS_AUTO_DEPS
+
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+"Failed to install" Error
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Ensure ``uv`` or ``pip`` is available:
+
+.. code:: bash
+
+    which uv
+    which pip
+
+Slow First Import
+^^^^^^^^^^^^^^^^^
+
+First import is slow due to installation. Subsequent imports are fast.
+
+Permission Errors
+^^^^^^^^^^^^^^^^^
+
+Use user installation:
+
+.. code:: bash
+
+    export RGPYCRUMBS_AUTO_DEPS=1
+    pip install --user "rgpycrumbs[surfaces]"
+
+Examples
+~~~~~~~~
+
+Using Surface Fitting Without Pre-Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    # Enable auto-install
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+    # Run script that uses JAX
+    python3 my_gp_script.py
+    # JAX is automatically installed on first import
+
+CI/CD Pipeline
+^^^^^^^^^^^^^^
+
+.. code:: yaml
+
+    # .github/workflows/ci.yml
+    - name: Run tests
+      env:
+        RGPYCRUMBS_AUTO_DEPS: "1"
+      run: pytest
+
+Jupyter Notebook
+^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    import os
+    os.environ["RGPYCRUMBS_AUTO_DEPS"] = "1"
+
+    from rgpycrumbs.surfaces import FastTPS  # Auto-installs JAX
+
+See Also
+~~~~~~~~
+
+- `Lazy Import Pattern <../dev/lazy_imports.rst>`_ - Technical implementation details
+
+- `Glossary <../reference/glossary.rst>`_ - Optional dependencies definition

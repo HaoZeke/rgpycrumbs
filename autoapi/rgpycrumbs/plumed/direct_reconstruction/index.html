@@ -94,15 +94,19 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html">ChemGP Plotting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_command.html">Batch Plot Generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
@@ -148,7 +152,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../chemgp/match_atoms/index.html">rgpycrumbs.chemgp.match_atoms</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
@@ -157,7 +161,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -170,13 +173,14 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/fragment_visualization/index.html">rgpycrumbs.geom.fragment_visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/fragments/index.html">rgpycrumbs.geom.fragments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../parsers/chemgp/index.html">rgpycrumbs.parsers.chemgp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
 </ul>
 </li>
@@ -195,7 +199,11 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_imq/index.html">rgpycrumbs.surfaces.gradient_imq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_matern/index.html">rgpycrumbs.surfaces.gradient_matern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_nystrom/index.html">rgpycrumbs.surfaces.gradient_nystrom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_rq/index.html">rgpycrumbs.surfaces.gradient_rq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_se/index.html">rgpycrumbs.surfaces.gradient_se</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
 </ul>
 </li>
@@ -221,12 +229,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#attributes">Attributes</a></li>
-<li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction._calculate_fes_2d"><code class="docutils literal notranslate"><span class="pre">_calculate_fes_2d()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction._calculate_fes_1d"><code class="docutils literal notranslate"><span class="pre">_calculate_fes_1d()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills"><code class="docutils literal notranslate"><span class="pre">calculate_fes_from_hills()</span></code></a></li>
-<li><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction.find_fes_minima"><code class="docutils literal notranslate"><span class="pre">find_fes_minima()</span></code></a></li>
 <li><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction.HILLS_FILENAME"><code class="docutils literal notranslate"><span class="pre">HILLS_FILENAME</span></code></a></li>
 </ul>
 </li>
@@ -344,112 +347,8 @@ data-aria-dark="Switch to auto color mode">
 </table>
 </div>
 </section>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction._calculate_fes_2d" title="rgpycrumbs.plumed.direct_reconstruction._calculate_fes_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_calculate_fes_2d</span></code></a>(hills_data, x, y, per, npoints)</p></td>
-<td><p>Helper function to calculate the 2D Free Energy Surface.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction._calculate_fes_1d" title="rgpycrumbs.plumed.direct_reconstruction._calculate_fes_1d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_calculate_fes_1d</span></code></a>(hills_data, x, per, npoints)</p></td>
-<td><p>Helper function to calculate the 1D Free Energy Surface.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills" title="rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_fes_from_hills</span></code></a>(hills[, imin, imax, xlim, ...])</p></td>
-<td><p>Calculates a 1D or 2D Free Energy Surface (FES) from a metadynamics hills file.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#rgpycrumbs.plumed.direct_reconstruction.find_fes_minima" title="rgpycrumbs.plumed.direct_reconstruction.find_fes_minima"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_fes_minima</span></code></a>(fes_result[, nbins])</p></td>
-<td><p>Finds local minima on a Free Energy Surface by dividing it into bins.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction._calculate_fes_2d">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">_calculate_fes_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hills_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#_calculate_fes_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction._calculate_fes_2d" title="Link to this definition">¶</a></dt>
-<dd><p>Helper function to calculate the 2D Free Energy Surface.</p>
-<p>The FES is calculated as the negative sum of Gaussian kernels.
-FES(x, y) = - sum_{i} [ H_i * exp( - (dx_i^2 / (2*sx_i^2)) - (dy_i^2 / (2*sy_i^2)) ) ]</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction._calculate_fes_1d">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">_calculate_fes_1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hills_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#_calculate_fes_1d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction._calculate_fes_1d" title="Link to this definition">¶</a></dt>
-<dd><p>Helper function to calculate the 1D Free Energy Surface.</p>
-<p>FES(x) = - sum_{i} [ H_i * exp( - (dx_i^2 / (2*sx_i^2)) ) ]</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">calculate_fes_from_hills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hills</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#calculate_fes_from_hills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction.calculate_fes_from_hills" title="Link to this definition">¶</a></dt>
-<dd><p>Calculates a 1D or 2D Free Energy Surface (FES) from a metadynamics hills file.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.3.</span></p>
-</div>
-<p>This is a Python/NumPy translation of the R function fes2.hillsfile.</p>
-<dl>
-<dt>Args:</dt><dd><dl>
-<dt>hills (dict): A dictionary containing the metadynamics data. Expected keys:</dt><dd><dl class="simple">
-<dt>‘hillsfile’ (np.ndarray): The hills data. For 1D FES, shape is (N, 5).</dt><dd><p>For 2D FES, shape is (N, 7).
-Columns are typically:
-time, cv1, (cv2), sigma_cv1, (sigma_cv2), height, …</p>
-</dd>
-<dt>‘per’ (list or tuple): A boolean list indicating periodicity for each CV.</dt><dd><p>e.g., [False, False].</p>
-</dd>
-</dl>
-<p>‘pcv1’ (list or tuple): Periodic boundary limits for CV1. e.g., [0, 2*pi].
-‘pcv2’ (list or tuple): Periodic boundary limits for CV2.</p>
-</dd>
-<dt>imin (int, optional): The starting hill index (1-based) to include in the FES.</dt><dd><p>Defaults to 1.</p>
-</dd>
-<dt>imax (int, optional): The final hill index (1-based) to include. If None, all</dt><dd><p>hills from imin to the end are used. Defaults to None.</p>
-</dd>
-<dt>xlim (list or tuple, optional): Manual limits for the x-axis (CV1).</dt><dd><p>Defaults to None, which auto-detects limits.</p>
-</dd>
-<dt>ylim (list or tuple, optional): Manual limits for the y-axis (CV2).</dt><dd><p>Defaults to None, which auto-detects limits.</p>
-</dd>
-<dt>npoints (int, optional): The number of grid points for each dimension.</dt><dd><p>Defaults to 256.</p>
-</dd>
-</dl>
-</dd>
-<dt>Returns:</dt><dd><dl class="simple">
-<dt>dict: A dictionary containing the FES and associated metadata, with keys:</dt><dd><p>‘fes’: The calculated FES as a 1D or 2D NumPy array.
-‘hills’: The original hills data used.
-‘rows’: Number of grid points (npoints).
-‘dimension’: 1 or 2.
-‘per’: Periodicity flags.
-‘x’: The grid coordinates for the first dimension (CV1).
-‘y’: The grid coordinates for the second dimension (CV2, if applicable).
-‘pcv1’, ‘pcv2’: Periodic boundary values.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction.find_fes_minima">
-<span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">find_fes_minima</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fes_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#find_fes_minima"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction.find_fes_minima" title="Link to this definition">¶</a></dt>
-<dd><p>Finds local minima on a Free Energy Surface by dividing it into bins.</p>
-<div class="versionadded">
-<p><span class="versionmodified added">Added in version 0.0.3.</span></p>
-</div>
-<p>This is a Python/Pandas translation of the R function fesminima.fes.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>fes_result (dict): The output dictionary from calculate_fes_from_hills.
-nbins (int): The number of bins to divide each dimension into for the search.</p>
-</dd>
-<dt>Returns:</dt><dd><dl class="simple">
-<dt>dict: A dictionary containing a pandas DataFrame of the minima and the original</dt><dd><p>FES data. Returns None if no minima are found.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py data">
 <dt class="sig sig-object py" id="rgpycrumbs.plumed.direct_reconstruction.HILLS_FILENAME">
 <span class="sig-prename descclassname"><span class="pre">rgpycrumbs.plumed.direct_reconstruction.</span></span><span class="sig-name descname"><span class="pre">HILLS_FILENAME</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HILLS'</span></span><a class="reference internal" href="../../../../_modules/rgpycrumbs/plumed/direct_reconstruction.html#HILLS_FILENAME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rgpycrumbs.plumed.direct_reconstruction.HILLS_FILENAME" title="Link to this definition">¶</a></dt>
@@ -519,14 +418,12 @@ nbins (int): The number of bins to divide each dimension into for the search.</p
           </svg>
           <span
             >Analytics by
-            <a
-              href="https://umami.is/"
+<a
+              href="https://analytics.turtletech.us/"
               target="_blank"
               rel="noopener noreferrer"
               style="color: inherit; text-decoration: underline"
               >Umami</a
-            ></span
-          >
         </span>
 
         

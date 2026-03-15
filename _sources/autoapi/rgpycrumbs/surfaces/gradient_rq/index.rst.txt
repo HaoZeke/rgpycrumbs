@@ -1,0 +1,70 @@
+rgpycrumbs.surfaces.gradient_rq
+===============================
+
+.. py:module:: rgpycrumbs.surfaces.gradient_rq
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_rq.GradientRQ
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_rq.negative_mll_rq_map
+   rgpycrumbs.surfaces.gradient_rq._grad_rq_solve
+   rgpycrumbs.surfaces.gradient_rq._grad_rq_predict
+   rgpycrumbs.surfaces.gradient_rq._grad_rq_var
+
+
+Module Contents
+---------------
+
+.. py:function:: negative_mll_rq_map(log_params, x, y_flat, D_plus_1)
+
+.. py:function:: _grad_rq_solve(x, y_full, noise_scalar, params)
+
+.. py:function:: _grad_rq_predict(x_query, x_obs, alpha, params)
+
+.. py:function:: _grad_rq_var(x_query, x_obs, K_inv, params)
+
+.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.
+
+   .. versionadded:: 1.0.0
+
+
+   .. py:method:: _fit(_smoothing, length_scale, optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+

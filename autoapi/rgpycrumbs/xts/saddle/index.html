@@ -94,15 +94,19 @@ data-aria-dark="Switch to auto color mode">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../quickstart.html">Quickstart</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html">ChemGP Plotting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_command.html">Batch Plot Generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../../../tools/eon/index.html">eOn Helpers</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
@@ -148,7 +152,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../_aux/index.html">rgpycrumbs._aux</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../basetypes/index.html">rgpycrumbs.basetypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../chemgp/index.html">rgpycrumbs.chemgp</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../chemgp/plt_gp/index.html">rgpycrumbs.chemgp.plt_gp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../chemgp/match_atoms/index.html">rgpycrumbs.chemgp.match_atoms</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../cli/index.html">rgpycrumbs.cli</a></li>
@@ -157,7 +161,6 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -170,13 +173,14 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/api/index.html">rgpycrumbs.geom.api</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/fragment_visualization/index.html">rgpycrumbs.geom.fragment_visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../geom/fragments/index.html">rgpycrumbs.geom.fragments</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../interpolation/index.html">rgpycrumbs.interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../parsers/index.html">rgpycrumbs.parsers</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../parsers/chemgp/index.html">rgpycrumbs.parsers.chemgp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
 </ul>
 </li>
@@ -195,7 +199,11 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../surfaces/index.html">rgpycrumbs.surfaces</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient/index.html">rgpycrumbs.surfaces.gradient</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_imq/index.html">rgpycrumbs.surfaces.gradient_imq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_matern/index.html">rgpycrumbs.surfaces.gradient_matern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_nystrom/index.html">rgpycrumbs.surfaces.gradient_nystrom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_rq/index.html">rgpycrumbs.surfaces.gradient_rq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../surfaces/gradient_se/index.html">rgpycrumbs.surfaces.gradient_se</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
 </ul>
 </li>
@@ -395,14 +403,12 @@ data-aria-dark="Switch to auto color mode">
           </svg>
           <span
             >Analytics by
-            <a
-              href="https://umami.is/"
+<a
+              href="https://analytics.turtletech.us/"
               target="_blank"
               rel="noopener noreferrer"
               style="color: inherit; text-decoration: underline"
               >Umami</a
-            ></span
-          >
         </span>
 
         

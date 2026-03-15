@@ -3,6 +3,11 @@ rgpycrumbs.chemgp
 
 .. py:module:: rgpycrumbs.chemgp
 
+.. autoapi-nested-parse::
+
+   ChemGP utilities (plotting and parsing moved to chemparseplot).
+
+
 
 Submodules
 ----------
@@ -10,6 +15,6 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
-   /autoapi/rgpycrumbs/chemgp/plt_gp/index
+   /autoapi/rgpycrumbs/chemgp/match_atoms/index
 
 

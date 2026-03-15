@@ -1,0 +1,127 @@
+=======================
+Contributing Guidelines
+=======================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+.. contents::
+
+
+Contributing to rgpycrumbs
+--------------------------
+
+Getting Started
+~~~~~~~~~~~~~~~
+
+1. Fork and Clone
+^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    git clone https://github.com/your-username/rgpycrumbs
+    cd rgpycrumbs
+
+2. Set Up Environment
+^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: bash
+
+    uv sync --all-extras
+
+3. Run Tests
+^^^^^^^^^^^^
+
+.. code:: bash
+
+    uv run pytest -m pure
+    uv run pytest -m surfaces
+
+Code Style
+~~~~~~~~~~
+
+Formatting
+^^^^^^^^^^
+
+.. code:: bash
+
+    uv run ruff format .
+    uv run ruff check .
+
+Type Hints
+^^^^^^^^^^
+
+Target: 90%+ coverage.
+
+.. code:: python
+
+    def ensure_import(module_name: str):
+        """Import module through 5-step priority chain."""
+        ...
+
+Pull Request Process
+~~~~~~~~~~~~~~~~~~~~
+
+1. Create branch: ``git checkout -b feature/name``
+
+2. Make changes with tests
+
+3. Run CI checks locally
+
+4. Submit PR on GitHub
+
+5. Address reviewer comments
+
+Adding New Features
+~~~~~~~~~~~~~~~~~~~
+
+New CLI Commands
+^^^^^^^^^^^^^^^^
+
+1. Create ``rgpycrumbs/<module>/cli_<name>.py``
+
+2. Add PEP 723 header
+
+3. Use click for CLI
+
+4. Add tests
+
+New Modules
+^^^^^^^^^^^
+
+1. Create module directory
+
+2. Add ``__init__.py`` with exports
+
+3. Add tests
+
+4. Update documentation
+
+Testing
+~~~~~~~
+
+Test Categories
+^^^^^^^^^^^^^^^
+
+- ``@pytest.mark pure`` - Pure Python tests
+
+- ``@pytest.mark surfaces`` - JAX-dependent tests
+
+- ``@pytest.mark interpolation`` - scipy-dependent tests
+
+Documentation
+~~~~~~~~~~~~~
+
+All new features need:
+
+- Tutorial (if user-facing)
+
+- API reference
+
+- How-to guide
+
+See Also
+~~~~~~~~
+
+- `Best Practices <best_practices.rst>`_
+
+- `How-to Guides <../howto/index.rst>`_

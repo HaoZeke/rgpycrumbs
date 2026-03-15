@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Batch Plot Generation - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Batch Figure Generation Tutorial" href="batch_tutorial.html" /><link rel="prev" title="Plotting ChemGP figures" href="plt_gp.html" />
+      <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/chemgp/batch_command.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../_static/shibuya.css?v=a318c5d4" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="rgpycrumbs.rgoswami.me/tools/chemgp/batch_command.html"/>
+  <meta property="og:title" content="Batch Plot Generation"/>
+    <meta name="twitter:card" content="summary"/>
+  <!-- Manual favicon handling with favicon.io -->
+<!-- since sphinx-favicon doesn't work with shibuya -->
+<link rel="icon" type="image/png" sizes="16x16" href="../../_static/favicons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../_static/favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../../_static/favicons/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../_static/favicons/android-chrome-512x512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../_static/favicons/apple-touch-icon.png">
+<link rel="shortcut icon" href="../../_static/favicons/favicon.ico">
+<link rel="manifest" href="../../_static/favicons/site.webmanifest">
+<!-- Umami analytics -->
+<script defer src="https://analytics.turtletech.us/script.js" data-website-id="f6ae7643-2047-4413-8611-07690030edca"></script>
+<script>window.umami=window.umami||{track:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)umami.track('Outbound Link',{url:a.href})});</script></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../index.html">
+      <img class="light-logo" src="../../_static/pycrumbs_notext.svg" alt="rgpycrumbs" height="28" loading="lazy" />
+      <img class="dark-logo" src="../../_static/pycrumbs_notext.svg" alt="rgpycrumbs" height="28" loading="lazy" />
+      <strong>rgpycrumbs</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-1" aria-controls="nav-children-1">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-1" aria-labelledby="nav-trigger-1"><li><a href="https://chemparseplot.rgoswami.me">
+                <span>chemparseplot</span>
+                <small>Parsing and plotting for computational chemistry</small>
+              </a></li><li><a href="https://eondocs.org">
+                <span>eOn</span>
+                <small>Long-timescale molecular dynamics engine, primary consumer</small>
+              </a></li><li><a href="https://github.com/HaoZeke/pychum">
+                <span>pychum</span>
+                <small>Input file generation for ORCA and NWChem</small>
+              </a></li></ul>
+      </li><li class="link">
+          <a href="https://pypi.org/project/rgpycrumbs/">
+            <span>PyPI</span><i class="i-lucide external-link"></i></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/first-project.html">First Project</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">ChemGP Plotting</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="plt_gp.html">Plotting ChemGP figures</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Batch Plot Generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html">Generators for NWChem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for eOn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/plt_neb.html">Plotting NEB paths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../orca/generate_orca_input.html">ORCA Input Generator</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/_aux/index.html">rgpycrumbs._aux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/basetypes/index.html">rgpycrumbs.basetypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/index.html">rgpycrumbs.chemgp</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/chemgp/match_atoms/index.html">rgpycrumbs.chemgp.match_atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/cli/index.html">rgpycrumbs.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/index.html">rgpycrumbs.eon</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/_mlflow/index.html">rgpycrumbs.eon._mlflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/func/index.html">rgpycrumbs.func</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/func/muller_brown/index.html">rgpycrumbs.func.muller_brown</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/index.html">rgpycrumbs.geom</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/analysis/index.html">rgpycrumbs.geom.analysis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/api/index.html">rgpycrumbs.geom.api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/detect_fragments/index.html">rgpycrumbs.geom.detect_fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/fragment_visualization/index.html">rgpycrumbs.geom.fragment_visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/fragments/index.html">rgpycrumbs.geom.fragments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/geom/ira/index.html">rgpycrumbs.geom.ira</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/interpolation/index.html">rgpycrumbs.interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/index.html">rgpycrumbs.parsers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/bless/index.html">rgpycrumbs.parsers.bless</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/parsers/common/index.html">rgpycrumbs.parsers.common</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/plumed/index.html">rgpycrumbs.plumed</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/plumed/direct_reconstruction/index.html">rgpycrumbs.plumed.direct_reconstruction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/prefix/index.html">rgpycrumbs.prefix</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/prefix/delete_packages/index.html">rgpycrumbs.prefix.delete_packages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/index.html">rgpycrumbs.run</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/run/jupyter/index.html">rgpycrumbs.run.jupyter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/index.html">rgpycrumbs.surfaces</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/_base/index.html">rgpycrumbs.surfaces._base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/_kernels/index.html">rgpycrumbs.surfaces._kernels</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient_imq/index.html">rgpycrumbs.surfaces.gradient_imq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient_matern/index.html">rgpycrumbs.surfaces.gradient_matern</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient_nystrom/index.html">rgpycrumbs.surfaces.gradient_nystrom</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient_rq/index.html">rgpycrumbs.surfaces.gradient_rq</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/gradient_se/index.html">rgpycrumbs.surfaces.gradient_se</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/surfaces/standard/index.html">rgpycrumbs.surfaces.standard</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/index.html">rgpycrumbs.xts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/cuh2/index.html">rgpycrumbs.xts.cuh2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/xts/saddle/index.html">rgpycrumbs.xts.saddle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
+</ul>
+</li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#configuration-file-format">Configuration File Format</a></li>
+<li><a class="reference internal" href="#configuration-options">Configuration Options</a><ul>
+<li><a class="reference internal" href="#defaults-section">Defaults Section</a></li>
+<li><a class="reference internal" href="#plot-entries">Plot Entries</a></li>
+<li><a class="reference internal" href="#plot-types">Plot Types</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parallel-processing">Parallel Processing</a><ul>
+<li><a class="reference internal" href="#performance">Performance</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#basic-batch">Basic Batch</a></li>
+<li><a class="reference internal" href="#id1">Parallel Processing</a></li>
+<li><a class="reference internal" href="#custom-output-directory">Custom Output Directory</a></li>
+<li><a class="reference internal" href="#type-specific-options">Type-Specific Options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li><a class="reference internal" href="#performance-tips">Performance Tips</a></li>
+<li><a class="reference internal" href="#see-also">See Also</a></li>
+<li><a class="reference internal" href="#implementation-notes">Implementation Notes</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/HaoZeke/rgpycrumbs"
+  data-type="github" data-user="HaoZeke" data-repo="rgpycrumbs">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>rgpycrumbs</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/HaoZeke/rgpycrumbs/blob/main/docs/source/tools/chemgp/batch_command.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">rgpycrumbs</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">ChemGP Plotting</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Batch Plot Generation</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="rgpycrumbs.rgoswami.me/_sources/tools/chemgp/batch_command.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="rgpycrumbs.rgoswami.me/_sources/tools/chemgp/batch_command.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="rgpycrumbs.rgoswami.me/_sources/tools/chemgp/batch_command.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20rgpycrumbs.rgoswami.me/_sources/tools/chemgp/batch_command.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20rgpycrumbs.rgoswami.me/_sources/tools/chemgp/batch_command.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="batch-plot-generation">
+<h1>Batch Plot Generation<a class="headerlink" href="#batch-plot-generation" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">Author<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://rgoswami.me">Rohit Goswami</a></p>
+</dd>
+</dl>
+</div></blockquote>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.7.0: </span>The <code class="docutils literal notranslate"><span class="pre">batch</span></code> command with parallel processing support.</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">batch</span></code> command generates multiple plots from a TOML configuration file.
+It supports parallel execution for improved performance when processing many files.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Sequential processing (default)</span>
+</span><span data-line="2">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>--config<span class="w"> </span>plots.toml
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Parallel processing with 4 workers</span>
+</span><span data-line="5">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>--config<span class="w"> </span>plots.toml<span class="w"> </span>--parallel<span class="w"> </span><span class="m">4</span>
+</span><span data-line="6">
+</span><span data-line="7"><span class="c1"># Short form</span>
+</span><span data-line="8">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>-c<span class="w"> </span>plots.toml<span class="w"> </span>-j<span class="w"> </span><span class="m">4</span>
+</span></pre></div>
+</div>
+</section>
+<section id="configuration-file-format">
+<h2>Configuration File Format<a class="headerlink" href="#configuration-file-format" title="Link to this heading">¶</a></h2>
+<p>The TOML configuration file specifies plots to generate:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">[defaults]</span>
+</span><span data-line="2"><span class="n">input_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./data&quot;</span>
+</span><span data-line="3"><span class="n">output_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./figures&quot;</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="k">[[plots]]</span>
+</span><span data-line="6"><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;surface&quot;</span>
+</span><span data-line="7"><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;mb_surface.h5&quot;</span>
+</span><span data-line="8"><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;mb_surface.pdf&quot;</span>
+</span><span data-line="9"><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">7.0</span>
+</span><span data-line="10"><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.0</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="k">[[plots]]</span>
+</span><span data-line="13"><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;convergence&quot;</span>
+</span><span data-line="14"><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;convergence.h5&quot;</span>
+</span><span data-line="15"><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;convergence.pdf&quot;</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="k">[[plots]]</span>
+</span><span data-line="18"><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;quality&quot;</span>
+</span><span data-line="19"><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gp_quality.h5&quot;</span>
+</span><span data-line="20"><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gp_quality.pdf&quot;</span>
+</span><span data-line="21"><span class="n">n-points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">]</span>
+</span></pre></div>
+</div>
+</section>
+<section id="configuration-options">
+<h2>Configuration Options<a class="headerlink" href="#configuration-options" title="Link to this heading">¶</a></h2>
+<section id="defaults-section">
+<h3>Defaults Section<a class="headerlink" href="#defaults-section" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>input<sub>dir</sub></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.</span></code></p></td>
+<td><p>Base directory for input files</p></td>
+</tr>
+<tr class="row-odd"><td><p>output<sub>dir</sub></p></td>
+<td><p>string</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">.</span></code></p></td>
+<td><p>Base directory for output files</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="plot-entries">
+<h3>Plot Entries<a class="headerlink" href="#plot-entries" title="Link to this heading">¶</a></h3>
+<p>Each <code class="docutils literal notranslate"><span class="pre">[[plots]]</span></code> entry specifies a single plot:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>type</p></td>
+<td><p>string</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Plot type (see below)</p></td>
+</tr>
+<tr class="row-odd"><td><p>input</p></td>
+<td><p>string</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Input HDF5 file (relative to input<sub>dir</sub>)</p></td>
+</tr>
+<tr class="row-even"><td><p>output</p></td>
+<td><p>string</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Output PDF file (relative to output<sub>dir</sub>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>width</p></td>
+<td><p>float</p></td>
+<td><p>7.0</p></td>
+<td><p>Figure width in inches</p></td>
+</tr>
+<tr class="row-even"><td><p>height</p></td>
+<td><p>float</p></td>
+<td><p>5.0</p></td>
+<td><p>Figure height in inches</p></td>
+</tr>
+<tr class="row-odd"><td><p>dpi</p></td>
+<td><p>int</p></td>
+<td><p>300</p></td>
+<td><p>Output resolution</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>type-specific</strong></p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Additional options per plot type</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="plot-types">
+<h3>Plot Types<a class="headerlink" href="#plot-types" title="Link to this heading">¶</a></h3>
+<p>Available plot types correspond to individual chemgp commands:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">surface</span></code> - 2D PES contour plot</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code> - Force/energy convergence curve</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quality</span></code> - GP surrogate quality progression</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rff</span></code> - RFF approximation quality</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nll</span></code> - MAP-NLL landscape</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sensitivity</span></code> - Hyperparameter sensitivity grid</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trust</span></code> - Trust region illustration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">variance</span></code> - GP variance overlay</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fps</span></code> - FPS subset visualization</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">profile</span></code> - NEB energy profile</p></li>
+</ul>
+</section>
+</section>
+<section id="parallel-processing">
+<h2>Parallel Processing<a class="headerlink" href="#parallel-processing" title="Link to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">--parallel</span></code> (or <code class="docutils literal notranslate"><span class="pre">-j</span></code>) option enables concurrent plot generation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Use 4 parallel workers</span>
+</span><span data-line="2">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>-c<span class="w"> </span>plots.toml<span class="w"> </span>-j<span class="w"> </span><span class="m">4</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Use 8 workers for large batches</span>
+</span><span data-line="5">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>-c<span class="w"> </span>plots.toml<span class="w"> </span>-j<span class="w"> </span><span class="m">8</span>
+</span></pre></div>
+</div>
+<section id="performance">
+<h3>Performance<a class="headerlink" href="#performance" title="Link to this heading">¶</a></h3>
+<p>Parallel processing provides significant speedup for batch operations:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Workers</p></th>
+<th class="head"><p>Speedup</p></th>
+<th class="head"><p>Best For</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>1x (baseline)</p></td>
+<td><p>Small batches (&lt; 5 plots)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2-4</p></td>
+<td><p>2-3x</p></td>
+<td><p>Medium batches (5-20 plots)</p></td>
+</tr>
+<tr class="row-even"><td><p>4-8</p></td>
+<td><p>3-5x</p></td>
+<td><p>Large batches (20+ plots)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note: Speedup depends on I/O bandwidth and CPU cores available.</p>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
+<section id="basic-batch">
+<h3>Basic Batch<a class="headerlink" href="#basic-batch" title="Link to this heading">¶</a></h3>
+<p>Generate all plots from configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>-c<span class="w"> </span>my_plots.toml
+</span></pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>Parallel Processing<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>Process 20 plots with 4 workers:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>-c<span class="w"> </span>large_batch.toml<span class="w"> </span>-j<span class="w"> </span><span class="m">4</span>
+</span></pre></div>
+</div>
+</section>
+<section id="custom-output-directory">
+<h3>Custom Output Directory<a class="headerlink" href="#custom-output-directory" title="Link to this heading">¶</a></h3>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">[defaults]</span>
+</span><span data-line="2"><span class="n">input_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./h5_data&quot;</span>
+</span><span data-line="3"><span class="n">output_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./publication/figures&quot;</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="k">[[plots]]</span>
+</span><span data-line="6"><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;surface&quot;</span>
+</span><span data-line="7"><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;reaction1.h5&quot;</span>
+</span><span data-line="8"><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;reaction1_surface.pdf&quot;</span>
+</span></pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>chemgp<span class="w"> </span>batch<span class="w"> </span>-c<span class="w"> </span>config.toml
+</span></pre></div>
+</div>
+</section>
+<section id="type-specific-options">
+<h3>Type-Specific Options<a class="headerlink" href="#type-specific-options" title="Link to this heading">¶</a></h3>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">[[plots]]</span>
+</span><span data-line="2"><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;surface&quot;</span>
+</span><span data-line="3"><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;mb.h5&quot;</span>
+</span><span data-line="4"><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;mb_contour.pdf&quot;</span>
+</span><span data-line="5"><span class="n">clamp-lo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">-200.0</span>
+</span><span data-line="6"><span class="n">clamp-hi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">50.0</span>
+</span><span data-line="7"><span class="n">contour-step</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">25.0</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="k">[[plots]]</span>
+</span><span data-line="10"><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;quality&quot;</span>
+</span><span data-line="11"><span class="n">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gp.h5&quot;</span>
+</span><span data-line="12"><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gp_quality.pdf&quot;</span>
+</span><span data-line="13"><span class="n">n-points</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">400</span><span class="p">]</span>
+</span></pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading">¶</a></h2>
+<p>The batch command continues processing remaining plots if one fails:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">[OK] reaction1_surface.pdf
+</span><span data-line="2">[FAIL] reaction2_convergence.pdf: Input not found: ./data/reaction2.h5
+</span><span data-line="3">[OK] reaction3_quality.pdf
+</span><span data-line="4">
+</span><span data-line="5">Batch complete: 2 ok, 1 failed
+</span></pre></div>
+</div>
+<p>Exit code is 1 if any plots failed, 0 if all succeeded.</p>
+</section>
+<section id="performance-tips">
+<h2>Performance Tips<a class="headerlink" href="#performance-tips" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>**Use parallel processing**</strong> for batches &gt; 5 plots</p></li>
+<li><p><strong>**Match workers to CPU cores**</strong> (typically 4-8 workers optimal)</p></li>
+<li><p><strong>**Group by input directory**</strong> to minimize I/O seeks</p></li>
+<li><p><strong>**Use SSD storage**</strong> for best I/O performance</p></li>
+</ol>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="plt_gp.rst">Individual Plot Commands</a> - Details on each plot type</p></li>
+<li><p><a class="reference external" href="hdf5_schema.rst">HDF5 Schema</a> - Expected HDF5 file structure</p></li>
+<li><p><a class="reference external" href="../../quickstart.rst">Quickstart Guide</a> - Getting started with rgpycrumbs</p></li>
+</ul>
+</section>
+<section id="implementation-notes">
+<h2>Implementation Notes<a class="headerlink" href="#implementation-notes" title="Link to this heading">¶</a></h2>
+<p>The batch command uses <code class="docutils literal notranslate"><span class="pre">concurrent.futures.ThreadPoolExecutor</span></code> for parallel
+processing. This pattern is adopted from the <code class="docutils literal notranslate"><span class="pre">nebmmf_repro</span></code> project’s
+<code class="docutils literal notranslate"><span class="pre">scripts/parse_results.py</span></code> for consistent parallel file processing.</p>
+<p>Progress tracking uses <code class="docutils literal notranslate"><span class="pre">rich.progress</span></code> for user-friendly output during
+long-running batch operations.</p>
+<p class="rubric">Footnotes</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="plt_gp.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Plotting ChemGP figures</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="batch_tutorial.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Batch Figure Generation Tutorial</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+<a
+              href="https://analytics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Umami</a
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2025, Rohit Goswami</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/HaoZeke/rgpycrumbs" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

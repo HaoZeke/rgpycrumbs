@@ -12,7 +12,11 @@ Submodules
 
    /autoapi/rgpycrumbs/surfaces/_base/index
    /autoapi/rgpycrumbs/surfaces/_kernels/index
-   /autoapi/rgpycrumbs/surfaces/gradient/index
+   /autoapi/rgpycrumbs/surfaces/gradient_imq/index
+   /autoapi/rgpycrumbs/surfaces/gradient_matern/index
+   /autoapi/rgpycrumbs/surfaces/gradient_nystrom/index
+   /autoapi/rgpycrumbs/surfaces/gradient_rq/index
+   /autoapi/rgpycrumbs/surfaces/gradient_se/index
    /autoapi/rgpycrumbs/surfaces/standard/index
 
 

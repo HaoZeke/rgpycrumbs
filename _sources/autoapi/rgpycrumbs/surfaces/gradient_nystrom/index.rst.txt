@@ -1,0 +1,77 @@
+rgpycrumbs.surfaces.gradient_nystrom
+====================================
+
+.. py:module:: rgpycrumbs.surfaces.gradient_nystrom
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_nystrom.NystromGradientIMQ
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.surfaces.gradient_nystrom._stable_nystrom_grad_imq_solve
+   rgpycrumbs.surfaces.gradient_nystrom._nystrom_grad_imq_predict
+   rgpycrumbs.surfaces.gradient_nystrom._nystrom_grad_imq_var
+
+
+Module Contents
+---------------
+
+.. py:function:: _stable_nystrom_grad_imq_solve(x, y_full, x_inducing, noise_scalar, epsilon)
+
+.. py:function:: _nystrom_grad_imq_predict(x_query, x_inducing, alpha_m, epsilon)
+
+.. py:function:: _nystrom_grad_imq_var(x_query, x_inducing, W, epsilon)
+
+.. py:class:: NystromGradientIMQ(x, y, gradients=None, n_inducing=300, nimags=None, smoothing=0.001, length_scale=None, optimize=True, **kwargs)
+
+   Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
+
+
+   Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.
+
+   .. versionadded:: 1.1.0
+
+
+   .. py:attribute:: n_inducing
+      :value: 300
+
+
+
+   .. py:attribute:: nimags
+      :value: None
+
+
+
+   .. py:method:: _fit(smoothing, length_scale, _optimize)
+
+      Internal method to perform parameter optimization.
+
+
+
+   .. py:method:: _solve()
+
+      Internal method to solve the linear system for weights.
+
+
+
+   .. py:method:: _predict_chunk(chunk)
+
+      Internal method for batch prediction.
+
+
+
+   .. py:method:: _var_chunk(chunk)
+
+      Internal method for batch variance.
+
+
+
