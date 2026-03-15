@@ -2,14 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-from rgpycrumbs.plumed.fes_calculation import calculate_fes_from_hills
+"""PLUMED utilities (parsing moved to chemparseplot.parse.plumed)."""
 
-__all__ = ["calculate_fes_from_hills", "find_fes_minima"]
-
-
-def __getattr__(name):
-    if name == "find_fes_minima":
-        from rgpycrumbs.plumed.direct_reconstruction import find_fes_minima
-
-        return find_fes_minima
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+__all__: list[str] = []

@@ -1,11 +1,5 @@
-from rgpycrumbs.parsers.chemgp import (
-    ComparisonData,
-    GPQualityData,
-    GPQualityGrid,
-    OptimizerTrace,
-    RFFQualityData,
-    StationaryPoint,
-    parse_comparison_jsonl,
-    parse_gp_quality_jsonl,
-    parse_rff_quality_jsonl,
-)
+# SPDX-FileCopyrightText: 2023-present Rohit Goswami <rog32@hi.is>
+#
+# SPDX-License-Identifier: MIT
+
+"""Parsers for various log and data formats."""
