@@ -165,6 +165,7 @@ ban-relative-imports = "all"
   "PLC0415",
 ] # deferred imports for ensure_import
 "surfaces.py" = [ "ARG001", "ARG002" ] # Jax seems to like this
+"scripts/**/*" = [ "PLC0415", "PLW1510", "PLR2004", "S101", "S603", "T201" ] # test/doctest scripts
 "tests/**/*" = [ "PLR2004", "S101", "TID252", "PLC0415" ]
 
 [tool.coverage.run]
