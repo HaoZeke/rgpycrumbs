@@ -31,10 +31,10 @@ jobs:
           uv run python3 -m py_compile rgpycrumbs/eon/plt_neb.py
           echo "✓ All eon modules compile"
       
-      - name: Test batch command help
+      - name: Test CLI help
         run: |
-          uv run --extra test python3 -m rgpycrumbs.cli chemgp batch --help
-          echo "✓ Batch command works"
+          uv run --extra test python3 -m rgpycrumbs.cli chemgp plot-gp --help
+          echo "✓ CLI help works"
       
       - name: Test CLI registration
         run: |

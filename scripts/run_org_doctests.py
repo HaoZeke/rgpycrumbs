@@ -21,15 +21,14 @@ def extract_python_blocks(org_path: Path) -> list[tuple[int, str]]:
     text = org_path.read_text()
     blocks = []
     pattern = re.compile(
-        r"#\+begin_src python(?:\s+.*?)?\n(.*?)#\+end_src",
+        r"#\+begin_src python([^\n]*)\n(.*?)#\+end_src",
         re.DOTALL | re.IGNORECASE,
     )
     for match in pattern.finditer(text):
-        code = match.group(1)
+        header_args = match.group(1)
+        code = match.group(2)
         line = text[: match.start()].count("\n") + 1
-        # Skip blocks with :eval no or SKIP-DOCTEST
-        header = text[match.start() : match.start() + text[match.start() :].index("\n")]
-        if ":eval no" in header or "SKIP-DOCTEST" in code:
+        if ":eval no" in header_args or "SKIP-DOCTEST" in code:
             continue
         blocks.append((line, code))
     return blocks
