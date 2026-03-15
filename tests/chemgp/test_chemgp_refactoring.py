@@ -26,17 +26,11 @@ class TestHDF5IO:
         with h5py.File(h5_path, "w") as f:
             table_grp = f.create_group("table")
             table_grp.create_dataset("step", data=np.array([1, 2, 3, 4, 5]))
-            table_grp.create_dataset(
-                "energy", data=np.array([0.1, 0.2, 0.3, 0.4, 0.5])
-            )
-            table_grp.create_dataset(
-                "force", data=np.array([0.5, 0.4, 0.3, 0.2, 0.1])
-            )
+            table_grp.create_dataset("energy", data=np.array([0.1, 0.2, 0.3, 0.4, 0.5]))
+            table_grp.create_dataset("force", data=np.array([0.5, 0.4, 0.3, 0.2, 0.1]))
 
             grid_grp = f.create_group("grids")
-            energy_ds = grid_grp.create_dataset(
-                "energy", data=np.random.rand(10, 10)
-            )
+            energy_ds = grid_grp.create_dataset("energy", data=np.random.rand(10, 10))
             energy_ds.attrs["x_range"] = [0.0, 1.0]
             energy_ds.attrs["y_range"] = [0.0, 1.0]
             energy_ds.attrs["x_length"] = 10
@@ -47,12 +41,8 @@ class TestHDF5IO:
             path_grp.create_dataset("path1_y", data=np.array([0.4, 0.5, 0.6]))
 
             points_grp = f.create_group("points")
-            points_grp.create_dataset(
-                "train_x", data=np.array([0.2, 0.4, 0.6])
-            )
-            points_grp.create_dataset(
-                "train_y", data=np.array([0.3, 0.5, 0.7])
-            )
+            points_grp.create_dataset("train_x", data=np.array([0.2, 0.4, 0.6]))
+            points_grp.create_dataset("train_y", data=np.array([0.3, 0.5, 0.7]))
 
             f.attrs["conv_tol"] = 0.01
             f.attrs["n_steps"] = 100

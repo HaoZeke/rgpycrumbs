@@ -9,33 +9,33 @@ on:
 jobs:
   test-tutorials:
     runs-on: ubuntu-22.04
-    
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      
+
       - name: Test chemgp modules compile
         run: |
           uv run python3 -m py_compile rgpycrumbs/chemgp/hdf5_io.py
           uv run python3 -m py_compile rgpycrumbs/chemgp/plotting.py
           uv run python3 -m py_compile rgpycrumbs/chemgp/plot_gp.py
           echo "✓ All chemgp modules compile"
-      
+
       - name: Test eon modules compile
         run: |
           uv run python3 -m py_compile rgpycrumbs/eon/plt_neb.py
           echo "✓ All eon modules compile"
-      
+
       - name: Test CLI help
         run: |
           uv run --extra test python3 -m rgpycrumbs.cli chemgp plot-gp --help
           echo "✓ CLI help works"
-      
+
       - name: Test CLI registration
         run: |
           uv run --extra test python3 -c "

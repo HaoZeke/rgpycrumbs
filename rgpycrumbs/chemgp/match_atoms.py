@@ -218,9 +218,7 @@ def main(
             f"(Symbol: {result['closest_atom_symbol']})"
         )
         cp = result["closest_atom_pos"]
-        output_lines.append(
-            f"     Position: ({cp[0]:.4f}, {cp[1]:.4f}, {cp[2]:.4f})"
-        )
+        output_lines.append(f"     Position: ({cp[0]:.4f}, {cp[1]:.4f}, {cp[2]:.4f})")
         output_lines.append(f"     Distance: {result['distance']:.6f}")
 
     output_text = "\n".join(output_lines) + "\n"

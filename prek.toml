@@ -55,4 +55,3 @@ hooks = [
   { id = "gen-readme", name = "Generate README.md from readme_src.org", entry = "bash scripts/gen_readme.sh", language = "system", files = "readme_src\\.org$", pass_filenames = false },
 ]
 repo = "local"
-

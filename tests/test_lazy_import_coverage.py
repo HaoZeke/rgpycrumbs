@@ -85,8 +85,7 @@ class TestDependencyMapCoverage:
             pkg = pip_spec.split(">=")[0].split("[")[0].strip()
             if top in top_levels:
                 assert top_levels[top] == pkg, (
-                    f"Inconsistent pip packages for {top}: "
-                    f"{top_levels[top]} vs {pkg}"
+                    f"Inconsistent pip packages for {top}: {top_levels[top]} vs {pkg}"
                 )
             else:
                 top_levels[top] = pkg

@@ -93,9 +93,9 @@ asv        = ">=0.6"
 rgpycrumbs = { path = ".", editable = true }
 
 [feature.pytest.dependencies]
-click = "*"
-h5py = "*"
-numpy = "*"
+click  = "*"
+h5py   = "*"
+numpy  = "*"
 pandas = "*"
 
 [feature.docs.tasks.minify]
