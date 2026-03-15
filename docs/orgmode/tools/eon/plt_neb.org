@@ -1,12 +1,20 @@
 #+TITLE: Plotting NEB paths
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
-* Visualizing path trajectories
-#+BEGIN_EXPORT rst
-.. click:: rgpycrumbs.eon.plt_neb:main
-   :prog: rgpycrumbs eon plt-neb
-   :nested: full
-#+END_EXPORT
+* Visualizing NEB Landscapes
+
+This tool generates 2D energy landscape plots from NEB calculations using gradient-enhanced surface interpolation.
+
+** Method
+
+The default ~grad_imq~ surface method uses gradient-enhanced Inverse Multiquadric interpolation on 2D RMSD projections.
+This approach is described in:
+
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation,"
+  _MethodsX_, p. 103851, Mar. 2026, doi: [[https://doi.org/10.1016/j.mex.2026.103851][10.1016/j.mex.2026.103851]].
+
+The method projects high-dimensional structures onto 2D RMSD coordinates (reactant distance ~r~ vs product distance ~p~),
+then fits a smooth surface using energy values and their gradients for enhanced accuracy.
 
 ** Usage
 To plot a specific range of ~neb_*.dat~ files and save the output:
@@ -20,6 +28,51 @@ To show the plot interactively without saving:
 python -m rgpycrumbs.cli eon plt-neb --start 280
 #+END_SRC
 
+
+** Troubleshooting
+
+*** "No .dat files found" error
+
+**Problem:** The script reports no input files matching the pattern.
+
+**Solution:**
+1. Verify the input pattern matches your files:
+   #+BEGIN_SRC shell
+   ls neb_*.dat
+   #+END_SRC
+2. Use the ~--input-pattern~ flag to specify a custom pattern:
+   #+BEGIN_SRC shell
+   python -m rgpycrumbs.cli eon plt-neb --input-pattern "path/to/neb_*.dat"
+   #+END_SRC
+
+*** "Index out of range" error
+
+**Problem:** The ~--start~ or ~--end~ indices are outside the available data range.
+
+**Solution:**
+1. Check available iterations:
+   #+BEGIN_SRC shell
+   ls -1 neb_*.dat | wc -l
+   #+END_SRC
+2. Adjust indices to be within range (0 to N-1 where N is the number of files)
+
+*** Plot appears empty
+
+**Problem:** The plot window opens but shows no data.
+
+**Solution:**
+1. Verify the .dat files contain valid energy data (column 2)
+2. Check that the energy values are not all identical
+3. Try with a smaller range first: ~--start 0 --end 5~
+
+*** Force-corrected interpolation fails
+
+**Problem:** Hermite spline interpolation produces warnings or errors.
+
+**Solution:**
+1. Ensure you have at least 3 data points
+2. Check that force data (column 4 in .dat) is present
+3. The script falls back to raw lines if spline fails - this is expected behavior
 
 ** API Reference
 

@@ -1,0 +1,210 @@
+#+TITLE: Batch Plot Generation
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil todo:nil num:nil author:t title:t
+
+#+begin_export rst
+.. versionadded:: 1.7.0
+   The ``batch`` command with parallel processing support.
+#+end_export
+
+* Overview
+
+The =batch= command generates multiple plots from a TOML configuration file.
+It supports parallel execution for improved performance when processing many files.
+
+* Usage
+
+#+begin_src bash
+# Sequential processing (default)
+rgpycrumbs chemgp batch --config plots.toml
+
+# Parallel processing with 4 workers
+rgpycrumbs chemgp batch --config plots.toml --parallel 4
+
+# Short form
+rgpycrumbs chemgp batch -c plots.toml -j 4
+#+end_src
+
+* Configuration File Format
+
+The TOML configuration file specifies plots to generate:
+
+#+begin_src toml
+[defaults]
+input_dir = "./data"
+output_dir = "./figures"
+
+[[plots]]
+type = "surface"
+input = "mb_surface.h5"
+output = "mb_surface.pdf"
+width = 7.0
+height = 5.0
+
+[[plots]]
+type = "convergence"
+input = "convergence.h5"
+output = "convergence.pdf"
+
+[[plots]]
+type = "quality"
+input = "gp_quality.h5"
+output = "gp_quality.pdf"
+n-points = [100, 200, 400]
+#+end_src
+
+* Configuration Options
+
+** Defaults Section
+
+| Option      | Type   | Default | Description                    |
+|-------------+--------+---------+--------------------------------|
+| input_dir   | string | =.=     | Base directory for input files |
+| output_dir  | string | =.=     | Base directory for output files|
+
+** Plot Entries
+
+Each =[[plots]]= entry specifies a single plot:
+
+| Option       | Type         | Default | Description                          |
+|--------------+--------------+---------+--------------------------------------|
+| type         | string       | -       | Plot type (see below)                |
+| input        | string       | -       | Input HDF5 file (relative to input_dir) |
+| output       | string       | -       | Output PDF file (relative to output_dir)|
+| width        | float        | 7.0     | Figure width in inches               |
+| height       | float        | 5.0     | Figure height in inches              |
+| dpi          | int          | 300     | Output resolution                    |
+| *type-specific* | -        | -       | Additional options per plot type     |
+
+** Plot Types
+
+Available plot types correspond to individual chemgp commands:
+
+- =surface= - 2D PES contour plot
+- =convergence= - Force/energy convergence curve
+- =quality= - GP surrogate quality progression
+- =rff= - RFF approximation quality
+- =nll= - MAP-NLL landscape
+- =sensitivity= - Hyperparameter sensitivity grid
+- =trust= - Trust region illustration
+- =variance= - GP variance overlay
+- =fps= - FPS subset visualization
+- =profile= - NEB energy profile
+
+* Parallel Processing
+
+The =--parallel= (or =-j=) option enables concurrent plot generation:
+
+#+begin_src bash
+# Use 4 parallel workers
+rgpycrumbs chemgp batch -c plots.toml -j 4
+
+# Use 8 workers for large batches
+rgpycrumbs chemgp batch -c plots.toml -j 8
+#+end_src
+
+** Performance
+
+Parallel processing provides significant speedup for batch operations:
+
+| Workers | Speedup    | Best For                    |
+|---------+------------+-----------------------------|
+| 1       | 1x (baseline) | Small batches (< 5 plots)   |
+| 2-4     | 2-3x       | Medium batches (5-20 plots) |
+| 4-8     | 3-5x       | Large batches (20+ plots)   |
+
+Note: Speedup depends on I/O bandwidth and CPU cores available.
+
+* Examples
+
+** Basic Batch
+
+Generate all plots from configuration:
+
+#+begin_src bash
+rgpycrumbs chemgp batch -c my_plots.toml
+#+end_src
+
+** Parallel Processing
+
+Process 20 plots with 4 workers:
+
+#+begin_src bash
+rgpycrumbs chemgp batch -c large_batch.toml -j 4
+#+end_src
+
+** Custom Output Directory
+
+#+begin_src toml
+[defaults]
+input_dir = "./h5_data"
+output_dir = "./publication/figures"
+
+[[plots]]
+type = "surface"
+input = "reaction1.h5"
+output = "reaction1_surface.pdf"
+#+end_src
+
+#+begin_src bash
+rgpycrumbs chemgp batch -c config.toml
+#+end_src
+
+** Type-Specific Options
+
+#+begin_src toml
+[[plots]]
+type = "surface"
+input = "mb.h5"
+output = "mb_contour.pdf"
+clamp-lo = -200.0
+clamp-hi = 50.0
+contour-step = 25.0
+
+[[plots]]
+type = "quality"
+input = "gp.h5"
+output = "gp_quality.pdf"
+n-points = [50, 100, 200, 400]
+#+end_src
+
+* Error Handling
+
+The batch command continues processing remaining plots if one fails:
+
+#+begin_src
+[OK] reaction1_surface.pdf
+[FAIL] reaction2_convergence.pdf: Input not found: ./data/reaction2.h5
+[OK] reaction3_quality.pdf
+
+Batch complete: 2 ok, 1 failed
+#+end_src
+
+Exit code is 1 if any plots failed, 0 if all succeeded.
+
+* Performance Tips
+
+1. **Use parallel processing** for batches > 5 plots
+2. **Match workers to CPU cores** (typically 4-8 workers optimal)
+3. **Group by input directory** to minimize I/O seeks
+4. **Use SSD storage** for best I/O performance
+
+* See Also
+
+- [[file:plt_gp.org][Individual Plot Commands]] - Details on each plot type
+- [[file:hdf5_schema.org][HDF5 Schema]] - Expected HDF5 file structure
+- [[file:../../quickstart.org][Quickstart Guide]] - Getting started with rgpycrumbs
+
+* Implementation Notes
+
+The batch command uses =concurrent.futures.ThreadPoolExecutor= for parallel
+processing. This pattern is adopted from the =nebmmf_repro= project's
+=scripts/parse_results.py= for consistent parallel file processing.
+
+Progress tracking uses =rich.progress= for user-friendly output during
+long-running batch operations.
+
+#+begin_export rst
+.. rubric:: Footnotes
+#+end_export

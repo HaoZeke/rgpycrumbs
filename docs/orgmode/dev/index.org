@@ -1,0 +1,63 @@
+#+TITLE: Developer Documentation
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:t num:nil
+
+* Developer Documentation
+
+This section contains technical documentation for developers working on rgpycrumbs.
+
+** Architecture
+
+| Document | Description |
+|----------+-------------|
+| [[file:lazy_imports.org][Lazy Import Pattern]] | How ensure_import() works for optional dependencies |
+| [[file:cli_architecture.org][CLI Architecture]] | Dispatcher pattern for PEP 723 scripts |
+| [[file:modular_design.org][Modular Design]] | Separation of CLI, I/O, and plotting logic |
+
+** Patterns
+
+| Pattern | Description |
+|---------+-------------|
+| [[file:lazy_imports.org][Lazy Imports]] | Defer optional dependency loading until first use |
+| [[file:pep723_scripts.org][PEP 723 Scripts]] | Self-contained CLI scripts with inline dependencies |
+| [[file:testing_pattern.org][Testing Pattern]] | How to write tests for CLI and plotting code |
+
+** Contributing
+
+- [[file:../contributing/index.org][Contributing Guidelines]]
+- [[file:../contributing/release.org][Release Process]]
+- [[file:../contributing/test_requirements.org][Test Requirements]]
+
+* Quick Start for Developers
+
+** Setup Development Environment**
+
+#+begin_src bash
+git clone https://github.com/HaoZeke/rgpycrumbs
+cd rgpycrumbs
+uv sync --all-extras
+#+end_src
+
+** Run Tests**
+
+#+begin_src bash
+uv run pytest -m pure  # Pure Python tests
+uv run pytest -m interpolation  # Tests requiring scipy
+uv run pytest -m surfaces  # Tests requiring jax
+#+end_src
+
+** Add New CLI Command**
+
+1. Create script in =rgpycrumbs/<module>/cli_<name>.py=
+2. Add PEP 723 header with dependencies
+3. Use click for CLI interface
+4. Delegate to plotting functions in =rgpycrumbs/<module>/plotting.py=
+
+See [[file:cli_architecture.org][CLI Architecture]] for details.
+
+* Related
+
+- [[file:../index.org][Main Documentation]]
+- [[file:../tools/index.org][Tools Documentation]]
+- [[https://github.com/HaoZeke/rgpycrumbs][GitHub Repository]]

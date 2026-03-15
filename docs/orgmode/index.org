@@ -139,6 +139,9 @@ The package also includes *pure-python* helpers for parsing logs like those from
      :caption: Getting Started
 
      quickstart
+     tutorials/first-project
+
+     quickstart
 #+END_EXPORT
 
 * Tool Categories

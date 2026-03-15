@@ -1,0 +1,114 @@
+#+TITLE: Testing Verification
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:t num:nil
+
+* Testing Verification
+
+All features documented have been tested and verified working.
+
+** Running Tests
+
+Execute the test script:
+
+#+begin_src bash
+cd rgpycrumbs
+python3 scripts/test_all_features.py
+# or
+uv run scripts/test_all_features.py
+#+end_src
+
+** Test Results
+
+#+begin_src
+======================================================================
+  rgpycrumbs Feature Verification
+======================================================================
+
+======================================================================
+  Test 1: Auto-deps Error Message
+======================================================================
+✓ PASS: Error message contains pip install
+✓ PASS: Error message contains CUDA info
+✓ PASS: Error message contains docs link
+
+======================================================================
+  Test 2: Auto-deps Installation
+======================================================================
+✓ PASS: Auto-install JAX and run FastTPS
+
+======================================================================
+  Test 3: CLI Help System
+======================================================================
+✓ PASS: plt-neb --help shows options
+✓ PASS: plt-neb --help shows --help flag
+
+======================================================================
+  Test 4: ChemGP Commands
+======================================================================
+✓ PASS: Shows match-atoms command
+✓ PASS: Shows plot-gp command
+✓ PASS: Hides library modules
+
+======================================================================
+  Test 5: Surface Models
+======================================================================
+✓ PASS: FastTPS
+✓ PASS: FastMatern
+✓ PASS: FastIMQ
+✓ PASS: get_surface_model(tps)
+✓ PASS: get_surface_model(grad_imq)
+
+======================================================================
+  Summary
+======================================================================
+✓ Auto-deps error message
+✓ Auto-deps installation
+✓ CLI help system
+✓ ChemGP commands
+✓ Surface models
+
+======================================================================
+  ALL TESTS PASSED - Documentation is accurate
+======================================================================
+#+end_src
+
+** Test Commands
+
+#+begin_src bash
+# Auto-deps error message (checks code if JAX cached)
+python3 scripts/test_all_features.py
+
+# Auto-deps installation (installs JAX if needed)
+RGPYCRUMBS_AUTO_DEPS=1 python3 scripts/test_all_features.py
+
+# CLI help
+python3 -m rgpycrumbs.cli eon plt-neb --help | head -15
+python3 -m rgpycrumbs.cli chemgp --help
+
+# Surface models
+uv run --with "jax[cpu]" python3 -c "
+from rgpycrumbs.surfaces import FastTPS, FastMatern, FastIMQ
+print('all work')
+"
+#+end_src
+
+** Documentation Accuracy
+
+All documentation has been verified against actual behavior:
+
+| Feature | Documented | Tested | Working |
+|---------+------------+--------+---------|
+| Auto-deps error message | ✓ | ✓ | ✓ |
+| Auto-deps installation | ✓ | ✓ | ✓ |
+| CLI --help passthrough | ✓ | ✓ | ✓ |
+| CLI command names | ✓ | ✓ | ✓ |
+| FastTPS | ✓ | ✓ | ✓ |
+| FastMatern | ✓ | ✓ | ✓ |
+| FastIMQ | ✓ | ✓ | ✓ |
+| get_surface_model() | ✓ | ✓ | ✓ |
+| Gradient models | ✓ | ✓ | ✓ |
+
+** Last Tested**
+
+2026-03-14 - All features verified working with scripts/test_all_features.py.

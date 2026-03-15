@@ -30,6 +30,9 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "eon": ("https://eondocs.org", None),
+    # Link to other rgpkgs packages
+    "pychum": ("https://pychum.rgoswami.me", None),
+    "chemparseplot": ("https://chemparseplot.rgoswami.me", None),
 }
 
 # -- Mocking Dependencies ----------------------------------------------------
