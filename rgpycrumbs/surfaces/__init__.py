@@ -23,16 +23,18 @@ _LAZY_IMPORTS = {
 }
 
 # Submodules that require jax at import time
-_JAX_SUBMODULES = frozenset({
-    "gradient",
-    "gradient_imq",
-    "gradient_matern",
-    "gradient_nystrom",
-    "gradient_rq",
-    "gradient_se",
-    "standard",
-    "_kernels",
-})
+_JAX_SUBMODULES = frozenset(
+    {
+        "gradient",
+        "gradient_imq",
+        "gradient_matern",
+        "gradient_nystrom",
+        "gradient_rq",
+        "gradient_se",
+        "standard",
+        "_kernels",
+    }
+)
 
 NYSTROM_THRESHOLD = 1000
 NYSTROM_N_INDUCING_DEFAULT = 300

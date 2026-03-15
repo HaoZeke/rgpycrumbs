@@ -40,7 +40,6 @@ from rgpycrumbs.chemgp.hdf5_io import (
 from rgpycrumbs.chemgp.plotting import (
     detect_clamp,
     plot_convergence,
-    plot_profile,
     plot_fps,
     plot_gp_quality,
     plot_nll,
@@ -620,14 +619,34 @@ def batch(
         # Build arguments based on plot type
         if plot_type == "landscape":
             src_dir = base_dir / entry.get("source_dir", ".")
-            inp_name = entry.get("source_dir", ".")
-            args = ["--source-dir", str(src_dir), "--output", str(out), "--width", str(w), "--height", str(h), "--dpi", str(d)]
+            args = [
+                "--source-dir",
+                str(src_dir),
+                "--output",
+                str(out),
+                "--width",
+                str(w),
+                "--height",
+                str(h),
+                "--dpi",
+                str(d),
+            ]
         else:
             inp = input_dir / entry["input"]
-            inp_name = inp.name
             if not inp.exists():
                 return entry["output"], False, f"Input not found: {inp}"
-            args = ["--input", str(inp), "--output", str(out), "--width", str(w), "--height", str(h), "--dpi", str(d)]
+            args = [
+                "--input",
+                str(inp),
+                "--output",
+                str(out),
+                "--width",
+                str(w),
+                "--height",
+                str(h),
+                "--dpi",
+                str(d),
+            ]
 
         # Forward extra keys as CLI options
         skip = {"type", "input", "output", "width", "height", "dpi", "source_dir"}
@@ -650,6 +669,7 @@ def batch(
 
         try:
             from click.testing import CliRunner
+
             runner = CliRunner()
             result = runner.invoke(cmds[plot_type], args)
             if result.exit_code == 0:
@@ -671,7 +691,9 @@ def batch(
             task = progress.add_task("[cyan]Generating plots...", total=len(plots))
 
             with ThreadPoolExecutor(max_workers=parallel) as executor:
-                futures = {executor.submit(generate_single_plot, entry): entry for entry in plots}
+                futures = {
+                    executor.submit(generate_single_plot, entry): entry for entry in plots
+                }
                 for future in as_completed(futures):
                     entry = futures[future]
                     try:
@@ -684,7 +706,9 @@ def batch(
                             log.error("[red][FAIL][/red] %s: %s", out_name, error)
                     except Exception as e:
                         n_fail += 1
-                        log.error("[red][FAIL][/red] %s: %s", entry.get("output", "unknown"), e)
+                        log.error(
+                            "[red][FAIL][/red] %s: %s", entry.get("output", "unknown"), e
+                        )
                     progress.advance(task)
     else:
         # Sequential processing
@@ -700,8 +724,8 @@ def batch(
     log.info("Batch complete: %d ok, %d failed", n_ok, n_fail)
     if n_fail > 0:
         import sys
-        sys.exit(1)
 
+        sys.exit(1)
 
 
 def main():

@@ -24,6 +24,7 @@ class TestPltNebCLI:
     def test_cli_help_output(self) -> None:
         """Test that CLI help is available."""
         from click.testing import CliRunner
+
         from rgpycrumbs.eon.plt_neb import main
 
         runner = CliRunner()
@@ -36,6 +37,7 @@ class TestPltNebCLI:
     def test_cli_options_present(self) -> None:
         """Test that expected CLI options are present."""
         from click.testing import CliRunner
+
         from rgpycrumbs.eon.plt_neb import main
 
         runner = CliRunner()
@@ -91,6 +93,7 @@ class TestLazyImports:
     def test_plt_neb_uses_lazy_imports(self) -> None:
         """Test that plt_neb uses lazy imports pattern."""
         import inspect
+
         from rgpycrumbs.eon import plt_neb
 
         # Get the source code

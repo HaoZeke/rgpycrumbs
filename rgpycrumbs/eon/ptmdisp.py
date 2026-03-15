@@ -40,6 +40,7 @@ else:
     class StrEnum(str, Enum):
         """Backport for Python 3.10."""
 
+
 # Third-Party
 import ase.io as aseio
 import click

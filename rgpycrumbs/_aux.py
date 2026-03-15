@@ -174,7 +174,7 @@ def ensure_import(module_name: str):
     # Step 5: actionable error
     if module_name in _DEPENDENCY_MAP:
         _spec, extra = _DEPENDENCY_MAP[module_name]
-        
+
         # Special handling for JAX with detailed instructions
         if module_name in ("jax", "jaxlib"):
             msg = """
@@ -182,7 +182,7 @@ JAX is required for surface fitting and Gaussian Process models.
 
 Quick install:
   pip install "rgpycrumbs[surfaces]"
-  
+
 Or enable auto-install:
   export RGPYCRUMBS_AUTO_DEPS=1
 

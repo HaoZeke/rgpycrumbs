@@ -76,7 +76,9 @@ def read_h5_table(f: Any, name: str = "table") -> Any:
     return pd.DataFrame(cols)
 
 
-def read_h5_grid(f: Any, name: str) -> tuple[np.ndarray, np.ndarray | None, np.ndarray | None]:
+def read_h5_grid(
+    f: Any, name: str
+) -> tuple[np.ndarray, np.ndarray | None, np.ndarray | None]:
     """Read a 2D grid with optional axis ranges.
 
     Parameters
@@ -167,21 +169,23 @@ def read_h5_metadata(f: Any) -> dict[str, Any]:
     return {k: f.attrs[k] for k in f.attrs.keys()}
 
 
-def validate_hdf5_structure(f: Any, required_groups: list[str] | None = None) -> list[str]:
+def validate_hdf5_structure(
+    f: Any, required_groups: list[str] | None = None
+) -> list[str]:
     """Validate HDF5 file has expected structure.
-    
+
     Parameters
     ----------
     f
         Open HDF5 file object
     required_groups
         List of required group names (default: ["grids", "table"])
-    
+
     Returns
     -------
     list[str]
         List of missing groups (empty if all present)
-    
+
     Raises
     ------
     ValueError
@@ -189,10 +193,8 @@ def validate_hdf5_structure(f: Any, required_groups: list[str] | None = None) ->
     """
     if required_groups is None:
         required_groups = ["grids", "table"]
-    
+
     missing = [g for g in required_groups if g not in f]
     if missing:
         raise ValueError(f"Invalid HDF5 structure. Missing groups: {missing}")
     return missing
-
-

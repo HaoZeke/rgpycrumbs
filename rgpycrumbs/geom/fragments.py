@@ -18,6 +18,7 @@ else:
     class StrEnum(str, Enum):
         """Backport for Python 3.10."""
 
+
 import numpy as np
 from ase.atoms import Atoms
 from ase.data import covalent_radii

@@ -76,7 +76,7 @@ Location: =rgpycrumbs/_aux.py=
 #+begin_src python
 def ensure_import(module_name: str):
     """Import module through 5-step priority chain.
-    
+
     1. Current environment (importlib)
     2. Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)
     3. uv cache directory on sys.path
@@ -88,12 +88,12 @@ def ensure_import(module_name: str):
         return importlib.import_module(module_name)
     except ImportError:
         pass
-    
+
     # Step 2: parent env
     mod = _import_from_parent_env(module_name)
     if mod is not None:
         return mod
-    
+
     # Step 3: check uv cache
     cache_dir = _get_dep_cache_dir()
     cache_str = str(cache_dir)
@@ -103,14 +103,14 @@ def ensure_import(module_name: str):
             return importlib.import_module(module_name)
         except ImportError:
             pass
-    
+
     # Step 4: auto-install (opt-in)
     auto = os.environ.get("RGPYCRUMBS_AUTO_DEPS", "").strip()
     if auto == "1" and module_name in _DEPENDENCY_MAP:
         spec = _resolve_pip_spec(module_name)
         _uv_install(spec, cache_dir)
         # ... retry import
-    
+
     # Step 5: actionable error
     raise ImportError(f"Module '{module_name}' is not installed...")
 #+end_src
@@ -244,11 +244,11 @@ uv run pytest tests/test_lazy_import_coverage.py -m pure
 def test_lazy_import():
     """Test that lazy imports work correctly."""
     from rgpycrumbs._aux import ensure_import
-    
+
     # Should work for installed packages
     np = ensure_import("numpy")
     assert hasattr(np, "array")
-    
+
     # Should raise clear error for missing packages
     with pytest.raises(ImportError, match="pip install"):
         ensure_import("nonexistent_package_xyz")

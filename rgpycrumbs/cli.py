@@ -16,17 +16,17 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 def _get_scripts_in_folder(folder_name: str) -> list[str]:
     """Returns a sorted list of CLI script names (without extension) in a folder.
-    
+
     Excludes library modules (hdf5_io, plotting) and internal files (__init__, _*).
     Includes actual CLI entry point scripts.
     """
     folder_path = PACKAGE_ROOT / folder_name
     if not folder_path.is_dir():
         return []
-    
+
     # Library modules to exclude
     library_modules = {"hdf5_io", "plotting", "utils", "helpers"}
-    
+
     scripts = []
     for f in folder_path.glob("*.py"):
         if f.name.startswith("_"):
@@ -39,7 +39,7 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
         if stem.startswith("cli_"):
             stem = stem[4:]
         scripts.append(stem)
-    
+
     return sorted(scripts)
 
 
@@ -100,7 +100,7 @@ def _dispatch(
 
 def _make_script_command(group_name: str, script_stem: str) -> click.Command:
     """Creates a click command that dispatches to a PEP 723 script.
-    
+
     For full option help, run the script directly:
         python -m rgpycrumbs.<group>.<script> --help
     """
@@ -116,7 +116,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
         # Retrieve the dev flag safely from the parent context
         is_dev = ctx.obj.get("is_dev", False) if ctx.obj else False
         is_verbose = ctx.obj.get("is_verbose", False) if ctx.obj else False
-        
+
         # Pass through --help to underlying script
         if "--help" in ctx.args or "-h" in ctx.args:
             # Run script with --help to show actual options
@@ -128,7 +128,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
                 is_verbose=False,  # Don't add verbose noise to help output
             )
             return
-        
+
         _dispatch(
             group_name,
             display_name,
