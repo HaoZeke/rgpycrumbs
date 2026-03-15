@@ -56,13 +56,3 @@ hooks = [
 ]
 repo = "local"
 
-[[repos]]
-hooks = [
-  {
-    id = "lychee",
-    args = ["--no-progress", "--cache", "--max-cache-age=1d", "--accept", "200..=399"],
-    files = "\\.(md|rst|html)$"
-  }
-]
-repo = "https://github.com/lycheeverse/lychee"
-rev = "lychee-v0.23.0"
