@@ -25,14 +25,14 @@ _DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
     "ase": ("ase>=3.22", "analysis"),
     "ase.data": ("ase>=3.22", "analysis"),
     "ase.neighborlist": ("ase>=3.22", "analysis"),
-    "adjustText": ("adjustText>=1.0", "plot"),
-    "chemparseplot": ("chemparseplot", "plot"),
-    "chemparseplot.plot.chemgp": ("chemparseplot", "plot"),
-    "h5py": ("h5py", "chemgp"),
-    "matplotlib": ("matplotlib>=3.7", "plot"),
-    "matplotlib.pyplot": ("matplotlib>=3.7", "plot"),
-    "pandas": ("pandas>=2.0", "chemgp"),
-    "polars": ("polars>=1.0", "eon"),
+    "adjustText": ("adjustText>=1.0", "analysis"),
+    "chemparseplot": ("chemparseplot", "analysis"),
+    "chemparseplot.plot.chemgp": ("chemparseplot", "analysis"),
+    "h5py": ("h5py", "analysis"),
+    "matplotlib": ("matplotlib>=3.7", "analysis"),
+    "matplotlib.pyplot": ("matplotlib>=3.7", "analysis"),
+    "pandas": ("pandas>=2.0", "analysis"),
+    "polars": ("polars>=1.0", "analysis"),
 }
 
 # CPU-only pip spec overrides for packages with heavy GPU backends.
