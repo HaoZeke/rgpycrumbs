@@ -173,6 +173,48 @@ def _resolve_pip_spec(module_name: str) -> str:
 
 Automatically uses CPU-only JAX if no GPU detected.
 
+* Maintaining the Dependency Map
+
+When adding a new =ensure_import("X")= call, you must also add =X= to
+=_DEPENDENCY_MAP= in =rgpycrumbs/_aux.py=. Without a map entry,
+=RGPYCRUMBS_AUTO_DEPS=1= cannot resolve the pip spec and falls through
+to an ImportError.
+
+** Adding a new entry
+
+#+begin_src python
+_DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
+    # ...
+    "newpkg": ("newpkg>=1.0", "extra_name"),
+    "newpkg.submod": ("newpkg>=1.0", "extra_name"),
+}
+#+end_src
+
+The tuple fields:
+- First: pip install spec (with version constraint)
+- Second: the pyproject.toml optional extra that includes this dep
+
+If the module is a submodule (e.g. =scipy.interpolate=), add both the
+submodule and the top-level package to the map. Both must point to the
+same pip package.
+
+** Conda-only deps
+
+Packages without a PyPI distribution (ira_mod, tblite, ovito) should
+NOT be added to the map. They fall through to a helpful error message
+suggesting =pixi= installation.
+
+** CI enforcement
+
+=tests/test_lazy_import_coverage.py= uses AST parsing to find all
+=ensure_import("X")= calls and verifies each has a matching map entry.
+The test fails if you add a new =ensure_import= call without updating
+the map. Run with:
+
+#+begin_src bash
+uv run pytest tests/test_lazy_import_coverage.py -m pure
+#+end_src
+
 * Benefits
 
 1. **Smaller installations** - Users only install what they need
