@@ -241,10 +241,8 @@ def main(
 
     pl = _get_polars()
     mpl, plt = _get_mpl()
-    adjust_text = _get_adjust_text()
-    import matplotlib.patheffects as path_effects
+    _get_adjust_text()
     from matplotlib.gridspec import GridSpec
-    from matplotlib.patches import ArrowStyle
 
     # Setup theme
     active_theme = get_theme("ruhi")
@@ -265,12 +263,11 @@ def main(
 
     # Load structures if needed
     atoms_list = None
-    additional_atoms_data = []
     sp_data = None
 
     if con_file:
         try:
-            atoms_list, additional_atoms_data, sp_data = (
+            atoms_list, _additional_atoms_data, sp_data = (
                 load_structures_and_calculate_additional_rmsd(
                     con_file, [], ira_kmax, None
                 )
@@ -363,7 +360,7 @@ def main(
             if landscape_path == "all":
                 # Overlay all optimization steps (faint for earlier steps)
                 steps = sorted(df["step"].unique())
-                for step_idx, step in enumerate(steps):
+                for _step_idx, step in enumerate(steps):
                     df_step = df.filter(pl.col("step") == step)
                     step_r = df_step["r"].to_numpy()
                     step_p = df_step["p"].to_numpy()

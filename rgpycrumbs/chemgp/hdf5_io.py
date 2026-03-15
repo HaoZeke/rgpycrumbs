@@ -19,14 +19,11 @@ HDF5 Layout
     Extracted from chemgp.plt_gp to standalone module.
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 
 from rgpycrumbs._aux import ensure_import
-
-if TYPE_CHECKING:
-    import h5py
 
 # Lazy imports for optional dependencies
 _pd = None
