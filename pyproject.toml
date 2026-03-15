@@ -54,7 +54,7 @@ source = "vcs"
 
 [tool.ruff]
 line-length    = 90
-target-version = "py312"
+target-version = "py310"
 [tool.ruff.lint]
 allowed-confusables = [ "K", "X", "Y", "A", "B" ]
 extend-ignore = [

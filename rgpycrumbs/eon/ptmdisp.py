@@ -31,7 +31,14 @@ warnings.filterwarnings(
 # Standard Library
 import logging
 import sys
-from enum import StrEnum
+
+if sys.version_info >= (3, 11):
+    from enum import StrEnum
+else:
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        """Backport for Python 3.10."""
 
 # Third-Party
 import ase.io as aseio
