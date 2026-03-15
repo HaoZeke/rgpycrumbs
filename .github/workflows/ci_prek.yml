@@ -16,3 +16,8 @@ jobs:
     - name: Run precommit
       run: |
         uvx prek run -a -vvv
+    - name: Link check (advisory)
+      continue-on-error: true
+      run: |
+        cargo install lychee@0.23.0 --locked
+        lychee --no-progress --cache --max-cache-age=1d --accept '200..=399' $(git ls-files '*.md' '*.rst' '*.html')
