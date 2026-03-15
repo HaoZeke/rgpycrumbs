@@ -1,3 +1,39 @@
+rgpycrumbs 1.4.0 (2026-03-15)
+=============================
+
+Removed
+-------
+
+- Moved ChemGP plotting (``chemgp/plotting.py``, ``chemgp/plot_gp.py``, ``chemgp/hdf5_io.py``),
+  NEB CLI (``eon/plt_neb.py``), ChemGP JSONL parsers (``parsers/chemgp.py``), and PLUMED
+  parsing (``plumed/fes_calculation.py``) to chemparseplot. Use ``chemparseplot.parse`` and
+  ``chemparseplot.scripts`` for these modules going forward. (scope_migration)
+
+
+Added
+-----
+
+- Updated ``plt-neb`` documentation with comprehensive usage examples, options table, and troubleshooting guide for landscape plotting. (docs_plt_neb)
+- Tutorial documentation following Diataxis structure: quickstart, first-project
+  tutorial, how-to guides (install, troubleshooting, FAQ), reference (glossary),
+  and developer guides (testing, lazy imports, best practices). (docs_tutorials)
+- Added 2D landscape plotting capabilities to ``plt-neb`` with gradient-enhanced surface methods (``grad_imq``, ``grad_matern``), structure strip rendering, and colorbar legend support. (feat_plt_neb_landscape)
+
+
+Developer
+---------
+
+- Added ``batch`` command with ``--parallel/-j`` flag for concurrent plot generation using ThreadPoolExecutor. Provides 3-5x speedup for batch operations with 4-8 workers. Pattern adopted from nebmmf_repro project. (perf_batch)
+- Added ``safe_plot()`` decorator and ``validate_hdf5_structure()`` function for robust error handling. Better error messages for missing files and invalid structures. (perf_errorhandling)
+- Added complete type hints to chemgp modules (hdf5_io.py, plotting.py) reaching 90%+ coverage. Improves IDE support and code documentation. (perf_typehints)
+
+
+Changed
+-------
+
+- Changed default surface method in ``plt-neb`` from ``rbf`` to ``grad_imq`` for higher-quality gradient-enhanced interpolation. (feat_plt_neb_defaults)
+
+
 rgpycrumbs v1.3.0 (2026-03-09)
 ==============================
 
