@@ -1,0 +1,3 @@
+# Lychee ignore file
+# Ignore Jinja template files that contain unresolved template variables
+.*/_templates/.*

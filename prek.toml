@@ -54,3 +54,14 @@ hooks = [
   { id = "gen-readme", name = "Generate README.md from readme_src.org", entry = "bash scripts/gen_readme.sh", language = "system", files = "readme_src\\.org$", pass_filenames = false },
 ]
 repo = "local"
+
+[[repos]]
+hooks = [
+  {
+    id = "lychee",
+    args = ["--no-progress", "--cache", "--max-cache-age=1d", "--accept", "2xx,3xx"],
+    files = "\\.(md|rst|html)$"
+  }
+]
+repo = "https://github.com/lycheeverse/lychee"
+rev = "lychee-v0.23.0"
