@@ -1,0 +1,121 @@
+rgpycrumbs.chemgp.plot_gp
+=========================
+
+.. py:module:: rgpycrumbs.chemgp.plot_gp
+
+.. autoapi-nested-parse::
+
+   ChemGP CLI - Plot generation from HDF5 data.
+
+   Thin CLI wrapper around chemgp.plotting functions.
+   All plotting logic delegated to pure functions.
+
+   .. versionadded:: 1.7.0
+       Refactored from chemgp.plt_gp to thin CLI wrapper.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.chemgp.plot_gp.log
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   rgpycrumbs.chemgp.plot_gp.common_options
+   rgpycrumbs.chemgp.plot_gp.cli
+   rgpycrumbs.chemgp.plot_gp.convergence
+   rgpycrumbs.chemgp.plot_gp.surface
+   rgpycrumbs.chemgp.plot_gp.quality
+   rgpycrumbs.chemgp.plot_gp.rff
+   rgpycrumbs.chemgp.plot_gp.nll
+   rgpycrumbs.chemgp.plot_gp.sensitivity
+   rgpycrumbs.chemgp.plot_gp.trust
+   rgpycrumbs.chemgp.plot_gp.variance
+   rgpycrumbs.chemgp.plot_gp.fps
+   rgpycrumbs.chemgp.plot_gp.profile
+   rgpycrumbs.chemgp.plot_gp.batch
+   rgpycrumbs.chemgp.plot_gp.main
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:function:: common_options(func)
+
+   Shared options for all subcommands.
+
+
+.. py:function:: cli()
+
+   ChemGP figure generation from HDF5 data.
+
+
+.. py:function:: convergence(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   Force/energy convergence vs oracle calls.
+
+
+.. py:function:: surface(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int, clamp_lo: float | None, clamp_hi: float | None, contour_step: float | None)
+
+   2D PES contour plot.
+
+
+.. py:function:: quality(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int, n_points: tuple[int, Ellipsis] | None)
+
+   GP surrogate quality progression (multi-panel).
+
+
+.. py:function:: rff(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   RFF approximation quality vs exact GP.
+
+
+.. py:function:: nll(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   MAP-NLL landscape in hyperparameter space.
+
+
+.. py:function:: sensitivity(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   Hyperparameter sensitivity grid (3x3).
+
+
+.. py:function:: trust(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   Trust region illustration (1D slice).
+
+
+.. py:function:: variance(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   GP variance overlaid on PES.
+
+
+.. py:function:: fps(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   FPS subset visualization (PCA scatter).
+
+
+.. py:function:: profile(input_path: pathlib.Path, output_path: pathlib.Path, width: float, height: float, dpi: int)
+
+   NEB energy profile (image index vs delta E).
+
+
+.. py:function:: batch(config_path: pathlib.Path, base_dir: pathlib.Path | None, dpi: int, parallel: int)
+
+   Generate multiple plots from a TOML config.
+
+
+.. py:function:: main()
+
+   CLI entry point.
+
+

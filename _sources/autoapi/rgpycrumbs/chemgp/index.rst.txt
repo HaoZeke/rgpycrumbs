@@ -5,7 +5,11 @@ rgpycrumbs.chemgp
 
 .. autoapi-nested-parse::
 
-   ChemGP utilities (plotting and parsing moved to chemparseplot).
+   ChemGP plotting and I/O utilities.
+
+   Parsing and plotting functions live in chemparseplot. This module
+   re-exports them for backward compatibility. The CLI entry point
+   is plot_gp.py (PEP 723 script dispatched by rgpycrumbs.cli).
 
 
 
@@ -16,5 +20,6 @@ Submodules
    :maxdepth: 1
 
    /autoapi/rgpycrumbs/chemgp/match_atoms/index
+   /autoapi/rgpycrumbs/chemgp/plot_gp/index
 
 
