@@ -84,6 +84,8 @@ from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
+    plot_mmf_peaks_overlay,
+    plot_neb_evolution,
     plot_structure_inset,
     plot_structure_strip,
 )
@@ -398,6 +400,24 @@ IRA_KMAX_DEFAULT = 1.8
     help="Force re-calculation of RMSD.",
 )
 @click.option(
+    "--mmf-peaks/--no-mmf-peaks",
+    is_flag=True,
+    default=None,
+    help="Overlay MMF peak positions on landscape (auto-detected if peak files exist).",
+)
+@click.option(
+    "--peak-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Directory containing peak{NN}_pos.con files for MMF overlay.",
+)
+@click.option(
+    "--show-evolution",
+    is_flag=True,
+    default=False,
+    help="Show band evolution across iterations (requires write_movies data).",
+)
+@click.option(
     "--show-legend",
     is_flag=True,
     default=False,
@@ -463,6 +483,10 @@ def main(
     draw_reactant,
     draw_saddle,
     draw_product,
+    # --- OCI-NEB/RONEB ---
+    mmf_peaks,
+    peak_dir,
+    show_evolution,
     show_legend,
     # Caching
     cache_file,
@@ -667,6 +691,63 @@ def main(
             z_label,
             project_path=project_path,
         )
+
+        # --- OCI-NEB/RONEB: MMF Peaks Overlay ---
+        _show_mmf = mmf_peaks
+        _peak_search_dir = peak_dir or Path(".")
+        if _show_mmf is None:
+            # Auto-detect: check if peak files exist
+            _show_mmf = len(list(_peak_search_dir.glob("peak*_pos.con"))) > 0
+        if _show_mmf:
+            peak_files = sorted(_peak_search_dir.glob("peak*_pos.con"))
+            if peak_files:
+                from ase.io import read as ase_read
+
+                from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
+
+                try:
+                    from rgpycrumbs._aux import _import_from_parent_env
+
+                    _ira_mod = _import_from_parent_env("ira_mod")
+                    ira_instance = _ira_mod.IRA()
+                except (ImportError, AttributeError):
+                    ira_instance = None
+                peak_atoms = [ase_read(str(pf), format="eon") for pf in peak_files]
+                # Use same references as the main path
+                ref_r = atoms_list[0] if atoms_list else None
+                ref_p = atoms_list[-1] if atoms_list else None
+                if ref_r is not None and ref_p is not None:
+                    peak_rmsd_r = calculate_rmsd_from_ref(
+                        peak_atoms, ira_instance, ref_atom=ref_r, ira_kmax=ira_kmax
+                    )
+                    peak_rmsd_p = calculate_rmsd_from_ref(
+                        peak_atoms, ira_instance, ref_atom=ref_p, ira_kmax=ira_kmax
+                    )
+                    # Energies from peak structures (if available)
+                    peak_e = np.array(
+                        [a.get_potential_energy() if a.calc else 0.0 for a in peak_atoms]
+                    )
+                    plot_mmf_peaks_overlay(
+                        ax, peak_rmsd_r, peak_rmsd_p, peak_e,
+                        project_path=project_path,
+                    )
+                    log.info("Plotted %d MMF peak(s)", len(peak_files))
+
+        # --- OCI-NEB/RONEB: Band Evolution ---
+        if show_evolution:
+            unique_steps = sorted(df["step"].unique().to_list())
+            if len(unique_steps) > 1:
+                step_r_list = []
+                step_p_list = []
+                for step in unique_steps:
+                    step_df = df.filter(pl.col("step") == step)
+                    step_r_list.append(step_df["r"].to_numpy())
+                    step_p_list.append(step_df["p"].to_numpy())
+                plot_neb_evolution(
+                    ax, step_r_list, step_p_list,
+                    project_path=project_path,
+                )
+                log.info("Plotted band evolution (%d steps)", len(unique_steps))
 
         # Saddle Point Marker
         if sp_data:
