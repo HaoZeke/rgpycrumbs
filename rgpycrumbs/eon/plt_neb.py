@@ -766,16 +766,16 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            r_start, p_start = final_r[0], final_p[0]
-            r_end, p_end = final_r[-1], final_p[-1]
-            vec_r = r_end - r_start
-            vec_p = p_end - p_start
-            path_norm = np.hypot(vec_r, vec_p)
-            u_r, u_p = vec_r / path_norm, vec_p / path_norm
-            v_r, v_p = -u_p, u_r
+            from chemparseplot.parse.projection import (
+                compute_projection_basis,
+                project_to_sd,
+            )
 
-            sp_x = (sp_x_raw - r_start) * u_r + (sp_y_raw - p_start) * u_p
-            sp_y = (sp_x_raw - r_start) * v_r + (sp_y_raw - p_start) * v_p
+            basis = compute_projection_basis(final_r, final_p)
+            sp_sd = project_to_sd(
+                np.array([sp_x_raw]), np.array([sp_y_raw]), basis
+            )
+            sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
             sp_x, sp_y = sp_x_raw, sp_y_raw
 
