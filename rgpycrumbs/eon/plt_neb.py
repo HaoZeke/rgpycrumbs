@@ -730,6 +730,8 @@ def main(
                     plot_mmf_peaks_overlay(
                         ax, peak_rmsd_r, peak_rmsd_p, peak_e,
                         project_path=project_path,
+                        path_rmsd_r=final_r,
+                        path_rmsd_p=final_p,
                     )
                     log.info("Plotted %d MMF peak(s)", len(peak_files))
 

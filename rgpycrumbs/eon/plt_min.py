@@ -29,7 +29,6 @@ valley projection. Supports:
 # ///
 
 import logging
-import sys
 from pathlib import Path
 
 import click

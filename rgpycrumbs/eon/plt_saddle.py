@@ -30,13 +30,11 @@ using the generalized (s, d) reaction valley projection. Supports:
 # ///
 
 import logging
-import sys
 from pathlib import Path
 
 import click
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.gridspec import GridSpec
 from rich.logging import RichHandler
 
 from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
@@ -175,17 +173,18 @@ def _plot_profile(traj, output, dpi):
     iters = dat["iteration"].to_numpy()
     energies = dat["delta_e"].to_numpy()
 
-    plot_optimization_profile(axes[0], iters, energies)
+    eigenvalues = dat["eigenvalue"].to_numpy() if "eigenvalue" in dat.columns else None
+
+    plot_optimization_profile(
+        axes[0],
+        iters,
+        energies,
+        eigenvalues=eigenvalues,
+        ax_eigen=axes[1] if eigenvalues is not None else None,
+    )
     axes[0].set_title("Energy vs Iteration")
 
-    if "eigenvalue" in dat.columns:
-        plot_optimization_profile(
-            axes[0],
-            iters,
-            energies,
-            eigenvalues=dat["eigenvalue"].to_numpy(),
-            ax_eigen=axes[1],
-        )
+    if eigenvalues is not None:
         axes[1].set_title("Eigenvalue vs Iteration")
     else:
         axes[1].set_visible(False)
