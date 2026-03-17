@@ -1,3 +1,19 @@
+rgpycrumbs [Unreleased]
+=======================
+
+Added
+-----
+
+- New ``plt-saddle`` CLI tool for dimer/saddle search trajectory visualization
+  with profile, landscape, convergence, and mode-evolution plot types. Supports
+  ``--ref-product`` for (initial, product) reference pairs.
+- New ``plt-min`` CLI tool for minimization trajectory visualization with
+  profile, landscape, and convergence plot types.
+- Extended ``plt-neb`` with OCI-NEB/RONEB options: ``--mmf-peaks`` for MMF peak
+  overlay (auto-detected), ``--peak-dir`` for explicit peak file directory,
+  ``--show-evolution`` for band evolution across iterations.
+
+
 rgpycrumbs 1.4.0 (2026-03-15)
 =============================
 

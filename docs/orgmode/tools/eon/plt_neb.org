@@ -74,6 +74,37 @@ python -m rgpycrumbs.cli eon plt-neb --start 280
 2. Check that force data (column 4 in .dat) is present
 3. The script falls back to raw lines if spline fails - this is expected behavior
 
+** OCI-NEB/RONEB Options
+
+*** MMF Peak Overlay
+
+When eOn produces ~peak{NN}_pos.con~ files (from OCI-NEB mode-following), overlay them on the landscape:
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks
+#+END_SRC
+
+Peaks are auto-detected in the current directory. Use ~--peak-dir~ to specify an explicit path:
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks --peak-dir path/to/peaks/
+#+END_SRC
+
+*** Band Evolution
+
+Show how the NEB band evolves across optimization iterations (requires ~write_movies=true~ data):
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --plot-type landscape --show-evolution
+#+END_SRC
+
+Older bands appear with lower opacity; the final band is most visible.
+
+** See Also
+
+- [[file:plt_saddle.org][Plotting saddle search trajectories]] for dimer/single-ended visualization
+- [[file:plt_min.org][Plotting minimization trajectories]] for minimization visualization
+
 ** API Reference
 
 For developer details and source code see
