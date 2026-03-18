@@ -19,6 +19,21 @@ import numpy as np
 import pytest
 from click.testing import CliRunner
 
+import importlib
+
+def _has(mod):
+    try:
+        importlib.import_module(mod)
+        return True
+    except Exception:
+        return False
+
+_HAS_REQUESTS = _has("requests")
+_HAS_PANDAS_BOOST = _has("pandas")
+_HAS_MLFLOW = _has("mlflow")
+_HAS_OVITO = _has("ovito")
+_HAS_PYVISTA = _has("pyvista")
+
 pytestmark = pytest.mark.pure
 
 
@@ -725,6 +740,7 @@ class TestPltMin:
 # ======================================================================
 # 6. to_mlflow.py -- MLflow logging CLI
 # ======================================================================
+@pytest.mark.skipif(not _HAS_MLFLOW, reason="mlflow required")
 class TestToMlflow:
     """Test to_mlflow.py CLI with mocked mlflow."""
 
@@ -825,6 +841,7 @@ class TestToMlflow:
 # ======================================================================
 # 7. delete_packages.py -- Package deletion utility
 # ======================================================================
+@pytest.mark.skipif(not _HAS_REQUESTS, reason="requests required")
 class TestDeletePackages:
     """Test prefix/delete_packages.py CLI."""
 
@@ -919,6 +936,7 @@ class TestDeletePackages:
 # ======================================================================
 # 8. match_atoms.py -- Atom matching
 # ======================================================================
+@pytest.mark.skipif(not _HAS_PANDAS_BOOST, reason="pandas required")
 class TestMatchAtoms:
     """Test chemgp/match_atoms.py with real ASE Atoms."""
 
@@ -1072,6 +1090,7 @@ class TestMatchAtoms:
 # ======================================================================
 # 9. fragment_visualization.py -- PyVista visualization
 # ======================================================================
+@pytest.mark.skipif(not _HAS_PYVISTA, reason="pyvista required")
 class TestFragmentVisualization:
     """Test fragment_visualization.py with mocked pyvista."""
 
@@ -1145,6 +1164,7 @@ class TestFragmentVisualization:
 # ======================================================================
 # 10. ptmdisp.py -- PTM displacement (mocked ovito)
 # ======================================================================
+@pytest.mark.skipif(not _HAS_OVITO, reason="ovito required")
 class TestPtmdisp:
     """Test ptmdisp.py with mocked ovito."""
 
@@ -1467,6 +1487,7 @@ class TestPackageInit:
 # ======================================================================
 # 15. _mlflow/log_params.py -- MLflow logging params
 # ======================================================================
+@pytest.mark.skipif(not _HAS_MLFLOW, reason="mlflow required")
 class TestMlflowLogParams:
     """Test _mlflow/log_params.py with mocked mlflow and eon.config."""
 
@@ -1563,6 +1584,7 @@ class TestMlflowLogParams:
 # ======================================================================
 # 16. Regex coverage for to_mlflow
 # ======================================================================
+@pytest.mark.skipif(not _HAS_MLFLOW, reason="mlflow required")
 class TestToMlflowRegex:
     """Extra regex tests for to_mlflow patterns."""
 
