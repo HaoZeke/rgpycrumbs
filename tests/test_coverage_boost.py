@@ -241,6 +241,14 @@ class TestPltNeb:
 # ======================================================================
 # 2. plot_gp.py -- ChemGP CLI
 # ======================================================================
+try:
+    from chemparseplot.plot.chemgp import plot_convergence  # noqa: F401
+    _HAS_DEV_CHEMGP = True
+except (ImportError, ModuleNotFoundError):
+    _HAS_DEV_CHEMGP = False
+
+
+@pytest.mark.skipif(not _HAS_DEV_CHEMGP, reason="needs dev chemparseplot with plot_convergence")
 class TestPlotGP:
     """Test chemgp/plot_gp.py click CLI group."""
 
