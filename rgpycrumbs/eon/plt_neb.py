@@ -323,10 +323,23 @@ IRA_KMAX_DEFAULT = 1.8
 )
 @click.option(
     "--strip-renderer",
-    type=click.Choice(["ase", "xyzrender"]),
+    type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
     default="ase",
     show_default=True,
     help="Rendering backend for structure images.",
+)
+@click.option(
+    "--strip-spacing",
+    type=float,
+    default=1.5,
+    show_default=True,
+    help="Horizontal spacing between structure images.",
+)
+@click.option(
+    "--strip-dividers/--no-strip-dividers",
+    is_flag=True,
+    default=False,
+    help="Draw vertical divider lines between structures.",
 )
 @click.option(
     "--arrow-head-length",
@@ -474,6 +487,8 @@ def main(
     zoom_ratio,
     ase_rotation,
     strip_renderer,
+    strip_spacing,
+    strip_dividers,
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
@@ -885,6 +900,8 @@ def main(
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
+                col_spacing=strip_spacing,
+                show_dividers=strip_dividers,
             )
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
