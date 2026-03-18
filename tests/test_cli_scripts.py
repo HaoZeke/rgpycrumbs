@@ -16,7 +16,19 @@ pytestmark = pytest.mark.pure
 
 
 def _can_import(module_name):
-    return importlib.util.find_spec(module_name) is not None
+    """Check if a module is importable without triggering full import chains."""
+    try:
+        importlib.import_module(module_name)
+        return True
+    except (ImportError, ModuleNotFoundError, Exception):
+        return False
+
+
+# Evaluate these once, catching any cascading import errors
+_HAS_CHEMPARSEPLOT_NEB = _can_import("chemparseplot.plot.neb")
+_HAS_DIMER_TRAJ = _can_import("chemparseplot.parse.eon.dimer_trajectory")
+_HAS_CHEMGP = _can_import("chemparseplot.plot.chemgp")
+_HAS_PYPOTLIB = _can_import("pypotlib")
 
 
 class TestMainCLI:
@@ -40,7 +52,7 @@ class TestMainCLI:
 
 
 @pytest.mark.skipif(
-    not _can_import("chemparseplot.plot.neb"),
+    not _HAS_CHEMPARSEPLOT_NEB,
     reason="chemparseplot not installed",
 )
 class TestPltNebCLI:
@@ -59,7 +71,7 @@ class TestPltNebCLI:
 
 
 @pytest.mark.skipif(
-    not _can_import("chemparseplot.parse.eon.dimer_trajectory"),
+    not _HAS_DIMER_TRAJ,
     reason="chemparseplot dev branch not installed",
 )
 class TestPltSaddleCLI:
@@ -83,7 +95,7 @@ class TestPltSaddleCLI:
 
 
 @pytest.mark.skipif(
-    not _can_import("chemparseplot.parse.eon.min_trajectory"),
+    not _HAS_DIMER_TRAJ,
     reason="chemparseplot dev branch not installed",
 )
 class TestPltMinCLI:
@@ -115,7 +127,7 @@ class TestGenerateNWChemCLI:
         assert result.exit_code == 0
 
 
-@pytest.mark.skipif(not _can_import("pypotlib"), reason="pypotlib not installed")
+@pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
 class TestXtsPotentials:
     def test_muller_brown(self):
         from rgpycrumbs.func.muller_brown import muller_brown
@@ -132,7 +144,7 @@ class TestXtsPotentials:
 
 
 @pytest.mark.skipif(
-    not _can_import("chemparseplot.plot.chemgp"),
+    not _HAS_CHEMGP,
     reason="chemparseplot chemgp not importable",
 )
 class TestChemGPMatchAtoms:
