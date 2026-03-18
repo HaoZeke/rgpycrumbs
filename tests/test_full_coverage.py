@@ -94,7 +94,7 @@ class TestParsersBless:
         assert t.hour == 18
         assert t.minute == 58
         assert t.second == 24
-        assert t.tzinfo is datetime.UTC
+        assert t.tzinfo is datetime.timezone.utc
 
     def test_bless_time_difference(self):
         from rgpycrumbs.parsers.bless import BLESS_TIME
