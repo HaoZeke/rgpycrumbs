@@ -34,12 +34,7 @@ _HAS_MLFLOW = _has("mlflow")
 _HAS_OVITO = _has("ovito")
 _HAS_PYVISTA = _has("pyvista")
 
-# This import chain (chemparseplot -> pint) can fail across pixi envs
-try:
-    from chemparseplot.plot.chemgp import plot_convergence_curve  # noqa: F401
-    _HAS_DEV_CHEMGP = True
-except Exception:
-    _HAS_DEV_CHEMGP = False
+_HAS_DEV_CHEMGP = _has("chemparseplot.plot.chemgp")
 
 pytestmark = pytest.mark.pure
 
