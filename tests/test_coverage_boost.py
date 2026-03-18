@@ -936,7 +936,7 @@ class TestDeletePackages:
 # ======================================================================
 # 8. match_atoms.py -- Atom matching
 # ======================================================================
-@pytest.mark.skipif(not _HAS_PANDAS_BOOST, reason="pandas required")
+@pytest.mark.skipif(not _HAS_DEV_CHEMGP, reason="needs dev chemparseplot with chemgp API")
 class TestMatchAtoms:
     """Test chemgp/match_atoms.py with real ASE Atoms."""
 
