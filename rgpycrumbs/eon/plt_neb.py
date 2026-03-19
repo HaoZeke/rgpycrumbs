@@ -80,6 +80,10 @@ from chemparseplot.parse.trajectory.neb import (
     trajectory_to_landscape_df,
     trajectory_to_profile_dat,
 )
+from chemparseplot.parse.projection import (
+    compute_projection_basis,
+    project_to_sd,
+)
 from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
@@ -781,11 +785,6 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            from chemparseplot.parse.projection import (
-                compute_projection_basis,
-                project_to_sd,
-            )
-
             basis = compute_projection_basis(final_r, final_p)
             sp_sd = project_to_sd(
                 np.array([sp_x_raw]), np.array([sp_y_raw]), basis
@@ -812,8 +811,11 @@ def main(
                 color = marker_cmap(i % 10)
 
                 if project_path:
-                    plot_add_r = (add_r - r_start) * u_r + (add_p - p_start) * u_p
-                    plot_add_p = (add_r - r_start) * v_r + (add_p - p_start) * v_p
+                    _basis = compute_projection_basis(final_r, final_p)
+                    _s, _d = project_to_sd(
+                        np.array([add_r]), np.array([add_p]), _basis
+                    )
+                    plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
                     plot_add_r, plot_add_p = add_r, add_p
 
@@ -836,9 +838,11 @@ def main(
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
-                    s_val = (r_val - r_start) * u_r + (p_val - p_start) * u_p
-                    d_val = (r_val - r_start) * v_r + (p_val - p_start) * v_p
-                    return s_val, d_val
+                    _basis = compute_projection_basis(final_r, final_p)
+                    _s, _d = project_to_sd(
+                        np.array([r_val]), np.array([p_val]), _basis
+                    )
+                    return float(_s[0]), float(_d[0])
                 return r_val, p_val
 
             # Add Reactant
@@ -1054,7 +1058,10 @@ def main(
             rmsd_rc = None
             if rc_mode == "rmsd" and atoms_list:
                 df_rmsd = compute_profile_rmsd(
-                    atoms_list, cache_file, force_recompute, ira_kmax
+                    atoms_list,
+                    cache_file=cache_file,
+                    force_recompute=force_recompute,
+                    ira_kmax=ira_kmax,
                 )
                 rmsd_rc = df_rmsd["r"].to_numpy()
 
@@ -1209,9 +1216,12 @@ def main(
             x_span = x_max - x_min
             half_span = x_span / 2
             if additional_atoms_data:
+                _basis = compute_projection_basis(final_r, final_p)
                 for _, add_r, add_p, _ in additional_atoms_data:
-                    add_d = (add_r - r_start) * v_r + (add_p - p_start) * v_p
-                    half_span = max(half_span, abs(add_d) * 1.15)
+                    _, add_d = project_to_sd(
+                        np.array([add_r]), np.array([add_p]), _basis
+                    )
+                    half_span = max(half_span, abs(float(add_d[0])) * 1.15)
             ax.set_ylim(-half_span, half_span)
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 
