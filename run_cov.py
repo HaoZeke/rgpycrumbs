@@ -19,13 +19,13 @@ def run_env(env_name, extra_args):
     cov_file = ROOT / f".coverage.{env_name}"
     env = os.environ.copy()
     env["COVERAGE_FILE"] = str(cov_file)
-    # Must set COVERAGE_FILE inside the pixi shell, not in parent env
-    inner_cmd = (
-        f"COVERAGE_FILE={cov_file} "
-        f"python -m coverage run --source=rgpycrumbs "
-        f"-m pytest tests/ -q {' '.join(extra_args)}"
-    )
-    cmd = ["pixi", "run", "-e", env_name, "--", "bash", "-c", inner_cmd]
+    cmd = [
+        "pixi", "run", "-e", env_name, "--",
+        "python", "-m", "coverage", "run",
+        f"--data-file={cov_file}",
+        "--source=rgpycrumbs",
+        "-m", "pytest", "tests/", "-q",
+    ] + extra_args
     print(f"=== {env_name} ===")
     result = subprocess.run(cmd, cwd=ROOT, capture_output=False)
     if cov_file.exists():
