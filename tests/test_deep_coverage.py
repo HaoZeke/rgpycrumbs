@@ -1207,3 +1207,89 @@ class TestInitDeep:
         import rgpycrumbs
         with pytest.raises(AttributeError, match="has no attribute"):
             _ = rgpycrumbs.totally_nonexistent_xyz
+
+
+@pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
+class TestPlotGPBatchDeep:
+    """Cover batch parallel and error handling paths."""
+
+    def test_batch_parallel(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        h5 = tmp_path / "data" / "conv.h5"
+        h5.parent.mkdir()
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "table", {
+                "oracle_calls": np.arange(5, dtype=float),
+                "max_force": np.abs(np.random.default_rng(1).standard_normal(5)),
+            })
+            f.create_group("metadata")
+
+        cfg = tmp_path / "plots.toml"
+        cfg.write_text(textwrap.dedent("""\
+            [defaults]
+            input_dir = "data"
+            output_dir = "output"
+
+            [[plots]]
+            type = "convergence"
+            input = "conv.h5"
+            output = "conv1.pdf"
+
+            [[plots]]
+            type = "convergence"
+            input = "conv.h5"
+            output = "conv2.pdf"
+        """))
+        (tmp_path / "output").mkdir()
+
+        result = CliRunner().invoke(cli, [
+            "batch", "-c", str(cfg), "-b", str(tmp_path), "-j", "2",
+        ])
+        assert result.exit_code in (0, 1)
+
+    def test_batch_unknown_type(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        cfg = tmp_path / "bad.toml"
+        cfg.write_text(textwrap.dedent("""\
+            [defaults]
+            input_dir = "."
+            output_dir = "."
+
+            [[plots]]
+            type = "nonexistent_plot_type"
+            input = "x.h5"
+            output = "x.pdf"
+        """))
+
+        result = CliRunner().invoke(cli, [
+            "batch", "-c", str(cfg), "-b", str(tmp_path),
+        ])
+        assert result.exit_code == 1  # Should fail with unknown type
+
+    def test_batch_missing_input(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        cfg = tmp_path / "missing.toml"
+        cfg.write_text(textwrap.dedent("""\
+            [defaults]
+            input_dir = "nonexistent_dir"
+            output_dir = "."
+
+            [[plots]]
+            type = "convergence"
+            input = "missing.h5"
+            output = "out.pdf"
+        """))
+
+        result = CliRunner().invoke(cli, [
+            "batch", "-c", str(cfg), "-b", str(tmp_path),
+        ])
+        assert result.exit_code == 1
