@@ -56,7 +56,7 @@ def main():
     env["COVERAGE_FILE"] = str(ROOT / ".coverage")
     subprocess.run(
         ["pixi", "run", "-e", "test", "--",
-         "python", "-m", "coverage", "combine"] + produced,
+         "python", "-m", "coverage", "combine", "--keep"] + produced,
         cwd=ROOT, env=env,
     )
     subprocess.run(
