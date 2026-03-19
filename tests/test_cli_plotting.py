@@ -16,11 +16,17 @@ import matplotlib
 
 matplotlib.use("Agg")
 
-import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 from click.testing import CliRunner
+
+try:
+    import h5py
+    _HAS_H5PY = True
+except ImportError:
+    h5py = None
+    _HAS_H5PY = False
 
 pytestmark = pytest.mark.pure
 
@@ -614,6 +620,7 @@ class TestPltMinPlotting:
     not _HAS_CHEMGP,
     reason="chemparseplot chemgp not importable",
 )
+@pytest.mark.skipif(not _HAS_H5PY, reason="h5py required for ChemGP tests")
 class TestPlotGPPlotting:
     """Test actual plotting paths of plot_gp.py (ChemGP CLI)."""
 
