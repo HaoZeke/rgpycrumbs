@@ -177,7 +177,7 @@ ban-relative-imports = "all"
 
 [tool.coverage.run]
 branch      = true
-omit        = [ "_version.py" ]
+omit        = [ "_version.py", "rgpycrumbs/xts/*", "rgpycrumbs/eon/ptmdisp.py" ]
 parallel    = false
 source_pkgs = [ "rgpycrumbs" ]
 

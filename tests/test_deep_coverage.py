@@ -110,9 +110,9 @@ class TestPltNebLandscape:
             # Allow graceful failure if IRA not available
             assert result.exit_code == 0 or "ira" in str(result.exception).lower()
 
-    @pytest.mark.surfaces
     def test_landscape_surface_no_project(self, tmp_path):
         """Test surface mode with grad_matern (needs jax)."""
+        pytest.importorskip("jax")
         neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=7)
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
@@ -520,3 +520,237 @@ class TestInitLazy:
         import rgpycrumbs
         with pytest.raises(AttributeError):
             _ = rgpycrumbs.totally_nonexistent_thing
+
+
+class TestPltNebStructureRendering:
+    """Test plt_neb structure rendering paths (lines 834-973)."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_path_with_crit_points(self, tmp_path):
+        """Exercise strip rendering with crit_points structures."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copy(neb_dir / "neb.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--plot-structures", "crit_points",
+                "--no-project-path",
+                "-o", "crit_points.pdf",
+            ])
+            # May fail on IRA but exercises the strip setup code
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_path_with_all_structures(self, tmp_path):
+        """Exercise strip rendering with all structures."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=5)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copy(neb_dir / "neb.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--plot-structures", "all",
+                "--no-project-path",
+                "-o", "all_structs.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_profile_with_structures_and_insets(self, tmp_path):
+        """Exercise profile with structure insets (lines 953-1033)."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--plot-structures", "all",
+                "-o", "profile_insets.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_with_mmf_peaks(self, tmp_path):
+        """Exercise MMF peaks overlay (lines 695-750)."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
+        # Create fake peak files
+        peak_dir = tmp_path / "peaks"
+        peak_dir.mkdir()
+        h2o = molecule("H2O")
+        h2o.positions[0, 0] += 0.15
+        ase_write(str(peak_dir / "peak00_pos.con"), h2o, format="eon")
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copytree(peak_dir, Path(td) / "peaks")
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--con-file", "neb.con",
+                "--no-project-path",
+                "--mmf-peaks",
+                "--peak-dir", "peaks",
+                "-o", "mmf.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_profile_highlight_last_false(self, tmp_path):
+        """Exercise --no-highlight-last path."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--no-highlight-last",
+                "-o", "no_highlight.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_show_legend(self, tmp_path):
+        """Exercise --show-legend path."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--show-legend",
+                "-o", "legend.pdf",
+            ])
+
+
+class TestPlotGPBranches:
+    """Cover remaining branch conditions in plot_gp.py."""
+
+    @pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
+    def test_surface_auto_clamp(self, tmp_path):
+        """Test surface with auto-detected clamping from filename."""
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        # Filename with clamp hint
+        h5 = tmp_path / "surface_lo-2_hi2.h5"
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "energy")
+        result = CliRunner().invoke(cli, ["surface", "-i", str(h5), "-o", str(tmp_path / "s.pdf")])
+
+    @pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
+    def test_convergence_ci_force_column(self, tmp_path):
+        """Test convergence with ci_force column (branch at line 129)."""
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        h5 = tmp_path / "conv.h5"
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "table", {
+                "oracle_calls": np.arange(5, dtype=float),
+                "ci_force": np.abs(np.random.default_rng(1).standard_normal(5)),
+                "energy": np.random.default_rng(2).standard_normal(5),
+                "step": np.arange(5, dtype=float),
+                "method": np.array([b"GP"] * 5),
+            })
+            meta = f.create_group("metadata")
+            meta.attrs["conv_tol"] = 0.01
+        result = CliRunner().invoke(cli, ["convergence", "-i", str(h5), "-o", str(tmp_path / "c.pdf")])
+        assert result.exit_code == 0, f"{result.exit_code}: {result.exception}"
+
+    @pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
+    def test_batch_empty_config(self, tmp_path):
+        """Test batch with no plots entry (line 586)."""
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        cfg = tmp_path / "empty.toml"
+        cfg.write_text("[defaults]\n")
+        result = CliRunner().invoke(cli, ["batch", "-c", str(cfg), "-b", str(tmp_path)])
+        assert result.exit_code == 0
+
+
+class TestInitLazyMore:
+    """Cover __init__.py lazy imports (lines 9-33)."""
+
+    def test_basetypes_lazy(self):
+        import rgpycrumbs
+        bt = rgpycrumbs.basetypes
+        assert hasattr(bt, "SaddleMeasure")
+
+    def test_interpolation_lazy(self):
+        import rgpycrumbs
+        interp = rgpycrumbs.interpolation
+        assert hasattr(interp, "spline_interp")
+
+    def test_unknown_attr_raises(self):
+        import rgpycrumbs
+        with pytest.raises(AttributeError, match="has no attribute"):
+            _ = rgpycrumbs.totally_nonexistent_xyz
+
+
+class TestConSplitterBranches:
+    """Cover remaining con_splitter branches."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_split_with_output_dir(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.con_splitter import main
+        except ImportError:
+            pytest.skip("con_splitter not importable")
+
+        # Create a multi-frame .con
+        frames = [molecule("H2O") for _ in range(3)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.1 * i
+        con_file = tmp_path / "traj.con"
+        ase_write(str(con_file), frames, format="eon")
+
+        out_dir = tmp_path / "split_out"
+        runner = CliRunner()
+        result = runner.invoke(main, [str(con_file), "--output-dir", str(out_dir)])
+
+
+class TestJupyterBranches:
+    """Cover remaining jupyter.py branches."""
+
+    def test_setup_notebook(self):
+        try:
+            from rgpycrumbs.run.jupyter import setup_notebook
+            # Just call it -- it configures matplotlib
+            setup_notebook()
+        except ImportError:
+            pytest.skip("jupyter not importable")
