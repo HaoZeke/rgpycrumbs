@@ -915,7 +915,6 @@ class TestDeletePackagesDeep:
 class TestToMlflowDeep:
     """Cover remaining to_mlflow.py lines (182-210)."""
 
-    @pytest.mark.eon
     def test_plot_structure_evolution_with_data(self, tmp_path):
         try:
             from rgpycrumbs.eon.to_mlflow import plot_structure_evolution
@@ -1070,4 +1069,58 @@ class TestPltSaddleDeep:
             "--job-dir", str(job),
             "--plot-type", "mode-evolution",
             "-o", str(tmp_path / "mode.pdf"),
+        ])
+
+
+class TestPltMinDeep:
+    """Cover remaining plt_min branches."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_min_verbose(self, tmp_path):
+        from rgpycrumbs.eon.plt_min import main
+
+        job = tmp_path / "job"
+        job.mkdir()
+
+        h2o = molecule("H2O")
+        frames = [h2o.copy() for _ in range(4)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.05 * i
+        ase_write(str(job / "min"), frames, format="eon")
+        ase_write(str(job / "min.con"), frames[-1], format="eon")
+
+        lines = ["iteration\tstep_size\tconvergence\tenergy"]
+        for i in range(4):
+            lines.append(f"{i}\t0.1\t{0.5 * 0.5**i}\t{-10.0 - 0.5*i}")
+        (job / "min.dat").write_text("\n".join(lines) + "\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--job-dir", str(job),
+            "--plot-type", "profile",
+            "-v",
+            "-o", str(tmp_path / "min.pdf"),
+        ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_min_convergence(self, tmp_path):
+        from rgpycrumbs.eon.plt_min import main
+
+        job = tmp_path / "job"
+        job.mkdir()
+
+        h2o = molecule("H2O")
+        frames = [h2o.copy() for _ in range(3)]
+        ase_write(str(job / "min"), frames, format="eon")
+
+        lines = ["iteration\tstep_size\tconvergence\tenergy"]
+        for i in range(3):
+            lines.append(f"{i}\t0.1\t{0.5 * 0.5**i}\t{-10.0 - i}")
+        (job / "min.dat").write_text("\n".join(lines) + "\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--job-dir", str(job),
+            "--plot-type", "convergence",
+            "-o", str(tmp_path / "conv.pdf"),
         ])
