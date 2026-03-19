@@ -833,3 +833,102 @@ class TestPltNebWithIRA:
                 "-o", "additional.pdf",
             ])
             assert result.exit_code == 0, f"{result.exit_code}: {result.exception}"
+
+
+class TestDeletePackagesDeep:
+    """Cover the main CLI execution path of delete_packages."""
+
+    def test_main_dry_run_with_packages(self, tmp_path):
+        from unittest.mock import patch, MagicMock
+        try:
+            from rgpycrumbs.prefix.delete_packages import main
+        except ImportError:
+            pytest.skip("delete_packages not importable")
+
+        runner = CliRunner()
+        # Mock get_packages_to_delete to return fake packages
+        with patch("rgpycrumbs.prefix.delete_packages.get_packages_to_delete") as mock_get:
+            mock_get.return_value = [
+                ("linux-64", "pkg-1.0.tar.bz2"),
+                ("linux-64", "pkg-1.1.tar.bz2"),
+            ]
+            result = runner.invoke(main, [
+                "--channel", "test-channel",
+                "--package-name", "pkg",
+                "--dry-run",
+            ], input="y\n")  # Confirm deletion prompt
+            assert result.exit_code == 0
+
+    def test_main_no_packages_found(self, tmp_path):
+        from unittest.mock import patch
+        try:
+            from rgpycrumbs.prefix.delete_packages import main
+        except ImportError:
+            pytest.skip("delete_packages not importable")
+
+        runner = CliRunner()
+        with patch("rgpycrumbs.prefix.delete_packages.get_packages_to_delete") as mock_get:
+            mock_get.return_value = []
+            result = runner.invoke(main, [
+                "--channel", "test-channel",
+                "--package-name", "nonexistent",
+                "--dry-run",
+            ])
+            assert result.exit_code == 0
+
+    def test_main_no_packages_with_version_regex(self, tmp_path):
+        from unittest.mock import patch
+        try:
+            from rgpycrumbs.prefix.delete_packages import main
+        except ImportError:
+            pytest.skip("delete_packages not importable")
+
+        runner = CliRunner()
+        with patch("rgpycrumbs.prefix.delete_packages.get_packages_to_delete") as mock_get:
+            mock_get.return_value = []
+            result = runner.invoke(main, [
+                "--channel", "test-channel",
+                "--package-name", "pkg",
+                "--version-regex", "1\\.0.*",
+                "--dry-run",
+            ])
+            assert result.exit_code == 0
+
+    def test_main_abort_on_prompt(self, tmp_path):
+        from unittest.mock import patch
+        try:
+            from rgpycrumbs.prefix.delete_packages import main
+        except ImportError:
+            pytest.skip("delete_packages not importable")
+
+        runner = CliRunner()
+        with patch("rgpycrumbs.prefix.delete_packages.get_packages_to_delete") as mock_get:
+            mock_get.return_value = [("linux-64", "pkg.tar.bz2")]
+            result = runner.invoke(main, [
+                "--channel", "test-channel",
+                "--package-name", "pkg",
+                "--dry-run",
+            ], input="n\n")  # Deny deletion
+            assert result.exit_code == 0
+
+
+class TestToMlflowDeep:
+    """Cover remaining to_mlflow.py lines (182-210)."""
+
+    @pytest.mark.eon
+    def test_plot_structure_evolution_with_data(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.to_mlflow import plot_structure_evolution
+        except ImportError:
+            pytest.skip("to_mlflow not importable")
+
+        # Create synthetic structures
+        from ase.build import molecule
+        frames = [molecule("H2O") for _ in range(5)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.1 * i
+
+        fig = plot_structure_evolution(frames)
+        assert fig is not None
+        import matplotlib.pyplot as plt
+        plt.close(fig)
