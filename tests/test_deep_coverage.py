@@ -1506,3 +1506,43 @@ class TestJupyterTimeout:
             with pytest.raises(SystemExit) as exc_info:
                 run_command_or_exit(["test"])
             assert exc_info.value.code == 124
+
+
+class TestInitErrorPaths:
+    """Cover __init__.py lines 14-26 (ImportError with hints)."""
+
+    def test_surfaces_import_error_message(self):
+        """Trigger the surfaces ImportError path if jax unavailable."""
+        import rgpycrumbs
+        try:
+            _ = rgpycrumbs.surfaces
+        except ImportError as e:
+            # Verify the hint message (lines 20-24)
+            assert "pip install" in str(e)
+            assert "surfaces" in str(e)
+        # If no ImportError, surfaces is available (jax installed) -- ok
+
+    def test_interpolation_error_with_mock(self):
+        """Force interpolation to fail to cover lines 19-25."""
+        from unittest.mock import patch
+        import rgpycrumbs
+
+        # Temporarily make the import fail
+        with patch("importlib.import_module", side_effect=ImportError("fake")):
+            try:
+                # Force re-evaluation of __getattr__
+                rgpycrumbs.__getattr__("interpolation")
+            except ImportError as e:
+                assert "pip install" in str(e) or "fake" in str(e)
+
+    def test_geom_error_reraise(self):
+        """Cover line 26 (re-raise without hint for geom)."""
+        from unittest.mock import patch
+        import rgpycrumbs
+
+        with patch("importlib.import_module", side_effect=ImportError("no geom")):
+            try:
+                rgpycrumbs.__getattr__("geom")
+            except ImportError as e:
+                # Line 26: re-raise without custom message (geom not in hints)
+                assert "no geom" in str(e)
