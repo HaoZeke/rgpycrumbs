@@ -105,6 +105,7 @@ polars        = ">=0.20"
 pychum        = ">=0.1"
 pytest        = "*"
 pytest-cov    = ">=4.1"
+requests      = ">=2.31"
 rgpycrumbs    = { path = ".", editable = true }
 rich          = ">=13.0"
 scipy         = ">=1.11"
