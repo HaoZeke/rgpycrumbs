@@ -1124,3 +1124,86 @@ class TestPltMinDeep:
             "--plot-type", "convergence",
             "-o", str(tmp_path / "conv.pdf"),
         ])
+import subprocess
+
+
+@pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
+@pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs plt_neb")
+class TestPltNebHdf5Source:
+    """Cover the --source hdf5 paths in plt_neb."""
+
+    def test_hdf5_missing_file(self):
+        runner = CliRunner()
+        result = runner.invoke(plt_neb_main, [
+            "--source", "hdf5",
+            "--plot-type", "profile",
+            "-o", "/tmp/nope.pdf",
+        ])
+        assert result.exit_code != 0
+
+
+class TestJupyterDeep:
+    """Cover remaining jupyter.py branches."""
+
+    def test_run_command_live_success(self):
+        from rgpycrumbs.run.jupyter import _run_command_live
+        result = _run_command_live(["echo", "hello"], capture=True)
+        assert result.returncode == 0
+        assert "hello" in result.stdout
+
+    def test_run_command_live_failure(self):
+        from rgpycrumbs.run.jupyter import _run_command_live
+        with pytest.raises(subprocess.CalledProcessError):
+            _run_command_live(["false"], check=True)
+
+    def test_run_command_live_no_capture(self):
+        from rgpycrumbs.run.jupyter import _run_command_live
+        result = _run_command_live(["echo", "test"], capture=False)
+        assert result.returncode == 0
+        assert result.stdout is None
+
+    def test_run_command_live_not_on_path(self):
+        from rgpycrumbs.run.jupyter import _run_command_live
+        with pytest.raises(FileNotFoundError):
+            _run_command_live(["totally_nonexistent_binary_xyz"])
+
+    def test_run_command_or_exit_not_found(self):
+        from rgpycrumbs.run.jupyter import run_command_or_exit
+        with pytest.raises(SystemExit) as exc_info:
+            run_command_or_exit(["totally_nonexistent_xyz"])
+        assert exc_info.value.code == 2
+
+    def test_run_command_or_exit_failure(self):
+        from rgpycrumbs.run.jupyter import run_command_or_exit
+        with pytest.raises(SystemExit) as exc_info:
+            run_command_or_exit(["false"])
+        assert exc_info.value.code != 0
+
+    def test_run_command_live_shell_mode(self):
+        from rgpycrumbs.run.jupyter import _run_command_live
+        result = _run_command_live("echo shell_mode", capture=True)
+        assert "shell_mode" in result.stdout
+
+
+class TestInitDeep:
+    """Cover __init__.py lazy import error messages."""
+
+    def test_basetypes_lazy(self):
+        import rgpycrumbs
+        bt = rgpycrumbs.basetypes
+        assert hasattr(bt, "SaddleMeasure")
+
+    def test_interpolation_lazy(self):
+        import rgpycrumbs
+        interp = rgpycrumbs.interpolation
+        assert hasattr(interp, "spline_interp")
+
+    def test_geom_lazy(self):
+        import rgpycrumbs
+        geom = rgpycrumbs.geom
+        assert geom is not None
+
+    def test_unknown_attr_raises(self):
+        import rgpycrumbs
+        with pytest.raises(AttributeError, match="has no attribute"):
+            _ = rgpycrumbs.totally_nonexistent_xyz
