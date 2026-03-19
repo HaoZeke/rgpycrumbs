@@ -1,0 +1,39 @@
+name: Coverage
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+on: [push, pull_request]
+jobs:
+  coverage:
+    runs-on: ubuntu-22.04
+    name: Combined coverage (pixi multi-env)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.8.10
+        with:
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+          activate-environment: false
+      - name: Run test env
+        shell: bash -el {0}
+        run: |
+          pixi r -e test -- python -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q || true
+      - name: Run surfaces env
+        shell: bash -el {0}
+        run: |
+          pixi r -e surfaces -- python -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q || true
+      - name: Run fragments env
+        shell: bash -el {0}
+        run: |
+          pixi r -e fragments -- python -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q || true
+      - name: Run eonmlflow env
+        shell: bash -el {0}
+        run: |
+          pixi r -e eonmlflow -- python -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q || true
+      - name: Combine and report
+        shell: bash -el {0}
+        run: |
+          pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow || true
+          pixi r -e test -- python -m coverage report --fail-under=90
