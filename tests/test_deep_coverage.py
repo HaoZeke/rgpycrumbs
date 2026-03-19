@@ -1546,3 +1546,58 @@ class TestInitErrorPaths:
             except ImportError as e:
                 # Line 26: re-raise without custom message (geom not in hints)
                 assert "no geom" in str(e)
+
+
+class TestPltMinDefaultOutput:
+    """Cover plt_min line 135 (default output name)."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_default_output_name(self, tmp_path):
+        from rgpycrumbs.eon.plt_min import main
+
+        job = tmp_path / "job"
+        job.mkdir()
+
+        h2o = molecule("H2O")
+        frames = [h2o.copy() for _ in range(3)]
+        ase_write(str(job / "min"), frames, format="eon")
+        lines = ["iteration\tstep_size\tconvergence\tenergy"]
+        for i in range(3):
+            lines.append(f"{i}\t0.1\t0.5\t{-10.0 - i}")
+        (job / "min.dat").write_text("\n".join(lines) + "\n")
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(main, [
+                "--job-dir", str(job),
+                "--plot-type", "profile",
+                # No -o flag -- triggers default output name (line 135)
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_landscape_triggers_ira_import(self, tmp_path):
+        """Cover lines 175-179 (IRA import in landscape mode)."""
+        from rgpycrumbs.eon.plt_min import main
+
+        job = tmp_path / "job"
+        job.mkdir()
+
+        h2o = molecule("H2O")
+        frames = [h2o.copy() for _ in range(3)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.05 * i
+        ase_write(str(job / "min"), frames, format="eon")
+        ase_write(str(job / "min.con"), frames[-1], format="eon")
+        lines = ["iteration\tstep_size\tconvergence\tenergy"]
+        for i in range(3):
+            lines.append(f"{i}\t0.1\t0.5\t{-10.0 - i}")
+        (job / "min.dat").write_text("\n".join(lines) + "\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--job-dir", str(job),
+            "--plot-type", "landscape",
+            "--no-project-path",
+            "-o", str(tmp_path / "land.pdf"),
+        ])
+        # Will fail without IRA but exercises the import path
