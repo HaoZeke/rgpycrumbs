@@ -1620,3 +1620,67 @@ class TestPltSaddleDefaultOutput:
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path):
             result = runner.invoke(main, ["--job-dir", str(job), "--plot-type", "profile"])
+
+
+@pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
+class TestPlotGPBatchExtraArgs:
+    """Cover batch extra args forwarding (lines 651-663)."""
+
+    def test_batch_with_bool_arg(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        h5 = tmp_path / "data" / "s.h5"
+        h5.parent.mkdir()
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "energy")
+
+        cfg = tmp_path / "plots.toml"
+        cfg.write_text(textwrap.dedent("""\
+            [defaults]
+            input_dir = "data"
+            output_dir = "output"
+
+            [[plots]]
+            type = "surface"
+            input = "s.h5"
+            output = "s.pdf"
+            clamp_lo = -2.0
+            clamp_hi = 2.0
+        """))
+        (tmp_path / "output").mkdir()
+
+        result = CliRunner().invoke(cli, [
+            "batch", "-c", str(cfg), "-b", str(tmp_path),
+        ])
+
+    def test_batch_with_list_arg(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        h5 = tmp_path / "data" / "q.h5"
+        h5.parent.mkdir()
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "true_energy")
+            for n in [5, 10]:
+                _make_grid(f, f"gp_mean_N{n}")
+
+        cfg = tmp_path / "plots.toml"
+        cfg.write_text(textwrap.dedent("""\
+            [defaults]
+            input_dir = "data"
+            output_dir = "output"
+
+            [[plots]]
+            type = "quality"
+            input = "q.h5"
+            output = "q.pdf"
+            n_points = [5, 10]
+        """))
+        (tmp_path / "output").mkdir()
+
+        result = CliRunner().invoke(cli, [
+            "batch", "-c", str(cfg), "-b", str(tmp_path),
+        ])
