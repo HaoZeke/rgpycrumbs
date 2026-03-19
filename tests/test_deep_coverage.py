@@ -754,3 +754,82 @@ class TestJupyterBranches:
             setup_notebook()
         except ImportError:
             pytest.skip("jupyter not importable")
+
+
+@pytest.mark.fragments
+class TestPltNebWithIRA:
+    """Tests that need IRA for RMSD calculations (fragments env)."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_surface_with_ira(self, tmp_path):
+        """Full landscape surface with IRA RMSD + structure insets."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copy(neb_dir / "neb.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--plot-structures", "crit_points",
+                "--project-path",
+                "-o", "ira_landscape.pdf",
+            ])
+            assert result.exit_code == 0, f"{result.exit_code}: {result.exception}"
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_profile_insets_with_ira(self, tmp_path):
+        """Profile with structure insets requiring RMSD projection."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--plot-structures", "crit_points",
+                "--rc-mode", "rmsd",
+                "-o", "ira_profile.pdf",
+            ])
+            assert result.exit_code == 0, f"{result.exit_code}: {result.exception}"
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_with_additional_con(self, tmp_path):
+        """Landscape with additional .con overlay."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=5)
+        extra = tmp_path / "extra.con"
+        h2o = molecule("H2O")
+        h2o.positions[0, 0] += 0.15
+        ase_write(str(extra), h2o, format="eon")
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copy(extra, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--additional-con", "extra.con", "Extra",
+                "--project-path",
+                "-o", "additional.pdf",
+            ])
+            assert result.exit_code == 0, f"{result.exit_code}: {result.exception}"
