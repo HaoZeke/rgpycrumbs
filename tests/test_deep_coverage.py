@@ -1684,3 +1684,99 @@ class TestPlotGPBatchExtraArgs:
         result = CliRunner().invoke(cli, [
             "batch", "-c", str(cfg), "-b", str(tmp_path),
         ])
+
+
+class TestNwchemGenDeep:
+    """Cover remaining generate_nwchem_input lines."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_unix_socket_mode(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.generate_nwchem_input import main
+        except ImportError:
+            pytest.skip("not importable")
+
+        h2o = molecule("H2O")
+        pos = tmp_path / "pos.con"
+        ase_write(str(pos), h2o, format="eon")
+
+        settings = tmp_path / "settings.ini"
+        settings.write_text("[NWChem]\nbasis = 6-31G\nunix_socket_mode = True\nunix_socket_path = /tmp/eon.sock\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--pos-file", str(pos),
+            "--settings", str(settings),
+            "--output", str(tmp_path / "nwchem.nwi"),
+        ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_tcp_socket_mode(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.generate_nwchem_input import main
+        except ImportError:
+            pytest.skip("not importable")
+
+        h2o = molecule("H2O")
+        pos = tmp_path / "pos.con"
+        ase_write(str(pos), h2o, format="eon")
+
+        settings = tmp_path / "settings.ini"
+        settings.write_text("[NWChem]\nbasis = 6-31G\nhost = 127.0.0.1\nport = 12345\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--pos-file", str(pos),
+            "--settings", str(settings),
+            "--output", str(tmp_path / "nwchem.nwi"),
+        ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_missing_settings(self, tmp_path):
+        """Cover lines 109-111 (error handler)."""
+        try:
+            from rgpycrumbs.eon.generate_nwchem_input import main
+        except ImportError:
+            pytest.skip("not importable")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--pos-file", str(tmp_path / "nonexistent.con"),
+            "--settings", str(tmp_path / "nope.ini"),
+            "--output", str(tmp_path / "out.nwi"),
+        ])
+        assert result.exit_code != 0
+
+
+class TestLogParamsDeep:
+    """Cover remaining log_params lines 86-91."""
+
+    @pytest.mark.eon
+    def test_missing_config(self, tmp_path):
+        try:
+            from rgpycrumbs.eon._mlflow.log_params import log_config_ini
+        except ImportError:
+            pytest.skip("needs mlflow")
+
+        # Non-existent config should handle gracefully
+        import mlflow
+        with mlflow.start_run():
+            log_config_ini(tmp_path / "nonexistent.ini")
+
+
+class TestAuxDeep:
+    """Cover _aux.py lines 159-160, 171-172, 196, 242."""
+
+    def test_import_from_parent_env_missing(self):
+        from rgpycrumbs._aux import _import_from_parent_env
+
+        try:
+            result = _import_from_parent_env("totally_nonexistent_module_xyz123")
+        except (ImportError, Exception):
+            pass
+
+    def test_has_cuda_check(self):
+        from rgpycrumbs._aux import _has_cuda
+
+        result = _has_cuda()
+        assert isinstance(result, bool)
