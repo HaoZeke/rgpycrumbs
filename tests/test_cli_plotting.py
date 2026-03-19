@@ -476,7 +476,7 @@ class TestPltSaddlePlotting:
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
 
-    @pytest.mark.skipif(not _HAS_JAX, reason="JAX required for surface fitting")
+    @pytest.mark.surfaces
     def test_landscape(self, tmp_path):
         """Test saddle landscape plot (no IRA, falls back to ASE Procrustes)."""
         main = self._import_main()
@@ -577,7 +577,7 @@ class TestPltMinPlotting:
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
 
-    @pytest.mark.skipif(not _HAS_JAX, reason="JAX required for surface fitting")
+    @pytest.mark.surfaces
     def test_landscape(self, tmp_path):
         """Test minimization landscape plot."""
         main = self._import_main()

@@ -110,8 +110,9 @@ class TestPltNebLandscape:
             # Allow graceful failure if IRA not available
             assert result.exit_code == 0 or "ira" in str(result.exception).lower()
 
+    @pytest.mark.surfaces
     def test_landscape_surface_no_project(self, tmp_path):
-        """Test surface mode without projection (avoids jax requirement for simple RBF)."""
+        """Test surface mode with grad_matern (needs jax)."""
         neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=7)
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
@@ -127,13 +128,10 @@ class TestPltNebLandscape:
                 "--con-file", "neb.con",
                 "--sp-file", "sp.con",
                 "--no-project-path",
-                "--surface-type", "rbf",
+                "--surface-type", "grad_matern",
                 "-o", "landscape_surface.pdf",
             ])
-            # May fail without IRA but should get deep into the code
-            if result.exit_code != 0 and result.exception:
-                # Check it got past the CLI parsing at least
-                assert "landscape" not in str(result.exception) or "ira" in str(result.exception).lower()
+            assert result.exit_code == 0, f"Exit {result.exit_code}: {result.exception}"
 
     def test_profile_with_structures_crit_points(self, tmp_path):
         """Test profile plot with crit_points structure rendering."""
