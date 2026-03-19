@@ -21,19 +21,19 @@ depends-on = [
 ]
 
 [feature.test.tasks.test-base]
-cmd = "COVERAGE_FILE=.coverage.test python -m pytest tests/ -m 'pure or eon' --cov -q; true"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.test && python -m coverage run --source=rgpycrumbs -m pytest tests/ -q; true'"
 
 [feature.surfaces.tasks.test-surfaces]
-cmd = "COVERAGE_FILE=.coverage.surfaces python -m pytest tests/ -m 'surfaces' --cov -q; true"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.surfaces && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m surfaces -q; true'"
 
 [feature.fragments.tasks.test-fragments]
-cmd = "COVERAGE_FILE=.coverage.fragments python -m pytest tests/ -m 'fragments or ira or align' --cov -q; true"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.fragments && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m \"fragments or ira or align\" -q; true'"
 
 [feature.eonmlflow.tasks.test-eonmlflow]
-cmd = "COVERAGE_FILE=.coverage.eonmlflow python -m pytest tests/ -m 'eon' --cov -q; true"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.eonmlflow && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m eon -q; true'"
 
 [feature.ptm.tasks.test-ptm]
-cmd = "COVERAGE_FILE=.coverage.ptm python -m pytest tests/ -m 'ptm' --cov -q; true"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.ptm && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m ptm -q; true'"
 
 [dependencies]
 python = ">=3.10"
@@ -94,7 +94,7 @@ tblite-python  = ">=0.5.0,<0.6"
 
 [feature.test.pypi-dependencies]
 adjusttext    = ">=1.3"
-chemparseplot = ">=1.2"
+chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "feat/generalize-projection" }
 click         = ">=8.3.1, <9"
 cmcrameri     = ">=1.7"
 matplotlib    = ">=3.8"

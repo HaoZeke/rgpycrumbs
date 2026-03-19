@@ -151,7 +151,7 @@ class TestChemGPMatchAtoms:
     def test_import(self):
         try:
             from rgpycrumbs.chemgp import match_atoms
-            assert hasattr(match_atoms, "match_atoms_by_distance")
+            assert hasattr(match_atoms, "match_atoms")
         except ImportError:
             pytest.skip("chemgp import chain failed")
 
