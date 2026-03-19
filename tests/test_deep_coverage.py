@@ -1489,3 +1489,20 @@ class TestPltNebEdgeCases:
                 "--cmap-profile", "viridis",
                 "-o", "cmap.pdf",
             ])
+
+
+class TestJupyterTimeout:
+    """Cover timeout and keyboard interrupt handlers in jupyter.py."""
+
+    def test_run_command_or_exit_timeout(self):
+        """Cover lines 92-94 (timeout handler in run_command_or_exit)."""
+        from unittest.mock import patch
+        import subprocess
+        from rgpycrumbs.run.jupyter import run_command_or_exit
+
+        # Mock _run_command_live to raise TimeoutExpired
+        with patch("rgpycrumbs.run.jupyter._run_command_live") as mock:
+            mock.side_effect = subprocess.TimeoutExpired("cmd", 1.0)
+            with pytest.raises(SystemExit) as exc_info:
+                run_command_or_exit(["test"])
+            assert exc_info.value.code == 124
