@@ -486,7 +486,7 @@ class TestPltSaddlePlotting:
         result = runner.invoke(main, [
             "--job-dir", str(job_dir),
             "--plot-type", "landscape",
-            "--surface-type", "rbf",
+            "--surface-type", "grad_matern",
             "-o", str(output),
             "--dpi", "72",
         ])
@@ -587,7 +587,7 @@ class TestPltMinPlotting:
         result = runner.invoke(main, [
             "--job-dir", str(job_dir),
             "--plot-type", "landscape",
-            "--surface-type", "rbf",
+            "--surface-type", "grad_matern",
             "-o", str(output),
             "--dpi", "72",
         ])
