@@ -80,10 +80,14 @@ from chemparseplot.parse.trajectory.neb import (
     trajectory_to_landscape_df,
     trajectory_to_profile_dat,
 )
-from chemparseplot.parse.projection import (
-    compute_projection_basis,
-    project_to_sd,
-)
+try:
+    from chemparseplot.parse.projection import (
+        compute_projection_basis,
+        project_to_sd,
+    )
+except ImportError:
+    compute_projection_basis = None
+    project_to_sd = None
 from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
