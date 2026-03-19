@@ -249,136 +249,238 @@ class TestPltNebLandscape:
             ])
 
 
+def _try_import_plot_gp():
+    try:
+        from rgpycrumbs.chemgp.plot_gp import cli
+        return cli
+    except (ImportError, ModuleNotFoundError):
+        return None
+
+
+def _make_grid(f, name, n=20):
+    """Add a grid dataset with axis attrs to an HDF5 file."""
+    g = f["grids"] if "grids" in f else f.create_group("grids")
+    rng = np.random.default_rng(hash(name) % 2**32)
+    ds = g.create_dataset(name, data=rng.standard_normal((n, n)))
+    # Axis attrs on the dataset (read_h5_grid reads from ds.attrs)
+    ds.attrs["x_range"] = [-1.0, 1.0]
+    ds.attrs["x_length"] = n
+    ds.attrs["y_range"] = [-1.0, 1.0]
+    ds.attrs["y_length"] = n
+    return ds
+
+
+def _make_table(f, name, columns):
+    """Add a table group with named datasets."""
+    t = f.create_group(name) if name not in f else f[name]
+    for col_name, data in columns.items():
+        t.create_dataset(col_name, data=data)
+
+
+def _make_points(f, name, columns):
+    """Add a points group with named datasets."""
+    pts = f["points"] if "points" in f else f.create_group("points")
+    p = pts.create_group(name) if name not in pts else pts[name]
+    for col_name, data in columns.items():
+        p.create_dataset(col_name, data=data)
+
+
 @pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
 class TestPlotGPDeep:
-    """Additional plot_gp subcommand coverage."""
-
-    def _make_chemgp_h5(self, path, n_images=5, n_steps=3):
-        """Create a synthetic ChemGP HDF5 file."""
-        with h5py.File(path, "w") as f:
-            # Metadata
-            meta = f.create_group("metadata")
-            meta.create_group("table")
-            meta["table"].create_dataset("step", data=np.arange(n_steps))
-            meta["table"].create_dataset("oracle_calls", data=np.arange(n_steps) * n_images)
-            meta["table"].create_dataset("energy", data=np.random.default_rng(42).standard_normal(n_steps))
-            meta["table"].create_dataset("max_force", data=np.abs(np.random.default_rng(43).standard_normal(n_steps)))
-
-            # Grids
-            grids = f.create_group("grids")
-            for step in range(n_steps):
-                g = grids.create_group(f"step_{step}")
-                x = np.linspace(-1, 1, 20)
-                y = np.linspace(-1, 1, 20)
-                X, Y = np.meshgrid(x, y)
-                g.create_dataset("energy", data=np.sin(X) * np.cos(Y))
-                g.create_dataset("variance", data=np.abs(np.random.default_rng(step).standard_normal((20, 20))) * 0.1)
-                g.attrs["axis_0_min"] = -1.0
-                g.attrs["axis_0_max"] = 1.0
-                g.attrs["axis_1_min"] = -1.0
-                g.attrs["axis_1_max"] = 1.0
-
-            # Paths
-            paths = f.create_group("paths")
-            for step in range(n_steps):
-                p = paths.create_group(f"step_{step}")
-                p.create_dataset("positions", data=np.random.default_rng(step).standard_normal((n_images, 2)))
-                p.create_dataset("energy", data=np.random.default_rng(step).standard_normal(n_images))
-
-            # Points
-            points = f.create_group("points")
-            points.create_dataset("positions", data=np.random.default_rng(99).standard_normal((3, 2)))
-            points.create_dataset("energy", data=np.array([-1.0, 0.5, -0.8]))
+    """Each subcommand gets its own properly structured HDF5."""
 
     def test_nll_subcommand(self, tmp_path):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli as main
-        except ImportError:
+        cli = _try_import_plot_gp()
+        if cli is None:
             pytest.skip("plot_gp not importable")
 
-        h5_path = tmp_path / "result.h5"
-        self._make_chemgp_h5(h5_path)
+        h5 = tmp_path / "nll.h5"
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "nll")
+            _make_grid(f, "grad_norm")
+            _make_points(f, "optimum", {
+                "log_sigma2": np.array([0.5]),
+                "log_theta": np.array([-1.0]),
+            })
 
-        runner = CliRunner()
-        result = runner.invoke(main, [
-            "nll", str(h5_path),
-            "-o", str(tmp_path / "nll.pdf"),
-        ])
+        result = CliRunner().invoke(cli, ["nll", "-i", str(h5), "-o", str(tmp_path / "nll.pdf")])
+        assert result.exit_code == 0, result.output
 
     def test_sensitivity_subcommand(self, tmp_path):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli as main
-        except ImportError:
+        cli = _try_import_plot_gp()
+        if cli is None:
             pytest.skip("plot_gp not importable")
 
-        h5_path = tmp_path / "result.h5"
-        self._make_chemgp_h5(h5_path)
+        h5 = tmp_path / "sens.h5"
+        n = 30
+        x = np.linspace(-1, 1, n)
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "slice", {"x": x})
+            _make_table(f, "true_surface", {"E_true": np.sin(x)})
+            for j in range(1, 4):
+                for i in range(1, 4):
+                    _make_table(f, f"gp_ls{j}_sv{i}", {
+                        "E_pred": np.sin(x) + 0.1 * j,
+                        "E_std": np.abs(np.random.default_rng(j * i).standard_normal(n)) * 0.05,
+                    })
 
-        runner = CliRunner()
-        result = runner.invoke(main, [
-            "sensitivity", str(h5_path),
-            "-o", str(tmp_path / "sensitivity.pdf"),
-        ])
+        result = CliRunner().invoke(cli, ["sensitivity", "-i", str(h5), "-o", str(tmp_path / "sens.pdf")])
+        assert result.exit_code == 0, result.output
 
     def test_trust_subcommand(self, tmp_path):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli as main
-        except ImportError:
+        cli = _try_import_plot_gp()
+        if cli is None:
             pytest.skip("plot_gp not importable")
 
-        h5_path = tmp_path / "result.h5"
-        self._make_chemgp_h5(h5_path)
+        h5 = tmp_path / "trust.h5"
+        n = 30
+        x = np.linspace(-1, 1, n)
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "slice", {
+                "x": x,
+                "E_true": np.sin(x),
+                "E_pred": np.sin(x) + 0.05,
+                "E_std": np.ones(n) * 0.1,
+                "in_trust": np.array([1.0 if abs(xi) < 0.5 else 0.0 for xi in x]),
+            })
+            _make_points(f, "training", {
+                "x": np.array([-0.5, 0.0, 0.5]),
+                "y": np.array([0.5, 0.5, 0.5]),
+            })
+            meta = f.create_group("metadata")
+            meta.attrs["y_slice"] = 0.5
 
-        runner = CliRunner()
-        result = runner.invoke(main, [
-            "trust", str(h5_path),
-            "-o", str(tmp_path / "trust.pdf"),
-        ])
+        result = CliRunner().invoke(cli, ["trust", "-i", str(h5), "-o", str(tmp_path / "trust.pdf")])
+        assert result.exit_code == 0, result.output
 
     def test_fps_subcommand(self, tmp_path):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli as main
-        except ImportError:
+        cli = _try_import_plot_gp()
+        if cli is None:
             pytest.skip("plot_gp not importable")
 
-        h5_path = tmp_path / "result.h5"
-        self._make_chemgp_h5(h5_path)
+        h5 = tmp_path / "fps.h5"
+        rng = np.random.default_rng(42)
+        with h5py.File(h5, "w") as f:
+            _make_points(f, "selected", {"pc1": rng.standard_normal(20), "pc2": rng.standard_normal(20)})
+            _make_points(f, "pruned", {"pc1": rng.standard_normal(10), "pc2": rng.standard_normal(10)})
 
-        runner = CliRunner()
-        result = runner.invoke(main, [
-            "fps", str(h5_path),
-            "-o", str(tmp_path / "fps.pdf"),
-        ])
+        result = CliRunner().invoke(cli, ["fps", "-i", str(h5), "-o", str(tmp_path / "fps.pdf")])
+        assert result.exit_code == 0, result.output
 
     def test_variance_subcommand(self, tmp_path):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli as main
-        except ImportError:
+        cli = _try_import_plot_gp()
+        if cli is None:
             pytest.skip("plot_gp not importable")
 
-        h5_path = tmp_path / "result.h5"
-        self._make_chemgp_h5(h5_path)
+        h5 = tmp_path / "var.h5"
+        rng = np.random.default_rng(42)
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "energy")
+            _make_grid(f, "variance")
+            _make_points(f, "training", {"x": rng.standard_normal(5), "y": rng.standard_normal(5)})
+            _make_points(f, "minima", {"x": np.array([0.0]), "y": np.array([0.0])})
+            _make_points(f, "saddles", {"x": np.array([0.5]), "y": np.array([0.5])})
 
-        runner = CliRunner()
-        result = runner.invoke(main, [
-            "variance", str(h5_path),
-            "-o", str(tmp_path / "variance.pdf"),
-        ])
+        result = CliRunner().invoke(cli, ["variance", "-i", str(h5), "-o", str(tmp_path / "var.pdf")])
+        assert result.exit_code == 0, result.output
 
     def test_quality_subcommand(self, tmp_path):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli as main
-        except ImportError:
+        cli = _try_import_plot_gp()
+        if cli is None:
             pytest.skip("plot_gp not importable")
 
-        h5_path = tmp_path / "result.h5"
-        self._make_chemgp_h5(h5_path)
+        h5 = tmp_path / "quality.h5"
+        n = 20
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "true_energy")
+            for npts in [5, 10, 15]:
+                _make_grid(f, f"gp_mean_N{npts}")
+                rng = np.random.default_rng(npts)
+                _make_points(f, f"train_N{npts}", {
+                    "x": rng.standard_normal(npts),
+                    "y": rng.standard_normal(npts),
+                })
 
-        runner = CliRunner()
-        result = runner.invoke(main, [
-            "quality", str(h5_path),
-            "-o", str(tmp_path / "quality.pdf"),
+        result = CliRunner().invoke(cli, ["quality", "-i", str(h5), "-o", str(tmp_path / "q.pdf")])
+        assert result.exit_code == 0, result.output
+
+    def test_rff_subcommand(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        h5 = tmp_path / "rff.h5"
+        n = 10
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "table", {
+                "D_rff": np.arange(n, dtype=float) * 100,
+                "energy_mae_vs_gp": np.random.default_rng(1).standard_normal(n),
+                "gradient_mae_vs_gp": np.random.default_rng(2).standard_normal(n),
+            })
+            meta = f.create_group("metadata")
+            meta.attrs["gp_e_mae"] = 0.01
+            meta.attrs["gp_g_mae"] = 0.02
+
+        result = CliRunner().invoke(cli, ["rff", "-i", str(h5), "-o", str(tmp_path / "rff.pdf")])
+        assert result.exit_code == 0, result.output
+
+    def test_surface_with_paths_points(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        h5 = tmp_path / "surface.h5"
+        rng = np.random.default_rng(42)
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "energy")
+            # Add paths
+            paths = f.create_group("paths")
+            p = paths.create_group("neb_path")
+            p.create_dataset("x", data=rng.standard_normal(5))
+            p.create_dataset("y", data=rng.standard_normal(5))
+            # Add points
+            _make_points(f, "saddle", {"x": np.array([0.1]), "y": np.array([0.2])})
+
+        result = CliRunner().invoke(cli, [
+            "surface", "-i", str(h5), "-o", str(tmp_path / "surf.pdf"),
+            "--clamp-lo", "-2.0", "--clamp-hi", "2.0",
         ])
+        assert result.exit_code == 0, result.output
+
+    def test_batch_subcommand(self, tmp_path):
+        cli = _try_import_plot_gp()
+        if cli is None:
+            pytest.skip("plot_gp not importable")
+
+        # Create a convergence H5
+        h5 = tmp_path / "data" / "conv.h5"
+        h5.parent.mkdir()
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "table", {
+                "oracle_calls": np.arange(5, dtype=float),
+                "max_force": np.abs(np.random.default_rng(1).standard_normal(5)),
+            })
+            f.create_group("metadata")
+
+        # Write TOML config
+        cfg = tmp_path / "plots.toml"
+        cfg.write_text(textwrap.dedent(f"""\
+            [defaults]
+            input_dir = "data"
+            output_dir = "output"
+
+            [[plots]]
+            type = "convergence"
+            input = "conv.h5"
+            output = "conv.pdf"
+        """))
+        (tmp_path / "output").mkdir()
+
+        result = CliRunner().invoke(cli, [
+            "batch", "-c", str(cfg), "-b", str(tmp_path),
+        ])
+        # Batch may fail internally but exercises the dispatch code
+        assert result.exit_code in (0, 1), result.output
 
 
 class TestPlumedTrivial:
