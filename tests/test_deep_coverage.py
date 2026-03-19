@@ -728,7 +728,7 @@ class TestConSplitterBranches:
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
     def test_split_with_output_dir(self, tmp_path):
         try:
-            from rgpycrumbs.eon.con_splitter import main
+            from rgpycrumbs.eon.con_splitter import con_splitter as main
         except ImportError:
             pytest.skip("con_splitter not importable")
 
@@ -747,13 +747,11 @@ class TestConSplitterBranches:
 class TestJupyterBranches:
     """Cover remaining jupyter.py branches."""
 
-    def test_setup_notebook(self):
-        try:
-            from rgpycrumbs.run.jupyter import setup_notebook
-            # Just call it -- it configures matplotlib
-            setup_notebook()
-        except ImportError:
-            pytest.skip("jupyter not importable")
+    def test_run_command_success(self):
+        from rgpycrumbs.run.jupyter import run_command_or_exit
+
+        result = run_command_or_exit(["echo", "test"], capture=True)
+        assert result.returncode == 0
 
 
 @pytest.mark.fragments
@@ -938,7 +936,7 @@ class TestConSplitterDeep:
 
     def test_split_single_frame(self, tmp_path):
         try:
-            from rgpycrumbs.eon.con_splitter import main
+            from rgpycrumbs.eon.con_splitter import con_splitter as main
         except ImportError:
             pytest.skip("con_splitter not importable")
 
@@ -952,7 +950,7 @@ class TestConSplitterDeep:
 
     def test_split_multi_frame(self, tmp_path):
         try:
-            from rgpycrumbs.eon.con_splitter import main
+            from rgpycrumbs.eon.con_splitter import con_splitter as main
         except ImportError:
             pytest.skip("con_splitter not importable")
 
@@ -967,7 +965,7 @@ class TestConSplitterDeep:
 
     def test_split_with_prefix(self, tmp_path):
         try:
-            from rgpycrumbs.eon.con_splitter import main
+            from rgpycrumbs.eon.con_splitter import con_splitter as main
         except ImportError:
             pytest.skip("con_splitter not importable")
 
