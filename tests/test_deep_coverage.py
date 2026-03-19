@@ -53,9 +53,10 @@ def _write_neb_dat(path, n_images=5, step=0):
 def _write_neb_con(path, n_images=5):
     """Write a multi-frame .con trajectory."""
     frames = []
-    h2o = molecule("H2O")
+    # Use C2H6 (8 atoms) -- IRA needs >= 4 atoms to find a basis
+    base = molecule("C2H6")
     for i in range(n_images):
-        frame = h2o.copy()
+        frame = base.copy()
         frame.positions[0, 0] += 0.1 * i
         frames.append(frame)
     ase_write(str(path), frames, format="eon")
@@ -63,9 +64,9 @@ def _write_neb_con(path, n_images=5):
 
 def _write_sp_con(path):
     """Write a saddle point .con file."""
-    h2o = molecule("H2O")
-    h2o.positions[0, 0] += 0.2
-    ase_write(str(path), h2o, format="eon")
+    base = molecule("C2H6")
+    base.positions[0, 0] += 0.2
+    ase_write(str(path), base, format="eon")
 
 
 def _make_neb_dir(tmp_path, n_steps=3, n_images=5):
@@ -808,9 +809,9 @@ class TestPltNebWithIRA:
         """Landscape with additional .con overlay."""
         neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=5)
         extra = tmp_path / "extra.con"
-        h2o = molecule("H2O")
-        h2o.positions[0, 0] += 0.15
-        ase_write(str(extra), h2o, format="eon")
+        base = molecule("C2H6")
+        base.positions[0, 0] += 0.15
+        ase_write(str(extra), base, format="eon")
 
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
