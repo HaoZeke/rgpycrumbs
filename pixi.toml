@@ -24,7 +24,7 @@ depends-on = [
 cmd = "bash -c 'export COVERAGE_FILE=.coverage.test && python -m coverage run --source=rgpycrumbs -m pytest tests/ -q; true'"
 
 [feature.surfaces.tasks.test-surfaces]
-cmd = "bash -c 'export COVERAGE_FILE=.coverage.surfaces && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m surfaces -q; true'"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.surfaces && python -m coverage run --source=rgpycrumbs -m pytest tests/ -q; true'"
 
 [feature.fragments.tasks.test-fragments]
 cmd = "bash -c 'export COVERAGE_FILE=.coverage.fragments && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m \"fragments or ira or align\" -q; true'"
