@@ -317,6 +317,8 @@ class TestToMlflow:
 
     def test_cli_with_log_file(self, tmp_path):
         """Full CLI invocation with a minimal log file."""
+        from rgpycrumbs.eon.to_mlflow import main
+
         import mlflow
 
         log_file = tmp_path / "client.log"
@@ -336,9 +338,6 @@ class TestToMlflow:
         )
         # Exit code 0 means the run completed (config parsing may warn but not fail)
         assert result.exit_code == 0, result.output
-
-        # Importing main here to avoid issues; it's already imported above
-        from rgpycrumbs.eon.to_mlflow import main
 
 
 # ======================================================================
