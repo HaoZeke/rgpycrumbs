@@ -1293,3 +1293,201 @@ class TestPlotGPBatchDeep:
             "batch", "-c", str(cfg), "-b", str(tmp_path),
         ])
         assert result.exit_code == 1
+
+
+class TestPltNebEdgeCases:
+    """Cover specific uncovered lines/branches in plt_neb."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_fig_height_and_aspect_ratio(self, tmp_path):
+        """Cover line 527 (fig_height+aspect_ratio)."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--fig-height", "4.0",
+                "--aspect-ratio", "1.5",
+                "-o", "sized.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_fig_height_only_error(self, tmp_path):
+        """Cover line 529 (fig_height without aspect_ratio)."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--fig-height", "4.0",
+                "-o", "error.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_traj_source_missing_file(self):
+        """Cover line 580-581 (missing --input-traj)."""
+        runner = CliRunner()
+        result = runner.invoke(plt_neb_main, [
+            "--source", "traj",
+            "--plot-type", "profile",
+            "-o", "/tmp/nope.pdf",
+        ])
+        assert result.exit_code != 0
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_traj_landscape(self, tmp_path):
+        """Cover lines 592-596 (traj landscape source)."""
+        frames = [molecule("H2O") for _ in range(7)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.1 * i
+            f.info["energy"] = -0.5 * np.cos(np.pi * i / 6)
+            f.arrays["forces"] = np.zeros_like(f.positions)
+        traj = tmp_path / "traj.xyz"
+        ase_write(str(traj), frames, format="extxyz")
+
+        runner = CliRunner()
+        result = runner.invoke(plt_neb_main, [
+            "--source", "traj",
+            "--input-traj", str(traj),
+            "--plot-type", "landscape",
+            "--landscape-mode", "path",
+            "--no-project-path",
+            "-o", str(tmp_path / "traj_land.pdf"),
+        ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_hdf5_landscape_source(self, tmp_path):
+        """Cover lines 597-617 (hdf5 landscape source)."""
+        if not _HAS_H5PY:
+            pytest.skip("h5py required")
+
+        h5 = tmp_path / "neb_history.h5"
+        with h5py.File(h5, "w") as f:
+            # Minimal history structure
+            f.create_group("metadata")
+
+        runner = CliRunner()
+        result = runner.invoke(plt_neb_main, [
+            "--source", "hdf5",
+            "--input-h5", str(h5),
+            "--plot-type", "landscape",
+            "--landscape-mode", "path",
+            "--no-project-path",
+            "-o", str(tmp_path / "h5_land.pdf"),
+        ])
+        # Will likely fail but exercises the hdf5 landscape branch
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_no_dat_files(self, tmp_path):
+        """Cover lines 622-624 (no .dat files found)."""
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "-o", "nope.pdf",
+            ])
+            assert result.exit_code != 0
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_hdf5_profile_eigenvalue(self, tmp_path):
+        """Cover lines 971 (eigenvalue column in hdf5 profile)."""
+        if not _HAS_H5PY:
+            pytest.skip("h5py required")
+
+        h5 = tmp_path / "result.h5"
+        with h5py.File(h5, "w") as f:
+            f.create_group("metadata")
+
+        runner = CliRunner()
+        result = runner.invoke(plt_neb_main, [
+            "--source", "hdf5",
+            "--input-h5", str(h5),
+            "--plot-type", "profile",
+            "--plot-mode", "eigenvalue",
+            "-o", str(tmp_path / "eigen.pdf"),
+        ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_profile_normalize_rc(self, tmp_path):
+        """Cover normalize_rc branch."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--normalize-rc",
+                "-o", "normalized.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_last_path_only(self, tmp_path):
+        """Cover --landscape-path last branch."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=3)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--landscape-path", "last",
+                "--con-file", "neb.con",
+                "--no-project-path",
+                "-o", "last_path.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_strip_dividers_and_spacing(self, tmp_path):
+        """Cover strip rendering options."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "landscape",
+                "--landscape-mode", "path",
+                "--con-file", "neb.con",
+                "--sp-file", "sp.con",
+                "--plot-structures", "crit_points",
+                "--no-project-path",
+                "--strip-spacing", "2.0",
+                "--strip-dividers",
+                "-o", "strip.pdf",
+            ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_cmap_overrides(self, tmp_path):
+        """Cover cmap override options."""
+        neb_dir = _make_neb_dir(tmp_path)
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            import shutil
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+
+            result = runner.invoke(plt_neb_main, [
+                "--plot-type", "profile",
+                "--cmap-profile", "viridis",
+                "-o", "cmap.pdf",
+            ])

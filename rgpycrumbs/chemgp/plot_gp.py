@@ -665,12 +665,15 @@ def batch(
         try:
             from click.testing import CliRunner
 
-            runner = CliRunner()
-            result = runner.invoke(cmds[plot_type], args)
+            runner = CliRunner(mix_stderr=False)
+            result = runner.invoke(cmds[plot_type], args, catch_exceptions=True)
             if result.exit_code == 0:
                 return entry["output"], True, None
             else:
-                return entry["output"], False, result.output
+                err = result.output or ""
+                if result.exception:
+                    err += f" ({result.exception})"
+                return entry["output"], False, err
         except Exception as e:
             return entry["output"], False, str(e)
 
