@@ -1601,3 +1601,22 @@ class TestPltMinDefaultOutput:
             "-o", str(tmp_path / "land.pdf"),
         ])
         # Will fail without IRA but exercises the import path
+
+
+class TestPltSaddleDefaultOutput:
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_default_output(self, tmp_path):
+        from rgpycrumbs.eon.plt_saddle import main
+        h2o = molecule("H2O")
+        job = tmp_path / "job"
+        job.mkdir()
+        frames = [h2o.copy() for _ in range(3)]
+        ase_write(str(job / "climb"), frames, format="eon")
+        ase_write(str(job / "reactant.con"), h2o, format="eon")
+        lines = ["iteration\tstep_size\tdelta_e\tconvergence\teigenvalue\ttorque\tangle\trotations"]
+        for i in range(1, 3):
+            lines.append(f"{i}\t0.1\t0.01\t0.05\t-0.1\t0.05\t10.0\t3")
+        (job / "climb.dat").write_text("\n".join(lines) + "\n")
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(main, ["--job-dir", str(job), "--plot-type", "profile"])
