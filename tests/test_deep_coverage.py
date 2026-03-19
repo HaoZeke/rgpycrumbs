@@ -932,3 +932,142 @@ class TestToMlflowDeep:
         assert fig is not None
         import matplotlib.pyplot as plt
         plt.close(fig)
+
+
+class TestConSplitterDeep:
+    """Cover remaining con_splitter branches (lines 76-96)."""
+
+    def test_split_single_frame(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.con_splitter import main
+        except ImportError:
+            pytest.skip("con_splitter not importable")
+
+        # Single frame .con
+        h2o = molecule("H2O")
+        con = tmp_path / "single.con"
+        ase_write(str(con), h2o, format="eon")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [str(con), "--output-dir", str(tmp_path / "out")])
+
+    def test_split_multi_frame(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.con_splitter import main
+        except ImportError:
+            pytest.skip("con_splitter not importable")
+
+        frames = [molecule("H2O") for _ in range(4)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.1 * i
+        con = tmp_path / "multi.con"
+        ase_write(str(con), frames, format="eon")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [str(con), "--output-dir", str(tmp_path / "out")])
+
+    def test_split_with_prefix(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.con_splitter import main
+        except ImportError:
+            pytest.skip("con_splitter not importable")
+
+        frames = [molecule("H2O") for _ in range(3)]
+        con = tmp_path / "traj.con"
+        ase_write(str(con), frames, format="eon")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            str(con), "--output-dir", str(tmp_path / "out"), "--prefix", "image"
+        ])
+
+
+class TestNwchemGenDeep:
+    """Cover remaining generate_nwchem_input lines."""
+
+    def test_generate_with_pos_file(self, tmp_path):
+        try:
+            from rgpycrumbs.eon.generate_nwchem_input import main
+        except ImportError:
+            pytest.skip("generate_nwchem_input not importable")
+
+        # Create a pos.con file
+        h2o = molecule("H2O")
+        pos = tmp_path / "pos.con"
+        ase_write(str(pos), h2o, format="eon")
+
+        # Create a settings file
+        settings = tmp_path / "settings.ini"
+        settings.write_text("[NWChem]\nbasis = 6-31G\nmethod = dft\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--pos-file", str(pos),
+            "--settings", str(settings),
+            "--socket-address", "localhost:12345",
+            "--output", str(tmp_path / "nwchem.nwi"),
+        ])
+
+
+class TestPltSaddleDeep:
+    """Cover remaining plt_saddle branches."""
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_verbose_mode(self, tmp_path):
+        from rgpycrumbs.eon.plt_saddle import main
+
+        # Create synthetic job dir
+        h2o = molecule("H2O")
+        job = tmp_path / "job"
+        job.mkdir()
+
+        frames = [h2o.copy() for _ in range(5)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.05 * i
+        ase_write(str(job / "climb"), frames, format="eon")
+        ase_write(str(job / "reactant.con"), h2o, format="eon")
+
+        saddle = h2o.copy()
+        saddle.positions[0, 0] += 0.2
+        ase_write(str(job / "saddle.con"), saddle, format="eon")
+
+        (job / "mode.dat").write_text("1.0 0.0 0.0\n0.0 1.0 0.0\n0.0 0.0 1.0\n")
+        lines = ["iteration\tstep_size\tdelta_e\tconvergence\teigenvalue\ttorque\tangle\trotations"]
+        for i in range(1, 5):
+            lines.append(f"{i}\t0.1\t0.01\t0.05\t-0.1\t0.05\t10.0\t3")
+        (job / "climb.dat").write_text("\n".join(lines) + "\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--job-dir", str(job),
+            "--plot-type", "convergence",
+            "-v",
+            "-o", str(tmp_path / "conv.pdf"),
+        ])
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
+    def test_mode_evolution(self, tmp_path):
+        from rgpycrumbs.eon.plt_saddle import main
+
+        h2o = molecule("H2O")
+        job = tmp_path / "job"
+        job.mkdir()
+
+        frames = [h2o.copy() for _ in range(3)]
+        for i, f in enumerate(frames):
+            f.positions[0, 0] += 0.05 * i
+        ase_write(str(job / "climb"), frames, format="eon")
+        ase_write(str(job / "reactant.con"), h2o, format="eon")
+        ase_write(str(job / "saddle.con"), h2o, format="eon")
+        (job / "mode.dat").write_text("1.0 0.0 0.0\n0.0 1.0 0.0\n0.0 0.0 1.0\n")
+        lines = ["iteration\tstep_size\tdelta_e\tconvergence\teigenvalue\ttorque\tangle\trotations"]
+        for i in range(1, 3):
+            lines.append(f"{i}\t0.1\t0.01\t0.05\t-0.1\t0.05\t10.0\t3")
+        (job / "climb.dat").write_text("\n".join(lines) + "\n")
+
+        runner = CliRunner()
+        result = runner.invoke(main, [
+            "--job-dir", str(job),
+            "--plot-type", "mode-evolution",
+            "-o", str(tmp_path / "mode.pdf"),
+        ])
