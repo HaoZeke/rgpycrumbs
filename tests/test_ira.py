@@ -42,25 +42,31 @@ class TestIRAMatching:
 
     @pytest.fixture
     def h2_molecule(self):
-        """A simple H2 molecule."""
+        """A CH4 molecule (5 atoms, enough for IRA basis)."""
         skip_if_not_env("ira")
-        from ase.atoms import Atoms
+        from ase.build import molecule
 
-        return Atoms("H2", positions=[[0, 0, 0], [0, 0, 0.74]])
+        return molecule("CH4")
 
     @pytest.fixture
     def h2_translated(self, h2_molecule):
-        """H2 molecule translated by [1, 0, 0]."""
+        """CH4 molecule translated by [1, 0, 0]."""
         shifted = h2_molecule.copy()
         shifted.translate([1.0, 0.0, 0.0])
         return shifted
 
     @pytest.fixture
     def h2_permuted(self):
-        """H2 molecule with swapped atom indices."""
-        from ase.atoms import Atoms
+        """CH4 with permuted H atoms."""
+        skip_if_not_env("ira")
+        from ase.build import molecule
 
-        return Atoms("H2", positions=[[0, 0, 0.74], [0, 0, 0]])
+        mol = molecule("CH4")
+        # Swap two hydrogen positions
+        pos = mol.positions.copy()
+        pos[1], pos[2] = pos[2].copy(), pos[1].copy()
+        mol.positions = pos
+        return mol
 
     def test_perform_ira_match_different_lengths(self):
         """Should raise IncomparableStructuresError for different-length structures."""

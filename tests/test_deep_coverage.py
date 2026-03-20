@@ -1753,16 +1753,18 @@ class TestLogParamsDeep:
     """Cover remaining log_params lines 86-91."""
 
     @pytest.mark.eon
-    def test_missing_config(self, tmp_path):
+    def test_empty_config(self, tmp_path):
         try:
             from rgpycrumbs.eon._mlflow.log_params import log_config_ini
         except ImportError:
             pytest.skip("needs mlflow")
 
-        # Non-existent config should handle gracefully
+        # Empty config file
+        cfg = tmp_path / "empty.ini"
+        cfg.write_text("[Main]\njob = minimization\n")
         import mlflow
         with mlflow.start_run():
-            log_config_ini(tmp_path / "nonexistent.ini")
+            log_config_ini(cfg)
 
 
 class TestAuxDeep:

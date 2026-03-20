@@ -61,7 +61,7 @@ def _make_h2o_images(n_images=5, displacement_scale=0.05):
     from ase.build import molecule
 
     images = []
-    base = molecule("H2O")
+    base = molecule("C2H6")
     base.cell = [10, 10, 10]
     base.pbc = True
     rng = np.random.RandomState(42)
@@ -118,7 +118,7 @@ def _make_climb_dir(tmpdir, n_frames=10):
     job_dir = tmpdir / "climb_job"
     job_dir.mkdir()
 
-    base = molecule("H2O")
+    base = molecule("C2H6")
     base.cell = [10, 10, 10]
     base.pbc = True
 
@@ -168,7 +168,7 @@ def _make_min_dir(tmpdir, n_frames=10, prefix="min"):
     job_dir = tmpdir / "min_job"
     job_dir.mkdir()
 
-    base = molecule("H2O")
+    base = molecule("C2H6")
     base.cell = [10, 10, 10]
     base.pbc = True
 
@@ -478,6 +478,7 @@ class TestPltSaddlePlotting:
 
     @pytest.mark.surfaces
     def test_landscape(self, tmp_path):
+        pytest.importorskip("jax")
         """Test saddle landscape plot (no IRA, falls back to ASE Procrustes)."""
         main = self._import_main()
         job_dir = _make_climb_dir(tmp_path)
@@ -579,6 +580,7 @@ class TestPltMinPlotting:
 
     @pytest.mark.surfaces
     def test_landscape(self, tmp_path):
+        pytest.importorskip("jax")
         """Test minimization landscape plot."""
         main = self._import_main()
         job_dir = _make_min_dir(tmp_path)
