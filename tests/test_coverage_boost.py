@@ -1098,14 +1098,8 @@ class TestFragmentVisualization:
         pv_mock.Cylinder = MagicMock(return_value=MagicMock(n_points=10, point_data={}))
         pv_mock.merge = MagicMock(return_value=MagicMock())
 
-        # Mock cmcrameri
-        cmc_mock = types.ModuleType("cmcrameri")
-        cmc_cm = types.ModuleType("cmcrameri.cm")
-        cmc_cm.batlow = MagicMock()
-        cmc_mock.cm = cmc_cm
-
         self._originals = {}
-        for name, mod in [("pyvista", pv_mock), ("cmcrameri", cmc_mock), ("cmcrameri.cm", cmc_cm)]:
+        for name, mod in [("pyvista", pv_mock)]:
             self._originals[name] = sys.modules.get(name)
             sys.modules[name] = mod
 
