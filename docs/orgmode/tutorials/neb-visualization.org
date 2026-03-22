@@ -1,0 +1,298 @@
+#+TITLE: NEB Reaction Path Visualization
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+
+#+begin_export rst
+=============================
+NEB Reaction Path Visualization
+=============================
+#+end_export
+
+In this tutorial you will produce publication-quality figures from a
+Diels-Alder NEB calculation: a 1D energy profile, a 2D reaction
+valley landscape, a structure gallery with dividers, and an OCI-NEB
+peak overlay. You will try all four rendering backends (ASE, xyzrender,
+solvis, ovito).
+
+[[file:../../../_static/tutorial_final.png]]
+
+* Prerequisites
+
+#+begin_src bash
+# Install rgpycrumbs with plotting support
+pip install "rgpycrumbs[all]"
+
+# For xyzrender ball-and-stick rendering
+pip install xyzrender
+#+end_src
+
+The tutorial data ships with the rgpycrumbs source tree at
+=docs/orgmode/tutorials/data/diels_alder/=. It contains output from an
+OCI-NEB calculation of the Diels-Alder [4+2] cycloaddition of
+1,3-butadiene and ethylene (C6H10, 16 atoms, 22 images).
+
+* Step 1: Energy Profile
+
+#+begin_src python
+import matplotlib
+matplotlib.use("Agg")  # headless rendering
+
+from pathlib import Path
+
+# Point to the tutorial data
+data_dir = Path("docs/orgmode/tutorials/data/diels_alder")
+
+# Generate the energy profile with Hermite spline interpolation
+from click.testing import CliRunner
+from rgpycrumbs.eon.plt_neb import main
+
+runner = CliRunner()
+result = runner.invoke(main, [
+    "--plot-type", "profile",         # 1D energy profile
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--spline-method", "hermite",     # force-aware interpolation
+    "-o", "diels_alder_profile.pdf",
+])
+print(f"Exit: {result.exit_code}")
+#+end_src
+
+This produces a 1D energy profile with cubic Hermite spline interpolation
+using NEB parallel forces. The saddle point is automatically detected.
+
+* Step 2: 2D Reaction Valley Landscape
+
+The 2D landscape projects the NEB path onto RMSD coordinates, then fits a
+gradient-enhanced GP surface.
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "surface",     # GP surface interpolation
+    "--surface-type", "grad_matern",   # gradient-enhanced Matern kernel
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--project-path",                  # reaction valley (s, d) coordinates
+    "-o", "diels_alder_landscape.pdf",
+])
+print(f"Exit: {result.exit_code}")
+#+end_src
+
+The =--project-path= flag rotates the 2D RMSD plane into reaction progress
+(s) and orthogonal deviation (d) coordinates. This is the method from
+[[https://doi.org/10.1016/j.mex.2026.103851][goswami2026valley]].
+
+* Step 3: Structure Gallery with Dividers
+
+Render the key structures (reactant, saddle point, product) as a
+horizontal gallery below the landscape.
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",        # path overlay only (faster, no jax)
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--plot-structures", "crit_points", # R, SP, P gallery
+    "--strip-spacing", "2.0",          # wider gaps between images
+    "--strip-dividers",                # vertical divider lines
+    "--project-path",
+    "-o", "diels_alder_gallery.pdf",
+])
+print(f"Exit: {result.exit_code}")
+#+end_src
+
+The =--strip-spacing= and =--strip-dividers= flags control the gap between
+structure images and draw vertical separators for clarity.
+
+* Step 4: Rendering Backends
+
+The default ASE renderer produces space-filling sphere images. For
+ball-and-stick style, use the xyzrender backend.
+
+** ASE (default)
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--plot-structures", "crit_points",
+    "--strip-renderer", "ase",         # default: space-filling spheres
+    "--project-path",
+    "-o", "diels_alder_ase.pdf",
+])
+#+end_src
+
+** xyzrender (ball-and-stick)
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--plot-structures", "crit_points",
+    "--strip-renderer", "xyzrender",   # ball-and-stick with paton preset
+    "--project-path",
+    "-o", "diels_alder_xyzrender.pdf",
+])
+#+end_src
+
+Requires =pip install xyzrender=. Uses the paton preset with hydrogens
+visible and transparent background.
+
+** solvis (PyVista)
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--plot-structures", "crit_points",
+    "--strip-renderer", "solvis",      # ball-and-stick with PyVista
+    "--project-path",
+    "-o", "diels_alder_solvis.pdf",
+])
+#+end_src
+
+Requires =pip install solvis-tools=. Renders atoms as spheres with cylinder
+bonds using ASE neighbor list detection.
+
+** ovito (off-screen rendering)
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--plot-structures", "crit_points",
+    "--strip-renderer", "ovito",       # OVITO off-screen rendering
+    "--project-path",
+    "-o", "diels_alder_ovito.pdf",
+])
+#+end_src
+
+Requires =pip install ovito= (large dependency). Uses OpenGL off-screen
+rendering with orthographic projection.
+
+* Step 5: OCI-NEB Peak Overlay
+
+This Diels-Alder calculation used OCI-NEB (Optimized Climbing Image),
+which produces MMF (Mode-Following) peak refinement data. Overlay the
+refined peak positions on the landscape.
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--sp-file", str(data_dir / "sp.con"),
+    "--mmf-peaks",                     # overlay MMF peak positions
+    "--peak-dir", str(data_dir),       # directory with peak00_pos.con
+    "--project-path",
+    "-o", "diels_alder_mmf.pdf",
+])
+print(f"Exit: {result.exit_code}")
+#+end_src
+
+The star markers show where the dimer refinement placed the saddle
+point. This is useful for validating that the climbing image converged
+to the same transition state as the dimer.
+
+* Step 6: Band Evolution
+
+Show how the NEB band evolved during optimization.
+
+#+begin_src python
+result = runner.invoke(main, [
+    "--plot-type", "landscape",
+    "--landscape-mode", "path",
+    "--input-dat-pattern", str(data_dir / "neb_*.dat"),
+    "--input-path-pattern", str(data_dir / "neb_path_*.con"),
+    "--con-file", str(data_dir / "neb.con"),
+    "--show-evolution",                # show band evolution
+    "--no-project-path",               # raw RMSD coordinates
+    "-o", "diels_alder_evolution.pdf",
+])
+print(f"Exit: {result.exit_code}")
+#+end_src
+
+Older bands are drawn with lower opacity. The final converged band is
+most visible.
+
+* Step 7: CLI Shortcuts
+
+All the above can be run directly from the command line without Python.
+
+#+begin_src bash
+# Energy profile
+rgpycrumbs eon plt-neb \
+  --plot-type profile \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o profile.pdf
+
+# 2D landscape with xyzrender structures and dividers
+rgpycrumbs eon plt-neb \
+  --plot-type landscape \
+  --landscape-mode path \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  --plot-structures crit_points \
+  --strip-renderer xyzrender \
+  --strip-spacing 2.0 \
+  --strip-dividers \
+  --project-path \
+  -o landscape.pdf
+
+# OCI-NEB with peak overlay
+rgpycrumbs eon plt-neb \
+  --plot-type landscape \
+  --landscape-mode path \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  --mmf-peaks \
+  --peak-dir data/diels_alder/ \
+  --project-path \
+  -o mmf_peaks.pdf
+#+end_src
+
+* Summary
+
+You produced:
+
+| Figure | Description | Flag |
+|--------+-------------+------|
+| Energy profile | 1D Hermite spline with saddle marker | =--plot-type profile= |
+| Reaction landscape | 2D GP surface in (s, d) coordinates | =--landscape-mode surface= |
+| Structure gallery | R, SP, P images with dividers | =--plot-structures crit_points= |
+| Backend comparison | ASE / xyzrender / solvis / ovito | =--strip-renderer= |
+| MMF peaks | OCI-NEB dimer refinement overlay | =--mmf-peaks= |
+| Band evolution | Optimization iteration fading | =--show-evolution= |
+
+* See Also
+
+- [[file:../howto/dev_testing.org][How-to: Run Tests and Check Coverage]]
+- [[file:../reference/plotting_api.org][Plotting API Reference]] (chemparseplot docs)
+- [[file:../tools/eon/plt_neb.org][plt-neb CLI Reference]]
+- [[file:../tools/eon/plt_saddle.org][plt-saddle CLI Reference]]
+- [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]
