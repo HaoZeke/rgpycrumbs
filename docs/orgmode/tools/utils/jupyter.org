@@ -1,4 +1,4 @@
-#+TITLE: Jupyter Notebook Helpers
+#+TITLE: ~jupyter~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Notebook Execution Helpers

@@ -13,6 +13,18 @@ valley landscape with GP surface, structure galleries with four
 rendering backends, OCI-NEB peak overlays, and band evolution plots.
 
 #+begin_export rst
+.. admonition:: Reference
+
+   The 2D RMSD projection method used here is described in:
+
+   R. Goswami, "Two-dimensional RMSD projections for reaction path
+   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
+   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
+
+   If you use these visualizations in your work, please cite the paper.
+#+end_export
+
+#+begin_export rst
 .. image:: /_static/tutorial/surface_gallery.png
    :width: 100%
    :alt: Final result: 2D GP surface with xyzrender structure strip
@@ -125,7 +137,15 @@ kernel GP surface with variance contours (dashed lines). Requires jax.
 
 ** Rendering backends
 
-Four backends are available via =--strip-renderer=:
+Four backends are available via =--strip-renderer=. Each wraps an
+external visualization library:
+
+- [[https://github.com/aligfellow/xyzrender][xyzrender]] (default) -- ball-and-stick with the =paton= preset, auto-orientation via PCA
+- [[https://wiki.fysik.dtu.dk/ase/][ASE]] -- space-filling spheres, built-in (no extra deps)
+- [[https://github.com/amritagos/solvis][solvis]] -- PyVista ball-and-stick with transparent RGBA backgrounds
+- [[https://www.ovito.org/python/][OVITO Python]] -- off-screen rendering with orthographic projection
+
+See the [[file:rendering-backends.org][Rendering Backends Guide]] for detailed feature comparison.
 
 #+begin_src shell
 # xyzrender (default): ball-and-stick with paton preset
@@ -273,7 +293,8 @@ rgpycrumbs eon plt-neb \
 
 * See Also
 
-- [[file:../howto/dev_testing.org][How-to: Run Tests and Check Coverage]]
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
+- [[file:rendering-backends.org][Rendering Backends Guide]]
 - [[file:../tools/eon/plt_neb.org][plt-neb CLI Reference]]
 - [[file:../tools/eon/plt_saddle.org][plt-saddle CLI Reference]]
 - [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]

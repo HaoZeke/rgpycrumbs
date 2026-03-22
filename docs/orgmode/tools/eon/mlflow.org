@@ -1,4 +1,4 @@
-#+TITLE: MLFlow Logging for eOn
+#+TITLE: ~to-mlflow~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Configuration Logging

@@ -1,4 +1,4 @@
-#+TITLE: Batch Plot Generation
+#+TITLE: ~batch~
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+EMAIL: rgoswami@ieee.org
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t
@@ -56,14 +56,14 @@ n-points = [100, 200, 400]
 
 * Configuration Options
 
-** Defaults Section
+* Defaults Section
 
 | Option      | Type   | Default | Description                    |
 |-------------+--------+---------+--------------------------------|
 | input_dir   | string | =.=     | Base directory for input files |
 | output_dir  | string | =.=     | Base directory for output files|
 
-** Plot Entries
+* Plot Entries
 
 Each =[[plots]]= entry specifies a single plot:
 
@@ -118,7 +118,7 @@ Note: Speedup depends on I/O bandwidth and CPU cores available.
 
 * Examples
 
-** Basic Batch
+* Basic Batch
 
 Generate all plots from configuration:
 
@@ -126,7 +126,7 @@ Generate all plots from configuration:
 rgpycrumbs chemgp batch -c my_plots.toml
 #+end_src
 
-** Parallel Processing
+* Parallel Processing
 
 Process 20 plots with 4 workers:
 
@@ -134,7 +134,7 @@ Process 20 plots with 4 workers:
 rgpycrumbs chemgp batch -c large_batch.toml -j 4
 #+end_src
 
-** Custom Output Directory
+* Custom Output Directory
 
 #+begin_src toml
 [defaults]
@@ -151,7 +151,7 @@ output = "reaction1_surface.pdf"
 rgpycrumbs chemgp batch -c config.toml
 #+end_src
 
-** Type-Specific Options
+* Type-Specific Options
 
 #+begin_src toml
 [[plots]]
@@ -185,10 +185,10 @@ Exit code is 1 if any plots failed, 0 if all succeeded.
 
 * Performance Tips
 
-1. **Use parallel processing** for batches > 5 plots
-2. **Match workers to CPU cores** (typically 4-8 workers optimal)
-3. **Group by input directory** to minimize I/O seeks
-4. **Use SSD storage** for best I/O performance
+1. *Use parallel processing* for batches > 5 plots
+2. *Match workers to CPU cores* (typically 4-8 workers optimal)
+3. *Group by input directory* to minimize I/O seeks
+4. *Use SSD storage* for best I/O performance
 
 * See Also
 

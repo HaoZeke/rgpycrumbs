@@ -1,4 +1,4 @@
-#+TITLE: Batch Figure Generation Tutorial
+#+TITLE: Batch tutorial
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * What You Will Build

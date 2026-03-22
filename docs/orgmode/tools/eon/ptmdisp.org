@@ -1,4 +1,4 @@
-#+TITLE: Polyhedral Template Matcher
+#+TITLE: ~ptmdisp~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * PTM Displacement

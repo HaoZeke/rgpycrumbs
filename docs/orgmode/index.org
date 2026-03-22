@@ -16,10 +16,17 @@
 # Copied over by sphinx-build
 file:../../branding/logo/pycrumbs_logo.webp
 
-* Ecosystem Overview
-  The ~rgpycrumbs~ suite consists of several interlinked projects designed to
-  streamline computational chemistry workflows.
+* Overview
 
+~rgpycrumbs~ is a computational library and CLI toolkit for chemical
+physics. It provides surface fitting (JAX kernels), structure analysis
+(IRA matching, fragment detection), and a dispatcher-based CLI for NEB
+visualization, saddle search analysis, and simulation setup.
+
+Start with the [[file:quickstart.org][quickstart]] or the
+[[file:tutorials/neb-visualization.org][NEB visualization tutorial]].
+
+# Ecosystem diagram (generated during doc build)
 #+begin_src dot :file ecosystem.svg :exports results
 digraph G {
     rankdir=LR;
@@ -51,107 +58,51 @@ digraph G {
 }
 #+end_src
 
-* Overview
-  ~rgpycrumbs~ is a computational library and CLI toolkit for chemical physics
-  research. It provides both *importable library modules* for computational
-  tasks and a *dispatcher-based CLI* for running self-contained research scripts.
+* Key Features
 
-- Library Modules :: Importable Python modules for surface fitting (JAX-based
-  kernel methods), structure analysis (distance matrices, fragment detection),
-  IRA matching (RMSD-based structure comparison), spline interpolation, and
-  shared data types for NEB paths and saddle searches.
-- CLI Dispatcher :: A unified command-line interface that employs [[https://peps.python.org/pep-0723/][PEP 723]]
-  metadata to isolate dependencies per script via ~uv~ for conflict-free,
-  reproducible execution.
+- *NEB Visualization* :: 1D energy profiles, 2D reaction valley landscapes
+  with GP surface fitting, four rendering backends (xyzrender, ASE, solvis,
+  ovito), OCI-NEB peak overlays, and band evolution ([[file:tutorials/neb-visualization.org][tutorial]])
+- *Single-Ended Methods* :: Dimer/saddle search and minimization trajectory
+  visualization with the same 2D projection framework
+- *Surface Fitting* :: JAX-based gradient-enhanced kernels (Matern, IMQ, RBF)
+  for energy landscape interpolation
+- *Structure Analysis* :: IRA matching, fragment detection, distance matrices
+- *Simulation Setup* :: eOn, ORCA, and NWChem input generation
+- *CLI Dispatcher* :: [[https://peps.python.org/pep-0723/][PEP 723]] script metadata with ~uv~ auto-resolution
 
-Broadly speaking, the tooling here assists with computational methods to find
-reaction pathways, along with packaging helpers.
-* Advanced NEB Visualization
-The @@rst::doc:`plt-neb tool <tools/eon/plt_neb>`@@ offers novel visualization
-capabilities for Nudged Elastic Band calculations:
-- Force-Corrected Interpolation :: Uses Hermite splines incorporating force
-  projections to produce physically consistent energy profiles.
-- 2D Energy Landscapes :: Projects reaction paths onto Reactant/Product RMSD
-  coordinates to reveal path complexity often hidden in 1D profiles.
-- Structural Context :: Automatically renders and embeds atomic structure insets
-  for critical points or all images directly onto the plots.
-* Simulation Setup & Analysis
-** eOn
-- NEB initial path generation :: @@rst::doc:`con-splitter <tools/eon/con_splitter>`@@
-  simplifies the generation of initial paths enabling for instance ~IDPP~
-  initialization through ~ase~ by processing multi-image trajectories into
-  eOn-compatible input lists.
-- Defect Identification :: @@rst::doc:`ptmdisp <tools/eon/ptmdisp>`@@
-  employs Polyhedral Template Matching via ~OVITO~ to algorithmically identify
-  and index interstitial defects in crystalline systems.
-- ~NWChem~ Input Generation :: @@rst::doc:`generate-nwchem-input <tools/eon/generate_nwchem_input>`@@
-  generates complete input files compatible with eOn's ~SocketNWChemPot~,
-  merging geometry data with calculation settings.
-** ORCA
-- Input Generation :: @@rst::doc:`generate-orca-input <tools/orca/generate_orca_input>`@@
-  generates ORCA input files from TOML configurations, supporting NEB and single-point runs.
-** PLUMED
-- Free Energy Reconstruction :: Pure-python implementations for reconstructing
-  bias potentials from PLUMED hills files.
-* Infrastructure & Maintenance
-- Prefix.dev Management :: ~delete_packages~ helps maintain custom Conda/Pixi
-  channels by automating the cleanup of old or specific package versions on
-  [[https://prefix.dev][prefix.dev]].
-* Library API
-Beyond the CLI tools, ~rgpycrumbs~ provides importable library modules:
-
-- ~rgpycrumbs.surfaces~ :: JAX-based surface fitting with TPS, RBF, Matern 5/2,
-  SE, and IMQ kernels. Includes gradient-enhanced variants for energy landscape
-  interpolation. Install with ~pip install rgpycrumbs[surfaces]~.
-- ~rgpycrumbs.geom.analysis~ :: Structure analysis: distance matrices, bond
-  matrices, and fragment detection via ASE's ~NeighborList~. Install with ~pip
-  install rgpycrumbs[analysis]~.
-- ~rgpycrumbs.geom.ira~ :: Iterative Rotations and Assignments (IRA) for
-  RMSD-based structure comparison. Install with ~pip install rgpycrumbs[ira]~.
-- ~rgpycrumbs.interpolation~ :: Spline interpolation utilities built on SciPy.
-  Install with ~pip install rgpycrumbs[interpolation]~.
-- ~rgpycrumbs.basetypes~ :: Shared data structures (~nebiter~, ~nebpath~,
-  ~SaddleMeasure~, ~DimerOpt~, ~MolGeom~, ~SpinID~) used across ~rgpycrumbs~
-  and ~chemparseplot~. No extra dependencies required.
-
-** On-Demand Dependency Resolution
-A bare ~pip install rgpycrumbs~ gives access to the full API surface. Heavy
-optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use
-through a five-step priority chain:
-
-1. Current Python environment
-2. Parent environment (via ~RGPYCRUMBS_PARENT_SITE_PACKAGES~)
-3. Shared cache (~$XDG_CACHE_HOME/rgpycrumbs/deps/~)
-4. Automatic ~uv~ installation into the cache (opt-in: ~RGPYCRUMBS_AUTO_DEPS=1~)
-5. Actionable error message with install instructions
-
-CUDA-aware resolution selects CPU-only package variants (e.g. ~jax[cpu]~) on
-machines without a GPU, avoiding large downloads. See the
-@@rst::doc:`quickstart <quickstart>`@@ for configuration details.
-
-* Utility Functions
-The package also includes *pure-python* helpers for parsing logs like those from
-[[https://crates.io/crates/bless][bless]] and managing data structures in Jupyter notebooks.
-* Getting Started
+* Tutorials
 #+BEGIN_EXPORT rst
   .. toctree::
      :maxdepth: 1
-     :caption: Getting Started
+     :caption: Tutorials
 
      quickstart
+     tutorials/neb-visualization
+     tutorials/rendering-backends
      tutorials/first-project
-
-     quickstart
 #+END_EXPORT
 
-* Tool Categories
+* How-to Guides
+#+BEGIN_EXPORT rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: How-to Guides
+
+     howto/install
+     howto/faq
+     howto/troubleshooting
+     howto/dev_testing
+#+END_EXPORT
+
+* Tools
 #+BEGIN_EXPORT rst
   .. toctree::
      :maxdepth: 2
      :caption: Tools
 
-     tools/chemgp/index
      tools/eon/index
+     tools/chemgp/index
      tools/orca/index
      tools/geom/index
      tools/surfaces
@@ -159,17 +110,25 @@ The package also includes *pure-python* helpers for parsing logs like those from
      tools/prefix/index
 #+END_EXPORT
 
-* Developer Reference
-  For details on the dispatcher architecture or internal API:
-
+* Reference
 #+begin_export rst
   .. toctree::
      :maxdepth: 2
      :caption: Reference
 
-     used_by
-     changelog
-     devnotes
-     contributing/index
      autoapi/index
+     reference/glossary
+     changelog
+     used_by
+#+END_EXPORT
+
+* Contributing
+#+begin_export rst
+  .. toctree::
+     :maxdepth: 1
+     :caption: Contributing
+
+     contributing/index
+     dev/index
+     explanation/citation
 #+end_export

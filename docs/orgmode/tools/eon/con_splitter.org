@@ -1,4 +1,4 @@
-#+TITLE: Splitting ~con~ files
+#+TITLE: ~con-splitter~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Trajectory Splitting
@@ -8,7 +8,7 @@
    :nested: full
 #+END_EXPORT
 
-** Usage
+* Usage
 To split a trajectory file:
 #+BEGIN_SRC shell
 rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
@@ -31,8 +31,8 @@ minimize_endpoints_for_ipath = False
 # ❯ sphobjinv suggest -t 90 -u https://eondocs.org/objects/inv "NudgedElasticBand"
 # For all eOn NEB options, see the @@rst::external:py:pydantic_model:`eon:eon.schema.NudgedElasticBandConfig`@@ schema.
 
-** Refinement Strategies
-*** Structural Alignment
+* Refinement Strategies
+** Structural Alignment
 The ~--align-type~ option removes non-physical translational and rotational degrees of freedom that often accumulate during optimization.
 - all :: Aligns every intermediate image to the reactant. This creates a
   visually smooth trajectory but can occasionally introduce artifacts if the
@@ -40,19 +40,19 @@ The ~--align-type~ option removes non-physical translational and rotational degr
 - endpoints :: Aligns only the reactant and product. This ensures consistent
   boundary conditions while preserving the relative internal coordinates of the
   intermediate images as optimized.
-*** Iterative Reordering and Alignment (IRA)
+** Iterative Reordering and Alignment (IRA)
 When using ~--use-ira~, the script handles atom index permutations. In complex
 NEB optimizations (especially those involving surface diffusion or molecular
 dissociations), atom indices in the output trajectory may not match the reactant's
 order. IRA finds the optimal mapping and alignment simultaneously so that
 the resulting ~.con~ files maintain a consistent atom numbering scheme across
 the entire path.
-*** Centering and Unit Cell Management
+** Centering and Unit Cell Management
 The ~--center~ flag translates the center of mass of each image to the origin.
 Use ~--box-diagonal~ to override the simulation cell dimensions (e.g., ~20 20
 20~), which ensures all generated images share an identical vacuum box for
 eOn calculations.
-** Initial Path Generation from Generic Files
+* Initial Path Generation from Generic Files
 We may also generate valid starting points for an eOn NEB calculation from a
 generic ~.xyz~ file or any ASE compatible input. For instance, for a two-image
 trajectory, to convert a reactant/product pair into the required eOn format
@@ -65,13 +65,13 @@ python -m rgpycrumbs.cli eon con-splitter --images-per-path 2 initial.xyz --box-
 This approach ensures that the reactant and product share an identical vacuum
 box, center of mass, and atom indexing before the NEB optimization begins.
 
-** Troubleshooting
+* Troubleshooting
 
-*** "No images found in input file"
+** "No images found in input file"
 
-**Problem:** The script reports no structures in the input trajectory.
+*Problem:* The script reports no structures in the input trajectory.
 
-**Solution:**
+*Solution:*
 1. Verify the input file format is valid:
    #+BEGIN_SRC shell
    head -20 input.con
@@ -79,40 +79,40 @@ box, center of mass, and atom indexing before the NEB optimization begins.
 2. Check that the file contains multiple images (look for repeated headers)
 3. For .xyz files, ensure the first line is the atom count
 
-*** "Atom count mismatch between images"
+** "Atom count mismatch between images"
 
-**Problem:** Different images have different numbers of atoms.
+*Problem:* Different images have different numbers of atoms.
 
-**Solution:**
+*Solution:*
 1. Verify all images in the trajectory have the same atom count
 2. If using IRA (~--use-ira~), ensure ~--ira-kmax~ is appropriate for your system
 3. Check for missing atoms in the input file
 
-*** IRA alignment fails
+** IRA alignment fails
 
-**Problem:** The IRA algorithm cannot find a consistent atom mapping.
+*Problem:* The IRA algorithm cannot find a consistent atom mapping.
 
-**Solution:**
+*Solution:*
 1. Increase ~--ira-kmax~ (default 1.8) for more flexible matching
 2. Try ~--align-type endpoints~ instead of ~all~
 3. For surface systems, ensure the slab atoms are in consistent order
 
-*** Output images have wrong box size
+** Output images have wrong box size
 
-**Problem:** Generated .con files have incorrect unit cell dimensions.
+*Problem:* Generated .con files have incorrect unit cell dimensions.
 
-**Solution:**
+*Solution:*
 1. Use ~--box-diagonal~ to explicitly set cell dimensions:
    #+BEGIN_SRC shell
    rgpycrumbs eon con-splitter input.con --box-diagonal 25 25 25
    #+END_SRC
 2. Check that the input trajectory has valid cell information
 
-*** eOn reports "initial_path.in not found"
+** eOn reports "initial_path.in not found"
 
-**Problem:** eOn cannot find the generated path file.
+*Problem:* eOn cannot find the generated path file.
 
-**Solution:**
+*Solution:*
 1. Verify the output directory was created:
    #+BEGIN_SRC shell
    ls -la initial_images/

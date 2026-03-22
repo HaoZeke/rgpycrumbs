@@ -1,4 +1,4 @@
-#+TITLE: Plotting ChemGP figures
+#+TITLE: ~plt-gp~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * CLI Reference

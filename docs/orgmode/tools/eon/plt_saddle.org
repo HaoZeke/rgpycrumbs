@@ -1,4 +1,4 @@
-#+TITLE: Plotting Saddle Search Trajectories
+#+TITLE: ~plt-saddle~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Visualizing Dimer/Saddle Search Optimization
