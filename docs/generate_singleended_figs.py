@@ -134,6 +134,8 @@ run("saddle_convergence", saddle_main, ["--job-dir", sd, "--plot-type", "converg
 run("saddle_landscape", saddle_main, [
     "--job-dir", sd, "--plot-type", "landscape",
     "--surface-type", "grad_matern", "--project-path",
+    "--plot-structures", "endpoints", "--strip-renderer", "xyzrender",
+    "--strip-dividers",
 ])
 run("saddle_mode", saddle_main, ["--job-dir", sd, "--plot-type", "mode-evolution"])
 
@@ -150,6 +152,8 @@ run("min_convergence", min_main, ["--job-dir", md, "--plot-type", "convergence"]
 run("min_landscape", min_main, [
     "--job-dir", md, "--plot-type", "landscape",
     "--surface-type", "grad_matern", "--project-path",
+    "--plot-structures", "endpoints", "--strip-renderer", "xyzrender",
+    "--strip-dividers",
 ])
 
 # Clean up
