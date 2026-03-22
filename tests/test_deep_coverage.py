@@ -1783,3 +1783,48 @@ class TestAuxDeep:
 
         result = _has_cuda()
         assert isinstance(result, bool)
+
+
+@pytest.mark.fragments
+class TestSolvisRendering:
+    """Test solvis backend in fragments env (has pyvista)."""
+
+    def test_render_c2h6(self, tmp_path):
+        import pyvista as pv
+        pv.start_xvfb()
+        from chemparseplot.plot.neb import _render_atoms
+
+        c2h6 = molecule("C2H6")
+        img = _render_atoms(c2h6, "solvis", 0.3, "0x,90y,0z")
+        assert img.ndim == 3
+        assert img.shape[0] > 0
+
+    def test_render_in_strip(self, tmp_path):
+        import pyvista as pv
+        pv.start_xvfb()
+        from chemparseplot.plot.neb import plot_structure_strip
+
+        atoms = [molecule("C2H6"), molecule("CH4")]
+        fig, ax = plt.subplots(figsize=(6, 2))
+        plot_structure_strip(ax, atoms, ["A", "B"], renderer="solvis")
+        plt.close(fig)
+
+
+@pytest.mark.ptm
+class TestOvitoRendering:
+    """Test ovito backend in ptm env (has ovito)."""
+
+    def test_render_c2h6(self, tmp_path):
+        from chemparseplot.plot.neb import _render_atoms
+
+        c2h6 = molecule("C2H6")
+        img = _render_atoms(c2h6, "ovito", 0.3, "0x,90y,0z")
+        assert img.ndim == 3
+
+    def test_render_in_strip(self, tmp_path):
+        from chemparseplot.plot.neb import plot_structure_strip
+
+        atoms = [molecule("C2H6"), molecule("CH4")]
+        fig, ax = plt.subplots(figsize=(6, 2))
+        plot_structure_strip(ax, atoms, ["A", "B"], renderer="ovito")
+        plt.close(fig)
