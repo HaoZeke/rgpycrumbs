@@ -329,9 +329,9 @@ IRA_KMAX_DEFAULT = 1.8
     "--rotation",
     "ase_rotation",
     type=str,
-    default="0x, 90y, 0z",
+    default="auto",
     show_default=True,
-    help="Viewing rotation (applied to all backends). ASE-style string, e.g. '0x,90y,0z'.",
+    help="Viewing rotation. 'auto' lets xyzrender auto-orient (default). ASE-style string e.g. '0x,90y,0z' for manual control.",
 )
 @click.option(
     "--perspective-tilt",
