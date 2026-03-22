@@ -159,3 +159,68 @@ run("surface_mmf", [
 
 n_figs = len(list(OUT.glob("*.png")))
 print(f"\nGenerated {n_figs} figures in {OUT}")
+
+# --- Post-process RST to inject image directives ---
+RST = ROOT / "docs" / "source" / "tutorials" / "neb-visualization.rst"
+if RST.exists():
+    print(f"Injecting images into {RST}...")
+    rst = RST.read_text()
+
+    INJECTIONS = [
+        ("Step 1: Energy Profile\n----------------------", "profile"),
+        ("Multiple NEB optimization steps", None),  # skip, image before text
+        ("Shows the NEB path on raw RMSD", "landscape_raw"),
+        ("concerted mechanism.", "landscape_projected"),
+        ("contours with dashed variance", None),  # surfaces side-by-side
+        ("Left: projected", None),  # skip
+        ("Four backends are available", None),
+        ("solvis: PyVista", None),
+        ("Star markers show where", "mmf_peaks"),
+        ("Older bands are drawn", "evolution"),
+    ]
+
+    # Simpler approach: inject after specific headings
+    IMAGE_MAP = {
+        "Step 1: Energy Profile\n----------------------\n": (
+            "\n.. image:: /_static/tutorial/profile.png\n   :width: 80%\n\n"
+        ),
+        "Path overlay (no surface fit)\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n": (
+            "\n.. image:: /_static/tutorial/landscape_raw.png\n   :width: 80%\n\n"
+        ),
+        "Projected (s, d) coordinates\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n": (
+            "\n.. image:: /_static/tutorial/landscape_projected.png\n   :width: 80%\n\n"
+        ),
+        "GP surface fit\n~~~~~~~~~~~~~~\n": (
+            "\n.. image:: /_static/tutorial/surface_projected.png\n   :width: 49%\n"
+            ".. image:: /_static/tutorial/surface_raw.png\n   :width: 49%\n\n"
+        ),
+        "Rendering backends\n~~~~~~~~~~~~~~~~~~\n": (
+            "\n.. image:: /_static/tutorial/gallery_xyzrender.png\n   :width: 49%\n"
+            ".. image:: /_static/tutorial/gallery_ase.png\n   :width: 49%\n\n"
+            ".. image:: /_static/tutorial/gallery_solvis.png\n   :width: 60%\n\n"
+        ),
+        "Perspective tilt\n~~~~~~~~~~~~~~~~\n": (
+            "\n.. image:: /_static/tutorial/no_tilt.png\n   :width: 49%\n"
+            ".. image:: /_static/tutorial/tilt_8deg.png\n   :width: 49%\n\n"
+        ),
+        "Step 4: OCI-NEB Peak Overlay\n----------------------------\n": (
+            "\n.. image:: /_static/tutorial/mmf_peaks.png\n   :width: 80%\n\n"
+        ),
+        "Step 5: Band Evolution\n----------------------\n": (
+            "\n.. image:: /_static/tutorial/evolution.png\n   :width: 80%\n\n"
+        ),
+        "Combined Figure\n": (
+            "\n.. image:: /_static/tutorial/surface_mmf.png\n   :width: 100%\n\n"
+        ),
+    }
+
+    for marker, img_rst in IMAGE_MAP.items():
+        if marker in rst:
+            # Find the end of the heading (after the underline)
+            idx = rst.index(marker) + len(marker)
+            # Insert after the first blank line following the heading
+            next_blank = rst.index("\n\n", idx)
+            rst = rst[:next_blank] + "\n" + img_rst + rst[next_blank:]
+
+    RST.write_text(rst)
+    print("  Images injected into RST.")
