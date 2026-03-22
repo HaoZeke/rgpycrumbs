@@ -79,6 +79,8 @@ digraph G {
 
      quickstart
      tutorials/neb-visualization
+     tutorials/saddle-search-visualization
+     tutorials/minimization-visualization
      tutorials/rendering-backends
      tutorials/first-project
 #+END_EXPORT

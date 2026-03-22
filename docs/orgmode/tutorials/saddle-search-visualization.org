@@ -1,0 +1,158 @@
+#+TITLE: Saddle Search Visualization
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+
+#+begin_export rst
+=============================
+Saddle Search Visualization
+=============================
+#+end_export
+
+This tutorial shows how to visualize dimer and saddle point search
+trajectories using ~plt-saddle~. You will produce energy/eigenvalue
+profiles, 2D optimization landscapes, convergence panels, and mode
+evolution plots.
+
+#+begin_export rst
+.. admonition:: Reference
+
+   The 2D projection method used here is described in:
+
+   R. Goswami, "Two-dimensional RMSD projections for reaction path
+   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
+   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
+#+end_export
+
+* Prerequisites
+
+~plt-saddle~ reads eOn saddle search output: =climb= (movie file),
+=climb.dat= (iteration log), =reactant.con=, =saddle.con=, and
+optionally =mode.dat=.
+
+#+begin_src bash
+pip install "rgpycrumbs[all]"
+#+end_src
+
+The expected directory layout:
+
+#+begin_example
+saddle_job/
+  climb          # multi-frame .con trajectory
+  climb.dat      # TSV: iteration, step_size, convergence, delta_e, eigenvalue
+  reactant.con   # initial minimum
+  saddle.con     # converged saddle point
+  mode.dat       # (optional) final dimer eigenvector (Nx3)
+#+end_example
+
+* Step 1: Energy and Eigenvalue Profile
+
+The profile plot shows energy and lowest eigenvalue vs iteration.
+A successful dimer search shows energy rising while the eigenvalue
+becomes increasingly negative (negative curvature along the dimer axis).
+
+#+begin_src shell
+rgpycrumbs eon plt-saddle \
+  --job-dir saddle_job/ \
+  --plot-type profile \
+  -o saddle_profile.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/saddle_profile.png
+   :width: 80%
+   :alt: Energy and eigenvalue profile for dimer search
+#+end_export
+
+The dual-axis plot shows energy (left, teal) and eigenvalue (right,
+coral). The eigenvalue crossing zero indicates transition from convex
+to concave curvature -- the dimer has found a saddle region.
+
+* Step 2: 2D Optimization Landscape
+
+The landscape projects the trajectory into /(s, d)/ coordinates using
+RMSD from the reactant and saddle (or an optional product reference):
+
+- /s/ (progress): how far along the reactant-to-saddle axis
+- /d/ (deviation): lateral displacement from that axis
+
+#+begin_src shell
+rgpycrumbs eon plt-saddle \
+  --job-dir saddle_job/ \
+  --plot-type landscape \
+  --surface-type grad_matern \
+  --project-path \
+  -o saddle_landscape.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/saddle_landscape.png
+   :width: 80%
+   :alt: 2D optimization landscape for dimer search
+#+end_export
+
+The colored path shows the dimer walking uphill from the reactant
+basin toward the saddle point. The GP surface contours reveal the
+energy landscape topology. Dashed lines show variance contours -- the
+surface prediction is reliable inside the inner contour.
+
+Use =--ref-product product.con= to define the projection basis as
+reactant-to-product instead of reactant-to-saddle.
+
+* Step 3: Convergence Panel
+
+The convergence panel shows force norm and step size vs iteration --
+useful for diagnosing convergence issues.
+
+#+begin_src shell
+rgpycrumbs eon plt-saddle \
+  --job-dir saddle_job/ \
+  --plot-type convergence \
+  -o saddle_convergence.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/saddle_convergence.png
+   :width: 80%
+   :alt: Convergence panel for dimer search
+#+end_export
+
+The upper panel shows the maximum force component (convergence
+criterion); the lower panel shows the step size. Both should decrease
+monotonically for a well-behaved search.
+
+* Step 4: Mode Evolution
+
+When =mode.dat= is present, the mode evolution plot shows how the
+dimer rotation axis aligns with the final converged mode over
+iterations. This requires per-iteration mode vectors, which future
+eOn versions will provide.
+
+#+begin_src shell
+rgpycrumbs eon plt-saddle \
+  --job-dir saddle_job/ \
+  --plot-type mode-evolution \
+  -o saddle_mode.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/saddle_mode.png
+   :width: 80%
+   :alt: Mode evolution for dimer search
+#+end_export
+
+* Summary
+
+| Feature | Flag | Notes |
+|---------+------+-------|
+| Energy + eigenvalue | =--plot-type profile= | Dual-axis |
+| 2D landscape | =--plot-type landscape= | GP surface fit |
+| Convergence | =--plot-type convergence= | Force + step size |
+| Mode evolution | =--plot-type mode-evolution= | Requires mode.dat |
+| Product reference | =--ref-product product.con= | Changes (s,d) basis |
+| Projection toggle | =--project-path / --no-project-path= | Default: on |
+
+* See Also
+
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
+- [[file:neb-visualization.org][NEB Visualization Tutorial]]
+- [[file:minimization-visualization.org][Minimization Visualization Tutorial]]
+- [[file:../tools/eon/plt_saddle.org][plt-saddle CLI Reference]]
