@@ -334,6 +334,13 @@ IRA_KMAX_DEFAULT = 1.8
     help="Viewing rotation (applied to all backends). ASE-style string, e.g. '0x,90y,0z'.",
 )
 @click.option(
+    "--perspective-tilt",
+    type=float,
+    default=0.0,
+    show_default=True,
+    help="Small off-axis tilt (degrees) to reveal occluded atoms. 5-10 is typical.",
+)
+@click.option(
     "--strip-renderer",
     type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
     default="xyzrender",
@@ -498,6 +505,7 @@ def main(
     dpi,
     zoom_ratio,
     ase_rotation,
+    perspective_tilt,
     strip_renderer,
     strip_spacing,
     strip_dividers,
@@ -914,6 +922,7 @@ def main(
                 renderer=strip_renderer,
                 col_spacing=strip_spacing,
                 show_dividers=strip_dividers,
+                perspective_tilt=perspective_tilt,
             )
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
@@ -1052,6 +1061,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
+                        perspective_tilt=perspective_tilt,
                     )
         else:
             # eOn source: multiple .dat files
