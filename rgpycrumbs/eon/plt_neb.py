@@ -326,11 +326,12 @@ IRA_KMAX_DEFAULT = 1.8
     help="Scale the inset image.",
 )
 @click.option(
-    "--ase-rotation",
+    "--rotation",
+    "ase_rotation",
     type=str,
     default="0x, 90y, 0z",
     show_default=True,
-    help="ASE rotation string.",
+    help="Viewing rotation (applied to all backends). ASE-style string, e.g. '0x,90y,0z'.",
 )
 @click.option(
     "--strip-renderer",
