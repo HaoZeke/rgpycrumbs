@@ -139,6 +139,36 @@ rgpycrumbs eon plt-saddle \
    :alt: Mode evolution for dimer search
 #+end_export
 
+* Step 5: Comparing Optimizers
+
+Use =--job-dir= multiple times to overlay trajectories from different
+optimizers on the same plot. Each trajectory gets a distinct color and
+legend entry.
+
+#+begin_src shell
+rgpycrumbs eon plt-saddle \
+  --job-dir fire_job/ --label FIRE \
+  --job-dir lbfgs_job/ --label LBFGS \
+  --job-dir sd_job/ --label SD \
+  --plot-type profile \
+  -o optimizer_comparison.pdf
+#+end_src
+
+This works for all plot types -- profile, landscape, and convergence.
+On the landscape, the GP surface is fitted from the primary (first)
+trajectory, and all paths are overlaid with different colors. The
+convergence panel shows how quickly each optimizer reaches the force
+threshold.
+
+#+begin_src shell
+# Compare convergence of three optimizers
+rgpycrumbs eon plt-saddle \
+  --job-dir fire_job/ --label FIRE \
+  --job-dir lbfgs_job/ --label LBFGS \
+  --plot-type convergence \
+  -o convergence_comparison.pdf
+#+end_src
+
 * Summary
 
 | Feature | Flag | Notes |
@@ -148,6 +178,8 @@ rgpycrumbs eon plt-saddle \
 | Convergence | =--plot-type convergence= | Force + step size |
 | Mode evolution | =--plot-type mode-evolution= | Requires mode.dat |
 | Product reference | =--ref-product product.con= | Changes (s,d) basis |
+| Multi-trajectory | =--job-dir A --job-dir B= | Overlay with legend |
+| Structure strip | =--plot-structures endpoints= | R and SP below plot |
 | Projection toggle | =--project-path / --no-project-path= | Default: on |
 
 * See Also

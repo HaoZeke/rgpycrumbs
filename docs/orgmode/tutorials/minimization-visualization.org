@@ -123,6 +123,34 @@ type. Use =--prefix= to match:
 rgpycrumbs eon plt-min --job-dir job/ --prefix qm_min --plot-type profile
 #+end_src
 
+* Step 4: Comparing Optimizers
+
+Use =--job-dir= multiple times to overlay trajectories from different
+optimizers (FIRE, LBFGS, SD) on the same plot:
+
+#+begin_src shell
+rgpycrumbs eon plt-min \
+  --job-dir fire_min/ --label FIRE \
+  --job-dir lbfgs_min/ --label LBFGS \
+  --job-dir sd_min/ --label SD \
+  --plot-type profile \
+  -o optimizer_comparison.pdf
+#+end_src
+
+Each trajectory is plotted with a different color and appears in the
+legend. This works for profile, landscape, and convergence plots. On
+the landscape, the GP surface is fitted from the primary (first)
+trajectory, and all paths are overlaid.
+
+#+begin_src shell
+# Convergence comparison
+rgpycrumbs eon plt-min \
+  --job-dir fire_min/ --label FIRE \
+  --job-dir lbfgs_min/ --label LBFGS \
+  --plot-type convergence \
+  -o convergence_comparison.pdf
+#+end_src
+
 * Summary
 
 | Feature | Flag | Notes |
@@ -130,6 +158,8 @@ rgpycrumbs eon plt-min --job-dir job/ --prefix qm_min --plot-type profile
 | Energy profile | =--plot-type profile= | Energy vs iteration |
 | 2D landscape | =--plot-type landscape= | GP surface fit |
 | Convergence | =--plot-type convergence= | Force + step size |
+| Multi-trajectory | =--job-dir A --job-dir B= | Overlay with legend |
+| Structure strip | =--plot-structures endpoints= | Init and Min below |
 | Custom prefix | =--prefix qm_min= | For non-default file names |
 | Projection toggle | =--project-path / --no-project-path= | Default: on |
 
