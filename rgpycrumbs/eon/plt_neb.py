@@ -38,6 +38,9 @@ https://realpython.com/python-script-structure/
 #   "polars",
 #   "h5py",
 #   "chemparseplot",
+#   "xyzrender>=0.1.3",
+#   "solvis-tools>=0.1",
+#   "ovito>=3.14",
 # ]
 # ///
 
