@@ -100,6 +100,30 @@ rgpycrumbs eon plt-neb --plot-type landscape --show-evolution
 
 Older bands appear with lower opacity; the final band is most visible.
 
+** Structure Rendering
+
+*** Rendering Backends
+
+Four backends available via ~--strip-renderer~:
+
+| Backend | Install | Style |
+|---------+---------+-------|
+| ~xyzrender~ (default) | ~pip install xyzrender~ | Ball-and-stick, paton preset |
+| ~ase~ | Built-in | Space-filling spheres |
+| ~solvis~ | ~pip install solvis-tools~ | PyVista ball-and-stick, transparent bg |
+| ~ovito~ | ~pip install ovito~ | OVITO off-screen |
+
+*** Viewing Angle
+
+~--rotation "0x,90y,0z"~ (default) sets the viewing angle for all backends. Uses
+ASE-style rotation syntax.
+
+*** Perspective Tilt
+
+~--perspective-tilt 8~ applies a small Rodrigues off-axis rotation (8 degrees)
+to reveal atoms hidden by orthographic projection overlap. Useful for ring
+structures where H atoms hide behind carbons.
+
 ** See Also
 
 - [[file:plt_saddle.org][Plotting saddle search trajectories]] for dimer/single-ended visualization
