@@ -450,9 +450,8 @@ IRA_KMAX_DEFAULT = 1.8
     help="Show band evolution across iterations (requires write_movies data).",
 )
 @click.option(
-    "--show-legend",
-    is_flag=True,
-    default=False,
+    "--show-legend/--no-legend",
+    default=True,
     help="Show the legends.",
 )
 @click.option(
@@ -717,6 +716,15 @@ def main(
         final_p = df_final["p"].to_numpy()
         final_z = df_final["z"].to_numpy()
 
+        # Pass all-iteration data for triangulated background when no GP surface
+        bg_kwargs = {}
+        if landscape_mode != "surface":
+            bg_kwargs = {
+                "all_r": df["r"].to_numpy(),
+                "all_p": df["p"].to_numpy(),
+                "all_z": df["z"].to_numpy(),
+            }
+
         plot_landscape_path_overlay(
             ax,
             final_r,
@@ -725,6 +733,7 @@ def main(
             active_theme.cmap_landscape,
             z_label,
             project_path=project_path,
+            **bg_kwargs,
         )
 
         # --- OCI-NEB/RONEB: MMF Peaks Overlay ---
@@ -1111,10 +1120,12 @@ def main(
                 is_last = idx == len(file_paths_to_plot) - 1
                 if highlight_last and is_last:
                     color, alpha, zorder = active_theme.highlight_color, 1.0, 20
+                    step_label = f"Step {idx + 1} (final)"
                 else:
                     color = cm(idx / color_divisor)
                     alpha = 1.0 if idx == 0 else 0.5
                     zorder = 10 if idx == 0 else 5
+                    step_label = f"Step {idx + 1}" if idx == 0 else None
 
                 # Plot
                 plot_energy_path(
@@ -1126,6 +1137,7 @@ def main(
                     alpha,
                     zorder,
                     method=spline_method,
+                    label=step_label,
                 )
 
                 if (
