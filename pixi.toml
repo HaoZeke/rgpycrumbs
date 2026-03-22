@@ -150,8 +150,11 @@ npx html-minifier-terser \
 """
 
 
+[feature.test.tasks.genfigs]
+cmd = "python docs/generate_tutorial_figs.py"
+
 [feature.docs.tasks.docbld]
-depends-on = [ "mkrst", "sphinxbld" ]
+depends-on = [ { task = "genfigs", environment = "test" }, "mkrst", "sphinxbld" ]
 
 [feature.docs.tasks.sphinxbld]
 cmd = """
