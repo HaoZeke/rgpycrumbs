@@ -332,9 +332,9 @@ IRA_KMAX_DEFAULT = 1.8
 @click.option(
     "--strip-renderer",
     type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
-    default="ase",
+    default="xyzrender",
     show_default=True,
-    help="Rendering backend for structure images.",
+    help="Rendering backend for structure images (falls back to ASE if unavailable).",
 )
 @click.option(
     "--strip-spacing",
