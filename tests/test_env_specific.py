@@ -153,7 +153,9 @@ class TestDeletePackages:
         import requests
 
         session = requests.Session()
-        result = delete_package(session, "ch", "linux-64", "pkg-1.0.tar.bz2", dry_run=True)
+        result = delete_package(
+            session, "ch", "linux-64", "pkg-1.0.tar.bz2", dry_run=True
+        )
         assert result is True
 
     @patch("rgpycrumbs.prefix.delete_packages.requests.get")
@@ -174,7 +176,9 @@ class TestDeletePackages:
 
         mock_session = MagicMock()
         mock_session.delete.return_value = MagicMock(status_code=200)
-        result = delete_package(mock_session, "ch", "linux-64", "pkg.tar.bz2", dry_run=False)
+        result = delete_package(
+            mock_session, "ch", "linux-64", "pkg.tar.bz2", dry_run=False
+        )
         assert result is True
 
     def test_delete_package_failure(self):
@@ -183,7 +187,9 @@ class TestDeletePackages:
 
         mock_session = MagicMock()
         mock_session.delete.return_value = MagicMock(status_code=403, text="forbidden")
-        result = delete_package(mock_session, "ch", "linux-64", "pkg.tar.bz2", dry_run=False)
+        result = delete_package(
+            mock_session, "ch", "linux-64", "pkg.tar.bz2", dry_run=False
+        )
         assert result is False
 
 
@@ -300,9 +306,7 @@ class TestToMlflow:
 
         from rgpycrumbs.eon.to_mlflow import plot_structure_evolution
 
-        atoms_list = [
-            Atoms("H2", positions=[[0, 0, 0], [0.74, 0, 0]]) for _ in range(10)
-        ]
+        atoms_list = [Atoms("H2", positions=[[0, 0, 0], [0.74, 0, 0]]) for _ in range(10)]
         fig = plot_structure_evolution(atoms_list, plot_every=5)
         assert fig is not None
         plt.close(fig)
@@ -331,9 +335,12 @@ class TestToMlflow:
         result = runner.invoke(
             main,
             [
-                "--log-file", str(log_file),
-                "--config-file", str(config_file),
-                "--experiment", "test_cli_run",
+                "--log-file",
+                str(log_file),
+                "--config-file",
+                str(config_file),
+                "--experiment",
+                "test_cli_run",
             ],
         )
         # Exit code 0 means the run completed (config parsing may warn but not fail)
@@ -569,9 +576,7 @@ class TestDetectFragmentsCLI:
         write(str(xyz_path), dimer)
 
         runner = CliRunner()
-        result = runner.invoke(
-            main, ["geometric", str(xyz_path), "--min-dist", "5.0"]
-        )
+        result = runner.invoke(main, ["geometric", str(xyz_path), "--min-dist", "5.0"])
         assert result.exit_code == 0
 
     def test_geometric_covalent_radius_type(self, tmp_path):
@@ -609,8 +614,10 @@ class TestDetectFragmentsCLI:
             [
                 "batch",
                 str(tmp_path),
-                "--method", "geometric",
-                "--output", str(output_csv),
+                "--method",
+                "geometric",
+                "--output",
+                str(output_csv),
             ],
         )
         assert result.exit_code == 0
@@ -691,11 +698,13 @@ class TestFragmentVisualization:
 
         atoms = Atoms("H3", positions=[[0, 0, 0], [0.74, 0, 0], [2.0, 0, 0]])
         # Matrix with one strong bond and one weak interaction
-        matrix = np.array([
-            [0.0, 1.2, 0.3],
-            [1.2, 0.0, 0.1],
-            [0.3, 0.1, 0.0],
-        ])
+        matrix = np.array(
+            [
+                [0.0, 1.2, 0.3],
+                [1.2, 0.0, 0.1],
+                [0.3, 0.1, 0.0],
+            ]
+        )
         visualize_with_pyvista(
             atoms,
             DetectionMethod.BOND_ORDER,

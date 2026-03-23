@@ -125,9 +125,21 @@ IRA_KMAX_DEFAULT = 1.8
     help="Rendering backend for structure strip.",
 )
 @click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
-@click.option("--strip-dividers", is_flag=True, default=False, help="Show dividers between structures.")
-@click.option("--rotation", type=str, default="auto", help="Viewing angle for structure rendering.")
-@click.option("--perspective-tilt", type=float, default=0.0, help="Off-axis perspective tilt in degrees.")
+@click.option(
+    "--strip-dividers",
+    is_flag=True,
+    default=False,
+    help="Show dividers between structures.",
+)
+@click.option(
+    "--rotation", type=str, default="auto", help="Viewing angle for structure rendering."
+)
+@click.option(
+    "--perspective-tilt",
+    type=float,
+    default=0.0,
+    help="Off-axis perspective tilt in degrees.",
+)
 @click.option(
     "-o",
     "--output",
@@ -181,7 +193,7 @@ def main(
 
     labels = list(label) if label else [Path(jd).name for jd in job_dir]
     if len(labels) < len(trajs):
-        labels.extend([f"Run {i+1}" for i in range(len(labels), len(trajs))])
+        labels.extend([f"Run {i + 1}" for i in range(len(labels), len(trajs))])
 
     trajs[0]
 
@@ -192,7 +204,10 @@ def main(
         _plot_profile(trajs, labels, output, dpi)
     elif plot_type == "landscape":
         _plot_landscape(
-            trajs, labels, output, dpi,
+            trajs,
+            labels,
+            output,
+            dpi,
             project_path=project_path,
             surface_type=surface_type,
             ira_kmax=ira_kmax,
@@ -222,8 +237,9 @@ def _plot_profile(trajs, labels, output, dpi):
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         iters = dat["iteration"].to_numpy()
         energies = dat["energy"].to_numpy()
-        ax.plot(iters, energies, "o-", color=color, markersize=4,
-                linewidth=1.5, label=lbl)
+        ax.plot(
+            iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
+        )
 
     ax.set_xlabel("Iteration")
     ax.set_ylabel("Energy (eV)")
@@ -237,10 +253,22 @@ def _plot_profile(trajs, labels, output, dpi):
 
 
 def _plot_landscape(
-    trajs, labels, output, dpi, *, project_path, surface_type, ira_kmax,
-    cmap="viridis", plot_structures="none", strip_renderer="xyzrender",
-    strip_spacing=1.5, strip_dividers=False, rotation="auto",
-    perspective_tilt=0.0, theme=None,
+    trajs,
+    labels,
+    output,
+    dpi,
+    *,
+    project_path,
+    surface_type,
+    ira_kmax,
+    cmap="viridis",
+    plot_structures="none",
+    strip_renderer="xyzrender",
+    strip_spacing=1.5,
+    strip_dividers=False,
+    rotation="auto",
+    perspective_tilt=0.0,
+    theme=None,
 ):
     try:
         from rgpycrumbs._aux import _import_from_parent_env
@@ -253,8 +281,11 @@ def _plot_landscape(
     traj = trajs[0]
 
     rmsd_a, rmsd_b = calculate_landscape_coords(
-        traj.atoms_list, ira_instance, ira_kmax,
-        ref_a=traj.initial_atoms, ref_b=traj.final_atoms,
+        traj.atoms_list,
+        ira_instance,
+        ira_kmax,
+        ref_a=traj.initial_atoms,
+        ref_b=traj.final_atoms,
     )
     energies = traj.dat_df["energy"].to_numpy()
     n = min(len(rmsd_a), len(energies))
@@ -279,16 +310,26 @@ def _plot_landscape(
         apply_axis_theme(ax, theme)
 
     plot_optimization_landscape(
-        ax, rmsd_a, rmsd_b, grad_a, grad_b, energies,
-        project_path=project_path, method=surface_type, cmap=cmap,
+        ax,
+        rmsd_a,
+        rmsd_b,
+        grad_a,
+        grad_b,
+        energies,
+        project_path=project_path,
+        method=surface_type,
+        cmap=cmap,
         label_mode="optimization",
     )
 
     # Overlay paths from all trajectories
     for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
-            t.atoms_list, ira_instance, ira_kmax,
-            ref_a=traj.initial_atoms, ref_b=traj.final_atoms,
+            t.atoms_list,
+            ira_instance,
+            ira_kmax,
+            ref_a=traj.initial_atoms,
+            ref_b=traj.final_atoms,
         )
         m = min(len(ra), len(t.dat_df))
         ra, rb = ra[:m], rb[:m]
@@ -301,8 +342,17 @@ def _plot_landscape(
 
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         if len(trajs) > 1:
-            ax.plot(px, py, "o-", color=color, markersize=3, linewidth=1.5,
-                    alpha=0.8, zorder=55, label=lbl)
+            ax.plot(
+                px,
+                py,
+                "o-",
+                color=color,
+                markersize=3,
+                linewidth=1.5,
+                alpha=0.8,
+                zorder=55,
+                label=lbl,
+            )
 
     # Annotate endpoints
     if project_path:
@@ -314,10 +364,24 @@ def _plot_landscape(
         sx, sy = float(rmsd_a[0]), float(rmsd_b[0])
         ex, ey = float(rmsd_a[-1]), float(rmsd_b[-1])
 
-    ax.annotate("Init", (sx, sy), fontsize=10, fontweight="bold",
-                ha="center", va="bottom", zorder=60)
-    ax.annotate("Min", (ex, ey), fontsize=10, fontweight="bold",
-                ha="center", va="bottom", zorder=60)
+    ax.annotate(
+        "Init",
+        (sx, sy),
+        fontsize=10,
+        fontweight="bold",
+        ha="center",
+        va="bottom",
+        zorder=60,
+    )
+    ax.annotate(
+        "Min",
+        (ex, ey),
+        fontsize=10,
+        fontweight="bold",
+        ha="center",
+        va="bottom",
+        zorder=60,
+    )
 
     if len(trajs) > 1:
         ax.legend(frameon=True, framealpha=0.9, loc="best")
@@ -333,10 +397,16 @@ def _plot_landscape(
             strip_labels.append("Min")
 
         plot_structure_strip(
-            ax_strip, structs, strip_labels, zoom=0.8, rotation=rotation,
+            ax_strip,
+            structs,
+            strip_labels,
+            zoom=0.8,
+            rotation=rotation,
             theme_color=theme.textcolor if theme else "black",
-            renderer=strip_renderer, col_spacing=strip_spacing,
-            show_dividers=strip_dividers, perspective_tilt=perspective_tilt,
+            renderer=strip_renderer,
+            col_spacing=strip_spacing,
+            show_dividers=strip_dividers,
+            perspective_tilt=perspective_tilt,
         )
 
     fig.tight_layout()

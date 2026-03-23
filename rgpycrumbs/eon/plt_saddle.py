@@ -126,9 +126,21 @@ IRA_KMAX_DEFAULT = 1.8
     help="Rendering backend for structure strip.",
 )
 @click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
-@click.option("--strip-dividers", is_flag=True, default=False, help="Show dividers between structures.")
-@click.option("--rotation", type=str, default="auto", help="Viewing angle for structure rendering.")
-@click.option("--perspective-tilt", type=float, default=0.0, help="Off-axis perspective tilt in degrees.")
+@click.option(
+    "--strip-dividers",
+    is_flag=True,
+    default=False,
+    help="Show dividers between structures.",
+)
+@click.option(
+    "--rotation", type=str, default="auto", help="Viewing angle for structure rendering."
+)
+@click.option(
+    "--perspective-tilt",
+    type=float,
+    default=0.0,
+    help="Off-axis perspective tilt in degrees.",
+)
 @click.option(
     "-o",
     "--output",
@@ -178,14 +190,17 @@ def main(
     for jd in job_dir:
         log.info("Loading trajectory from %s", jd)
         t = load_dimer_trajectory(jd)
-        log.info("  %d frames, saddle=%s", len(t.atoms_list),
-                 "yes" if t.saddle_atoms is not None else "no")
+        log.info(
+            "  %d frames, saddle=%s",
+            len(t.atoms_list),
+            "yes" if t.saddle_atoms is not None else "no",
+        )
         trajs.append(t)
 
     # Generate labels
     labels = list(label) if label else [Path(jd).name for jd in job_dir]
     if len(labels) < len(trajs):
-        labels.extend([f"Run {i+1}" for i in range(len(labels), len(trajs))])
+        labels.extend([f"Run {i + 1}" for i in range(len(labels), len(trajs))])
 
     traj = trajs[0]  # primary trajectory for single-traj plot types
 
@@ -226,8 +241,9 @@ _OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#0096
 
 def _plot_profile(trajs, labels, output, dpi):
     has_eigen = any("eigenvalue" in t.dat_df.columns for t in trajs)
-    fig, axes = plt.subplots(1, 2 if has_eigen else 1,
-                             figsize=(10 if has_eigen else 5.37, 4), dpi=dpi)
+    fig, axes = plt.subplots(
+        1, 2 if has_eigen else 1, figsize=(10 if has_eigen else 5.37, 4), dpi=dpi
+    )
     if not has_eigen:
         axes = [axes]
 
@@ -236,13 +252,21 @@ def _plot_profile(trajs, labels, output, dpi):
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         iters = dat["iteration"].to_numpy()
         energies = dat["delta_e"].to_numpy()
-        axes[0].plot(iters, energies, "o-", color=color, markersize=4,
-                     linewidth=1.5, label=lbl)
+        axes[0].plot(
+            iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
+        )
 
         if has_eigen and "eigenvalue" in dat.columns:
             eigenvalues = dat["eigenvalue"].to_numpy()
-            axes[1].plot(iters, eigenvalues, "s-", color=color, markersize=3,
-                         linewidth=1.2, label=lbl)
+            axes[1].plot(
+                iters,
+                eigenvalues,
+                "s-",
+                color=color,
+                markersize=3,
+                linewidth=1.2,
+                label=lbl,
+            )
 
     axes[0].set_xlabel("Iteration")
     axes[0].set_ylabel("Energy (eV)")
@@ -264,10 +288,23 @@ def _plot_profile(trajs, labels, output, dpi):
 
 
 def _plot_landscape(
-    trajs, labels, output, dpi, *, ref_product, project_path, surface_type,
-    ira_kmax, cmap="viridis", plot_structures="none", strip_renderer="xyzrender",
-    strip_spacing=1.5, strip_dividers=False, rotation="auto",
-    perspective_tilt=0.0, theme=None,
+    trajs,
+    labels,
+    output,
+    dpi,
+    *,
+    ref_product,
+    project_path,
+    surface_type,
+    ira_kmax,
+    cmap="viridis",
+    plot_structures="none",
+    strip_renderer="xyzrender",
+    strip_spacing=1.5,
+    strip_dividers=False,
+    rotation="auto",
+    perspective_tilt=0.0,
+    theme=None,
 ):
     from ase.io import read as ase_read
 
@@ -307,8 +344,11 @@ def _plot_landscape(
 
     # Plot surface from primary trajectory
     rmsd_a, rmsd_b = calculate_landscape_coords(
-        traj.atoms_list, ira_instance, ira_kmax,
-        ref_a=traj.initial_atoms, ref_b=ref_b,
+        traj.atoms_list,
+        ira_instance,
+        ira_kmax,
+        ref_a=traj.initial_atoms,
+        ref_b=ref_b,
     )
     energies = traj.dat_df["delta_e"].to_numpy()
     n = min(len(rmsd_a), len(energies))
@@ -317,16 +357,26 @@ def _plot_landscape(
     grad_a, grad_b = compute_synthetic_gradients(rmsd_a, rmsd_b, f_para)
 
     plot_optimization_landscape(
-        ax, rmsd_a, rmsd_b, grad_a, grad_b, energies,
-        project_path=project_path, method=surface_type, cmap=cmap,
+        ax,
+        rmsd_a,
+        rmsd_b,
+        grad_a,
+        grad_b,
+        energies,
+        project_path=project_path,
+        method=surface_type,
+        cmap=cmap,
         label_mode="optimization",
     )
 
     # Overlay paths from all trajectories
     for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
-            t.atoms_list, ira_instance, ira_kmax,
-            ref_a=traj.initial_atoms, ref_b=ref_b,
+            t.atoms_list,
+            ira_instance,
+            ira_kmax,
+            ref_a=traj.initial_atoms,
+            ref_b=ref_b,
         )
         e = t.dat_df["delta_e"].to_numpy()
         m = min(len(ra), len(e))
@@ -340,11 +390,27 @@ def _plot_landscape(
 
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         if len(trajs) > 1:
-            ax.plot(px, py, "o-", color=color, markersize=3, linewidth=1.5,
-                    alpha=0.8, zorder=55, label=lbl)
+            ax.plot(
+                px,
+                py,
+                "o-",
+                color=color,
+                markersize=3,
+                linewidth=1.5,
+                alpha=0.8,
+                zorder=55,
+                label=lbl,
+            )
         # Annotate endpoints
-        ax.annotate("R", (float(px[0]), float(py[0])), fontsize=10,
-                    fontweight="bold", ha="center", va="bottom", zorder=60)
+        ax.annotate(
+            "R",
+            (float(px[0]), float(py[0])),
+            fontsize=10,
+            fontweight="bold",
+            ha="center",
+            va="bottom",
+            zorder=60,
+        )
 
     # Label final point of primary trajectory
     if project_path:
@@ -355,8 +421,15 @@ def _plot_landscape(
         ex, ey = float(rmsd_a[-1]), float(rmsd_b[-1])
 
     label_b = "SP" if traj.saddle_atoms is not None else "End"
-    ax.annotate(label_b, (ex, ey), fontsize=10, fontweight="bold",
-                ha="center", va="bottom", zorder=60)
+    ax.annotate(
+        label_b,
+        (ex, ey),
+        fontsize=10,
+        fontweight="bold",
+        ha="center",
+        va="bottom",
+        zorder=60,
+    )
 
     if len(trajs) > 1:
         ax.legend(frameon=True, framealpha=0.9, loc="best")
@@ -373,10 +446,16 @@ def _plot_landscape(
             strip_labels.append("End")
 
         plot_structure_strip(
-            ax_strip, structs, strip_labels, zoom=0.8, rotation=rotation,
+            ax_strip,
+            structs,
+            strip_labels,
+            zoom=0.8,
+            rotation=rotation,
             theme_color=theme.textcolor if theme else "black",
-            renderer=strip_renderer, col_spacing=strip_spacing,
-            show_dividers=strip_dividers, perspective_tilt=perspective_tilt,
+            renderer=strip_renderer,
+            col_spacing=strip_spacing,
+            show_dividers=strip_dividers,
+            perspective_tilt=perspective_tilt,
         )
 
     fig.tight_layout()

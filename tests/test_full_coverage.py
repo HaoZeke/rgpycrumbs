@@ -240,9 +240,7 @@ class TestAuxHelpers:
     def test_get_gitroot(self, _mock_which, mock_run):
         from rgpycrumbs._aux import get_gitroot
 
-        mock_run.return_value = MagicMock(
-            stdout=b"/home/user/project\n", returncode=0
-        )
+        mock_run.return_value = MagicMock(stdout=b"/home/user/project\n", returncode=0)
         root = get_gitroot()
         assert root == Path("/home/user/project")
 
@@ -281,7 +279,9 @@ class TestAuxHelpers:
     def test_uv_install_success(self, monkeypatch, tmp_path):
         from rgpycrumbs._aux import _uv_install
 
-        monkeypatch.setattr("shutil.which", lambda name: "/usr/bin/uv" if name == "uv" else None)
+        monkeypatch.setattr(
+            "shutil.which", lambda name: "/usr/bin/uv" if name == "uv" else None
+        )
         monkeypatch.setattr(
             "rgpycrumbs._aux.subprocess.run",
             MagicMock(return_value=MagicMock(returncode=0)),
@@ -430,9 +430,7 @@ class TestFragments:
         # Water 1 at origin
         w1 = Atoms("OH2", positions=[[0, 0, 0], [0.96, 0, 0], [-0.24, 0.93, 0]])
         # Water 2 far away
-        w2 = Atoms(
-            "OH2", positions=[[10, 10, 10], [10.96, 10, 10], [9.76, 10.93, 10]]
-        )
+        w2 = Atoms("OH2", positions=[[10, 10, 10], [10.96, 10, 10], [9.76, 10.93, 10]])
         combined = w1 + w2
         combined.set_cell([20, 20, 20])
         combined.set_pbc(False)
@@ -489,7 +487,9 @@ class TestFragments:
 
         from rgpycrumbs.geom.fragments import merge_fragments_by_distance
 
-        atoms = Atoms("H4", positions=[[0, 0, 0], [0.5, 0, 0], [100, 0, 0], [100.5, 0, 0]])
+        atoms = Atoms(
+            "H4", positions=[[0, 0, 0], [0.5, 0, 0], [100, 0, 0], [100.5, 0, 0]]
+        )
         labels = np.array([0, 0, 1, 1])
         n, new_labels = merge_fragments_by_distance(atoms, 2, labels, 3.0)
         assert n == 2
@@ -831,7 +831,9 @@ class TestBasetypesExtended:
     def test_mol_geom(self):
         from rgpycrumbs.basetypes import MolGeom
 
-        m = MolGeom(pos=np.array([[0, 0, 0]]), energy=-1.5, forces=np.array([[0.1, 0, 0]]))
+        m = MolGeom(
+            pos=np.array([[0, 0, 0]]), energy=-1.5, forces=np.array([[0.1, 0, 0]])
+        )
         assert m.energy == -1.5
 
     def test_saddle_measure_defaults(self):

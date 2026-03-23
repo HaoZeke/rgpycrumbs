@@ -23,6 +23,7 @@ from click.testing import CliRunner
 
 try:
     import h5py
+
     _HAS_H5PY = True
 except ImportError:
     h5py = None
@@ -49,6 +50,7 @@ _HAS_JAX = _can_import("jax")
 # Helpers: synthetic eOn data
 # ---------------------------------------------------------------------------
 
+
 def _write_con_file(path, atoms_list):
     """Write a list of ASE Atoms as a multi-frame eOn .con file."""
     from ase.io import write
@@ -67,7 +69,9 @@ def _make_h2o_images(n_images=5, displacement_scale=0.05):
     rng = np.random.RandomState(42)
     for i in range(n_images):
         atoms = base.copy()
-        atoms.positions += rng.randn(*atoms.positions.shape) * displacement_scale * (i + 1)
+        atoms.positions += (
+            rng.randn(*atoms.positions.shape) * displacement_scale * (i + 1)
+        )
         images.append(atoms)
     return images
 
@@ -146,7 +150,9 @@ def _make_climb_dir(tmpdir, n_frames=10):
         convergence = 0.5 / (i + 1)
         delta_e = -0.01 * i + rng.randn() * 0.001
         eigenvalue = -0.5 + 0.05 * i
-        rows.append(f"{i}\t{step_size:.6f}\t{convergence:.6f}\t{delta_e:.6f}\t{eigenvalue:.6f}\n")
+        rows.append(
+            f"{i}\t{step_size:.6f}\t{convergence:.6f}\t{delta_e:.6f}\t{eigenvalue:.6f}\n"
+        )
     with open(job_dir / "climb.dat", "w") as f:
         f.write(header)
         f.writelines(rows)
@@ -254,6 +260,7 @@ def _make_chemgp_profile_h5(path):
 # plt_neb tests
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.skipif(
     not _HAS_CHEMPARSEPLOT_NEB,
     reason="chemparseplot.plot.neb not available",
@@ -264,6 +271,7 @@ class TestPltNebPlotting:
     def _import_main(self):
         try:
             from rgpycrumbs.eon.plt_neb import main
+
             return main
         except ImportError:
             pytest.skip("plt_neb import failed (missing dep)")
@@ -278,15 +286,23 @@ class TestPltNebPlotting:
             # Copy data files into the isolated dir
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         # Allow exit code 0 or graceful error; check no crash
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
@@ -301,16 +317,25 @@ class TestPltNebPlotting:
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "--rc-mode", "index",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--rc-mode",
+                    "index",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -323,16 +348,25 @@ class TestPltNebPlotting:
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "--plot-mode", "eigenvalue",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--plot-mode",
+                    "eigenvalue",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -345,16 +379,25 @@ class TestPltNebPlotting:
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "--spline-method", "spline",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--spline-method",
+                    "spline",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -367,16 +410,24 @@ class TestPltNebPlotting:
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "--normalize-rc",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--normalize-rc",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -389,17 +440,27 @@ class TestPltNebPlotting:
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "--start", "0",
-                "--end", "2",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--start",
+                    "0",
+                    "--end",
+                    "2",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -412,16 +473,24 @@ class TestPltNebPlotting:
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
             td_path = Path(td)
             import shutil
+
             for f in tmp_path.glob("neb_*"):
                 shutil.copy2(f, td_path / f.name)
 
-            result = runner.invoke(main, [
-                "--plot-type", "profile",
-                "--source", "eon",
-                "--no-highlight-last",
-                "-o", str(output),
-                "--dpi", "72",
-            ])
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--no-highlight-last",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -429,6 +498,7 @@ class TestPltNebPlotting:
 # ---------------------------------------------------------------------------
 # plt_saddle tests
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.skipif(
     not _HAS_DIMER_TRAJ,
@@ -440,6 +510,7 @@ class TestPltSaddlePlotting:
     def _import_main(self):
         try:
             from rgpycrumbs.eon.plt_saddle import main
+
             return main
         except ImportError:
             pytest.skip("plt_saddle import failed")
@@ -450,12 +521,19 @@ class TestPltSaddlePlotting:
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_profile.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "profile",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -466,12 +544,19 @@ class TestPltSaddlePlotting:
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_convergence.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "convergence",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "convergence",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -484,13 +569,21 @@ class TestPltSaddlePlotting:
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_landscape.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "landscape",
-            "--surface-type", "grad_matern",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "landscape",
+                "--surface-type",
+                "grad_matern",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -501,12 +594,19 @@ class TestPltSaddlePlotting:
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_mode.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "mode-evolution",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "mode-evolution",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -517,13 +617,20 @@ class TestPltSaddlePlotting:
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_verbose.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "profile",
-            "-v",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-v",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -531,6 +638,7 @@ class TestPltSaddlePlotting:
 # ---------------------------------------------------------------------------
 # plt_min tests
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.skipif(
     not _HAS_DIMER_TRAJ,
@@ -542,6 +650,7 @@ class TestPltMinPlotting:
     def _import_main(self):
         try:
             from rgpycrumbs.eon.plt_min import main
+
             return main
         except ImportError:
             pytest.skip("plt_min import failed")
@@ -552,12 +661,19 @@ class TestPltMinPlotting:
         job_dir = _make_min_dir(tmp_path)
         output = tmp_path / "min_profile.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "profile",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -568,12 +684,19 @@ class TestPltMinPlotting:
         job_dir = _make_min_dir(tmp_path)
         output = tmp_path / "min_convergence.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "convergence",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "convergence",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -586,13 +709,21 @@ class TestPltMinPlotting:
         job_dir = _make_min_dir(tmp_path)
         output = tmp_path / "min_landscape.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "landscape",
-            "--surface-type", "grad_matern",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "landscape",
+                "--surface-type",
+                "grad_matern",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -603,13 +734,20 @@ class TestPltMinPlotting:
         job_dir = _make_min_dir(tmp_path)
         output = tmp_path / "min_verbose.png"
         runner = CliRunner()
-        result = runner.invoke(main, [
-            "--job-dir", str(job_dir),
-            "--plot-type", "profile",
-            "-v",
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-v",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -617,6 +755,7 @@ class TestPltMinPlotting:
 # ---------------------------------------------------------------------------
 # plot_gp (ChemGP) tests
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.skipif(
     not _HAS_CHEMGP,
@@ -629,6 +768,7 @@ class TestPlotGPPlotting:
     def _import_cli(self):
         try:
             from rgpycrumbs.chemgp.plot_gp import cli
+
             return cli
         except ImportError:
             pytest.skip("plot_gp import failed (missing dep)")
@@ -640,12 +780,18 @@ class TestPlotGPPlotting:
         _make_chemgp_convergence_h5(h5_path)
         output = tmp_path / "convergence.pdf"
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "convergence",
-            "-i", str(h5_path),
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            cli,
+            [
+                "convergence",
+                "-i",
+                str(h5_path),
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -657,14 +803,22 @@ class TestPlotGPPlotting:
         _make_chemgp_surface_h5(h5_path)
         output = tmp_path / "surface.pdf"
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "surface",
-            "-i", str(h5_path),
-            "-o", str(output),
-            "--clamp-lo", "-2.0",
-            "--clamp-hi", "2.0",
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            cli,
+            [
+                "surface",
+                "-i",
+                str(h5_path),
+                "-o",
+                str(output),
+                "--clamp-lo",
+                "-2.0",
+                "--clamp-hi",
+                "2.0",
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -676,12 +830,18 @@ class TestPlotGPPlotting:
         _make_chemgp_profile_h5(h5_path)
         output = tmp_path / "profile.pdf"
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "profile",
-            "-i", str(h5_path),
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            cli,
+            [
+                "profile",
+                "-i",
+                str(h5_path),
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
         assert output.exists()
@@ -694,12 +854,18 @@ class TestPlotGPPlotting:
         _make_chemgp_surface_h5(h5_path)
         output = tmp_path / "surface_auto.pdf"
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "surface",
-            "-i", str(h5_path),
-            "-o", str(output),
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            cli,
+            [
+                "surface",
+                "-i",
+                str(h5_path),
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
@@ -710,15 +876,25 @@ class TestPlotGPPlotting:
         _make_chemgp_surface_h5(h5_path)
         output = tmp_path / "surface_sized.pdf"
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            "surface",
-            "-i", str(h5_path),
-            "-o", str(output),
-            "-W", "10.0",
-            "-H", "8.0",
-            "--clamp-lo", "-2.0",
-            "--clamp-hi", "2.0",
-            "--dpi", "72",
-        ])
+        result = runner.invoke(
+            cli,
+            [
+                "surface",
+                "-i",
+                str(h5_path),
+                "-o",
+                str(output),
+                "-W",
+                "10.0",
+                "-H",
+                "8.0",
+                "--clamp-lo",
+                "-2.0",
+                "--clamp-hi",
+                "2.0",
+                "--dpi",
+                "72",
+            ],
+        )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"

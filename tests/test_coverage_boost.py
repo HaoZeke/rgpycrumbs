@@ -21,12 +21,14 @@ from click.testing import CliRunner
 
 import importlib
 
+
 def _has(mod):
     try:
         importlib.import_module(mod)
         return True
     except Exception:
         return False
+
 
 _HAS_REQUESTS = _has("requests")
 _HAS_PANDAS_BOOST = _has("pandas")
@@ -42,6 +44,7 @@ pytestmark = pytest.mark.pure
 # ======================================================================
 # Helpers for building mock modules
 # ======================================================================
+
 
 def _install_fake_module(name, attrs=None, monkeypatch=None):
     """Create a fake module in sys.modules."""
@@ -86,7 +89,9 @@ def _make_chemparseplot_mocks():
     mods["chemparseplot.parse.eon.min_trajectory"].load_min_trajectory = MagicMock()
 
     # chemparseplot.parse.trajectory
-    mods["chemparseplot.parse.trajectory"] = types.ModuleType("chemparseplot.parse.trajectory")
+    mods["chemparseplot.parse.trajectory"] = types.ModuleType(
+        "chemparseplot.parse.trajectory"
+    )
     mods["chemparseplot.parse.trajectory.hdf5"] = types.ModuleType(
         "chemparseplot.parse.trajectory.hdf5"
     )
@@ -103,11 +108,17 @@ def _make_chemparseplot_mocks():
     mods["chemparseplot.parse.trajectory.neb"] = types.ModuleType(
         "chemparseplot.parse.trajectory.neb"
     )
-    for fn_name in ["load_trajectory", "trajectory_to_landscape_df", "trajectory_to_profile_dat"]:
+    for fn_name in [
+        "load_trajectory",
+        "trajectory_to_landscape_df",
+        "trajectory_to_profile_dat",
+    ]:
         setattr(mods["chemparseplot.parse.trajectory.neb"], fn_name, MagicMock())
 
     # chemparseplot.parse.neb_utils
-    mods["chemparseplot.parse.neb_utils"] = types.ModuleType("chemparseplot.parse.neb_utils")
+    mods["chemparseplot.parse.neb_utils"] = types.ModuleType(
+        "chemparseplot.parse.neb_utils"
+    )
     mods["chemparseplot.parse.neb_utils"].calculate_landscape_coords = MagicMock(
         return_value=(np.zeros(5), np.zeros(5))
     )
@@ -116,8 +127,16 @@ def _make_chemparseplot_mocks():
     )
 
     # chemparseplot.parse.chemgp_hdf5
-    mods["chemparseplot.parse.chemgp_hdf5"] = types.ModuleType("chemparseplot.parse.chemgp_hdf5")
-    for fn_name in ["read_h5_grid", "read_h5_metadata", "read_h5_path", "read_h5_points", "read_h5_table"]:
+    mods["chemparseplot.parse.chemgp_hdf5"] = types.ModuleType(
+        "chemparseplot.parse.chemgp_hdf5"
+    )
+    for fn_name in [
+        "read_h5_grid",
+        "read_h5_metadata",
+        "read_h5_path",
+        "read_h5_points",
+        "read_h5_table",
+    ]:
         setattr(mods["chemparseplot.parse.chemgp_hdf5"], fn_name, MagicMock())
 
     # chemparseplot.plot
@@ -139,7 +158,9 @@ def _make_chemparseplot_mocks():
     mods["chemparseplot.plot.theme"].get_theme = MagicMock(return_value={})
     mods["chemparseplot.plot.theme"].setup_global_theme = MagicMock()
 
-    mods["chemparseplot.plot.optimization"] = types.ModuleType("chemparseplot.plot.optimization")
+    mods["chemparseplot.plot.optimization"] = types.ModuleType(
+        "chemparseplot.plot.optimization"
+    )
     for fn_name in [
         "plot_convergence_panel",
         "plot_dimer_mode_evolution",
@@ -248,7 +269,11 @@ class TestPltNeb:
         assert result.exit_code is not None
 
     def test_constants(self):
-        from rgpycrumbs.eon.plt_neb import DEFAULT_INPUT_PATTERN, DEFAULT_PATH_PATTERN, IRA_KMAX_DEFAULT
+        from rgpycrumbs.eon.plt_neb import (
+            DEFAULT_INPUT_PATTERN,
+            DEFAULT_PATH_PATTERN,
+            IRA_KMAX_DEFAULT,
+        )
 
         assert DEFAULT_INPUT_PATTERN == "neb_*.dat"
         assert DEFAULT_PATH_PATTERN == "neb_path_*.con"
@@ -258,7 +283,9 @@ class TestPltNeb:
 # ======================================================================
 # 2. plot_gp.py -- ChemGP CLI
 # ======================================================================
-@pytest.mark.skipif(not _HAS_DEV_CHEMGP, reason="needs dev chemparseplot with plot_convergence")
+@pytest.mark.skipif(
+    not _HAS_DEV_CHEMGP, reason="needs dev chemparseplot with plot_convergence"
+)
 class TestPlotGP:
     """Test chemgp/plot_gp.py click CLI group."""
 
@@ -523,7 +550,13 @@ class TestConSplitter:
         runner = CliRunner()
         result = runner.invoke(
             con_splitter,
-            [str(traj_file), "--images-per-path", "5", "--output-dir", str(tmp_path / "out")],
+            [
+                str(traj_file),
+                "--images-per-path",
+                "5",
+                "--output-dir",
+                str(tmp_path / "out"),
+            ],
         )
         assert result.exit_code != 0
 
@@ -572,7 +605,13 @@ class TestConSplitter:
         runner = CliRunner()
         result = runner.invoke(
             con_splitter,
-            [str(traj_file), "--images-per-path", "0", "--output-dir", str(tmp_path / "out")],
+            [
+                str(traj_file),
+                "--images-per-path",
+                "0",
+                "--output-dir",
+                str(tmp_path / "out"),
+            ],
         )
         assert result.exit_code != 0
 
@@ -618,7 +657,12 @@ class TestConSplitter:
         traj_file = tmp_path / "neb.traj"
         # 5 frames, images_per_path=3 -> 1 full path + 2 remainder
         frames = [
-            Atoms("H2", positions=[[0, 0, 0], [0.74 + i * 0.01, 0, 0]], cell=[10, 10, 10], pbc=True)
+            Atoms(
+                "H2",
+                positions=[[0, 0, 0], [0.74 + i * 0.01, 0, 0]],
+                cell=[10, 10, 10],
+                pbc=True,
+            )
             for i in range(5)
         ]
         ase_write(str(traj_file), frames)
@@ -744,7 +788,11 @@ class TestToMlflow:
         # Mock mlflow
         mlflow_mock = types.ModuleType("mlflow")
         mlflow_mock.set_experiment = MagicMock()
-        mlflow_mock.start_run = MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock(return_value=False)))
+        mlflow_mock.start_run = MagicMock(
+            return_value=MagicMock(
+                __enter__=MagicMock(), __exit__=MagicMock(return_value=False)
+            )
+        )
         mlflow_mock.log_metric = MagicMock()
         mlflow_mock.log_param = MagicMock()
         mlflow_mock.log_artifact = MagicMock()
@@ -785,7 +833,12 @@ class TestToMlflow:
         assert "--experiment" in result.output
 
     def test_regex_patterns(self):
-        from rgpycrumbs.eon.to_mlflow import NEB_ITER_RE, DIMER_STEP_RE, IDIMER_ROT_RE, POT_CALLS_RE
+        from rgpycrumbs.eon.to_mlflow import (
+            NEB_ITER_RE,
+            DIMER_STEP_RE,
+            IDIMER_ROT_RE,
+            POT_CALLS_RE,
+        )
 
         # NEB iteration line
         neb_line = "  1  0.0000e+00     1.3907e+01          10         8.304"
@@ -820,16 +873,16 @@ class TestToMlflow:
 
     def test_plot_structure_evolution_nonempty(self):
         import matplotlib
+
         matplotlib.use("Agg")
         from ase import Atoms
         from rgpycrumbs.eon.to_mlflow import plot_structure_evolution
 
-        atoms_list = [
-            Atoms("H2", positions=[[0, 0, 0], [0.74, 0, 0]]) for _ in range(10)
-        ]
+        atoms_list = [Atoms("H2", positions=[[0, 0, 0], [0.74, 0, 0]]) for _ in range(10)]
         fig = plot_structure_evolution(atoms_list, plot_every=5)
         assert fig is not None
         import matplotlib.pyplot as plt
+
         plt.close(fig)
 
 
@@ -919,7 +972,9 @@ class TestDeletePackages:
     def test_dry_run_no_packages(self):
         from rgpycrumbs.prefix.delete_packages import main
 
-        with patch("rgpycrumbs.prefix.delete_packages.get_packages_to_delete", return_value=[]):
+        with patch(
+            "rgpycrumbs.prefix.delete_packages.get_packages_to_delete", return_value=[]
+        ):
             runner = CliRunner()
             result = runner.invoke(
                 main,
@@ -1142,11 +1197,13 @@ class TestFragmentVisualization:
 
         atoms = Atoms("H2O", positions=[[0, 0, 0], [0.96, 0, 0], [0, 0.96, 0]])
         # Bond order matrix
-        bo_matrix = np.array([
-            [0, 1.0, 1.0],
-            [1.0, 0, 0.03],
-            [1.0, 0.03, 0],
-        ])
+        bo_matrix = np.array(
+            [
+                [0, 1.0, 1.0],
+                [1.0, 0, 0.03],
+                [1.0, 0.03, 0],
+            ]
+        )
         visualize_with_pyvista(atoms, DetectionMethod.BOND_ORDER, bo_matrix)
 
 
@@ -1387,6 +1444,7 @@ class TestJupyterHelper:
         from rgpycrumbs.run.jupyter import _run_command_live
 
         import inspect
+
         sig = inspect.signature(_run_command_live)
         assert "timeout" in sig.parameters
 
@@ -1505,21 +1563,31 @@ class TestMlflowLogParams:
         class FakeConfigClass:
             def __init__(self):
                 self.format = [
-                    FakeSection("Main", [
-                        FakeKey("method", "neb"),
-                        FakeKey("max_steps", "100", "int"),
-                    ]),
-                    FakeSection("NEB", [
-                        FakeKey("spring_constant", "5.0", "float"),
-                        FakeKey("converged", "false", "boolean"),
-                    ]),
+                    FakeSection(
+                        "Main",
+                        [
+                            FakeKey("method", "neb"),
+                            FakeKey("max_steps", "100", "int"),
+                        ],
+                    ),
+                    FakeSection(
+                        "NEB",
+                        [
+                            FakeKey("spring_constant", "5.0", "float"),
+                            FakeKey("converged", "false", "boolean"),
+                        ],
+                    ),
                 ]
 
         eon_config_mod.ConfigClass = FakeConfigClass
 
         # Mock _import_from_parent_env
         self._originals = {}
-        for name, mod in [("mlflow", mlflow_mock), ("eon", eon_mod), ("eon.config", eon_config_mod)]:
+        for name, mod in [
+            ("mlflow", mlflow_mock),
+            ("eon", eon_mod),
+            ("eon.config", eon_config_mod),
+        ]:
             self._originals[name] = sys.modules.get(name)
             sys.modules[name] = mod
 
@@ -1538,7 +1606,10 @@ class TestMlflowLogParams:
         sys.modules.pop("rgpycrumbs.eon._mlflow", None)
 
     def test_log_config_ini(self, tmp_path):
-        with patch("rgpycrumbs._aux._import_from_parent_env", return_value=sys.modules["eon.config"]):
+        with patch(
+            "rgpycrumbs._aux._import_from_parent_env",
+            return_value=sys.modules["eon.config"],
+        ):
             # Force reimport with mocks in place
             sys.modules.pop("rgpycrumbs.eon._mlflow.log_params", None)
             from rgpycrumbs.eon._mlflow.log_params import log_config_ini
@@ -1554,10 +1625,14 @@ class TestMlflowLogParams:
             log_config_ini(conf_file, w_artifact=False, track_overrides=True)
 
             import mlflow
+
             assert mlflow.log_param.called
 
     def test_log_config_ini_no_file(self, tmp_path):
-        with patch("rgpycrumbs._aux._import_from_parent_env", return_value=sys.modules["eon.config"]):
+        with patch(
+            "rgpycrumbs._aux._import_from_parent_env",
+            return_value=sys.modules["eon.config"],
+        ):
             sys.modules.pop("rgpycrumbs.eon._mlflow.log_params", None)
             from rgpycrumbs.eon._mlflow.log_params import log_config_ini
 
@@ -1565,6 +1640,7 @@ class TestMlflowLogParams:
             log_config_ini(conf_file, w_artifact=False)
 
             import mlflow
+
             assert mlflow.log_param.called
 
 
@@ -1579,9 +1655,11 @@ class TestToMlflowRegex:
     def _setup_mocks(self):
         mlflow_mock = types.ModuleType("mlflow")
         mlflow_mock.set_experiment = MagicMock()
-        mlflow_mock.start_run = MagicMock(return_value=MagicMock(
-            __enter__=MagicMock(), __exit__=MagicMock(return_value=False)
-        ))
+        mlflow_mock.start_run = MagicMock(
+            return_value=MagicMock(
+                __enter__=MagicMock(), __exit__=MagicMock(return_value=False)
+            )
+        )
         mlflow_mock.log_metric = MagicMock()
         mlflow_mock.log_param = MagicMock()
         mlflow_mock.log_artifact = MagicMock()
@@ -1636,4 +1714,5 @@ class TestToMlflowRegex:
         parse_and_log_metrics(log_file)
 
         import mlflow
+
         assert mlflow.log_metric.called

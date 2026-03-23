@@ -4,6 +4,7 @@
 Creates synthetic eOn-style output directories and generates all figures.
 Run as: pixi run -e test python docs/generate_singleended_figs.py
 """
+
 import shutil
 import tempfile
 from pathlib import Path
@@ -96,9 +97,7 @@ def _make_min_data(job_dir, n_frames=20, prefix="min"):
         step_size = 0.1 * np.exp(-0.1 * i) + 0.001
         convergence = 2.0 * np.exp(-0.2 * i) + 0.005
         energy = -10.0 - 0.5 * (1 - np.exp(-0.15 * i)) + rng.randn() * 0.002
-        rows.append(
-            f"{i}\t{step_size:.6f}\t{convergence:.6f}\t{energy:.6f}\n"
-        )
+        rows.append(f"{i}\t{step_size:.6f}\t{convergence:.6f}\t{energy:.6f}\n")
     with open(job_dir / f"{prefix}.dat", "w") as f:
         f.write(header)
         f.writelines(rows)
@@ -114,7 +113,10 @@ def run(name, cli_main, args):
     print(f"  {name}: {status}")
     if r.exit_code != 0 and r.exception:
         import traceback
-        traceback.print_exception(type(r.exception), r.exception, r.exception.__traceback__)
+
+        traceback.print_exception(
+            type(r.exception), r.exception, r.exception.__traceback__
+        )
     plt.close("all")
     return r.exit_code == 0
 
@@ -133,12 +135,24 @@ from rgpycrumbs.eon.plt_saddle import main as saddle_main  # noqa: E402
 sd = str(saddle_dir)
 run("saddle_profile", saddle_main, ["--job-dir", sd, "--plot-type", "profile"])
 run("saddle_convergence", saddle_main, ["--job-dir", sd, "--plot-type", "convergence"])
-run("saddle_landscape", saddle_main, [
-    "--job-dir", sd, "--plot-type", "landscape",
-    "--surface-type", "grad_matern", "--project-path",
-    "--plot-structures", "endpoints", "--strip-renderer", "xyzrender",
-    "--strip-dividers",
-])
+run(
+    "saddle_landscape",
+    saddle_main,
+    [
+        "--job-dir",
+        sd,
+        "--plot-type",
+        "landscape",
+        "--surface-type",
+        "grad_matern",
+        "--project-path",
+        "--plot-structures",
+        "endpoints",
+        "--strip-renderer",
+        "xyzrender",
+        "--strip-dividers",
+    ],
+)
 run("saddle_mode", saddle_main, ["--job-dir", sd, "--plot-type", "mode-evolution"])
 
 # --- Minimization ---
@@ -151,12 +165,24 @@ from rgpycrumbs.eon.plt_min import main as min_main  # noqa: E402
 md = str(min_dir)
 run("min_profile", min_main, ["--job-dir", md, "--plot-type", "profile"])
 run("min_convergence", min_main, ["--job-dir", md, "--plot-type", "convergence"])
-run("min_landscape", min_main, [
-    "--job-dir", md, "--plot-type", "landscape",
-    "--surface-type", "grad_matern", "--project-path",
-    "--plot-structures", "endpoints", "--strip-renderer", "xyzrender",
-    "--strip-dividers",
-])
+run(
+    "min_landscape",
+    min_main,
+    [
+        "--job-dir",
+        md,
+        "--plot-type",
+        "landscape",
+        "--surface-type",
+        "grad_matern",
+        "--project-path",
+        "--plot-structures",
+        "endpoints",
+        "--strip-renderer",
+        "xyzrender",
+        "--strip-dividers",
+    ],
+)
 
 # Clean up
 shutil.rmtree(tmpdir, ignore_errors=True)

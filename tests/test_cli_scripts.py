@@ -7,6 +7,7 @@ Tests that need cross-repo dev branches or conda-only deps (pypotlib,
 ovito) are guarded with skipif. They run in the pixi_envs workspace
 where all repos are editable installs.
 """
+
 import importlib
 
 import pytest
@@ -59,6 +60,7 @@ class TestPltNebCLI:
     def _import_main(self):
         try:
             from rgpycrumbs.eon.plt_neb import main
+
             return main
         except ImportError:
             pytest.skip("plt_neb import failed (missing dep)")
@@ -78,6 +80,7 @@ class TestPltSaddleCLI:
     def _import_main(self):
         try:
             from rgpycrumbs.eon.plt_saddle import main
+
             return main
         except ImportError:
             pytest.skip("plt_saddle import failed")
@@ -102,6 +105,7 @@ class TestPltMinCLI:
     def _import_main(self):
         try:
             from rgpycrumbs.eon.plt_min import main
+
             return main
         except ImportError:
             pytest.skip("plt_min import failed")
@@ -133,6 +137,7 @@ class TestXtsPotentials:
         from rgpycrumbs.func.muller_brown import muller_brown
 
         import numpy as np
+
         val, grad = muller_brown(np.array([0.0, 0.0]))
         assert isinstance(val, float)
         assert grad.shape == (2,)
@@ -151,6 +156,7 @@ class TestChemGPMatchAtoms:
     def test_import(self):
         try:
             from rgpycrumbs.chemgp import match_atoms
+
             assert hasattr(match_atoms, "match_atoms")
         except ImportError:
             pytest.skip("chemgp import chain failed")

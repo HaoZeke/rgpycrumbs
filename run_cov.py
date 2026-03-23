@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Run coverage across pixi environments and combine."""
+
 import os
 import subprocess
 import sys
@@ -20,11 +21,21 @@ def run_env(env_name, extra_args):
     env = os.environ.copy()
     env["COVERAGE_FILE"] = str(cov_file)
     cmd = [
-        "pixi", "run", "-e", env_name, "--",
-        "python", "-m", "coverage", "run",
+        "pixi",
+        "run",
+        "-e",
+        env_name,
+        "--",
+        "python",
+        "-m",
+        "coverage",
+        "run",
         f"--data-file={cov_file}",
         "--source=rgpycrumbs",
-        "-m", "pytest", "tests/", "-q",
+        "-m",
+        "pytest",
+        "tests/",
+        "-q",
     ] + extra_args
     print(f"=== {env_name} ===")
     result = subprocess.run(cmd, cwd=ROOT, capture_output=False)
@@ -55,14 +66,26 @@ def main():
     env = os.environ.copy()
     env["COVERAGE_FILE"] = str(ROOT / ".coverage")
     subprocess.run(
-        ["pixi", "run", "-e", "test", "--",
-         "python", "-m", "coverage", "combine", "--keep"] + produced,
-        cwd=ROOT, env=env,
+        [
+            "pixi",
+            "run",
+            "-e",
+            "test",
+            "--",
+            "python",
+            "-m",
+            "coverage",
+            "combine",
+            "--keep",
+        ]
+        + produced,
+        cwd=ROOT,
+        env=env,
     )
     subprocess.run(
-        ["pixi", "run", "-e", "test", "--",
-         "python", "-m", "coverage", "report"],
-        cwd=ROOT, env=env,
+        ["pixi", "run", "-e", "test", "--", "python", "-m", "coverage", "report"],
+        cwd=ROOT,
+        env=env,
     )
 
 

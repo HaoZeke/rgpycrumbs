@@ -772,7 +772,10 @@ def main(
                         [a.get_potential_energy() if a.calc else 0.0 for a in peak_atoms]
                     )
                     plot_mmf_peaks_overlay(
-                        ax, peak_rmsd_r, peak_rmsd_p, peak_e,
+                        ax,
+                        peak_rmsd_r,
+                        peak_rmsd_p,
+                        peak_e,
                         project_path=project_path,
                         path_rmsd_r=final_r,
                         path_rmsd_p=final_p,
@@ -790,7 +793,9 @@ def main(
                     step_r_list.append(step_df["r"].to_numpy())
                     step_p_list.append(step_df["p"].to_numpy())
                 plot_neb_evolution(
-                    ax, step_r_list, step_p_list,
+                    ax,
+                    step_r_list,
+                    step_p_list,
                     project_path=project_path,
                 )
                 log.info("Plotted band evolution (%d steps)", len(unique_steps))
@@ -811,9 +816,7 @@ def main(
         # Apply projection to saddle point if enabled
         if project_path:
             basis = compute_projection_basis(final_r, final_p)
-            sp_sd = project_to_sd(
-                np.array([sp_x_raw]), np.array([sp_y_raw]), basis
-            )
+            sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), basis)
             sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
             sp_x, sp_y = sp_x_raw, sp_y_raw
@@ -837,9 +840,7 @@ def main(
 
                 if project_path:
                     _basis = compute_projection_basis(final_r, final_p)
-                    _s, _d = project_to_sd(
-                        np.array([add_r]), np.array([add_p]), _basis
-                    )
+                    _s, _d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
                     plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
                     plot_add_r, plot_add_p = add_r, add_p
@@ -864,9 +865,7 @@ def main(
             def get_projected_coords(r_val, p_val):
                 if project_path:
                     _basis = compute_projection_basis(final_r, final_p)
-                    _s, _d = project_to_sd(
-                        np.array([r_val]), np.array([p_val]), _basis
-                    )
+                    _s, _d = project_to_sd(np.array([r_val]), np.array([p_val]), _basis)
                     return float(_s[0]), float(_d[0])
                 return r_val, p_val
 
@@ -1248,9 +1247,7 @@ def main(
             if additional_atoms_data:
                 _basis = compute_projection_basis(final_r, final_p)
                 for _, add_r, add_p, _ in additional_atoms_data:
-                    _, add_d = project_to_sd(
-                        np.array([add_r]), np.array([add_p]), _basis
-                    )
+                    _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
                     half_span = max(half_span, abs(float(add_d[0])) * 1.15)
             ax.set_ylim(-half_span, half_span)
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
