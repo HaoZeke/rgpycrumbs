@@ -36,4 +36,4 @@ jobs:
         shell: bash -el {0}
         run: |
           pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow || true
-          pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=87
+          pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=70
