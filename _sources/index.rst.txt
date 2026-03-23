@@ -57,7 +57,6 @@ Tutorials
      tutorials/saddle-search-visualization
      tutorials/minimization-visualization
      tutorials/rendering-backends
-     tutorials/first-project
 
 How-to Guides
 -------------
