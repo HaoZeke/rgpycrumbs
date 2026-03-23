@@ -22,13 +22,8 @@
 For developer details, see the @@rst::doc:`ChemGP Helper Reference
 <../../autoapi/rgpycrumbs/chemgp/index>`@@.
 
-* Performance Improvements [2026-03-13]
+** Performance notes
 
-  Recent performance enhancements to chemgp tools:
-
-  - Parallel batch processing with =--parallel/-j= flag (3-5x speedup)
-  - Caching with =@lru_cache= for repeated operations (10-20% speedup)
-  - Complete type hints (90%+ coverage)
-  - Error handling and HDF5 validation
-
-  See [[file:../../../Performance_Improvements_2026_03.org][internal documentation]] for details.
+   - Parallel batch processing with =--parallel/-j= flag (3-5x speedup)
+   - Caching with =@lru_cache= for repeated operations
+   - Complete type hints and HDF5 validation

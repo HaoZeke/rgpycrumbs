@@ -203,8 +203,8 @@ def calculate_rmsd_from_ref(
     :param ira_kmax: kmax factor for IRA.
     :return: An array of RMSD values.
     """
-    import os  # noqa: PLC0415
-    from concurrent.futures import ThreadPoolExecutor  # noqa: PLC0415
+    import os
+    from concurrent.futures import ThreadPoolExecutor
 
     config = IRAConfig(enabled=(ira_instance is not None), kmax=ira_kmax)
     coords_ref = ref_atom.get_positions()

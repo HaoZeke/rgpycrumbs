@@ -1,0 +1,171 @@
+#+TITLE: Minimization Visualization
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+
+#+begin_export rst
+==============================
+Minimization Visualization
+==============================
+#+end_export
+
+This tutorial shows how to visualize energy minimization trajectories
+using ~plt-min~. You will produce energy profiles, 2D optimization
+landscapes, and convergence panels.
+
+#+begin_export rst
+.. admonition:: Reference
+
+   The 2D projection method used here is described in:
+
+   R. Goswami, "Two-dimensional RMSD projections for reaction path
+   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
+   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
+#+end_export
+
+* Prerequisites
+
+~plt-min~ reads eOn minimization output: a movie file (multi-frame
+=.con=), a =.dat= iteration log, and optionally the final structure.
+
+#+begin_src bash
+pip install "rgpycrumbs[all]"
+#+end_src
+
+The expected directory layout:
+
+#+begin_example
+min_job/
+  min            # multi-frame .con trajectory (movie file)
+  min.dat        # TSV: iteration, step_size, convergence, energy
+  min.con        # (optional) final minimized structure
+#+end_example
+
+The file prefix defaults to =min= but can be changed with =--prefix=
+(e.g., =--prefix qm_min= for =qm_min=, =qm_min.dat=, =qm_min.con=).
+
+* Step 1: Energy Profile
+
+The profile plot shows total energy vs iteration. A successful
+minimization shows monotonically decreasing energy converging to a
+plateau.
+
+#+begin_src shell
+rgpycrumbs eon plt-min \
+  --job-dir min_job/ \
+  --plot-type profile \
+  -o min_profile.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/min_profile.png
+   :width: 80%
+   :alt: Energy profile for minimization
+#+end_export
+
+The exponential decay shape is typical for gradient descent
+minimization. The curve should flatten as forces approach zero.
+
+* Step 2: 2D Optimization Landscape
+
+The landscape projects the trajectory into /(s, d)/ coordinates:
+
+- /s/ (progress): RMSD distance from initial to final structure
+- /d/ (deviation): lateral displacement from the direct path
+
+#+begin_src shell
+rgpycrumbs eon plt-min \
+  --job-dir min_job/ \
+  --plot-type landscape \
+  --surface-type grad_matern \
+  --project-path \
+  -o min_landscape.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/min_landscape.png
+   :width: 80%
+   :alt: 2D optimization landscape for minimization
+#+end_export
+
+For a well-behaved minimization, the trajectory should follow the
+energy valley from the initial displaced geometry toward the minimum.
+Large lateral deviations indicate the optimizer is exploring
+off-pathway configurations.
+
+* Step 3: Convergence Panel
+
+The convergence panel monitors the force norm and step size to diagnose
+optimization quality.
+
+#+begin_src shell
+rgpycrumbs eon plt-min \
+  --job-dir min_job/ \
+  --plot-type convergence \
+  -o min_convergence.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/min_convergence.png
+   :width: 80%
+   :alt: Convergence panel for minimization
+#+end_export
+
+Both curves should decrease monotonically. Oscillations in the force
+norm suggest the step size is too large or the optimizer is struggling
+with the PES topology.
+
+* Custom File Prefix
+
+eOn minimization jobs can use different prefixes depending on the job
+type. Use =--prefix= to match:
+
+#+begin_src shell
+# For jobs with qm_min, qm_min.dat, qm_min.con
+rgpycrumbs eon plt-min --job-dir job/ --prefix qm_min --plot-type profile
+#+end_src
+
+* Step 4: Comparing Optimizers
+
+Use =--job-dir= multiple times to overlay trajectories from different
+optimizers (FIRE, LBFGS, SD) on the same plot:
+
+#+begin_src shell
+rgpycrumbs eon plt-min \
+  --job-dir fire_min/ --label FIRE \
+  --job-dir lbfgs_min/ --label LBFGS \
+  --job-dir sd_min/ --label SD \
+  --plot-type profile \
+  -o optimizer_comparison.pdf
+#+end_src
+
+Each trajectory is plotted with a different color and appears in the
+legend. This works for profile, landscape, and convergence plots. On
+the landscape, the GP surface is fitted from the primary (first)
+trajectory, and all paths are overlaid.
+
+#+begin_src shell
+# Convergence comparison
+rgpycrumbs eon plt-min \
+  --job-dir fire_min/ --label FIRE \
+  --job-dir lbfgs_min/ --label LBFGS \
+  --plot-type convergence \
+  -o convergence_comparison.pdf
+#+end_src
+
+* Summary
+
+| Feature | Flag | Notes |
+|---------+------+-------|
+| Energy profile | =--plot-type profile= | Energy vs iteration |
+| 2D landscape | =--plot-type landscape= | GP surface fit |
+| Convergence | =--plot-type convergence= | Force + step size |
+| Multi-trajectory | =--job-dir A --job-dir B= | Overlay with legend |
+| Structure strip | =--plot-structures endpoints= | Init and Min below |
+| Custom prefix | =--prefix qm_min= | For non-default file names |
+| Projection toggle | =--project-path / --no-project-path= | Default: on |
+
+* See Also
+
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
+- [[file:neb-visualization.org][NEB Visualization Tutorial]]
+- [[file:saddle-search-visualization.org][Saddle Search Visualization Tutorial]]
+- [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]

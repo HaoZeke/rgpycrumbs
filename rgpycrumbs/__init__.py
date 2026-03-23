@@ -5,31 +5,24 @@ except ImportError:
 
 
 def __getattr__(name):
-    if name == "surfaces":
-        try:
-            from rgpycrumbs import surfaces
-        except ImportError as exc:
-            msg = (
-                "rgpycrumbs.surfaces requires jax. Install with:\n"
-                "  pip install rgpycrumbs[surfaces]\n"
-                "Or set RGPYCRUMBS_AUTO_DEPS=1 to auto-resolve via uv."
-            )
-            raise ImportError(msg) from exc
-        return surfaces
-    if name == "basetypes":
-        from rgpycrumbs import basetypes
+    import importlib
 
-        return basetypes
-    if name == "interpolation":
+    _LAZY = {"surfaces", "basetypes", "interpolation", "geom"}
+    if name in _LAZY:
         try:
-            from rgpycrumbs import interpolation
+            return importlib.import_module(f".{name}", __name__)
         except ImportError as exc:
-            msg = (
-                "rgpycrumbs.interpolation requires scipy. Install with:\n"
-                "  pip install rgpycrumbs[interpolation]\n"
-                "Or set RGPYCRUMBS_AUTO_DEPS=1 to auto-resolve via uv."
-            )
-            raise ImportError(msg) from exc
-        return interpolation
+            hints = {
+                "surfaces": "pip install rgpycrumbs[surfaces]",
+                "interpolation": "pip install rgpycrumbs[interpolation]",
+            }
+            if name in hints:
+                msg = (
+                    f"rgpycrumbs.{name} requires optional deps. Install with:\n"
+                    f"  {hints[name]}\n"
+                    "Or set RGPYCRUMBS_AUTO_DEPS=1 to auto-resolve via uv."
+                )
+                raise ImportError(msg) from exc
+            raise
     aerr = f"module 'rgpycrumbs' has no attribute {name}"
     raise AttributeError(aerr)

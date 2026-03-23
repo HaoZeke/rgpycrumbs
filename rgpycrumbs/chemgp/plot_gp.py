@@ -28,7 +28,6 @@ from pathlib import Path
 import click
 import h5py
 import numpy as np
-
 from chemparseplot.parse.chemgp_hdf5 import (
     read_h5_grid,
     read_h5_metadata,
@@ -568,8 +567,9 @@ def batch(
     parallel: int,
 ):
     """Generate multiple plots from a TOML config."""
-    import tomllib
     from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    import tomllib
 
     with open(config_path, "rb") as fp:
         cfg = tomllib.load(fp)
@@ -665,12 +665,15 @@ def batch(
         try:
             from click.testing import CliRunner
 
-            runner = CliRunner()
-            result = runner.invoke(cmds[plot_type], args)
+            runner = CliRunner(mix_stderr=False)
+            result = runner.invoke(cmds[plot_type], args, catch_exceptions=True)
             if result.exit_code == 0:
                 return entry["output"], True, None
             else:
-                return entry["output"], False, result.output
+                err = result.output or ""
+                if result.exception:
+                    err += f" ({result.exception})"
+                return entry["output"], False, err
         except Exception as e:
             return entry["output"], False, str(e)
 

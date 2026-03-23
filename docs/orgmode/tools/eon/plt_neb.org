@@ -1,11 +1,11 @@
-#+TITLE: Plotting NEB paths
+#+TITLE: ~plt-neb~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Visualizing NEB Landscapes
 
 This tool generates 2D energy landscape plots from NEB calculations using gradient-enhanced surface interpolation.
 
-** Method
+* Method
 
 The default ~grad_imq~ surface method uses gradient-enhanced Inverse Multiquadric interpolation on 2D RMSD projections.
 This approach is described in:
@@ -16,7 +16,7 @@ This approach is described in:
 The method projects high-dimensional structures onto 2D RMSD coordinates (reactant distance ~r~ vs product distance ~p~),
 then fits a smooth surface using energy values and their gradients for enhanced accuracy.
 
-** Usage
+* Usage
 To plot a specific range of ~neb_*.dat~ files and save the output:
 # #+BEGIN_EXPORT rst
 # .. command-output:: python -m rgpycrumbs.cli eon plt-neb --start 10 --end 15 -o final_path.pdf
@@ -29,13 +29,13 @@ python -m rgpycrumbs.cli eon plt-neb --start 280
 #+END_SRC
 
 
-** Troubleshooting
+* Troubleshooting
 
-*** "No .dat files found" error
+** "No .dat files found" error
 
-**Problem:** The script reports no input files matching the pattern.
+*Problem:* The script reports no input files matching the pattern.
 
-**Solution:**
+*Solution:*
 1. Verify the input pattern matches your files:
    #+BEGIN_SRC shell
    ls neb_*.dat
@@ -45,34 +45,89 @@ python -m rgpycrumbs.cli eon plt-neb --start 280
    python -m rgpycrumbs.cli eon plt-neb --input-pattern "path/to/neb_*.dat"
    #+END_SRC
 
-*** "Index out of range" error
+** "Index out of range" error
 
-**Problem:** The ~--start~ or ~--end~ indices are outside the available data range.
+*Problem:* The ~--start~ or ~--end~ indices are outside the available data range.
 
-**Solution:**
+*Solution:*
 1. Check available iterations:
    #+BEGIN_SRC shell
    ls -1 neb_*.dat | wc -l
    #+END_SRC
 2. Adjust indices to be within range (0 to N-1 where N is the number of files)
 
-*** Plot appears empty
+** Plot appears empty
 
-**Problem:** The plot window opens but shows no data.
+*Problem:* The plot window opens but shows no data.
 
-**Solution:**
+*Solution:*
 1. Verify the .dat files contain valid energy data (column 2)
 2. Check that the energy values are not all identical
 3. Try with a smaller range first: ~--start 0 --end 5~
 
-*** Force-corrected interpolation fails
+** Force-corrected interpolation fails
 
-**Problem:** Hermite spline interpolation produces warnings or errors.
+*Problem:* Hermite spline interpolation produces warnings or errors.
 
-**Solution:**
+*Solution:*
 1. Ensure you have at least 3 data points
 2. Check that force data (column 4 in .dat) is present
 3. The script falls back to raw lines if spline fails - this is expected behavior
+
+* OCI-NEB/RONEB Options
+
+** MMF Peak Overlay
+
+When eOn produces ~peak{NN}_pos.con~ files (from OCI-NEB mode-following), overlay them on the landscape:
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks
+#+END_SRC
+
+Peaks are auto-detected in the current directory. Use ~--peak-dir~ to specify an explicit path:
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks --peak-dir path/to/peaks/
+#+END_SRC
+
+** Band Evolution
+
+Show how the NEB band evolves across optimization iterations (requires ~write_movies=true~ data):
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --plot-type landscape --show-evolution
+#+END_SRC
+
+Older bands appear with lower opacity; the final band is most visible.
+
+* Structure Rendering
+
+** Rendering Backends
+
+Four backends available via ~--strip-renderer~:
+
+| Backend | Install | Style |
+|---------+---------+-------|
+| ~xyzrender~ (default) | ~pip install xyzrender~ | Ball-and-stick, paton preset |
+| ~ase~ | Built-in | Space-filling spheres |
+| ~solvis~ | ~pip install solvis-tools~ | PyVista ball-and-stick, transparent bg |
+| ~ovito~ | ~pip install ovito~ | OVITO off-screen |
+
+** Viewing Angle
+
+~--rotation "0x,90y,0z"~ (default) sets the viewing angle for all backends. Uses
+ASE-style rotation syntax.
+
+** Perspective Tilt
+
+~--perspective-tilt 8~ applies a small Rodrigues off-axis rotation (8 degrees)
+to reveal atoms hidden by orthographic projection overlap. Useful for ring
+structures where H atoms hide behind carbons.
+
+* See Also
+
+- [[file:plt_saddle.org][Plotting saddle search trajectories]] for dimer/single-ended visualization
+- [[file:plt_min.org][Plotting minimization trajectories]] for minimization visualization
 
 ** API Reference
 

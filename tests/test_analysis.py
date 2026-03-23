@@ -4,10 +4,10 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("align")
 
-import numpy as np  # noqa: E402
-from ase.atoms import Atoms  # noqa: E402
+import numpy as np
+from ase.atoms import Atoms
 
-from rgpycrumbs.geom.analysis import analyze_structure  # noqa: E402
+from rgpycrumbs.geom.analysis import analyze_structure
 
 pytestmark = pytest.mark.align
 

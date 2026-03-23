@@ -1,4 +1,4 @@
-#+TITLE: Robust Structural Alignment
+#+TITLE: ~alignment~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Structural Alignment API

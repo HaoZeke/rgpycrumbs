@@ -1,0 +1,300 @@
+#+TITLE: NEB Reaction Path Visualization
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+
+#+begin_export rst
+=============================
+NEB Reaction Path Visualization
+=============================
+#+end_export
+
+In this tutorial you will produce publication-quality figures from a
+Diels-Alder NEB calculation: a 1D energy profile, a 2D reaction
+valley landscape with GP surface, structure galleries with four
+rendering backends, OCI-NEB peak overlays, and band evolution plots.
+
+#+begin_export rst
+.. admonition:: Reference
+
+   The 2D RMSD projection method used here is described in:
+
+   R. Goswami, "Two-dimensional RMSD projections for reaction path
+   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
+   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
+
+   If you use these visualizations in your work, please cite the paper.
+#+end_export
+
+#+begin_export rst
+.. image:: /_static/tutorial/surface_gallery.png
+   :width: 100%
+   :alt: Final result: 2D GP surface with xyzrender structure strip
+#+end_export
+
+* Prerequisites
+
+#+begin_src bash
+# Core package with all rendering backends
+pip install "rgpycrumbs[all]" xyzrender solvis-tools ovito
+#+end_src
+
+The tutorial data ships with the rgpycrumbs source tree at
+=docs/orgmode/tutorials/data/diels_alder/=. It contains output from an
+OCI-NEB calculation of the Diels-Alder [4+2] cycloaddition of
+1,3-butadiene and ethylene (C6H10, 16 atoms, 22 images).
+
+* Step 1: Energy Profile
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type profile \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o profile.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/profile.png
+   :width: 80%
+   :alt: Energy profile with Hermite spline interpolation
+#+end_export
+
+Multiple NEB optimization steps are overlaid with Hermite spline
+interpolation. The final converged barrier is ~0.8 eV.
+
+* Step 2: 2D Reaction Valley Landscape
+
+** Path overlay (no surface fit)
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape \
+  --landscape-mode path \
+  --no-project-path \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o landscape_raw.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/landscape_raw.png
+   :width: 80%
+   :alt: Raw RMSD landscape
+#+end_export
+
+Shows the NEB path on raw RMSD(R,P) axes, colored by energy.
+
+** Projected (s, d) coordinates
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape \
+  --landscape-mode path \
+  --project-path \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o landscape_projected.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/landscape_projected.png
+   :width: 80%
+   :alt: Projected (s,d) reaction valley
+#+end_export
+
+The =--project-path= flag rotates into reaction progress (s) and
+orthogonal deviation (d). A path with d near 0 indicates a
+concerted mechanism.
+
+** GP surface fit
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape \
+  --landscape-mode surface \
+  --surface-type grad_matern \
+  --project-path \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o landscape_surface.pdf
+#+end_src
+
+#+begin_export rst
+.. |surface_proj| image:: /_static/tutorial/surface_projected.png
+   :width: 49%
+
+.. |surface_raw| image:: /_static/tutorial/surface_raw.png
+   :width: 49%
+
+|surface_proj| |surface_raw|
+#+end_export
+
+Left: projected (s,d). Right: raw RMSD(R,P). Gradient-enhanced Matern
+kernel GP surface with variance contours (dashed lines). Requires jax.
+
+* Step 3: Structure Galleries
+
+** Rendering backends
+
+Four backends are available via =--strip-renderer=. Each wraps an
+external visualization library:
+
+- [[https://github.com/aligfellow/xyzrender][xyzrender]] (default) -- ball-and-stick with the =paton= preset, auto-orientation via PCA
+- [[https://wiki.fysik.dtu.dk/ase/][ASE]] -- space-filling spheres, built-in (no extra deps)
+- [[https://github.com/amritagos/solvis][solvis]] -- PyVista ball-and-stick with transparent RGBA backgrounds
+- [[https://www.ovito.org/python/][OVITO Python]] -- off-screen rendering with orthographic projection
+
+See the [[file:rendering-backends.org][Rendering Backends Guide]] for detailed feature comparison.
+
+#+begin_src shell
+# xyzrender (default): ball-and-stick with paton preset
+rgpycrumbs eon plt-neb \
+  --plot-type landscape --landscape-mode path --no-project-path \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  --plot-structures crit_points \
+  --strip-renderer xyzrender \
+  --strip-spacing 2.0 --strip-dividers \
+  -o gallery_xyzrender.pdf
+#+end_src
+
+#+begin_export rst
+.. |gal_xyz| image:: /_static/tutorial/gallery_xyzrender.png
+   :width: 49%
+
+.. |gal_ase| image:: /_static/tutorial/gallery_ase.png
+   :width: 49%
+
+|gal_xyz| |gal_ase|
+
+*Left:* xyzrender (ball-and-stick). *Right:* ASE (space-filling).
+#+end_export
+
+#+begin_export rst
+.. image:: /_static/tutorial/gallery_solvis.png
+   :width: 60%
+   :alt: solvis rendering (PyVista, transparent background)
+
+solvis: PyVista ball-and-stick with transparent background.
+#+end_export
+
+** Viewing angle
+
+The =--rotation= flag controls the viewing angle for all backends:
+
+#+begin_src shell
+rgpycrumbs eon plt-neb ... --rotation "45x,30y,0z"
+#+end_src
+
+** Perspective tilt
+
+When atoms overlap in orthographic projection, use =--perspective-tilt=
+to apply a small Rodrigues off-axis rotation that reveals hidden atoms:
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape --landscape-mode path --no-project-path \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  --plot-structures crit_points \
+  --strip-dividers \
+  --perspective-tilt 8 \
+  -o gallery_tilted.pdf
+#+end_src
+
+#+begin_export rst
+.. |no_tilt| image:: /_static/tutorial/no_tilt.png
+   :width: 49%
+
+.. |tilt_8| image:: /_static/tutorial/tilt_8deg.png
+   :width: 49%
+
+|no_tilt| |tilt_8|
+
+*Left:* no tilt (H atoms hidden). *Right:* 8 degree tilt (H atoms revealed).
+#+end_export
+
+* Step 4: OCI-NEB Peak Overlay
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape --landscape-mode path --no-project-path \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  --mmf-peaks --peak-dir data/diels_alder/ \
+  -o mmf_peaks.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/mmf_peaks.png
+   :width: 80%
+   :alt: MMF peak overlay
+#+end_export
+
+Star markers show where OCI-NEB dimer refinement placed the saddle.
+
+* Step 5: Band Evolution
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape --landscape-mode path --no-project-path \
+  --con-file data/diels_alder/neb.con \
+  --show-evolution \
+  -o evolution.pdf
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/evolution.png
+   :width: 80%
+   :alt: Band evolution
+#+end_export
+
+Older bands are drawn with lower opacity.
+
+* Step 6: Combined Figure
+
+The full figure with 2D GP surface, xyzrender structure strip, and
+MMF peak overlay:
+
+#+begin_export rst
+.. image:: /_static/tutorial/surface_mmf.png
+   :width: 100%
+   :alt: Combined: surface + MMF + xyzrender strip
+#+end_export
+
+#+begin_src shell
+rgpycrumbs eon plt-neb \
+  --plot-type landscape --landscape-mode surface \
+  --surface-type grad_matern --project-path \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  --mmf-peaks --peak-dir data/diels_alder/ \
+  --plot-structures crit_points \
+  --strip-renderer xyzrender \
+  --strip-spacing 2.0 --strip-dividers \
+  -o combined.pdf
+#+end_src
+
+* Summary
+
+| Feature | Flag | Notes |
+|---------+------+-------|
+| Energy profile | =--plot-type profile= | Hermite spline |
+| Raw RMSD landscape | =--no-project-path= | RMSD(R) vs RMSD(P) |
+| Reaction valley | =--project-path= | (s, d) coordinates |
+| GP surface | =--landscape-mode surface= | Needs jax |
+| Structure strip | =--plot-structures crit_points= | R, SP, P |
+| xyzrender | =--strip-renderer xyzrender= | Default, ball-and-stick |
+| ASE | =--strip-renderer ase= | Space-filling |
+| solvis | =--strip-renderer solvis= | PyVista, transparent bg |
+| ovito | =--strip-renderer ovito= | OVITO off-screen |
+| Custom rotation | =--rotation "45x,30y,0z"= | All backends |
+| Perspective tilt | =--perspective-tilt 8= | Reveals hidden atoms |
+| Spacing/dividers | =--strip-spacing 2.0 --strip-dividers= | |
+| MMF peaks | =--mmf-peaks --peak-dir .= | OCI-NEB |
+| Band evolution | =--show-evolution= | Fading iterations |
+
+* See Also
+
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
+- [[file:rendering-backends.org][Rendering Backends Guide]]
+- [[file:../tools/eon/plt_neb.org][plt-neb CLI Reference]]
+- [[file:../tools/eon/plt_saddle.org][plt-saddle CLI Reference]]
+- [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]

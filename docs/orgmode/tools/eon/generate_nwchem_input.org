@@ -1,4 +1,4 @@
-#+TITLE: Generators for NWChem
+#+TITLE: ~generate-nwchem~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * NWChem Input Generator

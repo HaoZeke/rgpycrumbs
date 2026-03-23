@@ -38,6 +38,9 @@ https://realpython.com/python-script-structure/
 #   "polars",
 #   "h5py",
 #   "chemparseplot",
+#   "xyzrender>=0.1.3",
+#   "solvis-tools>=0.1",
+#   "ovito>=3.14",
 # ]
 # ///
 
@@ -52,10 +55,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
-from matplotlib.gridspec import GridSpec
-from matplotlib.patches import ArrowStyle
-from rich.logging import RichHandler
-
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -80,10 +79,24 @@ from chemparseplot.parse.trajectory.neb import (
     trajectory_to_landscape_df,
     trajectory_to_profile_dat,
 )
+from matplotlib.gridspec import GridSpec
+from matplotlib.patches import ArrowStyle
+from rich.logging import RichHandler
+
+try:
+    from chemparseplot.parse.projection import (
+        compute_projection_basis,
+        project_to_sd,
+    )
+except ImportError:
+    compute_projection_basis = None
+    project_to_sd = None
 from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
+    plot_mmf_peaks_overlay,
+    plot_neb_evolution,
     plot_structure_inset,
     plot_structure_strip,
 )
@@ -313,18 +326,39 @@ IRA_KMAX_DEFAULT = 1.8
     help="Scale the inset image.",
 )
 @click.option(
-    "--ase-rotation",
+    "--rotation",
+    "ase_rotation",
     type=str,
-    default="0x, 90y, 0z",
+    default="auto",
     show_default=True,
-    help="ASE rotation string.",
+    help="Viewing rotation. 'auto' lets xyzrender auto-orient (default). ASE-style string e.g. '0x,90y,0z' for manual control.",
+)
+@click.option(
+    "--perspective-tilt",
+    type=float,
+    default=0.0,
+    show_default=True,
+    help="Small off-axis tilt (degrees) to reveal occluded atoms. 5-10 is typical.",
 )
 @click.option(
     "--strip-renderer",
-    type=click.Choice(["ase", "xyzrender"]),
-    default="ase",
+    type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
+    default="xyzrender",
     show_default=True,
-    help="Rendering backend for structure images.",
+    help="Rendering backend for structure images (falls back to ASE if unavailable).",
+)
+@click.option(
+    "--strip-spacing",
+    type=float,
+    default=1.5,
+    show_default=True,
+    help="Horizontal spacing between structure images.",
+)
+@click.option(
+    "--strip-dividers/--no-strip-dividers",
+    is_flag=True,
+    default=False,
+    help="Draw vertical divider lines between structures.",
 )
 @click.option(
     "--arrow-head-length",
@@ -398,9 +432,26 @@ IRA_KMAX_DEFAULT = 1.8
     help="Force re-calculation of RMSD.",
 )
 @click.option(
-    "--show-legend",
+    "--mmf-peaks/--no-mmf-peaks",
+    is_flag=True,
+    default=None,
+    help="Overlay MMF peak positions on landscape (auto-detected if peak files exist).",
+)
+@click.option(
+    "--peak-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Directory containing peak{NN}_pos.con files for MMF overlay.",
+)
+@click.option(
+    "--show-evolution",
     is_flag=True,
     default=False,
+    help="Show band evolution across iterations (requires write_movies data).",
+)
+@click.option(
+    "--show-legend/--no-legend",
+    default=True,
     help="Show the legends.",
 )
 @click.option(
@@ -453,7 +504,10 @@ def main(
     dpi,
     zoom_ratio,
     ase_rotation,
+    perspective_tilt,
     strip_renderer,
+    strip_spacing,
+    strip_dividers,
     arrow_head_length,
     arrow_head_width,
     arrow_tail_width,
@@ -463,6 +517,10 @@ def main(
     draw_reactant,
     draw_saddle,
     draw_product,
+    # --- OCI-NEB/RONEB ---
+    mmf_peaks,
+    peak_dir,
+    show_evolution,
     show_legend,
     # Caching
     cache_file,
@@ -658,6 +716,15 @@ def main(
         final_p = df_final["p"].to_numpy()
         final_z = df_final["z"].to_numpy()
 
+        # Pass all-iteration data for triangulated background when no GP surface
+        bg_kwargs = {}
+        if landscape_mode != "surface":
+            bg_kwargs = {
+                "all_r": df["r"].to_numpy(),
+                "all_p": df["p"].to_numpy(),
+                "all_z": df["z"].to_numpy(),
+            }
+
         plot_landscape_path_overlay(
             ax,
             final_r,
@@ -666,7 +733,72 @@ def main(
             active_theme.cmap_landscape,
             z_label,
             project_path=project_path,
+            **bg_kwargs,
         )
+
+        # --- OCI-NEB/RONEB: MMF Peaks Overlay ---
+        _show_mmf = mmf_peaks
+        _peak_search_dir = peak_dir or Path(".")
+        if _show_mmf is None:
+            # Auto-detect: check if peak files exist
+            _show_mmf = len(list(_peak_search_dir.glob("peak*_pos.con"))) > 0
+        if _show_mmf:
+            peak_files = sorted(_peak_search_dir.glob("peak*_pos.con"))
+            if peak_files:
+                from ase.io import read as ase_read
+
+                from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
+
+                try:
+                    from rgpycrumbs._aux import _import_from_parent_env
+
+                    _ira_mod = _import_from_parent_env("ira_mod")
+                    ira_instance = _ira_mod.IRA()
+                except (ImportError, AttributeError):
+                    ira_instance = None
+                peak_atoms = [ase_read(str(pf), format="eon") for pf in peak_files]
+                # Use same references as the main path
+                ref_r = atoms_list[0] if atoms_list else None
+                ref_p = atoms_list[-1] if atoms_list else None
+                if ref_r is not None and ref_p is not None:
+                    peak_rmsd_r = calculate_rmsd_from_ref(
+                        peak_atoms, ira_instance, ref_atom=ref_r, ira_kmax=ira_kmax
+                    )
+                    peak_rmsd_p = calculate_rmsd_from_ref(
+                        peak_atoms, ira_instance, ref_atom=ref_p, ira_kmax=ira_kmax
+                    )
+                    # Energies from peak structures (if available)
+                    peak_e = np.array(
+                        [a.get_potential_energy() if a.calc else 0.0 for a in peak_atoms]
+                    )
+                    plot_mmf_peaks_overlay(
+                        ax,
+                        peak_rmsd_r,
+                        peak_rmsd_p,
+                        peak_e,
+                        project_path=project_path,
+                        path_rmsd_r=final_r,
+                        path_rmsd_p=final_p,
+                    )
+                    log.info("Plotted %d MMF peak(s)", len(peak_files))
+
+        # --- OCI-NEB/RONEB: Band Evolution ---
+        if show_evolution:
+            unique_steps = sorted(df["step"].unique().to_list())
+            if len(unique_steps) > 1:
+                step_r_list = []
+                step_p_list = []
+                for step in unique_steps:
+                    step_df = df.filter(pl.col("step") == step)
+                    step_r_list.append(step_df["r"].to_numpy())
+                    step_p_list.append(step_df["p"].to_numpy())
+                plot_neb_evolution(
+                    ax,
+                    step_r_list,
+                    step_p_list,
+                    project_path=project_path,
+                )
+                log.info("Plotted band evolution (%d steps)", len(unique_steps))
 
         # Saddle Point Marker
         if sp_data:
@@ -683,16 +815,9 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            r_start, p_start = final_r[0], final_p[0]
-            r_end, p_end = final_r[-1], final_p[-1]
-            vec_r = r_end - r_start
-            vec_p = p_end - p_start
-            path_norm = np.hypot(vec_r, vec_p)
-            u_r, u_p = vec_r / path_norm, vec_p / path_norm
-            v_r, v_p = -u_p, u_r
-
-            sp_x = (sp_x_raw - r_start) * u_r + (sp_y_raw - p_start) * u_p
-            sp_y = (sp_x_raw - r_start) * v_r + (sp_y_raw - p_start) * v_p
+            basis = compute_projection_basis(final_r, final_p)
+            sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), basis)
+            sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
             sp_x, sp_y = sp_x_raw, sp_y_raw
 
@@ -714,8 +839,9 @@ def main(
                 color = marker_cmap(i % 10)
 
                 if project_path:
-                    plot_add_r = (add_r - r_start) * u_r + (add_p - p_start) * u_p
-                    plot_add_p = (add_r - r_start) * v_r + (add_p - p_start) * v_p
+                    _basis = compute_projection_basis(final_r, final_p)
+                    _s, _d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
+                    plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
                     plot_add_r, plot_add_p = add_r, add_p
 
@@ -738,9 +864,9 @@ def main(
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
-                    s_val = (r_val - r_start) * u_r + (p_val - p_start) * u_p
-                    d_val = (r_val - r_start) * v_r + (p_val - p_start) * v_p
-                    return s_val, d_val
+                    _basis = compute_projection_basis(final_r, final_p)
+                    _s, _d = project_to_sd(np.array([r_val]), np.array([p_val]), _basis)
+                    return float(_s[0]), float(_d[0])
                 return r_val, p_val
 
             # Add Reactant
@@ -802,6 +928,9 @@ def main(
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
+                col_spacing=strip_spacing,
+                show_dividers=strip_dividers,
+                perspective_tilt=perspective_tilt,
             )
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
@@ -940,6 +1069,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
+                        perspective_tilt=perspective_tilt,
                     )
         else:
             # eOn source: multiple .dat files
@@ -954,7 +1084,10 @@ def main(
             rmsd_rc = None
             if rc_mode == "rmsd" and atoms_list:
                 df_rmsd = compute_profile_rmsd(
-                    atoms_list, cache_file, force_recompute, ira_kmax
+                    atoms_list,
+                    cache_file=cache_file,
+                    force_recompute=force_recompute,
+                    ira_kmax=ira_kmax,
                 )
                 rmsd_rc = df_rmsd["r"].to_numpy()
 
@@ -986,10 +1119,12 @@ def main(
                 is_last = idx == len(file_paths_to_plot) - 1
                 if highlight_last and is_last:
                     color, alpha, zorder = active_theme.highlight_color, 1.0, 20
+                    step_label = f"Step {idx + 1} (final)"
                 else:
                     color = cm(idx / color_divisor)
                     alpha = 1.0 if idx == 0 else 0.5
                     zorder = 10 if idx == 0 else 5
+                    step_label = f"Step {idx + 1}" if idx == 0 else None
 
                 # Plot
                 plot_energy_path(
@@ -1001,6 +1136,7 @@ def main(
                     alpha,
                     zorder,
                     method=spline_method,
+                    label=step_label,
                 )
 
                 if (
@@ -1109,9 +1245,10 @@ def main(
             x_span = x_max - x_min
             half_span = x_span / 2
             if additional_atoms_data:
+                _basis = compute_projection_basis(final_r, final_p)
                 for _, add_r, add_p, _ in additional_atoms_data:
-                    add_d = (add_r - r_start) * v_r + (add_p - p_start) * v_p
-                    half_span = max(half_span, abs(add_d) * 1.15)
+                    _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
+                    half_span = max(half_span, abs(float(add_d[0])) * 1.15)
             ax.set_ylim(-half_span, half_span)
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 

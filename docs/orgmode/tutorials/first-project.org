@@ -13,7 +13,7 @@ diffusion problem as our example.
 
 * Prerequisites
 
-** Installation
+* Installation
 
 #+begin_src bash
 # Core package with all pip-available extras
@@ -25,7 +25,7 @@ cd rgpycrumbs
 uv sync --all-extras
 #+end_src
 
-** Sample Data
+* Sample Data
 
 For this tutorial, we assume you have:
 1. NEB calculation output files (~neb_*.dat~) from eOn
@@ -192,9 +192,9 @@ print(f"Reaction energy: {product_energy - reactant_energy:.3f} eV")
 
 Now that you have the basics, explore:
 
-1. **2D Landscapes**: Use ~plot_landscape_surface~ for RMSD-based projections
-2. **Gradient-Enhanced Fitting**: Include force data for better accuracy
-3. **Batch Processing**: Process multiple NEB calculations automatically
+1. *2D Landscapes*: Use ~plot_landscape_surface~ for RMSD-based projections
+2. *Gradient-Enhanced Fitting*: Include force data for better accuracy
+3. *Batch Processing*: Process multiple NEB calculations automatically
 
 See also:
 - @@rst::doc:`tools/eon/plt_neb`@@ for NEB plotting options

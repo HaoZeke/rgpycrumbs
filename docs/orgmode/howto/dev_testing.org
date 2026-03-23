@@ -1,0 +1,75 @@
+#+TITLE: How-to: Run Tests and Check Coverage
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil
+
+* Problem
+
+You want to run tests and check coverage across all optional dependency sets.
+
+* Quick Start
+
+** Single Environment (uv)
+
+For basic development:
+
+#+BEGIN_SRC shell
+cd rgpycrumbs
+uv sync --extra test
+uv run pytest tests/ -m pure
+#+END_SRC
+
+** Full Coverage (pixi)
+
+pixi manages multiple environments with different optional deps:
+
+#+BEGIN_SRC shell
+pixi run cov
+#+END_SRC
+
+This runs:
+
+| Environment | Deps | Test marker | Covers |
+|-------------+------+-------------+--------|
+| test | numpy, scipy, ase, click | pure, eon | CLI, parsers, basetypes, interpolation |
+| surfaces | + jax | surfaces | Surface models, kernels, gradient-enhanced GP |
+| fragments | + IRA, tblite, pyvista | fragments, ira, align | Geometry analysis, IRA alignment, fragments |
+
+Each env writes ~COVERAGE_FILE=.coverage.<env>~, then ~cov~ combines them all.
+
+** Individual Environments
+
+#+BEGIN_SRC shell
+pixi run -e test test-base          # base tests
+pixi run -e surfaces test-surfaces  # jax surface models
+pixi run -e fragments test-fragments # IRA + geometry
+#+END_SRC
+
+* How It Works
+
+#+BEGIN_SRC dot :file coverage_flow.png
+digraph coverage_flow {
+    fontname="Jost"; fontsize=12;
+    node [fontname="Jost", fontsize=12, shape=box, style=filled, fillcolor=white];
+    edge [fontname="Jost", fontsize=11];
+
+    clean [label="cov-clean\nremove .coverage.*", fillcolor="#F1DB4B"];
+    test [label="test-base\n(numpy, scipy, ase)"];
+    surfaces [label="test-surfaces\n(+ jax)"];
+    fragments [label="test-fragments\n(+ IRA, tblite)"];
+    combine [label="coverage combine\n.coverage.test + .coverage.surfaces + .coverage.fragments", fillcolor="#FF655D", fontcolor=white];
+    report [label="coverage report", fillcolor="#004D40", fontcolor=white];
+
+    clean -> test -> combine;
+    clean -> surfaces -> combine;
+    clean -> fragments -> combine;
+    combine -> report;
+}
+#+END_SRC
+
+* Quality Guidelines
+
+- New modules must have tests in the same PR
+- Plot functions: at least smoke tests
+- Parsers: synthetic input + output schema validation
+- Conda-only deps (IRA, jax, tblite): tested in their pixi env, not mocked

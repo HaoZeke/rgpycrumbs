@@ -1,0 +1,147 @@
+#+TITLE: Rendering Backends Guide
+#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+
+#+begin_export rst
+=========================
+Rendering Backends Guide
+=========================
+#+end_export
+
+This guide covers the four structure rendering backends and their
+unique features. Each backend has different strengths.
+
+* Quick Comparison
+
+| Backend | Style | Speed | Features | Install |
+|---------+-------+-------+----------+---------|
+| xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | ~pip install xyzrender~ |
+| ASE | Space-filling | Fast | Built-in, no extra deps | Built-in |
+| solvis | Ball-and-stick | Medium | Transparent bg, PyVista 3D | ~pip install solvis-tools~ |
+| ovito | Configurable | Slow | Full MD viz, modifiers | ~pip install ovito~ |
+
+* xyzrender
+
+The default backend. Uses the [[https://github.com/aligfellow/xyzrender][xyzrender]] CLI with the ~paton~ preset.
+
+** Auto-orientation
+
+By default, xyzrender auto-orients each structure using PCA to find
+the best viewing angle. This is usually good for small molecules.
+Override with ~--rotation "45x,30y,0z"~ for manual control.
+
+** Transition State Bonds
+
+xyzrender can highlight forming/breaking bonds at transition states:
+
+#+begin_src shell
+# Auto-detect TS bonds (dashed lines for partially formed bonds)
+rgpycrumbs eon plt-neb ... --strip-renderer xyzrender
+#+end_src
+
+The ~--ts~ flag in xyzrender auto-detects bonds being formed or broken
+using graphRC analysis. This is built into the paton preset.
+
+** Bond Orders and NCI
+
+xyzrender supports bond order display and non-covalent interaction
+detection:
+
+#+begin_src shell
+# These are xyzrender CLI flags, not rgpycrumbs flags
+# For advanced rendering, use xyzrender directly:
+xyzrender structure.xyz -o output.png --config paton --hy --bo --nci
+#+end_src
+
+** VdW Spheres
+
+Show van der Waals radii as translucent spheres:
+
+#+begin_src shell
+xyzrender structure.xyz -o output.png --vdw --vdw-opacity 0.3
+#+end_src
+
+** Presets
+
+| Preset | Description |
+|--------+-------------|
+| ~default~ | Standard CPK radii |
+| ~paton~ | Publication-style, smaller atoms (used by rgpycrumbs) |
+| ~flat~ | Flat 2D style |
+| ~bubble~ | Large translucent spheres |
+
+* ASE
+
+The ASE backend uses ~ase.io.write(format="png")~ for space-filling
+sphere rendering. No bonds are drawn.
+
+** When to Use ASE
+
+- No extra dependencies needed
+- Good for periodic systems where bonds are ambiguous
+- Fast rendering for large systems
+
+** Limitations
+
+- No bond rendering
+- No auto-orientation (uses ~--rotation~ directly)
+- All atoms same style (no ball-and-stick option)
+
+* solvis
+
+The [[https://github.com/amritagos/solvis][solvis]] backend uses PyVista for 3D rendering with transparent
+backgrounds.
+
+** Ball-and-Stick with Bonds
+
+solvis renders atoms as spheres and bonds as cylinders. Bonds are
+detected using ASE's neighbor list with natural cutoffs.
+
+** Transparent Background
+
+solvis renders with RGBA transparent backgrounds, so structures
+blend seamlessly into plots without white rectangles.
+
+** When to Use solvis
+
+- When you need transparent backgrounds for overlaying on colored plots
+- When you want 3D depth effects (shadows, lighting)
+- For PyVista-based workflows
+
+* ovito
+
+The [[https://www.ovito.org/python/][OVITO Python]] backend provides off-screen rendering with
+orthographic projection.
+
+** When to Use ovito
+
+- For crystalline systems where OVITO modifiers are useful
+- When you need OVITO's bond computation
+- For consistency with OVITO Desktop visualizations
+
+** Limitations
+
+- Large dependency (~2-3 GB)
+- No auto-orientation (uses pre-rotation like ASE/solvis)
+- Requires OpenGL (headless via osmesa)
+
+* Unified Controls
+
+All backends share these controls:
+
+| Flag | Effect |
+|------+--------|
+| ~--rotation "auto"~ | xyzrender auto-orients; others use side view |
+| ~--rotation "Xx,Yy,Zz"~ | Manual rotation for all backends |
+| ~--perspective-tilt N~ | Rodrigues off-axis tilt (degrees) |
+| ~--strip-spacing N~ | Horizontal gap between images |
+| ~--strip-dividers~ | Vertical separator lines |
+
+* See Also
+
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
+- [[file:neb-visualization.org][NEB Visualization Tutorial]]
+- [[file:../tools/eon/plt_neb.org][plt-neb CLI Reference]]
+- [[https://github.com/aligfellow/xyzrender][xyzrender]] -- ball-and-stick molecular renderer
+- [[https://wiki.fysik.dtu.dk/ase/][ASE]] -- Atomic Simulation Environment
+- [[https://github.com/amritagos/solvis][solvis]] -- PyVista molecular visualization
+- [[https://www.ovito.org/python/][OVITO Python]] -- scientific visualization and analysis

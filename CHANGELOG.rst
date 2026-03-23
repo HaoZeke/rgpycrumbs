@@ -1,3 +1,51 @@
+rgpycrumbs [Unreleased]
+=======================
+
+Added
+-----
+
+- New ``plt-saddle`` CLI tool for dimer/saddle search trajectory visualization
+  with profile, landscape, convergence, and mode-evolution plot types. Supports
+  ``--ref-product`` for (initial, product) reference pairs.
+- New ``plt-min`` CLI tool for minimization trajectory visualization with
+  profile, landscape, and convergence plot types.
+- Extended ``plt-neb`` with OCI-NEB/RONEB options: ``--mmf-peaks`` for MMF peak
+  overlay (auto-detected), ``--peak-dir`` for explicit peak file directory,
+  ``--show-evolution`` for band evolution across iterations.
+- Four rendering backends for structure galleries: ``xyzrender`` (default,
+  ball-and-stick), ``ase`` (space-filling), ``solvis`` (PyVista, transparent
+  background), ``ovito`` (OVITO off-screen). All via ``--strip-renderer``.
+- ``--rotation`` flag (renamed from ``--ase-rotation``) applies viewing angle
+  uniformly to all rendering backends via pre-rotation of atom coordinates.
+- ``--perspective-tilt`` flag for Rodrigues off-axis rotation to reveal
+  atoms hidden by orthographic projection overlap. 5-10 degrees typical.
+- ``--strip-spacing`` and ``--strip-dividers`` for wider gaps and vertical
+  separator lines between structure images.
+- NEB visualization tutorial with real Diels-Alder [4+2] cycloaddition data,
+  covering all plot types and rendering backends.
+- Multi-environment coverage CI workflow (``ci_coverage.yml``) combining
+  test, surfaces, fragments, and eonmlflow pixi environments with
+  ``--fail-under=89``.
+
+Changed
+-------
+
+- Default rendering backend changed from ``ase`` to ``xyzrender`` for
+  ball-and-stick visualization with bonds visible.
+
+Fixed
+-----
+
+- Fixed infinite recursion in ``__init__.py`` lazy imports (replaced
+  ``from rgpycrumbs import X`` with ``importlib.import_module``).
+- Fixed ``chemgp/__init__.py`` re-export names after migration
+  (``plot_convergence`` -> ``plot_convergence_curve``, etc.).
+- Fixed ``plot_gp.py`` batch parallel I/O bug (CliRunner in threads).
+- Fixed ``parsers/bless.py`` ``datetime.UTC`` for Python 3.10 compat.
+- Fixed ``plt_neb.py`` dangling inline projection variables after refactor.
+- Fixed ``plt_neb.py`` ``compute_profile_rmsd`` keyword-only args.
+
+
 rgpycrumbs 1.4.0 (2026-03-15)
 =============================
 

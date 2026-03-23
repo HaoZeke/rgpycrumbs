@@ -1,4 +1,4 @@
-#+TITLE: Prefix Channel Package Deletion
+#+TITLE: ~delete-packages~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * Removing packages from custom ~prefix.dev~ channels

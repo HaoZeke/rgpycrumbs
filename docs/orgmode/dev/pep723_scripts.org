@@ -1,0 +1,62 @@
+#+TITLE: PEP 723 Scripts
+#+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
+#+EMAIL: rgoswami@ieee.org
+#+OPTIONS: toc:nil num:nil
+
+* PEP 723 Script Metadata
+
+Each CLI script in rgpycrumbs uses [[https://peps.python.org/pep-0723/][PEP 723]] inline metadata to declare its
+own dependencies. This lets =uv run --script= resolve and install exactly what
+the script needs without polluting the base environment.
+
+* Format
+
+The metadata block sits at the top of the script, inside a TOML comment fence:
+
+#+begin_src python
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "click>=8.0",
+#     "matplotlib>=3.7",
+#     "rgpycrumbs",
+# ]
+# ///
+
+import click
+import matplotlib.pyplot as plt
+from rgpycrumbs.neb.plotting import plot_neb_band
+
+@click.command()
+@click.argument("datafile")
+def main(datafile):
+    ...
+
+if __name__ == "__main__":
+    main()
+#+end_src
+
+* Running Scripts
+
+#+begin_src bash
+# Via the dispatcher
+rgpycrumbs plt-neb path/to/neb.dat
+
+# Standalone (useful during development)
+uv run --script rgpycrumbs/neb/cli_plt_neb.py path/to/neb.dat
+#+end_src
+
+=uv= reads the =# /// script= block, creates an ephemeral environment with the
+listed dependencies, and executes the script.
+
+* Adding a New Script
+
+1. Create =rgpycrumbs/<module>/cli_<name>.py=
+2. Add the PEP 723 header with the script's dependencies
+3. Implement a =click= CLI; delegate logic to library functions
+4. The dispatcher picks it up automatically by filename convention
+
+* Related
+
+- [[file:cli_architecture.org][CLI Architecture]] -- dispatcher that invokes these scripts
+- [[file:lazy_imports.org][Lazy Import Pattern]] -- runtime fallback for library code
