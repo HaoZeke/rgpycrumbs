@@ -20,7 +20,24 @@ def run_env(env_name, extra_args):
     cov_file = ROOT / f".coverage.{env_name}"
     env = os.environ.copy()
     env["COVERAGE_FILE"] = str(cov_file)
-    cmd = ["pixi", "run", "-e", env_name, "--", "python", "-m", "coverage", "run", f"--data-file={cov_file}", "--source=rgpycrumbs", "-m", "pytest", "tests/", "-q", *extra_args]
+    cmd = [
+        "pixi",
+        "run",
+        "-e",
+        env_name,
+        "--",
+        "python",
+        "-m",
+        "coverage",
+        "run",
+        f"--data-file={cov_file}",
+        "--source=rgpycrumbs",
+        "-m",
+        "pytest",
+        "tests/",
+        "-q",
+        *extra_args,
+    ]
     print(f"=== {env_name} ===")
     subprocess.run(cmd, cwd=ROOT, capture_output=False, check=False)
     if cov_file.exists():
@@ -50,14 +67,28 @@ def main():
     env = os.environ.copy()
     env["COVERAGE_FILE"] = str(ROOT / ".coverage")
     subprocess.run(
-        ["pixi", "run", "-e", "test", "--", "python", "-m", "coverage", "combine", "--keep", *produced],
+        [
+            "pixi",
+            "run",
+            "-e",
+            "test",
+            "--",
+            "python",
+            "-m",
+            "coverage",
+            "combine",
+            "--keep",
+            *produced,
+        ],
         cwd=ROOT,
-        env=env, check=False,
+        env=env,
+        check=False,
     )
     subprocess.run(
         ["pixi", "run", "-e", "test", "--", "python", "-m", "coverage", "report"],
         cwd=ROOT,
-        env=env, check=False,
+        env=env,
+        check=False,
     )
 
 
