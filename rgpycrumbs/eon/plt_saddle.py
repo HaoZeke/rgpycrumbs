@@ -38,9 +38,6 @@ from pathlib import Path
 import click
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.gridspec import GridSpec
-from rich.logging import RichHandler
-
 from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
@@ -50,11 +47,11 @@ from chemparseplot.parse.projection import compute_projection_basis, project_to_
 from chemparseplot.plot.neb import plot_structure_strip
 from chemparseplot.plot.optimization import (
     plot_convergence_panel,
-    plot_dimer_mode_evolution,
     plot_optimization_landscape,
-    plot_optimization_profile,
 )
 from chemparseplot.plot.theme import apply_axis_theme, get_theme, setup_global_theme
+from matplotlib.gridspec import GridSpec
+from rich.logging import RichHandler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -234,7 +231,7 @@ def _plot_profile(trajs, labels, output, dpi):
     if not has_eigen:
         axes = [axes]
 
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels)):
+    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
         dat = traj.dat_df
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         iters = dat["iteration"].to_numpy()
@@ -326,7 +323,7 @@ def _plot_landscape(
     )
 
     # Overlay paths from all trajectories
-    for idx, (t, lbl) in enumerate(zip(trajs, labels)):
+    for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
             t.atoms_list, ira_instance, ira_kmax,
             ref_a=traj.initial_atoms, ref_b=ref_b,
@@ -389,7 +386,7 @@ def _plot_landscape(
 
 def _plot_convergence(trajs, labels, output, dpi):
     fig, (ax_force, ax_step) = plt.subplots(1, 2, figsize=(10, 4), dpi=dpi)
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels)):
+    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         plot_convergence_panel(ax_force, ax_step, traj.dat_df, color=color)
         # Add legend entry via invisible line

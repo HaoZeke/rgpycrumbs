@@ -55,10 +55,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
-from matplotlib.gridspec import GridSpec
-from matplotlib.patches import ArrowStyle
-from rich.logging import RichHandler
-
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -83,6 +79,10 @@ from chemparseplot.parse.trajectory.neb import (
     trajectory_to_landscape_df,
     trajectory_to_profile_dat,
 )
+from matplotlib.gridspec import GridSpec
+from matplotlib.patches import ArrowStyle
+from rich.logging import RichHandler
+
 try:
     from chemparseplot.parse.projection import (
         compute_projection_basis,

@@ -37,9 +37,6 @@ from pathlib import Path
 import click
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.gridspec import GridSpec
-from rich.logging import RichHandler
-
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
@@ -50,9 +47,10 @@ from chemparseplot.plot.neb import plot_structure_strip
 from chemparseplot.plot.optimization import (
     plot_convergence_panel,
     plot_optimization_landscape,
-    plot_optimization_profile,
 )
 from chemparseplot.plot.theme import apply_axis_theme, get_theme, setup_global_theme
+from matplotlib.gridspec import GridSpec
+from rich.logging import RichHandler
 
 logging.basicConfig(
     level=logging.INFO,
@@ -185,7 +183,7 @@ def main(
     if len(labels) < len(trajs):
         labels.extend([f"Run {i+1}" for i in range(len(labels), len(trajs))])
 
-    traj = trajs[0]
+    trajs[0]
 
     active_theme = get_theme(theme)
     setup_global_theme(active_theme)
@@ -219,7 +217,7 @@ _OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#0096
 def _plot_profile(trajs, labels, output, dpi):
     fig, ax = plt.subplots(figsize=(5.37, 4), dpi=dpi)
 
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels)):
+    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
         dat = traj.dat_df
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         iters = dat["iteration"].to_numpy()
@@ -287,7 +285,7 @@ def _plot_landscape(
     )
 
     # Overlay paths from all trajectories
-    for idx, (t, lbl) in enumerate(zip(trajs, labels)):
+    for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
             t.atoms_list, ira_instance, ira_kmax,
             ref_a=traj.initial_atoms, ref_b=traj.final_atoms,
@@ -348,7 +346,7 @@ def _plot_landscape(
 
 def _plot_convergence(trajs, labels, output, dpi):
     fig, (ax_force, ax_step) = plt.subplots(1, 2, figsize=(10, 4), dpi=dpi)
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels)):
+    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         plot_convergence_panel(ax_force, ax_step, traj.dat_df, color=color)
         ax_force.plot([], [], color=color, label=lbl)

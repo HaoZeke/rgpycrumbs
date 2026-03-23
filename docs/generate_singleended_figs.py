@@ -8,16 +8,18 @@ import shutil
 import tempfile
 from pathlib import Path
 
-import matplotlib
-matplotlib.use("Agg")
+import matplotlib as mpl
+
+mpl.use("Agg")
+
+# Import the write helper from tests
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 from ase.build import molecule
 from click.testing import CliRunner
 
-# Import the write helper from tests
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "tests"))
 from test_cli_plotting import _write_con_file
 
@@ -107,7 +109,7 @@ def _make_min_data(job_dir, n_frames=20, prefix="min"):
 def run(name, cli_main, args):
     """Run a CLI command and save the figure."""
     out_path = str(OUT / f"{name}.png")
-    r = runner.invoke(cli_main, args + ["-o", out_path])
+    r = runner.invoke(cli_main, [*args, "-o", out_path])
     status = "OK" if r.exit_code == 0 else f"FAIL({r.exit_code})"
     print(f"  {name}: {status}")
     if r.exit_code != 0 and r.exception:
@@ -126,7 +128,7 @@ saddle_dir = tmpdir / "saddle_job"
 saddle_dir.mkdir()
 _make_saddle_data(saddle_dir)
 
-from rgpycrumbs.eon.plt_saddle import main as saddle_main
+from rgpycrumbs.eon.plt_saddle import main as saddle_main  # noqa: E402
 
 sd = str(saddle_dir)
 run("saddle_profile", saddle_main, ["--job-dir", sd, "--plot-type", "profile"])
@@ -144,7 +146,7 @@ min_dir = tmpdir / "min_job"
 min_dir.mkdir()
 _make_min_data(min_dir)
 
-from rgpycrumbs.eon.plt_min import main as min_main
+from rgpycrumbs.eon.plt_min import main as min_main  # noqa: E402
 
 md = str(min_dir)
 run("min_profile", min_main, ["--job-dir", md, "--plot-type", "profile"])
