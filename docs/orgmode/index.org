@@ -82,7 +82,6 @@ digraph G {
      tutorials/saddle-search-visualization
      tutorials/minimization-visualization
      tutorials/rendering-backends
-     tutorials/first-project
 #+END_EXPORT
 
 * How-to Guides
