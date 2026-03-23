@@ -7,10 +7,10 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("align")
 
-from ase import Atoms  # noqa: E402
-from ase.build import molecule  # noqa: E402
+from ase import Atoms
+from ase.build import molecule
 
-from rgpycrumbs.geom.api.alignment import (  # noqa: E402
+from rgpycrumbs.geom.api.alignment import (
     AlignmentMethod,
     IRAConfig,
     _rmsd_single,

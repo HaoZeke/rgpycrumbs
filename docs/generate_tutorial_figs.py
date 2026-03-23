@@ -16,7 +16,7 @@ try:
     import pyvista as pv
 
     pv.start_xvfb()
-except Exception:  # noqa: S110
+except Exception:
     pass
 
 import matplotlib.pyplot as plt

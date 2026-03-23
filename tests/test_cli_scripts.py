@@ -134,9 +134,9 @@ class TestGenerateNWChemCLI:
 @pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
 class TestXtsPotentials:
     def test_muller_brown(self):
-        from rgpycrumbs.func.muller_brown import muller_brown
-
         import numpy as np
+
+        from rgpycrumbs.func.muller_brown import muller_brown
 
         val, grad = muller_brown(np.array([0.0, 0.0]))
         assert isinstance(val, float)
@@ -164,7 +164,7 @@ class TestChemGPMatchAtoms:
 
 class TestPackageInit:
     def test_basetypes(self):
-        from rgpycrumbs.basetypes import SaddleMeasure, DimerOpt
+        from rgpycrumbs.basetypes import DimerOpt, SaddleMeasure
 
         assert SaddleMeasure is not None
         assert DimerOpt is not None

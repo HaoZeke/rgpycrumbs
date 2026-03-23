@@ -148,9 +148,9 @@ class TestDeletePackages:
 
     def test_delete_package_dry_run(self):
         """Dry run should return True without making API calls."""
-        from rgpycrumbs.prefix.delete_packages import delete_package
-
         import requests
+
+        from rgpycrumbs.prefix.delete_packages import delete_package
 
         session = requests.Session()
         result = delete_package(
@@ -321,9 +321,9 @@ class TestToMlflow:
 
     def test_cli_with_log_file(self, tmp_path):
         """Full CLI invocation with a minimal log file."""
-        from rgpycrumbs.eon.to_mlflow import main
-
         import mlflow
+
+        from rgpycrumbs.eon.to_mlflow import main
 
         log_file = tmp_path / "client.log"
         log_file.write_text("    1  0.01  5.0  10  3.5\n")

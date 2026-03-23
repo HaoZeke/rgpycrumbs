@@ -44,19 +44,14 @@ plot_trust = plot_trust_region
 plot_variance = plot_variance_overlay
 
 __all__ = [
-    "read_h5_grid",
-    "read_h5_metadata",
-    "read_h5_path",
-    "read_h5_points",
-    "read_h5_table",
     "detect_clamp",
     "plot_convergence",
     "plot_convergence_curve",
     "plot_energy_profile",
     "plot_fps",
     "plot_fps_projection",
-    "plot_gp_quality",
     "plot_gp_progression",
+    "plot_gp_quality",
     "plot_hyperparameter_sensitivity",
     "plot_nll",
     "plot_nll_landscape",
@@ -70,5 +65,10 @@ __all__ = [
     "plot_trust_region",
     "plot_variance",
     "plot_variance_overlay",
+    "read_h5_grid",
+    "read_h5_metadata",
+    "read_h5_path",
+    "read_h5_points",
+    "read_h5_table",
     "save_plot",
 ]

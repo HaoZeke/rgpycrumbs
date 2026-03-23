@@ -3,16 +3,16 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("ptm")
 
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
-from ase.build import bulk  # noqa: E402
-from ase.io import write  # noqa: E402
-from ase.neighborlist import NeighborList  # noqa: E402
-from click.testing import CliRunner  # noqa: E402
+import numpy as np
+import pytest
+from ase.build import bulk
+from ase.io import write
+from ase.neighborlist import NeighborList
+from click.testing import CliRunner
 
 pytestmark = pytest.mark.ptm
 
-from rgpycrumbs.eon.ptmdisp import (  # noqa: E402
+from rgpycrumbs.eon.ptmdisp import (
     CrystalStructure,
     find_mismatch_indices,
     main,

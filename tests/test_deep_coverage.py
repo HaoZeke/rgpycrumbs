@@ -613,7 +613,7 @@ class TestPlotGPDeep:
         # Write TOML config
         cfg = tmp_path / "plots.toml"
         cfg.write_text(
-            textwrap.dedent(f"""\
+            textwrap.dedent("""\
             [defaults]
             input_dir = "data"
             output_dir = "output"
@@ -1093,7 +1093,7 @@ class TestDeletePackagesDeep:
     """Cover the main CLI execution path of delete_packages."""
 
     def test_main_dry_run_with_packages(self, tmp_path):
-        from unittest.mock import patch, MagicMock
+        from unittest.mock import MagicMock, patch
 
         try:
             from rgpycrumbs.prefix.delete_packages import main
@@ -1959,8 +1959,9 @@ class TestJupyterTimeout:
 
     def test_run_command_or_exit_timeout(self):
         """Cover lines 92-94 (timeout handler in run_command_or_exit)."""
-        from unittest.mock import patch
         import subprocess
+        from unittest.mock import patch
+
         from rgpycrumbs.run.jupyter import run_command_or_exit
 
         # Mock _run_command_live to raise TimeoutExpired
@@ -1989,6 +1990,7 @@ class TestInitErrorPaths:
     def test_interpolation_error_with_mock(self):
         """Force interpolation to fail to cover lines 19-25."""
         from unittest.mock import patch
+
         import rgpycrumbs
 
         # Temporarily make the import fail
@@ -2002,6 +2004,7 @@ class TestInitErrorPaths:
     def test_geom_error_reraise(self):
         """Cover line 26 (re-raise without hint for geom)."""
         from unittest.mock import patch
+
         import rgpycrumbs
 
         with patch("importlib.import_module", side_effect=ImportError("no geom")):
@@ -2184,7 +2187,7 @@ class TestPlotGPBatchExtraArgs:
         )
 
 
-class TestNwchemGenDeep:
+class TestNwchemGenDeepExtra:
     """Cover remaining generate_nwchem_input lines."""
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
@@ -2292,8 +2295,8 @@ class TestAuxDeep:
         from rgpycrumbs._aux import _import_from_parent_env
 
         try:
-            result = _import_from_parent_env("totally_nonexistent_module_xyz123")
-        except (ImportError, Exception):
+            _import_from_parent_env("totally_nonexistent_module_xyz123")
+        except (ImportError, Exception):  # noqa: S110
             pass
 
     def test_has_cuda_check(self):

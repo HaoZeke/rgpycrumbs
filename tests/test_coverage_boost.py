@@ -7,19 +7,18 @@ paths and --help flags to maximize statement coverage.
 """
 
 import configparser
+import importlib
 import io
 import re
 import subprocess
 import sys
 import types
 from pathlib import Path
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import numpy as np
 import pytest
 from click.testing import CliRunner
-
-import importlib
 
 
 def _has(mod):
@@ -834,9 +833,9 @@ class TestToMlflow:
 
     def test_regex_patterns(self):
         from rgpycrumbs.eon.to_mlflow import (
-            NEB_ITER_RE,
             DIMER_STEP_RE,
             IDIMER_ROT_RE,
+            NEB_ITER_RE,
             POT_CALLS_RE,
         )
 
@@ -876,6 +875,7 @@ class TestToMlflow:
 
         matplotlib.use("Agg")
         from ase import Atoms
+
         from rgpycrumbs.eon.to_mlflow import plot_structure_evolution
 
         atoms_list = [Atoms("H2", positions=[[0, 0, 0], [0.74, 0, 0]]) for _ in range(10)]
@@ -955,6 +955,7 @@ class TestDeletePackages:
 
     def test_delete_package_request_exception(self):
         import requests
+
         from rgpycrumbs.prefix.delete_packages import delete_package
 
         session = MagicMock()
@@ -1131,7 +1132,7 @@ class TestMatchAtoms:
         assert out_file.exists()
 
     def test_constants(self):
-        from rgpycrumbs.chemgp.match_atoms import POSCON_FILENAME, _EXPECTED_COORD_COLS
+        from rgpycrumbs.chemgp.match_atoms import _EXPECTED_COORD_COLS, POSCON_FILENAME
 
         assert POSCON_FILENAME == "pos.con"
         assert _EXPECTED_COORD_COLS == 3
@@ -1441,9 +1442,9 @@ class TestJupyterHelper:
 
     def test_run_command_live_timeout(self):
         """Timeout behavior tested by verifying the function accepts a timeout param."""
-        from rgpycrumbs.run.jupyter import _run_command_live
-
         import inspect
+
+        from rgpycrumbs.run.jupyter import _run_command_live
 
         sig = inspect.signature(_run_command_live)
         assert "timeout" in sig.parameters
@@ -1459,7 +1460,7 @@ class TestMullerBrown:
         from rgpycrumbs.func.muller_brown import muller_brown
 
         val = muller_brown([0.0, 0.0])
-        assert isinstance(val, (float, np.floating))
+        assert isinstance(val, float | np.floating)
 
     def test_meshgrid_eval(self):
         from rgpycrumbs.func.muller_brown import muller_brown

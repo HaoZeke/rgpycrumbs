@@ -4,9 +4,9 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("surfaces")
 
-import jax.numpy as jnp  # noqa: E402
+import jax.numpy as jnp
 
-from rgpycrumbs.surfaces import (  # noqa: E402
+from rgpycrumbs.surfaces import (
     FastIMQ,
     FastMatern,
     FastTPS,

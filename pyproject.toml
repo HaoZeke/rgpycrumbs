@@ -135,6 +135,7 @@ ban-relative-imports = "all"
   "ARG002",
   "PLC0415",
 ] # ASV convention: mutable class attrs, framework-injected args, deferred imports
+"docs/generate*.py" = [ "E402", "PLC0415", "S110", "T201" ]
 "docs/source/conf.py" = [ "A001" ] # Sphinx requires 'copyright' variable
 "rgpycrumbs/_aux.py" = [ "PLW0603" ] # global for _cuda_available cache
 "rgpycrumbs/chemgp/hdf5_io.py" = [ "PLW0603" ] # global for lazy-loaded modules
@@ -147,6 +148,7 @@ ban-relative-imports = "all"
   "PLC0415",
   "PLR2004",
 ] # lazy loading pattern
+"rgpycrumbs/eon/plt_min.py" = [ "PLC0415", "PLR2004", "N806" ]
 "rgpycrumbs/eon/plt_neb.py" = [
   "ARG001",  # unused title param kept for CLI API
   "PLW0603", # global for lazy-loaded modules
@@ -154,6 +156,7 @@ ban-relative-imports = "all"
   "PLR2004", # magic values for plot layout
   "N806",    # uppercase variable names for math
 ] # NEB plotting with lazy deps
+"rgpycrumbs/eon/plt_saddle.py" = [ "PLC0415", "PLR2004", "N806" ]
 "rgpycrumbs/eon/ptmdisp.py" = [
   "E402",    # Module level import not at top (for warnings suppression)
   "PLC0415", # Local import (for the Viewport GUI)
@@ -173,7 +176,29 @@ ban-relative-imports = "all"
   "T201",
 ] # test/doctest scripts
 "surfaces.py" = [ "ARG001", "ARG002" ] # Jax seems to like this
-"tests/**/*" = [ "PLR2004", "S101", "TID252", "PLC0415" ]
+"tests/**/*" = [
+  "ARG001",
+  "ARG002",
+  "ARG005",
+  "B007",
+  "B017",
+  "E402",
+  "F401",
+  "F841",
+  "ICN001",
+  "N806",
+  "PLC0415",
+  "PLR2004",
+  "PLW1510",
+  "RUF005",
+  "RUF059",
+  "S101",
+  "S108",
+  "S603",
+  "S607",
+  "T201",
+  "TID252",
+]
 
 [tool.coverage.run]
 branch      = true

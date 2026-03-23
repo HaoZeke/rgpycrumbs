@@ -130,7 +130,7 @@ saddle_dir = tmpdir / "saddle_job"
 saddle_dir.mkdir()
 _make_saddle_data(saddle_dir)
 
-from rgpycrumbs.eon.plt_saddle import main as saddle_main  # noqa: E402
+from rgpycrumbs.eon.plt_saddle import main as saddle_main
 
 sd = str(saddle_dir)
 run("saddle_profile", saddle_main, ["--job-dir", sd, "--plot-type", "profile"])
@@ -160,7 +160,7 @@ min_dir = tmpdir / "min_job"
 min_dir.mkdir()
 _make_min_data(min_dir)
 
-from rgpycrumbs.eon.plt_min import main as min_main  # noqa: E402
+from rgpycrumbs.eon.plt_min import main as min_main
 
 md = str(min_dir)
 run("min_profile", min_main, ["--job-dir", md, "--plot-type", "profile"])

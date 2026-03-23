@@ -23,12 +23,12 @@ def mock_script_group(monkeypatch):
 
     # We also need to mock the path resolution inside _dispatch so it doesn't
     # sys.exit(1)
-    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)  # noqa: ARG005
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
     monkeypatch.setattr("rgpycrumbs.cli.Path.resolve", lambda self: self)
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_standard_execution(mock_run, runner, mock_script_group):  # noqa: ARG001
+def test_cli_standard_execution(mock_run, runner, mock_script_group):
     """Test that default execution uses 'uv run'."""
     result = runner.invoke(main, ["dummy_script", "arg1"])
 
@@ -44,7 +44,7 @@ def test_cli_standard_execution(mock_run, runner, mock_script_group):  # noqa: A
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_dev_execution(mock_run, runner, mock_script_group):  # noqa: ARG001
+def test_cli_dev_execution(mock_run, runner, mock_script_group):
     """Test that the --dev flag switches execution to sys.executable."""
     result = runner.invoke(main, ["--dev", "dummy_script", "arg1"])
 
@@ -58,7 +58,7 @@ def test_cli_dev_execution(mock_run, runner, mock_script_group):  # noqa: ARG001
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_verbose_output(mock_run, runner, mock_script_group):  # noqa: ARG001
+def test_cli_verbose_output(mock_run, runner, mock_script_group):
     """Test that the --verbose flag prints the paths before execution."""
     result = runner.invoke(main, ["--verbose", "dummy_script"])
 

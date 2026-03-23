@@ -256,7 +256,7 @@ class TestAuxHelpers:
         from rgpycrumbs._aux import switchdir
 
         original = Path.cwd()
-        with pytest.raises(ValueError):  # noqa: PT011
+        with pytest.raises(ValueError):
             with switchdir(tmp_path):
                 raise ValueError("boom")
         assert Path.cwd() == original
@@ -378,7 +378,7 @@ class TestSurfacesInit:
                 surf.get_surface_model("grad_matern")
 
     def test_lazy_imports_mapping(self):
-        from rgpycrumbs.surfaces import _LAZY_IMPORTS, _JAX_SUBMODULES
+        from rgpycrumbs.surfaces import _JAX_SUBMODULES, _LAZY_IMPORTS
 
         # All gradient modules require jax
         for name, target in _LAZY_IMPORTS.items():
