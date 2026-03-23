@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Surface Fitting with Kernel Methods - rgpycrumbs documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="General Utilities" href="utils/index.html" /><link rel="prev" title="Fragment Detection" href="geom/detect_fragments.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Surface Fitting with Kernel Methods - rgpycrumbs documentation</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="General Utilities" href="utils/index.html" /><link rel="prev" title="detect-fragments" href="geom/detect_fragments.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/surfaces.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -91,28 +91,39 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/neb-visualization.html">NEB Reaction Path Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/saddle-search-visualization.html">Saddle Search Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/minimization-visualization.html">Minimization Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rendering-backends.html">Rendering Backends Guide</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/first-project.html">First Project</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to Guides</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Installation Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/dev_testing.html">How-to: Run Tests and Check Coverage</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="chemgp/index.html">ChemGP Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chemgp/batch_command.html">Batch Plot Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="eon/con_splitter.html"><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eon/generate_nwchem_input.html"><code class="docutils literal notranslate"><span class="pre">generate-nwchem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eon/mlflow.html"><code class="docutils literal notranslate"><span class="pre">to-mlflow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eon/plt_min.html"><code class="docutils literal notranslate"><span class="pre">plt-min</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eon/plt_neb.html"><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eon/plt_saddle.html"><code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="eon/ptmdisp.html"><code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="eon/index.html">eOn Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eon/generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eon/mlflow.html">MLFlow Logging for eOn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eon/plt_neb.html">Plotting NEB paths</a></li>
-<li class="toctree-l2"><a class="reference internal" href="eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chemgp/plt_gp.html"><code class="docutils literal notranslate"><span class="pre">plt-gp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chemgp/batch_command.html"><code class="docutils literal notranslate"><span class="pre">batch</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="chemgp/batch_tutorial.html">Batch tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chemgp/hdf5_schema.html">HDF5 schema</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="orca/index.html">ORCA Tools</a><ul>
@@ -120,32 +131,25 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="geom/index.html">Geometry Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="geom/alignment.html">Robust Structural Alignment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="geom/detect_fragments.html">Fragment Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geom/alignment.html"><code class="docutils literal notranslate"><span class="pre">alignment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="geom/detect_fragments.html"><code class="docutils literal notranslate"><span class="pre">detect-fragments</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="#variance-windowing-and-chunking">Variance Windowing and Chunking</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="#numerical-stability">Numerical Stability</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="utils/index.html">General Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils/jupyter.html"><code class="docutils literal notranslate"><span class="pre">jupyter</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="prefix/index.html">Prefix Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prefix/delete_packages.html"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../used_by.html">Used By</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../contributing/release.html">Release Management</a></li>
-</ul>
-</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
@@ -162,7 +166,9 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/plt_min/index.html">rgpycrumbs.eon.plt_min</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/plt_saddle/index.html">rgpycrumbs.eon.plt_saddle</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -219,6 +225,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../used_by.html">Used By</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../dev/index.html">Developer Documentation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">How to Cite rgpycrumbs</a></li>
 </ul>
         </div>
       </div>
@@ -230,19 +251,22 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#">Surface Fitting with Kernel Methods</a><ul>
 <li><a class="reference internal" href="#available-models">Available Models</a></li>
 <li><a class="reference internal" href="#uncertainty-and-variance">Uncertainty and Variance</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#variance-windowing-and-chunking">Variance Windowing and Chunking</a></li>
 <li><a class="reference internal" href="#numerical-stability">Numerical Stability</a></li>
 <li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
-<li><a class="reference internal" href="#out-of-memory-during-surface-fitting">&#8220;Out of memory&#8221; during surface fitting</a></li>
+<li><a class="reference internal" href="#out-of-memory-during-surface-fitting">“Out of memory” during surface fitting</a></li>
 <li><a class="reference internal" href="#cholesky-decomposition-fails">Cholesky decomposition fails</a></li>
 <li><a class="reference internal" href="#variance-predictions-are-all-zero">Variance predictions are all zero</a></li>
 <li><a class="reference internal" href="#length-scale-optimization-fails">Length scale optimization fails</a></li>
 <li><a class="reference internal" href="#gradient-enhanced-model-slower-than-expected">Gradient-enhanced model slower than expected</a></li>
+<li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/HaoZeke/rgpycrumbs"
   data-type="github" data-user="HaoZeke" data-repo="rgpycrumbs">
@@ -353,8 +377,9 @@ data-aria-dark="Switch to auto color mode">
 <li><p><strong>Optimization</strong>: Parameters like length scales (<span class="math notranslate nohighlight">\(l\)</span>, <span class="math notranslate nohighlight">\(\epsilon\)</span>) and noise scalars are optimized via Maximum Likelihood Estimation (MLE) or Maximum A Posteriori (MAP) with physically-informed priors.</p></li>
 </ul>
 </section>
+</section>
 <section id="variance-windowing-and-chunking">
-<h2>Variance Windowing and Chunking<a class="headerlink" href="#variance-windowing-and-chunking" title="Link to this heading">¶</a></h2>
+<h1>Variance Windowing and Chunking<a class="headerlink" href="#variance-windowing-and-chunking" title="Link to this heading">¶</a></h1>
 <p>To prevent Out-Of-Memory (OOM) errors during the evaluation of large grids (e.g., 2D slice visualizations), both the prediction and variance calls are internally chunked.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">model</span> <span class="o">=</span> <span class="n">GradientMatern</span><span class="p">(</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="n">g_obs</span><span class="p">)</span>
 </span><span data-line="2"><span class="c1"># Evaluates in chunks of 500 query points by default</span>
@@ -365,7 +390,7 @@ data-aria-dark="Switch to auto color mode">
 <p>This “windowed” evaluation ensures that the large <span class="math notranslate nohighlight">\(N_{query} \times N_{train}\)</span> cross-covariance matrices do not exhaust system memory.</p>
 </section>
 <section id="numerical-stability">
-<h2>Numerical Stability<a class="headerlink" href="#numerical-stability" title="Link to this heading">¶</a></h2>
+<h1>Numerical Stability<a class="headerlink" href="#numerical-stability" title="Link to this heading">¶</a></h1>
 <p>Gradient-enhanced models use auto-differentiation (via <code class="docutils literal notranslate"><span class="pre">jax.grad</span></code> and <code class="docutils literal notranslate"><span class="pre">jax.jacfwd</span></code>) to construct the full <span class="math notranslate nohighlight">\((D+1)N \times (D+1)N\)</span> covariance matrix.</p>
 <ul class="simple">
 <li><p><strong>Cholesky Fallback</strong>: The <code class="docutils literal notranslate"><span class="pre">safe_cholesky_solve</span></code> utility attempts Cholesky decomposition with increasing jitter to handle near-singular matrices.</p></li>
@@ -373,11 +398,11 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </section>
 <section id="troubleshooting">
-<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h1>
 <section id="out-of-memory-during-surface-fitting">
-<h3>“Out of memory” during surface fitting<a class="headerlink" href="#out-of-memory-during-surface-fitting" title="Link to this heading">¶</a></h3>
-<p><strong>**Problem:**</strong> JAX runs out of GPU/CPU memory when fitting large datasets.</p>
-<p><strong>**Solution:**</strong></p>
+<h2>“Out of memory” during surface fitting<a class="headerlink" href="#out-of-memory-during-surface-fitting" title="Link to this heading">¶</a></h2>
+<p><strong>Problem:</strong> JAX runs out of GPU/CPU memory when fitting large datasets.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Use Nystrom approximation for datasets with &gt;1000 points:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs.surfaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_surface_model</span>
@@ -390,9 +415,9 @@ data-aria-dark="Switch to auto color mode">
 </ol>
 </section>
 <section id="cholesky-decomposition-fails">
-<h3>Cholesky decomposition fails<a class="headerlink" href="#cholesky-decomposition-fails" title="Link to this heading">¶</a></h3>
-<p><strong>**Problem:**</strong> <code class="docutils literal notranslate"><span class="pre">safe_cholesky_solve</span></code> reports numerical instability.</p>
-<p><strong>**Solution:**</strong></p>
+<h2>Cholesky decomposition fails<a class="headerlink" href="#cholesky-decomposition-fails" title="Link to this heading">¶</a></h2>
+<p><strong>Problem:</strong> <code class="docutils literal notranslate"><span class="pre">safe_cholesky_solve</span></code> reports numerical instability.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Increase the <code class="docutils literal notranslate"><span class="pre">smoothing</span></code> parameter (adds jitter to diagonal):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">model</span> <span class="o">=</span> <span class="n">GradientMatern</span><span class="p">(</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">gradients</span><span class="o">=</span><span class="n">g_obs</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
@@ -404,9 +429,9 @@ data-aria-dark="Switch to auto color mode">
 </ol>
 </section>
 <section id="variance-predictions-are-all-zero">
-<h3>Variance predictions are all zero<a class="headerlink" href="#variance-predictions-are-all-zero" title="Link to this heading">¶</a></h3>
-<p><strong>**Problem:**</strong> <code class="docutils literal notranslate"><span class="pre">predict_var()</span></code> returns zeros everywhere.</p>
-<p><strong>**Solution:**</strong></p>
+<h2>Variance predictions are all zero<a class="headerlink" href="#variance-predictions-are-all-zero" title="Link to this heading">¶</a></h2>
+<p><strong>Problem:</strong> <code class="docutils literal notranslate"><span class="pre">predict_var()</span></code> returns zeros everywhere.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic simple">
 <li><p>Verify the model was fitted successfully (check <code class="docutils literal notranslate"><span class="pre">model.ls</span></code> or <code class="docutils literal notranslate"><span class="pre">model.epsilon</span></code>)</p></li>
 <li><p>Ensure query points are not exactly at training points (variance should be <code class="docutils literal notranslate"><span class="pre">noise</span></code> there)</p></li>
@@ -414,9 +439,9 @@ data-aria-dark="Switch to auto color mode">
 </ol>
 </section>
 <section id="length-scale-optimization-fails">
-<h3>Length scale optimization fails<a class="headerlink" href="#length-scale-optimization-fails" title="Link to this heading">¶</a></h3>
-<p><strong>**Problem:**</strong> Optimizer reports “optimization failed” or length scales are extreme.</p>
-<p><strong>**Solution:**</strong></p>
+<h2>Length scale optimization fails<a class="headerlink" href="#length-scale-optimization-fails" title="Link to this heading">¶</a></h2>
+<p><strong>Problem:</strong> Optimizer reports “optimization failed” or length scales are extreme.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Provide better initial guesses:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">model</span> <span class="o">=</span> <span class="n">GradientMatern</span><span class="p">(</span><span class="n">x_obs</span><span class="p">,</span> <span class="n">y_obs</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
@@ -428,15 +453,14 @@ data-aria-dark="Switch to auto color mode">
 </ol>
 </section>
 <section id="gradient-enhanced-model-slower-than-expected">
-<h3>Gradient-enhanced model slower than expected<a class="headerlink" href="#gradient-enhanced-model-slower-than-expected" title="Link to this heading">¶</a></h3>
-<p><strong>**Problem:**</strong> Fitting with gradients is much slower than standard RBF.</p>
-<p><strong>**Solution:**</strong></p>
+<h2>Gradient-enhanced model slower than expected<a class="headerlink" href="#gradient-enhanced-model-slower-than-expected" title="Link to this heading">¶</a></h2>
+<p><strong>Problem:</strong> Fitting with gradients is much slower than standard RBF.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic simple">
 <li><p>This is expected - gradient models have <span class="math notranslate nohighlight">\((D+1)N \times (D+1)N\)</span> covariance</p></li>
 <li><p>Use Nystrom approximation for large datasets</p></li>
 <li><p>Consider using standard (non-gradient) models if gradients are noisy</p></li>
 </ol>
-</section>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h2>
@@ -453,7 +477,7 @@ data-aria-dark="Switch to auto color mode">
     <a href="geom/detect_fragments.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Fragment Detection</div></div>
+        <span>Previous</span><div class="title"><code class="docutils literal notranslate"><span class="pre">detect-fragments</span></code></div></div>
     </a>
   </div><div class="navigation-next">
     <a href="utils/index.html">

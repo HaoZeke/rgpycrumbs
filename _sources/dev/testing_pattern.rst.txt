@@ -1,0 +1,98 @@
+===============
+Testing Pattern
+===============
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+
+Testing Pattern
+---------------
+
+rgpycrumbs uses pixi environments with pytest markers to test against different
+dependency sets, then combines coverage across all runs.
+
+Pytest Markers
+--------------
+
+Tests are tagged by the optional dependencies they require:
+
+.. code:: ini
+
+    # pyproject.toml [tool.pytest.ini_options]
+    markers = [
+        "pure: no optional deps",
+        "interpolation: requires scipy",
+        "surfaces: requires jax",
+        "analysis: requires ase",
+    ]
+
+Multi-Environment Runs
+----------------------
+
+Each pixi environment installs a different subset of extras:
+
+.. code:: bash
+
+    # Pure tests (no optional deps)
+    pixi run -e test-pure pytest -m pure --cov --cov-append
+
+    # Scipy tests
+    pixi run -e test-scipy pytest -m interpolation --cov --cov-append
+
+    # JAX tests
+    pixi run -e test-jax pytest -m surfaces --cov --cov-append
+
+    # Combine coverage from all runs
+    pixi run coverage combine
+    pixi run coverage report --fail-under=80
+
+Guarding Optional-Dependency Tests
+----------------------------------
+
+Because rgpycrumbs and chemparseplot have a circular runtime dependency,
+``uv`` cannot install both simultaneously. Tests that import chemparseplot
+(e.g. ``plt_saddle``, ``plt_min``, rendering backends) must use a
+``try/except`` guard at module level:
+
+.. code:: python
+
+    try:
+        from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+        _HAS_PLT_SADDLE = True
+    except (ImportError, ModuleNotFoundError):
+        plt_saddle_main = None
+        _HAS_PLT_SADDLE = False
+
+    @pytest.mark.skipif(not _HAS_PLT_SADDLE, reason="plt_saddle not importable")
+    class TestPltSaddle:
+        ...
+
+This pattern ensures:
+
+- ``uv`` test runs (``pytest -m pure``) skip these tests cleanly
+
+- pixi test runs (which install chemparseplot) execute them normally
+
+- CI stays green in both environments
+
+Apply the same pattern for pyvista, ovito, and any other optional dep.
+
+Key Points
+----------
+
+- Each marker set runs in its own isolated environment
+
+- ``--cov-append`` accumulates ``.coverage`` data across runs
+
+- CI runs all marker groups sequentially, then checks combined coverage
+
+- Tests that need no optional deps use the ``pure`` marker and run fastest
+
+- Use ``try/except`` guards for circular or optional dep imports
+
+Related
+-------
+
+- `Test Requirements <../contributing/test_requirements.rst>`_ -- environment setup details
+
+- `Lazy Import Pattern <lazy_imports.rst>`_ -- why tests need separate environments

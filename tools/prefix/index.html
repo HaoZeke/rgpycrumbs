@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Prefix Helpers - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Prefix Channel Package Deletion" href="delete_packages.html" /><link rel="prev" title="Jupyter Notebook Helpers" href="../utils/jupyter.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Prefix Helpers - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="delete-packages" href="delete_packages.html" /><link rel="prev" title="jupyter" href="../utils/jupyter.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/prefix/" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -91,28 +91,39 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/neb-visualization.html">NEB Reaction Path Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/saddle-search-visualization.html">Saddle Search Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/minimization-visualization.html">Minimization Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/rendering-backends.html">Rendering Backends Guide</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/first-project.html">First Project</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to Guides</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/install.html">Installation Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/dev_testing.html">How-to: Run Tests and Check Coverage</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html">ChemGP Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_command.html">Batch Plot Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html"><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html"><code class="docutils literal notranslate"><span class="pre">generate-nwchem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html"><code class="docutils literal notranslate"><span class="pre">to-mlflow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/plt_min.html"><code class="docutils literal notranslate"><span class="pre">plt-min</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/plt_neb.html"><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/plt_saddle.html"><code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html"><code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../eon/index.html">eOn Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../eon/generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../eon/mlflow.html">MLFlow Logging for eOn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../eon/plt_neb.html">Plotting NEB paths</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/plt_gp.html"><code class="docutils literal notranslate"><span class="pre">plt-gp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_command.html"><code class="docutils literal notranslate"><span class="pre">batch</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_tutorial.html">Batch tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/hdf5_schema.html">HDF5 schema</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
@@ -120,32 +131,25 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html"><code class="docutils literal notranslate"><span class="pre">alignment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html"><code class="docutils literal notranslate"><span class="pre">detect-fragments</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#variance-windowing-and-chunking">Variance Windowing and Chunking</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#numerical-stability">Numerical Stability</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html"><code class="docutils literal notranslate"><span class="pre">jupyter</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Prefix Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="delete_packages.html">Prefix Channel Package Deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="delete_packages.html"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
-</ul>
-</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
@@ -162,7 +166,9 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_min/index.html">rgpycrumbs.eon.plt_min</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_saddle/index.html">rgpycrumbs.eon.plt_saddle</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -219,6 +225,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../dev/index.html">Developer Documentation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../explanation/citation.html">How to Cite rgpycrumbs</a></li>
 </ul>
         </div>
       </div>
@@ -326,7 +347,7 @@ data-aria-dark="Switch to auto color mode">
 <div><div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Tools</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="delete_packages.html">Prefix Channel Package Deletion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="delete_packages.html"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></a></li>
 </ul>
 </div>
 </div></blockquote>
@@ -351,13 +372,13 @@ data-aria-dark="Switch to auto color mode">
     <a href="../utils/jupyter.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Jupyter Notebook Helpers</div></div>
+        <span>Previous</span><div class="title"><code class="docutils literal notranslate"><span class="pre">jupyter</span></code></div></div>
     </a>
   </div><div class="navigation-next">
     <a href="delete_packages.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Prefix Channel Package Deletion</div>
+        <div class="title"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

@@ -1,0 +1,109 @@
+==============
+``plt-saddle``
+==============
+
+
+
+Visualizing Dimer/Saddle Search Optimization
+--------------------------------------------
+
+This tool generates 2D optimization landscape plots and convergence profiles from dimer or saddle point search calculations.
+
+Method
+~~~~~~
+
+Uses the same gradient-enhanced surface interpolation as NEB landscapes, but with different reference structures and axis labels. The (s, d) projection maps into optimization progress (s) and lateral deviation (d), where s represents how far along the path from initial to saddle, and d represents wasted sideways motion.
+
+Requires eOn output with ``write_movies=true`` which produces ``climb.dat`` (structured per-iteration metrics) and ``climb`` (concatenated structure movie).
+
+Plot Types
+~~~~~~~~~~
+
+Energy/Eigenvalue Profile
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: shell
+
+    rgpycrumbs eon plt-saddle --job-dir results/ --plot-type profile
+
+Shows energy delta and eigenvalue vs iteration. Useful for checking convergence behavior.
+
+2D Optimization Landscape
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: shell
+
+    rgpycrumbs eon plt-saddle --job-dir results/ --plot-type landscape
+
+Projects the dimer trajectory into (s, d) coordinates using RMSD from the initial structure and saddle point.
+
+Convergence Panel
+^^^^^^^^^^^^^^^^^
+
+.. code:: shell
+
+    rgpycrumbs eon plt-saddle --job-dir results/ --plot-type convergence
+
+Side-by-side plots of force norm and step size vs iteration.
+
+Options
+~~~~~~~
+
+.. table::
+
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | Option             | Default               | Description                                                     |
+    +====================+=======================+=================================================================+
+    | ``--job-dir``      | (required)            | eOn output directory                                            |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--plot-type``    | ``profile``           | ``profile``, ``landscape``, ``convergence``, ``mode-evolution`` |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--ref-product``  | None                  | Optional product .con for (initial, product) reference pair     |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--project-path`` | True                  | Project into (s, d) coordinates                                 |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--surface-type`` | ``grad_matern``       | Surface fitting method                                          |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--ira-kmax``     | 1.8                   | IRA kmax for RMSD calculation                                   |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--theme``        | ``ruhi``              | Plot theme                                                      |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``-o``             | ``saddle_{type}.pdf`` | Output file path                                                |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+    | ``--dpi``          | 200                   | Resolution                                                      |
+    +--------------------+-----------------------+-----------------------------------------------------------------+
+
+Using a Product Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, the landscape uses (initial, saddle) as the two references. To use (initial, product) instead (showing the full reaction path context):
+
+.. code:: shell
+
+    rgpycrumbs eon plt-saddle --job-dir results/ --plot-type landscape --ref-product product.con
+
+Required eOn Output Files
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. table::
+
+    +---------------------------------+----------+------------------------------+
+    | File                            | Required | Description                  |
+    +=================================+==========+==============================+
+    | ``climb``                       | Yes      | Concatenated structure movie |
+    +---------------------------------+----------+------------------------------+
+    | ``climb.dat``                   | Yes      | Per-iteration metrics (TSV)  |
+    +---------------------------------+----------+------------------------------+
+    | ``reactant.con`` or ``pos.con`` | Yes      | Initial structure            |
+    +---------------------------------+----------+------------------------------+
+    | ``saddle.con``                  | No       | Final saddle point           |
+    +---------------------------------+----------+------------------------------+
+    | ``mode.dat``                    | No       | Eigenvector at saddle        |
+    +---------------------------------+----------+------------------------------+
+
+See Also
+~~~~~~~~
+
+- `Plotting NEB paths <plt_neb.rst>`_ for double-ended method visualization
+
+- `Plotting minimization trajectories <plt_min.rst>`_ for minimization visualization

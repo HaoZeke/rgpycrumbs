@@ -12,7 +12,9 @@ These tools work with `eOn output files <https://eondocs.org>`_.
    con_splitter
    generate_nwchem_input
    mlflow
+   plt_min
    plt_neb
+   plt_saddle
    ptmdisp
 
 API Reference

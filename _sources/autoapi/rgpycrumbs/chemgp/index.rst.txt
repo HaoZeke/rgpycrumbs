@@ -23,3 +23,43 @@ Submodules
    /autoapi/rgpycrumbs/chemgp/plot_gp/index
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   rgpycrumbs.chemgp.plot_convergence
+   rgpycrumbs.chemgp.plot_fps
+   rgpycrumbs.chemgp.plot_gp_quality
+   rgpycrumbs.chemgp.plot_nll
+   rgpycrumbs.chemgp.plot_profile
+   rgpycrumbs.chemgp.plot_rff
+   rgpycrumbs.chemgp.plot_sensitivity
+   rgpycrumbs.chemgp.plot_surface
+   rgpycrumbs.chemgp.plot_trust
+   rgpycrumbs.chemgp.plot_variance
+
+
+Package Contents
+----------------
+
+.. py:data:: plot_convergence
+
+.. py:data:: plot_fps
+
+.. py:data:: plot_gp_quality
+
+.. py:data:: plot_nll
+
+.. py:data:: plot_profile
+
+.. py:data:: plot_rff
+
+.. py:data:: plot_sensitivity
+
+.. py:data:: plot_surface
+
+.. py:data:: plot_trust
+
+.. py:data:: plot_variance
+

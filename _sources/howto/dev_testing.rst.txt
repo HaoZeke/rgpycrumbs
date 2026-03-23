@@ -1,0 +1,93 @@
+====================================
+How-to: Run Tests and Check Coverage
+====================================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+
+Problem
+-------
+
+You want to run tests and check coverage across all optional dependency sets.
+
+Quick Start
+-----------
+
+Single Environment (uv)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+For basic development:
+
+.. code:: shell
+
+    cd rgpycrumbs
+    uv sync --extra test
+    uv run pytest tests/ -m pure
+
+Full Coverage (pixi)
+~~~~~~~~~~~~~~~~~~~~
+
+pixi manages multiple environments with different optional deps:
+
+.. code:: shell
+
+    pixi run cov
+
+This runs:
+
+.. table::
+
+    +-------------+--------------------------+-----------------------+-----------------------------------------------+
+    | Environment | Deps                     | Test marker           | Covers                                        |
+    +=============+==========================+=======================+===============================================+
+    | test        | numpy, scipy, ase, click | pure, eon             | CLI, parsers, basetypes, interpolation        |
+    +-------------+--------------------------+-----------------------+-----------------------------------------------+
+    | surfaces    | + jax                    | surfaces              | Surface models, kernels, gradient-enhanced GP |
+    +-------------+--------------------------+-----------------------+-----------------------------------------------+
+    | fragments   | + IRA, tblite, pyvista   | fragments, ira, align | Geometry analysis, IRA alignment, fragments   |
+    +-------------+--------------------------+-----------------------+-----------------------------------------------+
+
+Each env writes ``COVERAGE_FILE=.coverage.<env>``, then ``cov`` combines them all.
+
+Individual Environments
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: shell
+
+    pixi run -e test test-base          # base tests
+    pixi run -e surfaces test-surfaces  # jax surface models
+    pixi run -e fragments test-fragments # IRA + geometry
+
+How It Works
+------------
+
+.. code:: dot
+
+    digraph coverage_flow {
+        fontname="Jost"; fontsize=12;
+        node [fontname="Jost", fontsize=12, shape=box, style=filled, fillcolor=white];
+        edge [fontname="Jost", fontsize=11];
+
+        clean [label="cov-clean\nremove .coverage.*", fillcolor="#F1DB4B"];
+        test [label="test-base\n(numpy, scipy, ase)"];
+        surfaces [label="test-surfaces\n(+ jax)"];
+        fragments [label="test-fragments\n(+ IRA, tblite)"];
+        combine [label="coverage combine\n.coverage.test + .coverage.surfaces + .coverage.fragments", fillcolor="#FF655D", fontcolor=white];
+        report [label="coverage report", fillcolor="#004D40", fontcolor=white];
+
+        clean -> test -> combine;
+        clean -> surfaces -> combine;
+        clean -> fragments -> combine;
+        combine -> report;
+    }
+
+Quality Guidelines
+------------------
+
+- New modules must have tests in the same PR
+
+- Plot functions: at least smoke tests
+
+- Parsers: synthetic input + output schema validation
+
+- Conda-only deps (IRA, jax, tblite): tested in their pixi env, not mocked

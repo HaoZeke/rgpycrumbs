@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="./">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Changelog - rgpycrumbs documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="rgpycrumbs Design &amp; Architecture Notes" href="devnotes.html" /><link rel="prev" title="Used By" href="used_by.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Changelog - rgpycrumbs documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Used By" href="used_by.html" /><link rel="prev" title="Glossary" href="reference/glossary.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/changelog.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -91,28 +91,39 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/neb-visualization.html">NEB Reaction Path Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/saddle-search-visualization.html">Saddle Search Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/minimization-visualization.html">Minimization Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/rendering-backends.html">Rendering Backends Guide</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="tutorials/first-project.html">First Project</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to Guides</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/install.html">Installation Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="howto/dev_testing.html">How-to: Run Tests and Check Coverage</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tools/chemgp/index.html">ChemGP Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/batch_command.html">Batch Plot Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tools/eon/index.html">eOn Helpers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/con_splitter.html"><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/generate_nwchem_input.html"><code class="docutils literal notranslate"><span class="pre">generate-nwchem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/mlflow.html"><code class="docutils literal notranslate"><span class="pre">to-mlflow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_min.html"><code class="docutils literal notranslate"><span class="pre">plt-min</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_neb.html"><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_saddle.html"><code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html"><code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tools/chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="tools/eon/index.html">eOn Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tools/eon/con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/eon/generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/eon/mlflow.html">MLFlow Logging for eOn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/eon/plt_neb.html">Plotting NEB paths</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/eon/ptmdisp.html">Polyhedral Template Matcher</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tools/chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/plt_gp.html"><code class="docutils literal notranslate"><span class="pre">plt-gp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/batch_command.html"><code class="docutils literal notranslate"><span class="pre">batch</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/batch_tutorial.html">Batch tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/chemgp/hdf5_schema.html">HDF5 schema</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="tools/orca/index.html">ORCA Tools</a><ul>
@@ -120,32 +131,25 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="tools/geom/index.html">Geometry Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html">Robust Structural Alignment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html">Fragment Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/geom/alignment.html"><code class="docutils literal notranslate"><span class="pre">alignment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/geom/detect_fragments.html"><code class="docutils literal notranslate"><span class="pre">detect-fragments</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="tools/surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tools/surfaces.html#variance-windowing-and-chunking">Variance Windowing and Chunking</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tools/surfaces.html#numerical-stability">Numerical Stability</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="tools/surfaces.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="tools/utils/index.html">General Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/utils/jupyter.html"><code class="docutils literal notranslate"><span class="pre">jupyter</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="tools/prefix/index.html">Prefix Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tools/prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools/prefix/delete_packages.html"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="used_by.html">Used By</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="code_of_conduct.html">Code of Conduct</a></li>
-<li class="toctree-l2"><a class="reference internal" href="contributing/release.html">Release Management</a></li>
-</ul>
-</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
@@ -162,7 +166,9 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/plt_min/index.html">rgpycrumbs.eon.plt_min</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/plt_saddle/index.html">rgpycrumbs.eon.plt_saddle</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -219,6 +225,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="used_by.html">Used By</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="dev/index.html">Developer Documentation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="explanation/citation.html">How to Cite rgpycrumbs</a></li>
 </ul>
         </div>
       </div>
@@ -230,66 +251,72 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#rgpycrumbs-1-4-0-2026-03-15">rgpycrumbs 1.4.0 (2026-03-15)</a><ul>
-<li><a class="reference internal" href="#removed">Removed</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-1-5-0-2026-03-23">rgpycrumbs 1.5.0 (2026-03-23)</a><ul>
 <li><a class="reference internal" href="#added">Added</a></li>
-<li><a class="reference internal" href="#developer">Developer</a></li>
 <li><a class="reference internal" href="#changed">Changed</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#rgpycrumbs-v1-3-0-2026-03-09">rgpycrumbs v1.3.0 (2026-03-09)</a><ul>
-<li><a class="reference internal" href="#id1">Added</a></li>
-<li><a class="reference internal" href="#id2">Developer</a></li>
-<li><a class="reference internal" href="#id3">Changed</a></li>
 <li><a class="reference internal" href="#fixed">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rgpycrumbs-v1-2-0-2026-02-24">rgpycrumbs v1.2.0 (2026-02-24)</a><ul>
-<li><a class="reference internal" href="#id4">Added</a></li>
-<li><a class="reference internal" href="#id5">Developer</a></li>
-<li><a class="reference internal" href="#id6">Changed</a></li>
+<li><a class="reference internal" href="#rgpycrumbs-1-4-0-2026-03-15">rgpycrumbs 1.4.0 (2026-03-15)</a><ul>
+<li><a class="reference internal" href="#removed">Removed</a></li>
+<li><a class="reference internal" href="#id1">Added</a></li>
+<li><a class="reference internal" href="#developer">Developer</a></li>
+<li><a class="reference internal" href="#id2">Changed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rgpycrumbs-v1-1-0-2026-02-21">rgpycrumbs v1.1.0 (2026-02-21)</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-v1-3-0-2026-03-09">rgpycrumbs v1.3.0 (2026-03-09)</a><ul>
+<li><a class="reference internal" href="#id3">Added</a></li>
+<li><a class="reference internal" href="#id4">Developer</a></li>
+<li><a class="reference internal" href="#id5">Changed</a></li>
+<li><a class="reference internal" href="#id6">Fixed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs-v1-2-0-2026-02-24">rgpycrumbs v1.2.0 (2026-02-24)</a><ul>
 <li><a class="reference internal" href="#id7">Added</a></li>
 <li><a class="reference internal" href="#id8">Developer</a></li>
 <li><a class="reference internal" href="#id9">Changed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#rgpycrumbs-v1-0-1-2026-02-17">rgpycrumbs v1.0.1 (2026-02-17)</a><ul>
+<li><a class="reference internal" href="#rgpycrumbs-v1-1-0-2026-02-21">rgpycrumbs v1.1.0 (2026-02-21)</a><ul>
 <li><a class="reference internal" href="#id10">Added</a></li>
-<li><a class="reference internal" href="#id11">Changed</a></li>
+<li><a class="reference internal" href="#id11">Developer</a></li>
+<li><a class="reference internal" href="#id12">Changed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rgpycrumbs-v1-0-1-2026-02-17">rgpycrumbs v1.0.1 (2026-02-17)</a><ul>
+<li><a class="reference internal" href="#id13">Added</a></li>
+<li><a class="reference internal" href="#id14">Changed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#rgpycrumbs-v1-0-0-2026-02-17">rgpycrumbs v1.0.0 (2026-02-17)</a><ul>
-<li><a class="reference internal" href="#id12">Removed</a></li>
-<li><a class="reference internal" href="#id13">Added</a></li>
-<li><a class="reference internal" href="#id14">Changed</a></li>
-<li><a class="reference internal" href="#id15">Fixed</a></li>
+<li><a class="reference internal" href="#id15">Removed</a></li>
+<li><a class="reference internal" href="#id16">Added</a></li>
+<li><a class="reference internal" href="#id17">Changed</a></li>
+<li><a class="reference internal" href="#id18">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#rgpycrumbs-v0-1-2-2026-01-28">rgpycrumbs v0.1.2 (2026-01-28)</a><ul>
-<li><a class="reference internal" href="#id16">Fixed</a></li>
+<li><a class="reference internal" href="#id19">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#rgpycrumbs-v0-1-1-2026-01-28">rgpycrumbs v0.1.1 (2026-01-28)</a><ul>
-<li><a class="reference internal" href="#id17">Fixed</a></li>
+<li><a class="reference internal" href="#id20">Fixed</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id18">Changelog</a><ul>
+<li><a class="reference internal" href="#id21">Changelog</a><ul>
 <li><a class="reference internal" href="#v0-1-0-2026-01-28">v0.1.0 - 2026-01-28</a><ul>
-<li><a class="reference internal" href="#id19">Added</a></li>
-<li><a class="reference internal" href="#id20">Developer</a></li>
+<li><a class="reference internal" href="#id22">Added</a></li>
+<li><a class="reference internal" href="#id23">Developer</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#v0-0-6-2025-12-23">v0.0.6 - 2025-12-23</a><ul>
 <li><a class="reference internal" href="#added-1">Added</a></li>
-<li><a class="reference internal" href="#id22">Fixed</a></li>
+<li><a class="reference internal" href="#id25">Fixed</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#v0-0-5-2025-12-06">v0.0.5 - 2025-12-06</a><ul>
 <li><a class="reference internal" href="#added-2">Added</a></li>
-<li><a class="reference internal" href="#id24">Changed</a></li>
+<li><a class="reference internal" href="#id27">Changed</a></li>
 <li><a class="reference internal" href="#fixed-1">Fixed</a></li>
 </ul>
 </li>
@@ -407,6 +434,56 @@ data-aria-dark="Switch to auto color mode">
 </dd>
 </dl>
 </div></blockquote>
+<section id="rgpycrumbs-1-5-0-2026-03-23">
+<h2>rgpycrumbs 1.5.0 (2026-03-23)<a class="headerlink" href="#rgpycrumbs-1-5-0-2026-03-23" title="Link to this heading">¶</a></h2>
+<section id="added">
+<h3>Added<a class="headerlink" href="#added" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>New <code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code> CLI tool for dimer/saddle search trajectory visualization
+with profile, landscape, convergence, and mode-evolution plot types. Supports
+<code class="docutils literal notranslate"><span class="pre">--ref-product</span></code> for (initial, product) reference pairs.</p></li>
+<li><p>New <code class="docutils literal notranslate"><span class="pre">plt-min</span></code> CLI tool for minimization trajectory visualization with
+profile, landscape, and convergence plot types.</p></li>
+<li><p>Extended <code class="docutils literal notranslate"><span class="pre">plt-neb</span></code> with OCI-NEB/RONEB options: <code class="docutils literal notranslate"><span class="pre">--mmf-peaks</span></code> for MMF peak
+overlay (auto-detected), <code class="docutils literal notranslate"><span class="pre">--peak-dir</span></code> for explicit peak file directory,
+<code class="docutils literal notranslate"><span class="pre">--show-evolution</span></code> for band evolution across iterations.</p></li>
+<li><p>Four rendering backends for structure galleries: <code class="docutils literal notranslate"><span class="pre">xyzrender</span></code> (default,
+ball-and-stick), <code class="docutils literal notranslate"><span class="pre">ase</span></code> (space-filling), <code class="docutils literal notranslate"><span class="pre">solvis</span></code> (PyVista, transparent
+background), <code class="docutils literal notranslate"><span class="pre">ovito</span></code> (OVITO off-screen). All via <code class="docutils literal notranslate"><span class="pre">--strip-renderer</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--rotation</span></code> flag (renamed from <code class="docutils literal notranslate"><span class="pre">--ase-rotation</span></code>) applies viewing angle
+uniformly to all rendering backends via pre-rotation of atom coordinates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--perspective-tilt</span></code> flag for Rodrigues off-axis rotation to reveal
+atoms hidden by orthographic projection overlap. 5-10 degrees typical.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--strip-spacing</span></code> and <code class="docutils literal notranslate"><span class="pre">--strip-dividers</span></code> for wider gaps and vertical
+separator lines between structure images.</p></li>
+<li><p>NEB visualization tutorial with real Diels-Alder [4+2] cycloaddition data,
+covering all plot types and rendering backends.</p></li>
+<li><p>Multi-environment coverage CI workflow (<code class="docutils literal notranslate"><span class="pre">ci_coverage.yml</span></code>) combining
+test, surfaces, fragments, and eonmlflow pixi environments with
+<code class="docutils literal notranslate"><span class="pre">--fail-under=89</span></code>.</p></li>
+</ul>
+</section>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Default rendering backend changed from <code class="docutils literal notranslate"><span class="pre">ase</span></code> to <code class="docutils literal notranslate"><span class="pre">xyzrender</span></code> for
+ball-and-stick visualization with bonds visible.</p></li>
+</ul>
+</section>
+<section id="fixed">
+<h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Fixed infinite recursion in <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> lazy imports (replaced
+<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">rgpycrumbs</span> <span class="pre">import</span> <span class="pre">X</span></code> with <code class="docutils literal notranslate"><span class="pre">importlib.import_module</span></code>).</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">chemgp/__init__.py</span></code> re-export names after migration
+(<code class="docutils literal notranslate"><span class="pre">plot_convergence</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">plot_convergence_curve</span></code>, etc.).</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">plot_gp.py</span></code> batch parallel I/O bug (CliRunner in threads).</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">parsers/bless.py</span></code> <code class="docutils literal notranslate"><span class="pre">datetime.UTC</span></code> for Python 3.10 compat.</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">plt_neb.py</span></code> dangling inline projection variables after refactor.</p></li>
+<li><p>Fixed <code class="docutils literal notranslate"><span class="pre">plt_neb.py</span></code> <code class="docutils literal notranslate"><span class="pre">compute_profile_rmsd</span></code> keyword-only args.</p></li>
+</ul>
+</section>
+</section>
 <section id="rgpycrumbs-1-4-0-2026-03-15">
 <h2>rgpycrumbs 1.4.0 (2026-03-15)<a class="headerlink" href="#rgpycrumbs-1-4-0-2026-03-15" title="Link to this heading">¶</a></h2>
 <section id="removed">
@@ -418,8 +495,8 @@ parsing (<code class="docutils literal notranslate"><span class="pre">plumed/fes
 <code class="docutils literal notranslate"><span class="pre">chemparseplot.scripts</span></code> for these modules going forward. (scope_migration)</p></li>
 </ul>
 </section>
-<section id="added">
-<h3>Added<a class="headerlink" href="#added" title="Link to this heading">¶</a></h3>
+<section id="id1">
+<h3>Added<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Updated <code class="docutils literal notranslate"><span class="pre">plt-neb</span></code> documentation with comprehensive usage examples, options table, and troubleshooting guide for landscape plotting. (docs_plt_neb)</p></li>
 <li><p>Tutorial documentation following Diataxis structure: quickstart, first-project
@@ -436,8 +513,8 @@ and developer guides (testing, lazy imports, best practices). (docs_tutorials)</
 <li><p>Added complete type hints to chemgp modules (hdf5_io.py, plotting.py) reaching 90%+ coverage. Improves IDE support and code documentation. (perf_typehints)</p></li>
 </ul>
 </section>
-<section id="changed">
-<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">¶</a></h3>
+<section id="id2">
+<h3>Changed<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Changed default surface method in <code class="docutils literal notranslate"><span class="pre">plt-neb</span></code> from <code class="docutils literal notranslate"><span class="pre">rbf</span></code> to <code class="docutils literal notranslate"><span class="pre">grad_imq</span></code> for higher-quality gradient-enhanced interpolation. (feat_plt_neb_defaults)</p></li>
 </ul>
@@ -445,8 +522,8 @@ and developer guides (testing, lazy imports, best practices). (docs_tutorials)</
 </section>
 <section id="rgpycrumbs-v1-3-0-2026-03-09">
 <h2>rgpycrumbs v1.3.0 (2026-03-09)<a class="headerlink" href="#rgpycrumbs-v1-3-0-2026-03-09" title="Link to this heading">¶</a></h2>
-<section id="id1">
-<h3>Added<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="id3">
+<h3>Added<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">[all]</span></code> optional dependency extra combining plot, eon, and other extras. (all-extra)</p></li>
 <li><p>ASV benchmark infrastructure with asv-perch CI integration. (asv-benchmarks)</p></li>
@@ -455,20 +532,20 @@ and developer guides (testing, lazy imports, best practices). (docs_tutorials)</
 <li><p><code class="docutils literal notranslate"><span class="pre">plt-gp</span></code> PEP 723 CLI script for ChemGP figure generation with batch mode and landscape subcommand. (plt-gp-cli)</p></li>
 </ul>
 </section>
-<section id="id2">
-<h3>Developer<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3>Developer<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>ASV benchmark infrastructure, prek linting, taplo formatting, codespell configuration. (dev-infra)</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Changed<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h3>Changed<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Documentation overhaul: Shibuya theme, quickstart page, Google-style docstrings, CI/PyPI badges, and README generation from Org source. (docs-overhaul)</p></li>
 </ul>
 </section>
-<section id="fixed">
-<h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">¶</a></h3>
+<section id="id6">
+<h3>Fixed<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Skip missing H5 inputs in batch mode instead of failing. (batch-skip)</p></li>
 <li><p>Fix <code class="docutils literal notranslate"><span class="pre">plt-neb</span></code> keyword arguments for <code class="docutils literal notranslate"><span class="pre">compute_profile_rmsd</span></code> call. (plt-neb-kwargs)</p></li>
@@ -478,8 +555,8 @@ and developer guides (testing, lazy imports, best practices). (docs_tutorials)</
 </section>
 <section id="rgpycrumbs-v1-2-0-2026-02-24">
 <h2>rgpycrumbs v1.2.0 (2026-02-24)<a class="headerlink" href="#rgpycrumbs-v1-2-0-2026-02-24" title="Link to this heading">¶</a></h2>
-<section id="id4">
-<h3>Added<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<section id="id7">
+<h3>Added<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Added –strip-renderer CLI option for selecting structure rendering backend. (#1)</p></li>
 <li><p>Export Nystrom threshold, default inducing count, and <code class="docutils literal notranslate"><span class="pre">nystrom_paths_needed</span></code>
@@ -490,14 +567,14 @@ RMSD/IRA aggregation. (#2)</p></li>
 <li><p>Added –n-inducing flag to eON surface-fitting CLI for controlling the Nystrom approximation inducing-point count. (#5)</p></li>
 </ul>
 </section>
-<section id="id5">
-<h3>Developer<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<section id="id8">
+<h3>Developer<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Added versionadded directives to all public API docstrings. (#7)</p></li>
 </ul>
 </section>
-<section id="id6">
-<h3>Changed<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<section id="id9">
+<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Per-image RMSD alignment in rgpycrumbs.geom now runs in parallel over threads for improved performance on large NEB paths. (#6)</p></li>
 </ul>
@@ -505,20 +582,20 @@ RMSD/IRA aggregation. (#2)</p></li>
 </section>
 <section id="rgpycrumbs-v1-1-0-2026-02-21">
 <h2>rgpycrumbs v1.1.0 (2026-02-21)<a class="headerlink" href="#rgpycrumbs-v1-1-0-2026-02-21" title="Link to this heading">¶</a></h2>
-<section id="id7">
-<h3>Added<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<section id="id10">
+<h3>Added<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Comprehensive pytest suite for surface models, covering fit, prediction, variance, and optimization.</p></li>
 </ul>
 </section>
-<section id="id8">
-<h3>Developer<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id11">
+<h3>Developer<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Added detailed API docstrings and Org-mode documentation for surfaces, including uncertainty and variance windowing.</p></li>
 </ul>
 </section>
-<section id="id9">
-<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<section id="id12">
+<h3>Changed<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Refactored rgpycrumbs.surfaces into a structured package with BaseSurface and BaseGradientSurface abstractions.</p></li>
 </ul>
@@ -526,15 +603,15 @@ RMSD/IRA aggregation. (#2)</p></li>
 </section>
 <section id="rgpycrumbs-v1-0-1-2026-02-17">
 <h2>rgpycrumbs v1.0.1 (2026-02-17)<a class="headerlink" href="#rgpycrumbs-v1-0-1-2026-02-17" title="Link to this heading">¶</a></h2>
-<section id="id10">
-<h3>Added<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<section id="id13">
+<h3>Added<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>CI workflow to auto-generate <code class="docutils literal notranslate"><span class="pre">README.md</span></code> from <code class="docutils literal notranslate"><span class="pre">readme_src.org</span></code> on push to main.</p></li>
 <li><p>Downstream users page (<code class="docutils literal notranslate"><span class="pre">used_by.org</span></code>) listing public projects that depend on <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code>.</p></li>
 </ul>
 </section>
-<section id="id11">
-<h3>Changed<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<section id="id14">
+<h3>Changed<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Updated <code class="docutils literal notranslate"><span class="pre">readme_src.org</span></code> with current <code class="docutils literal notranslate"><span class="pre">uv</span></code> + <code class="docutils literal notranslate"><span class="pre">hatch-vcs</span></code> + <code class="docutils literal notranslate"><span class="pre">twine</span></code> development and release workflow.</p></li>
 </ul>
@@ -542,15 +619,15 @@ RMSD/IRA aggregation. (#2)</p></li>
 </section>
 <section id="rgpycrumbs-v1-0-0-2026-02-17">
 <h2>rgpycrumbs v1.0.0 (2026-02-17)<a class="headerlink" href="#rgpycrumbs-v1-0-0-2026-02-17" title="Link to this heading">¶</a></h2>
-<section id="id12">
-<h3>Removed<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<section id="id15">
+<h3>Removed<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ira_mod</span></code> from pip-installable optional dependencies (conda-only; managed exclusively via <code class="docutils literal notranslate"><span class="pre">pixi</span></code>). (#37)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pdm</span></code> and <code class="docutils literal notranslate"><span class="pre">pip</span></code> from <code class="docutils literal notranslate"><span class="pre">pixi</span></code> base dependencies. (#37)</p></li>
 </ul>
 </section>
-<section id="id13">
-<h3>Added<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<section id="id16">
+<h3>Added<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Library modules extracted from chemparseplot: <code class="docutils literal notranslate"><span class="pre">basetypes</span></code> (NEB, dimer, saddle point data types), <code class="docutils literal notranslate"><span class="pre">surfaces</span></code> (JAX-based GP surface fitting with gradient-enhanced kernels), <code class="docutils literal notranslate"><span class="pre">interpolation</span></code> (spline helpers), and <code class="docutils literal notranslate"><span class="pre">parsers</span></code> (common parsing patterns). (#36)</p></li>
 <li><p>Public API with lazy loading via <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> for <code class="docutils literal notranslate"><span class="pre">surfaces</span></code>, <code class="docutils literal notranslate"><span class="pre">basetypes</span></code>, and <code class="docutils literal notranslate"><span class="pre">interpolation</span></code> modules. (#36)</p></li>
@@ -560,15 +637,15 @@ RMSD/IRA aggregation. (#2)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rich</span></code> as a core dependency (used across CLI modules). (#37)</p></li>
 </ul>
 </section>
-<section id="id14">
-<h3>Changed<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<section id="id17">
+<h3>Changed<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">uv</span></code>-first development workflow; <code class="docutils literal notranslate"><span class="pre">pixi</span></code> now only needed for conda-gated features (IRA, fragments). (#37)</p></li>
 <li><p>CI split into <code class="docutils literal notranslate"><span class="pre">uv</span></code> job (pure, interpolation, align tests on Python 3.10-3.12) and <code class="docutils literal notranslate"><span class="pre">pixi</span></code> job (fragments, surfaces tests requiring conda packages). (#37)</p></li>
 </ul>
 </section>
-<section id="id15">
-<h3>Fixed<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<section id="id18">
+<h3>Fixed<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Interpolation tests correctly marked as <code class="docutils literal notranslate"><span class="pre">interpolation</span></code> (needs scipy), not <code class="docutils literal notranslate"><span class="pre">pure</span></code>. (#37)</p></li>
 </ul>
@@ -576,8 +653,8 @@ RMSD/IRA aggregation. (#2)</p></li>
 </section>
 <section id="rgpycrumbs-v0-1-2-2026-01-28">
 <h2>rgpycrumbs v0.1.2 (2026-01-28)<a class="headerlink" href="#rgpycrumbs-v0-1-2-2026-01-28" title="Link to this heading">¶</a></h2>
-<section id="id16">
-<h3>Fixed<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<section id="id19">
+<h3>Fixed<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Additional imports</p></li>
 </ul>
@@ -585,20 +662,20 @@ RMSD/IRA aggregation. (#2)</p></li>
 </section>
 <section id="rgpycrumbs-v0-1-1-2026-01-28">
 <h2>rgpycrumbs v0.1.1 (2026-01-28)<a class="headerlink" href="#rgpycrumbs-v0-1-1-2026-01-28" title="Link to this heading">¶</a></h2>
-<section id="id17">
-<h3>Fixed<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<section id="id20">
+<h3>Fixed<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Add an __init__ for modules</p></li>
 <li><p>Rework documentation</p></li>
 </ul>
 </section>
 </section>
-<section id="id18">
-<h2>Changelog<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<section id="id21">
+<h2>Changelog<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h2>
 <section id="v0-1-0-2026-01-28">
 <h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.1.0">v0.1.0</a> - 2026-01-28<a class="headerlink" href="#v0-1-0-2026-01-28" title="Link to this heading">¶</a></h3>
-<section id="id19">
-<h4>Added<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h4>
+<section id="id22">
+<h4>Added<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>feat(eon): add dictionary support
 (<a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/issues/28ac681.eon">#28ac681.eon</a>)</p></li>
@@ -616,8 +693,8 @@ fails.</p></li>
 global median RMSD step distance</p></li>
 </ul>
 </section>
-<section id="id20">
-<h4>Developer<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h4>
+<section id="id23">
+<h4>Developer<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Refactored alignment internals into structured dataclasses for
 improved API clarity.</p></li>
@@ -627,7 +704,7 @@ improved API clarity.</p></li>
 <section id="v0-0-6-2025-12-23">
 <h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.6">v0.0.6</a> - 2025-12-23<a class="headerlink" href="#v0-0-6-2025-12-23" title="Link to this heading">¶</a></h3>
 <section id="added-1">
-<span id="id21"></span><h4>Added<a class="headerlink" href="#added-1" title="Link to this heading">¶</a></h4>
+<span id="id24"></span><h4>Added<a class="headerlink" href="#added-1" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Added a new fragment detection tool () supporting both Geometric
 (covalent radii) and Bond Order (GFN2-xTB) methodologies.</p></li>
@@ -635,8 +712,8 @@ improved API clarity.</p></li>
 <li><p>feat(pltneb): Add ‘ira-kmax’ to tweak settings for IRA</p></li>
 </ul>
 </section>
-<section id="id22">
-<h4>Fixed<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h4>
+<section id="id25">
+<h4>Fixed<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Refactored internal import helper to use , fixing support for nested
 module imports (e.g., ).</p></li>
@@ -646,13 +723,13 @@ module imports (e.g., ).</p></li>
 <section id="v0-0-5-2025-12-06">
 <h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.5">v0.0.5</a> - 2025-12-06<a class="headerlink" href="#v0-0-5-2025-12-06" title="Link to this heading">¶</a></h3>
 <section id="added-2">
-<span id="id23"></span><h4>Added<a class="headerlink" href="#added-2" title="Link to this heading">¶</a></h4>
+<span id="id26"></span><h4>Added<a class="headerlink" href="#added-2" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>feat(pltneb): Add ‘index’ rc-mode to plot against image number</p></li>
 </ul>
 </section>
-<section id="id24">
-<h4>Changed<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h4>
+<section id="id27">
+<h4>Changed<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Use white as a default background for plots</p></li>
 <li><p>feat(cache1D): Add disk caching for 1D profiles with rmsd using
@@ -661,7 +738,7 @@ Parquet</p></li>
 </ul>
 </section>
 <section id="fixed-1">
-<span id="id25"></span><h4>Fixed<a class="headerlink" href="#fixed-1" title="Link to this heading">¶</a></h4>
+<span id="id28"></span><h4>Fixed<a class="headerlink" href="#fixed-1" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts</p></li>
 </ul>
@@ -670,7 +747,7 @@ Parquet</p></li>
 <section id="v0-0-4-2025-12-01">
 <h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.4">v0.0.4</a> - 2025-12-01<a class="headerlink" href="#v0-0-4-2025-12-01" title="Link to this heading">¶</a></h3>
 <section id="added-3">
-<span id="id26"></span><h4>Added<a class="headerlink" href="#added-3" title="Link to this heading">¶</a></h4>
+<span id="id29"></span><h4>Added<a class="headerlink" href="#added-3" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">_import_from_parent_env</span></code> helper to enable fallback imports
 from the parent python environment.</p></li>
@@ -679,7 +756,7 @@ from the parent python environment.</p></li>
 </ul>
 </section>
 <section id="changed-1">
-<span id="id27"></span><h4>Changed<a class="headerlink" href="#changed-1" title="Link to this heading">¶</a></h4>
+<span id="id30"></span><h4>Changed<a class="headerlink" href="#changed-1" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Migrated linting configuration to <code class="docutils literal notranslate"><span class="pre">tool.ruff.lint</span></code> and applied
 global formatting fixes.</p></li>
@@ -690,7 +767,7 @@ environment propagation for isolated scripts.</p></li>
 </ul>
 </section>
 <section id="fixed-2">
-<span id="id28"></span><h4>Fixed<a class="headerlink" href="#fixed-2" title="Link to this heading">¶</a></h4>
+<span id="id31"></span><h4>Fixed<a class="headerlink" href="#fixed-2" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Added conditional skipping for <code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code> tests when <code class="docutils literal notranslate"><span class="pre">ase</span></code> is not
 present in the environment.</p></li>
@@ -702,7 +779,7 @@ overlay data.</p></li>
 <section id="v0-0-3-2025-10-27">
 <h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.3">v0.0.3</a> - 2025-10-27<a class="headerlink" href="#v0-0-3-2025-10-27" title="Link to this heading">¶</a></h3>
 <section id="added-4">
-<span id="id29"></span><h4>Added<a class="headerlink" href="#added-4" title="Link to this heading">¶</a></h4>
+<span id="id32"></span><h4>Added<a class="headerlink" href="#added-4" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Add a FES direct reconstruction helper</p></li>
 <li><p>Add a version picker for the prefix package deleter</p></li>
@@ -713,7 +790,7 @@ overlay data.</p></li>
 </ul>
 </section>
 <section id="changed-2">
-<span id="id30"></span><h4>Changed<a class="headerlink" href="#changed-2" title="Link to this heading">¶</a></h4>
+<span id="id33"></span><h4>Changed<a class="headerlink" href="#changed-2" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Use hermite interpolation for NEB plots</p></li>
 </ul>
@@ -722,7 +799,7 @@ overlay data.</p></li>
 <section id="v0-0-2-2025-09-06">
 <h3><a class="reference external" href="https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.2">v0.0.2</a> - 2025-09-06<a class="headerlink" href="#v0-0-2-2025-09-06" title="Link to this heading">¶</a></h3>
 <section id="added-5">
-<span id="id31"></span><h4>Added<a class="headerlink" href="#added-5" title="Link to this heading">¶</a></h4>
+<span id="id34"></span><h4>Added<a class="headerlink" href="#added-5" title="Link to this heading">¶</a></h4>
 <ul class="simple">
 <li><p>Helper to delete prefix packages</p></li>
 <li><p>Helper to generate initial paths for EON’s NEB</p></li>
@@ -740,16 +817,16 @@ overlay data.</p></li>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="used_by.html">
+    <a href="reference/glossary.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Used By</div></div>
+        <span>Previous</span><div class="title">Glossary</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="devnotes.html">
+    <a href="used_by.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</div>
+        <div class="title">Used By</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

@@ -1,6 +1,6 @@
-=======================
-Splitting ``con`` files
-=======================
+================
+``con-splitter``
+================
 
 
 
@@ -12,7 +12,7 @@ Trajectory Splitting
    :nested: full
 
 Usage
-~~~~~
+-----
 
 To split a trajectory file:
 
@@ -31,10 +31,10 @@ feeds into eOn via:
     minimize_endpoints_for_ipath = False
 
 Refinement Strategies
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Structural Alignment
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~
 
 The ``--align-type`` option removes non-physical translational and rotational degrees of freedom that often accumulate during optimization.
 
@@ -49,7 +49,7 @@ endpoints
     intermediate images as optimized.
 
 Iterative Reordering and Alignment (IRA)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When using ``--use-ira``, the script handles atom index permutations. In complex
 NEB optimizations (especially those involving surface diffusion or molecular
@@ -59,14 +59,14 @@ the resulting ``.con`` files maintain a consistent atom numbering scheme across
 the entire path.
 
 Centering and Unit Cell Management
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``--center`` flag translates the center of mass of each image to the origin.
 Use ``--box-diagonal`` to override the simulation cell dimensions (e.g., ``20 20 20``), which ensures all generated images share an identical vacuum box for
 eOn calculations.
 
 Initial Path Generation from Generic Files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------
 
 We may also generate valid starting points for an eOn NEB calculation from a
 generic ``.xyz`` file or any ASE compatible input. For instance, for a two-image
@@ -81,14 +81,14 @@ This approach ensures that the reactant and product share an identical vacuum
 box, center of mass, and atom indexing before the NEB optimization begins.
 
 Troubleshooting
-~~~~~~~~~~~~~~~
+---------------
 
 "No images found in input file"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** The script reports no structures in the input trajectory.
+**Problem:** The script reports no structures in the input trajectory.
 
-****Solution:****
+**Solution:**
 
 1. Verify the input file format is valid:
 
@@ -101,11 +101,11 @@ Troubleshooting
 3. For .xyz files, ensure the first line is the atom count
 
 "Atom count mismatch between images"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** Different images have different numbers of atoms.
+**Problem:** Different images have different numbers of atoms.
 
-****Solution:****
+**Solution:**
 
 1. Verify all images in the trajectory have the same atom count
 
@@ -114,11 +114,11 @@ Troubleshooting
 3. Check for missing atoms in the input file
 
 IRA alignment fails
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** The IRA algorithm cannot find a consistent atom mapping.
+**Problem:** The IRA algorithm cannot find a consistent atom mapping.
 
-****Solution:****
+**Solution:**
 
 1. Increase ``--ira-kmax`` (default 1.8) for more flexible matching
 
@@ -127,11 +127,11 @@ IRA alignment fails
 3. For surface systems, ensure the slab atoms are in consistent order
 
 Output images have wrong box size
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** Generated .con files have incorrect unit cell dimensions.
+**Problem:** Generated .con files have incorrect unit cell dimensions.
 
-****Solution:****
+**Solution:**
 
 1. Use ``--box-diagonal`` to explicitly set cell dimensions:
 
@@ -142,11 +142,11 @@ Output images have wrong box size
 2. Check that the input trajectory has valid cell information
 
 eOn reports "initial\ :sub:`path.in`\ not found"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** eOn cannot find the generated path file.
+**Problem:** eOn cannot find the generated path file.
 
-****Solution:****
+**Solution:**
 
 1. Verify the output directory was created:
 

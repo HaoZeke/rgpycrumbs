@@ -1,6 +1,6 @@
-=====================
-Batch Plot Generation
-=====================
+=========
+``batch``
+=========
 
     :Author: `Rohit Goswami <https://rgoswami.me>`_
 
@@ -60,7 +60,7 @@ Configuration Options
 ---------------------
 
 Defaults Section
-~~~~~~~~~~~~~~~~
+----------------
 
 .. table::
 
@@ -73,7 +73,7 @@ Defaults Section
     +---------------------+--------+---------+---------------------------------+
 
 Plot Entries
-~~~~~~~~~~~~
+------------
 
 Each ``[[plots]]`` entry specifies a single plot:
 
@@ -158,7 +158,7 @@ Examples
 --------
 
 Basic Batch
-~~~~~~~~~~~
+-----------
 
 Generate all plots from configuration:
 
@@ -167,7 +167,7 @@ Generate all plots from configuration:
     rgpycrumbs chemgp batch -c my_plots.toml
 
 Parallel Processing
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Process 20 plots with 4 workers:
 
@@ -176,7 +176,7 @@ Process 20 plots with 4 workers:
     rgpycrumbs chemgp batch -c large_batch.toml -j 4
 
 Custom Output Directory
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 .. code:: toml
 
@@ -194,7 +194,7 @@ Custom Output Directory
     rgpycrumbs chemgp batch -c config.toml
 
 Type-Specific Options
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 .. code:: toml
 
@@ -230,13 +230,13 @@ Exit code is 1 if any plots failed, 0 if all succeeded.
 Performance Tips
 ----------------
 
-1. ****Use parallel processing**** for batches > 5 plots
+1. **Use parallel processing** for batches > 5 plots
 
-2. ****Match workers to CPU cores**** (typically 4-8 workers optimal)
+2. **Match workers to CPU cores** (typically 4-8 workers optimal)
 
-3. ****Group by input directory**** to minimize I/O seeks
+3. **Group by input directory** to minimize I/O seeks
 
-4. ****Use SSD storage**** for best I/O performance
+4. **Use SSD storage** for best I/O performance
 
 See Also
 --------

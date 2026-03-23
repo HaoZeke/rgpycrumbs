@@ -25,7 +25,7 @@ Development Environment
     with local, editable installs of dependent packages.
 
 Code Style
-    We follow a "Dispatcher" pattern detailed in the `design and architecture notes <~/Git/Github/Python/rgpycrumbs/docs/orgmode/devnotes.rst>`_. Keep core logic in
+    We follow a "Dispatcher" pattern detailed in the `design and architecture notes <../devnotes.rst>`_. Keep core logic in
     independent scripts using PEP 723 metadata as per these `real python best practices <https://realpython.com/python-script-structure/>`_.
 
 Documentation

@@ -30,7 +30,7 @@ Every model in ``surfaces.py`` implements a ``predict_var(x_query)`` method. Thi
 - **Optimization**: Parameters like length scales (:math:`l`, :math:`\epsilon`) and noise scalars are optimized via Maximum Likelihood Estimation (MLE) or Maximum A Posteriori (MAP) with physically-informed priors.
 
 Variance Windowing and Chunking
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 To prevent Out-Of-Memory (OOM) errors during the evaluation of large grids (e.g., 2D slice visualizations), both the prediction and variance calls are internally chunked.
 
@@ -44,7 +44,7 @@ To prevent Out-Of-Memory (OOM) errors during the evaluation of large grids (e.g.
 This "windowed" evaluation ensures that the large :math:`N_{query} \times N_{train}` cross-covariance matrices do not exhaust system memory.
 
 Numerical Stability
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Gradient-enhanced models use auto-differentiation (via ``jax.grad`` and ``jax.jacfwd``) to construct the full :math:`(D+1)N \times (D+1)N` covariance matrix.
 
@@ -53,14 +53,14 @@ Gradient-enhanced models use auto-differentiation (via ``jax.grad`` and ``jax.ja
 - **Float Precision**: By default, models use ``float32`` for performance and compatibility with visualization backends, but ``jax_enable_x64`` can be toggled if higher precision is required.
 
 Troubleshooting
-~~~~~~~~~~~~~~~
+---------------
 
 "Out of memory" during surface fitting
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** JAX runs out of GPU/CPU memory when fitting large datasets.
+**Problem:** JAX runs out of GPU/CPU memory when fitting large datasets.
 
-****Solution:****
+**Solution:**
 
 1. Use Nystrom approximation for datasets with >1000 points:
 
@@ -74,11 +74,11 @@ Troubleshooting
 3. Use ``float32`` precision instead of ``float64``
 
 Cholesky decomposition fails
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** ``safe_cholesky_solve`` reports numerical instability.
+**Problem:** ``safe_cholesky_solve`` reports numerical instability.
 
-****Solution:****
+**Solution:**
 
 1. Increase the ``smoothing`` parameter (adds jitter to diagonal):
 
@@ -91,11 +91,11 @@ Cholesky decomposition fails
 3. Normalize input coordinates to [0, 1] range
 
 Variance predictions are all zero
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** ``predict_var()`` returns zeros everywhere.
+**Problem:** ``predict_var()`` returns zeros everywhere.
 
-****Solution:****
+**Solution:**
 
 1. Verify the model was fitted successfully (check ``model.ls`` or ``model.epsilon``)
 
@@ -104,11 +104,11 @@ Variance predictions are all zero
 3. Check that ``smoothing`` parameter is not too large
 
 Length scale optimization fails
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** Optimizer reports "optimization failed" or length scales are extreme.
+**Problem:** Optimizer reports "optimization failed" or length scales are extreme.
 
-****Solution:****
+**Solution:**
 
 1. Provide better initial guesses:
 
@@ -121,11 +121,11 @@ Length scale optimization fails
 3. Try a different kernel (TPS is more stable for some problems)
 
 Gradient-enhanced model slower than expected
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Problem:**** Fitting with gradients is much slower than standard RBF.
+**Problem:** Fitting with gradients is much slower than standard RBF.
 
-****Solution:****
+**Solution:**
 
 1. This is expected - gradient models have :math:`(D+1)N \times (D+1)N` covariance
 

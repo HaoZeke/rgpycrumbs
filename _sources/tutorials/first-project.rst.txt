@@ -11,7 +11,7 @@ Prerequisites
 -------------
 
 Installation
-~~~~~~~~~~~~
+------------
 
 .. code:: bash
 
@@ -24,7 +24,7 @@ Installation
     uv sync --all-extras
 
 Sample Data
-~~~~~~~~~~~
+-----------
 
 For this tutorial, we assume you have:
 
@@ -206,11 +206,11 @@ Next Steps
 
 Now that you have the basics, explore:
 
-1. ****2D Landscapes****: Use ``plot_landscape_surface`` for RMSD-based projections
+1. **2D Landscapes**: Use ``plot_landscape_surface`` for RMSD-based projections
 
-2. ****Gradient-Enhanced Fitting****: Include force data for better accuracy
+2. **Gradient-Enhanced Fitting**: Include force data for better accuracy
 
-3. ****Batch Processing****: Process multiple NEB calculations automatically
+3. **Batch Processing**: Process multiple NEB calculations automatically
 
 See also:
 

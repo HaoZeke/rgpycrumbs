@@ -1,0 +1,48 @@
+================
+CLI Architecture
+================
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+
+CLI Architecture
+----------------
+
+rgpycrumbs uses a dispatcher pattern where each CLI command is a standalone
+script with PEP 723 inline metadata. The entry point ``rgpycrumbs`` dispatches
+to these scripts at runtime, avoiding a monolithic CLI with heavy imports.
+
+Dispatcher Pattern
+------------------
+
+The main ``rgpycrumbs`` command discovers scripts under ``rgpycrumbs/*/cli_*.py``
+and maps subcommand names to script paths. When invoked, it calls ``uv run`` on
+the target script, letting uv resolve the per-script dependencies declared in
+the PEP 723 header.
+
+.. code:: python
+
+    # Simplified dispatcher logic (see rgpycrumbs/__main__.py)
+    def dispatch(cmd: str, args: list[str]):
+        script = SCRIPT_MAP[cmd]  # e.g. rgpycrumbs/neb/cli_plt_neb.py
+        subprocess.run(["uv", "run", "--script", str(script), *args])
+
+Key Benefits
+------------
+
+- Each script declares only its own dependencies (click, matplotlib, etc.)
+
+- No global import of JAX/scipy/ASE at startup
+
+- Scripts are runnable standalone: ``uv run rgpycrumbs/neb/cli_plt_neb.py --help``
+
+- New commands added by dropping a ``cli_*.py`` file in the right subpackage
+
+Related
+-------
+
+- `PEP 723 Scripts <pep723_scripts.rst>`_ -- inline dependency metadata format
+
+- `Lazy Import Pattern <lazy_imports.rst>`_ -- runtime dependency resolution
+
+- `Modular Design <modular_design.rst>`_ -- package separation rationale

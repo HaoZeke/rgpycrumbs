@@ -35,6 +35,7 @@ Attributes
 
 .. autoapisummary::
 
+   rgpycrumbs.eon.plt_neb.compute_projection_basis
    rgpycrumbs.eon.plt_neb.log
    rgpycrumbs.eon.plt_neb.DEFAULT_INPUT_PATTERN
    rgpycrumbs.eon.plt_neb.DEFAULT_PATH_PATTERN
@@ -52,6 +53,10 @@ Functions
 Module Contents
 ---------------
 
+.. py:data:: compute_projection_basis
+   :value: None
+
+
 .. py:data:: log
 
 .. py:data:: DEFAULT_INPUT_PATTERN
@@ -66,7 +71,7 @@ Module Contents
    :value: 1.8
 
 
-.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, source, input_traj, input_h5, plot_type, landscape_mode, landscape_path, project_path, rc_mode, plot_structures, rbf_smoothing, show_pts, plot_mode, surface_type, n_inducing, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, strip_renderer, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, draw_reactant, draw_saddle, draw_product, show_legend, cache_file, force_recompute, ira_kmax, sp_file, augment_dat, augment_con)
+.. py:function:: main(input_dat_pattern, input_path_pattern, con_file, additional_con, source, input_traj, input_h5, plot_type, landscape_mode, landscape_path, project_path, rc_mode, plot_structures, rbf_smoothing, show_pts, plot_mode, surface_type, n_inducing, output_file, start, end, normalize_rc, title, xlabel, ylabel, highlight_last, theme, cmap_profile, cmap_landscape, facecolor, fontsize_base, figsize, fig_height, aspect_ratio, dpi, zoom_ratio, ase_rotation, perspective_tilt, strip_renderer, strip_spacing, strip_dividers, arrow_head_length, arrow_head_width, arrow_tail_width, spline_method, draw_reactant, draw_saddle, draw_product, mmf_peaks, peak_dir, show_evolution, show_legend, cache_file, force_recompute, ira_kmax, sp_file, augment_dat, augment_con)
 
    Main entry point for NEB plot script.
 

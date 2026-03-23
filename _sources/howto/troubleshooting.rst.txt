@@ -13,25 +13,25 @@ Troubleshooting Guide
 Common problems and solutions for rgpycrumbs.
 
 Installation
-~~~~~~~~~~~~
+------------
 
 Problem: "ModuleNotFoundError: No module named 'rgpycrumbs'"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** Not installed in current Python environment.
+**Cause:** Not installed in current Python environment.
 
-****Solution:****
+**Solution:**
 
 .. code:: bash
 
     python -m pip install rgpycrumbs
 
 Problem: "Module 'jax' is not installed"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** JAX required for surface fitting.
+**Cause:** JAX required for surface fitting.
 
-****Solution:****
+**Solution:**
 
 .. code:: bash
 
@@ -40,14 +40,14 @@ Problem: "Module 'jax' is not installed"
     export RGPYCRUMBS_AUTO_DEPS=1
 
 CLI Issues
-~~~~~~~~~~
+----------
 
 Problem: "Error: Script not found"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** CLI script missing or not discovered.
+**Cause:** CLI script missing or not discovered.
 
-****Solution:****
+**Solution:**
 
 .. code:: bash
 
@@ -58,36 +58,36 @@ Problem: "Error: Script not found"
     pip install -e .
 
 Problem: "uv command not found"
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** uv not installed (required for PEP 723 scripts).
+**Cause:** uv not installed (required for PEP 723 scripts).
 
-****Solution:****
+**Solution:**
 
 .. code:: bash
 
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
 Batch Processing
-~~~~~~~~~~~~~~~~
+----------------
 
 Problem: Batch command not found
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** chemgp module not installed.
+**Cause:** chemgp module not installed.
 
-****Solution:****
+**Solution:**
 
 .. code:: bash
 
     pip install "rgpycrumbs[analysis]"
 
 Problem: Parallel processing not working
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** Too many workers or memory issues.
+**Cause:** Too many workers or memory issues.
 
-****Solution:****
+**Solution:**
 
 .. code:: bash
 
@@ -95,14 +95,14 @@ Problem: Parallel processing not working
     rgpycrumbs chemgp batch -c config.toml -j 2
 
 Performance
-~~~~~~~~~~~
+-----------
 
 Problem: Slow plotting
-^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~
 
-****Cause:**** Large datasets or complex surfaces.
+**Cause:** Large datasets or complex surfaces.
 
-****Solution:****
+**Solution:**
 
 1. Use parallel processing
 
@@ -111,7 +111,7 @@ Problem: Slow plotting
 3. Use simpler interpolation methods
 
 Getting Help
-~~~~~~~~~~~~
+------------
 
 - `FAQ <faq.rst>`_ - Common questions
 

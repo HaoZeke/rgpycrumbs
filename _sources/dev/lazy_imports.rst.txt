@@ -13,8 +13,8 @@ This document explains the lazy import pattern used throughout rgpycrumbs for op
 Problem
 -------
 
-Hard Dependencies\*\*
-~~~~~~~~~~~~~~~~~~~~~
+Hard Dependencies\*
+-------------------
 
 Making all dependencies hard requirements:
 
@@ -26,8 +26,8 @@ Making all dependencies hard requirements:
 
 - Complicates dependency resolution
 
-Example: JAX for Surface Fitting\*\*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example: JAX for Surface Fitting\*
+----------------------------------
 
 .. code:: python
 
@@ -44,8 +44,8 @@ Problem: Users who only need basic plotting must install JAX (hundreds of MBs wi
 Solution: Lazy Imports
 ----------------------
 
-Pattern\*\*
-~~~~~~~~~~~
+Pattern\*
+---------
 
 .. code:: python
 
@@ -67,8 +67,8 @@ Pattern\*\*
         # Now use JAX
         ...
 
-How It Works\*\*
-~~~~~~~~~~~~~~~~
+How It Works\*
+--------------
 
 1. Module imports without loading optional dependency
 
@@ -91,8 +91,8 @@ How It Works\*\*
 Implementation
 --------------
 
-ensure\ :sub:`import`\() Function\*\*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ensure\ :sub:`import`\() Function\*
+-----------------------------------
 
 Location: ``rgpycrumbs/_aux.py``
 
@@ -138,8 +138,8 @@ Location: ``rgpycrumbs/_aux.py``
         # Step 5: actionable error
         raise ImportError(f"Module '{module_name}' is not installed...")
 
-Dependency Map\*\*
-~~~~~~~~~~~~~~~~~~
+Dependency Map\*
+----------------
 
 .. code:: python
 
@@ -159,8 +159,8 @@ Maps module names to:
 Usage Examples
 --------------
 
-Basic Lazy Import\*\*
-~~~~~~~~~~~~~~~~~~~~~
+Basic Lazy Import\*
+-------------------
 
 .. code:: python
 
@@ -181,8 +181,8 @@ Basic Lazy Import\*\*
         spl = scipy_interp.splrep(x, y, k=3)
         # ...
 
-With CUDA Override\*\*
-~~~~~~~~~~~~~~~~~~~~~~
+With CUDA Override\*
+--------------------
 
 .. code:: python
 
@@ -211,7 +211,7 @@ When adding a new ``ensure_import("X")`` call, you must also add ``X`` to
 to an ImportError.
 
 Adding a new entry
-~~~~~~~~~~~~~~~~~~
+------------------
 
 .. code:: python
 
@@ -232,7 +232,7 @@ submodule and the top-level package to the map. Both must point to the
 same pip package.
 
 Conda-only deps
-~~~~~~~~~~~~~~~
+---------------
 
 Packages without a PyPI distribution (ira\ :sub:`mod`\, tblite, ovito) should
 NOT be added to the map. They fall through to a helpful error message
@@ -253,20 +253,20 @@ the map. Run with:
 Benefits
 --------
 
-1. ****Smaller installations**** - Users only install what they need
+1. **Smaller installations** - Users only install what they need
 
-2. ****Graceful degradation**** - Features unavailable if deps missing, but core works
+2. **Graceful degradation** - Features unavailable if deps missing, but core works
 
-3. ****Auto-install option**** - ``RGPYCRUMBS_AUTO_DEPS=1`` for convenience
+3. **Auto-install option** - ``RGPYCRUMBS_AUTO_DEPS=1`` for convenience
 
-4. ****Clear error messages**** - Users told exactly how to install missing deps
+4. **Clear error messages** - Users told exactly how to install missing deps
 
-5. ****CUDA-aware**** - Automatically uses CPU-only packages if no GPU
+5. **CUDA-aware** - Automatically uses CPU-only packages if no GPU
 
 Trade-offs
 ----------
 
-****Pros:****
+**Pros:**
 
 - [OK] Smaller default installation
 
@@ -274,7 +274,7 @@ Trade-offs
 
 - [OK] Better user experience for minimal users
 
-****Cons:****
+**Cons:**
 
 - [FAIL] Runtime errors instead of import errors
 
@@ -285,7 +285,7 @@ Trade-offs
 Testing
 -------
 
-****Test Lazy Imports****
+**Test Lazy Imports**
 
 .. code:: python
 
@@ -302,7 +302,7 @@ Testing
         with pytest.raises(ImportError, match="pip install"):
             ensure_import("nonexistent_package_xyz")
 
-****Test Auto-Install****
+**Test Auto-Install**
 
 .. code:: bash
 

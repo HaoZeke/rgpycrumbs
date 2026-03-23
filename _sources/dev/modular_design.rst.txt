@@ -1,0 +1,53 @@
+==============
+Modular Design
+==============
+
+    :Author: `Rohit Goswami <https://rgoswami.me>`_
+
+
+Modular Design
+--------------
+
+The ecosystem is split into three packages with distinct responsibilities:
+
+.. table::
+
+    +-------------------+------------------------------------------+------------------------+
+    | Package           | Role                                     | Key Dependencies       |
+    +===================+==========================================+========================+
+    | ``rgpycrumbs``    | CLI tools, plotting, surface fitting     | click, matplotlib, JAX |
+    +-------------------+------------------------------------------+------------------------+
+    | ``chemparseplot`` | Output parsing, unit-aware data          | pint, ase              |
+    +-------------------+------------------------------------------+------------------------+
+    | ``pychum``        | Workflow orchestration, input generation | jobflow, fireworks     |
+    +-------------------+------------------------------------------+------------------------+
+
+Separation Rationale
+--------------------
+
+- **rgpycrumbs** owns visualization and numerical routines. It has no knowledge
+  of specific computational chemistry codes.
+
+- **chemparseplot** handles I/O for ORCA, eOn, Sella, and other codes. It
+  delegates plotting to rgpycrumbs, keeping parsers free of display logic.
+
+- **pychum** manages job submission and configuration. It calls chemparseplot for
+  parsing but never imports rgpycrumbs directly.
+
+Dependency Flow
+---------------
+
+::
+
+    pychum --> chemparseplot --> rgpycrumbs
+    (workflow)   (parsing)       (plotting/numerics)
+
+Each layer depends only on the one to its right. This keeps installation
+lightweight: users who only need parsing install chemparseplot without JAX.
+
+Related
+-------
+
+- `CLI Architecture <cli_architecture.rst>`_ -- how rgpycrumbs dispatches commands
+
+- `Lazy Import Pattern <lazy_imports.rst>`_ -- optional dependency handling

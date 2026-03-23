@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Splitting con files - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Generators for NWChem" href="generate_nwchem_input.html" /><link rel="prev" title="eOn Helpers" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>con-splitter - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="generate-nwchem" href="generate_nwchem_input.html" /><link rel="prev" title="eOn Helpers" href="index.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/eon/con_splitter.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -22,7 +22,7 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="rgpycrumbs.rgoswami.me/tools/eon/con_splitter.html"/>
-  <meta property="og:title" content="Splitting con files"/>
+  <meta property="og:title" content="con-splitter"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Manual favicon handling with favicon.io -->
 <!-- since sphinx-favicon doesn't work with shibuya -->
@@ -91,28 +91,39 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/neb-visualization.html">NEB Reaction Path Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/saddle-search-visualization.html">Saddle Search Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/minimization-visualization.html">Minimization Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/rendering-backends.html">Rendering Backends Guide</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/first-project.html">First Project</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to Guides</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/install.html">Installation Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/dev_testing.html">How-to: Run Tests and Check Coverage</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html">ChemGP Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_command.html">Batch Plot Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">eOn Helpers</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html"><code class="docutils literal notranslate"><span class="pre">generate-nwchem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlflow.html"><code class="docutils literal notranslate"><span class="pre">to-mlflow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plt_min.html"><code class="docutils literal notranslate"><span class="pre">plt-min</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plt_neb.html"><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plt_saddle.html"><code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptmdisp.html"><code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">eOn Helpers</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlflow.html">MLFlow Logging for eOn</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plt_neb.html">Plotting NEB paths</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ptmdisp.html">Polyhedral Template Matcher</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/plt_gp.html"><code class="docutils literal notranslate"><span class="pre">plt-gp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_command.html"><code class="docutils literal notranslate"><span class="pre">batch</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_tutorial.html">Batch tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/hdf5_schema.html">HDF5 schema</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
@@ -120,32 +131,25 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html"><code class="docutils literal notranslate"><span class="pre">alignment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html"><code class="docutils literal notranslate"><span class="pre">detect-fragments</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#variance-windowing-and-chunking">Variance Windowing and Chunking</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#numerical-stability">Numerical Stability</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html"><code class="docutils literal notranslate"><span class="pre">jupyter</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
-</ul>
-</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
@@ -162,7 +166,9 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_min/index.html">rgpycrumbs.eon.plt_min</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_saddle/index.html">rgpycrumbs.eon.plt_saddle</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -219,6 +225,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../dev/index.html">Developer Documentation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../explanation/citation.html">How to Cite rgpycrumbs</a></li>
 </ul>
         </div>
       </div>
@@ -232,6 +253,8 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#trajectory-splitting">Trajectory Splitting</a><ul>
 <li><a class="reference internal" href="#rgpycrumbs-eon-con-splitter">rgpycrumbs eon con-splitter</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#refinement-strategies">Refinement Strategies</a><ul>
 <li><a class="reference internal" href="#structural-alignment">Structural Alignment</a></li>
@@ -246,8 +269,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#ira-alignment-fails">IRA alignment fails</a></li>
 <li><a class="reference internal" href="#output-images-have-wrong-box-size">Output images have wrong box size</a></li>
 <li><a class="reference internal" href="#eon-reports-initialpath-innot-found">eOn reports &#8220;initial<sub>path.in</sub>not found&#8221;</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </li>
@@ -295,7 +316,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</strong>
+        <strong itemprop="name"><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code></strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -343,8 +364,8 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="splitting-con-files">
-<h1>Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files<a class="headerlink" href="#splitting-con-files" title="Link to this heading">¶</a></h1>
+          <section id="con-splitter">
+<h1><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code><a class="headerlink" href="#con-splitter" title="Link to this heading">¶</a></h1>
 <section id="trajectory-splitting">
 <h2>Trajectory Splitting<a class="headerlink" href="#trajectory-splitting" title="Link to this heading">¶</a></h2>
 <section id="rgpycrumbs-eon-con-splitter">
@@ -454,8 +475,9 @@ alignment (RMSD minimization).</p>
 </dd></dl>
 
 </section>
+</section>
 <section id="usage">
-<h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
 <p>To split a trajectory file:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>con-splitter<span class="w"> </span>neb_final_path.con<span class="w"> </span>-o<span class="w"> </span>initial_images
 </span></pre></div>
@@ -470,9 +492,9 @@ feeds into eOn via:</p>
 </div>
 </section>
 <section id="refinement-strategies">
-<h3>Refinement Strategies<a class="headerlink" href="#refinement-strategies" title="Link to this heading">¶</a></h3>
+<h2>Refinement Strategies<a class="headerlink" href="#refinement-strategies" title="Link to this heading">¶</a></h2>
 <section id="structural-alignment">
-<h4>Structural Alignment<a class="headerlink" href="#structural-alignment" title="Link to this heading">¶</a></h4>
+<h3>Structural Alignment<a class="headerlink" href="#structural-alignment" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">--align-type</span></code> option removes non-physical translational and rotational degrees of freedom that often accumulate during optimization.</p>
 <dl class="simple">
 <dt>all</dt><dd><p>Aligns every intermediate image to the reactant. This creates a
@@ -486,7 +508,7 @@ intermediate images as optimized.</p>
 </dl>
 </section>
 <section id="iterative-reordering-and-alignment-ira">
-<h4>Iterative Reordering and Alignment (IRA)<a class="headerlink" href="#iterative-reordering-and-alignment-ira" title="Link to this heading">¶</a></h4>
+<h3>Iterative Reordering and Alignment (IRA)<a class="headerlink" href="#iterative-reordering-and-alignment-ira" title="Link to this heading">¶</a></h3>
 <p>When using <code class="docutils literal notranslate"><span class="pre">--use-ira</span></code>, the script handles atom index permutations. In complex
 NEB optimizations (especially those involving surface diffusion or molecular
 dissociations), atom indices in the output trajectory may not match the reactant’s
@@ -495,14 +517,14 @@ the resulting <code class="docutils literal notranslate"><span class="pre">.con<
 the entire path.</p>
 </section>
 <section id="centering-and-unit-cell-management">
-<h4>Centering and Unit Cell Management<a class="headerlink" href="#centering-and-unit-cell-management" title="Link to this heading">¶</a></h4>
+<h3>Centering and Unit Cell Management<a class="headerlink" href="#centering-and-unit-cell-management" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">--center</span></code> flag translates the center of mass of each image to the origin.
 Use <code class="docutils literal notranslate"><span class="pre">--box-diagonal</span></code> to override the simulation cell dimensions (e.g., <code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">20</span> <span class="pre">20</span></code>), which ensures all generated images share an identical vacuum box for
 eOn calculations.</p>
 </section>
 </section>
 <section id="initial-path-generation-from-generic-files">
-<h3>Initial Path Generation from Generic Files<a class="headerlink" href="#initial-path-generation-from-generic-files" title="Link to this heading">¶</a></h3>
+<h2>Initial Path Generation from Generic Files<a class="headerlink" href="#initial-path-generation-from-generic-files" title="Link to this heading">¶</a></h2>
 <p>We may also generate valid starting points for an eOn NEB calculation from a
 generic <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> file or any ASE compatible input. For instance, for a two-image
 trajectory, to convert a reactant/product pair into the required eOn format
@@ -514,11 +536,11 @@ while fixing coordinate and mapping issues:</p>
 box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </section>
 <section id="troubleshooting">
-<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h3>
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
 <section id="no-images-found-in-input-file">
-<h4>“No images found in input file”<a class="headerlink" href="#no-images-found-in-input-file" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The script reports no structures in the input trajectory.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>“No images found in input file”<a class="headerlink" href="#no-images-found-in-input-file" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> The script reports no structures in the input trajectory.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Verify the input file format is valid:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">head<span class="w"> </span>-20<span class="w"> </span>input.con
@@ -530,9 +552,9 @@ box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </ol>
 </section>
 <section id="atom-count-mismatch-between-images">
-<h4>“Atom count mismatch between images”<a class="headerlink" href="#atom-count-mismatch-between-images" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> Different images have different numbers of atoms.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>“Atom count mismatch between images”<a class="headerlink" href="#atom-count-mismatch-between-images" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> Different images have different numbers of atoms.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic simple">
 <li><p>Verify all images in the trajectory have the same atom count</p></li>
 <li><p>If using IRA (<code class="docutils literal notranslate"><span class="pre">--use-ira</span></code>), ensure <code class="docutils literal notranslate"><span class="pre">--ira-kmax</span></code> is appropriate for your system</p></li>
@@ -540,9 +562,9 @@ box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </ol>
 </section>
 <section id="ira-alignment-fails">
-<h4>IRA alignment fails<a class="headerlink" href="#ira-alignment-fails" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The IRA algorithm cannot find a consistent atom mapping.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>IRA alignment fails<a class="headerlink" href="#ira-alignment-fails" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> The IRA algorithm cannot find a consistent atom mapping.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic simple">
 <li><p>Increase <code class="docutils literal notranslate"><span class="pre">--ira-kmax</span></code> (default 1.8) for more flexible matching</p></li>
 <li><p>Try <code class="docutils literal notranslate"><span class="pre">--align-type</span> <span class="pre">endpoints</span></code> instead of <code class="docutils literal notranslate"><span class="pre">all</span></code></p></li>
@@ -550,9 +572,9 @@ box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </ol>
 </section>
 <section id="output-images-have-wrong-box-size">
-<h4>Output images have wrong box size<a class="headerlink" href="#output-images-have-wrong-box-size" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> Generated .con files have incorrect unit cell dimensions.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>Output images have wrong box size<a class="headerlink" href="#output-images-have-wrong-box-size" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> Generated .con files have incorrect unit cell dimensions.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">--box-diagonal</span></code> to explicitly set cell dimensions:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>con-splitter<span class="w"> </span>input.con<span class="w"> </span>--box-diagonal<span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">25</span><span class="w"> </span><span class="m">25</span>
@@ -563,9 +585,9 @@ box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </ol>
 </section>
 <section id="eon-reports-initialpath-innot-found">
-<h4>eOn reports “initial<sub>path.in</sub>not found”<a class="headerlink" href="#eon-reports-initialpath-innot-found" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> eOn cannot find the generated path file.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>eOn reports “initial<sub>path.in</sub>not found”<a class="headerlink" href="#eon-reports-initialpath-innot-found" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> eOn cannot find the generated path file.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Verify the output directory was created:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">ls<span class="w"> </span>-la<span class="w"> </span>initial_images/
@@ -580,7 +602,6 @@ box, center of mass, and atom indexing before the NEB optimization begins.</p>
 </div>
 </li>
 </ol>
-</section>
 </section>
 <section id="api-reference">
 <h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h3>
@@ -605,7 +626,7 @@ box, center of mass, and atom indexing before the NEB optimization begins.</p>
     <a href="generate_nwchem_input.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Generators for NWChem</div>
+        <div class="title"><code class="docutils literal notranslate"><span class="pre">generate-nwchem</span></code></div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Plotting NEB paths - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Polyhedral Template Matcher" href="ptmdisp.html" /><link rel="prev" title="MLFlow Logging for eOn" href="mlflow.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>plt-neb - rgpycrumbs documentation</title><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="plt-saddle" href="plt_saddle.html" /><link rel="prev" title="plt-min" href="plt_min.html" />
       <link rel="canonical" href="rgpycrumbs.rgoswami.me/tools/eon/plt_neb.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -22,7 +22,7 @@
 </style>
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="rgpycrumbs.rgoswami.me/tools/eon/plt_neb.html"/>
-  <meta property="og:title" content="Plotting NEB paths"/>
+  <meta property="og:title" content="plt-neb"/>
     <meta name="twitter:card" content="summary"/>
   <!-- Manual favicon handling with favicon.io -->
 <!-- since sphinx-favicon doesn't work with shibuya -->
@@ -91,28 +91,39 @@ data-aria-dark="Switch to auto color mode">
   <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
     <div class="sy-lside-inner md:sticky">
       <div class="sy-scrollbar p-6">
-        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/neb-visualization.html">NEB Reaction Path Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/saddle-search-visualization.html">Saddle Search Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/minimization-visualization.html">Minimization Visualization</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/rendering-backends.html">Rendering Backends Guide</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../tutorials/first-project.html">First Project</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to Guides</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/install.html">Installation Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/faq.html">Frequently Asked Questions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/troubleshooting.html">Troubleshooting Guide</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../howto/dev_testing.html">How-to: Run Tests and Check Coverage</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Tools</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html">ChemGP Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/plt_gp.html">Plotting ChemGP figures</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_command.html">Batch Plot Generation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_tutorial.html">Batch Figure Generation Tutorial</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../chemgp/hdf5_schema.html">HDF5 Schema for ChemGP Plots</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">eOn Helpers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="con_splitter.html"><code class="docutils literal notranslate"><span class="pre">con-splitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html"><code class="docutils literal notranslate"><span class="pre">generate-nwchem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlflow.html"><code class="docutils literal notranslate"><span class="pre">to-mlflow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plt_min.html"><code class="docutils literal notranslate"><span class="pre">plt-min</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plt_saddle.html"><code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptmdisp.html"><code class="docutils literal notranslate"><span class="pre">ptmdisp</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html#performance-improvements-2026-03-13-fri">Performance Improvements [2026-03-13 Fri]</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">eOn Helpers</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="con_splitter.html">Splitting <code class="docutils literal notranslate"><span class="pre">con</span></code> files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="generate_nwchem_input.html">Generators for NWChem</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mlflow.html">MLFlow Logging for eOn</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Plotting NEB paths</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ptmdisp.html">Polyhedral Template Matcher</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../chemgp/index.html">ChemGP Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/plt_gp.html"><code class="docutils literal notranslate"><span class="pre">plt-gp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_command.html"><code class="docutils literal notranslate"><span class="pre">batch</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/batch_tutorial.html">Batch tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../chemgp/hdf5_schema.html">HDF5 schema</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../orca/index.html">ORCA Tools</a><ul>
@@ -120,32 +131,25 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../geom/index.html">Geometry Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html">Robust Structural Alignment</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html">Fragment Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/alignment.html"><code class="docutils literal notranslate"><span class="pre">alignment</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../geom/detect_fragments.html"><code class="docutils literal notranslate"><span class="pre">detect-fragments</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html">Surface Fitting with Kernel Methods</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#variance-windowing-and-chunking">Variance Windowing and Chunking</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#numerical-stability">Numerical Stability</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../surfaces.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../utils/index.html">General Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html">Jupyter Notebook Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/jupyter.html"><code class="docutils literal notranslate"><span class="pre">jupyter</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../prefix/index.html">Prefix Helpers</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html">Prefix Channel Package Deletion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../prefix/delete_packages.html"><code class="docutils literal notranslate"><span class="pre">delete-packages</span></code></a></li>
 </ul>
 </li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../devnotes.html"><code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code> Design &amp; Architecture Notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
-</ul>
-</li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/helpers/index.html">helpers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/rgpycrumbs/index.html">rgpycrumbs</a><ul>
@@ -162,7 +166,9 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/con_splitter/index.html">rgpycrumbs.eon.con_splitter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/generate_nwchem_input/index.html">rgpycrumbs.eon.generate_nwchem_input</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/helpers/index.html">rgpycrumbs.eon.helpers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_min/index.html">rgpycrumbs.eon.plt_min</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_neb/index.html">rgpycrumbs.eon.plt_neb</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/plt_saddle/index.html">rgpycrumbs.eon.plt_saddle</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/ptmdisp/index.html">rgpycrumbs.eon.ptmdisp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/rgpycrumbs/eon/to_mlflow/index.html">rgpycrumbs.eon.to_mlflow</a></li>
 </ul>
@@ -219,6 +225,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/generate_orca_input/index.html">generate_orca_input</a></li>
 </ul>
 </li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../used_by.html">Used By</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Contributing</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../contributing/index.html">Contributing to <code class="docutils literal notranslate"><span class="pre">rgpycrumbs</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/doc_builds.html">Documentation Standards &amp; Authoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/test_requirements.html">Testing &amp; Environment Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code_of_conduct.html">Code of Conduct</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../contributing/release.html">Release Management</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../dev/index.html">Developer Documentation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../../explanation/citation.html">How to Cite rgpycrumbs</a></li>
 </ul>
         </div>
       </div>
@@ -230,7 +251,7 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
-<li><a class="reference internal" href="#visualizing-neb-landscapes">Visualizing NEB Landscapes</a><ul>
+<li><a class="reference internal" href="#visualizing-neb-landscapes">Visualizing NEB Landscapes</a></li>
 <li><a class="reference internal" href="#method">Method</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
@@ -240,6 +261,18 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#force-corrected-interpolation-fails">Force-corrected interpolation fails</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#oci-neb-roneb-options">OCI-NEB/RONEB Options</a><ul>
+<li><a class="reference internal" href="#mmf-peak-overlay">MMF Peak Overlay</a></li>
+<li><a class="reference internal" href="#band-evolution">Band Evolution</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#structure-rendering">Structure Rendering</a><ul>
+<li><a class="reference internal" href="#rendering-backends">Rendering Backends</a></li>
+<li><a class="reference internal" href="#viewing-angle">Viewing Angle</a></li>
+<li><a class="reference internal" href="#perspective-tilt">Perspective Tilt</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#see-also">See Also</a><ul>
 <li><a class="reference internal" href="#api-reference">API Reference</a></li>
 </ul>
 </li>
@@ -287,7 +320,7 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="2" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Plotting NEB paths</strong>
+        <strong itemprop="name"><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code></strong>
         <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
@@ -335,13 +368,14 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </div><article class="yue dark-code" role="main">
-          <section id="plotting-neb-paths">
-<h1>Plotting NEB paths<a class="headerlink" href="#plotting-neb-paths" title="Link to this heading">¶</a></h1>
+          <section id="plt-neb">
+<h1><code class="docutils literal notranslate"><span class="pre">plt-neb</span></code><a class="headerlink" href="#plt-neb" title="Link to this heading">¶</a></h1>
 <section id="visualizing-neb-landscapes">
 <h2>Visualizing NEB Landscapes<a class="headerlink" href="#visualizing-neb-landscapes" title="Link to this heading">¶</a></h2>
 <p>This tool generates 2D energy landscape plots from NEB calculations using gradient-enhanced surface interpolation.</p>
+</section>
 <section id="method">
-<h3>Method<a class="headerlink" href="#method" title="Link to this heading">¶</a></h3>
+<h2>Method<a class="headerlink" href="#method" title="Link to this heading">¶</a></h2>
 <p>The default <code class="docutils literal notranslate"><span class="pre">grad_imq</span></code> surface method uses gradient-enhanced Inverse Multiquadric interpolation on 2D RMSD projections.
 This approach is described in:</p>
 <ul class="simple">
@@ -352,7 +386,7 @@ MethodsX, p. 103851, Mar. 2026, doi: <a class="reference external" href="https:/
 then fits a smooth surface using energy values and their gradients for enhanced accuracy.</p>
 </section>
 <section id="usage">
-<h3>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h3>
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
 <p>To plot a specific range of <code class="docutils literal notranslate"><span class="pre">neb_*.dat</span></code> files and save the output:</p>
 <p>To show the plot interactively without saving:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">python<span class="w"> </span>-m<span class="w"> </span>rgpycrumbs.cli<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span>--start<span class="w"> </span><span class="m">280</span>
@@ -360,11 +394,11 @@ then fits a smooth surface using energy values and their gradients for enhanced 
 </div>
 </section>
 <section id="troubleshooting">
-<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h3>
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
 <section id="no-dat-files-found-error">
-<h4>“No .dat files found” error<a class="headerlink" href="#no-dat-files-found-error" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The script reports no input files matching the pattern.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>“No .dat files found” error<a class="headerlink" href="#no-dat-files-found-error" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> The script reports no input files matching the pattern.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Verify the input pattern matches your files:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">ls<span class="w"> </span>neb_*.dat
@@ -379,9 +413,9 @@ then fits a smooth surface using energy values and their gradients for enhanced 
 </ol>
 </section>
 <section id="index-out-of-range-error">
-<h4>“Index out of range” error<a class="headerlink" href="#index-out-of-range-error" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The <code class="docutils literal notranslate"><span class="pre">--start</span></code> or <code class="docutils literal notranslate"><span class="pre">--end</span></code> indices are outside the available data range.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>“Index out of range” error<a class="headerlink" href="#index-out-of-range-error" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> The <code class="docutils literal notranslate"><span class="pre">--start</span></code> or <code class="docutils literal notranslate"><span class="pre">--end</span></code> indices are outside the available data range.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic">
 <li><p>Check available iterations:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">ls<span class="w"> </span>-1<span class="w"> </span>neb_*.dat<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l
@@ -392,9 +426,9 @@ then fits a smooth surface using energy values and their gradients for enhanced 
 </ol>
 </section>
 <section id="plot-appears-empty">
-<h4>Plot appears empty<a class="headerlink" href="#plot-appears-empty" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> The plot window opens but shows no data.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>Plot appears empty<a class="headerlink" href="#plot-appears-empty" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> The plot window opens but shows no data.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic simple">
 <li><p>Verify the .dat files contain valid energy data (column 2)</p></li>
 <li><p>Check that the energy values are not all identical</p></li>
@@ -402,9 +436,9 @@ then fits a smooth surface using energy values and their gradients for enhanced 
 </ol>
 </section>
 <section id="force-corrected-interpolation-fails">
-<h4>Force-corrected interpolation fails<a class="headerlink" href="#force-corrected-interpolation-fails" title="Link to this heading">¶</a></h4>
-<p><strong>**Problem:**</strong> Hermite spline interpolation produces warnings or errors.</p>
-<p><strong>**Solution:**</strong></p>
+<h3>Force-corrected interpolation fails<a class="headerlink" href="#force-corrected-interpolation-fails" title="Link to this heading">¶</a></h3>
+<p><strong>Problem:</strong> Hermite spline interpolation produces warnings or errors.</p>
+<p><strong>Solution:</strong></p>
 <ol class="arabic simple">
 <li><p>Ensure you have at least 3 data points</p></li>
 <li><p>Check that force data (column 4 in .dat) is present</p></li>
@@ -412,6 +446,80 @@ then fits a smooth surface using energy values and their gradients for enhanced 
 </ol>
 </section>
 </section>
+<section id="oci-neb-roneb-options">
+<h2>OCI-NEB/RONEB Options<a class="headerlink" href="#oci-neb-roneb-options" title="Link to this heading">¶</a></h2>
+<section id="mmf-peak-overlay">
+<h3>MMF Peak Overlay<a class="headerlink" href="#mmf-peak-overlay" title="Link to this heading">¶</a></h3>
+<p>When eOn produces <code class="docutils literal notranslate"><span class="pre">peak{NN}_pos.con</span></code> files (from OCI-NEB mode-following), overlay them on the landscape:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span>--plot-type<span class="w"> </span>landscape<span class="w"> </span>--mmf-peaks
+</span></pre></div>
+</div>
+<p>Peaks are auto-detected in the current directory. Use <code class="docutils literal notranslate"><span class="pre">--peak-dir</span></code> to specify an explicit path:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span>--plot-type<span class="w"> </span>landscape<span class="w"> </span>--mmf-peaks<span class="w"> </span>--peak-dir<span class="w"> </span>path/to/peaks/
+</span></pre></div>
+</div>
+</section>
+<section id="band-evolution">
+<h3>Band Evolution<a class="headerlink" href="#band-evolution" title="Link to this heading">¶</a></h3>
+<p>Show how the NEB band evolves across optimization iterations (requires <code class="docutils literal notranslate"><span class="pre">write_movies=true</span></code> data):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span data-line="1">rgpycrumbs<span class="w"> </span>eon<span class="w"> </span>plt-neb<span class="w"> </span>--plot-type<span class="w"> </span>landscape<span class="w"> </span>--show-evolution
+</span></pre></div>
+</div>
+<p>Older bands appear with lower opacity; the final band is most visible.</p>
+</section>
+</section>
+<section id="structure-rendering">
+<h2>Structure Rendering<a class="headerlink" href="#structure-rendering" title="Link to this heading">¶</a></h2>
+<section id="rendering-backends">
+<h3>Rendering Backends<a class="headerlink" href="#rendering-backends" title="Link to this heading">¶</a></h3>
+<p>Four backends available via <code class="docutils literal notranslate"><span class="pre">--strip-renderer</span></code>:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Backend</p></th>
+<th class="head"><p>Install</p></th>
+<th class="head"><p>Style</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">xyzrender</span></code> (default)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">xyzrender</span></code></p></td>
+<td><p>Ball-and-stick, paton preset</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ase</span></code></p></td>
+<td><p>Built-in</p></td>
+<td><p>Space-filling spheres</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">solvis</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">solvis-tools</span></code></p></td>
+<td><p>PyVista ball-and-stick, transparent bg</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ovito</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">ovito</span></code></p></td>
+<td><p>OVITO off-screen</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="viewing-angle">
+<h3>Viewing Angle<a class="headerlink" href="#viewing-angle" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--rotation</span> <span class="pre">&quot;0x,90y,0z&quot;</span></code> (default) sets the viewing angle for all backends. Uses
+ASE-style rotation syntax.</p>
+</section>
+<section id="perspective-tilt">
+<h3>Perspective Tilt<a class="headerlink" href="#perspective-tilt" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">--perspective-tilt</span> <span class="pre">8</span></code> applies a small Rodrigues off-axis rotation (8 degrees)
+to reveal atoms hidden by orthographic projection overlap. Useful for ring
+structures where H atoms hide behind carbons.</p>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="plt_saddle.rst">Plotting saddle search trajectories</a> for dimer/single-ended visualization</p></li>
+<li><p><a class="reference external" href="plt_min.rst">Plotting minimization trajectories</a> for minimization visualization</p></li>
+</ul>
 <section id="api-reference">
 <h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h3>
 <p>For developer details and source code see
@@ -426,16 +534,16 @@ then fits a smooth surface using energy values and their gradients for enhanced 
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="mlflow.html">
+    <a href="plt_min.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">MLFlow Logging for eOn</div></div>
+        <span>Previous</span><div class="title"><code class="docutils literal notranslate"><span class="pre">plt-min</span></code></div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="ptmdisp.html">
+    <a href="plt_saddle.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Polyhedral Template Matcher</div>
+        <div class="title"><code class="docutils literal notranslate"><span class="pre">plt-saddle</span></code></div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

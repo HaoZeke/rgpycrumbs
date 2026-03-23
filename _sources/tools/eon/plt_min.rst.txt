@@ -1,0 +1,96 @@
+===========
+``plt-min``
+===========
+
+
+
+Visualizing Minimization Optimization
+-------------------------------------
+
+This tool generates energy profiles, 2D optimization landscapes, and convergence plots from minimization calculations.
+
+Method
+~~~~~~
+
+Same projection approach as NEB/saddle search but using (initial, minimum) as references. The 2D landscape shows s = optimization progress toward the minimum and d = lateral deviation during optimization.
+
+Requires eOn output with ``write_movies=true`` which produces ``min.dat`` (structured per-iteration metrics) and ``min`` (concatenated structure movie).
+
+Plot Types
+~~~~~~~~~~
+
+Energy Profile
+^^^^^^^^^^^^^^
+
+.. code:: shell
+
+    rgpycrumbs eon plt-min --job-dir results/ --plot-type profile
+
+Shows energy vs iteration. Useful for checking monotonic descent and convergence.
+
+2D Optimization Landscape
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: shell
+
+    rgpycrumbs eon plt-min --job-dir results/ --plot-type landscape
+
+Projects the minimization trajectory into (s, d) coordinates. A good optimizer produces a path with d near zero (straight line to the minimum).
+
+Convergence Panel
+^^^^^^^^^^^^^^^^^
+
+.. code:: shell
+
+    rgpycrumbs eon plt-min --job-dir results/ --plot-type convergence
+
+Side-by-side plots of force norm and step size vs iteration.
+
+Options
+~~~~~~~
+
+.. table::
+
+    +--------------------+--------------------+---------------------------------------------+
+    | Option             | Default            | Description                                 |
+    +====================+====================+=============================================+
+    | ``--job-dir``      | (required)         | eOn output directory                        |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--prefix``       | ``min``            | Movie file prefix                           |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--plot-type``    | ``profile``        | ``profile``, ``landscape``, ``convergence`` |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--project-path`` | True               | Project into (s, d) coordinates             |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--surface-type`` | ``grad_matern``    | Surface fitting method                      |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--ira-kmax``     | 1.8                | IRA kmax for RMSD calculation               |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--theme``        | ``ruhi``           | Plot theme                                  |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``-o``             | ``min_{type}.pdf`` | Output file path                            |
+    +--------------------+--------------------+---------------------------------------------+
+    | ``--dpi``          | 200                | Resolution                                  |
+    +--------------------+--------------------+---------------------------------------------+
+
+Required eOn Output Files
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. table::
+
+    +--------------------------+----------+------------------------------------------------------------+
+    | File                     | Required | Description                                                |
+    +==========================+==========+============================================================+
+    | ``min`` (or ``min.con``) | Yes      | Concatenated structure movie                               |
+    +--------------------------+----------+------------------------------------------------------------+
+    | ``min.dat``              | Yes      | Per-iteration metrics (TSV)                                |
+    +--------------------------+----------+------------------------------------------------------------+
+    | ``min.con``              | No       | Final minimized structure (falls back to last movie frame) |
+    +--------------------------+----------+------------------------------------------------------------+
+
+See Also
+~~~~~~~~
+
+- `Plotting NEB paths <plt_neb.rst>`_ for double-ended method visualization
+
+- `Plotting saddle search trajectories <plt_saddle.rst>`_ for dimer visualization
