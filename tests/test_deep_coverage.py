@@ -55,7 +55,7 @@ except (ImportError, ModuleNotFoundError):
     _HAS_PLT_MIN = False
 
 try:
-    import pyvista  # noqa: F401
+    import pyvista
 
     _HAS_PYVISTA = True
 except ImportError:

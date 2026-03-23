@@ -161,12 +161,12 @@ ban-relative-imports = "all"
   "E402",    # Module level import not at top (for warnings suppression)
   "PLC0415", # Local import (for the Viewport GUI)
 ]
-"rgpycrumbs/geom/analysis.py" = [
-  "PLC0415",
-] # deferred imports for ensure_import
+"rgpycrumbs/geom/analysis.py" = [ "PLC0415" ]
+"rgpycrumbs/geom/api/alignment.py" = [ "PLC0415" ]
 "rgpycrumbs/interpolation.py" = [
   "PLC0415",
 ] # deferred imports for ensure_import
+"run_cov.py" = [ "S603", "S607", "T201" ]
 "scripts/**/*" = [
   "PLC0415",
   "PLW1510",

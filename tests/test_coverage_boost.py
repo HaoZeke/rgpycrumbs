@@ -687,7 +687,7 @@ class TestConSplitter:
 # 4. plt_saddle.py -- Saddle search CLI
 # ======================================================================
 try:
-    from rgpycrumbs.eon.plt_saddle import main as _saddle_main  # noqa: F401
+    from rgpycrumbs.eon.plt_saddle import main as _saddle_main
 
     _HAS_SADDLE = True
 except (ImportError, ModuleNotFoundError):
@@ -742,7 +742,7 @@ class TestPltSaddle:
 # 5. plt_min.py -- Minimization CLI
 # ======================================================================
 try:
-    from rgpycrumbs.eon.plt_min import main as _min_main  # noqa: F401
+    from rgpycrumbs.eon.plt_min import main as _min_main
 
     _HAS_MIN = True
 except (ImportError, ModuleNotFoundError):
