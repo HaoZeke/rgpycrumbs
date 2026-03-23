@@ -7,10 +7,11 @@ NEB Reaction Path Visualization
 =============================
 #+end_export
 
-In this tutorial you will produce publication-quality figures from a
-Diels-Alder NEB calculation: a 1D energy profile, a 2D reaction
-valley landscape with GP surface, structure galleries with four
-rendering backends, OCI-NEB peak overlays, and band evolution plots.
+In this tutorial you will produce publication-quality figures from a Diels-Alder
+NEB calculation: a 1D energy profile, a 2D reaction valley landscape with GP
+surface [fn:: defaults to the gradient-enhanced Inverse Multiquadric], structure
+galleries with four rendering backends, OCI-NEB peak overlays, and band
+evolution plots.
 
 #+begin_export rst
 .. admonition:: Reference
@@ -27,7 +28,7 @@ rendering backends, OCI-NEB peak overlays, and band evolution plots.
 #+begin_export rst
 .. image:: /_static/tutorial/surface_gallery.png
    :width: 100%
-   :alt: Final result: 2D GP surface with xyzrender structure strip
+   :alt: Final result: 2D GP surface using the gradient-enhanced Inverse Multiquadric kernel with xyzrender structure strip
 #+end_export
 
 * Prerequisites
@@ -274,22 +275,22 @@ rgpycrumbs eon plt-neb \
 
 * Summary
 
-| Feature | Flag | Notes |
-|---------+------+-------|
-| Energy profile | =--plot-type profile= | Hermite spline |
-| Raw RMSD landscape | =--no-project-path= | RMSD(R) vs RMSD(P) |
-| Reaction valley | =--project-path= | (s, d) coordinates |
-| GP surface | =--landscape-mode surface= | Needs jax |
-| Structure strip | =--plot-structures crit_points= | R, SP, P |
-| xyzrender | =--strip-renderer xyzrender= | Default, ball-and-stick |
-| ASE | =--strip-renderer ase= | Space-filling |
-| solvis | =--strip-renderer solvis= | PyVista, transparent bg |
-| ovito | =--strip-renderer ovito= | OVITO off-screen |
-| Custom rotation | =--rotation "45x,30y,0z"= | All backends |
-| Perspective tilt | =--perspective-tilt 8= | Reveals hidden atoms |
-| Spacing/dividers | =--strip-spacing 2.0 --strip-dividers= | |
-| MMF peaks | =--mmf-peaks --peak-dir .= | OCI-NEB |
-| Band evolution | =--show-evolution= | Fading iterations |
+| Feature            | Flag                                 | Notes                   |
+|--------------------+--------------------------------------+-------------------------|
+| Energy profile     | =--plot-type profile=                  | Hermite spline          |
+| Raw RMSD landscape | =--no-project-path=                    | RMSD(R) vs RMSD(P)      |
+| Reaction valley    | =--project-path=                       | (s, d) coordinates      |
+| GP surface         | =--landscape-mode surface=             | Needs jax               |
+| Structure strip    | =--plot-structures crit_points=        | R, SP, P                |
+| xyzrender          | =--strip-renderer xyzrender=           | Default, ball-and-stick |
+| ASE                | =--strip-renderer ase=                 | Space-filling           |
+| solvis             | =--strip-renderer solvis=              | PyVista, transparent bg |
+| ovito              | =--strip-renderer ovito=               | OVITO off-screen        |
+| Custom rotation    | =--rotation "45x,30y,0z"=              | All backends            |
+| Perspective tilt   | =--perspective-tilt 8=                 | Reveals hidden atoms    |
+| Spacing/dividers   | =--strip-spacing 2.0 --strip-dividers= |                         |
+| MMF peaks          | =--mmf-peaks --peak-dir .=             | OCI-NEB                 |
+| Band evolution     | =--show-evolution=                     | Fading iterations       |
 
 * See Also
 
