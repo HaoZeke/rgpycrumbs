@@ -689,6 +689,20 @@ def main(
             for _, add_r, add_p, _ in additional_atoms_data:
                 extra_pts.append([add_r, add_p])
             extra_pts_arr = np.array(extra_pts) if extra_pts else None
+
+            # Pre-compute viewport so the surface grid fills it exactly
+            vp_xlim = vp_ylim = None
+            if project_path:
+                _basis = compute_projection_basis(r_all, p_all)
+                _s, _d = project_to_sd(r_all, p_all, _basis)
+                _s_pad = (_s.max() - _s.min()) * 0.1
+                vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
+                _half = (vp_xlim[1] - vp_xlim[0]) / 2
+                for _, add_r, add_p, _ in additional_atoms_data:
+                    _, _ad = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
+                    _half = max(_half, abs(float(_ad[0])) * 1.15)
+                vp_ylim = (-_half, _half)
+
             plot_landscape_surface(
                 ax,
                 r_all,
@@ -707,6 +721,8 @@ def main(
                 project_path=project_path,
                 extra_points=extra_pts_arr,
                 n_inducing=n_inducing,
+                xlim=vp_xlim,
+                ylim=vp_ylim,
             )
 
         # Path Overlay (Final Step)

@@ -111,7 +111,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9a/3c/c17fb3ca2d9c3acff52e30b309f538586f9f5b9c9cf454f3845fc9af4881/certifi-2026.2.25-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/a2/4c88f17ee50af5093978c4d989936883f959d7d81e1e2fa093863b080c1c/cmcrameri-1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/e5/06b1f88f42a5a99df42ce61208bdec3bddb3d261412874280a19796fc09c/coverage-7.13.5-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
@@ -920,7 +920,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/93/d8/ba13451aa6b745c49536e87b6bf8f629b950e84bd0e8308f7dc6883b67e2/cairocffi-1.7.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bf/e0/5011747466414c12cac8a8df77aa235068669a6a5a5df301a96209db6054/cairosvg-2.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/dc/76/96b7ffc917962e6f74bff1ec850838796f58bedceac6f610834898af6462/cclib-1.8.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/a2/4c88f17ee50af5093978c4d989936883f959d7d81e1e2fa093863b080c1c/cmcrameri-1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8c/49/cd14b789536ac6a4778c453c6a2338bc0a2fb60c5a5a41b4008328b9acc1/coverage-7.13.5-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
@@ -1243,7 +1243,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/93/d8/ba13451aa6b745c49536e87b6bf8f629b950e84bd0e8308f7dc6883b67e2/cairocffi-1.7.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bf/e0/5011747466414c12cac8a8df77aa235068669a6a5a5df301a96209db6054/cairosvg-2.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/dc/76/96b7ffc917962e6f74bff1ec850838796f58bedceac6f610834898af6462/cclib-1.8.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/a2/4c88f17ee50af5093978c4d989936883f959d7d81e1e2fa093863b080c1c/cmcrameri-1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8c/49/cd14b789536ac6a4778c453c6a2338bc0a2fb60c5a5a41b4008328b9acc1/coverage-7.13.5-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
@@ -1545,7 +1545,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9a/3c/c17fb3ca2d9c3acff52e30b309f538586f9f5b9c9cf454f3845fc9af4881/certifi-2026.2.25-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/a2/4c88f17ee50af5093978c4d989936883f959d7d81e1e2fa093863b080c1c/cmcrameri-1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/e5/06b1f88f42a5a99df42ce61208bdec3bddb3d261412874280a19796fc09c/coverage-7.13.5-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
@@ -1737,7 +1737,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9a/3c/c17fb3ca2d9c3acff52e30b309f538586f9f5b9c9cf454f3845fc9af4881/certifi-2026.2.25-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/a2/4c88f17ee50af5093978c4d989936883f959d7d81e1e2fa093863b080c1c/cmcrameri-1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/e5/06b1f88f42a5a99df42ce61208bdec3bddb3d261412874280a19796fc09c/coverage-7.13.5-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
@@ -1930,7 +1930,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9a/3c/c17fb3ca2d9c3acff52e30b309f538586f9f5b9c9cf454f3845fc9af4881/certifi-2026.2.25-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
-      - pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f9/a2/4c88f17ee50af5093978c4d989936883f959d7d81e1e2fa093863b080c1c/cmcrameri-1.9-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/97/891a0971e1e4a8c5d2b20bbe0e524dc04548d2307fee33cdeba148fd4fc7/comm-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/22/e5/06b1f88f42a5a99df42ce61208bdec3bddb3d261412874280a19796fc09c/coverage-7.13.5-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl
@@ -3178,10 +3178,10 @@ packages:
   - pytest>=7.4.3 ; extra == 'test'
   - xyzrender>=0.1.2 ; extra == 'xyzrender'
   requires_python: '>=3.10'
-- pypi: https://files.pythonhosted.org/packages/80/a8/d67e91328744c0d619188169bf2121c792d28b3d4e31d237411ae51dc67f/chemparseplot-1.5.0-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/e1/ed/10d861fbe5dedaad9ac16edad26decc48755cfb0d374baf2f9696057a882/chemparseplot-1.5.2-py3-none-any.whl
   name: chemparseplot
-  version: 1.5.0
-  sha256: 8a80317a20ca0d0c6ad1b6da7acab6930992f727af983041a9949a686b0693ff
+  version: 1.5.2
+  sha256: f2910abb820a73e0e58a2235bfc02878a15afa98647693fcc921aa34b3bf895a
   requires_dist:
   - numpy>=1.26.2
   - pint>=0.22
@@ -10765,6 +10765,25 @@ packages:
 - pypi: ./
   name: rgpycrumbs
   version: 1.4.2.dev103+g76d2465ee.d20260323
+  sha256: 09ce008045c6789c852e2ddd7791bdc5a29bc8420080952bc5574d797c92ea25
+  requires_dist:
+  - click>=8.1
+  - numpy>=1.24
+  - rich>=13.0
+  - ase>=3.22 ; extra == 'all'
+  - jax[cpu]>=0.4 ; extra == 'all'
+  - scipy>=1.11 ; extra == 'all'
+  - ase>=3.22 ; extra == 'analysis'
+  - scipy>=1.11 ; extra == 'analysis'
+  - scipy>=1.11 ; extra == 'interpolation'
+  - ruff>=0.1.6 ; extra == 'lint'
+  - jax>=0.4 ; extra == 'surfaces'
+  - pytest-cov>=4.1.0 ; extra == 'test'
+  - pytest>=9.0 ; extra == 'test'
+  requires_python: '>=3.10'
+- pypi: ./
+  name: rgpycrumbs
+  version: 1.5.1.dev1+g1ab49d39a.d20260323
   sha256: 09ce008045c6789c852e2ddd7791bdc5a29bc8420080952bc5574d797c92ea25
   requires_dist:
   - click>=8.1
