@@ -3,10 +3,11 @@
 NEB Reaction Path Visualization
 =============================
 
-In this tutorial you will produce publication-quality figures from a
-Diels-Alder NEB calculation: a 1D energy profile, a 2D reaction
-valley landscape with GP surface, structure galleries with four
-rendering backends, OCI-NEB peak overlays, and band evolution plots.
+In this tutorial you will produce publication-quality figures from a Diels-Alder
+NEB calculation: a 1D energy profile, a 2D reaction valley landscape with GP
+surface  [1]_ , structure
+galleries with four rendering backends, OCI-NEB peak overlays, and band
+evolution plots.
 
 .. admonition:: Reference
 
@@ -20,7 +21,7 @@ rendering backends, OCI-NEB peak overlays, and band evolution plots.
 
 .. image:: /_static/tutorial/surface_gallery.png
    :width: 100%
-   :alt: Final result: 2D GP surface with xyzrender structure strip
+   :alt: Final result: 2D GP surface using the gradient-enhanced Inverse Multiquadric kernel with xyzrender structure strip
 
 Prerequisites
 -------------
@@ -309,3 +310,6 @@ See Also
 - `plt-saddle CLI Reference <../tools/eon/plt_saddle.rst>`_
 
 - `plt-min CLI Reference <../tools/eon/plt_min.rst>`_
+
+
+.. [1]  defaults to the gradient-enhanced Inverse Multiquadric
