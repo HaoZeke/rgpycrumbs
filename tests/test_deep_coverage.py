@@ -38,6 +38,29 @@ except (ImportError, ModuleNotFoundError):
     plt_neb_main = None
     _HAS_PLT_NEB = False
 
+try:
+    from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+
+    _HAS_PLT_SADDLE = True
+except (ImportError, ModuleNotFoundError):
+    plt_saddle_main = None
+    _HAS_PLT_SADDLE = False
+
+try:
+    from rgpycrumbs.eon.plt_min import main as plt_min_main
+
+    _HAS_PLT_MIN = True
+except (ImportError, ModuleNotFoundError):
+    plt_min_main = None
+    _HAS_PLT_MIN = False
+
+try:
+    import pyvista  # noqa: F401
+
+    _HAS_PYVISTA = True
+except ImportError:
+    _HAS_PYVISTA = False
+
 pytestmark = pytest.mark.pure
 
 
@@ -1306,6 +1329,7 @@ class TestNwchemGenDeep:
         )
 
 
+@pytest.mark.skipif(not _HAS_PLT_SADDLE, reason="plt_saddle not importable")
 class TestPltSaddleDeep:
     """Cover remaining plt_saddle branches."""
 
@@ -1386,6 +1410,7 @@ class TestPltSaddleDeep:
         )
 
 
+@pytest.mark.skipif(not _HAS_PLT_MIN, reason="plt_min not importable")
 class TestPltMinDeep:
     """Cover remaining plt_min branches."""
 
@@ -2015,6 +2040,7 @@ class TestInitErrorPaths:
                 assert "no geom" in str(e)
 
 
+@pytest.mark.skipif(not _HAS_PLT_MIN, reason="plt_min not importable")
 class TestPltMinDefaultOutput:
     """Cover plt_min line 135 (default output name)."""
 
@@ -2081,6 +2107,7 @@ class TestPltMinDefaultOutput:
         # Will fail without IRA but exercises the import path
 
 
+@pytest.mark.skipif(not _HAS_PLT_SADDLE, reason="plt_saddle not importable")
 class TestPltSaddleDefaultOutput:
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
     def test_default_output(self, tmp_path):
@@ -2307,6 +2334,8 @@ class TestAuxDeep:
 
 
 @pytest.mark.fragments
+@pytest.mark.skipif(not _HAS_PYVISTA, reason="pyvista not installed")
+@pytest.mark.skipif(not _HAS_PLT_NEB, reason="chemparseplot not installed")
 class TestSolvisRendering:
     """Test solvis backend in fragments env (has pyvista)."""
 
@@ -2334,6 +2363,7 @@ class TestSolvisRendering:
 
 
 @pytest.mark.ptm
+@pytest.mark.skipif(not _HAS_PLT_NEB, reason="chemparseplot not installed")
 class TestOvitoRendering:
     """Test ovito backend in ptm env (has ovito)."""
 

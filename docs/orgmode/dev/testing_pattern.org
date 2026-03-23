@@ -41,12 +41,40 @@ pixi run coverage combine
 pixi run coverage report --fail-under=80
 #+end_src
 
+* Guarding Optional-Dependency Tests
+
+Because rgpycrumbs and chemparseplot have a circular runtime dependency,
+=uv= cannot install both simultaneously. Tests that import chemparseplot
+(e.g. ~plt_saddle~, ~plt_min~, rendering backends) must use a
+=try/except= guard at module level:
+
+#+begin_src python
+try:
+    from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+    _HAS_PLT_SADDLE = True
+except (ImportError, ModuleNotFoundError):
+    plt_saddle_main = None
+    _HAS_PLT_SADDLE = False
+
+@pytest.mark.skipif(not _HAS_PLT_SADDLE, reason="plt_saddle not importable")
+class TestPltSaddle:
+    ...
+#+end_src
+
+This pattern ensures:
+- =uv= test runs (=pytest -m pure=) skip these tests cleanly
+- pixi test runs (which install chemparseplot) execute them normally
+- CI stays green in both environments
+
+Apply the same pattern for pyvista, ovito, and any other optional dep.
+
 * Key Points
 
 - Each marker set runs in its own isolated environment
 - =--cov-append= accumulates =.coverage= data across runs
 - CI runs all marker groups sequentially, then checks combined coverage
 - Tests that need no optional deps use the =pure= marker and run fastest
+- Use =try/except= guards for circular or optional dep imports
 
 * Related
 
