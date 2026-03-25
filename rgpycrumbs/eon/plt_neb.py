@@ -1302,11 +1302,12 @@ def main(
         # and push it down slightly to avoid overlapping the xlabel
         strip_y = pos_strip.y0 - 0.02
         ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, pos_strip.height])
-        # Clip strip axis to prevent bbox_inches="tight" from expanding
-        # the figure to fit oversized AnnotationBbox images
-        ax_strip.set_clip_on(True)
+        # Clip AnnotationBbox images to prevent bbox_inches="tight" from
+        # expanding the figure, but leave Text labels unclipped.
+        from matplotlib.offsetbox import AnnotationBbox as _AB
         for artist in ax_strip.get_children():
-            artist.set_clip_on(True)
+            if isinstance(artist, _AB):
+                artist.set_clip_on(True)
 
     if output_file:
         plt.savefig(output_file, transparent=False, bbox_inches="tight",
