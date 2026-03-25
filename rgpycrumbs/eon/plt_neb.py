@@ -346,6 +346,13 @@ IRA_KMAX_DEFAULT = 1.8
     help="Rendering backend for structure images (falls back to ASE if unavailable).",
 )
 @click.option(
+    "--xyzrender-config",
+    type=str,
+    default="paton",
+    show_default=True,
+    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
+)
+@click.option(
     "--strip-spacing",
     type=float,
     default=1.5,
@@ -504,6 +511,7 @@ def main(
     ase_rotation,
     perspective_tilt,
     strip_renderer,
+    xyzrender_config,
     strip_spacing,
     strip_dividers,
     arrow_head_length,
@@ -954,6 +962,7 @@ def main(
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
                 col_spacing=strip_spacing,
                 show_dividers=strip_dividers,
                 perspective_tilt=perspective_tilt,
@@ -1095,6 +1104,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
                         perspective_tilt=perspective_tilt,
                     )
         else:
@@ -1207,6 +1217,7 @@ def main(
                             zoom=zoom_ratio,
                             rotation=ase_rotation,
                             renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
                         )
 
         # --- Profile Additional Structures ---
@@ -1235,6 +1246,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
                         arrow_props={
                             "arrowstyle": ArrowStyle.Fancy(
                                 head_length=arrow_head_length,

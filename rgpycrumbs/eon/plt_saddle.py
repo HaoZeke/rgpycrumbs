@@ -123,6 +123,10 @@ IRA_KMAX_DEFAULT = 1.8
     default="xyzrender",
     help="Rendering backend for structure strip.",
 )
+@click.option(
+    "--xyzrender-config", type=str, default="paton", show_default=True,
+    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
+)
 @click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
 @click.option(
     "--strip-dividers",
@@ -164,6 +168,7 @@ def main(
     theme,
     plot_structures,
     strip_renderer,
+    xyzrender_config,
     strip_spacing,
     strip_dividers,
     rotation,
@@ -220,6 +225,7 @@ def main(
             cmap=active_theme.cmap_landscape,
             plot_structures=plot_structures,
             strip_renderer=strip_renderer,
+            xyzrender_config=xyzrender_config,
             strip_spacing=strip_spacing,
             strip_dividers=strip_dividers,
             rotation=rotation,
@@ -298,6 +304,7 @@ def _plot_landscape(
     cmap="viridis",
     plot_structures="none",
     strip_renderer="xyzrender",
+    xyzrender_config="paton",
     strip_spacing=1.5,
     strip_dividers=False,
     rotation="auto",
@@ -452,6 +459,7 @@ def _plot_landscape(
             theme_color=theme.textcolor if theme else "black",
             renderer=strip_renderer,
             col_spacing=strip_spacing,
+            xyzrender_config=xyzrender_config,
             show_dividers=strip_dividers,
             perspective_tilt=perspective_tilt,
         )
