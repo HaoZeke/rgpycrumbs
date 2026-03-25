@@ -128,6 +128,8 @@ IRA_KMAX_DEFAULT = 1.8
     help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
 )
 @click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
+@click.option("--strip-zoom", type=float, default=None,
+    help="Strip image zoom (default: auto-scaled by atom count).")
 @click.option(
     "--strip-dividers",
     is_flag=True,
@@ -170,6 +172,7 @@ def main(
     strip_renderer,
     xyzrender_config,
     strip_spacing,
+    strip_zoom,
     strip_dividers,
     rotation,
     perspective_tilt,
@@ -227,6 +230,7 @@ def main(
             strip_renderer=strip_renderer,
             xyzrender_config=xyzrender_config,
             strip_spacing=strip_spacing,
+            strip_zoom=strip_zoom,
             strip_dividers=strip_dividers,
             rotation=rotation,
             perspective_tilt=perspective_tilt,
@@ -306,6 +310,7 @@ def _plot_landscape(
     strip_renderer="xyzrender",
     xyzrender_config="paton",
     strip_spacing=1.5,
+    strip_zoom=None,
     strip_dividers=False,
     rotation="auto",
     perspective_tilt=0.0,
@@ -450,8 +455,9 @@ def _plot_landscape(
             structs.append(traj.atoms_list[-1])
             strip_labels.append("End")
 
-        max_atoms = max(len(s) for s in structs) if structs else 10
-        strip_zoom = max(0.2, min(0.8, 0.8 - 0.006 * (max_atoms - 20)))
+        if strip_zoom is None:
+            max_atoms = max(len(s) for s in structs) if structs else 10
+            strip_zoom = max(0.25, 0.8 * (20 / max(max_atoms, 20)) ** 0.3)
         plot_structure_strip(
             ax_strip,
             structs,
