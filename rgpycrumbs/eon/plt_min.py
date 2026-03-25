@@ -307,7 +307,7 @@ def _plot_landscape(
     fig = plt.figure(figsize=(5.37, 5.37 + (1.5 if has_strip else 0)), dpi=dpi)
 
     if has_strip:
-        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=0.05, figure=fig)
+        gs = GridSpec(2, 1, height_ratios=[1, 0.3], hspace=0.15, figure=fig)
         ax = fig.add_subplot(gs[0])
         ax_strip = fig.add_subplot(gs[1])
         if theme:
