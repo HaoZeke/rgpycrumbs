@@ -166,6 +166,7 @@ class BaseGradientSurface:
         smoothing=1e-4,
         length_scale=None,
         optimize=True,
+        noise_per_obs=None,
         **_kwargs,
     ):
         """
@@ -178,8 +179,16 @@ class BaseGradientSurface:
             smoothing: Initial noise/smoothing parameter.
             length_scale: Initial length scale parameter(s).
             optimize: Whether to optimize parameters.
+            noise_per_obs: Per-observation noise array (N,) for heteroscedastic
+                GP. When provided, each observation gets its own noise level
+                instead of the global smoothing parameter.
             **kwargs: Additional model-specific parameters.
         """
+        self._noise_per_obs = (
+            jnp.asarray(noise_per_obs, dtype=jnp.float32)
+            if noise_per_obs is not None
+            else None
+        )
         self.x = jnp.asarray(x, dtype=jnp.float32)
         y_energies = jnp.asarray(y, dtype=jnp.float32)[:, None]
         grad_vals = (

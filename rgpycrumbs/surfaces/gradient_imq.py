@@ -40,16 +40,32 @@ def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
 
     noise_target = jnp.log(1e-2)
     noise_penalty = (log_noise - noise_target) ** 2 / 0.5
+
     return mll_cost + eps_penalty + noise_penalty
 
 
 @jit
-def _grad_imq_solve(x, y_full, noise_scalar, epsilon):
+def _grad_imq_solve(x, y_full, noise_scalar, epsilon, noise_per_obs=None):
     K_blocks = k_matrix_imq_grad_map(x, x, epsilon)
     N, _, D_plus_1, _ = K_blocks.shape
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
-    diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
-    K_full = K_full + diag_noise
+    if noise_per_obs is not None:
+        # Heteroscedastic: each observation has its own noise level,
+        # repeated for the value + D gradient components.
+        # Gradient components get 10x less noise than energy (trust gradients).
+        D = D_plus_1 - 1
+        noise_blocks = []
+        for i in range(N):
+            obs_noise = noise_per_obs[i]
+            block = jnp.concatenate([
+                jnp.array([obs_noise]),           # energy noise
+                jnp.full(D, obs_noise * 0.1),     # gradient noise (10x lower)
+            ])
+            noise_blocks.append(block)
+        noise_diag = jnp.concatenate(noise_blocks) + 1e-6
+        K_full = K_full + jnp.diag(noise_diag)
+    else:
+        K_full = K_full + (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
     K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
     return alpha, K_inv
@@ -106,6 +122,9 @@ class GradientIMQ(BaseGradientSurface):
             results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
             self.epsilon = float(jnp.exp(results.x[0]))
             self.noise = float(jnp.exp(results.x[1]))
+            # Cap noise at smoothing input -- the MLL tends to overestimate
+            # noise for gradient-enhanced IMQ, destroying basin accuracy.
+            self.noise = min(self.noise, max(smoothing, 1e-2))
             if jnp.isnan(self.epsilon) or jnp.isnan(self.noise):
                 self.epsilon, self.noise = init_eps, init_noise
         else:
@@ -113,7 +132,8 @@ class GradientIMQ(BaseGradientSurface):
 
     def _solve(self):
         self.alpha, self.K_inv = _grad_imq_solve(
-            self.x, self.y_full, self.noise, self.epsilon
+            self.x, self.y_full, self.noise, self.epsilon,
+            noise_per_obs=getattr(self, '_noise_per_obs', None),
         )
 
     def _predict_chunk(self, chunk):

@@ -27,8 +27,6 @@ using the generalized (s, d) reaction valley projection. Supports:
 #   "polars",
 #   "chemparseplot",
 #   "xyzrender>=0.1.3",
-#   "solvis-tools>=0.1",
-#   "ovito>=3.14",
 # ]
 # ///
 
