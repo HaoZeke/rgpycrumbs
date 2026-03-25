@@ -335,7 +335,7 @@ def _plot_landscape(
     fig = plt.figure(figsize=(5.37, 5.37 + (1.5 if has_strip else 0)), dpi=dpi)
 
     if has_strip:
-        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=0.3, figure=fig)
+        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=0.05, figure=fig)
         ax = fig.add_subplot(gs[0])
         ax_strip = fig.add_subplot(gs[1])
         if theme:
@@ -450,11 +450,13 @@ def _plot_landscape(
             structs.append(traj.atoms_list[-1])
             strip_labels.append("End")
 
+        max_atoms = max(len(s) for s in structs) if structs else 10
+        strip_zoom = max(0.2, min(0.8, 0.8 - 0.006 * (max_atoms - 20)))
         plot_structure_strip(
             ax_strip,
             structs,
             strip_labels,
-            zoom=0.8,
+            zoom=strip_zoom,
             rotation=rotation,
             theme_color=theme.textcolor if theme else "black",
             renderer=strip_renderer,
