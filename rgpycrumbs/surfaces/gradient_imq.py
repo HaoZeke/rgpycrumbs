@@ -57,10 +57,12 @@ def _grad_imq_solve(x, y_full, noise_scalar, epsilon, noise_per_obs=None):
         noise_blocks = []
         for i in range(N):
             obs_noise = noise_per_obs[i]
-            block = jnp.concatenate([
-                jnp.array([obs_noise]),           # energy noise
-                jnp.full(D, obs_noise * 0.1),     # gradient noise (10x lower)
-            ])
+            block = jnp.concatenate(
+                [
+                    jnp.array([obs_noise]),  # energy noise
+                    jnp.full(D, obs_noise * 0.1),  # gradient noise (10x lower)
+                ]
+            )
             noise_blocks.append(block)
         noise_diag = jnp.concatenate(noise_blocks) + 1e-6
         K_full = K_full + jnp.diag(noise_diag)
@@ -132,8 +134,11 @@ class GradientIMQ(BaseGradientSurface):
 
     def _solve(self):
         self.alpha, self.K_inv = _grad_imq_solve(
-            self.x, self.y_full, self.noise, self.epsilon,
-            noise_per_obs=getattr(self, '_noise_per_obs', None),
+            self.x,
+            self.y_full,
+            self.noise,
+            self.epsilon,
+            noise_per_obs=getattr(self, "_noise_per_obs", None),
         )
 
     def _predict_chunk(self, chunk):

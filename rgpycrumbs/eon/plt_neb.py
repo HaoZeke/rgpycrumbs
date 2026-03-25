@@ -673,9 +673,7 @@ def main(
         # additional-con overlay, and viewport calculation.
         r_full = df["r"].to_numpy()
         p_full = df["p"].to_numpy()
-        global_basis = (
-            compute_projection_basis(r_full, p_full) if project_path else None
-        )
+        global_basis = compute_projection_basis(r_full, p_full) if project_path else None
 
         # Surface Generation
         if landscape_mode == "surface":
@@ -849,7 +847,11 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            _sp_basis = global_basis if global_basis is not None else compute_projection_basis(final_r, final_p)
+            _sp_basis = (
+                global_basis
+                if global_basis is not None
+                else compute_projection_basis(final_r, final_p)
+            )
             sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), _sp_basis)
             sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
@@ -873,8 +875,14 @@ def main(
                 color = marker_cmap(i % 10)
 
                 if project_path:
-                    _add_basis = global_basis if global_basis is not None else compute_projection_basis(final_r, final_p)
-                    _s, _d = project_to_sd(np.array([add_r]), np.array([add_p]), _add_basis)
+                    _add_basis = (
+                        global_basis
+                        if global_basis is not None
+                        else compute_projection_basis(final_r, final_p)
+                    )
+                    _s, _d = project_to_sd(
+                        np.array([add_r]), np.array([add_p]), _add_basis
+                    )
                     plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
                     plot_add_r, plot_add_p = add_r, add_p
@@ -898,8 +906,14 @@ def main(
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
-                    _pc_basis = global_basis if global_basis is not None else compute_projection_basis(final_r, final_p)
-                    _s, _d = project_to_sd(np.array([r_val]), np.array([p_val]), _pc_basis)
+                    _pc_basis = (
+                        global_basis
+                        if global_basis is not None
+                        else compute_projection_basis(final_r, final_p)
+                    )
+                    _s, _d = project_to_sd(
+                        np.array([r_val]), np.array([p_val]), _pc_basis
+                    )
                     return float(_s[0]), float(_d[0])
                 return r_val, p_val
 
@@ -1104,7 +1118,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
-                xyzrender_config=xyzrender_config,
+                        xyzrender_config=xyzrender_config,
                         perspective_tilt=perspective_tilt,
                     )
         else:
@@ -1217,7 +1231,7 @@ def main(
                             zoom=zoom_ratio,
                             rotation=ase_rotation,
                             renderer=strip_renderer,
-                xyzrender_config=xyzrender_config,
+                            xyzrender_config=xyzrender_config,
                         )
 
         # --- Profile Additional Structures ---
@@ -1246,7 +1260,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
-                xyzrender_config=xyzrender_config,
+                        xyzrender_config=xyzrender_config,
                         arrow_props={
                             "arrowstyle": ArrowStyle.Fancy(
                                 head_length=arrow_head_length,
@@ -1317,13 +1331,15 @@ def main(
         # Clip AnnotationBbox images to prevent bbox_inches="tight" from
         # expanding the figure, but leave Text labels unclipped.
         from matplotlib.offsetbox import AnnotationBbox as _AB
+
         for artist in ax_strip.get_children():
             if isinstance(artist, _AB):
                 artist.set_clip_on(True)
 
     if output_file:
-        plt.savefig(output_file, transparent=False, bbox_inches="tight",
-                    pad_inches=0.1, dpi=dpi)
+        plt.savefig(
+            output_file, transparent=False, bbox_inches="tight", pad_inches=0.1, dpi=dpi
+        )
     else:
         plt.show()
 

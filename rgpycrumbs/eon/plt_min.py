@@ -123,12 +123,19 @@ IRA_KMAX_DEFAULT = 1.8
     help="Rendering backend for structure strip.",
 )
 @click.option(
-    "--xyzrender-config", type=str, default="paton", show_default=True,
+    "--xyzrender-config",
+    type=str,
+    default="paton",
+    show_default=True,
     help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
 )
 @click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
-@click.option("--strip-zoom", type=float, default=None,
-    help="Strip image zoom (default: auto-scaled by atom count).")
+@click.option(
+    "--strip-zoom",
+    type=float,
+    default=None,
+    help="Strip image zoom (default: auto-scaled by atom count).",
+)
 @click.option(
     "--strip-dividers",
     is_flag=True,
