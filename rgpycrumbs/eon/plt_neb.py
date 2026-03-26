@@ -39,8 +39,6 @@ https://realpython.com/python-script-structure/
 #   "h5py",
 #   "chemparseplot",
 #   "xyzrender>=0.1.3",
-#   "solvis-tools>=0.1",
-#   "ovito>=3.14",
 # ]
 # ///
 
@@ -348,6 +346,13 @@ IRA_KMAX_DEFAULT = 1.8
     help="Rendering backend for structure images (falls back to ASE if unavailable).",
 )
 @click.option(
+    "--xyzrender-config",
+    type=str,
+    default="paton",
+    show_default=True,
+    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
+)
+@click.option(
     "--strip-spacing",
     type=float,
     default=1.5,
@@ -506,6 +511,7 @@ def main(
     ase_rotation,
     perspective_tilt,
     strip_renderer,
+    xyzrender_config,
     strip_spacing,
     strip_dividers,
     arrow_head_length,
@@ -662,6 +668,13 @@ def main(
                 prod_atoms=atoms_list[-1] if atoms_list else None,  # main product
             )
 
+        # Compute a SINGLE projection basis from the full dataset's endpoints.
+        # This basis is used consistently for: surface grid, path overlay,
+        # additional-con overlay, and viewport calculation.
+        r_full = df["r"].to_numpy()
+        p_full = df["p"].to_numpy()
+        global_basis = compute_projection_basis(r_full, p_full) if project_path else None
+
         # Surface Generation
         if landscape_mode == "surface":
             if landscape_path == "last":
@@ -690,16 +703,17 @@ def main(
                 extra_pts.append([add_r, add_p])
             extra_pts_arr = np.array(extra_pts) if extra_pts else None
 
-            # Pre-compute viewport so the surface grid fills it exactly
+            # Pre-compute viewport from FULL data (not filtered surface data)
             vp_xlim = vp_ylim = None
-            if project_path:
-                _basis = compute_projection_basis(r_all, p_all)
-                _s, _d = project_to_sd(r_all, p_all, _basis)
+            if project_path and global_basis is not None:
+                _s, _d = project_to_sd(r_full, p_full, global_basis)
                 _s_pad = (_s.max() - _s.min()) * 0.1
                 vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
                 _half = (vp_xlim[1] - vp_xlim[0]) / 2
                 for _, add_r, add_p, _ in additional_atoms_data:
-                    _, _ad = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
+                    _, _ad = project_to_sd(
+                        np.array([add_r]), np.array([add_p]), global_basis
+                    )
                     _half = max(_half, abs(float(_ad[0])) * 1.15)
                 vp_ylim = (-_half, _half)
 
@@ -723,6 +737,7 @@ def main(
                 n_inducing=n_inducing,
                 xlim=vp_xlim,
                 ylim=vp_ylim,
+                basis=global_basis,
             )
 
         # Path Overlay (Final Step)
@@ -749,6 +764,7 @@ def main(
             active_theme.cmap_landscape,
             z_label,
             project_path=project_path,
+            basis=global_basis,
             **bg_kwargs,
         )
 
@@ -831,8 +847,12 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            basis = compute_projection_basis(final_r, final_p)
-            sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), basis)
+            _sp_basis = (
+                global_basis
+                if global_basis is not None
+                else compute_projection_basis(final_r, final_p)
+            )
+            sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), _sp_basis)
             sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
             sp_x, sp_y = sp_x_raw, sp_y_raw
@@ -855,8 +875,14 @@ def main(
                 color = marker_cmap(i % 10)
 
                 if project_path:
-                    _basis = compute_projection_basis(final_r, final_p)
-                    _s, _d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
+                    _add_basis = (
+                        global_basis
+                        if global_basis is not None
+                        else compute_projection_basis(final_r, final_p)
+                    )
+                    _s, _d = project_to_sd(
+                        np.array([add_r]), np.array([add_p]), _add_basis
+                    )
                     plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
                     plot_add_r, plot_add_p = add_r, add_p
@@ -880,8 +906,14 @@ def main(
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
-                    _basis = compute_projection_basis(final_r, final_p)
-                    _s, _d = project_to_sd(np.array([r_val]), np.array([p_val]), _basis)
+                    _pc_basis = (
+                        global_basis
+                        if global_basis is not None
+                        else compute_projection_basis(final_r, final_p)
+                    )
+                    _s, _d = project_to_sd(
+                        np.array([r_val]), np.array([p_val]), _pc_basis
+                    )
                     return float(_s[0]), float(_d[0])
                 return r_val, p_val
 
@@ -944,6 +976,7 @@ def main(
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
                 col_spacing=strip_spacing,
                 show_dividers=strip_dividers,
                 perspective_tilt=perspective_tilt,
@@ -1085,6 +1118,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
+                        xyzrender_config=xyzrender_config,
                         perspective_tilt=perspective_tilt,
                     )
         else:
@@ -1197,6 +1231,7 @@ def main(
                             zoom=zoom_ratio,
                             rotation=ase_rotation,
                             renderer=strip_renderer,
+                            xyzrender_config=xyzrender_config,
                         )
 
         # --- Profile Additional Structures ---
@@ -1225,6 +1260,7 @@ def main(
                         zoom=zoom_ratio,
                         rotation=ase_rotation,
                         renderer=strip_renderer,
+                        xyzrender_config=xyzrender_config,
                         arrow_props={
                             "arrowstyle": ArrowStyle.Fancy(
                                 head_length=arrow_head_length,
@@ -1292,9 +1328,18 @@ def main(
         # and push it down slightly to avoid overlapping the xlabel
         strip_y = pos_strip.y0 - 0.02
         ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, pos_strip.height])
+        # Clip AnnotationBbox images to prevent bbox_inches="tight" from
+        # expanding the figure, but leave Text labels unclipped.
+        from matplotlib.offsetbox import AnnotationBbox
+
+        for artist in ax_strip.get_children():
+            if isinstance(artist, AnnotationBbox):
+                artist.set_clip_on(True)
 
     if output_file:
-        plt.savefig(output_file, transparent=False, bbox_inches="tight", dpi=dpi)
+        plt.savefig(
+            output_file, transparent=False, bbox_inches="tight", pad_inches=0.1, dpi=dpi
+        )
     else:
         plt.show()
 

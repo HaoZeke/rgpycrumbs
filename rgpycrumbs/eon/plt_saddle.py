@@ -27,8 +27,6 @@ using the generalized (s, d) reaction valley projection. Supports:
 #   "polars",
 #   "chemparseplot",
 #   "xyzrender>=0.1.3",
-#   "solvis-tools>=0.1",
-#   "ovito>=3.14",
 # ]
 # ///
 
@@ -125,7 +123,20 @@ IRA_KMAX_DEFAULT = 1.8
     default="xyzrender",
     help="Rendering backend for structure strip.",
 )
+@click.option(
+    "--xyzrender-config",
+    type=str,
+    default="paton",
+    show_default=True,
+    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
+)
 @click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
+@click.option(
+    "--strip-zoom",
+    type=float,
+    default=None,
+    help="Strip image zoom (default: auto-scaled by atom count).",
+)
 @click.option(
     "--strip-dividers",
     is_flag=True,
@@ -166,7 +177,9 @@ def main(
     theme,
     plot_structures,
     strip_renderer,
+    xyzrender_config,
     strip_spacing,
+    strip_zoom,
     strip_dividers,
     rotation,
     perspective_tilt,
@@ -222,7 +235,9 @@ def main(
             cmap=active_theme.cmap_landscape,
             plot_structures=plot_structures,
             strip_renderer=strip_renderer,
+            xyzrender_config=xyzrender_config,
             strip_spacing=strip_spacing,
+            strip_zoom=strip_zoom,
             strip_dividers=strip_dividers,
             rotation=rotation,
             perspective_tilt=perspective_tilt,
@@ -300,7 +315,9 @@ def _plot_landscape(
     cmap="viridis",
     plot_structures="none",
     strip_renderer="xyzrender",
+    xyzrender_config="paton",
     strip_spacing=1.5,
+    strip_zoom=None,
     strip_dividers=False,
     rotation="auto",
     perspective_tilt=0.0,
@@ -330,7 +347,7 @@ def _plot_landscape(
     fig = plt.figure(figsize=(5.37, 5.37 + (1.5 if has_strip else 0)), dpi=dpi)
 
     if has_strip:
-        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=0.3, figure=fig)
+        gs = GridSpec(2, 1, height_ratios=[1, 0.3], hspace=0.15, figure=fig)
         ax = fig.add_subplot(gs[0])
         ax_strip = fig.add_subplot(gs[1])
         if theme:
@@ -445,15 +462,19 @@ def _plot_landscape(
             structs.append(traj.atoms_list[-1])
             strip_labels.append("End")
 
+        if strip_zoom is None:
+            max_atoms = max(len(s) for s in structs) if structs else 10
+            strip_zoom = max(0.25, 0.8 * (20 / max(max_atoms, 20)) ** 0.3)
         plot_structure_strip(
             ax_strip,
             structs,
             strip_labels,
-            zoom=0.8,
+            zoom=strip_zoom,
             rotation=rotation,
             theme_color=theme.textcolor if theme else "black",
             renderer=strip_renderer,
             col_spacing=strip_spacing,
+            xyzrender_config=xyzrender_config,
             show_dividers=strip_dividers,
             perspective_tilt=perspective_tilt,
         )
