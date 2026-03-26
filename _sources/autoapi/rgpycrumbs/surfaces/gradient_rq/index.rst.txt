@@ -34,7 +34,7 @@ Module Contents
 
 .. py:function:: _grad_rq_var(x_query, x_obs, K_inv, params)
 
-.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+.. py:class:: GradientRQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, noise_per_obs=None, **_kwargs)
 
    Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
 

@@ -45,7 +45,7 @@ Module Contents
 
 .. py:data:: CONSOLE
 
-.. py:class:: AlignMode(*args, **kwds)
+.. py:class:: AlignMode
 
    Bases: :py:obj:`enum.Enum`
 
@@ -68,7 +68,7 @@ Module Contents
 
 
 
-.. py:class:: SplitMode(*args, **kwds)
+.. py:class:: SplitMode
 
    Bases: :py:obj:`enum.Enum`
 

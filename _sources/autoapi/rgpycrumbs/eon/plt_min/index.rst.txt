@@ -49,7 +49,7 @@ Module Contents
    :value: 1.8
 
 
-.. py:function:: main(job_dir, label, prefix, plot_type, project_path, surface_type, ira_kmax, theme, plot_structures, strip_renderer, strip_spacing, strip_dividers, rotation, perspective_tilt, output, dpi, verbose)
+.. py:function:: main(job_dir, label, prefix, plot_type, project_path, surface_type, ira_kmax, theme, plot_structures, strip_renderer, xyzrender_config, strip_spacing, strip_zoom, strip_dividers, rotation, perspective_tilt, output, dpi, verbose)
 
    Plot minimization trajectory visualization.
 
@@ -63,7 +63,7 @@ Module Contents
 
 .. py:function:: _plot_profile(trajs, labels, output, dpi)
 
-.. py:function:: _plot_landscape(trajs, labels, output, dpi, *, project_path, surface_type, ira_kmax, cmap='viridis', plot_structures='none', strip_renderer='xyzrender', strip_spacing=1.5, strip_dividers=False, rotation='auto', perspective_tilt=0.0, theme=None)
+.. py:function:: _plot_landscape(trajs, labels, output, dpi, *, project_path, surface_type, ira_kmax, cmap='viridis', plot_structures='none', strip_renderer='xyzrender', xyzrender_config='paton', strip_spacing=1.5, strip_zoom=None, strip_dividers=False, rotation='auto', perspective_tilt=0.0, theme=None)
 
 .. py:function:: _plot_convergence(trajs, labels, output, dpi)
 

@@ -138,7 +138,7 @@ Module Contents
 
 
 
-.. py:class:: BaseGradientSurface(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+.. py:class:: BaseGradientSurface(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, noise_per_obs=None, **_kwargs)
 
    Abstract base class for gradient-enhanced surface models.
 
@@ -146,6 +146,9 @@ Module Contents
 
    Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
    These models incorporate both values and their gradients into the fit.
+
+
+   .. py:attribute:: _noise_per_obs
 
 
    .. py:attribute:: x

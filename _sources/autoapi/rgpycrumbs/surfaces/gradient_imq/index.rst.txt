@@ -31,13 +31,13 @@ Module Contents
 
 .. py:function:: negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1)
 
-.. py:function:: _grad_imq_solve(x, y_full, noise_scalar, epsilon)
+.. py:function:: _grad_imq_solve(x, y_full, noise_scalar, epsilon, noise_per_obs=None)
 
 .. py:function:: _grad_imq_predict(x_query, x_obs, alpha, epsilon)
 
 .. py:function:: _grad_imq_var(x_query, x_obs, K_inv, epsilon)
 
-.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, **_kwargs)
+.. py:class:: GradientIMQ(x, y, gradients=None, smoothing=0.0001, length_scale=None, optimize=True, noise_per_obs=None, **_kwargs)
 
    Bases: :py:obj:`rgpycrumbs.surfaces._base.BaseGradientSurface`
 
