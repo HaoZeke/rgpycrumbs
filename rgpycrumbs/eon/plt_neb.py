@@ -1330,10 +1330,10 @@ def main(
         ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, pos_strip.height])
         # Clip AnnotationBbox images to prevent bbox_inches="tight" from
         # expanding the figure, but leave Text labels unclipped.
-        from matplotlib.offsetbox import AnnotationBbox as _AB
+        from matplotlib.offsetbox import AnnotationBbox
 
         for artist in ax_strip.get_children():
-            if isinstance(artist, _AB):
+            if isinstance(artist, AnnotationBbox):
                 artist.set_clip_on(True)
 
     if output_file:
