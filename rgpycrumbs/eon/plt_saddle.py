@@ -323,7 +323,7 @@ def _plot_landscape(
     perspective_tilt=0.0,
     theme=None,
 ):
-    from ase.io import read as ase_read
+    import readcon
 
     try:
         from rgpycrumbs._aux import _import_from_parent_env
@@ -337,7 +337,7 @@ def _plot_landscape(
 
     # Determine reference B from primary trajectory
     if ref_product is not None:
-        ref_b = ase_read(str(ref_product), format="eon")
+        ref_b = readcon.read_con_as_ase(str(ref_product))[0]
     elif traj.saddle_atoms is not None:
         ref_b = traj.saddle_atoms
     else:
