@@ -1,3 +1,26 @@
+rgpycrumbs 1.7.0 (2026-04-07)
+=============================
+
+Added
+-----
+
+- Integrated pytest-pep723 plugin for static validation of PEP 723 inline script dependencies in CI.
+
+
+Developer
+---------
+
+- Added OIDC trusted publishing workflow for PyPI releases, gated on tests, lints, and docs.
+- Migrated documentation deployment from GitHub Pages to Cloudflare Pages.
+
+
+Fixed
+-----
+
+- Added missing numpy and rich to PEP 723 inline script dependencies in plot_gp.py.
+- Added readcon to PEP 723 inline script dependencies in plt_neb.py and plt_saddle.py, fixing dispatch failures.
+
+
 rgpycrumbs 1.5.0 (2026-03-23)
 =============================
 
