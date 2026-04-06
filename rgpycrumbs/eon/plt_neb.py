@@ -716,6 +716,11 @@ def main(
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.15)
                 vp_ylim = (-_half, _half)
+                # Expand X to match Y so equal-aspect produces a square plot
+                x_span = vp_xlim[1] - vp_xlim[0]
+                if 2 * _half > x_span:
+                    x_center = (vp_xlim[0] + vp_xlim[1]) / 2
+                    vp_xlim = (x_center - _half, x_center + _half)
 
             plot_landscape_surface(
                 ax,
@@ -777,7 +782,7 @@ def main(
         if _show_mmf:
             peak_files = sorted(_peak_search_dir.glob("peak*_pos.con"))
             if peak_files:
-                from ase.io import read as ase_read
+                import readcon
 
                 from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
 
@@ -788,7 +793,7 @@ def main(
                     ira_instance = _ira_mod.IRA()
                 except (ImportError, AttributeError):
                     ira_instance = None
-                peak_atoms = [ase_read(str(pf), format="eon") for pf in peak_files]
+                peak_atoms = [readcon.read_con_as_ase(str(pf))[0] for pf in peak_files]
                 # Use same references as the main path
                 ref_r = atoms_list[0] if atoms_list else None
                 ref_p = atoms_list[-1] if atoms_list else None
