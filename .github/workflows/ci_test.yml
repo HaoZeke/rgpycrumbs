@@ -23,6 +23,8 @@ jobs:
         run: uv sync --all-extras
       - name: Run pure tests
         run: uv run --extra test pytest -m pure
+      - name: Check PEP 723 inline deps
+        run: uv run --extra test pytest --pep723-check -m pep723 --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
       - name: Run interpolation tests
         run: uv run --extra test --extra interpolation pytest -m interpolation
       - name: Run align tests

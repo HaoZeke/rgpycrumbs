@@ -39,7 +39,7 @@ interpolation = [ "scipy>=1.11" ]
 surfaces      = [ "jax>=0.4" ]
 # ira_mod is conda-only (via pixi); not a pip-installable extra
 lint = [ "ruff>=0.1.6" ]
-test = [ "pytest>=9.0", "pytest-cov>=4.1.0" ]
+test = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
 
 [project.scripts]
 rgpycrumbs = "rgpycrumbs.cli:main"
@@ -228,3 +228,12 @@ markers = [
 ]
 minversion = "9.0"
 testpaths = [ "tests" ]
+pep723_paths = [ "rgpycrumbs" ]
+pep723_ignore_imports = [
+  "rgpycrumbs",
+  "chemparseplot",
+  "ira_mod",
+  "tblite",
+  "ovito",
+  "eon",
+]
