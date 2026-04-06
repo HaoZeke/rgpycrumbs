@@ -182,9 +182,7 @@ def _parse_pep723_deps(source: str) -> set[str]:
     # Strip leading '#' from each line, join, then extract from the
     # dependencies list.  This handles both one-dep-per-line and
     # multiple-deps-on-one-line formats.
-    stripped = "\n".join(
-        line.lstrip("#").strip() for line in block.splitlines()
-    )
+    stripped = "\n".join(line.lstrip("#").strip() for line in block.splitlines())
     # Find the dependencies = [...] section
     dep_match = re.search(r"dependencies\s*=\s*\[(.*?)\]", stripped, re.DOTALL)
     if not dep_match:
