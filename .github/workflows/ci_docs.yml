@@ -9,16 +9,13 @@ on:
     branches: [main]
     tags: ["*"]
   pull_request:
-    # Check all PR
   schedule:
-    - cron: "0 8 * * 1" # run every Monday at 8am UTC
+    - cron: "0 8 * * 1"
 
 jobs:
   build_docs:
     name: Build documentation
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,10 +41,10 @@ jobs:
           name: documentation
           path: docs/build
 
-      - name: Deploy
+      - name: Deploy to Cloudflare Pages
         if: github.event_name == 'push'
-        uses: peaceiris/actions-gh-pages@v4
+        uses: cloudflare/wrangler-action@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/build
-          cname: rgpycrumbs.rgoswami.me
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy docs/build --project-name=rgpycrumbs-docs --branch=main
