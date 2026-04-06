@@ -716,6 +716,11 @@ def main(
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.15)
                 vp_ylim = (-_half, _half)
+                # Expand X to match Y so equal-aspect produces a square plot
+                x_span = vp_xlim[1] - vp_xlim[0]
+                if 2 * _half > x_span:
+                    x_center = (vp_xlim[0] + vp_xlim[1]) / 2
+                    vp_xlim = (x_center - _half, x_center + _half)
 
             plot_landscape_surface(
                 ax,
