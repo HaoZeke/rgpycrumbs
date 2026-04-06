@@ -8,8 +8,10 @@
 # dependencies = [
 #   "click",
 #   "h5py",
+#   "numpy",
 #   "pandas",
 #   "plotnine",
+#   "rich",
 #   "chemparseplot",
 # ]
 # ///
