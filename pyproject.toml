@@ -227,8 +227,6 @@ markers = [
   "slow: mark tests as slow (deselect with '-m \"not slow\"').",
 ]
 minversion = "9.0"
-testpaths = [ "tests" ]
-pep723_paths = [ "rgpycrumbs" ]
 pep723_ignore_imports = [
   "rgpycrumbs",
   "chemparseplot",
@@ -237,3 +235,5 @@ pep723_ignore_imports = [
   "ovito",
   "eon",
 ]
+pep723_paths = [ "rgpycrumbs" ]
+testpaths = [ "tests" ]
