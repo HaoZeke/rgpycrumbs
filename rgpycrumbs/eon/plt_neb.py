@@ -1302,11 +1302,6 @@ def main(
                     _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
                     half_span = max(half_span, abs(float(add_d[0])) * 1.15)
             ax.set_ylim(-half_span, half_span)
-            # Expand X-axis to match Y-axis span so equal aspect stays square
-            x_center = (x_min + x_max) / 2
-            if 2 * half_span > x_span:
-                ax.set_xlim(x_center - half_span, x_center + half_span)
-                log.info(f"Expanded X-axis to match Y-span: [{x_center - half_span:.2f}, {x_center + half_span:.2f}]")
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 
     if show_legend:
