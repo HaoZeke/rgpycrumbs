@@ -9950,8 +9950,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: rgpycrumbs
-  version: 1.6.3.dev1+g303b5a7f9
-  sha256: 4e6146002aed41c27f94e7a510908b7b8dadd1792d54463f2decc5f43b0d8a40
+  version: 1.6.3.dev4+gce23bdebe
+  sha256: a841508a18079c1600e8dea69187539b4a83a9f0d2fc571f8343f3dc10fe3406
   requires_dist:
   - click>=8.1
   - numpy>=1.24
