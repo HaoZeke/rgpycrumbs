@@ -650,7 +650,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="323">    <span class="n">perspective_tilt</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
 </span><span data-line="324">    <span class="n">theme</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 </span><span data-line="325"><span class="p">):</span>
-</span><span data-line="326">    <span class="kn">from</span><span class="w"> </span><span class="nn">ase.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">read</span> <span class="k">as</span> <span class="n">ase_read</span>
+</span><span data-line="326">    <span class="kn">import</span><span class="w"> </span><span class="nn">readcon</span>
 </span><span data-line="327">
 </span><span data-line="328">    <span class="k">try</span><span class="p">:</span>
 </span><span data-line="329">        <span class="kn">from</span><span class="w"> </span><span class="nn">rgpycrumbs._aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">_import_from_parent_env</span>
@@ -664,7 +664,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="337">
 </span><span data-line="338">    <span class="c1"># Determine reference B from primary trajectory</span>
 </span><span data-line="339">    <span class="k">if</span> <span class="n">ref_product</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="340">        <span class="n">ref_b</span> <span class="o">=</span> <span class="n">ase_read</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ref_product</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;eon&quot;</span><span class="p">)</span>
+</span><span data-line="340">        <span class="n">ref_b</span> <span class="o">=</span> <span class="n">readcon</span><span class="o">.</span><span class="n">read_con_as_ase</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ref_product</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
 </span><span data-line="341">    <span class="k">elif</span> <span class="n">traj</span><span class="o">.</span><span class="n">saddle_atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 </span><span data-line="342">        <span class="n">ref_b</span> <span class="o">=</span> <span class="n">traj</span><span class="o">.</span><span class="n">saddle_atoms</span>
 </span><span data-line="343">    <span class="k">else</span><span class="p">:</span>
