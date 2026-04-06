@@ -9950,8 +9950,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: rgpycrumbs
-  version: 1.5.2.dev13+gc0f6a2c7f
-  sha256: 4c2b890dc7623c981cc49890cc0f5916f1e50fb314527f99bcc769aabfc2d6e4
+  version: 1.6.3.dev1+g303b5a7f9
+  sha256: 4e6146002aed41c27f94e7a510908b7b8dadd1792d54463f2decc5f43b0d8a40
   requires_dist:
   - click>=8.1
   - numpy>=1.24
@@ -9967,6 +9967,7 @@ packages:
   - ruff>=0.1.6 ; extra == 'lint'
   - jax>=0.4 ; extra == 'surfaces'
   - pytest-cov>=4.1.0 ; extra == 'test'
+  - pytest-pep723>=0.1.0 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
   requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/14/25/b208c5683343959b670dc001595f2f3737e051da617f66c31f7c4fa93abc/rich-14.3.3-py3-none-any.whl
