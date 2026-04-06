@@ -148,7 +148,6 @@ _STDLIB: set[str] = getattr(sys, "stdlib_module_names", set()) | {
     "stringprep",
     "readline",
     "rlcompleter",
-    "textwrap",
     "difflib",
     "pydoc",
     "doctest",
