@@ -39,6 +39,7 @@ https://realpython.com/python-script-structure/
 #   "h5py",
 #   "chemparseplot",
 #   "xyzrender>=0.1.3",
+#   "readcon>=0.7.0",
 # ]
 # ///
 
