@@ -17,7 +17,7 @@ affiliations:
     index: 1
   - name: "EPFL - Ecole Polytechnique Federale de Lausanne, Switzerland"
     index: 2
-date: 15 March 2026
+date: 7 April 2026
 bibliography: paper.bib
 ---
 
@@ -146,6 +146,16 @@ detects CUDA availability and selects CPU-only package variants when no GPU is
 present, avoiding unnecessary downloads of GPU-specific binary dependencies.
 This means `pip install rgpycrumbs` provides the full import surface; heavy
 dependencies materialize only when first accessed.
+
+The correctness of the PEP 723 metadata is enforced by `pytest-pep723`
+, a pytest plugin developed alongside `rgpycrumbs` that
+statically verifies every import in a dispatched script is declared in its
+inline metadata block. The plugin parses the `# /// script` dependencies,
+extracts all import statements via Python's AST, and reports uncovered imports.
+This catches a class of bug where a developer adds a new import but forgets to
+update the inline metadata &#x2013; a failure that only manifests at dispatch time in
+a clean environment. The plugin is published on PyPI and runs in CI on every
+push.
 
 ![Data flow from raw trajectory data through parsing (`chemparseplot`) and
 computation (`rgpycrumbs`) to visualization.](figures/dataflow.pdf){width="100%"}
