@@ -337,7 +337,9 @@ class TestPlotGP:
                 del sys.modules[key]
 
     def test_group_help(self, monkeypatch):
-        _assert_dispatches(["chemgp", "plot-gp", "--help"], "chemgp/plot_gp.py", monkeypatch)
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "--help"], "chemgp/plot_gp.py", monkeypatch
+        )
 
     def test_convergence_help(self, monkeypatch):
         _assert_dispatches(
@@ -837,7 +839,9 @@ class TestToMlflow:
         sys.modules.pop("rgpycrumbs.eon.to_mlflow", None)
 
     def test_help(self, monkeypatch):
-        _assert_dispatches(["eon", "to-mlflow", "--help"], "eon/to_mlflow.py", monkeypatch)
+        _assert_dispatches(
+            ["eon", "to-mlflow", "--help"], "eon/to_mlflow.py", monkeypatch
+        )
 
     def test_regex_patterns(self):
         from rgpycrumbs.eon.to_mlflow import (
