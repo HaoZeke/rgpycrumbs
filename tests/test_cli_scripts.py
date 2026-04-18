@@ -147,6 +147,22 @@ class TestXtsPotentials:
 
         assert callable(cuh2_potential)
 
+    def test_cuh2_import_has_no_side_effects(self, monkeypatch):
+        import rgpycrumbs.xts.saddle.cuh2 as cuh2_mod
+
+        def fail_read(*_args, **_kwargs):
+            msg = "cuh2 import should not read structures"
+            raise AssertionError(msg)
+
+        def fail_grid(*_args, **_kwargs):
+            msg = "cuh2 import should not build plotting grids"
+            raise AssertionError(msg)
+
+        monkeypatch.setattr("ase.io.read", fail_read)
+        monkeypatch.setattr("rgpycrumbs.xts.cuh2.datgen.get_from_gitroot_con", fail_grid)
+        reloaded = importlib.reload(cuh2_mod)
+        assert callable(reloaded.cuh2_potential)
+
 
 @pytest.mark.skipif(
     not _HAS_CHEMGP,
