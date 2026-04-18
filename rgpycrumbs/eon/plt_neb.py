@@ -711,6 +711,12 @@ def main(
                 _s_pad = (_s.max() - _s.min()) * 0.1
                 vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
                 _half = (vp_xlim[1] - vp_xlim[0]) / 2
+                # Make sure the trajectory itself fits inside the symmetric
+                # d window before considering additional structures, so the
+                # converged path and saddle marker do not get clipped at
+                # the top/bottom of the viewport.
+                _half = max(_half, abs(float(_d.max())) * 1.15,
+                            abs(float(_d.min())) * 1.15)
                 for _, add_r, add_p, _ in additional_atoms_data:
                     _, _ad = project_to_sd(
                         np.array([add_r]), np.array([add_p]), global_basis
