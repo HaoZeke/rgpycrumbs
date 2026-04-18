@@ -3,6 +3,8 @@ import importlib.util
 
 import pytest
 
+from tests._optional_imports import optional_import_available
+
 # Define the requirements for each suite/marker
 ENVIRONMENT_REQUIREMENTS = {
     "fragments": ["ase", "tblite"],
@@ -18,11 +20,7 @@ ENVIRONMENT_REQUIREMENTS = {
 
 def _try_import(module_name):
     """Return True if *module_name* can actually be imported."""
-    try:
-        importlib.import_module(module_name)
-        return True
-    except Exception:
-        return False
+    return optional_import_available(module_name)
 
 
 # Test files that import PEP 723 dispatcher modules with heavy or

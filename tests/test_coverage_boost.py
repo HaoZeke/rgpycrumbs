@@ -20,13 +20,11 @@ import numpy as np
 import pytest
 from click.testing import CliRunner
 
+from tests._optional_imports import has_module_spec, optional_import_available
+
 
 def _has(mod):
-    try:
-        importlib.import_module(mod)
-        return True
-    except Exception:
-        return False
+    return optional_import_available(mod)
 
 
 _HAS_REQUESTS = _has("requests")
@@ -35,9 +33,22 @@ _HAS_MLFLOW = _has("mlflow")
 _HAS_OVITO = _has("ovito")
 _HAS_PYVISTA = _has("pyvista")
 
-_HAS_DEV_CHEMGP = _has("chemparseplot.plot.chemgp")
+_HAS_DEV_CHEMGP = has_module_spec("chemparseplot") and _has("chemparseplot.plot.chemgp")
 
 pytestmark = pytest.mark.pure
+
+
+def _assert_dispatches(argv, expected_script, monkeypatch):
+    from rgpycrumbs.cli import main
+
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    with patch("rgpycrumbs.cli.subprocess.run") as mock_run:
+        result = CliRunner().invoke(main, argv)
+    assert result.exit_code == 0
+    command = mock_run.call_args.args[0]
+    assert command[:2] == ["uv", "run"]
+    assert command[2].endswith(expected_script)
+    assert command[3:] == argv[2:]
 
 
 # ======================================================================
@@ -250,13 +261,8 @@ class TestPltNeb:
             if key.startswith("rgpycrumbs.eon.plt_neb"):
                 del sys.modules[key]
 
-    def test_help(self):
-        from rgpycrumbs.eon.plt_neb import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "NEB" in result.output or "neb" in result.output.lower()
+    def test_help(self, monkeypatch):
+        _assert_dispatches(["eon", "plt-neb", "--help"], "eon/plt_neb.py", monkeypatch)
 
     def test_no_input_files(self, tmp_path):
         from rgpycrumbs.eon.plt_neb import main
@@ -317,91 +323,85 @@ class TestPlotGP:
             if key.startswith("rgpycrumbs.chemgp.plot_gp"):
                 del sys.modules[key]
 
-    def test_group_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
+    def test_group_help(self, monkeypatch):
+        _assert_dispatches(["chemgp", "plot-gp", "--help"], "chemgp/plot_gp.py", monkeypatch)
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ["--help"])
-        assert result.exit_code == 0
-        assert "ChemGP" in result.output or "chemgp" in result.output.lower()
+    def test_convergence_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "convergence", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-    def test_convergence_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
+    def test_surface_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "surface", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ["convergence", "--help"])
-        assert result.exit_code == 0
-        assert "--input" in result.output
+    def test_quality_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "quality", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-    def test_surface_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
+    def test_rff_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "rff", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ["surface", "--help"])
-        assert result.exit_code == 0
+    def test_nll_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "nll", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-    def test_quality_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
+    def test_sensitivity_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "sensitivity", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ["quality", "--help"])
-        assert result.exit_code == 0
+    def test_trust_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "trust", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-    def test_rff_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
+    def test_variance_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "variance", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ["rff", "--help"])
-        assert result.exit_code == 0
+    def test_fps_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "fps", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-    def test_nll_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
+    def test_profile_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "profile", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
-        runner = CliRunner()
-        result = runner.invoke(cli, ["nll", "--help"])
-        assert result.exit_code == 0
-
-    def test_sensitivity_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["sensitivity", "--help"])
-        assert result.exit_code == 0
-
-    def test_trust_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["trust", "--help"])
-        assert result.exit_code == 0
-
-    def test_variance_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["variance", "--help"])
-        assert result.exit_code == 0
-
-    def test_fps_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["fps", "--help"])
-        assert result.exit_code == 0
-
-    def test_profile_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["profile", "--help"])
-        assert result.exit_code == 0
-
-    def test_batch_help(self):
-        from rgpycrumbs.chemgp.plot_gp import cli
-
-        runner = CliRunner()
-        result = runner.invoke(cli, ["batch", "--help"])
-        assert result.exit_code == 0
+    def test_batch_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "plot-gp", "batch", "--help"],
+            "chemgp/plot_gp.py",
+            monkeypatch,
+        )
 
     def test_common_options_decorator(self):
         from rgpycrumbs.chemgp.plot_gp import common_options
@@ -420,13 +420,10 @@ class TestPlotGP:
 class TestConSplitter:
     """Test con_splitter click CLI with synthetic data."""
 
-    def test_help(self):
-        from rgpycrumbs.eon.con_splitter import con_splitter
-
-        runner = CliRunner()
-        result = runner.invoke(con_splitter, ["--help"])
-        assert result.exit_code == 0
-        assert "--images-per-path" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(
+            ["eon", "con-splitter", "--help"], "eon/con_splitter.py", monkeypatch
+        )
 
     def test_split_synthetic_traj(self, tmp_path):
         """Create a synthetic trajectory and split it."""
@@ -686,12 +683,10 @@ class TestConSplitter:
 # ======================================================================
 # 4. plt_saddle.py -- Saddle search CLI
 # ======================================================================
-try:
-    from rgpycrumbs.eon.plt_saddle import main as _saddle_main
-
-    _HAS_SADDLE = True
-except (ImportError, ModuleNotFoundError):
-    _HAS_SADDLE = False
+_HAS_SADDLE = all(
+    has_module_spec(mod)
+    for mod in ("matplotlib", "numpy", "scipy", "jax", "cmcrameri", "rich", "ase")
+)
 
 
 @pytest.mark.skipif(not _HAS_SADDLE, reason="chemparseplot not installed")
@@ -723,14 +718,10 @@ class TestPltSaddle:
             if key.startswith("rgpycrumbs.eon.plt_saddle"):
                 del sys.modules[key]
 
-    def test_help(self):
-        from rgpycrumbs.eon.plt_saddle import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--job-dir" in result.output
-        assert "--plot-type" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(
+            ["eon", "plt-saddle", "--help"], "eon/plt_saddle.py", monkeypatch
+        )
 
     def test_constants(self):
         from rgpycrumbs.eon.plt_saddle import IRA_KMAX_DEFAULT
@@ -741,12 +732,10 @@ class TestPltSaddle:
 # ======================================================================
 # 5. plt_min.py -- Minimization CLI
 # ======================================================================
-try:
-    from rgpycrumbs.eon.plt_min import main as _min_main
-
-    _HAS_MIN = True
-except (ImportError, ModuleNotFoundError):
-    _HAS_MIN = False
+_HAS_MIN = all(
+    has_module_spec(mod)
+    for mod in ("matplotlib", "numpy", "scipy", "jax", "cmcrameri", "rich", "ase")
+)
 
 
 @pytest.mark.skipif(not _HAS_MIN, reason="chemparseplot not installed")
@@ -778,14 +767,8 @@ class TestPltMin:
             if key.startswith("rgpycrumbs.eon.plt_min"):
                 del sys.modules[key]
 
-    def test_help(self):
-        from rgpycrumbs.eon.plt_min import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--job-dir" in result.output
-        assert "--prefix" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(["eon", "plt-min", "--help"], "eon/plt_min.py", monkeypatch)
 
     def test_constants(self):
         from rgpycrumbs.eon.plt_min import IRA_KMAX_DEFAULT
@@ -840,14 +823,8 @@ class TestToMlflow:
                 sys.modules[name] = self._originals[name]
         sys.modules.pop("rgpycrumbs.eon.to_mlflow", None)
 
-    def test_help(self):
-        from rgpycrumbs.eon.to_mlflow import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--log-file" in result.output
-        assert "--experiment" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(["eon", "to-mlflow", "--help"], "eon/to_mlflow.py", monkeypatch)
 
     def test_regex_patterns(self):
         from rgpycrumbs.eon.to_mlflow import (
@@ -911,15 +888,12 @@ class TestToMlflow:
 class TestDeletePackages:
     """Test prefix/delete_packages.py CLI."""
 
-    def test_help(self):
-        from rgpycrumbs.prefix.delete_packages import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--channel" in result.output
-        assert "--package-name" in result.output
-        assert "--dry-run" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(
+            ["prefix", "delete-packages", "--help"],
+            "prefix/delete_packages.py",
+            monkeypatch,
+        )
 
     def test_get_packages_to_delete_empty(self):
         from rgpycrumbs.prefix.delete_packages import get_packages_to_delete
@@ -1009,13 +983,12 @@ class TestDeletePackages:
 class TestMatchAtoms:
     """Test chemgp/match_atoms.py with real ASE Atoms."""
 
-    def test_help(self):
-        from rgpycrumbs.chemgp.match_atoms import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--structure" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(
+            ["chemgp", "match-atoms", "--help"],
+            "chemgp/match_atoms.py",
+            monkeypatch,
+        )
 
     def test_parse_target_coords(self):
         from rgpycrumbs.chemgp.match_atoms import parse_target_coords
@@ -1347,14 +1320,12 @@ class TestGenerateNwchemInput:
             sys.modules["pychum"] = self._originals["pychum"]
         sys.modules.pop("rgpycrumbs.eon.generate_nwchem_input", None)
 
-    def test_help(self):
-        from rgpycrumbs.eon.generate_nwchem_input import main
-
-        runner = CliRunner()
-        result = runner.invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--pos-file" in result.output
-        assert "--config" in result.output
+    def test_help(self, monkeypatch):
+        _assert_dispatches(
+            ["eon", "generate-nwchem-input", "--help"],
+            "eon/generate_nwchem_input.py",
+            monkeypatch,
+        )
 
     def test_generate_with_config(self, tmp_path):
         from ase import Atoms

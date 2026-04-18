@@ -14,22 +14,18 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
+from tests._optional_imports import optional_import_available
+from tests._optional_imports import has_module_spec
+
 pytestmark = pytest.mark.pure
 
-
-def _can_import(module_name):
-    """Check if a module is importable without triggering full import chains."""
-    try:
-        importlib.import_module(module_name)
-        return True
-    except (ImportError, ModuleNotFoundError, Exception):
-        return False
-
-
-# Evaluate these once, catching any cascading import errors
-_HAS_CHEMGP = _can_import("chemparseplot.plot.chemgp")
-_HAS_PYPOTLIB = _can_import("pypotlib")
-_HAS_XTS_MB = _can_import("rgpycrumbs.xts.saddle.mb")
+# Skip only for genuinely absent optional stacks.
+_HAS_CHEMGP = all(
+    has_module_spec(mod)
+    for mod in ("chemparseplot", "matplotlib", "pandas", "plotnine", "h5py")
+)
+_HAS_PYPOTLIB = has_module_spec("pypotlib")
+_HAS_XTS_MB = all(has_module_spec(mod) for mod in ("cmcrameri", "matplotlib"))
 
 
 class TestMainCLI:
@@ -149,12 +145,34 @@ class TestCuH2Xts:
 )
 class TestChemGPMatchAtoms:
     def test_import(self):
-        try:
-            from rgpycrumbs.chemgp import match_atoms
+        from rgpycrumbs.chemgp import match_atoms
 
-            assert hasattr(match_atoms, "match_atoms")
-        except ImportError:
-            pytest.skip("chemgp import chain failed")
+        assert hasattr(match_atoms, "match_atoms")
+
+
+class TestOptionalImportGuards:
+    def test_missing_third_party_returns_false(self, monkeypatch):
+        real_import = importlib.import_module
+
+        def fake_import(name, package=None):
+            if name == "chemparseplot.synthetic_optional":
+                raise ModuleNotFoundError("missing pandas", name="pandas")
+            return real_import(name, package)
+
+        monkeypatch.setattr(importlib, "import_module", fake_import)
+        assert optional_import_available("chemparseplot.synthetic_optional") is False
+
+    def test_first_party_breakage_raises(self, monkeypatch):
+        real_import = importlib.import_module
+
+        def fake_import(name, package=None):
+            if name == "rgpycrumbs.synthetic_broken":
+                raise ModuleNotFoundError("broken first-party import", name=name)
+            return real_import(name, package)
+
+        monkeypatch.setattr(importlib, "import_module", fake_import)
+        with pytest.raises(ModuleNotFoundError):
+            optional_import_available("rgpycrumbs.synthetic_broken")
 
 
 class TestPackageInit:
