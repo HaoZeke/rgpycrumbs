@@ -117,7 +117,7 @@ log = logging.getLogger("rich")
 # --- Constants ---
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
-IRA_KMAX_DEFAULT = 1.8
+IRA_KMAX_DEFAULT = 14.0
 
 
 # --- CLI ---
@@ -866,8 +866,8 @@ def main(
         ax.scatter(
             sp_x,
             sp_y,
-            marker="s",
-            s=int(active_theme.font_size * 2),
+            marker="*",
+            s=int(active_theme.font_size ** 2 * 1.5),
             c="white",
             edgecolors="black",
             linewidths=1.5,

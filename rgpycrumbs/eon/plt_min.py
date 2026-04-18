@@ -381,22 +381,38 @@ def _plot_landscape(
         sx, sy = float(rmsd_a[0]), float(rmsd_b[0])
         ex, ey = float(rmsd_a[-1]), float(rmsd_b[-1])
 
+    # Offset labels above each marker by ~5 px and give them a translucent
+    # white box so they remain readable against bright surface contours
+    # (the previous bare annotation got swallowed by yellow/green fills at
+    # the basin extrema).
+    label_box = {
+        "boxstyle": "round,pad=0.2",
+        "facecolor": "white",
+        "edgecolor": "none",
+        "alpha": 0.85,
+    }
     ax.annotate(
         "Init",
         (sx, sy),
+        xytext=(0, 6),
+        textcoords="offset points",
         fontsize=10,
         fontweight="bold",
         ha="center",
         va="bottom",
+        bbox=label_box,
         zorder=60,
     )
     ax.annotate(
         "Min",
         (ex, ey),
+        xytext=(0, 6),
+        textcoords="offset points",
         fontsize=10,
         fontweight="bold",
         ha="center",
         va="bottom",
+        bbox=label_box,
         zorder=60,
     )
 
