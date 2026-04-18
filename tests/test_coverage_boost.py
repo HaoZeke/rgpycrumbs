@@ -167,6 +167,19 @@ def _make_chemparseplot_mocks():
     mods["chemparseplot.plot.theme"].apply_axis_theme = MagicMock()
     mods["chemparseplot.plot.theme"].get_theme = MagicMock(return_value={})
     mods["chemparseplot.plot.theme"].setup_global_theme = MagicMock()
+    mods["chemparseplot.plot.structs"] = types.ModuleType("chemparseplot.plot.structs")
+    mods["chemparseplot.plot.structs"].convert_energy = MagicMock(
+        side_effect=lambda values, *_args, **_kwargs: values
+    )
+    mods["chemparseplot.plot.structs"].convert_energy_curvature = MagicMock(
+        side_effect=lambda values, *_args, **_kwargs: values
+    )
+    mods["chemparseplot.plot.structs"].energy_axis_label = MagicMock(
+        side_effect=lambda unit, **_kwargs: f"Energy ({unit})"
+    )
+    mods["chemparseplot.plot.structs"].eigenvalue_axis_label = MagicMock(
+        side_effect=lambda unit, **_kwargs: f"Eigenvalue ({unit}/$\\AA^2$)"
+    )
 
     mods["chemparseplot.plot.optimization"] = types.ModuleType(
         "chemparseplot.plot.optimization"

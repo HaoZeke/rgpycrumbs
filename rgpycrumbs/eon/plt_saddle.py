@@ -48,6 +48,12 @@ from chemparseplot.plot.optimization import (
     plot_convergence_panel,
     plot_optimization_landscape,
 )
+from chemparseplot.plot.structs import (
+    convert_energy,
+    convert_energy_curvature,
+    eigenvalue_axis_label,
+    energy_axis_label,
+)
 from chemparseplot.plot.theme import apply_axis_theme, get_theme, setup_global_theme
 from matplotlib.gridspec import GridSpec
 from rich.logging import RichHandler
@@ -105,6 +111,13 @@ IRA_KMAX_DEFAULT = 14.0
     type=float,
     default=IRA_KMAX_DEFAULT,
     help="IRA kmax parameter for RMSD calculation.",
+)
+@click.option(
+    "--energy-unit",
+    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
+    default="eV",
+    show_default=True,
+    help="Presentation unit for energy axes and color scales.",
 )
 @click.option(
     "--theme",
@@ -179,6 +192,7 @@ def main(
     project_path,
     surface_type,
     ira_kmax,
+    energy_unit,
     theme,
     plot_structures,
     strip_renderer,
@@ -226,7 +240,7 @@ def main(
     setup_global_theme(active_theme)
 
     if plot_type == "profile":
-        _plot_profile(trajs, labels, output, dpi)
+        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
     elif plot_type == "landscape":
         _plot_landscape(
             trajs,
@@ -237,6 +251,7 @@ def main(
             project_path=project_path,
             surface_type=surface_type,
             ira_kmax=ira_kmax,
+            energy_unit=energy_unit,
             cmap=active_theme.cmap_landscape,
             plot_structures=plot_structures,
             strip_renderer=strip_renderer,
@@ -259,7 +274,7 @@ def main(
 _OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#009688"]
 
 
-def _plot_profile(trajs, labels, output, dpi):
+def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
     has_eigen = any("eigenvalue" in t.dat_df.columns for t in trajs)
     fig, axes = plt.subplots(
         1, 2 if has_eigen else 1, figsize=(10 if has_eigen else 5.37, 4), dpi=dpi
@@ -271,13 +286,15 @@ def _plot_profile(trajs, labels, output, dpi):
         dat = traj.dat_df
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         iters = dat["iteration"].to_numpy()
-        energies = dat["delta_e"].to_numpy()
+        energies = convert_energy(dat["delta_e"].to_numpy(), energy_unit)
         axes[0].plot(
             iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
         )
 
         if has_eigen and "eigenvalue" in dat.columns:
-            eigenvalues = dat["eigenvalue"].to_numpy()
+            eigenvalues = convert_energy_curvature(
+                dat["eigenvalue"].to_numpy(), energy_unit
+            )
             axes[1].plot(
                 iters,
                 eigenvalues,
@@ -289,7 +306,7 @@ def _plot_profile(trajs, labels, output, dpi):
             )
 
     axes[0].set_xlabel("Iteration")
-    axes[0].set_ylabel("Energy (eV)")
+    axes[0].set_ylabel(energy_axis_label(energy_unit))
     axes[0].set_title("Energy vs Iteration")
     if len(trajs) > 1:
         axes[0].legend(frameon=False)
@@ -297,7 +314,7 @@ def _plot_profile(trajs, labels, output, dpi):
     if has_eigen:
         axes[1].axhline(0, color="gray", linestyle=":", linewidth=1, alpha=0.6)
         axes[1].set_xlabel("Iteration")
-        axes[1].set_ylabel("Eigenvalue (eV/$\\AA^2$)")
+        axes[1].set_ylabel(eigenvalue_axis_label(energy_unit))
         axes[1].set_title("Eigenvalue vs Iteration")
         if len(trajs) > 1:
             axes[1].legend(frameon=False)
@@ -317,6 +334,7 @@ def _plot_landscape(
     project_path,
     surface_type,
     ira_kmax,
+    energy_unit,
     cmap="viridis",
     plot_structures="none",
     strip_renderer="xyzrender",
@@ -372,7 +390,7 @@ def _plot_landscape(
         ref_a=traj.initial_atoms,
         ref_b=ref_b,
     )
-    energies = traj.dat_df["delta_e"].to_numpy()
+    energies = convert_energy(traj.dat_df["delta_e"].to_numpy(), energy_unit)
     n = min(len(rmsd_a), len(energies))
     rmsd_a, rmsd_b, energies = rmsd_a[:n], rmsd_b[:n], energies[:n]
     f_para = -np.gradient(energies)
@@ -389,6 +407,7 @@ def _plot_landscape(
         method=surface_type,
         cmap=cmap,
         label_mode="optimization",
+        energy_unit=energy_unit,
     )
 
     # Overlay paths from all trajectories

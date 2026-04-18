@@ -47,6 +47,7 @@ from chemparseplot.plot.optimization import (
     plot_convergence_panel,
     plot_optimization_landscape,
 )
+from chemparseplot.plot.structs import convert_energy, energy_axis_label
 from chemparseplot.plot.theme import apply_axis_theme, get_theme, setup_global_theme
 from matplotlib.gridspec import GridSpec
 from rich.logging import RichHandler
@@ -104,6 +105,13 @@ IRA_KMAX_DEFAULT = 14.0
     type=float,
     default=IRA_KMAX_DEFAULT,
     help="IRA kmax parameter for RMSD calculation.",
+)
+@click.option(
+    "--energy-unit",
+    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
+    default="eV",
+    show_default=True,
+    help="Presentation unit for energy axes and color scales.",
 )
 @click.option(
     "--theme",
@@ -178,6 +186,7 @@ def main(
     project_path,
     surface_type,
     ira_kmax,
+    energy_unit,
     theme,
     plot_structures,
     strip_renderer,
@@ -217,7 +226,7 @@ def main(
     setup_global_theme(active_theme)
 
     if plot_type == "profile":
-        _plot_profile(trajs, labels, output, dpi)
+        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
     elif plot_type == "landscape":
         _plot_landscape(
             trajs,
@@ -227,6 +236,7 @@ def main(
             project_path=project_path,
             surface_type=surface_type,
             ira_kmax=ira_kmax,
+            energy_unit=energy_unit,
             cmap=active_theme.cmap_landscape,
             plot_structures=plot_structures,
             strip_renderer=strip_renderer,
@@ -247,20 +257,20 @@ def main(
 _OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#009688"]
 
 
-def _plot_profile(trajs, labels, output, dpi):
+def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
     fig, ax = plt.subplots(figsize=(5.37, 4), dpi=dpi)
 
     for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
         dat = traj.dat_df
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         iters = dat["iteration"].to_numpy()
-        energies = dat["energy"].to_numpy()
+        energies = convert_energy(dat["energy"].to_numpy(), energy_unit)
         ax.plot(
             iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
         )
 
     ax.set_xlabel("Iteration")
-    ax.set_ylabel("Energy (eV)")
+    ax.set_ylabel(energy_axis_label(energy_unit))
     ax.set_title("Minimization Energy Profile")
     if len(trajs) > 1:
         ax.legend(frameon=False)
@@ -279,6 +289,7 @@ def _plot_landscape(
     project_path,
     surface_type,
     ira_kmax,
+    energy_unit,
     cmap="viridis",
     plot_structures="none",
     strip_renderer="xyzrender",
@@ -307,7 +318,7 @@ def _plot_landscape(
         ref_a=traj.initial_atoms,
         ref_b=traj.final_atoms,
     )
-    energies = traj.dat_df["energy"].to_numpy()
+    energies = convert_energy(traj.dat_df["energy"].to_numpy(), energy_unit)
     n = min(len(rmsd_a), len(energies))
     rmsd_a, rmsd_b, energies = rmsd_a[:n], rmsd_b[:n], energies[:n]
     f_para = -np.gradient(energies)
@@ -340,6 +351,7 @@ def _plot_landscape(
         method=surface_type,
         cmap=cmap,
         label_mode="optimization",
+        energy_unit=energy_unit,
     )
 
     # Overlay paths from all trajectories
