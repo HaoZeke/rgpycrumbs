@@ -344,7 +344,11 @@ IRA_KMAX_DEFAULT = 14.0
     type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
     default="xyzrender",
     show_default=True,
-    help="Rendering backend for structure images (falls back to ASE if unavailable).",
+    help=(
+        "Rendering backend for structure images. "
+        "xyzrender/ase work with the default dispatcher setup; "
+        "solvis and ovito require separate heavy installs."
+    ),
 )
 @click.option(
     "--xyzrender-config",

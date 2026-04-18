@@ -121,7 +121,11 @@ IRA_KMAX_DEFAULT = 14.0
     "--strip-renderer",
     type=click.Choice(["xyzrender", "ase", "solvis", "ovito"]),
     default="xyzrender",
-    help="Rendering backend for structure strip.",
+    help=(
+        "Rendering backend for structure strip. "
+        "xyzrender/ase work with the default dispatcher setup; "
+        "solvis and ovito require separate heavy installs."
+    ),
 )
 @click.option(
     "--xyzrender-config",
