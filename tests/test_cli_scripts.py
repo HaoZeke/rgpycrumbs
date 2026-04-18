@@ -30,6 +30,7 @@ _HAS_CHEMPARSEPLOT_NEB = _can_import("chemparseplot.plot.neb")
 _HAS_DIMER_TRAJ = _can_import("chemparseplot.parse.eon.dimer_trajectory")
 _HAS_CHEMGP = _can_import("chemparseplot.plot.chemgp")
 _HAS_PYPOTLIB = _can_import("pypotlib")
+_HAS_XTS_MB = _can_import("rgpycrumbs.xts.saddle.mb")
 
 
 class TestMainCLI:
@@ -131,8 +132,8 @@ class TestGenerateNWChemCLI:
         assert result.exit_code == 0
 
 
-@pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
-class TestXtsPotentials:
+@pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
+class TestMullerBrownXts:
     def test_muller_brown(self):
         import numpy as np
 
@@ -141,6 +142,26 @@ class TestXtsPotentials:
         val, grad = muller_brown(np.array([0.0, 0.0]))
         assert isinstance(val, float)
         assert grad.shape == (2,)
+
+    def test_mb_import_has_no_side_effects(self, monkeypatch):
+        import rgpycrumbs.xts.saddle.mb as mb_mod
+
+        def fail_meshgrid(*_args, **_kwargs):
+            msg = "mb import should not build surface grids"
+            raise AssertionError(msg)
+
+        def fail_surface(*_args, **_kwargs):
+            msg = "mb import should not evaluate Muller-Brown surface"
+            raise AssertionError(msg)
+
+        monkeypatch.setattr("numpy.meshgrid", fail_meshgrid)
+        monkeypatch.setattr("rgpycrumbs.func.muller_brown.muller_brown", fail_surface)
+        reloaded = importlib.reload(mb_mod)
+        assert hasattr(reloaded, "_surface_grid")
+
+
+@pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
+class TestCuH2Xts:
 
     def test_cuh2(self):
         from rgpycrumbs.xts.saddle.cuh2 import cuh2_potential
