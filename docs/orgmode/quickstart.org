@@ -49,17 +49,18 @@ pip install rgpycrumbs[analysis]
 pip install rgpycrumbs[all]
 #+end_src
 
-The ~[all]~ extra pre-installs ~ase~, ~scipy~, and ~jax[cpu]~. Conda-only
-packages (~tblite~, ~ovito~, ~ira_mod~) are not included; use pixi for those.
+The ~[all]~ extra pre-installs ~ase~, ~scipy~, and ~jax[cpu]~. Pixi-only
+packages such as ~ira_mod~ and ~tblite~, plus heavy optional tools like ~ovito~,
+are intentionally not included.
 
-** Full stack (including conda-only deps)
+** Full stack (including pixi-only and heavy deps)
 
 #+begin_src bash
 pixi install
 #+end_src
 
-This resolves everything including conda-only packages like ~tblite~,
-~ira_mod~, and ~ovito~ that are not available on PyPI.
+This resolves the full project stack, including pixi-only packages like ~tblite~
+and ~ira_mod~, plus heavier optional tools such as ~ovito~.
 
 * Environment Variables
 

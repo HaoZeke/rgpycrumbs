@@ -13,8 +13,9 @@ logger = logging.getLogger(__name__)
 # Dependency registry
 # ---------------------------------------------------------------------------
 # Maps importable module names to (pip_spec, extra_name).
-# Conda-only deps (ira_mod, tblite, ovito) are intentionally absent;
-# they fall through to a helpful error suggesting pixi.
+# Special-case deps are intentionally absent from the default auto-install map.
+# ira_mod/tblite require pixi, while heavy tools like ovito are left to
+# explicit user installation.
 _DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
     "jax": ("jax>=0.4", "surfaces"),
     "jaxlib": ("jax>=0.4", "surfaces"),
@@ -202,10 +203,10 @@ See: https://jax.readthedocs.io/en/latest/installation.html
             )
     else:
         msg = (
-            f"Module '{module_name}' is not installed and is not a "
-            "pip-installable dependency of rgpycrumbs. "
-            "For conda-only packages (ira_mod, tblite, ovito), "
-            "use pixi: pixi install"
+            f"Module '{module_name}' is not installed and is not part of "
+            "rgpycrumbs' default auto-resolved dependency set. "
+            "Use pixi for ira_mod/tblite, and install heavy optional "
+            "tools such as ovito explicitly in the active environment."
         )
     raise ImportError(msg)
 

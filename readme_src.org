@@ -281,11 +281,10 @@ assets; it is the GitHub default branch.
 :CUSTOM_ID: dev:whypixi
 :END:
 
-[[https://prefix.dev/][Pixi]] is only needed for features that require *conda-only* packages (not
-available on PyPI):
+[[https://prefix.dev/][Pixi]] is mainly needed for pixi-only or heavy optional packages that we do not auto-install by default:
 
-- ~fragments~ tests: need ~tblite~, ~ira~, ~pyvista~ (conda)
-- ~surfaces~ tests: may prefer conda ~jax~ builds
+- ~fragments~ tests: need ~tblite~, ~ira_mod~, and ~pyvista~
+- some heavy visualization workflows may still be easier to manage in pixi
 
 For everything else, ~uv~ is sufficient.
 

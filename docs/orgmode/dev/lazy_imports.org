@@ -198,11 +198,11 @@ If the module is a submodule (e.g. =scipy.interpolate=), add both the
 submodule and the top-level package to the map. Both must point to the
 same pip package.
 
-* Conda-only deps
+* Dependencies excluded from the default map
 
-Packages without a PyPI distribution (ira_mod, tblite, ovito) should
-NOT be added to the map. They fall through to a helpful error message
-suggesting =pixi= installation.
+Packages that should not be auto-installed by default stay out of the map.
+ira_mod and tblite are pixi-only; heavy optional tools like ovito remain
+explicit installs even though they are available on PyPI.
 
 ** CI enforcement
 

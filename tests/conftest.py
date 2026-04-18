@@ -24,7 +24,7 @@ def _try_import(module_name):
 
 
 # Test files that import PEP 723 dispatcher modules with heavy or
-# conda-only dependencies.  Prevent pytest collection when the source
+# pixi-only dependencies.  Prevent pytest collection when the source
 # module itself cannot import (regardless of what find_spec reports for
 # individual package names).
 _GUARDED_IMPORTS = {

@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 """Tests for CLI entry points and importable modules.
 
-Tests that need cross-repo dev branches or conda-only deps (pypotlib,
-ovito) are guarded with skipif. They run in the pixi_envs workspace
+Tests that need cross-repo dev branches or heavyweight optional deps
+(pypotlib, ovito) are guarded with skipif. They run in the pixi_envs workspace
 where all repos are editable installs.
 """
 

@@ -296,7 +296,7 @@ class TestDependencyMap:
         assert "jax" in _DEPENDENCY_MAP
         assert "scipy" in _DEPENDENCY_MAP
         assert "ase" in _DEPENDENCY_MAP
-        # Conda-only deps must NOT be in the map
+        # Special-case deps intentionally stay out of the default auto-install map
         assert "ira_mod" not in _DEPENDENCY_MAP
         assert "tblite" not in _DEPENDENCY_MAP
         assert "ovito" not in _DEPENDENCY_MAP
