@@ -4,7 +4,7 @@ import pytest
 pytestmark = pytest.mark.pure
 
 
-def test_nebpath_namedtuple():
+def test_nebpath_record():
     from rgpycrumbs.basetypes import nebpath
 
     p = nebpath(norm_dist=0.5, arc_dist=1.2, energy=-0.74)
@@ -13,7 +13,7 @@ def test_nebpath_namedtuple():
     assert p.energy == -0.74
 
 
-def test_nebiter_namedtuple():
+def test_nebiter_record():
     from rgpycrumbs.basetypes import nebiter, nebpath
 
     p = nebpath(norm_dist=0.0, arc_dist=0.0, energy=0.0)
