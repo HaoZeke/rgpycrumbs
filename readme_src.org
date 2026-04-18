@@ -1,5 +1,11 @@
 #+OPTIONS: num:nil
 
+#+begin_quote
+Canonical source note: this Org file is authoritative for contributor-facing
+documentation. Rendered Markdown files are derived artifacts and should not be
+edited separately.
+#+end_quote
+
 * About
 :PROPERTIES:
 :CUSTOM_ID: about
@@ -169,14 +175,11 @@ python -m rgpycrumbs eon plt-neb --con-file trajectory.con --plot-type landscape
 | ~--show-legend~ | Show colorbar legend | Off |
 | ~--show-pts~ / ~--no-show-pts~ | Show data points on surface | ~--show-pts~ |
 | ~--landscape-path~ | Path overlay: ~final~, ~all~, ~none~ | ~final~ |
-| ~--ira-kmax~ | kmax factor for IRA RMSD calculation | 1.8 |
+| ~--ira-kmax~ | kmax factor for IRA RMSD calculation | 14.0 |
 | ~-o PATH~ | Output image filename | None (display) |
 
 Use ~--landscape-path all~ to overlay all optimization steps and visualize convergence.
 This shows the full trajectory from initial guess to final path [1].
-| ~--show-pts~ / ~--no-show-pts~ | Show data points on surface | ~--show-pts~ |
-| ~--ira-kmax~ | kmax factor for IRA RMSD calculation | 1.8 |
-| ~-o PATH~ | Output image filename | None (display) |
 
 ***** Examples
 
@@ -302,22 +305,33 @@ automatically (e.g. ~1.0.1.dev3+gabcdef~).
 :END:
 
 #+begin_src bash
-# 1. Ensure tests pass
+# 1. Run the same checks the tag-triggered release workflow expects
+uv sync --extra test --extra release
 uv run --extra test pytest -m pure
+uv run --extra test pytest --pep723-check -m pep723 --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
+uvx prek run -a -vvv
+pixi run -e docs docbld
 
-# 2. Build changelog (uses towncrier fragments in docs/newsfragments/)
-uvx towncrier build --version "v1.0.0"
+# 2. Preview the next semantic version from Conventional Commits
+uvx cocogitto cog bump --dry-run --auto
 
-# 3. Commit the changelog
-git add CHANGELOG.rst && git commit -m "doc: release notes for v1.0.0"
+# 3. Build the release notes from towncrier fragments
+#    towncrier headings use X.Y.Z, while the git tag stays vX.Y.Z
+uvx towncrier build --version "1.7.1"
 
-# 4. Tag the release (hatch-vcs derives the version from this tag)
-git tag -a v1.0.0 -m "Version 1.0.0"
+# 4. Commit the release notes (historically: release: vX.Y.Z)
+git add CHANGELOG.rst docs/newsfragments
+git commit -m "release: v1.7.1"
 
-# 5. Build and publish
-uv build
-uvx twine upload dist/*
+# 5. Tag the release commit (hatch-vcs derives the package version from tags)
+uvx cocogitto cog bump --auto
+
+# 6. Push main and tags; GitHub Actions handles build/publish/release
+git push origin main --tags
 #+end_src
+
+The existing ~.github/workflows/release.yml~ publishes to PyPI and creates the
+GitHub release when a ~v*~ tag is pushed.
 * License
 :PROPERTIES:
 :CUSTOM_ID: license

@@ -39,6 +39,13 @@ interpolation = [ "scipy>=1.11" ]
 surfaces      = [ "jax>=0.4" ]
 # ira_mod is conda-only (via pixi); not a pip-installable extra
 lint = [ "ruff>=0.1.6" ]
+release = [
+  "build>=0.10",
+  "cocogitto>=6.2",
+  "towncrier>=24.8.0",
+  "twine>=4.0",
+  "wheel>=0.40",
+]
 test = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
 
 [project.scripts]
