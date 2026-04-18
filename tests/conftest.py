@@ -43,7 +43,16 @@ def check_missing_modules(marker_name):
     Returns a list of missing modules for a given marker.
     """
     modules = ENVIRONMENT_REQUIREMENTS.get(marker_name, [])
-    return [mod for mod in modules if importlib.util.find_spec(mod) is None]
+    missing = []
+    for mod in modules:
+        if mod in {"rgpycrumbs", "chemparseplot"}:
+            if importlib.util.find_spec(mod) is None:
+                missing.append(mod)
+            elif not optional_import_available(mod):
+                missing.append(mod)
+        elif importlib.util.find_spec(mod) is None:
+            missing.append(mod)
+    return missing
 
 
 def skip_if_not_env(marker_name):

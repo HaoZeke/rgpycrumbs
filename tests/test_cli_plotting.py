@@ -21,7 +21,7 @@ import numpy as np
 import pytest
 from click.testing import CliRunner
 
-from tests._optional_imports import has_module_spec
+from tests._optional_imports import has_module_spec, optional_import_available
 
 try:
     import h5py
@@ -34,13 +34,14 @@ except ImportError:
 pytestmark = pytest.mark.pure
 
 _HAS_CHEMPARSEPLOT_NEB = all(
-    has_module_spec(mod) for mod in ("chemparseplot", "matplotlib", "polars", "ase")
+    has_module_spec(mod) for mod in ("matplotlib", "polars", "ase")
+) and optional_import_available("chemparseplot")
+_HAS_DIMER_TRAJ = all(has_module_spec(mod) for mod in ("polars", "ase")) and (
+    optional_import_available("chemparseplot")
 )
-_HAS_DIMER_TRAJ = all(has_module_spec(mod) for mod in ("chemparseplot", "polars", "ase"))
 _HAS_CHEMGP = all(
-    has_module_spec(mod)
-    for mod in ("chemparseplot", "matplotlib", "pandas", "plotnine", "h5py")
-)
+    has_module_spec(mod) for mod in ("matplotlib", "pandas", "plotnine", "h5py")
+) and optional_import_available("chemparseplot.plot.chemgp")
 _HAS_JAX = has_module_spec("jax")
 
 

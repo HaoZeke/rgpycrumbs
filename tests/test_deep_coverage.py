@@ -8,6 +8,7 @@ that need synthetic eOn data.
 """
 
 import os
+import shutil
 import textwrap
 from pathlib import Path
 
@@ -22,6 +23,8 @@ from ase.build import molecule
 from ase.io import write as ase_write
 from click.testing import CliRunner
 
+from tests._optional_imports import has_module_spec, optional_import_available
+
 try:
     import h5py
 
@@ -30,29 +33,35 @@ except ImportError:
     h5py = None
     _HAS_H5PY = False
 
-try:
+_HAS_PLT_NEB = has_module_spec("rgpycrumbs.eon.plt_neb") and optional_import_available(
+    "rgpycrumbs.eon.plt_neb"
+)
+if _HAS_PLT_NEB:
     from rgpycrumbs.eon.plt_neb import main as plt_neb_main
-
-    _HAS_PLT_NEB = True
-except (ImportError, ModuleNotFoundError):
+else:
     plt_neb_main = None
-    _HAS_PLT_NEB = False
 
-try:
+_HAS_PLT_SADDLE = has_module_spec(
+    "rgpycrumbs.eon.plt_saddle"
+) and optional_import_available("rgpycrumbs.eon.plt_saddle")
+if _HAS_PLT_SADDLE:
     from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
-
-    _HAS_PLT_SADDLE = True
-except (ImportError, ModuleNotFoundError):
+else:
     plt_saddle_main = None
-    _HAS_PLT_SADDLE = False
 
-try:
+_HAS_PLT_MIN = has_module_spec("rgpycrumbs.eon.plt_min") and optional_import_available(
+    "rgpycrumbs.eon.plt_min"
+)
+if _HAS_PLT_MIN:
     from rgpycrumbs.eon.plt_min import main as plt_min_main
-
-    _HAS_PLT_MIN = True
-except (ImportError, ModuleNotFoundError):
+else:
     plt_min_main = None
-    _HAS_PLT_MIN = False
+
+_HAS_OVITO = has_module_spec("ovito")
+_HAS_OVITO_RENDER = _HAS_OVITO and any(
+    os.environ.get(var) for var in ("DISPLAY", "WAYLAND_DISPLAY", "QT_QPA_PLATFORM")
+)
+_HAS_XVFB = shutil.which("Xvfb") is not None
 
 try:
     import pyvista
@@ -2334,6 +2343,7 @@ class TestAuxDeep:
 
 
 @pytest.mark.fragments
+@pytest.mark.skipif(not _HAS_XVFB, reason="Xvfb not available")
 @pytest.mark.skipif(not _HAS_PYVISTA, reason="pyvista not installed")
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="chemparseplot not installed")
 class TestSolvisRendering:
@@ -2363,6 +2373,7 @@ class TestSolvisRendering:
 
 
 @pytest.mark.ptm
+@pytest.mark.skipif(not _HAS_OVITO_RENDER, reason="ovito render backend unavailable")
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="chemparseplot not installed")
 class TestOvitoRendering:
     """Test ovito backend in ptm env (has ovito)."""
