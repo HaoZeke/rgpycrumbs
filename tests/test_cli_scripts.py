@@ -9,6 +9,7 @@ where all repos are editable installs.
 """
 
 import importlib
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -84,6 +85,16 @@ class TestPep723DispatcherCli:
         command = mock_run.call_args.args[0]
         assert command[:2] == ["uv", "run"]
         assert command[2].endswith("eon/plt_min.py")
+
+    def test_plumed_direct_reconstruction_header_matches_project_floor(self):
+        script = (
+            Path(__file__).resolve().parent.parent
+            / "rgpycrumbs"
+            / "plumed"
+            / "direct_reconstruction.py"
+        )
+        text = script.read_text()
+        assert '# requires-python = ">=3.11"' in text
 
 
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
