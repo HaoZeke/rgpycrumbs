@@ -9,6 +9,7 @@ where all repos are editable installs.
 """
 
 import importlib
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
@@ -26,8 +27,6 @@ def _can_import(module_name):
 
 
 # Evaluate these once, catching any cascading import errors
-_HAS_CHEMPARSEPLOT_NEB = _can_import("chemparseplot.plot.neb")
-_HAS_DIMER_TRAJ = _can_import("chemparseplot.parse.eon.dimer_trajectory")
 _HAS_CHEMGP = _can_import("chemparseplot.plot.chemgp")
 _HAS_PYPOTLIB = _can_import("pypotlib")
 _HAS_XTS_MB = _can_import("rgpycrumbs.xts.saddle.mb")
@@ -53,83 +52,42 @@ class TestMainCLI:
         assert hasattr(rgpycrumbs, "__version__")
 
 
-@pytest.mark.skipif(
-    not _HAS_CHEMPARSEPLOT_NEB,
-    reason="chemparseplot not installed",
-)
-class TestPltNebCLI:
-    def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_neb import main
+class TestPep723DispatcherCli:
+    @pytest.mark.parametrize(
+        ("argv", "expected_script"),
+        [
+            (["eon", "plt-neb", "--help"], "eon/plt_neb.py"),
+            (["eon", "plt-saddle", "--help"], "eon/plt_saddle.py"),
+            (["eon", "plt-min", "--help"], "eon/plt_min.py"),
+            (["eon", "generate-nwchem-input", "--help"], "eon/generate_nwchem_input.py"),
+        ],
+    )
+    @patch("rgpycrumbs.cli.subprocess.run")
+    def test_help_routes_through_dispatcher(self, mock_run, argv, expected_script, monkeypatch):
+        from rgpycrumbs.cli import main
 
-            return main
-        except ImportError:
-            pytest.skip("plt_neb import failed (missing dep)")
+        monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
 
-    def test_help(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--plot-type" in result.output
-
-
-@pytest.mark.skipif(
-    not _HAS_DIMER_TRAJ,
-    reason="chemparseplot dev branch not installed",
-)
-class TestPltSaddleCLI:
-    def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_saddle import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_saddle import failed")
-
-    def test_help(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--job-dir" in result.output
-
-    def test_missing_job_dir(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, [])
-        assert result.exit_code != 0
-
-
-@pytest.mark.skipif(
-    not _HAS_DIMER_TRAJ,
-    reason="chemparseplot dev branch not installed",
-)
-class TestPltMinCLI:
-    def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_min import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_min import failed")
-
-    def test_help(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, ["--help"])
+        result = CliRunner().invoke(main, argv)
         assert result.exit_code == 0
 
-    def test_missing_job_dir(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, [])
-        assert result.exit_code != 0
+        command = mock_run.call_args.args[0]
+        assert command[:2] == ["uv", "run"]
+        assert command[2].endswith(expected_script)
+        assert command[-1] == "--help"
 
+    @patch("rgpycrumbs.cli.subprocess.run")
+    def test_missing_job_dir_is_forwarded_to_script(self, mock_run, monkeypatch):
+        from rgpycrumbs.cli import main
 
-class TestGenerateNWChemCLI:
-    def test_help(self):
-        try:
-            from rgpycrumbs.eon.generate_nwchem_input import main
-        except ImportError:
-            pytest.skip("generate_nwchem_input import failed")
-        result = CliRunner().invoke(main, ["--help"])
+        monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+
+        result = CliRunner().invoke(main, ["eon", "plt-min"])
         assert result.exit_code == 0
+
+        command = mock_run.call_args.args[0]
+        assert command[:2] == ["uv", "run"]
+        assert command[2].endswith("eon/plt_min.py")
 
 
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
