@@ -9,7 +9,9 @@ This tool generates energy profiles, 2D optimization landscapes, and convergence
 
 Same projection approach as NEB/saddle search but using (initial, minimum) as references. The 2D landscape shows s = optimization progress toward the minimum and d = lateral deviation during optimization.
 
-Requires eOn output with ~write_movies=true~ which produces ~min.dat~ (structured per-iteration metrics) and ~min~ (concatenated structure movie).
+Requires eOn output with ~write_movies=true~ which produces
+~minimization.dat~ (structured per-iteration metrics) and ~minimization~
+(concatenated structure movie).
 
 ** Plot Types
 
@@ -42,7 +44,7 @@ Side-by-side plots of force norm and step size vs iteration.
 | Option | Default | Description |
 |--------+---------+-------------|
 | ~--job-dir~ | (required) | eOn output directory |
-| ~--prefix~ | ~min~ | Movie file prefix |
+| ~--prefix~ | ~minimization~ | Movie file prefix |
 | ~--plot-type~ | ~profile~ | ~profile~, ~landscape~, ~convergence~ |
 | ~--project-path~ | True | Project into (s, d) coordinates |
 | ~--surface-type~ | ~grad_matern~ | Surface fitting method |
@@ -55,8 +57,8 @@ Side-by-side plots of force norm and step size vs iteration.
 
 | File | Required | Description |
 |------+----------+-------------|
-| ~min~ (or ~min.con~) | Yes | Concatenated structure movie |
-| ~min.dat~ | Yes | Per-iteration metrics (TSV) |
+| ~minimization~ (or ~minimization.con~) | Yes | Concatenated structure movie |
+| ~minimization.dat~ | Yes | Per-iteration metrics (TSV) |
 | ~min.con~ | No | Final minimized structure (falls back to last movie frame) |
 
 ** See Also

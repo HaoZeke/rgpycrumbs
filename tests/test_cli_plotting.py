@@ -171,7 +171,7 @@ def _make_climb_dir(tmpdir, n_frames=10):
     return job_dir
 
 
-def _make_min_dir(tmpdir, n_frames=10, prefix="min"):
+def _make_min_dir(tmpdir, n_frames=10, prefix="minimization"):
     """Create a synthetic minimization job directory.
 
     Returns the job directory path.
@@ -195,10 +195,10 @@ def _make_min_dir(tmpdir, n_frames=10, prefix="min"):
     # movie file
     _write_con_file(job_dir / prefix, frames)
 
-    # min.con (final structure)
+    # final structure
     _write_con_file(job_dir / f"{prefix}.con", [frames[-1]])
 
-    # min.dat (TSV)
+    # trajectory metrics (TSV)
     header = "iteration\tstep_size\tconvergence\tenergy\n"
     rows = []
     for i in range(n_frames):

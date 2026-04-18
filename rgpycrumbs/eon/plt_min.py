@@ -79,8 +79,8 @@ IRA_KMAX_DEFAULT = 14.0
 @click.option(
     "--prefix",
     type=str,
-    default="min",
-    help="Movie file prefix (default 'min').",
+    default="minimization",
+    help="Movie file prefix (default 'minimization').",
 )
 @click.option(
     "--plot-type",

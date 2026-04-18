@@ -34,12 +34,12 @@ The expected directory layout:
 
 #+begin_example
 min_job/
-  min            # multi-frame .con trajectory (movie file)
-  min.dat        # TSV: iteration, step_size, convergence, energy
+  minimization   # multi-frame .con trajectory (movie file)
+  minimization.dat  # TSV: iteration, step_size, convergence, energy
   min.con        # (optional) final minimized structure
 #+end_example
 
-The file prefix defaults to =min= but can be changed with =--prefix=
+The file prefix defaults to =minimization= but can be changed with =--prefix=
 (e.g., =--prefix qm_min= for =qm_min=, =qm_min.dat=, =qm_min.con=).
 
 * Step 1: Energy Profile

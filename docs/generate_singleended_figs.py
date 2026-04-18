@@ -73,7 +73,7 @@ def _make_saddle_data(job_dir, n_frames=15):
     return job_dir
 
 
-def _make_min_data(job_dir, n_frames=20, prefix="min"):
+def _make_min_data(job_dir, n_frames=20, prefix="minimization"):
     """Create synthetic minimization data (C2H6 relaxation)."""
     base = molecule("C2H6")
     base.cell = [10, 10, 10]
