@@ -26,6 +26,7 @@ valley projection. Supports:
 #   "polars",
 #   "chemparseplot",
 #   "xyzrender>=0.1.3",
+#   "readcon>=0.7.0",
 # ]
 # ///
 
@@ -57,7 +58,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("rich")
 
-IRA_KMAX_DEFAULT = 1.8
+IRA_KMAX_DEFAULT = 14.0
 
 
 @click.command()
@@ -207,8 +208,6 @@ def main(
     labels = list(label) if label else [Path(jd).name for jd in job_dir]
     if len(labels) < len(trajs):
         labels.extend([f"Run {i + 1}" for i in range(len(labels), len(trajs))])
-
-    trajs[0]
 
     active_theme = get_theme(theme)
     setup_global_theme(active_theme)

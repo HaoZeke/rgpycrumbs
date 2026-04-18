@@ -59,7 +59,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("rich")
 
-IRA_KMAX_DEFAULT = 1.8
+IRA_KMAX_DEFAULT = 14.0
 
 
 @click.command()

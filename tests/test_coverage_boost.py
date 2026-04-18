@@ -735,7 +735,7 @@ class TestPltSaddle:
     def test_constants(self):
         from rgpycrumbs.eon.plt_saddle import IRA_KMAX_DEFAULT
 
-        assert IRA_KMAX_DEFAULT == 1.8
+        assert IRA_KMAX_DEFAULT == 14.0
 
 
 # ======================================================================
@@ -790,7 +790,7 @@ class TestPltMin:
     def test_constants(self):
         from rgpycrumbs.eon.plt_min import IRA_KMAX_DEFAULT
 
-        assert IRA_KMAX_DEFAULT == 1.8
+        assert IRA_KMAX_DEFAULT == 14.0
 
 
 # ======================================================================
