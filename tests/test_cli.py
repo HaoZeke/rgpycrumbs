@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from rgpycrumbs.cli import _make_script_command, main
+from rgpycrumbs.cli import _dispatch, _make_script_command, main
 
 pytestmark = pytest.mark.pure
 
@@ -66,3 +66,24 @@ def test_cli_verbose_output(mock_run, runner, mock_script_group):
     # Check that our verbose click.echo statements fired
     assert "VERBOSE: Resolved script path ->" in result.output
     assert "VERBOSE: Constructed command -> uv run" in result.output
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_preserves_user_site_package_path(mock_run, monkeypatch):
+    """_dispatch should join parent site-packages paths, not split strings."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.site.getsitepackages",
+        lambda: ["/global/site-packages"],
+    )
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.site.getusersitepackages",
+        lambda: "/user/site-packages",
+    )
+
+    _dispatch("group", "script", ())
+
+    env = mock_run.call_args.kwargs["env"]
+    assert env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] == (
+        "/global/site-packages:/user/site-packages"
+    )

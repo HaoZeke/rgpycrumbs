@@ -75,7 +75,12 @@ def _dispatch(
 
     # Fallback imports
     try:
-        site_packages = [*site.getsitepackages(), *site.getusersitepackages()]
+        site_packages = list(site.getsitepackages())
+        user_site = site.getusersitepackages()
+        if isinstance(user_site, str):
+            site_packages.append(user_site)
+        else:
+            site_packages.extend(user_site)
         env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] = os.pathsep.join(site_packages)
     except (AttributeError, ImportError):
         pass
