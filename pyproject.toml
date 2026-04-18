@@ -234,6 +234,7 @@ markers = [
   "slow: mark tests as slow (deselect with '-m \"not slow\"').",
 ]
 minversion = "9.0"
+required_plugins = [ "pytest-pep723" ]
 pep723_ignore_imports = [
   "rgpycrumbs",
   "chemparseplot",
