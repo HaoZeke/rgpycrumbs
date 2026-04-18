@@ -45,6 +45,14 @@ _HAS_CHEMGP = all(
 _HAS_JAX = has_module_spec("jax")
 
 
+def _import_attr(module_name: str, attr_name: str, reason: str):
+    """Import an optional test target while failing loudly on broken first-party code."""
+    if not optional_import_available(module_name):
+        pytest.skip(reason)
+    module = importlib.import_module(module_name)
+    return getattr(module, attr_name)
+
+
 # ---------------------------------------------------------------------------
 # Helpers: synthetic eOn data
 # ---------------------------------------------------------------------------
@@ -268,12 +276,11 @@ class TestPltNebPlotting:
     """Test actual plotting paths of plt_neb.py."""
 
     def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_neb import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_neb import failed (missing dep)")
+        return _import_attr(
+            "rgpycrumbs.eon.plt_neb",
+            "main",
+            "plt_neb import failed (missing dep)",
+        )
 
     def test_profile_eon_source(self, tmp_path):
         """Test profile plot with eOn .dat source."""
@@ -507,12 +514,11 @@ class TestPltSaddlePlotting:
     """Test actual plotting paths of plt_saddle.py."""
 
     def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_saddle import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_saddle import failed")
+        return _import_attr(
+            "rgpycrumbs.eon.plt_saddle",
+            "main",
+            "plt_saddle import failed",
+        )
 
     def test_profile(self, tmp_path):
         """Test saddle profile plot."""
@@ -647,12 +653,11 @@ class TestPltMinPlotting:
     """Test actual plotting paths of plt_min.py."""
 
     def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_min import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_min import failed")
+        return _import_attr(
+            "rgpycrumbs.eon.plt_min",
+            "main",
+            "plt_min import failed",
+        )
 
     def test_profile(self, tmp_path):
         """Test minimization profile plot."""
@@ -765,12 +770,11 @@ class TestPlotGPPlotting:
     """Test actual plotting paths of plot_gp.py (ChemGP CLI)."""
 
     def _import_cli(self):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli
-
-            return cli
-        except ImportError:
-            pytest.skip("plot_gp import failed (missing dep)")
+        return _import_attr(
+            "rgpycrumbs.chemgp.plot_gp",
+            "cli",
+            "plot_gp import failed (missing dep)",
+        )
 
     def test_convergence(self, tmp_path):
         """Test convergence subcommand."""
