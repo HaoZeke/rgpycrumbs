@@ -176,6 +176,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/85/e8/9396cf11a60f80175bb3c5c1d498d84e87b7af653ab4ea001acf821a3981/pyside6_essentials-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c2/3c/2005227cb951df502412de2fa781f800663cccbef8d90ec6f1b371ac2c0d/python_discovery-1.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/f9/16491d7ed2a919954993e48aa941b200f38040928474c9e85ea9e64222c3/pyyaml-6.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
@@ -983,6 +984,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/85/e8/9396cf11a60f80175bb3c5c1d498d84e87b7af653ab4ea001acf821a3981/pyside6_essentials-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f8/9b/c108cdb55560eaf253f0cbdb61b29971e9fb34d9c3499b0e96e4e60ed8a5/pyzmq-27.1.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b0/c9/faa051848450109c83d29c7b1d5871deea4a33aacbb8bacccb7b0e5460b8/rdkit-2025.9.6-cp314-cp314-manylinux_2_28_x86_64.whl
@@ -1298,6 +1300,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f8/9b/c108cdb55560eaf253f0cbdb61b29971e9fb34d9c3499b0e96e4e60ed8a5/pyzmq-27.1.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b3/19/72b938ea5fdcdb189b560532a47208c0b1421061d387820b487d7fae97f6/rdkit-2025.9.6-cp313-cp313-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/89/87/7eb38065f66184b6e757b5dab5c04863247fda79782696cad8d01e834192/readcon-0.7.3-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -1609,6 +1612,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/85/e8/9396cf11a60f80175bb3c5c1d498d84e87b7af653ab4ea001acf821a3981/pyside6_essentials-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f8/9b/c108cdb55560eaf253f0cbdb61b29971e9fb34d9c3499b0e96e4e60ed8a5/pyzmq-27.1.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b0/c9/faa051848450109c83d29c7b1d5871deea4a33aacbb8bacccb7b0e5460b8/rdkit-2025.9.6-cp314-cp314-manylinux_2_28_x86_64.whl
@@ -1801,6 +1805,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/85/e8/9396cf11a60f80175bb3c5c1d498d84e87b7af653ab4ea001acf821a3981/pyside6_essentials-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f8/9b/c108cdb55560eaf253f0cbdb61b29971e9fb34d9c3499b0e96e4e60ed8a5/pyzmq-27.1.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b0/c9/faa051848450109c83d29c7b1d5871deea4a33aacbb8bacccb7b0e5460b8/rdkit-2025.9.6-cp314-cp314-manylinux_2_28_x86_64.whl
@@ -1993,6 +1998,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/85/e8/9396cf11a60f80175bb3c5c1d498d84e87b7af653ab4ea001acf821a3981/pyside6_essentials-6.9.3-cp39-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f8/9b/c108cdb55560eaf253f0cbdb61b29971e9fb34d9c3499b0e96e4e60ed8a5/pyzmq-27.1.0-cp312-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/b0/c9/faa051848450109c83d29c7b1d5871deea4a33aacbb8bacccb7b0e5460b8/rdkit-2025.9.6-cp314-cp314-manylinux_2_28_x86_64.whl
@@ -9470,6 +9476,13 @@ packages:
   - pytest-xdist ; extra == 'testing'
   - virtualenv ; extra == 'testing'
   requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
+  name: pytest-pep723
+  version: 0.1.0
+  sha256: 63b91ddc3704d544a359d7a46131c4c3e8447e8a3ec912715694813b1c2a7c5f
+  requires_dist:
+  - pytest>=7
+  requires_python: '>=3.10'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.13.12-hc97d973_100_cp313.conda
   build_number: 100
   sha256: 8a08fe5b7cb5a28aa44e2994d18dbf77f443956990753a4ca8173153ffb6eb56
@@ -9950,8 +9963,8 @@ packages:
   requires_python: '>=3.9'
 - pypi: ./
   name: rgpycrumbs
-  version: 1.6.3.dev4+gce23bdebe
-  sha256: a841508a18079c1600e8dea69187539b4a83a9f0d2fc571f8343f3dc10fe3406
+  version: 1.7.1.dev12+gc85e64827.d20260418
+  sha256: 23bedf2137f0352f448272ad719b590aa0af11ca9935011c248f43e70b7e90c9
   requires_dist:
   - click>=8.1
   - numpy>=1.24
@@ -9965,6 +9978,11 @@ packages:
   - scipy>=1.11 ; extra == 'analysis'
   - scipy>=1.11 ; extra == 'interpolation'
   - ruff>=0.1.6 ; extra == 'lint'
+  - build>=0.10 ; extra == 'release'
+  - cocogitto>=6.2 ; extra == 'release'
+  - towncrier>=24.8.0 ; extra == 'release'
+  - twine>=4.0 ; extra == 'release'
+  - wheel>=0.40 ; extra == 'release'
   - jax>=0.4 ; extra == 'surfaces'
   - pytest-cov>=4.1.0 ; extra == 'test'
   - pytest-pep723>=0.1.0 ; extra == 'test'
