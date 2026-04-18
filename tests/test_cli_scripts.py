@@ -51,6 +51,29 @@ class TestMainCLI:
 
 class TestPep723DispatcherCli:
     @pytest.mark.parametrize(
+        "rel_path",
+        [
+            "chemgp/match_atoms.py",
+            "chemgp/plot_gp.py",
+            "eon/con_splitter.py",
+            "eon/generate_nwchem_input.py",
+            "eon/plt_min.py",
+            "eon/plt_neb.py",
+            "eon/plt_saddle.py",
+            "eon/ptmdisp.py",
+            "eon/to_mlflow.py",
+            "geom/detect_fragments.py",
+            "orca/generate_orca_input.py",
+            "plumed/direct_reconstruction.py",
+            "prefix/delete_packages.py",
+        ],
+    )
+    def test_dispatched_scripts_share_python_floor(self, rel_path):
+        script = Path(__file__).resolve().parent.parent / "rgpycrumbs" / rel_path
+        text = script.read_text()
+        assert '# requires-python = ">=3.11"' in text
+
+    @pytest.mark.parametrize(
         ("argv", "expected_script"),
         [
             (["eon", "plt-neb", "--help"], "eon/plt_neb.py"),
@@ -85,16 +108,6 @@ class TestPep723DispatcherCli:
         command = mock_run.call_args.args[0]
         assert command[:2] == ["uv", "run"]
         assert command[2].endswith("eon/plt_min.py")
-
-    def test_plumed_direct_reconstruction_header_matches_project_floor(self):
-        script = (
-            Path(__file__).resolve().parent.parent
-            / "rgpycrumbs"
-            / "plumed"
-            / "direct_reconstruction.py"
-        )
-        text = script.read_text()
-        assert '# requires-python = ">=3.11"' in text
 
 
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
