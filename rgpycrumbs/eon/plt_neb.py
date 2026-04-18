@@ -99,6 +99,12 @@ from chemparseplot.plot.neb import (
     plot_structure_inset,
     plot_structure_strip,
 )
+from chemparseplot.plot.structs import (
+    convert_energy,
+    convert_energy_curvature,
+    eigenvalue_axis_label,
+    energy_axis_label,
+)
 from chemparseplot.plot.theme import (
     apply_axis_theme,
     get_theme,
@@ -118,6 +124,22 @@ log = logging.getLogger("rich")
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 IRA_KMAX_DEFAULT = 14.0
+
+
+def _convert_neb_values(values, plot_mode: str, energy_unit: str):
+    """Convert NEB data for the active plotted quantity."""
+
+    if plot_mode == "energy":
+        return convert_energy(values, energy_unit)
+    return convert_energy_curvature(values, energy_unit)
+
+
+def _default_neb_ylabel(plot_mode: str, energy_unit: str) -> str:
+    """Return the canonical label for NEB energy-like axes."""
+
+    if plot_mode == "energy":
+        return energy_axis_label(energy_unit, label="Relative Energy")
+    return eigenvalue_axis_label(energy_unit, label="Lowest Eigenvalue")
 
 
 # --- CLI ---
@@ -279,6 +301,13 @@ IRA_KMAX_DEFAULT = 14.0
 @click.option("--title", default="NEB Path", help="Plot title.")
 @click.option("--xlabel", default=None, help="X-axis label.")
 @click.option("--ylabel", default=None, help="Y-axis label.")
+@click.option(
+    "--energy-unit",
+    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
+    default="eV",
+    show_default=True,
+    help="Presentation unit for energy-like axes and color scales.",
+)
 # --- Theme and Override Options ---
 @click.option(
     "--theme",
@@ -500,6 +529,7 @@ def main(
     title,
     xlabel,
     ylabel,
+    energy_unit,
     highlight_last,
     # --- Theme ---
     theme,
@@ -613,11 +643,7 @@ def main(
 
     if plot_type == "landscape":
         # --- Landscape Plot ---
-        z_label = (
-            "Relative Energy (eV)"
-            if plot_mode == "energy"
-            else r"Lowest Eigenvalue (eV/$\AA^2$)"
-        )
+        z_label = _default_neb_ylabel(plot_mode, energy_unit)
 
         if source == "traj":
             df = trajectory_to_landscape_df(traj_atoms_list, ira_kmax=ira_kmax)
@@ -691,9 +717,15 @@ def main(
             # Prepare arrays
             r_all = df_surface["r"].to_numpy()
             p_all = df_surface["p"].to_numpy()
-            z_all = df_surface["z"].to_numpy()
-            gr_all = df_surface["grad_r"].to_numpy()
-            gp_all = df_surface["grad_p"].to_numpy()
+            z_all = _convert_neb_values(
+                df_surface["z"].to_numpy(), plot_mode, energy_unit
+            )
+            gr_all = _convert_neb_values(
+                df_surface["grad_r"].to_numpy(), plot_mode, energy_unit
+            )
+            gp_all = _convert_neb_values(
+                df_surface["grad_p"].to_numpy(), plot_mode, energy_unit
+            )
             step_all = df_surface["step"].to_numpy()
 
             # Heuristic for RBF smoothing if missing
@@ -719,8 +751,9 @@ def main(
                 # d window before considering additional structures, so the
                 # converged path and saddle marker do not get clipped at
                 # the top/bottom of the viewport.
-                _half = max(_half, abs(float(_d.max())) * 1.15,
-                            abs(float(_d.min())) * 1.15)
+                _half = max(
+                    _half, abs(float(_d.max())) * 1.15, abs(float(_d.min())) * 1.15
+                )
                 for _, add_r, add_p, _ in additional_atoms_data:
                     _, _ad = project_to_sd(
                         np.array([add_r]), np.array([add_p]), global_basis
@@ -761,7 +794,7 @@ def main(
         df_final = df.filter(pl.col("step") == max_step)
         final_r = df_final["r"].to_numpy()
         final_p = df_final["p"].to_numpy()
-        final_z = df_final["z"].to_numpy()
+        final_z = _convert_neb_values(df_final["z"].to_numpy(), plot_mode, energy_unit)
 
         # Pass all-iteration data for triangulated background when no GP surface
         bg_kwargs = {}
@@ -769,7 +802,7 @@ def main(
             bg_kwargs = {
                 "all_r": df["r"].to_numpy(),
                 "all_p": df["p"].to_numpy(),
-                "all_z": df["z"].to_numpy(),
+                "all_z": _convert_neb_values(df["z"].to_numpy(), plot_mode, energy_unit),
             }
 
         plot_landscape_path_overlay(
@@ -816,8 +849,14 @@ def main(
                         peak_atoms, ira_instance, ref_atom=ref_p, ira_kmax=ira_kmax
                     )
                     # Energies from peak structures (if available)
-                    peak_e = np.array(
-                        [a.get_potential_energy() if a.calc else 0.0 for a in peak_atoms]
+                    peak_e = convert_energy(
+                        np.array(
+                            [
+                                a.get_potential_energy() if a.calc else 0.0
+                                for a in peak_atoms
+                            ]
+                        ),
+                        energy_unit,
                     )
                     plot_mmf_peaks_overlay(
                         ax,
@@ -877,7 +916,7 @@ def main(
             sp_x,
             sp_y,
             marker="*",
-            s=int(active_theme.font_size ** 2 * 1.5),
+            s=int(active_theme.font_size**2 * 1.5),
             c="white",
             edgecolors="black",
             linewidths=1.5,
@@ -1063,6 +1102,9 @@ def main(
                 data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
 
             y_col = 2 if plot_mode == "energy" else 4
+            data[y_col] = _convert_neb_values(data[y_col], plot_mode, energy_unit)
+            if plot_mode == "energy":
+                data[3] = convert_energy(data[3], energy_unit)
             color = active_theme.highlight_color
             plot_energy_path(
                 ax,
@@ -1086,6 +1128,9 @@ def main(
                 data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
 
             y_col = 2 if plot_mode == "energy" else 4
+            data[y_col] = _convert_neb_values(data[y_col], plot_mode, energy_unit)
+            if plot_mode == "energy":
+                data[3] = convert_energy(data[3], energy_unit)
             color = active_theme.highlight_color
             plot_energy_path(
                 ax,
@@ -1193,6 +1238,9 @@ def main(
                     step_label = f"Step {idx + 1}" if idx == 0 else None
 
                 # Plot
+                data[y_col] = _convert_neb_values(data[y_col], plot_mode, energy_unit)
+                if plot_mode == "energy":
+                    data[3] = convert_energy(data[3], energy_unit)
                 plot_energy_path(
                     ax,
                     data[1],
@@ -1295,7 +1343,7 @@ def main(
         final_xlabel = xlabel or (
             r"RMSD ($\AA$)" if rc_mode == "rmsd" else r"Reaction Coordinate ($\AA$)"
         )
-        final_ylabel = ylabel or "Relative Energy (eV)"
+        final_ylabel = ylabel or _default_neb_ylabel(plot_mode, energy_unit)
         final_title = title
 
     # Final Aesthetics

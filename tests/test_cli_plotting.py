@@ -303,6 +303,8 @@ class TestPltNebPlotting:
                     "profile",
                     "--source",
                     "eon",
+                    "--energy-unit",
+                    "kJ/mol",
                     "-o",
                     str(output),
                     "--dpi",
