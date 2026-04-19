@@ -208,6 +208,94 @@ class TestSingleEndedPlotHelpers:
         assert fake_fig.tight_layout_calls == 1
         assert fake_fig.saved[0][1]["bbox_inches"] == "tight"
 
+    def test_plot_single_ended_profile_handles_optional_eigen_column(
+        self, monkeypatch, tmp_path
+    ):
+        import numpy as np
+
+        from rgpycrumbs.eon import _single_ended_plot as helper_mod
+
+        class _Column:
+            def __init__(self, values):
+                self._values = np.asarray(values)
+
+            def to_numpy(self):
+                return self._values
+
+        class _Frame:
+            def __init__(self, columns):
+                self._columns = {key: _Column(val) for key, val in columns.items()}
+
+            @property
+            def columns(self):
+                return list(self._columns)
+
+            def __getitem__(self, key):
+                return self._columns[key]
+
+        trajs = [
+            type(
+                "Traj",
+                (),
+                {"dat_df": _Frame({"iteration": [0, 1], "delta_e": [0.0, 1.0]})},
+            )(),
+            type(
+                "Traj",
+                (),
+                {
+                    "dat_df": _Frame(
+                        {
+                            "iteration": [0, 1],
+                            "delta_e": [0.0, 1.0],
+                            "eigenvalue": [-1.0, -0.5],
+                        }
+                    )
+                },
+            )(),
+        ]
+
+        called = {}
+
+        def _fake_save(fig, output, *, dpi):
+            called["axes"] = len(fig.axes)
+
+        monkeypatch.setattr(helper_mod, "save_standard_figure", _fake_save)
+        helper_mod.plot_single_ended_profile(
+            trajs,
+            ["a", "b"],
+            tmp_path / "profile.pdf",
+            100,
+            energy_unit="eV",
+            energy_column="delta_e",
+            title="Energy vs Iteration",
+            eigen_column="eigenvalue",
+        )
+        assert called["axes"] == 2
+
+    def test_plot_single_ended_convergence_adds_overlay_legend(
+        self, monkeypatch, tmp_path
+    ):
+        from rgpycrumbs.eon import _single_ended_plot as helper_mod
+
+        calls = []
+
+        def _fake_panel(ax_force, ax_step, dat_df, *, color):
+            calls.append(color)
+
+        monkeypatch.setattr(helper_mod, "plot_convergence_panel", _fake_panel)
+        monkeypatch.setattr(
+            helper_mod, "save_standard_figure", lambda fig, output, *, dpi: None
+        )
+
+        trajs = [
+            type("Traj", (), {"dat_df": object()})(),
+            type("Traj", (), {"dat_df": object()})(),
+        ]
+        helper_mod.plot_single_ended_convergence(
+            trajs, ["one", "two"], tmp_path / "conv.pdf", 100
+        )
+        assert len(calls) == 2
+
 
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
 class TestMullerBrownXts:

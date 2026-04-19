@@ -40,6 +40,8 @@ from ._render_cli import add_render_options
 from ._single_ended_plot import (
     annotate_endpoint,
     create_landscape_axes,
+    plot_single_ended_convergence,
+    plot_single_ended_profile,
     project_landscape_path,
     render_endpoint_strip,
     save_landscape_figure,
@@ -49,11 +51,8 @@ from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
     compute_synthetic_gradients,
 )
-from chemparseplot.plot.optimization import (
-    plot_convergence_panel,
-    plot_optimization_landscape,
-)
-from chemparseplot.plot.structs import convert_energy, energy_axis_label
+from chemparseplot.plot.optimization import plot_optimization_landscape
+from chemparseplot.plot.structs import convert_energy
 from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
 
@@ -227,30 +226,16 @@ def main(
     log.info("Saved %s", output)
 
 
-_OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#009688"]
-
-
 def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
-    fig, ax = plt.subplots(figsize=(5.37, 4), dpi=dpi)
-
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        dat = traj.dat_df
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
-        iters = dat["iteration"].to_numpy()
-        energies = convert_energy(dat["energy"].to_numpy(), energy_unit)
-        ax.plot(
-            iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
-        )
-
-    ax.set_xlabel("Iteration")
-    ax.set_ylabel(energy_axis_label(energy_unit))
-    ax.set_title("Minimization Energy Profile")
-    if len(trajs) > 1:
-        ax.legend(frameon=False)
-
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+    plot_single_ended_profile(
+        trajs,
+        labels,
+        output,
+        dpi,
+        energy_unit=energy_unit,
+        energy_column="energy",
+        title="Minimization Energy Profile",
+    )
 
 
 def _plot_landscape(
@@ -383,16 +368,7 @@ def _plot_landscape(
 
 
 def _plot_convergence(trajs, labels, output, dpi):
-    fig, (ax_force, ax_step) = plt.subplots(1, 2, figsize=(10, 4), dpi=dpi)
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
-        plot_convergence_panel(ax_force, ax_step, traj.dat_df, color=color)
-        ax_force.plot([], [], color=color, label=lbl)
-    if len(trajs) > 1:
-        ax_force.legend(frameon=False)
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+    plot_single_ended_convergence(trajs, labels, output, dpi)
 
 
 if __name__ == "__main__":

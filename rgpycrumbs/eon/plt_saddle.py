@@ -41,6 +41,8 @@ from ._render_cli import add_render_options
 from ._single_ended_plot import (
     annotate_endpoint,
     create_landscape_axes,
+    plot_single_ended_convergence,
+    plot_single_ended_profile,
     project_landscape_path,
     render_endpoint_strip,
     save_landscape_figure,
@@ -50,15 +52,9 @@ from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
     compute_synthetic_gradients,
 )
-from chemparseplot.plot.optimization import (
-    plot_convergence_panel,
-    plot_optimization_landscape,
-)
+from chemparseplot.plot.optimization import plot_optimization_landscape
 from chemparseplot.plot.structs import (
     convert_energy,
-    convert_energy_curvature,
-    eigenvalue_axis_label,
-    energy_axis_label,
 )
 from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
@@ -244,57 +240,17 @@ def main(
     log.info("Saved %s", output)
 
 
-_OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#009688"]
-
-
 def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
-    has_eigen = any("eigenvalue" in t.dat_df.columns for t in trajs)
-    fig, axes = plt.subplots(
-        1, 2 if has_eigen else 1, figsize=(10 if has_eigen else 5.37, 4), dpi=dpi
+    plot_single_ended_profile(
+        trajs,
+        labels,
+        output,
+        dpi,
+        energy_unit=energy_unit,
+        energy_column="delta_e",
+        title="Energy vs Iteration",
+        eigen_column="eigenvalue",
     )
-    if not has_eigen:
-        axes = [axes]
-
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        dat = traj.dat_df
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
-        iters = dat["iteration"].to_numpy()
-        energies = convert_energy(dat["delta_e"].to_numpy(), energy_unit)
-        axes[0].plot(
-            iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
-        )
-
-        if has_eigen and "eigenvalue" in dat.columns:
-            eigenvalues = convert_energy_curvature(
-                dat["eigenvalue"].to_numpy(), energy_unit
-            )
-            axes[1].plot(
-                iters,
-                eigenvalues,
-                "s-",
-                color=color,
-                markersize=3,
-                linewidth=1.2,
-                label=lbl,
-            )
-
-    axes[0].set_xlabel("Iteration")
-    axes[0].set_ylabel(energy_axis_label(energy_unit))
-    axes[0].set_title("Energy vs Iteration")
-    if len(trajs) > 1:
-        axes[0].legend(frameon=False)
-
-    if has_eigen:
-        axes[1].axhline(0, color="gray", linestyle=":", linewidth=1, alpha=0.6)
-        axes[1].set_xlabel("Iteration")
-        axes[1].set_ylabel(eigenvalue_axis_label(energy_unit))
-        axes[1].set_title("Eigenvalue vs Iteration")
-        if len(trajs) > 1:
-            axes[1].legend(frameon=False)
-
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
 
 
 def _plot_landscape(
@@ -442,17 +398,7 @@ def _plot_landscape(
 
 
 def _plot_convergence(trajs, labels, output, dpi):
-    fig, (ax_force, ax_step) = plt.subplots(1, 2, figsize=(10, 4), dpi=dpi)
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
-        plot_convergence_panel(ax_force, ax_step, traj.dat_df, color=color)
-        # Add legend entry via invisible line
-        ax_force.plot([], [], color=color, label=lbl)
-    if len(trajs) > 1:
-        ax_force.legend(frameon=False)
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+    plot_single_ended_convergence(trajs, labels, output, dpi)
 
 
 def _plot_mode_evolution(traj, output, dpi):
