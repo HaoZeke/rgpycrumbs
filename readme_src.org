@@ -172,6 +172,9 @@ python -m rgpycrumbs eon plt-neb --con-file trajectory.con --plot-type landscape
 | ~--surface-type~ | Surface method: ~grad_imq~, ~grad_matern~, ~grad_imq_ny~, ~rbf~ | ~grad_imq~ |
 | ~--project-path~ / ~--no-project-path~ | Project to reaction valley coordinates | ~--project-path~ |
 | ~--plot-structures~ | Structure strip: ~none~, ~all~, ~crit_points~ | ~none~ |
+| ~--energy-unit~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ | ~eV~ |
+| ~--strip-renderer~ | Structure renderer backend | ~xyzrender~ |
+| ~--xyzrender-config~ | xyzrender preset used for strips | ~paton~ |
 | ~--show-legend~ | Show colorbar legend | Off |
 | ~--show-pts~ / ~--no-show-pts~ | Show data points on surface | ~--show-pts~ |
 | ~--landscape-path~ | Path overlay: ~final~, ~all~, ~none~ | ~final~ |
@@ -191,8 +194,9 @@ python -m rgpycrumbs eon plt-neb \
   --plot-type landscape \
   --project-path \
   --plot-structures crit_points \
-  --surface-type grad_imq \
+  --surface-type grad_matern \
   --ira-kmax 14 \
+  --energy-unit kJ/mol \
   --show-legend \
   -o neb_landscape.png
 #+END_SRC

@@ -3,7 +3,7 @@
 
 * Visualizing Dimer/Saddle Search Optimization
 
-This tool generates 2D optimization landscape plots and convergence profiles from dimer or saddle point search calculations.
+This tool generates 2D optimization landscape plots and convergence profiles from dimer or saddle point search calculations. Like =plt-min= and =plt-neb=, it uses the shared renderer-option bundle for structure strips and viewing controls.
 
 ** Method
 
@@ -46,8 +46,14 @@ Side-by-side plots of force norm and step size vs iteration.
 | ~--ref-product~ | None | Optional product .con for (initial, product) reference pair |
 | ~--project-path~ | True | Project into (s, d) coordinates |
 | ~--surface-type~ | ~grad_matern~ | Surface fitting method |
-| ~--ira-kmax~ | 1.8 | IRA kmax for RMSD calculation |
+| ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
+| ~--energy-unit~ | ~eV~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ |
 | ~--theme~ | ~ruhi~ | Plot theme |
+| ~--plot-structures~ | ~none~ | Structure strip below landscape: ~none~, ~endpoints~ |
+| ~--strip-renderer~ | ~xyzrender~ | Renderer backend for structure strips |
+| ~--xyzrender-config~ | ~paton~ | xyzrender preset for strip rendering |
+| ~--rotation~ | ~auto~ | Shared viewing rotation control |
+| ~--perspective-tilt~ | 0.0 | Small off-axis tilt to reveal occluded atoms |
 | ~-o~ | ~saddle_{type}.pdf~ | Output file path |
 | ~--dpi~ | 200 | Resolution |
 
@@ -58,6 +64,22 @@ By default, the landscape uses (initial, saddle) as the two references. To use (
 #+BEGIN_SRC shell
 rgpycrumbs eon plt-saddle --job-dir results/ --plot-type landscape --ref-product product.con
 #+END_SRC
+
+** Structure Rendering
+
+Landscape plots can render the endpoint strip below the axes:
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-saddle \
+  --job-dir results/ \
+  --plot-type landscape \
+  --plot-structures endpoints \
+  --strip-renderer xyzrender \
+  --rotation auto \
+  --perspective-tilt 6
+#+END_SRC
+
+This shared renderer contract is identical to =plt-min= and =plt-neb=.
 
 ** Required eOn Output Files
 
