@@ -37,6 +37,7 @@ import click
 import matplotlib.pyplot as plt
 import numpy as np
 from ._render_cli import add_render_options
+from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
 from ._single_ended_plot import (
     annotate_endpoint,
     create_landscape_axes,
@@ -180,19 +181,15 @@ def main(
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    if output is None:
-        output = Path(f"min_{plot_type}.pdf")
-
-    trajs = []
-    for jd in job_dir:
-        log.info("Loading minimization trajectory from %s", jd)
-        t = load_min_trajectory(jd, prefix=prefix)
-        log.info("  %d frames", len(t.atoms_list))
-        trajs.append(t)
-
-    labels = list(label) if label else [Path(jd).name for jd in job_dir]
-    if len(labels) < len(trajs):
-        labels.extend([f"Run {i + 1}" for i in range(len(labels), len(trajs))])
+    output = default_output_path("min", plot_type, output)
+    trajs = load_trajectories(
+        job_dir,
+        lambda jd: load_min_trajectory(jd, prefix=prefix),
+        log_info=log.info,
+        noun="minimization trajectory",
+        detail=lambda traj: f"{len(traj.atoms_list)} frames",
+    )
+    labels = overlay_labels(job_dir, label)
 
     active_theme = get_theme(theme)
     setup_global_theme(active_theme)

@@ -38,6 +38,7 @@ import click
 import matplotlib.pyplot as plt
 import numpy as np
 from ._render_cli import add_render_options
+from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
 from ._single_ended_plot import (
     annotate_endpoint,
     create_landscape_axes,
@@ -183,25 +184,18 @@ def main(
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    if output is None:
-        output = Path(f"saddle_{plot_type}.pdf")
-
-    # Load all trajectories
-    trajs = []
-    for jd in job_dir:
-        log.info("Loading trajectory from %s", jd)
-        t = load_dimer_trajectory(jd)
-        log.info(
-            "  %d frames, saddle=%s",
-            len(t.atoms_list),
-            "yes" if t.saddle_atoms is not None else "no",
-        )
-        trajs.append(t)
-
-    # Generate labels
-    labels = list(label) if label else [Path(jd).name for jd in job_dir]
-    if len(labels) < len(trajs):
-        labels.extend([f"Run {i + 1}" for i in range(len(labels), len(trajs))])
+    output = default_output_path("saddle", plot_type, output)
+    trajs = load_trajectories(
+        job_dir,
+        load_dimer_trajectory,
+        log_info=log.info,
+        noun="trajectory",
+        detail=lambda traj: (
+            f"{len(traj.atoms_list)} frames, saddle="
+            f"{'yes' if traj.saddle_atoms is not None else 'no'}"
+        ),
+    )
+    labels = overlay_labels(job_dir, label)
 
     traj = trajs[0]  # primary trajectory for single-traj plot types
 

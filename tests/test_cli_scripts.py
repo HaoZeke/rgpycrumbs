@@ -297,6 +297,43 @@ class TestSingleEndedPlotHelpers:
         assert len(calls) == 2
 
 
+class TestSingleEndedCliHelpers:
+    def test_default_output_path_prefers_explicit_value(self, tmp_path):
+        from rgpycrumbs.eon._single_ended_cli import default_output_path
+
+        explicit = tmp_path / "out.pdf"
+        assert default_output_path("min", "profile", explicit) == explicit
+        assert default_output_path("min", "profile", None) == Path("min_profile.pdf")
+
+    def test_overlay_labels_pads_missing_entries(self, tmp_path):
+        from rgpycrumbs.eon._single_ended_cli import overlay_labels
+
+        job_dirs = [tmp_path / "a", tmp_path / "b", tmp_path / "c"]
+        assert overlay_labels(job_dirs, []) == ["a", "b", "c"]
+        assert overlay_labels(job_dirs, ["foo"]) == ["foo", "b", "c"]
+
+    def test_load_trajectories_logs_consistently(self, tmp_path):
+        from rgpycrumbs.eon._single_ended_cli import load_trajectories
+
+        logged = []
+
+        def _logger(message, *args):
+            logged.append(message % args)
+
+        result = load_trajectories(
+            [tmp_path / "job1", tmp_path / "job2"],
+            lambda path: {"path": path.name},
+            log_info=_logger,
+            noun="trajectory",
+            detail=lambda traj: f"loaded {traj['path']}",
+        )
+        assert [item["path"] for item in result] == ["job1", "job2"]
+        assert logged == [
+            f"Loaded trajectory from {tmp_path / 'job1'} (loaded job1)",
+            f"Loaded trajectory from {tmp_path / 'job2'} (loaded job2)",
+        ]
+
+
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
 class TestMullerBrownXts:
     def test_muller_brown(self):
