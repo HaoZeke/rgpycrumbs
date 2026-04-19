@@ -142,6 +142,37 @@ def _default_neb_ylabel(plot_mode: str, energy_unit: str) -> str:
     return eigenvalue_axis_label(energy_unit, label="Lowest Eigenvalue")
 
 
+def _landscape_projection_basis(global_basis, final_r, final_p):
+    """Reuse the full-dataset basis whenever projected overlays need one."""
+
+    if global_basis is not None:
+        return global_basis
+    return compute_projection_basis(final_r, final_p)
+
+
+def _landscape_half_span(x_limits, final_r, final_p, additional_atoms_data, global_basis):
+    """Expand the symmetric landscape half-span to keep extra markers visible."""
+
+    half_span = (x_limits[1] - x_limits[0]) / 2
+    if not additional_atoms_data:
+        return half_span
+
+    basis = _landscape_projection_basis(global_basis, final_r, final_p)
+    for _, add_r, add_p, _ in additional_atoms_data:
+        _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), basis)
+        half_span = max(half_span, abs(float(add_d[0])) * 1.15)
+    return half_span
+
+
+def _save_plot(output_file, dpi, *, has_strip):
+    """Save plots without tight-bbox strip overflow."""
+
+    save_kwargs = {"transparent": False, "pad_inches": 0.1, "dpi": dpi}
+    if not has_strip:
+        save_kwargs["bbox_inches"] = "tight"
+    plt.savefig(output_file, **save_kwargs)
+
+
 # --- CLI ---
 @click.command()
 @click.option(
@@ -902,11 +933,7 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            _sp_basis = (
-                global_basis
-                if global_basis is not None
-                else compute_projection_basis(final_r, final_p)
-            )
+            _sp_basis = _landscape_projection_basis(global_basis, final_r, final_p)
             sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), _sp_basis)
             sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
@@ -930,10 +957,8 @@ def main(
                 color = marker_cmap(i % 10)
 
                 if project_path:
-                    _add_basis = (
-                        global_basis
-                        if global_basis is not None
-                        else compute_projection_basis(final_r, final_p)
+                    _add_basis = _landscape_projection_basis(
+                        global_basis, final_r, final_p
                     )
                     _s, _d = project_to_sd(
                         np.array([add_r]), np.array([add_p]), _add_basis
@@ -961,10 +986,8 @@ def main(
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
-                    _pc_basis = (
-                        global_basis
-                        if global_basis is not None
-                        else compute_projection_basis(final_r, final_p)
+                    _pc_basis = _landscape_projection_basis(
+                        global_basis, final_r, final_p
                     )
                     _s, _d = project_to_sd(
                         np.array([r_val]), np.array([p_val]), _pc_basis
@@ -1358,13 +1381,13 @@ def main(
             # Force Y-axis to be symmetric and match the X-axis span,
             # but expand if additional structures fall outside
             x_min, x_max = ax.get_xlim()
-            x_span = x_max - x_min
-            half_span = x_span / 2
-            if additional_atoms_data:
-                _basis = compute_projection_basis(final_r, final_p)
-                for _, add_r, add_p, _ in additional_atoms_data:
-                    _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
-                    half_span = max(half_span, abs(float(add_d[0])) * 1.15)
+            half_span = _landscape_half_span(
+                (x_min, x_max),
+                final_r,
+                final_p,
+                additional_atoms_data,
+                global_basis,
+            )
             ax.set_ylim(-half_span, half_span)
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 
@@ -1401,9 +1424,7 @@ def main(
                 artist.set_clip_on(True)
 
     if output_file:
-        plt.savefig(
-            output_file, transparent=False, bbox_inches="tight", pad_inches=0.1, dpi=dpi
-        )
+        _save_plot(output_file, dpi, has_strip=ax_strip is not None)
     else:
         plt.show()
 
