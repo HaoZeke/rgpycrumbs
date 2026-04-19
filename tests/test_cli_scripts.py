@@ -142,6 +142,73 @@ class TestSharedRenderCli:
             assert "--strip-dividers / --no-strip-dividers" in result.output
 
 
+class TestSingleEndedPlotHelpers:
+    def test_project_landscape_path_reuses_basis(self, monkeypatch):
+        from rgpycrumbs.eon import _single_ended_plot as helper_mod
+
+        calls = []
+
+        def _fake_compute_projection_basis(*_args):
+            calls.append("compute")
+            return "basis"
+
+        def _fake_project_to_sd(_a, _b, basis):
+            calls.append(("project", basis))
+            return [1.0, 2.0], [3.0, 4.0]
+
+        monkeypatch.setattr(
+            helper_mod, "compute_projection_basis", _fake_compute_projection_basis
+        )
+        monkeypatch.setattr(helper_mod, "project_to_sd", _fake_project_to_sd)
+
+        x, y, basis = helper_mod.project_landscape_path(
+            [0.0, 1.0], [1.0, 0.0], project_path=True
+        )
+        assert basis == "basis"
+        assert calls == ["compute", ("project", "basis")]
+
+        calls.clear()
+        x2, y2, basis2 = helper_mod.project_landscape_path(
+            [0.0, 1.0], [1.0, 0.0], project_path=True, basis="reused"
+        )
+        assert basis2 == "reused"
+        assert calls == [("project", "reused")]
+        assert x == x2 and y == y2
+
+    def test_save_landscape_figure_skips_tight_layout_with_strip(
+        self, monkeypatch, tmp_path
+    ):
+        from rgpycrumbs.eon import _single_ended_plot as helper_mod
+
+        class _FakeFigure:
+            def __init__(self):
+                self.tight_layout_calls = 0
+                self.saved = []
+
+            def tight_layout(self):
+                self.tight_layout_calls += 1
+
+            def savefig(self, *args, **kwargs):
+                self.saved.append((args, kwargs))
+
+        fake_fig = _FakeFigure()
+        monkeypatch.setattr(helper_mod.plt, "close", lambda _fig: None)
+
+        helper_mod.save_landscape_figure(
+            fake_fig, tmp_path / "strip.pdf", dpi=100, has_strip=True
+        )
+        assert fake_fig.tight_layout_calls == 0
+        assert "bbox_inches" not in fake_fig.saved[0][1]
+
+        fake_fig = _FakeFigure()
+        monkeypatch.setattr(helper_mod.plt, "close", lambda _fig: None)
+        helper_mod.save_landscape_figure(
+            fake_fig, tmp_path / "plain.pdf", dpi=100, has_strip=False
+        )
+        assert fake_fig.tight_layout_calls == 1
+        assert fake_fig.saved[0][1]["bbox_inches"] == "tight"
+
+
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
 class TestMullerBrownXts:
     def test_muller_brown(self):

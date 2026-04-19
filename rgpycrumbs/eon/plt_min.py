@@ -37,20 +37,24 @@ import click
 import matplotlib.pyplot as plt
 import numpy as np
 from ._render_cli import add_render_options
+from ._single_ended_plot import (
+    annotate_endpoint,
+    create_landscape_axes,
+    project_landscape_path,
+    render_endpoint_strip,
+    save_landscape_figure,
+)
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
     compute_synthetic_gradients,
 )
-from chemparseplot.parse.projection import compute_projection_basis, project_to_sd
-from chemparseplot.plot.neb import plot_structure_strip
 from chemparseplot.plot.optimization import (
     plot_convergence_panel,
     plot_optimization_landscape,
 )
 from chemparseplot.plot.structs import convert_energy, energy_axis_label
-from chemparseplot.plot.theme import apply_axis_theme, get_theme, setup_global_theme
-from matplotlib.gridspec import GridSpec
+from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
 
 logging.basicConfig(
@@ -294,20 +298,7 @@ def _plot_landscape(
     grad_a, grad_b = compute_synthetic_gradients(rmsd_a, rmsd_b, f_para)
 
     has_strip = plot_structures == "endpoints"
-    fig = plt.figure(figsize=(5.37, 5.37 + (1.5 if has_strip else 0)), dpi=dpi)
-
-    if has_strip:
-        gs = GridSpec(2, 1, height_ratios=[1, 0.3], hspace=0.15, figure=fig)
-        ax = fig.add_subplot(gs[0])
-        ax_strip = fig.add_subplot(gs[1])
-        if theme:
-            apply_axis_theme(ax_strip, theme)
-    else:
-        ax = fig.add_subplot(111)
-        ax_strip = None
-
-    if theme:
-        apply_axis_theme(ax, theme)
+    fig, ax, ax_strip = create_landscape_axes(dpi=dpi, has_strip=has_strip, theme=theme)
 
     plot_optimization_landscape(
         ax,
@@ -324,6 +315,9 @@ def _plot_landscape(
     )
 
     # Overlay paths from all trajectories
+    basis = None
+    if project_path:
+        _, _, basis = project_landscape_path(rmsd_a, rmsd_b, project_path=True)
     for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
             t.atoms_list,
@@ -335,11 +329,7 @@ def _plot_landscape(
         m = min(len(ra), len(t.dat_df))
         ra, rb = ra[:m], rb[:m]
 
-        if project_path:
-            basis = compute_projection_basis(rmsd_a, rmsd_b)
-            px, py = project_to_sd(ra, rb, basis)
-        else:
-            px, py = ra, rb
+        px, py, _ = project_landscape_path(ra, rb, project_path=project_path, basis=basis)
 
         color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
         if len(trajs) > 1:
@@ -356,49 +346,11 @@ def _plot_landscape(
             )
 
     # Annotate endpoints
-    if project_path:
-        basis = compute_projection_basis(rmsd_a, rmsd_b)
-        s_all, d_all = project_to_sd(rmsd_a, rmsd_b, basis)
-        sx, sy = float(s_all[0]), float(d_all[0])
-        ex, ey = float(s_all[-1]), float(d_all[-1])
-    else:
-        sx, sy = float(rmsd_a[0]), float(rmsd_b[0])
-        ex, ey = float(rmsd_a[-1]), float(rmsd_b[-1])
-
-    # Offset labels above each marker by ~5 px and give them a translucent
-    # white box so they remain readable against bright surface contours
-    # (the previous bare annotation got swallowed by yellow/green fills at
-    # the basin extrema).
-    label_box = {
-        "boxstyle": "round,pad=0.2",
-        "facecolor": "white",
-        "edgecolor": "none",
-        "alpha": 0.85,
-    }
-    ax.annotate(
-        "Init",
-        (sx, sy),
-        xytext=(0, 6),
-        textcoords="offset points",
-        fontsize=10,
-        fontweight="bold",
-        ha="center",
-        va="bottom",
-        bbox=label_box,
-        zorder=60,
+    plot_x, plot_y, _ = project_landscape_path(
+        rmsd_a, rmsd_b, project_path=project_path, basis=basis
     )
-    ax.annotate(
-        "Min",
-        (ex, ey),
-        xytext=(0, 6),
-        textcoords="offset points",
-        fontsize=10,
-        fontweight="bold",
-        ha="center",
-        va="bottom",
-        bbox=label_box,
-        zorder=60,
-    )
+    annotate_endpoint(ax, float(plot_x[0]), float(plot_y[0]), "Init", boxed=True)
+    annotate_endpoint(ax, float(plot_x[-1]), float(plot_y[-1]), "Min", boxed=True)
 
     if len(trajs) > 1:
         ax.legend(frameon=True, framealpha=0.9, loc="best")
@@ -413,28 +365,21 @@ def _plot_landscape(
             structs.append(traj.atoms_list[-1])
             strip_labels.append("Min")
 
-        # Scale zoom with atom count: small molecules (< 20 atoms) get 0.8,
-        # large systems (> 100 atoms) get 0.2, linear interpolation between
-        if strip_zoom is None:
-            max_atoms = max(len(s) for s in structs) if structs else 10
-            strip_zoom = max(0.25, 0.8 * (20 / max(max_atoms, 20)) ** 0.3)
-        plot_structure_strip(
+        render_endpoint_strip(
             ax_strip,
             structs,
             strip_labels,
-            zoom=strip_zoom,
+            strip_zoom=strip_zoom,
             rotation=rotation,
-            theme_color=theme.textcolor if theme else "black",
-            renderer=strip_renderer,
-            col_spacing=strip_spacing,
-            show_dividers=strip_dividers,
+            theme=theme,
+            strip_renderer=strip_renderer,
+            strip_spacing=strip_spacing,
+            strip_dividers=strip_dividers,
             perspective_tilt=perspective_tilt,
             xyzrender_config=xyzrender_config,
         )
 
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+    save_landscape_figure(fig, output, dpi=dpi, has_strip=has_strip)
 
 
 def _plot_convergence(trajs, labels, output, dpi):
