@@ -36,6 +36,7 @@ from pathlib import Path
 import click
 import matplotlib.pyplot as plt
 import numpy as np
+from ._render_cli import add_render_options
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
@@ -125,44 +126,12 @@ IRA_KMAX_DEFAULT = 14.0
     default="none",
     help="Show structure strip below landscape.",
 )
-@click.option(
-    "--strip-renderer",
-    type=click.Choice(["xyzrender", "ase", "solvis", "ovito"]),
-    default="xyzrender",
-    help=(
-        "Rendering backend for structure strip. "
-        "xyzrender/ase work with the default dispatcher setup; "
-        "solvis and ovito require separate heavy installs."
-    ),
-)
-@click.option(
-    "--xyzrender-config",
-    type=str,
-    default="paton",
-    show_default=True,
-    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
-)
-@click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
+@add_render_options
 @click.option(
     "--strip-zoom",
     type=float,
     default=None,
     help="Strip image zoom (default: auto-scaled by atom count).",
-)
-@click.option(
-    "--strip-dividers",
-    is_flag=True,
-    default=False,
-    help="Show dividers between structures.",
-)
-@click.option(
-    "--rotation", type=str, default="auto", help="Viewing angle for structure rendering."
-)
-@click.option(
-    "--perspective-tilt",
-    type=float,
-    default=0.0,
-    help="Off-axis perspective tilt in degrees.",
 )
 @click.option(
     "-o",

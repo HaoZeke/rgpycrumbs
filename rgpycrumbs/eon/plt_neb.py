@@ -54,6 +54,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
+from ._render_cli import add_render_options
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -426,44 +427,7 @@ def _profile_strip_payload(atoms_list, x_values, y_values, plot_structures, plot
     show_default=True,
     help="Viewing rotation. 'auto' lets xyzrender auto-orient (default). ASE-style string e.g. '0x,90y,0z' for manual control.",
 )
-@click.option(
-    "--perspective-tilt",
-    type=float,
-    default=0.0,
-    show_default=True,
-    help="Small off-axis tilt (degrees) to reveal occluded atoms. 5-10 is typical.",
-)
-@click.option(
-    "--strip-renderer",
-    type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
-    default="xyzrender",
-    show_default=True,
-    help=(
-        "Rendering backend for structure images. "
-        "xyzrender/ase work with the default dispatcher setup; "
-        "solvis and ovito require separate heavy installs."
-    ),
-)
-@click.option(
-    "--xyzrender-config",
-    type=str,
-    default="paton",
-    show_default=True,
-    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
-)
-@click.option(
-    "--strip-spacing",
-    type=float,
-    default=1.5,
-    show_default=True,
-    help="Horizontal spacing between structure images.",
-)
-@click.option(
-    "--strip-dividers/--no-strip-dividers",
-    is_flag=True,
-    default=False,
-    help="Draw vertical divider lines between structures.",
-)
+@add_render_options
 @click.option(
     "--arrow-head-length",
     type=float,

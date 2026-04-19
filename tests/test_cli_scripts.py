@@ -83,7 +83,9 @@ class TestPep723DispatcherCli:
         ],
     )
     @patch("rgpycrumbs.cli.subprocess.run")
-    def test_help_routes_through_dispatcher(self, mock_run, argv, expected_script, monkeypatch):
+    def test_help_routes_through_dispatcher(
+        self, mock_run, argv, expected_script, monkeypatch
+    ):
         from rgpycrumbs.cli import main
 
         monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
@@ -108,6 +110,36 @@ class TestPep723DispatcherCli:
         command = mock_run.call_args.args[0]
         assert command[:2] == ["uv", "run"]
         assert command[2].endswith("eon/plt_min.py")
+
+
+class TestSharedRenderCli:
+    def test_eon_plotters_share_render_option_contract(self):
+        from rgpycrumbs.eon.plt_min import main as plt_min_main
+        from rgpycrumbs.eon.plt_neb import main as plt_neb_main
+        from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+
+        expected = {
+            "strip_renderer",
+            "xyzrender_config",
+            "strip_spacing",
+            "strip_dividers",
+            "rotation",
+            "perspective_tilt",
+        }
+
+        commands = (plt_min_main, plt_saddle_main, plt_neb_main)
+        for command in commands:
+            param_names = {param.name for param in command.params}
+            assert expected.issubset(param_names)
+
+    def test_single_ended_help_uses_dual_strip_divider_flag(self):
+        from rgpycrumbs.eon.plt_min import main as plt_min_main
+        from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+
+        for command in (plt_min_main, plt_saddle_main):
+            result = CliRunner().invoke(command, ["--help"])
+            assert result.exit_code == 0
+            assert "--strip-dividers / --no-strip-dividers" in result.output
 
 
 @pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
@@ -140,7 +172,6 @@ class TestMullerBrownXts:
 
 @pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
 class TestCuH2Xts:
-
     def test_cuh2(self):
         from rgpycrumbs.xts.saddle.cuh2 import cuh2_potential
 
