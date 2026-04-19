@@ -173,6 +173,40 @@ def _save_plot(output_file, dpi, *, has_strip):
     plt.savefig(output_file, **save_kwargs)
 
 
+def _profile_structure_indices(atoms_list, y_values, plot_structures, plot_mode):
+    """Select profile structures to render as a strip payload."""
+
+    if plot_structures == "all":
+        return list(range(len(atoms_list)))
+    saddle_idx = (
+        int(np.argmax(y_values[1:-1]) + 1)
+        if plot_mode == "energy"
+        else int(np.argmin(y_values))
+    )
+    return sorted({0, saddle_idx, len(atoms_list) - 1})
+
+
+def _profile_strip_payload(atoms_list, x_values, y_values, plot_structures, plot_mode):
+    """Build an ordered strip payload for profile plots."""
+
+    payload = []
+    for index in _profile_structure_indices(
+        atoms_list, y_values, plot_structures, plot_mode
+    ):
+        if plot_structures == "all":
+            label = str(index)
+        elif index == 0:
+            label = "R"
+        elif index == len(atoms_list) - 1:
+            label = "P"
+        else:
+            label = "SP"
+        payload.append(
+            {"atoms": atoms_list[index], "x": float(x_values[index]), "label": label}
+        )
+    return payload
+
+
 # --- CLI ---
 @click.command()
 @click.option(
@@ -624,7 +658,10 @@ def main(
     fig = plt.figure(figsize=figsize, dpi=dpi)
 
     # Layout Logic
-    has_strip = plot_structures in ["all", "crit_points"] and plot_type == "landscape"
+    has_strip = plot_structures in ["all", "crit_points"] and plot_type in {
+        "landscape",
+        "profile",
+    }
 
     if has_strip:
         # Heuristic layout adjustment
@@ -1105,6 +1142,7 @@ def main(
 
     else:
         # --- Profile Plot ---
+        profile_strip_payload = []
         if source == "hdf5":
             if not input_h5:
                 log.critical("--input-h5 is required when --source hdf5 is used.")
@@ -1167,44 +1205,45 @@ def main(
             )
 
             if atoms_list and plot_structures != "none":
-                indices = (
-                    list(range(len(atoms_list)))
-                    if plot_structures == "all"
-                    else sorted(
-                        {
-                            0,
-                            np.argmax(data[y_col][1:-1]) + 1
-                            if plot_mode == "energy"
-                            else np.argmin(data[y_col]),
-                            len(atoms_list) - 1,
-                        }
+                if has_strip:
+                    profile_strip_payload.extend(
+                        _profile_strip_payload(
+                            atoms_list,
+                            data[1],
+                            data[y_col],
+                            plot_structures,
+                            plot_mode,
+                        )
                     )
-                )
-                for i in indices:
-                    if i == 0:
-                        xybox, rad = draw_reactant[:2], draw_reactant[2]
-                    elif i == len(atoms_list) - 1:
-                        xybox, rad = draw_product[:2], draw_product[2]
-                    else:
-                        xybox, rad = draw_saddle[:2], draw_saddle[2]
-
-                    if plot_structures == "all":
-                        xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
-                        rad = 0.1 if i % 2 == 0 else -0.1
-
-                    plot_structure_inset(
-                        ax,
-                        atoms_list[i],
-                        data[1][i],
-                        data[y_col][i],
-                        xybox,
-                        rad,
-                        zoom=zoom_ratio,
-                        rotation=ase_rotation,
-                        renderer=strip_renderer,
-                        xyzrender_config=xyzrender_config,
-                        perspective_tilt=perspective_tilt,
+                else:
+                    indices = _profile_structure_indices(
+                        atoms_list, data[y_col], plot_structures, plot_mode
                     )
+                    for i in indices:
+                        if i == 0:
+                            xybox, rad = draw_reactant[:2], draw_reactant[2]
+                        elif i == len(atoms_list) - 1:
+                            xybox, rad = draw_product[:2], draw_product[2]
+                        else:
+                            xybox, rad = draw_saddle[:2], draw_saddle[2]
+
+                        if plot_structures == "all":
+                            xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
+                            rad = 0.1 if i % 2 == 0 else -0.1
+
+                        plot_structure_inset(
+                            ax,
+                            atoms_list[i],
+                            data[1][i],
+                            data[y_col][i],
+                            xybox,
+                            rad,
+                            zoom=zoom_ratio,
+                            rotation=ase_rotation,
+                            renderer=strip_renderer,
+                            xyzrender_config=xyzrender_config,
+                            perspective_tilt=perspective_tilt,
+                        )
         else:
             # eOn source: multiple .dat files
             dat_paths = find_file_paths(input_dat_pattern)
@@ -1282,44 +1321,45 @@ def main(
                     and atoms_list
                     and plot_structures != "none"
                 ):
-                    indices = (
-                        list(range(len(atoms_list)))
-                        if plot_structures == "all"
-                        else sorted(
-                            {
-                                0,
-                                np.argmax(data[y_col][1:-1]) + 1
-                                if plot_mode == "energy"
-                                else np.argmin(data[y_col]),
-                                len(atoms_list) - 1,
-                            }
+                    if has_strip:
+                        profile_strip_payload.extend(
+                            _profile_strip_payload(
+                                atoms_list,
+                                data[1],
+                                data[y_col],
+                                plot_structures,
+                                plot_mode,
+                            )
                         )
-                    )
-                    for i in indices:
-                        if i == 0:
-                            xybox, rad = draw_reactant[:2], draw_reactant[2]
-                        elif i == len(atoms_list) - 1:
-                            xybox, rad = draw_product[:2], draw_product[2]
-                        else:
-                            xybox, rad = draw_saddle[:2], draw_saddle[2]
-
-                        if plot_structures == "all":
-                            xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
-                            rad = 0.1 if i % 2 == 0 else -0.1
-
-                        # Call library function
-                        plot_structure_inset(
-                            ax,
-                            atoms_list[i],
-                            data[1][i],
-                            data[y_col][i],
-                            xybox,
-                            rad,
-                            zoom=zoom_ratio,
-                            rotation=ase_rotation,
-                            renderer=strip_renderer,
-                            xyzrender_config=xyzrender_config,
+                    else:
+                        indices = _profile_structure_indices(
+                            atoms_list, data[y_col], plot_structures, plot_mode
                         )
+                        for i in indices:
+                            if i == 0:
+                                xybox, rad = draw_reactant[:2], draw_reactant[2]
+                            elif i == len(atoms_list) - 1:
+                                xybox, rad = draw_product[:2], draw_product[2]
+                            else:
+                                xybox, rad = draw_saddle[:2], draw_saddle[2]
+
+                            if plot_structures == "all":
+                                xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
+                                rad = 0.1 if i % 2 == 0 else -0.1
+
+                            # Call library function
+                            plot_structure_inset(
+                                ax,
+                                atoms_list[i],
+                                data[1][i],
+                                data[y_col][i],
+                                xybox,
+                                rad,
+                                zoom=zoom_ratio,
+                                rotation=ase_rotation,
+                                renderer=strip_renderer,
+                                xyzrender_config=xyzrender_config,
+                            )
 
         # --- Profile Additional Structures ---
         if additional_atoms_data and rc_mode == "rmsd":
@@ -1331,7 +1371,11 @@ def main(
                     linewidth=2,
                     zorder=90,
                 )
-                if plot_structures != "none":
+                if has_strip:
+                    profile_strip_payload.append(
+                        {"atoms": add_atoms, "x": float(add_r), "label": f"Add {i + 1}"}
+                    )
+                elif plot_structures != "none":
                     y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
                     y_pos = ax.get_ylim()[0] + 0.9 * y_span
                     plot_structure_inset(
@@ -1361,6 +1405,30 @@ def main(
                             "linewidth": 1.2,
                         },
                     )
+
+        if has_strip and profile_strip_payload:
+            deduped_payload = []
+            seen = set()
+            for entry in sorted(profile_strip_payload, key=lambda d: d["x"]):
+                key = (entry["label"], round(entry["x"], 8))
+                if key in seen:
+                    continue
+                seen.add(key)
+                deduped_payload.append(entry)
+
+            plot_structure_strip(
+                ax_strip,
+                [entry["atoms"] for entry in deduped_payload],
+                [entry["label"] for entry in deduped_payload],
+                zoom=zoom_ratio,
+                rotation=ase_rotation,
+                theme_color=active_theme.textcolor,
+                renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
+                col_spacing=strip_spacing,
+                show_dividers=strip_dividers,
+                perspective_tilt=perspective_tilt,
+            )
 
         # Profile Labels
         final_xlabel = xlabel or (
@@ -1405,7 +1473,8 @@ def main(
             fontsize=int(active_theme.font_size * 0.8),
         ).set_zorder(101)
 
-    plt.tight_layout(pad=0.5)
+    if not ax_strip:
+        plt.tight_layout(pad=0.5)
 
     if ax_strip:
         pos_main = ax.get_position()

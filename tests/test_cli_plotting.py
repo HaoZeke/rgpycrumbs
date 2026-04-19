@@ -378,6 +378,58 @@ class TestPltNebPlotting:
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
+    def test_profile_crit_points_uses_structure_strip(self, tmp_path, monkeypatch):
+        """Profile crit-point rendering should use the strip path, not overlapping insets."""
+        main = self._import_main()
+        _make_neb_data(tmp_path, n_steps=2, n_images=5)
+        _write_con_file(tmp_path / "neb.con", _make_h2o_images(5))
+        output = tmp_path / "profile_strip.png"
+        strip_calls = []
+        inset_calls = []
+
+        monkeypatch.setattr(
+            "rgpycrumbs.eon.plt_neb.plot_structure_strip",
+            lambda *args, **kwargs: strip_calls.append((args, kwargs)),
+        )
+        monkeypatch.setattr(
+            "rgpycrumbs.eon.plt_neb.plot_structure_inset",
+            lambda *args, **kwargs: inset_calls.append((args, kwargs)),
+        )
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            td_path = Path(td)
+            import shutil
+
+            for f in tmp_path.glob("neb_*"):
+                shutil.copy2(f, td_path / f.name)
+            shutil.copy2(tmp_path / "neb.con", td_path / "neb.con")
+
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--con-file",
+                    "neb.con",
+                    "--plot-structures",
+                    "crit_points",
+                    "--strip-renderer",
+                    "ase",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
+            plt.close("all")
+
+        assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+        assert strip_calls
+        assert not inset_calls
+
     def test_profile_spline_method(self, tmp_path):
         """Test profile plot with --spline-method spline."""
         main = self._import_main()
