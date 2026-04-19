@@ -658,11 +658,12 @@ def main(
     # Only attempt to load structures if specifically requested or needed for the plot type
     if con_file:
         try:
-            atoms_list, additional_atoms_data, sp_data = (
-                load_structures_and_calculate_additional_rmsd(
-                    con_file, additional_con, ira_kmax, sp_file
-                )
+            overlay_bundle = load_structures_and_calculate_additional_rmsd(
+                con_file, additional_con, ira_kmax, sp_file
             )
+            atoms_list = overlay_bundle.atoms_list
+            additional_atoms_data = overlay_bundle.additional_structures
+            sp_data = overlay_bundle.saddle_point
         except Exception as e:
             log.error(f"Error loading structures: {e}")
             # Critical failure for landscape/RMSD modes
