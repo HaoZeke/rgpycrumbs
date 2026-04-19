@@ -367,6 +367,8 @@ class TestPltNebLandscape:
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
 class TestPltNebHelpers:
     def test_landscape_half_span_prefers_global_basis(self, monkeypatch):
+        from chemparseplot.parse.eon.neb import NebOverlayStructure
+
         import rgpycrumbs.eon.plt_neb as plt_neb_mod
 
         recompute_calls = []
@@ -387,7 +389,7 @@ class TestPltNebHelpers:
             (0.0, 4.0),
             np.array([0.0, 1.0]),
             np.array([1.0, 0.0]),
-            [(None, 1.5, 0.5, "extra")],
+            [NebOverlayStructure(atoms=None, r=1.5, p=0.5, label="extra")],
             "global-basis",
         )
 

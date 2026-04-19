@@ -159,8 +159,8 @@ def _landscape_half_span(x_limits, final_r, final_p, additional_atoms_data, glob
         return half_span
 
     basis = _landscape_projection_basis(global_basis, final_r, final_p)
-    for _, add_r, add_p, _ in additional_atoms_data:
-        _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), basis)
+    for overlay in additional_atoms_data:
+        _, add_d = project_to_sd(np.array([overlay.r]), np.array([overlay.p]), basis)
         half_span = max(half_span, abs(float(add_d[0])) * 1.15)
     return half_span
 
@@ -767,9 +767,9 @@ def main(
 
             extra_pts = []
             if sp_data:
-                extra_pts.append([sp_data["r"], sp_data["p"]])
-            for _, add_r, add_p, _ in additional_atoms_data:
-                extra_pts.append([add_r, add_p])
+                extra_pts.append([sp_data.r, sp_data.p])
+            for overlay in additional_atoms_data:
+                extra_pts.append([overlay.r, overlay.p])
             extra_pts_arr = np.array(extra_pts) if extra_pts else None
 
             # Pre-compute viewport from FULL data (not filtered surface data)
@@ -786,9 +786,9 @@ def main(
                 _half = max(
                     _half, abs(float(_d.max())) * 1.15, abs(float(_d.min())) * 1.15
                 )
-                for _, add_r, add_p, _ in additional_atoms_data:
+                for overlay in additional_atoms_data:
                     _, _ad = project_to_sd(
-                        np.array([add_r]), np.array([add_p]), global_basis
+                        np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.15)
                 vp_ylim = (-_half, _half)
@@ -922,7 +922,7 @@ def main(
         # Saddle Point Marker
         if sp_data:
             # Use explicit SP coordinates
-            sp_x_raw, sp_y_raw = sp_data["r"], sp_data["p"]
+            sp_x_raw, sp_y_raw = sp_data.r, sp_data.p
             log.info(f"Plotting explicit SP at R={sp_x_raw:.3f}, P={sp_y_raw:.3f}")
         else:
             # Fallback to heuristic
@@ -954,7 +954,7 @@ def main(
 
         if additional_atoms_data:
             marker_cmap = mpl.colormaps.get_cmap("tab10")
-            for i, (_, add_r, add_p, add_label) in enumerate(additional_atoms_data):
+            for i, overlay in enumerate(additional_atoms_data):
                 color = marker_cmap(i % 10)
 
                 if project_path:
@@ -962,11 +962,11 @@ def main(
                         global_basis, final_r, final_p
                     )
                     _s, _d = project_to_sd(
-                        np.array([add_r]), np.array([add_p]), _add_basis
+                        np.array([overlay.r]), np.array([overlay.p]), _add_basis
                     )
                     plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
-                    plot_add_r, plot_add_p = add_r, add_p
+                    plot_add_r, plot_add_p = overlay.r, overlay.p
 
                 ax.plot(
                     plot_add_r,
@@ -978,7 +978,7 @@ def main(
                     markeredgewidth=1.0,
                     linestyle="None",
                     zorder=102,
-                    label=add_label,
+                    label=overlay.label,
                 )
 
         if has_strip and atoms_list:
@@ -1002,9 +1002,9 @@ def main(
 
             # Add Saddle (Explicit or Heuristic)
             if sp_data:
-                sx, sy = get_projected_coords(sp_data["r"], sp_data["p"])
+                sx, sy = get_projected_coords(sp_data.r, sp_data.p)
                 strip_payload.append(
-                    {"atoms": sp_data["atoms"], "x": sx, "y": sy, "label": "SP"}
+                    {"atoms": sp_data.atoms, "x": sx, "y": sy, "label": sp_data.label}
                 )
             else:
                 s_idx = (
@@ -1032,14 +1032,14 @@ def main(
                     )
 
             # Add additional structures
-            for add_atoms, add_r, add_p, add_label in additional_atoms_data:
-                ax_r, ax_p = get_projected_coords(add_r, add_p)
+            for overlay in additional_atoms_data:
+                ax_r, ax_p = get_projected_coords(overlay.r, overlay.p)
                 strip_payload.append(
                     {
-                        "atoms": add_atoms,
+                        "atoms": overlay.atoms,
                         "x": ax_r,
                         "y": ax_p,
-                        "label": add_label,
+                        "label": overlay.label,
                     }
                 )
 
@@ -1327,9 +1327,9 @@ def main(
 
         # --- Profile Additional Structures ---
         if additional_atoms_data and rc_mode == "rmsd":
-            for i, (add_atoms, add_r, _) in enumerate(additional_atoms_data):
+            for i, overlay in enumerate(additional_atoms_data):
                 ax.axvline(
-                    add_r,
+                    overlay.r,
                     color=active_theme.gridcolor,
                     linestyle=":",
                     linewidth=2,
@@ -1337,15 +1337,19 @@ def main(
                 )
                 if has_strip:
                     profile_strip_payload.append(
-                        {"atoms": add_atoms, "x": float(add_r), "label": f"Add {i + 1}"}
+                        {
+                            "atoms": overlay.atoms,
+                            "x": float(overlay.r),
+                            "label": overlay.label,
+                        }
                     )
                 elif plot_structures != "none":
                     y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
                     y_pos = ax.get_ylim()[0] + 0.9 * y_span
                     plot_structure_inset(
                         ax,
-                        add_atoms,
-                        add_r,
+                        overlay.atoms,
+                        overlay.r,
                         y_pos,
                         xybox=(
                             draw_saddle[0] + (i * 15),
