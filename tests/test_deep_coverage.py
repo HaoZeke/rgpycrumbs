@@ -366,6 +366,24 @@ class TestPltNebLandscape:
 
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
 class TestPltNebHelpers:
+    def test_profile_strip_payload_returns_typed_entries(self):
+        from chemparseplot.plot.structs import StructurePlacement
+        from ase import Atoms
+
+        import rgpycrumbs.eon.plt_neb as plt_neb_mod
+
+        atoms_list = [Atoms("H"), Atoms("H"), Atoms("H")]
+        payload = plt_neb_mod._profile_strip_payload(
+            atoms_list,
+            np.array([0.0, 1.0, 2.0]),
+            np.array([0.0, 2.0, 0.0]),
+            "crit_points",
+            "energy",
+        )
+
+        assert all(isinstance(entry, StructurePlacement) for entry in payload)
+        assert [entry.label for entry in payload] == ["R", "SP", "P"]
+
     def test_landscape_half_span_prefers_global_basis(self, monkeypatch):
         from chemparseplot.parse.eon.neb import NebOverlayStructure
 

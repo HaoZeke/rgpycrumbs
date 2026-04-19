@@ -101,6 +101,7 @@ from chemparseplot.plot.neb import (
     plot_structure_strip,
 )
 from chemparseplot.plot.structs import (
+    StructurePlacement,
     convert_energy,
     convert_energy_curvature,
     eigenvalue_axis_label,
@@ -203,7 +204,11 @@ def _profile_strip_payload(atoms_list, x_values, y_values, plot_structures, plot
         else:
             label = "SP"
         payload.append(
-            {"atoms": atoms_list[index], "x": float(x_values[index]), "label": label}
+            StructurePlacement(
+                atoms=atoms_list[index],
+                x=float(x_values[index]),
+                label=label,
+            )
         )
     return payload
 
@@ -998,13 +1003,20 @@ def main(
 
             # Add Reactant
             rx, ry = get_projected_coords(final_r[0], final_p[0])
-            strip_payload.append({"atoms": atoms_list[0], "x": rx, "y": ry, "label": "R"})
+            strip_payload.append(
+                StructurePlacement(atoms=atoms_list[0], x=rx, y=ry, label="R")
+            )
 
             # Add Saddle (Explicit or Heuristic)
             if sp_data:
                 sx, sy = get_projected_coords(sp_data.r, sp_data.p)
                 strip_payload.append(
-                    {"atoms": sp_data.atoms, "x": sx, "y": sy, "label": sp_data.label}
+                    StructurePlacement(
+                        atoms=sp_data.atoms,
+                        x=sx,
+                        y=sy,
+                        label=sp_data.label,
+                    )
                 )
             else:
                 s_idx = (
@@ -1014,13 +1026,18 @@ def main(
                 )
                 sx, sy = get_projected_coords(final_r[s_idx], final_p[s_idx])
                 strip_payload.append(
-                    {"atoms": atoms_list[s_idx], "x": sx, "y": sy, "label": "SP"}
+                    StructurePlacement(
+                        atoms=atoms_list[s_idx],
+                        x=sx,
+                        y=sy,
+                        label="SP",
+                    )
                 )
 
             # Add Product
             px, py = get_projected_coords(final_r[-1], final_p[-1])
             strip_payload.append(
-                {"atoms": atoms_list[-1], "x": px, "y": py, "label": "P"}
+                StructurePlacement(atoms=atoms_list[-1], x=px, y=py, label="P")
             )
 
             # Add intermediate points if 'all' requested
@@ -1028,29 +1045,31 @@ def main(
                 for i in range(1, len(atoms_list) - 1):
                     ix, iy = get_projected_coords(final_r[i], final_p[i])
                     strip_payload.append(
-                        {"atoms": atoms_list[i], "x": ix, "y": iy, "label": str(i)}
+                        StructurePlacement(
+                            atoms=atoms_list[i],
+                            x=ix,
+                            y=iy,
+                            label=str(i),
+                        )
                     )
 
             # Add additional structures
             for overlay in additional_atoms_data:
                 ax_r, ax_p = get_projected_coords(overlay.r, overlay.p)
                 strip_payload.append(
-                    {
-                        "atoms": overlay.atoms,
-                        "x": ax_r,
-                        "y": ax_p,
-                        "label": overlay.label,
-                    }
+                    StructurePlacement(
+                        atoms=overlay.atoms,
+                        x=ax_r,
+                        y=ax_p,
+                        label=overlay.label,
+                    )
                 )
 
-            strip_payload.sort(key=lambda d: d["x"])
-            labels = [d["label"] for d in strip_payload]
-            structs = [d["atoms"] for d in strip_payload]
+            strip_payload.sort(key=lambda entry: entry.x)
 
             plot_structure_strip(
                 ax_strip,
-                structs,
-                labels,
+                strip_payload,
                 zoom=zoom_ratio,
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
@@ -1066,12 +1085,12 @@ def main(
             main_plot_texts = []
             main_labels = {"R", "SP", "P"}
             for d in strip_payload:
-                if d["label"] not in main_labels:
+                if d.label not in main_labels:
                     continue
                 t = ax.text(
-                    d["x"],
-                    d["y"],
-                    d["label"],
+                    d.x,
+                    d.y,
+                    d.label,
                     fontsize=11,
                     fontweight="bold",
                     color="white",
@@ -1337,11 +1356,11 @@ def main(
                 )
                 if has_strip:
                     profile_strip_payload.append(
-                        {
-                            "atoms": overlay.atoms,
-                            "x": float(overlay.r),
-                            "label": overlay.label,
-                        }
+                        StructurePlacement(
+                            atoms=overlay.atoms,
+                            x=float(overlay.r),
+                            label=overlay.label,
+                        )
                     )
                 elif plot_structures != "none":
                     y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
@@ -1377,8 +1396,8 @@ def main(
         if has_strip and profile_strip_payload:
             deduped_payload = []
             seen = set()
-            for entry in sorted(profile_strip_payload, key=lambda d: d["x"]):
-                key = (entry["label"], round(entry["x"], 8))
+            for entry in sorted(profile_strip_payload, key=lambda d: d.x):
+                key = (entry.label, round(entry.x, 8))
                 if key in seen:
                     continue
                 seen.add(key)
@@ -1386,8 +1405,7 @@ def main(
 
             plot_structure_strip(
                 ax_strip,
-                [entry["atoms"] for entry in deduped_payload],
-                [entry["label"] for entry in deduped_payload],
+                deduped_payload,
                 zoom=zoom_ratio,
                 rotation=ase_rotation,
                 theme_color=active_theme.textcolor,
