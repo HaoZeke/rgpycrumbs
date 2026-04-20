@@ -40,15 +40,6 @@ import numpy as np
 try:
     from ._render_cli import add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
-    from ._single_ended_plot import (
-        annotate_endpoint,
-        create_landscape_axes,
-        plot_single_ended_convergence,
-        plot_single_ended_profile,
-        project_landscape_path,
-        render_endpoint_strip,
-        save_landscape_figure,
-    )
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_render_options
     from rgpycrumbs.eon._single_ended_cli import (
@@ -56,21 +47,22 @@ except ImportError:  # pragma: no cover - direct script execution
         load_trajectories,
         overlay_labels,
     )
-    from rgpycrumbs.eon._single_ended_plot import (
-        annotate_endpoint,
-        create_landscape_axes,
-        plot_single_ended_convergence,
-        plot_single_ended_profile,
-        project_landscape_path,
-        render_endpoint_strip,
-        save_landscape_figure,
-    )
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
     compute_synthetic_gradients,
 )
-from chemparseplot.plot.optimization import plot_optimization_landscape
+from chemparseplot.plot.optimization import (
+    OVERLAY_COLORS,
+    annotate_endpoint,
+    create_landscape_axes,
+    plot_optimization_landscape,
+    plot_single_ended_convergence,
+    plot_single_ended_profile,
+    project_landscape_path,
+    render_endpoint_strip,
+    save_landscape_figure,
+)
 from chemparseplot.plot.structs import convert_energy
 from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
@@ -331,7 +323,7 @@ def _plot_landscape(
 
         px, py, _ = project_landscape_path(ra, rb, project_path=project_path, basis=basis)
 
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
+        color = OVERLAY_COLORS[idx % len(OVERLAY_COLORS)]
         if len(trajs) > 1:
             ax.plot(
                 px,

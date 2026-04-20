@@ -41,15 +41,6 @@ import numpy as np
 try:
     from ._render_cli import add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
-    from ._single_ended_plot import (
-        annotate_endpoint,
-        create_landscape_axes,
-        plot_single_ended_convergence,
-        plot_single_ended_profile,
-        project_landscape_path,
-        render_endpoint_strip,
-        save_landscape_figure,
-    )
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_render_options
     from rgpycrumbs.eon._single_ended_cli import (
@@ -57,21 +48,22 @@ except ImportError:  # pragma: no cover - direct script execution
         load_trajectories,
         overlay_labels,
     )
-    from rgpycrumbs.eon._single_ended_plot import (
-        annotate_endpoint,
-        create_landscape_axes,
-        plot_single_ended_convergence,
-        plot_single_ended_profile,
-        project_landscape_path,
-        render_endpoint_strip,
-        save_landscape_figure,
-    )
 from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
     compute_synthetic_gradients,
 )
-from chemparseplot.plot.optimization import plot_optimization_landscape
+from chemparseplot.plot.optimization import (
+    OVERLAY_COLORS,
+    annotate_endpoint,
+    create_landscape_axes,
+    plot_optimization_landscape,
+    plot_single_ended_convergence,
+    plot_single_ended_profile,
+    project_landscape_path,
+    render_endpoint_strip,
+    save_landscape_figure,
+)
 from chemparseplot.plot.structs import (
     convert_energy,
 )
@@ -339,7 +331,9 @@ def _plot_landscape(
     )
 
     # Overlay paths from all trajectories
-    basis = compute_projection_basis(rmsd_a, rmsd_b) if project_path else None
+    basis = None
+    if project_path:
+        _, _, basis = project_landscape_path(rmsd_a, rmsd_b, project_path=True)
     for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
             t.atoms_list,
@@ -354,7 +348,7 @@ def _plot_landscape(
 
         px, py, _ = project_landscape_path(ra, rb, project_path=project_path, basis=basis)
 
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
+        color = OVERLAY_COLORS[idx % len(OVERLAY_COLORS)]
         if len(trajs) > 1:
             ax.plot(
                 px,
