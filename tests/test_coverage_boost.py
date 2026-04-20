@@ -13,6 +13,7 @@ import re
 import subprocess
 import sys
 import types
+from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch
 
@@ -153,11 +154,18 @@ def _make_chemparseplot_mocks():
     mods["chemparseplot.plot"] = types.ModuleType("chemparseplot.plot")
     mods["chemparseplot.plot.neb"] = types.ModuleType("chemparseplot.plot.neb")
     for fn_name in [
+        "convert_neb_values",
+        "default_neb_ylabel",
+        "landscape_half_span",
+        "landscape_projection_basis",
         "plot_energy_path",
         "plot_landscape_path_overlay",
         "plot_landscape_surface",
         "plot_mmf_peaks_overlay",
         "plot_neb_evolution",
+        "profile_strip_payload",
+        "profile_structure_indices",
+        "save_plot",
         "plot_structure_inset",
         "plot_structure_strip",
     ]:
@@ -168,6 +176,14 @@ def _make_chemparseplot_mocks():
     mods["chemparseplot.plot.theme"].get_theme = MagicMock(return_value={})
     mods["chemparseplot.plot.theme"].setup_global_theme = MagicMock()
     mods["chemparseplot.plot.structs"] = types.ModuleType("chemparseplot.plot.structs")
+
+    @dataclass
+    class _StructurePlacement:
+        atoms: object
+        x: float
+        label: str
+
+    mods["chemparseplot.plot.structs"].StructurePlacement = _StructurePlacement
     mods["chemparseplot.plot.structs"].convert_energy = MagicMock(
         side_effect=lambda values, *_args, **_kwargs: values
     )
@@ -185,12 +201,24 @@ def _make_chemparseplot_mocks():
         "chemparseplot.plot.optimization"
     )
     for fn_name in [
+        "OVERLAY_COLORS",
+        "annotate_endpoint",
+        "create_landscape_axes",
         "plot_convergence_panel",
         "plot_dimer_mode_evolution",
         "plot_optimization_landscape",
         "plot_optimization_profile",
+        "plot_single_ended_convergence",
+        "plot_single_ended_profile",
+        "project_landscape_path",
+        "render_endpoint_strip",
+        "save_landscape_figure",
+        "save_standard_figure",
     ]:
-        setattr(mods["chemparseplot.plot.optimization"], fn_name, MagicMock())
+        value = MagicMock()
+        if fn_name == "OVERLAY_COLORS":
+            value = ("#1b9e77", "#d95f02", "#7570b3")
+        setattr(mods["chemparseplot.plot.optimization"], fn_name, value)
 
     mods["chemparseplot.plot.chemgp"] = types.ModuleType("chemparseplot.plot.chemgp")
     for fn_name in [
