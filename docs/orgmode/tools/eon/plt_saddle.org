@@ -9,7 +9,10 @@ This tool generates 2D optimization landscape plots and convergence profiles fro
 
 Uses the same gradient-enhanced surface interpolation as NEB landscapes, but with different reference structures and axis labels. The (s, d) projection maps into optimization progress (s) and lateral deviation (d), where s represents how far along the path from initial to saddle, and d represents wasted sideways motion.
 
-Requires eOn output with ~write_movies=true~ which produces ~climb.dat~ (structured per-iteration metrics) and ~climb~ (concatenated structure movie).
+Requires eOn output with ~write_movies=true~ and a ~climb~ concatenated movie.
+When available, ~climb.dat~ remains the preferred source for structured
+per-iteration metrics; for metadata-rich full CON movies, =plt-saddle= can also
+reconstruct the table directly from per-frame CON metadata.
 
 ** Plot Types
 
@@ -86,7 +89,7 @@ This shared renderer contract is identical to =plt-min= and =plt-neb=.
 | File | Required | Description |
 |------+----------+-------------|
 | ~climb~ | Yes | Concatenated structure movie |
-| ~climb.dat~ | Yes | Per-iteration metrics (TSV) |
+| ~climb.dat~ | Preferred | Per-iteration metrics (TSV); falls back to per-frame CON metadata when absent |
 | ~reactant.con~ or ~pos.con~ | Yes | Initial structure |
 | ~saddle.con~ | No | Final saddle point |
 | ~mode.dat~ | No | Eigenvector at saddle |

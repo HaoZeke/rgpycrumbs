@@ -9,9 +9,10 @@ This tool generates energy profiles, 2D optimization landscapes, and convergence
 
 Same projection approach as NEB/saddle search but using (initial, minimum) as references. The 2D landscape shows s = optimization progress toward the minimum and d = lateral deviation during optimization.
 
-Requires eOn output with ~write_movies=true~ which produces
-~minimization.dat~ (structured per-iteration metrics) and ~minimization~
-(concatenated structure movie).
+Requires eOn output with ~write_movies=true~ and a concatenated
+~minimization~ movie. When available, ~minimization.dat~ remains the preferred
+source for structured per-iteration metrics; for metadata-rich full CON movies,
+=plt-min= can also reconstruct the table directly from per-frame CON metadata.
 
 ** Plot Types
 
@@ -82,7 +83,7 @@ lets xyzrender choose a good view, while ASE-style strings such as
 | File | Required | Description |
 |------+----------+-------------|
 | ~minimization~ (or ~minimization.con~) | Yes | Concatenated structure movie |
-| ~minimization.dat~ | Yes | Per-iteration metrics (TSV) |
+| ~minimization.dat~ | Preferred | Per-iteration metrics (TSV); falls back to per-frame CON metadata when absent |
 | ~min.con~ | No | Final minimized structure (falls back to last movie frame) |
 
 ** See Also

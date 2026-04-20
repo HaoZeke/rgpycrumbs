@@ -43,6 +43,7 @@ _HAS_CHEMGP = all(
     has_module_spec(mod) for mod in ("matplotlib", "pandas", "plotnine", "h5py")
 ) and optional_import_available("chemparseplot.plot.chemgp")
 _HAS_JAX = has_module_spec("jax")
+_HAS_IRA = has_module_spec("ira_mod")
 
 
 def _import_attr(module_name: str, attr_name: str, reason: str):
@@ -211,6 +212,19 @@ def _make_min_dir(tmpdir, n_frames=10, prefix="minimization"):
         f.writelines(rows)
 
     return job_dir
+
+
+class _MetadataFrame:
+    """Small readcon-like frame stub for metadata-only CLI fallback tests."""
+
+    def __init__(self, atoms, *, frame_index=None, energy=None, metadata=None):
+        self._atoms = atoms
+        self.frame_index = frame_index
+        self.energy = energy
+        self.metadata = metadata or {}
+
+    def to_ase(self):
+        return self._atoms.copy()
 
 
 def _make_chemgp_convergence_h5(path):
@@ -621,9 +635,13 @@ class TestPltSaddlePlotting:
         assert output.exists()
 
     @pytest.mark.surfaces
+    @pytest.mark.skipif(
+        not _HAS_IRA,
+        reason="IRA required for chemically meaningful landscape projection",
+    )
     def test_landscape(self, tmp_path):
         pytest.importorskip("jax")
-        """Test saddle landscape plot (no IRA, falls back to ASE Procrustes)."""
+        """Test saddle landscape plot."""
         main = self._import_main()
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_landscape.png"
@@ -693,6 +711,70 @@ class TestPltSaddlePlotting:
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
+    def test_profile_without_dat_uses_frame_metadata(self, tmp_path, monkeypatch):
+        """Test saddle profile plot using metadata-rich full .con frames only."""
+        from ase.build import molecule
+
+        main = self._import_main()
+        job_dir = _make_climb_dir(tmp_path)
+        (job_dir / "climb.dat").unlink()
+
+        base = molecule("C2H6")
+        base.cell = [10, 10, 10]
+        base.pbc = True
+        frames = [
+            _MetadataFrame(base.copy(), frame_index=0),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=1,
+                metadata={
+                    "step_size": 0.1,
+                    "delta_e": 0.01,
+                    "convergence": 0.05,
+                    "eigenvalue": -0.12,
+                    "torque": 0.05,
+                    "angle": 12.3,
+                    "rotations": 5,
+                },
+            ),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=2,
+                metadata={
+                    "step_size": 0.08,
+                    "delta_e": 0.02,
+                    "convergence": 0.03,
+                    "eigenvalue": -0.2,
+                    "torque": 0.03,
+                    "angle": 8.1,
+                    "rotations": 3,
+                },
+            ),
+        ]
+        monkeypatch.setattr(
+            "chemparseplot.parse.eon._trajectory_common.readcon.read_con",
+            lambda _: frames,
+        )
+
+        output = tmp_path / "saddle_metadata_profile.png"
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
+        plt.close("all")
+        assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+        assert output.exists()
+
 
 # ---------------------------------------------------------------------------
 # plt_min tests
@@ -760,6 +842,10 @@ class TestPltMinPlotting:
         assert output.exists()
 
     @pytest.mark.surfaces
+    @pytest.mark.skipif(
+        not _HAS_IRA,
+        reason="IRA required for chemically meaningful landscape projection",
+    )
     def test_landscape(self, tmp_path):
         pytest.importorskip("jax")
         """Test minimization landscape plot."""
@@ -808,6 +894,61 @@ class TestPltMinPlotting:
         )
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+
+    def test_profile_without_dat_uses_frame_metadata(self, tmp_path, monkeypatch):
+        """Test minimization profile plot using metadata-rich full .con frames only."""
+        from ase.build import molecule
+
+        main = self._import_main()
+        job_dir = _make_min_dir(tmp_path)
+        (job_dir / "minimization.dat").unlink()
+
+        base = molecule("C2H6")
+        base.cell = [10, 10, 10]
+        base.pbc = True
+        frames = [
+            _MetadataFrame(
+                base.copy(),
+                frame_index=0,
+                energy=-10.0,
+                metadata={"step_size": 0.0, "convergence": 1.0},
+            ),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=1,
+                energy=-10.1,
+                metadata={"step_size": 0.1, "convergence": 0.5},
+            ),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=2,
+                energy=-10.2,
+                metadata={"step_size": 0.05, "convergence": 0.2},
+            ),
+        ]
+        monkeypatch.setattr(
+            "chemparseplot.parse.eon._trajectory_common.readcon.read_con",
+            lambda _: frames,
+        )
+
+        output = tmp_path / "min_metadata_profile.png"
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
+        plt.close("all")
+        assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+        assert output.exists()
 
 
 # ---------------------------------------------------------------------------
