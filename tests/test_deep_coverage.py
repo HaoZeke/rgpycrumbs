@@ -367,13 +367,12 @@ class TestPltNebLandscape:
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
 class TestPltNebHelpers:
     def test_profile_strip_payload_returns_typed_entries(self):
+        from chemparseplot.plot.neb import profile_strip_payload
         from chemparseplot.plot.structs import StructurePlacement
         from ase import Atoms
 
-        import rgpycrumbs.eon.plt_neb as plt_neb_mod
-
         atoms_list = [Atoms("H"), Atoms("H"), Atoms("H")]
-        payload = plt_neb_mod._profile_strip_payload(
+        payload = profile_strip_payload(
             atoms_list,
             np.array([0.0, 1.0, 2.0]),
             np.array([0.0, 2.0, 0.0]),
@@ -386,8 +385,7 @@ class TestPltNebHelpers:
 
     def test_landscape_half_span_prefers_global_basis(self, monkeypatch):
         from chemparseplot.parse.eon.neb import NebOverlayStructure
-
-        import rgpycrumbs.eon.plt_neb as plt_neb_mod
+        from chemparseplot.plot import neb as neb_plot
 
         recompute_calls = []
 
@@ -399,11 +397,11 @@ class TestPltNebHelpers:
             return np.zeros(1), np.array([2.0 if basis == "global-basis" else 20.0])
 
         monkeypatch.setattr(
-            plt_neb_mod, "compute_projection_basis", _fake_compute_projection_basis
+            neb_plot, "compute_projection_basis", _fake_compute_projection_basis
         )
-        monkeypatch.setattr(plt_neb_mod, "project_to_sd", _fake_project_to_sd)
+        monkeypatch.setattr(neb_plot, "project_to_sd", _fake_project_to_sd)
 
-        half_span = plt_neb_mod._landscape_half_span(
+        half_span = neb_plot.landscape_half_span(
             (0.0, 4.0),
             np.array([0.0, 1.0]),
             np.array([1.0, 0.0]),
@@ -415,20 +413,20 @@ class TestPltNebHelpers:
         assert recompute_calls == []
 
     def test_save_plot_skips_tight_bbox_for_strip(self, monkeypatch, tmp_path):
-        import rgpycrumbs.eon.plt_neb as plt_neb_mod
+        from chemparseplot.plot import neb as neb_plot
 
         saved = {}
 
         def _fake_savefig(path, **kwargs):
             saved[str(path)] = kwargs
 
-        monkeypatch.setattr(plt_neb_mod.plt, "savefig", _fake_savefig)
+        monkeypatch.setattr(neb_plot.plt, "savefig", _fake_savefig)
 
         strip_out = tmp_path / "strip.pdf"
         plain_out = tmp_path / "plain.pdf"
 
-        plt_neb_mod._save_plot(strip_out, 150, has_strip=True)
-        plt_neb_mod._save_plot(plain_out, 150, has_strip=False)
+        neb_plot.save_plot(strip_out, 150, has_strip=True)
+        neb_plot.save_plot(plain_out, 150, has_strip=False)
 
         assert "bbox_inches" not in saved[str(strip_out)]
         assert saved[str(plain_out)]["bbox_inches"] == "tight"
@@ -1097,6 +1095,8 @@ class TestPltNebWithIRA:
                     "sp.con",
                     "--plot-structures",
                     "crit_points",
+                    "--strip-renderer",
+                    "ase",
                     "--project-path",
                     "-o",
                     "ira_landscape.pdf",
@@ -1128,6 +1128,8 @@ class TestPltNebWithIRA:
                     "sp.con",
                     "--plot-structures",
                     "crit_points",
+                    "--strip-renderer",
+                    "ase",
                     "--rc-mode",
                     "rmsd",
                     "-o",
