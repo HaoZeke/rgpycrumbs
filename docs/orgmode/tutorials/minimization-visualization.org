@@ -24,7 +24,9 @@ landscapes, and convergence panels.
 * Prerequisites
 
 ~plt-min~ reads eOn minimization output: a movie file (multi-frame
-=.con=), a =.dat= iteration log, and optionally the final structure.
+=.con=), optionally a =.dat= compatibility/export log, and optionally the
+final structure. Metadata-rich full CON frames are treated as the canonical
+source of per-iteration metrics.
 
 #+begin_src bash
 pip install "rgpycrumbs[all]"
@@ -35,12 +37,14 @@ The expected directory layout:
 #+begin_example
 min_job/
   minimization   # multi-frame .con trajectory (movie file)
-  minimization.dat  # TSV: iteration, step_size, convergence, energy
+  minimization.dat  # (optional fallback/export) TSV: iteration, step_size, convergence, energy
   min.con        # (optional) final minimized structure
 #+end_example
 
 The file prefix defaults to =minimization= but can be changed with =--prefix=
-(e.g., =--prefix qm_min= for =qm_min=, =qm_min.dat=, =qm_min.con=).
+(e.g., =--prefix qm_min= for =qm_min=, =qm_min.dat=, =qm_min.con=). The
+sidecar =.dat= file remains useful for inspection and backwards
+compatibility, but the embedded CON metadata is the primary source.
 
 * Step 1: Energy Profile
 
