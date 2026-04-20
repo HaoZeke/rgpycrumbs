@@ -84,7 +84,8 @@ lets xyzrender choose a good view, while ASE-style strings such as
 |------+----------+-------------|
 | ~minimization~ (or ~minimization.con~) | Yes | Concatenated structure movie |
 | ~minimization.dat~ | Fallback | Compatibility/export TSV when the movie does not carry full per-frame metadata |
-| ~min.con~ | No | Final minimized structure (falls back to last movie frame) |
+| ~<prefix>.con~ | No | Explicit final minimized structure matching the movie prefix |
+| ~min.con~ | No | Legacy fallback final structure when ~<prefix>.con~ is absent |
 
 ** See Also
 

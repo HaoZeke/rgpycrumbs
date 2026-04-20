@@ -38,13 +38,16 @@ The expected directory layout:
 min_job/
   minimization   # multi-frame .con trajectory (movie file)
   minimization.dat  # (optional fallback/export) TSV: iteration, step_size, convergence, energy
-  min.con        # (optional) final minimized structure
+  minimization.con  # (optional) explicit final structure
+  min.con        # (optional legacy fallback) final minimized structure
 #+end_example
 
 The file prefix defaults to =minimization= but can be changed with =--prefix=
 (e.g., =--prefix qm_min= for =qm_min=, =qm_min.dat=, =qm_min.con=). The
 sidecar =.dat= file remains useful for inspection and backwards
-compatibility, but the embedded CON metadata is the primary source.
+compatibility, but the embedded CON metadata is the primary source. When an
+explicit final structure is present, =plt-min= prefers =<prefix>.con= and then
+falls back to legacy =min.con=.
 
 * Step 1: Energy Profile
 
