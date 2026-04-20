@@ -25,7 +25,7 @@ using the generalized (s, d) reaction valley projection. Supports:
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot",
+#   "chemparseplot>=1.8.0",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.7.0",
 # ]

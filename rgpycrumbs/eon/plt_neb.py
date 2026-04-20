@@ -37,7 +37,7 @@ https://realpython.com/python-script-structure/
 #   "ase",
 #   "polars",
 #   "h5py",
-#   "chemparseplot",
+#   "chemparseplot>=1.8.0",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.7.0",
 # ]
