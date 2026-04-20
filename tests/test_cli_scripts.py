@@ -8,7 +8,10 @@ Tests that need cross-repo dev branches or heavyweight optional deps
 where all repos are editable installs.
 """
 
+import os
 import importlib
+import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -110,6 +113,35 @@ class TestPep723DispatcherCli:
         command = mock_run.call_args.args[0]
         assert command[:2] == ["uv", "run"]
         assert command[2].endswith("eon/plt_min.py")
+
+    @pytest.mark.parametrize(
+        "rel_path",
+        ["eon/plt_neb.py", "eon/plt_min.py", "eon/plt_saddle.py"],
+    )
+    def test_eon_plot_scripts_run_directly(self, rel_path):
+        repo_root = Path(__file__).resolve().parent.parent
+        script = repo_root / "rgpycrumbs" / rel_path
+        chemparseplot_root = repo_root.parent / "chemparseplot"
+
+        env = os.environ.copy()
+        pythonpath = str(repo_root)
+        existing_pythonpath = env.get("PYTHONPATH")
+        if existing_pythonpath:
+            pythonpath = f"{pythonpath}:{chemparseplot_root}:{existing_pythonpath}"
+        else:
+            pythonpath = f"{pythonpath}:{chemparseplot_root}"
+        env["PYTHONPATH"] = pythonpath
+
+        result = subprocess.run(
+            [sys.executable, str(script), "--help"],
+            capture_output=True,
+            text=True,
+            check=False,
+            env=env,
+        )
+
+        assert result.returncode == 0, result.stderr
+        assert "Usage:" in result.stdout
 
 
 class TestSharedRenderCli:

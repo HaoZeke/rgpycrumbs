@@ -54,7 +54,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
-from ._render_cli import add_render_options
+
+try:
+    from ._render_cli import add_render_options
+except ImportError:  # pragma: no cover - direct script execution
+    from rgpycrumbs.eon._render_cli import add_render_options
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -424,14 +428,6 @@ def _profile_strip_payload(atoms_list, x_values, y_values, plot_structures, plot
     show_default=True,
     help="Scale the inset image.",
 )
-@click.option(
-    "--rotation",
-    "ase_rotation",
-    type=str,
-    default="auto",
-    show_default=True,
-    help="Viewing rotation. 'auto' lets xyzrender auto-orient (default). ASE-style string e.g. '0x,90y,0z' for manual control.",
-)
 @add_render_options
 @click.option(
     "--arrow-head-length",
@@ -577,7 +573,7 @@ def main(
     aspect_ratio,
     dpi,
     zoom_ratio,
-    ase_rotation,
+    rotation,
     perspective_tilt,
     strip_renderer,
     xyzrender_config,
@@ -1072,7 +1068,7 @@ def main(
                 ax_strip,
                 strip_payload,
                 zoom=zoom_ratio,
-                rotation=ase_rotation,
+                rotation=rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
                 xyzrender_config=xyzrender_config,
@@ -1223,7 +1219,7 @@ def main(
                             xybox,
                             rad,
                             zoom=zoom_ratio,
-                            rotation=ase_rotation,
+                            rotation=rotation,
                             renderer=strip_renderer,
                             xyzrender_config=xyzrender_config,
                             perspective_tilt=perspective_tilt,
@@ -1340,7 +1336,7 @@ def main(
                                 xybox,
                                 rad,
                                 zoom=zoom_ratio,
-                                rotation=ase_rotation,
+                                rotation=rotation,
                                 renderer=strip_renderer,
                                 xyzrender_config=xyzrender_config,
                             )
@@ -1377,7 +1373,7 @@ def main(
                         ),  # Stagger slightly
                         rad=draw_saddle[2],
                         zoom=zoom_ratio,
-                        rotation=ase_rotation,
+                        rotation=rotation,
                         renderer=strip_renderer,
                         xyzrender_config=xyzrender_config,
                         arrow_props={
@@ -1408,7 +1404,7 @@ def main(
                 ax_strip,
                 deduped_payload,
                 zoom=zoom_ratio,
-                rotation=ase_rotation,
+                rotation=rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
                 xyzrender_config=xyzrender_config,

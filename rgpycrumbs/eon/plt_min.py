@@ -36,17 +36,35 @@ from pathlib import Path
 import click
 import matplotlib.pyplot as plt
 import numpy as np
-from ._render_cli import add_render_options
-from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
-from ._single_ended_plot import (
-    annotate_endpoint,
-    create_landscape_axes,
-    plot_single_ended_convergence,
-    plot_single_ended_profile,
-    project_landscape_path,
-    render_endpoint_strip,
-    save_landscape_figure,
-)
+
+try:
+    from ._render_cli import add_render_options
+    from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
+    from ._single_ended_plot import (
+        annotate_endpoint,
+        create_landscape_axes,
+        plot_single_ended_convergence,
+        plot_single_ended_profile,
+        project_landscape_path,
+        render_endpoint_strip,
+        save_landscape_figure,
+    )
+except ImportError:  # pragma: no cover - direct script execution
+    from rgpycrumbs.eon._render_cli import add_render_options
+    from rgpycrumbs.eon._single_ended_cli import (
+        default_output_path,
+        load_trajectories,
+        overlay_labels,
+    )
+    from rgpycrumbs.eon._single_ended_plot import (
+        annotate_endpoint,
+        create_landscape_axes,
+        plot_single_ended_convergence,
+        plot_single_ended_profile,
+        project_landscape_path,
+        render_endpoint_strip,
+        save_landscape_figure,
+    )
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
