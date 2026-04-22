@@ -10,7 +10,7 @@ NEB Reaction Path Visualization
 In this tutorial you will produce publication-quality figures from a Diels-Alder
 NEB calculation: a 1D energy profile, a 2D reaction valley landscape with GP
 surface [fn:: defaults to the gradient-enhanced Inverse Multiquadric], structure
-galleries with four rendering backends, OCI-NEB peak overlays, and band
+galleries with four rendering backends, OCI-NEB refinement-sample overlays, and band
 evolution plots.
 
 #+begin_export rst
@@ -214,7 +214,7 @@ rgpycrumbs eon plt-neb \
 *Left:* no tilt (H atoms hidden). *Right:* 8 degree tilt (H atoms revealed).
 #+end_export
 
-* Step 4: OCI-NEB Peak Overlay
+* Step 4: OCI-NEB Refinement Samples
 
 #+begin_src shell
 rgpycrumbs eon plt-neb \
@@ -227,10 +227,12 @@ rgpycrumbs eon plt-neb \
 #+begin_export rst
 .. image:: /_static/tutorial/mmf_peaks.png
    :width: 80%
-   :alt: MMF peak overlay
+   :alt: OCI-NEB refinement samples
 #+end_export
 
-Star markers show where OCI-NEB dimer refinement placed the saddle.
+Small inner markers show the extra OCI/MMF refinement samples without
+adding another independent trajectory layer. The dark outer points still
+represent every sampled structure across the combined search.
 
 * Step 5: Band Evolution
 
@@ -253,12 +255,12 @@ Older bands are drawn with lower opacity.
 * Step 6: Combined Figure
 
 The full figure with 2D GP surface, xyzrender structure strip, and
-MMF peak overlay:
+OCI/MMF refinement samples:
 
 #+begin_export rst
 .. image:: /_static/tutorial/surface_mmf.png
    :width: 100%
-   :alt: Combined: surface + MMF + xyzrender strip
+   :alt: Combined: surface + OCI/MMF samples + xyzrender strip
 #+end_export
 
 #+begin_src shell
@@ -289,7 +291,7 @@ rgpycrumbs eon plt-neb \
 | Custom rotation    | =--rotation "45x,30y,0z"=              | All backends            |
 | Perspective tilt   | =--perspective-tilt 8=                 | Reveals hidden atoms    |
 | Spacing/dividers   | =--strip-spacing 2.0 --strip-dividers= |                         |
-| MMF peaks          | =--mmf-peaks --peak-dir .=             | OCI-NEB                 |
+| OCI/MMF samples    | =--mmf-peaks --peak-dir .=             | OCI-NEB                 |
 | Band evolution     | =--show-evolution=                     | Fading iterations       |
 
 * See Also

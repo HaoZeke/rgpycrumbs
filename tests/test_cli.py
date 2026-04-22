@@ -1,4 +1,5 @@
 import sys
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -87,3 +88,37 @@ def test_dispatch_preserves_user_site_package_path(mock_run, monkeypatch):
     assert env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] == (
         "/global/site-packages:/user/site-packages"
     )
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatch):
+    """_dispatch should satisfy local linked deps via --with-editable."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.importlib.util.find_spec",
+        lambda name: SimpleNamespace(
+            origin="/tmp/chemparseplot/chemparseplot/__init__.py",
+            submodule_search_locations=["/tmp/chemparseplot/chemparseplot"],
+        )
+        if name == "chemparseplot"
+        else None,
+    )
+
+    _dispatch("group", "script", ("--flag",))
+
+    executed_command = mock_run.call_args[0][0]
+    assert executed_command[:4] == ["uv", "run", "--with-editable", "/tmp/chemparseplot"]
+    assert executed_command[-2:] == ["script.py", "--flag"]
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_skips_editable_sources_when_absent(mock_run, monkeypatch):
+    """_dispatch should not add editable flags without a linked checkout."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setattr("rgpycrumbs.cli.importlib.util.find_spec", lambda name: None)
+
+    _dispatch("group", "script", ())
+
+    executed_command = mock_run.call_args[0][0]
+    assert executed_command[:2] == ["uv", "run"]
+    assert "--with-editable" not in executed_command

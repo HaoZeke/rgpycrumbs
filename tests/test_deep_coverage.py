@@ -876,14 +876,23 @@ class TestPltNebStructureRendering:
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
     def test_landscape_with_mmf_peaks(self, tmp_path):
-        """Exercise MMF peaks overlay (lines 695-750)."""
+        """Exercise OCI/MMF refinement-sample overlay."""
         neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
-        # Create fake peak files
         peak_dir = tmp_path / "peaks"
         peak_dir.mkdir()
-        h2o = molecule("H2O")
-        h2o.positions[0, 0] += 0.15
-        ase_write(str(peak_dir / "peak00_pos.con"), h2o, format="eon")
+        peak_atoms = molecule("C2H6")
+        peak_atoms.positions[0, 0] += 0.15
+        climb_frames = []
+        for shift in (0.0, 0.03, 0.06):
+            frame = peak_atoms.copy()
+            frame.positions[0, 1] += shift
+            climb_frames.append(frame)
+        ase_write(str(peak_dir / "climb"), climb_frames, format="eon")
+        (peak_dir / "climb.dat").write_text(
+            "iteration\tstep_size\tconvergence\tdelta_e\teigenvalue\ttorque\tangle\trotations\n"
+            "0\t0.100000\t0.500000\t0.100000\t-0.500000\t0.010000\t0.100000\t1\n"
+            "1\t0.050000\t0.250000\t0.050000\t-0.400000\t0.008000\t0.080000\t2\n"
+        )
 
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
@@ -912,6 +921,47 @@ class TestPltNebStructureRendering:
                     "mmf.pdf",
                 ],
             )
+            assert result.exit_code == 0, result.output
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_with_mmf_peaks_skips_mismatched_overlay(self, tmp_path):
+        """Mismatched MMF structures should warn and continue, not abort plotting."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=5)
+        peak_dir = tmp_path / "peaks_mismatch"
+        peak_dir.mkdir()
+        h2o = molecule("H2O")
+        ase_write(str(peak_dir / "climb"), [h2o.copy(), h2o.copy()], format="eon")
+        (peak_dir / "climb.dat").write_text(
+            "iteration\tstep_size\tconvergence\tdelta_e\teigenvalue\ttorque\tangle\trotations\n"
+            "0\t0.100000\t0.500000\t0.100000\t-0.500000\t0.010000\t0.100000\t1\n"
+        )
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copytree(peak_dir, Path(td) / "peaks_mismatch")
+
+            result = runner.invoke(
+                plt_neb_main,
+                [
+                    "--plot-type",
+                    "landscape",
+                    "--landscape-mode",
+                    "path",
+                    "--con-file",
+                    "neb.con",
+                    "--no-project-path",
+                    "--mmf-peaks",
+                    "--peak-dir",
+                    "peaks_mismatch",
+                    "-o",
+                    "mmf_mismatch.pdf",
+                ],
+            )
+            assert result.exit_code == 0, result.output
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
     def test_profile_highlight_last_false(self, tmp_path):

@@ -176,6 +176,14 @@ class TestSharedRenderCli:
             assert result.exit_code == 0
             assert "--strip-dividers / --no-strip-dividers" in result.output
 
+    def test_neb_help_shows_larger_default_zoom_ratio(self):
+        from rgpycrumbs.eon.plt_neb import main as plt_neb_main
+
+        result = CliRunner().invoke(plt_neb_main, ["--help"])
+        assert result.exit_code == 0
+        assert "--zoom-ratio FLOAT" in result.output
+        assert "[default: 0.5]" in result.output
+
 
 class TestSingleEndedPlotHelpers:
     def test_wrapper_reexports_chemparseplot_surface(self):

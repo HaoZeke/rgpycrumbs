@@ -217,7 +217,7 @@ run(
     ],
 )
 
-# 10. MMF peaks overlay
+# 10. OCI/MMF refinement samples
 run(
     "mmf_peaks",
     [

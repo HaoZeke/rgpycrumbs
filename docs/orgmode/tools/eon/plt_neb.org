@@ -3,7 +3,7 @@
 
 * Visualizing NEB Paths and Landscapes
 
-This tool generates both 1D NEB profiles and 2D NEB landscapes from eOn calculations. It supports energy or curvature plots, structure strips, MMF peak overlays, and evolution overlays from saved optimization history.
+This tool generates both 1D NEB profiles and 2D NEB landscapes from eOn calculations. It supports energy or curvature plots, structure strips, OCI/MMF refinement-sample overlays, and evolution overlays from saved optimization history.
 
 * Method
 
@@ -49,7 +49,7 @@ python -m rgpycrumbs.cli eon plt-neb --plot-type profile
 | ~--rotation~ | ~auto~ | Shared viewing rotation control |
 | ~--perspective-tilt~ | 0.0 | Small off-axis tilt to reveal occluded atoms |
 | ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
-| ~--mmf-peaks~ | Off | Overlay OCI-NEB/RONEB refinement peaks |
+| ~--mmf-peaks~ | Off | Overlay OCI-NEB/RONEB refinement samples |
 | ~--show-evolution~ | Off | Fade earlier optimization bands behind final path |
 
 
@@ -113,6 +113,10 @@ Peaks are auto-detected in the current directory. Use ~--peak-dir~ to specify an
 #+BEGIN_SRC shell
 rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks --peak-dir path/to/peaks/
 #+END_SRC
+
+If the same directory also contains a metadata-rich ~climb~ / ~climb.con~
+movie from the MMF refinement, the sampled dimer phase is overlaid too, with
+distinct inner markers on top of the shared dark point cloud.
 
 ** Band Evolution
 

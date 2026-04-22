@@ -37,7 +37,7 @@ https://realpython.com/python-script-structure/
 #   "ase",
 #   "polars",
 #   "h5py",
-#   "chemparseplot>=1.8.0",
+#   "chemparseplot>=1.7.0",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.7.0",
 # ]
@@ -73,6 +73,7 @@ from chemparseplot.parse.eon.neb import (
     estimate_rbf_smoothing,
     load_structures_and_calculate_additional_rmsd,
 )
+from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 
 # --- Library Imports ---
 from chemparseplot.parse.file_ import find_file_paths
@@ -111,7 +112,7 @@ from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
-    plot_mmf_peaks_overlay,
+    plot_phase_points_overlay,
     plot_neb_evolution,
     profile_strip_payload,
     profile_structure_indices,
@@ -351,7 +352,7 @@ IRA_KMAX_DEFAULT = 14.0
 @click.option(
     "--zoom-ratio",
     type=float,
-    default=0.4,
+    default=0.5,
     show_default=True,
     help="Scale the inset image.",
 )
@@ -431,13 +432,13 @@ IRA_KMAX_DEFAULT = 14.0
     "--mmf-peaks/--no-mmf-peaks",
     is_flag=True,
     default=None,
-    help="Overlay MMF peak positions on landscape (auto-detected if peak files exist).",
+    help="Overlay OCI/MMF refinement samples on landscape (auto-detected from climb movies).",
 )
 @click.option(
     "--peak-dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default=None,
-    help="Directory containing peak{NN}_pos.con files for MMF overlay.",
+    help="Directory containing OCI/MMF refinement outputs (for example climb/climb.con).",
 )
 @click.option(
     "--show-evolution",
@@ -564,7 +565,7 @@ def main(
         n_rows = (n_expected + max_cols - 1) // max_cols
         calc_hspace = 0.8 if n_rows > 1 else 0.3
 
-        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=calc_hspace, figure=fig)
+        gs = GridSpec(2, 1, height_ratios=[1, 0.3], hspace=calc_hspace, figure=fig)
         ax = fig.add_subplot(gs[0])
         ax_strip = fig.add_subplot(gs[1])
         apply_axis_theme(ax_strip, active_theme)
@@ -776,57 +777,66 @@ def main(
             **bg_kwargs,
         )
 
-        # --- OCI-NEB/RONEB: MMF Peaks Overlay ---
+        # --- OCI-NEB/RONEB: refinement-sample overlay ---
         _show_mmf = mmf_peaks
         _peak_search_dir = peak_dir or Path(".")
         if _show_mmf is None:
-            # Auto-detect: check if peak files exist
-            _show_mmf = len(list(_peak_search_dir.glob("peak*_pos.con"))) > 0
+            _show_mmf = any(
+                (_peak_search_dir / name).exists() for name in ("climb", "climb.con")
+            )
         if _show_mmf:
-            peak_files = sorted(_peak_search_dir.glob("peak*_pos.con"))
-            if peak_files:
-                import readcon
+            from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
 
-                from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
+            try:
+                from rgpycrumbs._aux import _import_from_parent_env
 
+                _ira_mod = _import_from_parent_env("ira_mod")
+                ira_instance = _ira_mod.IRA()
+            except (ImportError, AttributeError):
+                ira_instance = None
+
+            # Use same references as the main path
+            ref_r = atoms_list[0] if atoms_list else None
+            ref_p = atoms_list[-1] if atoms_list else None
+            if ref_r is not None and ref_p is not None:
                 try:
-                    from rgpycrumbs._aux import _import_from_parent_env
+                    dimer_traj = load_dimer_trajectory(_peak_search_dir)
+                except (FileNotFoundError, ValueError):
+                    dimer_traj = None
 
-                    _ira_mod = _import_from_parent_env("ira_mod")
-                    ira_instance = _ira_mod.IRA()
-                except (ImportError, AttributeError):
-                    ira_instance = None
-                peak_atoms = [readcon.read_con_as_ase(str(pf))[0] for pf in peak_files]
-                # Use same references as the main path
-                ref_r = atoms_list[0] if atoms_list else None
-                ref_p = atoms_list[-1] if atoms_list else None
-                if ref_r is not None and ref_p is not None:
-                    peak_rmsd_r = calculate_rmsd_from_ref(
-                        peak_atoms, ira_instance, ref_atom=ref_r, ira_kmax=ira_kmax
-                    )
-                    peak_rmsd_p = calculate_rmsd_from_ref(
-                        peak_atoms, ira_instance, ref_atom=ref_p, ira_kmax=ira_kmax
-                    )
-                    # Energies from peak structures (if available)
-                    peak_e = convert_energy(
-                        np.array(
-                            [
-                                a.get_potential_energy() if a.calc else 0.0
-                                for a in peak_atoms
-                            ]
-                        ),
-                        energy_unit,
-                    )
-                    plot_mmf_peaks_overlay(
-                        ax,
-                        peak_rmsd_r,
-                        peak_rmsd_p,
-                        peak_e,
-                        project_path=project_path,
-                        path_rmsd_r=final_r,
-                        path_rmsd_p=final_p,
-                    )
-                    log.info("Plotted %d MMF peak(s)", len(peak_files))
+                if dimer_traj is not None and dimer_traj.atoms_list:
+                    try:
+                        dimer_rmsd_r = calculate_rmsd_from_ref(
+                            dimer_traj.atoms_list,
+                            ira_instance,
+                            ref_atom=ref_r,
+                            ira_kmax=ira_kmax,
+                        )
+                        dimer_rmsd_p = calculate_rmsd_from_ref(
+                            dimer_traj.atoms_list,
+                            ira_instance,
+                            ref_atom=ref_p,
+                            ira_kmax=ira_kmax,
+                        )
+                    except ValueError as exc:
+                        log.warning(
+                            "Skipping MMF refinement overlay from %s: %s",
+                            _peak_search_dir,
+                            exc,
+                        )
+                    else:
+                        plot_phase_points_overlay(
+                            ax,
+                            dimer_rmsd_r,
+                            dimer_rmsd_p,
+                            project_path=project_path,
+                            path_rmsd_r=final_r,
+                            path_rmsd_p=final_p,
+                        )
+                        log.info(
+                            "Plotted %d MMF refinement frame(s)",
+                            len(dimer_traj.atoms_list),
+                        )
 
         # --- OCI-NEB/RONEB: Band Evolution ---
         if show_evolution:

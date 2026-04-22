@@ -1,3 +1,4 @@
+import importlib.util
 import logging
 import os
 import site
@@ -12,6 +13,36 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # The directory where cli.py is located
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+
+
+def _find_editable_source(package_name: str) -> Path | None:
+    """Return the local project root for an editable package, if any."""
+    spec = importlib.util.find_spec(package_name)
+    if spec is None:
+        return None
+
+    candidates: list[Path] = []
+    if spec.origin:
+        candidates.append(Path(spec.origin).resolve())
+    if spec.submodule_search_locations:
+        candidates.extend(Path(loc).resolve() for loc in spec.submodule_search_locations)
+
+    for candidate in candidates:
+        search_root = candidate if candidate.is_dir() else candidate.parent
+        for parent in (search_root, *search_root.parents):
+            if (parent / "pyproject.toml").is_file():
+                return parent
+    return None
+
+
+def _uv_editable_sources() -> list[Path]:
+    """Return local editable roots that should satisfy script dependencies."""
+    sources: list[Path] = []
+    for package_name in ("chemparseplot",):
+        source = _find_editable_source(package_name)
+        if source is not None:
+            sources.append(source)
+    return sources
 
 
 def _get_scripts_in_folder(folder_name: str) -> list[str]:
@@ -62,7 +93,10 @@ def _dispatch(
         sys.exit(1)
 
     if not is_dev:
-        command = ["uv", "run", str(script_path), *script_args]
+        command = ["uv", "run"]
+        for source in _uv_editable_sources():
+            command.extend(["--with-editable", str(source)])
+        command.extend([str(script_path), *script_args])
     else:
         command = [sys.executable, str(script_path), *script_args]
 

@@ -62,7 +62,7 @@ digraph G {
 
 - *NEB Visualization* :: 1D energy profiles, 2D reaction valley landscapes
   with GP surface fitting, four rendering backends (xyzrender, ASE, solvis,
-  ovito), OCI-NEB peak overlays, and band evolution ([[file:tutorials/neb-visualization.org][tutorial]])
+  ovito), OCI-NEB refinement-sample overlays, and band evolution ([[file:tutorials/neb-visualization.org][tutorial]])
 - *Single-Ended Methods* :: Dimer/saddle search and minimization trajectory
   visualization with the same 2D projection framework
 - *Surface Fitting* :: JAX-based gradient-enhanced kernels (Matern, IMQ, RBF)
