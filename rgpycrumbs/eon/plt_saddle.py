@@ -408,7 +408,7 @@ def _plot_landscape(
             xyzrender_config=xyzrender_config,
         )
 
-    save_landscape_figure(fig, output, dpi=dpi, has_strip=has_strip)
+    save_landscape_figure(fig, output, dpi=dpi, has_strip=has_strip, ax=ax, ax_strip=ax_strip)
 
 
 def _plot_convergence(trajs, labels, output, dpi):
