@@ -143,8 +143,8 @@ log = logging.getLogger("rich")
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 IRA_KMAX_DEFAULT = 14.0
-NEB_LANDSCAPE_STRIP_ZOOM_MULT = 1.25
-NEB_PROFILE_STRIP_ZOOM_MULT = 1.75
+NEB_LANDSCAPE_STRIP_ZOOM_MULT = 1.8
+NEB_PROFILE_STRIP_ZOOM_MULT = 2.6
 
 
 # --- CLI ---
@@ -567,10 +567,10 @@ def main(
         n_rows = (n_expected + max_cols - 1) // max_cols
         if plot_type == "profile":
             calc_hspace = 0.85 if n_rows > 1 else 0.38
-            height_ratios = [1, 0.40]
+            height_ratios = [1, 0.46]
         else:
             calc_hspace = 0.75 if n_rows > 1 else 0.26
-            height_ratios = [1, 0.34]
+            height_ratios = [1, 0.40]
 
         gs = GridSpec(
             2, 1, height_ratios=height_ratios, hspace=calc_hspace, figure=fig
