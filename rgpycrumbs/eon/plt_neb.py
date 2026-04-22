@@ -567,10 +567,10 @@ def main(
         n_rows = (n_expected + max_cols - 1) // max_cols
         if plot_type == "profile":
             calc_hspace = 0.85 if n_rows > 1 else 0.30
-            height_ratios = [1, 0.56]
+            height_ratios = [1, 0.72]
         else:
             calc_hspace = 0.75 if n_rows > 1 else 0.20
-            height_ratios = [1, 0.46]
+            height_ratios = [1, 0.60]
 
         gs = GridSpec(2, 1, height_ratios=height_ratios, hspace=calc_hspace, figure=fig)
         ax = fig.add_subplot(gs[0])
@@ -1015,8 +1015,7 @@ def main(
                 col_spacing=strip_spacing,
                 show_dividers=strip_dividers,
                 perspective_tilt=perspective_tilt,
-                max_display_height_px=60.0,
-                width_fill_fraction=0.88,
+                width_fill_fraction=0.94,
             )
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
@@ -1353,8 +1352,7 @@ def main(
                 col_spacing=strip_spacing,
                 show_dividers=strip_dividers,
                 perspective_tilt=perspective_tilt,
-                max_display_height_px=74.0,
-                width_fill_fraction=0.92,
+                width_fill_fraction=0.97,
             )
 
         # Profile Labels
