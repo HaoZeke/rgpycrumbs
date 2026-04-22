@@ -5,11 +5,13 @@ Run during docs build to produce images embedded in the tutorial.
 Output goes to docs/source/_static/tutorial/.
 """
 
+import os
 from pathlib import Path
 
 import matplotlib as mpl
 
 mpl.use("Agg")
+os.environ.setdefault("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", "1")
 
 # Try headless PyVista
 try:

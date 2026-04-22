@@ -160,7 +160,7 @@ generating 2D surface plots with optional structure rendering.
 ***** Basic Usage
 
 #+BEGIN_SRC shell
-python -m rgpycrumbs eon plt-neb --con-file trajectory.con --plot-type landscape -o neb_landscape.png
+python -m rgpycrumbs.cli eon plt-neb --con-file trajectory.con --plot-type landscape -o neb_landscape.png
 #+END_SRC
 
 ***** Key Options
@@ -189,7 +189,7 @@ This shows the full trajectory from initial guess to final path [1].
 Full landscape with gradient-enhanced IMQ surface and critical point structures:
 
 #+BEGIN_SRC shell
-python -m rgpycrumbs eon plt-neb \
+python -m rgpycrumbs.cli eon plt-neb \
   --con-file neb.con \
   --plot-type landscape \
   --project-path \
@@ -204,7 +204,7 @@ python -m rgpycrumbs eon plt-neb \
 Surface-only plot without structure strip:
 
 #+BEGIN_SRC shell
-python -m rgpycrumbs eon plt-neb \
+python -m rgpycrumbs.cli eon plt-neb \
   --plot-type landscape \
   --surface-type grad_matern \
   --no-show-pts \
@@ -214,7 +214,7 @@ python -m rgpycrumbs eon plt-neb \
 Convergence visualization with all optimization steps:
 
 #+BEGIN_SRC shell
-python -m rgpycrumbs eon plt-neb \
+python -m rgpycrumbs.cli eon plt-neb \
   --con-file neb.con \
   --plot-type landscape \
   --landscape-path all \

@@ -17,7 +17,7 @@ the target script, letting uv resolve the per-script dependencies declared in
 the PEP 723 header.
 
 #+begin_src python
-# Simplified dispatcher logic (see rgpycrumbs/__main__.py)
+# Simplified dispatcher logic (see rgpycrumbs/cli.py)
 def dispatch(cmd: str, args: list[str]):
     script = SCRIPT_MAP[cmd]  # e.g. rgpycrumbs/neb/cli_plt_neb.py
     subprocess.run(["uv", "run", "--script", str(script), *args])
