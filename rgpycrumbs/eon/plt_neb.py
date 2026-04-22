@@ -56,6 +56,14 @@ import polars as pl
 from adjustText import adjust_text
 
 try:
+    from rgpycrumbs._aux import warn_on_direct_script_import
+except ImportError:  # pragma: no cover - direct script execution without package root
+    warn_on_direct_script_import = None
+
+if warn_on_direct_script_import is not None:
+    warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
+
+try:
     from ._render_cli import add_render_options
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_render_options

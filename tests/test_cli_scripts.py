@@ -21,7 +21,10 @@ from click.testing import CliRunner
 from tests._optional_imports import optional_import_available
 from tests._optional_imports import has_module_spec
 
-pytestmark = pytest.mark.pure
+pytestmark = [
+    pytest.mark.pure,
+    pytest.mark.filterwarnings("ignore:.*is a dispatched PEP 723 script.*:UserWarning"),
+]
 
 # Skip only for genuinely absent optional stacks.
 _HAS_CHEMGP = all(

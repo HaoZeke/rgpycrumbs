@@ -38,6 +38,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 try:
+    from rgpycrumbs._aux import warn_on_direct_script_import
+except ImportError:  # pragma: no cover - direct script execution without package root
+    warn_on_direct_script_import = None
+
+if warn_on_direct_script_import is not None:
+    warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-min")
+
+try:
     from ._render_cli import add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
 except ImportError:  # pragma: no cover - direct script execution

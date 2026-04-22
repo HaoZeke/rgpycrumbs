@@ -1,6 +1,7 @@
 import importlib
 import sys
 import types
+import warnings
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -13,6 +14,7 @@ from rgpycrumbs._aux import (
     _resolve_pip_spec,
     ensure_import,
     lazy_import,
+    warn_on_direct_script_import,
 )
 
 pytestmark = pytest.mark.pure
@@ -268,6 +270,40 @@ class TestLazyModule:
         _ = proxy.b
 
         mock_ensure.assert_called_once()
+
+
+class TestWarnOnDirectScriptImport:
+    def test_warns_when_imported_without_dispatch_env(self, monkeypatch):
+        monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", raising=False)
+
+        with pytest.warns(UserWarning, match="dispatched PEP 723 script"):
+            warn_on_direct_script_import(
+                "rgpycrumbs.eon.plt_neb", "rgpycrumbs eon plt-neb"
+            )
+
+    def test_no_warning_for_main_execution(self, monkeypatch):
+        monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", raising=False)
+
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            warn_on_direct_script_import("__main__", "rgpycrumbs eon plt-neb")
+        assert not record
+
+    def test_no_warning_when_auto_deps_enabled(self, monkeypatch):
+        monkeypatch.setenv("RGPYCRUMBS_AUTO_DEPS", "1")
+        monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", raising=False)
+
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            warn_on_direct_script_import(
+                "rgpycrumbs.eon.plt_neb", "rgpycrumbs eon plt-neb"
+            )
+        assert not record
 
 
 # ---------------------------------------------------------------------------
