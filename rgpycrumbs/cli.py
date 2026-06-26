@@ -56,7 +56,7 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
         return []
 
     # Library modules to exclude
-    library_modules = {"hdf5_io", "plotting", "utils", "helpers"}
+    library_modules = {"hdf5_io", "plotting", "utils", "helpers", "seed_dimers"}
 
     scripts = []
     for f in folder_path.glob("*.py"):
