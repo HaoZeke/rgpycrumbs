@@ -137,6 +137,21 @@ IRA_KMAX_DEFAULT = 14.0
     help="Presentation unit for energy axes and color scales.",
 )
 @click.option(
+    "--energy-cap",
+    type=float,
+    default=None,
+    help="Clip trajectory energies at this absolute ceiling (in --energy-unit) "
+    "before the surface fit and color scale, so a few high-energy frames (e.g. "
+    "repulsive starts) do not flatten the colormap. Overrides --energy-cap-window.",
+)
+@click.option(
+    "--energy-cap-window",
+    type=float,
+    default=None,
+    help="Clip trajectory energies to this window above the minimum energy "
+    "(in --energy-unit). Ignored when --energy-cap is given.",
+)
+@click.option(
     "--theme",
     type=str,
     default="ruhi",
@@ -169,7 +184,7 @@ IRA_KMAX_DEFAULT = 14.0
     help="Output resolution.",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
-def main(
+def main(  # noqa: PLR0913
     job_dir,
     label,
     prefix,
@@ -178,6 +193,8 @@ def main(
     surface_type,
     ira_kmax,
     energy_unit,
+    energy_cap,
+    energy_cap_window,
     theme,
     plot_structures,
     strip_renderer,
@@ -224,6 +241,8 @@ def main(
             surface_type=surface_type,
             ira_kmax=ira_kmax,
             energy_unit=energy_unit,
+            energy_cap=energy_cap,
+            energy_cap_window=energy_cap_window,
             cmap=active_theme.cmap_landscape,
             plot_structures=plot_structures,
             strip_renderer=strip_renderer,
@@ -263,6 +282,8 @@ def _plot_landscape(
     surface_type,
     ira_kmax,
     energy_unit,
+    energy_cap=None,
+    energy_cap_window=None,
     cmap="viridis",
     plot_structures="none",
     strip_renderer="xyzrender",
@@ -294,6 +315,13 @@ def _plot_landscape(
     energies = convert_energy(traj.dat_df["energy"].to_numpy(), energy_unit)
     n = min(len(rmsd_a), len(energies))
     rmsd_a, rmsd_b, energies = rmsd_a[:n], rmsd_b[:n], energies[:n]
+    # Clip high-energy frames (e.g. a repulsive start) before the surface fit and
+    # synthetic gradients so the colormap resolves the region of interest.
+    cap = energy_cap
+    if cap is None and energy_cap_window is not None:
+        cap = float(np.min(energies)) + energy_cap_window
+    if cap is not None:
+        energies = np.minimum(energies, cap)
     f_para = -np.gradient(energies)
     grad_a, grad_b = compute_synthetic_gradients(rmsd_a, rmsd_b, f_para)
 
