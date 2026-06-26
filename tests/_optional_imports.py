@@ -6,7 +6,11 @@ FIRST_PARTY_PREFIXES = ("rgpycrumbs", "chemparseplot")
 
 def has_module_spec(module_name: str) -> bool:
     """Return True when Python can locate *module_name*."""
-    return importlib.util.find_spec(module_name) is not None
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except (ImportError, ModuleNotFoundError, ValueError):
+        # Incomplete namespace packages (e.g. missing ``tblite``) raise on find_spec.
+        return False
 
 
 def optional_import_available(module_name: str) -> bool:

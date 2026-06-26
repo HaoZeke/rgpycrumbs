@@ -1,3 +1,42 @@
+rgpycrumbs 1.8.0 (2026-06-26)
+=============================
+
+Added
+-----
+
+- ``plt-neb-stitch`` CLI for full-path 1D strip and 2D landscape plots stitched from NEB segments. (#1800)
+- ``gen-dimer`` seeds dimer saddle searches from all NEB peaks; ``plt-kmc`` plots N2-ejection KMC timelines. (#1801)
+- Profile strip rendering for NEB plots via chemparseplot/xyzrender overlays. (#1802)
+- Energy unit selection for NEB (``plt-neb``) and single-ended (``plt-min`` / ``plt-saddle``) landscape tools. (#1803)
+- ``plt-min`` ``--energy-cap`` / ``--energy-cap-window`` options to limit landscape energy scale. (#1804)
+
+
+Developer
+---------
+
+- Cocogitto (``cog``) release tooling and contributor release docs; CI creates GitHub Release for Zenodo on publish. (#1813)
+- Tests fail loudly on broken optional imports; pytest-pep723 required in test env; tighter CLI plotting gates. (#1814)
+
+
+Changed
+-------
+
+- eOn plot scripts consume typed chemparseplot NEB/single-ended helpers and shared renderer option bundles. (#1812)
+- CLI warns when PEP 723 scripts are imported directly instead of through the dispatcher. (#1815)
+
+
+Fixed
+-----
+
+- NEB xyzrender strip layout budgets, clearance, and sizing for readable profile overlays. (#1805)
+- Single-ended landscape overlays stay on the shared projection basis; ``plt-min`` default prefix aligned. (#1806)
+- Dispatcher preserves parent site-packages paths; PEP 723 plot scripts execute when invoked via the CLI. (#1807)
+- Lazy imports for ``xts`` / ``cuh2`` so optional plotting stacks do not break base imports. (#1808)
+- ``ira_kmax`` default 14, Init/Min label boxes, larger SP star; NEB viewport includes trajectory d-range. (#1809)
+- Require chemparseplot eOn APIs for NEB overlays; simplify OCI overlays and local dispatch. (#1810)
+- PLUMED direct reconstruction script metadata aligned with dispatcher expectations. (#1811)
+
+
 rgpycrumbs 1.7.0 (2026-04-07)
 =============================
 

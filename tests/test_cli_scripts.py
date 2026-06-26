@@ -95,13 +95,14 @@ class TestPep723DispatcherCli:
         from rgpycrumbs.cli import main
 
         monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+        monkeypatch.setattr("rgpycrumbs.cli._uv_editable_sources", lambda: [])
 
         result = CliRunner().invoke(main, argv)
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.exception or result.output
 
         command = mock_run.call_args.args[0]
         assert command[:2] == ["uv", "run"]
-        assert command[2].endswith(expected_script)
+        assert any(str(part).endswith(expected_script) for part in command)
         assert command[-1] == "--help"
 
     @patch("rgpycrumbs.cli.subprocess.run")
@@ -109,13 +110,14 @@ class TestPep723DispatcherCli:
         from rgpycrumbs.cli import main
 
         monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+        monkeypatch.setattr("rgpycrumbs.cli._uv_editable_sources", lambda: [])
 
         result = CliRunner().invoke(main, ["eon", "plt-min"])
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.exception or result.output
 
         command = mock_run.call_args.args[0]
         assert command[:2] == ["uv", "run"]
-        assert command[2].endswith("eon/plt_min.py")
+        assert any(str(part).endswith("eon/plt_min.py") for part in command)
 
     @pytest.mark.parametrize(
         "rel_path",
@@ -242,9 +244,9 @@ class TestMullerBrownXts:
 
         from rgpycrumbs.func.muller_brown import muller_brown
 
-        val, grad = muller_brown(np.array([0.0, 0.0]))
-        assert isinstance(val, float)
-        assert grad.shape == (2,)
+        val = muller_brown(np.array([0.0, 0.0]))
+        assert np.isscalar(val) or getattr(val, "shape", ()) == ()
+        assert float(val) < 0.0  # known basin near origin on MB surface
 
     def test_mb_import_has_no_side_effects(self, monkeypatch):
         import rgpycrumbs.xts.saddle.mb as mb_mod

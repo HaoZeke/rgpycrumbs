@@ -17,7 +17,10 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 def _find_editable_source(package_name: str) -> Path | None:
     """Return the local project root for an editable package, if any."""
-    spec = importlib.util.find_spec(package_name)
+    try:
+        spec = importlib.util.find_spec(package_name)
+    except (ImportError, ModuleNotFoundError, ValueError):
+        return None
     if spec is None:
         return None
 

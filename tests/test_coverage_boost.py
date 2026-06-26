@@ -43,13 +43,18 @@ def _assert_dispatches(argv, expected_script, monkeypatch):
     from rgpycrumbs.cli import main
 
     monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    # Avoid real importlib probing of linked deps (can raise on broken namespaces).
+    monkeypatch.setattr("rgpycrumbs.cli._uv_editable_sources", lambda: [])
     with patch("rgpycrumbs.cli.subprocess.run") as mock_run:
         result = CliRunner().invoke(main, argv)
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.exception or result.output
     command = mock_run.call_args.args[0]
     assert command[:2] == ["uv", "run"]
-    assert command[2].endswith(expected_script)
-    assert command[3:] == argv[2:]
+    script_parts = [part for part in command[2:] if str(part).endswith(expected_script)]
+    assert script_parts, f"{expected_script} not in {command}"
+    # Trailing argv after the script path matches CLI args after group/cmd.
+    script_idx = command.index(script_parts[0])
+    assert command[script_idx + 1 :] == argv[2:]
 
 
 # ======================================================================
@@ -162,6 +167,7 @@ def _make_chemparseplot_mocks():
         "plot_landscape_path_overlay",
         "plot_landscape_surface",
         "plot_mmf_peaks_overlay",
+        "plot_phase_points_overlay",
         "plot_neb_evolution",
         "profile_strip_payload",
         "profile_structure_indices",

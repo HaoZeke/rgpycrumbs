@@ -40,7 +40,7 @@ def test_cli_standard_execution(mock_run, runner, mock_script_group):
 
     assert executed_command[0] == "uv"
     assert executed_command[1] == "run"
-    assert "dummy_script.py" in str(executed_command[2])
+    assert any("dummy_script.py" in str(part) for part in executed_command)
     assert "arg1" in executed_command
 
 
@@ -107,8 +107,16 @@ def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatc
     _dispatch("group", "script", ("--flag",))
 
     executed_command = mock_run.call_args[0][0]
-    assert executed_command[:4] == ["uv", "run", "--with-editable", "/tmp/chemparseplot"]
-    assert executed_command[-2:] == ["script.py", "--flag"]
+    assert executed_command[:2] == ["uv", "run"]
+    assert "--with-editable" in executed_command
+    editable_idx = executed_command.index("--with-editable")
+    # Prefer package dir when submodule_search_locations is set; fall back to repo root.
+    assert executed_command[editable_idx + 1] in {
+        "/tmp/chemparseplot",
+        "/tmp/chemparseplot/chemparseplot",
+    }
+    assert str(executed_command[-2]).endswith("script.py")
+    assert executed_command[-1] == "--flag"
 
 
 @patch("rgpycrumbs.cli.subprocess.run")

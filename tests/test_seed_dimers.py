@@ -22,18 +22,21 @@ def _make_band(tmp_path, energies):
     """Write a synthetic neb.con whose images carry the given energies.
 
     Reuses real eOn frames from the bundled test band (which keep valid
-    multi-frame headers) and overrides their energies so the peak finder sees
-    the desired profile.
+    multi-frame headers). ``readcon.ConFrame.energy`` is read-only, so the
+    profile is supplied via a sibling ``neb.dat`` (eOn layout, col index 2).
     """
     from readcon import read_con, write_con
 
     src = read_con(str(_TEST_NEB))
     assert len(src) >= len(energies), "bundled test band too short"
     frames = src[: len(energies)]
-    for frame, e in zip(frames, energies):
-        frame.set_energy(float(e))
     neb_con = tmp_path / "neb.con"
     write_con(str(neb_con), frames)
+    # img  rx  energy  ...
+    dat_lines = [
+        f"{i}  {float(i)}  {float(e)}  0.0  0.0\n" for i, e in enumerate(energies)
+    ]
+    (tmp_path / "neb.dat").write_text("".join(dat_lines))
     return neb_con
 
 
