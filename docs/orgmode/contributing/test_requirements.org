@@ -106,8 +106,8 @@ The ~pure~ marker is reserved for tests that depend only on core packages
 dispatcher scripts under the ~pure~ marker.
 
 Note that ~[all]~ is a best-effort convenience extra covering pip-installable
-optional dependencies only. Conda-only packages (~tblite~, ~ovito~, ~ira_mod~)
-require pixi.
+optional dependencies only. Pixi-only packages (~tblite~, ~ira_mod~) and
+heavier tools such as ~ovito~ still need explicit environment setup.
 
 ** Available Markers & Environments
 The following markers and their corresponding ~pixi~ environments are available:

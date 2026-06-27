@@ -31,15 +31,17 @@ requires-python = ">=3.10"
 
 [project.optional-dependencies]
 # [all] pre-installs pip-available optional deps as a convenience.
-# Conda-only packages (tblite, ovito, ira_mod) still require pixi.
+# The \[all\] extra covers light pip-installable deps only.
+# ira_mod/tblite still require pixi; heavy tools like ovito stay explicit.
 # Without extras, deps auto-resolve on first use when RGPYCRUMBS_AUTO_DEPS=1.
 all           = [ "ase>=3.22", "scipy>=1.11", "jax[cpu]>=0.4", "readcon>=0.7.0" ]
 analysis      = [ "ase>=3.22", "scipy>=1.11", "readcon>=0.7.0" ]
 interpolation = [ "scipy>=1.11" ]
 surfaces      = [ "jax>=0.4" ]
-# ira_mod is conda-only (via pixi); not a pip-installable extra
-lint = [ "ruff>=0.1.6" ]
-test = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
+# ira_mod remains pixi-only; it is not exposed as a pip extra
+lint    = [ "ruff>=0.1.6" ]
+release = [ "build>=0.10", "towncrier>=24.8.0", "twine>=4.0", "wheel>=0.40" ]
+test    = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
 
 [project.scripts]
 rgpycrumbs = "rgpycrumbs.cli:main"
@@ -236,4 +238,5 @@ pep723_ignore_imports = [
   "eon",
 ]
 pep723_paths = [ "rgpycrumbs" ]
+required_plugins = [ "pytest-pep723" ]
 testpaths = [ "tests" ]

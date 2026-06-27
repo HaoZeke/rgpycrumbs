@@ -25,8 +25,9 @@ evolution plots.
 * Prerequisites
 
 ~plt-saddle~ reads eOn saddle search output: =climb= (movie file),
-=climb.dat= (iteration log), =reactant.con=, =saddle.con=, and
-optionally =mode.dat=.
+optionally =climb.dat= (iteration log), =reactant.con=, =saddle.con=,
+and optionally =mode.dat=. Metadata-rich full CON frames are treated as the
+canonical source of per-iteration metrics.
 
 #+begin_src bash
 pip install "rgpycrumbs[all]"
@@ -37,7 +38,7 @@ The expected directory layout:
 #+begin_example
 saddle_job/
   climb          # multi-frame .con trajectory
-  climb.dat      # TSV: iteration, step_size, convergence, delta_e, eigenvalue
+  climb.dat      # (optional fallback/export) TSV: iteration, step_size, convergence, delta_e, eigenvalue
   reactant.con   # initial minimum
   saddle.con     # converged saddle point
   mode.dat       # (optional) final dimer eigenvector (Nx3)

@@ -1,13 +1,12 @@
 import datetime
-from collections import namedtuple
 from dataclasses import dataclass, field
 
 import numpy as np
 
-# namedtuple for storing NEB iteration data
-nebiter = namedtuple("nebiter", ["iteration", "nebpath"])
-"""
-A namedtuple representing an iteration of a Nudged Elastic Band (NEB) calculation.
+@dataclass(frozen=True, slots=True)
+class nebiter:
+    """
+    A typed record representing an iteration of a Nudged Elastic Band (NEB) calculation.
 
 .. versionadded:: 1.0.0
 
@@ -15,19 +14,23 @@ Parameters
 ----------
 iteration : int
     The iteration number of the NEB calculation.
-nebpath : nebpath namedtuple
+nebpath : nebpath
     The data for the NEB path at this iteration.
 
 See Also
 --------
 nebpath : Stores the normalized arclength, actual arclength, and energy data for
     the NEB path.
-"""
+    """
 
-# namedtuple for storing the NEB path data
-nebpath = namedtuple("nebpath", ["norm_dist", "arc_dist", "energy"])
-"""
-A namedtuple representing the NEB path data.
+    iteration: int
+    nebpath: "nebpath"
+
+
+@dataclass(frozen=True, slots=True)
+class nebpath:
+    """
+    A typed record representing the NEB path data.
 
 .. versionadded:: 1.0.0
 
@@ -47,9 +50,13 @@ energy : float
 
 Notes
 -----
-The `nebpath` namedtuple is used within the `nebiter` namedtuple to store
+The `nebpath` record is used within the `nebiter` record to store
 detailed path information for each NEB iteration.
-"""
+    """
+
+    norm_dist: float
+    arc_dist: float
+    energy: float
 
 
 @dataclass

@@ -5,6 +5,7 @@ Creates synthetic eOn-style output directories and generates all figures.
 Run as: pixi run -e test python docs/generate_singleended_figs.py
 """
 
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -12,6 +13,7 @@ from pathlib import Path
 import matplotlib as mpl
 
 mpl.use("Agg")
+os.environ.setdefault("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", "1")
 
 # Import the write helper from tests
 import sys
@@ -73,7 +75,7 @@ def _make_saddle_data(job_dir, n_frames=15):
     return job_dir
 
 
-def _make_min_data(job_dir, n_frames=20, prefix="min"):
+def _make_min_data(job_dir, n_frames=20, prefix="minimization"):
     """Create synthetic minimization data (C2H6 relaxation)."""
     base = molecule("C2H6")
     base.cell = [10, 10, 10]

@@ -3,13 +3,16 @@
 
 * Visualizing Minimization Optimization
 
-This tool generates energy profiles, 2D optimization landscapes, and convergence plots from minimization calculations.
+This tool generates energy profiles, 2D optimization landscapes, and convergence plots from minimization calculations. The CLI also shares the same structure-strip renderer contract as =plt-neb= and =plt-saddle=, so the same backend and viewing controls work across the full eOn plotting stack.
 
 ** Method
 
 Same projection approach as NEB/saddle search but using (initial, minimum) as references. The 2D landscape shows s = optimization progress toward the minimum and d = lateral deviation during optimization.
 
-Requires eOn output with ~write_movies=true~ which produces ~min.dat~ (structured per-iteration metrics) and ~min~ (concatenated structure movie).
+Requires eOn output with ~write_movies=true~ and a concatenated
+~minimization~ movie. Metadata-rich full CON movies are treated as the
+canonical structured source; ~minimization.dat~ is retained as a compatibility
+and export layer when present.
 
 ** Plot Types
 
@@ -42,22 +45,47 @@ Side-by-side plots of force norm and step size vs iteration.
 | Option | Default | Description |
 |--------+---------+-------------|
 | ~--job-dir~ | (required) | eOn output directory |
-| ~--prefix~ | ~min~ | Movie file prefix |
+| ~--prefix~ | ~minimization~ | Movie file prefix |
 | ~--plot-type~ | ~profile~ | ~profile~, ~landscape~, ~convergence~ |
 | ~--project-path~ | True | Project into (s, d) coordinates |
 | ~--surface-type~ | ~grad_matern~ | Surface fitting method |
-| ~--ira-kmax~ | 1.8 | IRA kmax for RMSD calculation |
+| ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
+| ~--energy-unit~ | ~eV~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ |
 | ~--theme~ | ~ruhi~ | Plot theme |
+| ~--plot-structures~ | ~none~ | Structure strip below landscape: ~none~, ~endpoints~ |
+| ~--strip-renderer~ | ~xyzrender~ | Renderer backend for structure strips |
+| ~--xyzrender-config~ | ~paton~ | xyzrender preset for strip rendering |
+| ~--rotation~ | ~auto~ | Shared viewing rotation control |
+| ~--perspective-tilt~ | 0.0 | Small off-axis tilt to reveal occluded atoms |
 | ~-o~ | ~min_{type}.pdf~ | Output file path |
 | ~--dpi~ | 200 | Resolution |
+
+** Structure Rendering
+
+Landscape plots can render the initial and final structures as a strip below the axes:
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-min \
+  --job-dir results/ \
+  --plot-type landscape \
+  --plot-structures endpoints \
+  --strip-renderer xyzrender \
+  --rotation auto \
+  --perspective-tilt 6
+#+END_SRC
+
+The shared renderer flags behave the same as in =plt-neb=: =--rotation auto=
+lets xyzrender choose a good view, while ASE-style strings such as
+=--rotation "0x,90y,0z"= force a manual orientation for all backends.
 
 ** Required eOn Output Files
 
 | File | Required | Description |
 |------+----------+-------------|
-| ~min~ (or ~min.con~) | Yes | Concatenated structure movie |
-| ~min.dat~ | Yes | Per-iteration metrics (TSV) |
-| ~min.con~ | No | Final minimized structure (falls back to last movie frame) |
+| ~minimization~ (or ~minimization.con~) | Yes | Concatenated structure movie |
+| ~minimization.dat~ | Fallback | Compatibility/export TSV when the movie does not carry full per-frame metadata |
+| ~<prefix>.con~ | No | Explicit final minimized structure matching the movie prefix |
+| ~min.con~ | No | Legacy fallback final structure when ~<prefix>.con~ is absent |
 
 ** See Also
 

@@ -7,8 +7,9 @@ can resolve pip specs for all lazily imported modules. Without a map
 entry, ensure_import falls through to a generic ImportError instead of
 auto-installing the dependency.
 
-Conda-only dependencies (ira_mod, tblite, ovito) are intentionally
-excluded from the map and tested separately.
+Dependencies intentionally excluded from the map are tested separately.
+ira_mod and tblite need pixi; ovito is kept out of the default auto-install
+path because it is a heavy optional install.
 """
 
 import ast
@@ -22,9 +23,9 @@ pytestmark = pytest.mark.pure
 
 PACKAGE_ROOT = Path(__file__).parent.parent / "rgpycrumbs"
 
-# Modules that are intentionally NOT in _DEPENDENCY_MAP because they
-# require conda/pixi (no pip package exists).
-CONDA_ONLY = {"ira_mod", "tblite", "ovito", "eon.config"}
+# Modules intentionally kept out of _DEPENDENCY_MAP because they are
+# pixi-only or heavy enough that we do not auto-install them by default.
+EXCLUDED_FROM_MAP = {"ira_mod", "tblite", "ovito", "eon.config"}
 
 
 def _find_ensure_import_args(root: Path) -> set[str]:
@@ -55,12 +56,12 @@ class TestDependencyMapCoverage:
 
     def test_all_ensure_imports_have_map_entries(self) -> None:
         """Every ensure_import("X") call must have X (or its top-level
-        package) in _DEPENDENCY_MAP, unless it is a conda-only dep."""
+        package) in _DEPENDENCY_MAP, unless it is a special-case dependency."""
         used = _find_ensure_import_args(PACKAGE_ROOT)
         unmapped = set()
         for mod in used:
             top_level = mod.split(".")[0]
-            if top_level in CONDA_ONLY:
+            if top_level in EXCLUDED_FROM_MAP:
                 continue
             if mod not in _DEPENDENCY_MAP and top_level not in _DEPENDENCY_MAP:
                 unmapped.add(mod)

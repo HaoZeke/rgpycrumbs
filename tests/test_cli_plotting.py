@@ -21,6 +21,8 @@ import numpy as np
 import pytest
 from click.testing import CliRunner
 
+from tests._optional_imports import has_module_spec, optional_import_available
+
 try:
     import h5py
 
@@ -31,19 +33,25 @@ except ImportError:
 
 pytestmark = pytest.mark.pure
 
+_HAS_CHEMPARSEPLOT_NEB = all(
+    has_module_spec(mod) for mod in ("matplotlib", "polars", "ase")
+) and optional_import_available("chemparseplot")
+_HAS_DIMER_TRAJ = all(has_module_spec(mod) for mod in ("polars", "ase")) and (
+    optional_import_available("chemparseplot")
+)
+_HAS_CHEMGP = all(
+    has_module_spec(mod) for mod in ("matplotlib", "pandas", "plotnine", "h5py")
+) and optional_import_available("chemparseplot.plot.chemgp")
+_HAS_JAX = has_module_spec("jax")
+_HAS_IRA = has_module_spec("ira_mod")
 
-def _can_import(module_name):
-    try:
-        importlib.import_module(module_name)
-        return True
-    except Exception:
-        return False
 
-
-_HAS_CHEMPARSEPLOT_NEB = _can_import("chemparseplot.plot.neb")
-_HAS_DIMER_TRAJ = _can_import("chemparseplot.parse.eon.dimer_trajectory")
-_HAS_CHEMGP = _can_import("chemparseplot.plot.chemgp")
-_HAS_JAX = _can_import("jax")
+def _import_attr(module_name: str, attr_name: str, reason: str):
+    """Import an optional test target while failing loudly on broken first-party code."""
+    if not optional_import_available(module_name):
+        pytest.skip(reason)
+    module = importlib.import_module(module_name)
+    return getattr(module, attr_name)
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +172,7 @@ def _make_climb_dir(tmpdir, n_frames=10):
     return job_dir
 
 
-def _make_min_dir(tmpdir, n_frames=10, prefix="min"):
+def _make_min_dir(tmpdir, n_frames=10, prefix="minimization"):
     """Create a synthetic minimization job directory.
 
     Returns the job directory path.
@@ -188,10 +196,10 @@ def _make_min_dir(tmpdir, n_frames=10, prefix="min"):
     # movie file
     _write_con_file(job_dir / prefix, frames)
 
-    # min.con (final structure)
+    # final structure
     _write_con_file(job_dir / f"{prefix}.con", [frames[-1]])
 
-    # min.dat (TSV)
+    # trajectory metrics (TSV)
     header = "iteration\tstep_size\tconvergence\tenergy\n"
     rows = []
     for i in range(n_frames):
@@ -204,6 +212,19 @@ def _make_min_dir(tmpdir, n_frames=10, prefix="min"):
         f.writelines(rows)
 
     return job_dir
+
+
+class _MetadataFrame:
+    """Small readcon-like frame stub for metadata-only CLI fallback tests."""
+
+    def __init__(self, atoms, *, frame_index=None, energy=None, metadata=None):
+        self._atoms = atoms
+        self.frame_index = frame_index
+        self.energy = energy
+        self.metadata = metadata or {}
+
+    def to_ase(self):
+        return self._atoms.copy()
 
 
 def _make_chemgp_convergence_h5(path):
@@ -269,12 +290,11 @@ class TestPltNebPlotting:
     """Test actual plotting paths of plt_neb.py."""
 
     def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_neb import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_neb import failed (missing dep)")
+        return _import_attr(
+            "rgpycrumbs.eon.plt_neb",
+            "main",
+            "plt_neb import failed (missing dep)",
+        )
 
     def test_profile_eon_source(self, tmp_path):
         """Test profile plot with eOn .dat source."""
@@ -297,6 +317,8 @@ class TestPltNebPlotting:
                     "profile",
                     "--source",
                     "eon",
+                    "--energy-unit",
+                    "kJ/mol",
                     "-o",
                     str(output),
                     "--dpi",
@@ -369,6 +391,58 @@ class TestPltNebPlotting:
             )
             plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+
+    def test_profile_crit_points_uses_structure_strip(self, tmp_path, monkeypatch):
+        """Profile crit-point rendering should use the strip path, not overlapping insets."""
+        main = self._import_main()
+        _make_neb_data(tmp_path, n_steps=2, n_images=5)
+        _write_con_file(tmp_path / "neb.con", _make_h2o_images(5))
+        output = tmp_path / "profile_strip.png"
+        strip_calls = []
+        inset_calls = []
+
+        monkeypatch.setattr(
+            "rgpycrumbs.eon.plt_neb.plot_structure_strip",
+            lambda *args, **kwargs: strip_calls.append((args, kwargs)),
+        )
+        monkeypatch.setattr(
+            "rgpycrumbs.eon.plt_neb.plot_structure_inset",
+            lambda *args, **kwargs: inset_calls.append((args, kwargs)),
+        )
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            td_path = Path(td)
+            import shutil
+
+            for f in tmp_path.glob("neb_*"):
+                shutil.copy2(f, td_path / f.name)
+            shutil.copy2(tmp_path / "neb.con", td_path / "neb.con")
+
+            result = runner.invoke(
+                main,
+                [
+                    "--plot-type",
+                    "profile",
+                    "--source",
+                    "eon",
+                    "--con-file",
+                    "neb.con",
+                    "--plot-structures",
+                    "crit_points",
+                    "--strip-renderer",
+                    "ase",
+                    "-o",
+                    str(output),
+                    "--dpi",
+                    "72",
+                ],
+            )
+            plt.close("all")
+
+        assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+        assert strip_calls
+        assert not inset_calls
 
     def test_profile_spline_method(self, tmp_path):
         """Test profile plot with --spline-method spline."""
@@ -508,12 +582,11 @@ class TestPltSaddlePlotting:
     """Test actual plotting paths of plt_saddle.py."""
 
     def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_saddle import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_saddle import failed")
+        return _import_attr(
+            "rgpycrumbs.eon.plt_saddle",
+            "main",
+            "plt_saddle import failed",
+        )
 
     def test_profile(self, tmp_path):
         """Test saddle profile plot."""
@@ -562,9 +635,13 @@ class TestPltSaddlePlotting:
         assert output.exists()
 
     @pytest.mark.surfaces
+    @pytest.mark.skipif(
+        not _HAS_IRA,
+        reason="IRA required for chemically meaningful landscape projection",
+    )
     def test_landscape(self, tmp_path):
         pytest.importorskip("jax")
-        """Test saddle landscape plot (no IRA, falls back to ASE Procrustes)."""
+        """Test saddle landscape plot."""
         main = self._import_main()
         job_dir = _make_climb_dir(tmp_path)
         output = tmp_path / "saddle_landscape.png"
@@ -634,6 +711,70 @@ class TestPltSaddlePlotting:
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
+    def test_profile_without_dat_uses_frame_metadata(self, tmp_path, monkeypatch):
+        """Test saddle profile plot using metadata-rich full .con frames only."""
+        from ase.build import molecule
+
+        main = self._import_main()
+        job_dir = _make_climb_dir(tmp_path)
+        (job_dir / "climb.dat").unlink()
+
+        base = molecule("C2H6")
+        base.cell = [10, 10, 10]
+        base.pbc = True
+        frames = [
+            _MetadataFrame(base.copy(), frame_index=0),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=1,
+                metadata={
+                    "step_size": 0.1,
+                    "delta_e": 0.01,
+                    "convergence": 0.05,
+                    "eigenvalue": -0.12,
+                    "torque": 0.05,
+                    "angle": 12.3,
+                    "rotations": 5,
+                },
+            ),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=2,
+                metadata={
+                    "step_size": 0.08,
+                    "delta_e": 0.02,
+                    "convergence": 0.03,
+                    "eigenvalue": -0.2,
+                    "torque": 0.03,
+                    "angle": 8.1,
+                    "rotations": 3,
+                },
+            ),
+        ]
+        monkeypatch.setattr(
+            "chemparseplot.parse.eon._trajectory_common.readcon.read_con",
+            lambda _: frames,
+        )
+
+        output = tmp_path / "saddle_metadata_profile.png"
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
+        plt.close("all")
+        assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+        assert output.exists()
+
 
 # ---------------------------------------------------------------------------
 # plt_min tests
@@ -648,12 +789,11 @@ class TestPltMinPlotting:
     """Test actual plotting paths of plt_min.py."""
 
     def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_min import main
-
-            return main
-        except ImportError:
-            pytest.skip("plt_min import failed")
+        return _import_attr(
+            "rgpycrumbs.eon.plt_min",
+            "main",
+            "plt_min import failed",
+        )
 
     def test_profile(self, tmp_path):
         """Test minimization profile plot."""
@@ -702,6 +842,10 @@ class TestPltMinPlotting:
         assert output.exists()
 
     @pytest.mark.surfaces
+    @pytest.mark.skipif(
+        not _HAS_IRA,
+        reason="IRA required for chemically meaningful landscape projection",
+    )
     def test_landscape(self, tmp_path):
         pytest.importorskip("jax")
         """Test minimization landscape plot."""
@@ -751,6 +895,61 @@ class TestPltMinPlotting:
         plt.close("all")
         assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
 
+    def test_profile_without_dat_uses_frame_metadata(self, tmp_path, monkeypatch):
+        """Test minimization profile plot using metadata-rich full .con frames only."""
+        from ase.build import molecule
+
+        main = self._import_main()
+        job_dir = _make_min_dir(tmp_path)
+        (job_dir / "minimization.dat").unlink()
+
+        base = molecule("C2H6")
+        base.cell = [10, 10, 10]
+        base.pbc = True
+        frames = [
+            _MetadataFrame(
+                base.copy(),
+                frame_index=0,
+                energy=-10.0,
+                metadata={"step_size": 0.0, "convergence": 1.0},
+            ),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=1,
+                energy=-10.1,
+                metadata={"step_size": 0.1, "convergence": 0.5},
+            ),
+            _MetadataFrame(
+                base.copy(),
+                frame_index=2,
+                energy=-10.2,
+                metadata={"step_size": 0.05, "convergence": 0.2},
+            ),
+        ]
+        monkeypatch.setattr(
+            "chemparseplot.parse.eon._trajectory_common.readcon.read_con",
+            lambda _: frames,
+        )
+
+        output = tmp_path / "min_metadata_profile.png"
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                "--job-dir",
+                str(job_dir),
+                "--plot-type",
+                "profile",
+                "-o",
+                str(output),
+                "--dpi",
+                "72",
+            ],
+        )
+        plt.close("all")
+        assert result.exit_code == 0, f"Exit {result.exit_code}: {result.output}"
+        assert output.exists()
+
 
 # ---------------------------------------------------------------------------
 # plot_gp (ChemGP) tests
@@ -766,12 +965,11 @@ class TestPlotGPPlotting:
     """Test actual plotting paths of plot_gp.py (ChemGP CLI)."""
 
     def _import_cli(self):
-        try:
-            from rgpycrumbs.chemgp.plot_gp import cli
-
-            return cli
-        except ImportError:
-            pytest.skip("plot_gp import failed (missing dep)")
+        return _import_attr(
+            "rgpycrumbs.chemgp.plot_gp",
+            "cli",
+            "plot_gp import failed (missing dep)",
+        )
 
     def test_convergence(self, tmp_path):
         """Test convergence subcommand."""

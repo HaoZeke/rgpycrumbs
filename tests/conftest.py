@@ -3,6 +3,8 @@ import importlib.util
 
 import pytest
 
+from tests._optional_imports import optional_import_available
+
 # Define the requirements for each suite/marker
 ENVIRONMENT_REQUIREMENTS = {
     "fragments": ["ase", "tblite"],
@@ -18,15 +20,11 @@ ENVIRONMENT_REQUIREMENTS = {
 
 def _try_import(module_name):
     """Return True if *module_name* can actually be imported."""
-    try:
-        importlib.import_module(module_name)
-        return True
-    except Exception:
-        return False
+    return optional_import_available(module_name)
 
 
 # Test files that import PEP 723 dispatcher modules with heavy or
-# conda-only dependencies.  Prevent pytest collection when the source
+# pixi-only dependencies.  Prevent pytest collection when the source
 # module itself cannot import (regardless of what find_spec reports for
 # individual package names).
 _GUARDED_IMPORTS = {
@@ -45,7 +43,16 @@ def check_missing_modules(marker_name):
     Returns a list of missing modules for a given marker.
     """
     modules = ENVIRONMENT_REQUIREMENTS.get(marker_name, [])
-    return [mod for mod in modules if importlib.util.find_spec(mod) is None]
+    missing = []
+    for mod in modules:
+        if mod in {"rgpycrumbs", "chemparseplot"}:
+            if importlib.util.find_spec(mod) is None:
+                missing.append(mod)
+            elif not optional_import_available(mod):
+                missing.append(mod)
+        elif importlib.util.find_spec(mod) is None:
+            missing.append(mod)
+    return missing
 
 
 def skip_if_not_env(marker_name):

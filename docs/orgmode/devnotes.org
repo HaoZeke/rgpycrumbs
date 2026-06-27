@@ -111,8 +111,8 @@ _DEPENDENCY_MAP = {
 }
 #+end_src
 
-Conda-only dependencies (ira_mod, tblite, ovito) are NOT in this map.
-They fall through to step 5 with a message pointing to pixi.
+Packages intentionally excluded from this map are NOT auto-installed by default.
+ira_mod and tblite fall through to step 5 with a pixi hint; heavy packages like ovito are left for explicit installation in the active environment.
 
 ** Cache Location
 

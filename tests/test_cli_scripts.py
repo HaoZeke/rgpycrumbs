@@ -3,33 +3,36 @@
 # SPDX-License-Identifier: MIT
 """Tests for CLI entry points and importable modules.
 
-Tests that need cross-repo dev branches or conda-only deps (pypotlib,
-ovito) are guarded with skipif. They run in the pixi_envs workspace
+Tests that need cross-repo dev branches or heavyweight optional deps
+(pypotlib, ovito) are guarded with skipif. They run in the pixi_envs workspace
 where all repos are editable installs.
 """
 
+import os
 import importlib
+import subprocess
+import sys
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
 
-pytestmark = pytest.mark.pure
+from tests._optional_imports import optional_import_available
+from tests._optional_imports import has_module_spec
 
+pytestmark = [
+    pytest.mark.pure,
+    pytest.mark.filterwarnings("ignore:.*is a dispatched PEP 723 script.*:UserWarning"),
+]
 
-def _can_import(module_name):
-    """Check if a module is importable without triggering full import chains."""
-    try:
-        importlib.import_module(module_name)
-        return True
-    except (ImportError, ModuleNotFoundError, Exception):
-        return False
-
-
-# Evaluate these once, catching any cascading import errors
-_HAS_CHEMPARSEPLOT_NEB = _can_import("chemparseplot.plot.neb")
-_HAS_DIMER_TRAJ = _can_import("chemparseplot.parse.eon.dimer_trajectory")
-_HAS_CHEMGP = _can_import("chemparseplot.plot.chemgp")
-_HAS_PYPOTLIB = _can_import("pypotlib")
+# Skip only for genuinely absent optional stacks.
+_HAS_CHEMGP = all(
+    has_module_spec(mod)
+    for mod in ("chemparseplot", "matplotlib", "pandas", "plotnine", "h5py")
+)
+_HAS_PYPOTLIB = has_module_spec("pypotlib")
+_HAS_XTS_MB = all(has_module_spec(mod) for mod in ("cmcrameri", "matplotlib"))
 
 
 class TestMainCLI:
@@ -52,100 +55,238 @@ class TestMainCLI:
         assert hasattr(rgpycrumbs, "__version__")
 
 
-@pytest.mark.skipif(
-    not _HAS_CHEMPARSEPLOT_NEB,
-    reason="chemparseplot not installed",
-)
-class TestPltNebCLI:
-    def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_neb import main
+class TestPep723DispatcherCli:
+    @pytest.mark.parametrize(
+        "rel_path",
+        [
+            "chemgp/match_atoms.py",
+            "chemgp/plot_gp.py",
+            "eon/con_splitter.py",
+            "eon/generate_nwchem_input.py",
+            "eon/plt_min.py",
+            "eon/plt_neb.py",
+            "eon/plt_saddle.py",
+            "eon/ptmdisp.py",
+            "eon/to_mlflow.py",
+            "geom/detect_fragments.py",
+            "orca/generate_orca_input.py",
+            "plumed/direct_reconstruction.py",
+            "prefix/delete_packages.py",
+        ],
+    )
+    def test_dispatched_scripts_share_python_floor(self, rel_path):
+        script = Path(__file__).resolve().parent.parent / "rgpycrumbs" / rel_path
+        text = script.read_text()
+        assert '# requires-python = ">=3.11"' in text
 
-            return main
-        except ImportError:
-            pytest.skip("plt_neb import failed (missing dep)")
+    @pytest.mark.parametrize(
+        ("argv", "expected_script"),
+        [
+            (["eon", "plt-neb", "--help"], "eon/plt_neb.py"),
+            (["eon", "plt-saddle", "--help"], "eon/plt_saddle.py"),
+            (["eon", "plt-min", "--help"], "eon/plt_min.py"),
+            (["eon", "generate-nwchem-input", "--help"], "eon/generate_nwchem_input.py"),
+        ],
+    )
+    @patch("rgpycrumbs.cli.subprocess.run")
+    def test_help_routes_through_dispatcher(
+        self, mock_run, argv, expected_script, monkeypatch
+    ):
+        from rgpycrumbs.cli import main
 
-    def test_help(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, ["--help"])
+        monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+        monkeypatch.setattr("rgpycrumbs.cli._uv_editable_sources", lambda: [])
+
+        result = CliRunner().invoke(main, argv)
+        assert result.exit_code == 0, result.exception or result.output
+
+        command = mock_run.call_args.args[0]
+        assert command[:2] == ["uv", "run"]
+        assert any(str(part).endswith(expected_script) for part in command)
+        assert command[-1] == "--help"
+
+    @patch("rgpycrumbs.cli.subprocess.run")
+    def test_missing_job_dir_is_forwarded_to_script(self, mock_run, monkeypatch):
+        from rgpycrumbs.cli import main
+
+        monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+        monkeypatch.setattr("rgpycrumbs.cli._uv_editable_sources", lambda: [])
+
+        result = CliRunner().invoke(main, ["eon", "plt-min"])
+        assert result.exit_code == 0, result.exception or result.output
+
+        command = mock_run.call_args.args[0]
+        assert command[:2] == ["uv", "run"]
+        assert any(str(part).endswith("eon/plt_min.py") for part in command)
+
+    @pytest.mark.parametrize(
+        "rel_path",
+        ["eon/plt_neb.py", "eon/plt_min.py", "eon/plt_saddle.py"],
+    )
+    def test_eon_plot_scripts_run_directly(self, rel_path):
+        repo_root = Path(__file__).resolve().parent.parent
+        script = repo_root / "rgpycrumbs" / rel_path
+        chemparseplot_root = repo_root.parent / "chemparseplot"
+
+        env = os.environ.copy()
+        pythonpath = str(repo_root)
+        existing_pythonpath = env.get("PYTHONPATH")
+        if existing_pythonpath:
+            pythonpath = f"{pythonpath}:{chemparseplot_root}:{existing_pythonpath}"
+        else:
+            pythonpath = f"{pythonpath}:{chemparseplot_root}"
+        env["PYTHONPATH"] = pythonpath
+
+        result = subprocess.run(
+            [sys.executable, str(script), "--help"],
+            capture_output=True,
+            text=True,
+            check=False,
+            env=env,
+        )
+
+        assert result.returncode == 0, result.stderr
+        assert "Usage:" in result.stdout
+
+
+class TestSharedRenderCli:
+    def test_eon_plotters_share_render_option_contract(self):
+        from rgpycrumbs.eon.plt_min import main as plt_min_main
+        from rgpycrumbs.eon.plt_neb import main as plt_neb_main
+        from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+
+        expected = {
+            "strip_renderer",
+            "xyzrender_config",
+            "strip_spacing",
+            "strip_dividers",
+            "rotation",
+            "perspective_tilt",
+        }
+
+        commands = (plt_min_main, plt_saddle_main, plt_neb_main)
+        for command in commands:
+            param_names = {param.name for param in command.params}
+            assert expected.issubset(param_names)
+
+    def test_single_ended_help_uses_dual_strip_divider_flag(self):
+        from rgpycrumbs.eon.plt_min import main as plt_min_main
+        from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
+
+        for command in (plt_min_main, plt_saddle_main):
+            result = CliRunner().invoke(command, ["--help"])
+            assert result.exit_code == 0
+            assert "--strip-dividers / --no-strip-dividers" in result.output
+
+    def test_neb_help_shows_larger_default_zoom_ratio(self):
+        from rgpycrumbs.eon.plt_neb import main as plt_neb_main
+
+        result = CliRunner().invoke(plt_neb_main, ["--help"])
         assert result.exit_code == 0
-        assert "--plot-type" in result.output
+        assert "--zoom-ratio FLOAT" in result.output
+        assert "[default: 0.5]" in result.output
 
 
-@pytest.mark.skipif(
-    not _HAS_DIMER_TRAJ,
-    reason="chemparseplot dev branch not installed",
-)
-class TestPltSaddleCLI:
-    def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_saddle import main
+class TestSingleEndedPlotHelpers:
+    def test_wrapper_reexports_chemparseplot_surface(self):
+        from chemparseplot.plot import optimization as opt_mod
+        from rgpycrumbs.eon import _single_ended_plot as helper_mod
 
-            return main
-        except ImportError:
-            pytest.skip("plt_saddle import failed")
-
-    def test_help(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, ["--help"])
-        assert result.exit_code == 0
-        assert "--job-dir" in result.output
-
-    def test_missing_job_dir(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, [])
-        assert result.exit_code != 0
+        assert helper_mod.project_landscape_path is opt_mod.project_landscape_path
+        assert helper_mod.plot_single_ended_profile is opt_mod.plot_single_ended_profile
+        assert (
+            helper_mod.plot_single_ended_convergence
+            is opt_mod.plot_single_ended_convergence
+        )
 
 
-@pytest.mark.skipif(
-    not _HAS_DIMER_TRAJ,
-    reason="chemparseplot dev branch not installed",
-)
-class TestPltMinCLI:
-    def _import_main(self):
-        try:
-            from rgpycrumbs.eon.plt_min import main
+class TestSingleEndedCliHelpers:
+    def test_default_output_path_prefers_explicit_value(self, tmp_path):
+        from rgpycrumbs.eon._single_ended_cli import default_output_path
 
-            return main
-        except ImportError:
-            pytest.skip("plt_min import failed")
+        explicit = tmp_path / "out.pdf"
+        assert default_output_path("min", "profile", explicit) == explicit
+        assert default_output_path("min", "profile", None) == Path("min_profile.pdf")
 
-    def test_help(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, ["--help"])
-        assert result.exit_code == 0
+    def test_overlay_labels_pads_missing_entries(self, tmp_path):
+        from rgpycrumbs.eon._single_ended_cli import overlay_labels
 
-    def test_missing_job_dir(self):
-        main = self._import_main()
-        result = CliRunner().invoke(main, [])
-        assert result.exit_code != 0
+        job_dirs = [tmp_path / "a", tmp_path / "b", tmp_path / "c"]
+        assert overlay_labels(job_dirs, []) == ["a", "b", "c"]
+        assert overlay_labels(job_dirs, ["foo"]) == ["foo", "b", "c"]
+
+    def test_load_trajectories_logs_consistently(self, tmp_path):
+        from rgpycrumbs.eon._single_ended_cli import load_trajectories
+
+        logged = []
+
+        def _logger(message, *args):
+            logged.append(message % args)
+
+        result = load_trajectories(
+            [tmp_path / "job1", tmp_path / "job2"],
+            lambda path: {"path": path.name},
+            log_info=_logger,
+            noun="trajectory",
+            detail=lambda traj: f"loaded {traj['path']}",
+        )
+        assert [item["path"] for item in result] == ["job1", "job2"]
+        assert logged == [
+            f"Loaded trajectory from {tmp_path / 'job1'} (loaded job1)",
+            f"Loaded trajectory from {tmp_path / 'job2'} (loaded job2)",
+        ]
 
 
-class TestGenerateNWChemCLI:
-    def test_help(self):
-        try:
-            from rgpycrumbs.eon.generate_nwchem_input import main
-        except ImportError:
-            pytest.skip("generate_nwchem_input import failed")
-        result = CliRunner().invoke(main, ["--help"])
-        assert result.exit_code == 0
-
-
-@pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
-class TestXtsPotentials:
+@pytest.mark.skipif(not _HAS_XTS_MB, reason="xts muller-brown plotting stack missing")
+class TestMullerBrownXts:
     def test_muller_brown(self):
         import numpy as np
 
         from rgpycrumbs.func.muller_brown import muller_brown
 
-        val, grad = muller_brown(np.array([0.0, 0.0]))
-        assert isinstance(val, float)
-        assert grad.shape == (2,)
+        val = muller_brown(np.array([0.0, 0.0]))
+        assert np.isscalar(val) or getattr(val, "shape", ()) == ()
+        assert float(val) < 0.0  # known basin near origin on MB surface
 
+    def test_mb_import_has_no_side_effects(self, monkeypatch):
+        import rgpycrumbs.xts.saddle.mb as mb_mod
+
+        def fail_meshgrid(*_args, **_kwargs):
+            msg = "mb import should not build surface grids"
+            raise AssertionError(msg)
+
+        def fail_surface(*_args, **_kwargs):
+            msg = "mb import should not evaluate Muller-Brown surface"
+            raise AssertionError(msg)
+
+        monkeypatch.setattr("numpy.meshgrid", fail_meshgrid)
+        monkeypatch.setattr("rgpycrumbs.func.muller_brown.muller_brown", fail_surface)
+        reloaded = importlib.reload(mb_mod)
+        assert hasattr(reloaded, "_surface_grid")
+
+
+@pytest.mark.skipif(not _HAS_PYPOTLIB, reason="pypotlib not installed")
+class TestCuH2Xts:
     def test_cuh2(self):
         from rgpycrumbs.xts.saddle.cuh2 import cuh2_potential
 
         assert callable(cuh2_potential)
+
+    def test_cuh2_import_has_no_side_effects(self, monkeypatch):
+        import rgpycrumbs.xts.saddle.cuh2 as cuh2_mod
+
+        def fail_read(*_args, **_kwargs):
+            msg = "cuh2 import should not read structures"
+            raise AssertionError(msg)
+
+        def fail_grid(*_args, **_kwargs):
+            msg = "cuh2 import should not build plotting grids"
+            raise AssertionError(msg)
+
+        monkeypatch.setattr("ase.io.read", fail_read)
+        monkeypatch.setattr("rgpycrumbs.xts.cuh2.datgen.get_from_gitroot_con", fail_grid)
+        reloaded = importlib.reload(cuh2_mod)
+        assert callable(reloaded.cuh2_potential)
 
 
 @pytest.mark.skipif(
@@ -154,12 +295,34 @@ class TestXtsPotentials:
 )
 class TestChemGPMatchAtoms:
     def test_import(self):
-        try:
-            from rgpycrumbs.chemgp import match_atoms
+        from rgpycrumbs.chemgp import match_atoms
 
-            assert hasattr(match_atoms, "match_atoms")
-        except ImportError:
-            pytest.skip("chemgp import chain failed")
+        assert hasattr(match_atoms, "match_atoms")
+
+
+class TestOptionalImportGuards:
+    def test_missing_third_party_returns_false(self, monkeypatch):
+        real_import = importlib.import_module
+
+        def fake_import(name, package=None):
+            if name == "chemparseplot.synthetic_optional":
+                raise ModuleNotFoundError("missing pandas", name="pandas")
+            return real_import(name, package)
+
+        monkeypatch.setattr(importlib, "import_module", fake_import)
+        assert optional_import_available("chemparseplot.synthetic_optional") is False
+
+    def test_first_party_breakage_raises(self, monkeypatch):
+        real_import = importlib.import_module
+
+        def fake_import(name, package=None):
+            if name == "rgpycrumbs.synthetic_broken":
+                raise ModuleNotFoundError("broken first-party import", name=name)
+            return real_import(name, package)
+
+        monkeypatch.setattr(importlib, "import_module", fake_import)
+        with pytest.raises(ModuleNotFoundError):
+            optional_import_available("rgpycrumbs.synthetic_broken")
 
 
 class TestPackageInit:

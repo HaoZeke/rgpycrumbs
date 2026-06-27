@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -13,8 +14,9 @@ logger = logging.getLogger(__name__)
 # Dependency registry
 # ---------------------------------------------------------------------------
 # Maps importable module names to (pip_spec, extra_name).
-# Conda-only deps (ira_mod, tblite, ovito) are intentionally absent;
-# they fall through to a helpful error suggesting pixi.
+# Special-case deps are intentionally absent from the default auto-install map.
+# ira_mod/tblite require pixi, while heavy tools like ovito are left to
+# explicit user installation.
 _DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
     "jax": ("jax>=0.4", "surfaces"),
     "jaxlib": ("jax>=0.4", "surfaces"),
@@ -45,6 +47,40 @@ _CPU_OVERRIDES: dict[str, str] = {
 
 # Cache the result of the CUDA probe so it runs at most once per process.
 _cuda_available: bool | None = None
+
+
+def warn_on_direct_script_import(
+    module_name: str,
+    cli_hint: str,
+    *,
+    auto_env: str = "RGPYCRUMBS_AUTO_DEPS",
+    parent_env: str = "RGPYCRUMBS_PARENT_SITE_PACKAGES",
+    suppress_env: str = "RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING",
+) -> None:
+    """Warn when a PEP 723 script module is imported directly.
+
+    The warning is suppressed for normal script execution (``__main__``),
+    when the dependency-resolution environment contract is already present,
+    or when the caller opts out explicitly.
+    """
+    if module_name == "__main__":
+        return
+    if os.environ.get(suppress_env, "").strip() == "1":
+        return
+    if os.environ.get(parent_env, "").strip():
+        return
+    if os.environ.get(auto_env, "").strip() == "1":
+        return
+    warnings.warn(
+        (
+            f"{module_name} is a dispatched PEP 723 script. Direct imports bypass the "
+            "normal rgpycrumbs dispatcher path and its dependency-resolution setup. "
+            f"Prefer `{cli_hint}` or `uv run <script>.py`. If you intentionally import "
+            f"this module directly, set {auto_env}=1 to allow auto-resolved deps, or "
+            f"{suppress_env}=1 to silence this warning."
+        ),
+        stacklevel=2,
+    )
 
 
 def _has_cuda() -> bool:
@@ -202,10 +238,10 @@ See: https://jax.readthedocs.io/en/latest/installation.html
             )
     else:
         msg = (
-            f"Module '{module_name}' is not installed and is not a "
-            "pip-installable dependency of rgpycrumbs. "
-            "For conda-only packages (ira_mod, tblite, ovito), "
-            "use pixi: pixi install"
+            f"Module '{module_name}' is not installed and is not part of "
+            "rgpycrumbs' default auto-resolved dependency set. "
+            "Use pixi for ira_mod/tblite, and install heavy optional "
+            "tools such as ovito explicitly in the active environment."
         )
     raise ImportError(msg)
 

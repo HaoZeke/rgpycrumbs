@@ -20,20 +20,13 @@ import numpy as np
 import pytest
 from click.testing import CliRunner
 
+from tests._optional_imports import has_module_spec
 
-def _can_import(mod):
-    try:
-        importlib.import_module(mod)
-        return True
-    except Exception:
-        return False
-
-
-_HAS_MLFLOW = _can_import("mlflow")
-_HAS_OVITO = _can_import("ovito")
-_HAS_PYVISTA = _can_import("pyvista")
-_HAS_TBLITE = _can_import("tblite.interface")
-_HAS_REQUESTS = _can_import("requests")
+_HAS_MLFLOW = has_module_spec("mlflow")
+_HAS_OVITO = has_module_spec("ovito")
+_HAS_PYVISTA = has_module_spec("pyvista")
+_HAS_TBLITE = has_module_spec("tblite.interface")
+_HAS_REQUESTS = has_module_spec("requests")
 
 
 # ======================================================================

@@ -38,7 +38,7 @@ RGPYCRUMBS_AUTO_DEPS=1 uv run scripts/test_all_features.py
 | ~surfaces~ | JAX-based surface fitting | ~test~, ~surfaces~ |
 | ~interpolation~ | Scipy spline interpolation | ~test~, ~interpolation~ |
 | ~eon~ | eOn integration (con files, NEB) | ~test~, ~analysis~ |
-| ~fragments~ | Fragment detection with tblite | pixi (tblite is conda-only) |
+| ~fragments~ | Fragment detection with tblite | pixi (tblite is pixi-only here) |
 
 * CI Workflows
 

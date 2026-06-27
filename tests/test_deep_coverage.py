@@ -8,7 +8,9 @@ that need synthetic eOn data.
 """
 
 import os
+import shutil
 import textwrap
+import importlib
 from pathlib import Path
 
 import matplotlib
@@ -22,6 +24,8 @@ from ase.build import molecule
 from ase.io import write as ase_write
 from click.testing import CliRunner
 
+from tests._optional_imports import has_module_spec, optional_import_available
+
 try:
     import h5py
 
@@ -30,29 +34,35 @@ except ImportError:
     h5py = None
     _HAS_H5PY = False
 
-try:
+_HAS_PLT_NEB = has_module_spec("rgpycrumbs.eon.plt_neb") and optional_import_available(
+    "rgpycrumbs.eon.plt_neb"
+)
+if _HAS_PLT_NEB:
     from rgpycrumbs.eon.plt_neb import main as plt_neb_main
-
-    _HAS_PLT_NEB = True
-except (ImportError, ModuleNotFoundError):
+else:
     plt_neb_main = None
-    _HAS_PLT_NEB = False
 
-try:
+_HAS_PLT_SADDLE = has_module_spec(
+    "rgpycrumbs.eon.plt_saddle"
+) and optional_import_available("rgpycrumbs.eon.plt_saddle")
+if _HAS_PLT_SADDLE:
     from rgpycrumbs.eon.plt_saddle import main as plt_saddle_main
-
-    _HAS_PLT_SADDLE = True
-except (ImportError, ModuleNotFoundError):
+else:
     plt_saddle_main = None
-    _HAS_PLT_SADDLE = False
 
-try:
+_HAS_PLT_MIN = has_module_spec("rgpycrumbs.eon.plt_min") and optional_import_available(
+    "rgpycrumbs.eon.plt_min"
+)
+if _HAS_PLT_MIN:
     from rgpycrumbs.eon.plt_min import main as plt_min_main
-
-    _HAS_PLT_MIN = True
-except (ImportError, ModuleNotFoundError):
+else:
     plt_min_main = None
-    _HAS_PLT_MIN = False
+
+_HAS_OVITO = has_module_spec("ovito")
+_HAS_OVITO_RENDER = _HAS_OVITO and any(
+    os.environ.get(var) for var in ("DISPLAY", "WAYLAND_DISPLAY", "QT_QPA_PLATFORM")
+)
+_HAS_XVFB = shutil.which("Xvfb") is not None
 
 try:
     import pyvista
@@ -354,13 +364,93 @@ class TestPltNebLandscape:
             )
 
 
-def _try_import_plot_gp():
-    try:
-        from rgpycrumbs.chemgp.plot_gp import cli
+@pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+class TestPltNebHelpers:
+    def test_profile_strip_payload_returns_typed_entries(self):
+        from chemparseplot.plot.neb import profile_strip_payload
+        from chemparseplot.plot.structs import StructurePlacement
+        from ase import Atoms
 
-        return cli
-    except (ImportError, ModuleNotFoundError):
-        return None
+        atoms_list = [Atoms("H"), Atoms("H"), Atoms("H")]
+        payload = profile_strip_payload(
+            atoms_list,
+            np.array([0.0, 1.0, 2.0]),
+            np.array([0.0, 2.0, 0.0]),
+            "crit_points",
+            "energy",
+        )
+
+        assert all(isinstance(entry, StructurePlacement) for entry in payload)
+        assert [entry.label for entry in payload] == ["R", "SP", "P"]
+
+    def test_landscape_half_span_prefers_global_basis(self, monkeypatch):
+        from chemparseplot.parse.eon.neb import NebOverlayStructure
+        from chemparseplot.plot import neb as neb_plot
+
+        recompute_calls = []
+
+        def _fake_compute_projection_basis(*_args):
+            recompute_calls.append(True)
+            return "final-basis"
+
+        def _fake_project_to_sd(_r, _p, basis):
+            return np.zeros(1), np.array([2.0 if basis == "global-basis" else 20.0])
+
+        monkeypatch.setattr(
+            neb_plot, "compute_projection_basis", _fake_compute_projection_basis
+        )
+        monkeypatch.setattr(neb_plot, "project_to_sd", _fake_project_to_sd)
+
+        half_span = neb_plot.landscape_half_span(
+            (0.0, 4.0),
+            np.array([0.0, 1.0]),
+            np.array([1.0, 0.0]),
+            [NebOverlayStructure(atoms=None, r=1.5, p=0.5, label="extra")],
+            "global-basis",
+        )
+
+        assert half_span == pytest.approx(2.3)
+        assert recompute_calls == []
+
+    def test_save_plot_skips_tight_bbox_for_strip(self, monkeypatch, tmp_path):
+        from chemparseplot.plot import neb as neb_plot
+
+        saved = {}
+
+        def _fake_savefig(path, **kwargs):
+            saved[str(path)] = kwargs
+
+        monkeypatch.setattr(neb_plot.plt, "savefig", _fake_savefig)
+
+        strip_out = tmp_path / "strip.pdf"
+        plain_out = tmp_path / "plain.pdf"
+
+        neb_plot.save_plot(strip_out, 150, has_strip=True)
+        neb_plot.save_plot(plain_out, 150, has_strip=False)
+
+        assert "bbox_inches" not in saved[str(strip_out)]
+        assert saved[str(plain_out)]["bbox_inches"] == "tight"
+
+
+def _try_import_plot_gp():
+    return _import_attr(
+        "rgpycrumbs.chemgp.plot_gp",
+        "cli",
+        "plot_gp not importable",
+    )
+
+
+def _import_optional_module(module_name: str, reason: str):
+    """Import an optional module, but fail loudly on broken first-party code."""
+    if not optional_import_available(module_name):
+        pytest.skip(reason)
+    return importlib.import_module(module_name)
+
+
+def _import_attr(module_name: str, attr_name: str, reason: str):
+    """Import *attr_name* from *module_name* with optional-dependency-aware skips."""
+    module = _import_optional_module(module_name, reason)
+    return getattr(module, attr_name)
 
 
 def _make_grid(f, name, n=20):
@@ -397,8 +487,6 @@ class TestPlotGPDeep:
 
     def test_nll_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "nll.h5"
         with h5py.File(h5, "w") as f:
@@ -420,8 +508,6 @@ class TestPlotGPDeep:
 
     def test_sensitivity_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "sens.h5"
         n = 30
@@ -450,8 +536,6 @@ class TestPlotGPDeep:
 
     def test_trust_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "trust.h5"
         n = 30
@@ -486,8 +570,6 @@ class TestPlotGPDeep:
 
     def test_fps_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "fps.h5"
         rng = np.random.default_rng(42)
@@ -510,8 +592,6 @@ class TestPlotGPDeep:
 
     def test_variance_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "var.h5"
         rng = np.random.default_rng(42)
@@ -531,8 +611,6 @@ class TestPlotGPDeep:
 
     def test_quality_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "quality.h5"
         n = 20
@@ -557,8 +635,6 @@ class TestPlotGPDeep:
 
     def test_rff_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "rff.h5"
         n = 10
@@ -583,8 +659,6 @@ class TestPlotGPDeep:
 
     def test_surface_with_paths_points(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "surface.h5"
         rng = np.random.default_rng(42)
@@ -616,8 +690,6 @@ class TestPlotGPDeep:
 
     def test_batch_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         # Create a convergence H5
         h5 = tmp_path / "data" / "conv.h5"
@@ -667,20 +739,16 @@ class TestPlumedTrivial:
     """Cover the 4 lines in plumed/."""
 
     def test_import_plumed_init(self):
-        try:
-            import rgpycrumbs.plumed
-
-            assert hasattr(rgpycrumbs.plumed, "direct_reconstruction") or True
-        except ImportError:
-            pytest.skip("plumed import failed")
+        module = _import_optional_module("rgpycrumbs.plumed", "plumed import failed")
+        assert hasattr(module, "direct_reconstruction") or True
 
     def test_import_direct_reconstruction(self):
-        try:
-            from rgpycrumbs.plumed.direct_reconstruction import reconstruct_fes
-
-            assert callable(reconstruct_fes)
-        except ImportError:
-            pytest.skip("direct_reconstruction import failed")
+        module = _import_optional_module(
+            "rgpycrumbs.plumed.direct_reconstruction",
+            "direct_reconstruction import failed",
+        )
+        assert hasattr(module, "calculate_fes_from_hills")
+        assert hasattr(module, "find_fes_minima")
 
 
 class TestInitLazy:
@@ -808,14 +876,23 @@ class TestPltNebStructureRendering:
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
     def test_landscape_with_mmf_peaks(self, tmp_path):
-        """Exercise MMF peaks overlay (lines 695-750)."""
+        """Exercise OCI/MMF refinement-sample overlay."""
         neb_dir = _make_neb_dir(tmp_path, n_steps=3, n_images=5)
-        # Create fake peak files
         peak_dir = tmp_path / "peaks"
         peak_dir.mkdir()
-        h2o = molecule("H2O")
-        h2o.positions[0, 0] += 0.15
-        ase_write(str(peak_dir / "peak00_pos.con"), h2o, format="eon")
+        peak_atoms = molecule("C2H6")
+        peak_atoms.positions[0, 0] += 0.15
+        climb_frames = []
+        for shift in (0.0, 0.03, 0.06):
+            frame = peak_atoms.copy()
+            frame.positions[0, 1] += shift
+            climb_frames.append(frame)
+        ase_write(str(peak_dir / "climb"), climb_frames, format="eon")
+        (peak_dir / "climb.dat").write_text(
+            "iteration\tstep_size\tconvergence\tdelta_e\teigenvalue\ttorque\tangle\trotations\n"
+            "0\t0.100000\t0.500000\t0.100000\t-0.500000\t0.010000\t0.100000\t1\n"
+            "1\t0.050000\t0.250000\t0.050000\t-0.400000\t0.008000\t0.080000\t2\n"
+        )
 
         runner = CliRunner()
         with runner.isolated_filesystem(temp_dir=tmp_path) as td:
@@ -844,6 +921,47 @@ class TestPltNebStructureRendering:
                     "mmf.pdf",
                 ],
             )
+            assert result.exit_code == 0, result.output
+
+    @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
+    def test_landscape_with_mmf_peaks_skips_mismatched_overlay(self, tmp_path):
+        """Mismatched MMF structures should warn and continue, not abort plotting."""
+        neb_dir = _make_neb_dir(tmp_path, n_steps=2, n_images=5)
+        peak_dir = tmp_path / "peaks_mismatch"
+        peak_dir.mkdir()
+        h2o = molecule("H2O")
+        ase_write(str(peak_dir / "climb"), [h2o.copy(), h2o.copy()], format="eon")
+        (peak_dir / "climb.dat").write_text(
+            "iteration\tstep_size\tconvergence\tdelta_e\teigenvalue\ttorque\tangle\trotations\n"
+            "0\t0.100000\t0.500000\t0.100000\t-0.500000\t0.010000\t0.100000\t1\n"
+        )
+
+        runner = CliRunner()
+        with runner.isolated_filesystem(temp_dir=tmp_path) as td:
+            for f in neb_dir.glob("neb_*"):
+                shutil.copy(f, td)
+            shutil.copy(neb_dir / "neb.con", td)
+            shutil.copy(neb_dir / "sp.con", td)
+            shutil.copytree(peak_dir, Path(td) / "peaks_mismatch")
+
+            result = runner.invoke(
+                plt_neb_main,
+                [
+                    "--plot-type",
+                    "landscape",
+                    "--landscape-mode",
+                    "path",
+                    "--con-file",
+                    "neb.con",
+                    "--no-project-path",
+                    "--mmf-peaks",
+                    "--peak-dir",
+                    "peaks_mismatch",
+                    "-o",
+                    "mmf_mismatch.pdf",
+                ],
+            )
+            assert result.exit_code == 0, result.output
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
     def test_profile_highlight_last_false(self, tmp_path):
@@ -897,8 +1015,6 @@ class TestPlotGPBranches:
     def test_surface_auto_clamp(self, tmp_path):
         """Test surface with auto-detected clamping from filename."""
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         # Filename with clamp hint
         h5 = tmp_path / "surface_lo-2_hi2.h5"
@@ -912,8 +1028,6 @@ class TestPlotGPBranches:
     def test_convergence_ci_force_column(self, tmp_path):
         """Test convergence with ci_force column (branch at line 129)."""
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "conv.h5"
         with h5py.File(h5, "w") as f:
@@ -939,8 +1053,6 @@ class TestPlotGPBranches:
     def test_batch_empty_config(self, tmp_path):
         """Test batch with no plots entry (line 586)."""
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         cfg = tmp_path / "empty.toml"
         cfg.write_text("[defaults]\n")
@@ -975,10 +1087,11 @@ class TestConSplitterBranches:
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
     def test_split_with_output_dir(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.con_splitter import con_splitter as main
-        except ImportError:
-            pytest.skip("con_splitter not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.con_splitter",
+            "con_splitter",
+            "con_splitter not importable",
+        )
 
         # Create a multi-frame .con
         frames = [molecule("H2O") for _ in range(3)]
@@ -1032,6 +1145,8 @@ class TestPltNebWithIRA:
                     "sp.con",
                     "--plot-structures",
                     "crit_points",
+                    "--strip-renderer",
+                    "ase",
                     "--project-path",
                     "-o",
                     "ira_landscape.pdf",
@@ -1063,6 +1178,8 @@ class TestPltNebWithIRA:
                     "sp.con",
                     "--plot-structures",
                     "crit_points",
+                    "--strip-renderer",
+                    "ase",
                     "--rc-mode",
                     "rmsd",
                     "-o",
@@ -1118,10 +1235,11 @@ class TestDeletePackagesDeep:
     def test_main_dry_run_with_packages(self, tmp_path):
         from unittest.mock import MagicMock, patch
 
-        try:
-            from rgpycrumbs.prefix.delete_packages import main
-        except ImportError:
-            pytest.skip("delete_packages not importable")
+        main = _import_attr(
+            "rgpycrumbs.prefix.delete_packages",
+            "main",
+            "delete_packages not importable",
+        )
 
         runner = CliRunner()
         # Mock get_packages_to_delete to return fake packages
@@ -1148,10 +1266,11 @@ class TestDeletePackagesDeep:
     def test_main_no_packages_found(self, tmp_path):
         from unittest.mock import patch
 
-        try:
-            from rgpycrumbs.prefix.delete_packages import main
-        except ImportError:
-            pytest.skip("delete_packages not importable")
+        main = _import_attr(
+            "rgpycrumbs.prefix.delete_packages",
+            "main",
+            "delete_packages not importable",
+        )
 
         runner = CliRunner()
         with patch(
@@ -1173,10 +1292,11 @@ class TestDeletePackagesDeep:
     def test_main_no_packages_with_version_regex(self, tmp_path):
         from unittest.mock import patch
 
-        try:
-            from rgpycrumbs.prefix.delete_packages import main
-        except ImportError:
-            pytest.skip("delete_packages not importable")
+        main = _import_attr(
+            "rgpycrumbs.prefix.delete_packages",
+            "main",
+            "delete_packages not importable",
+        )
 
         runner = CliRunner()
         with patch(
@@ -1200,10 +1320,11 @@ class TestDeletePackagesDeep:
     def test_main_abort_on_prompt(self, tmp_path):
         from unittest.mock import patch
 
-        try:
-            from rgpycrumbs.prefix.delete_packages import main
-        except ImportError:
-            pytest.skip("delete_packages not importable")
+        main = _import_attr(
+            "rgpycrumbs.prefix.delete_packages",
+            "main",
+            "delete_packages not importable",
+        )
 
         runner = CliRunner()
         with patch(
@@ -1228,10 +1349,11 @@ class TestToMlflowDeep:
     """Cover remaining to_mlflow.py lines (182-210)."""
 
     def test_plot_structure_evolution_with_data(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.to_mlflow import plot_structure_evolution
-        except ImportError:
-            pytest.skip("to_mlflow not importable")
+        plot_structure_evolution = _import_attr(
+            "rgpycrumbs.eon.to_mlflow",
+            "plot_structure_evolution",
+            "to_mlflow not importable",
+        )
 
         # Create synthetic structures
         from ase.build import molecule
@@ -1251,10 +1373,11 @@ class TestConSplitterDeep:
     """Cover remaining con_splitter branches (lines 76-96)."""
 
     def test_split_single_frame(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.con_splitter import con_splitter as main
-        except ImportError:
-            pytest.skip("con_splitter not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.con_splitter",
+            "con_splitter",
+            "con_splitter not importable",
+        )
 
         # Single frame .con
         h2o = molecule("H2O")
@@ -1265,10 +1388,11 @@ class TestConSplitterDeep:
         result = runner.invoke(main, [str(con), "--output-dir", str(tmp_path / "out")])
 
     def test_split_multi_frame(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.con_splitter import con_splitter as main
-        except ImportError:
-            pytest.skip("con_splitter not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.con_splitter",
+            "con_splitter",
+            "con_splitter not importable",
+        )
 
         frames = [molecule("H2O") for _ in range(4)]
         for i, f in enumerate(frames):
@@ -1280,10 +1404,11 @@ class TestConSplitterDeep:
         result = runner.invoke(main, [str(con), "--output-dir", str(tmp_path / "out")])
 
     def test_split_with_prefix(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.con_splitter import con_splitter as main
-        except ImportError:
-            pytest.skip("con_splitter not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.con_splitter",
+            "con_splitter",
+            "con_splitter not importable",
+        )
 
         frames = [molecule("H2O") for _ in range(3)]
         con = tmp_path / "traj.con"
@@ -1299,10 +1424,11 @@ class TestNwchemGenDeep:
     """Cover remaining generate_nwchem_input lines."""
 
     def test_generate_with_pos_file(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.generate_nwchem_input import main
-        except ImportError:
-            pytest.skip("generate_nwchem_input not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.generate_nwchem_input",
+            "main",
+            "generate_nwchem_input not importable",
+        )
 
         # Create a pos.con file
         h2o = molecule("H2O")
@@ -1585,8 +1711,6 @@ class TestPlotGPBatchDeep:
 
     def test_batch_parallel(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "data" / "conv.h5"
         h5.parent.mkdir()
@@ -1637,8 +1761,6 @@ class TestPlotGPBatchDeep:
 
     def test_batch_unknown_type(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         cfg = tmp_path / "bad.toml"
         cfg.write_text(
@@ -1668,8 +1790,6 @@ class TestPlotGPBatchDeep:
 
     def test_batch_missing_input(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         cfg = tmp_path / "missing.toml"
         cfg.write_text(
@@ -2138,8 +2258,6 @@ class TestPlotGPBatchExtraArgs:
 
     def test_batch_with_bool_arg(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "data" / "s.h5"
         h5.parent.mkdir()
@@ -2176,8 +2294,6 @@ class TestPlotGPBatchExtraArgs:
 
     def test_batch_with_list_arg(self, tmp_path):
         cli = _try_import_plot_gp()
-        if cli is None:
-            pytest.skip("plot_gp not importable")
 
         h5 = tmp_path / "data" / "q.h5"
         h5.parent.mkdir()
@@ -2219,10 +2335,11 @@ class TestNwchemGenDeepExtra:
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
     def test_unix_socket_mode(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.generate_nwchem_input import main
-        except ImportError:
-            pytest.skip("not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.generate_nwchem_input",
+            "main",
+            "generate_nwchem_input not importable",
+        )
 
         h2o = molecule("H2O")
         pos = tmp_path / "pos.con"
@@ -2248,10 +2365,11 @@ class TestNwchemGenDeepExtra:
 
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
     def test_tcp_socket_mode(self, tmp_path):
-        try:
-            from rgpycrumbs.eon.generate_nwchem_input import main
-        except ImportError:
-            pytest.skip("not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.generate_nwchem_input",
+            "main",
+            "generate_nwchem_input not importable",
+        )
 
         h2o = molecule("H2O")
         pos = tmp_path / "pos.con"
@@ -2276,10 +2394,11 @@ class TestNwchemGenDeepExtra:
     @pytest.mark.skipif(not _HAS_PLT_NEB, reason="needs chemparseplot")
     def test_missing_settings(self, tmp_path):
         """Cover lines 109-111 (error handler)."""
-        try:
-            from rgpycrumbs.eon.generate_nwchem_input import main
-        except ImportError:
-            pytest.skip("not importable")
+        main = _import_attr(
+            "rgpycrumbs.eon.generate_nwchem_input",
+            "main",
+            "generate_nwchem_input not importable",
+        )
 
         runner = CliRunner()
         result = runner.invoke(
@@ -2301,10 +2420,11 @@ class TestLogParamsDeep:
 
     @pytest.mark.eon
     def test_empty_config(self, tmp_path):
-        try:
-            from rgpycrumbs.eon._mlflow.log_params import log_config_ini
-        except ImportError:
-            pytest.skip("needs mlflow")
+        log_config_ini = _import_attr(
+            "rgpycrumbs.eon._mlflow.log_params",
+            "log_config_ini",
+            "needs mlflow",
+        )
 
         # Empty config file
         cfg = tmp_path / "empty.ini"
@@ -2334,6 +2454,7 @@ class TestAuxDeep:
 
 
 @pytest.mark.fragments
+@pytest.mark.skipif(not _HAS_XVFB, reason="Xvfb not available")
 @pytest.mark.skipif(not _HAS_PYVISTA, reason="pyvista not installed")
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="chemparseplot not installed")
 class TestSolvisRendering:
@@ -2363,6 +2484,7 @@ class TestSolvisRendering:
 
 
 @pytest.mark.ptm
+@pytest.mark.skipif(not _HAS_OVITO_RENDER, reason="ovito render backend unavailable")
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="chemparseplot not installed")
 class TestOvitoRendering:
     """Test ovito backend in ptm env (has ovito)."""

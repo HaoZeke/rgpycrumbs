@@ -24,8 +24,9 @@ valley projection. Supports:
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot",
+#   "chemparseplot>=1.7.0",
 #   "xyzrender>=0.1.3",
+#   "readcon>=0.7.0",
 # ]
 # ///
 
@@ -35,19 +36,43 @@ from pathlib import Path
 import click
 import matplotlib.pyplot as plt
 import numpy as np
+
+try:
+    from rgpycrumbs._aux import warn_on_direct_script_import
+except ImportError:  # pragma: no cover - direct script execution without package root
+    warn_on_direct_script_import = None
+
+if warn_on_direct_script_import is not None:
+    warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-min")
+
+try:
+    from ._render_cli import add_render_options
+    from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
+except ImportError:  # pragma: no cover - direct script execution
+    from rgpycrumbs.eon._render_cli import add_render_options
+    from rgpycrumbs.eon._single_ended_cli import (
+        default_output_path,
+        load_trajectories,
+        overlay_labels,
+    )
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.parse.neb_utils import (
     calculate_landscape_coords,
     compute_synthetic_gradients,
 )
-from chemparseplot.parse.projection import compute_projection_basis, project_to_sd
-from chemparseplot.plot.neb import plot_structure_strip
 from chemparseplot.plot.optimization import (
-    plot_convergence_panel,
+    OVERLAY_COLORS,
+    annotate_endpoint,
+    create_landscape_axes,
     plot_optimization_landscape,
+    plot_single_ended_convergence,
+    plot_single_ended_profile,
+    project_landscape_path,
+    render_endpoint_strip,
+    save_landscape_figure,
 )
-from chemparseplot.plot.theme import apply_axis_theme, get_theme, setup_global_theme
-from matplotlib.gridspec import GridSpec
+from chemparseplot.plot.structs import convert_energy
+from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
 
 logging.basicConfig(
@@ -57,7 +82,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("rich")
 
-IRA_KMAX_DEFAULT = 1.8
+IRA_KMAX_DEFAULT = 14.0
 
 
 @click.command()
@@ -77,8 +102,8 @@ IRA_KMAX_DEFAULT = 1.8
 @click.option(
     "--prefix",
     type=str,
-    default="min",
-    help="Movie file prefix (default 'min').",
+    default="minimization",
+    help="Movie file prefix (default 'minimization').",
 )
 @click.option(
     "--plot-type",
@@ -105,6 +130,28 @@ IRA_KMAX_DEFAULT = 1.8
     help="IRA kmax parameter for RMSD calculation.",
 )
 @click.option(
+    "--energy-unit",
+    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
+    default="eV",
+    show_default=True,
+    help="Presentation unit for energy axes and color scales.",
+)
+@click.option(
+    "--energy-cap",
+    type=float,
+    default=None,
+    help="Clip trajectory energies at this absolute ceiling (in --energy-unit) "
+    "before the surface fit and color scale, so a few high-energy frames (e.g. "
+    "repulsive starts) do not flatten the colormap. Overrides --energy-cap-window.",
+)
+@click.option(
+    "--energy-cap-window",
+    type=float,
+    default=None,
+    help="Clip trajectory energies to this window above the minimum energy "
+    "(in --energy-unit). Ignored when --energy-cap is given.",
+)
+@click.option(
     "--theme",
     type=str,
     default="ruhi",
@@ -116,40 +163,12 @@ IRA_KMAX_DEFAULT = 1.8
     default="none",
     help="Show structure strip below landscape.",
 )
-@click.option(
-    "--strip-renderer",
-    type=click.Choice(["xyzrender", "ase", "solvis", "ovito"]),
-    default="xyzrender",
-    help="Rendering backend for structure strip.",
-)
-@click.option(
-    "--xyzrender-config",
-    type=str,
-    default="paton",
-    show_default=True,
-    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
-)
-@click.option("--strip-spacing", type=float, default=1.5, help="Column spacing in strip.")
+@add_render_options
 @click.option(
     "--strip-zoom",
     type=float,
     default=None,
     help="Strip image zoom (default: auto-scaled by atom count).",
-)
-@click.option(
-    "--strip-dividers",
-    is_flag=True,
-    default=False,
-    help="Show dividers between structures.",
-)
-@click.option(
-    "--rotation", type=str, default="auto", help="Viewing angle for structure rendering."
-)
-@click.option(
-    "--perspective-tilt",
-    type=float,
-    default=0.0,
-    help="Off-axis perspective tilt in degrees.",
 )
 @click.option(
     "-o",
@@ -165,7 +184,7 @@ IRA_KMAX_DEFAULT = 1.8
     help="Output resolution.",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
-def main(
+def main(  # noqa: PLR0913
     job_dir,
     label,
     prefix,
@@ -173,6 +192,9 @@ def main(
     project_path,
     surface_type,
     ira_kmax,
+    energy_unit,
+    energy_cap,
+    energy_cap_window,
     theme,
     plot_structures,
     strip_renderer,
@@ -194,27 +216,21 @@ def main(
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    if output is None:
-        output = Path(f"min_{plot_type}.pdf")
-
-    trajs = []
-    for jd in job_dir:
-        log.info("Loading minimization trajectory from %s", jd)
-        t = load_min_trajectory(jd, prefix=prefix)
-        log.info("  %d frames", len(t.atoms_list))
-        trajs.append(t)
-
-    labels = list(label) if label else [Path(jd).name for jd in job_dir]
-    if len(labels) < len(trajs):
-        labels.extend([f"Run {i + 1}" for i in range(len(labels), len(trajs))])
-
-    trajs[0]
+    output = default_output_path("min", plot_type, output)
+    trajs = load_trajectories(
+        job_dir,
+        lambda jd: load_min_trajectory(jd, prefix=prefix),
+        log_info=log.info,
+        noun="minimization trajectory",
+        detail=lambda traj: f"{len(traj.atoms_list)} frames",
+    )
+    labels = overlay_labels(job_dir, label)
 
     active_theme = get_theme(theme)
     setup_global_theme(active_theme)
 
     if plot_type == "profile":
-        _plot_profile(trajs, labels, output, dpi)
+        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
     elif plot_type == "landscape":
         _plot_landscape(
             trajs,
@@ -224,6 +240,9 @@ def main(
             project_path=project_path,
             surface_type=surface_type,
             ira_kmax=ira_kmax,
+            energy_unit=energy_unit,
+            energy_cap=energy_cap,
+            energy_cap_window=energy_cap_window,
             cmap=active_theme.cmap_landscape,
             plot_structures=plot_structures,
             strip_renderer=strip_renderer,
@@ -241,30 +260,16 @@ def main(
     log.info("Saved %s", output)
 
 
-_OVERLAY_COLORS = ["#004D40", "#FF655D", "#3F51B5", "#FF9800", "#9C27B0", "#009688"]
-
-
-def _plot_profile(trajs, labels, output, dpi):
-    fig, ax = plt.subplots(figsize=(5.37, 4), dpi=dpi)
-
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        dat = traj.dat_df
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
-        iters = dat["iteration"].to_numpy()
-        energies = dat["energy"].to_numpy()
-        ax.plot(
-            iters, energies, "o-", color=color, markersize=4, linewidth=1.5, label=lbl
-        )
-
-    ax.set_xlabel("Iteration")
-    ax.set_ylabel("Energy (eV)")
-    ax.set_title("Minimization Energy Profile")
-    if len(trajs) > 1:
-        ax.legend(frameon=False)
-
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
+    plot_single_ended_profile(
+        trajs,
+        labels,
+        output,
+        dpi,
+        energy_unit=energy_unit,
+        energy_column="energy",
+        title="Minimization Energy Profile",
+    )
 
 
 def _plot_landscape(
@@ -276,6 +281,9 @@ def _plot_landscape(
     project_path,
     surface_type,
     ira_kmax,
+    energy_unit,
+    energy_cap=None,
+    energy_cap_window=None,
     cmap="viridis",
     plot_structures="none",
     strip_renderer="xyzrender",
@@ -304,27 +312,21 @@ def _plot_landscape(
         ref_a=traj.initial_atoms,
         ref_b=traj.final_atoms,
     )
-    energies = traj.dat_df["energy"].to_numpy()
+    energies = convert_energy(traj.dat_df["energy"].to_numpy(), energy_unit)
     n = min(len(rmsd_a), len(energies))
     rmsd_a, rmsd_b, energies = rmsd_a[:n], rmsd_b[:n], energies[:n]
+    # Clip high-energy frames (e.g. a repulsive start) before the surface fit and
+    # synthetic gradients so the colormap resolves the region of interest.
+    cap = energy_cap
+    if cap is None and energy_cap_window is not None:
+        cap = float(np.min(energies)) + energy_cap_window
+    if cap is not None:
+        energies = np.minimum(energies, cap)
     f_para = -np.gradient(energies)
     grad_a, grad_b = compute_synthetic_gradients(rmsd_a, rmsd_b, f_para)
 
     has_strip = plot_structures == "endpoints"
-    fig = plt.figure(figsize=(5.37, 5.37 + (1.5 if has_strip else 0)), dpi=dpi)
-
-    if has_strip:
-        gs = GridSpec(2, 1, height_ratios=[1, 0.3], hspace=0.15, figure=fig)
-        ax = fig.add_subplot(gs[0])
-        ax_strip = fig.add_subplot(gs[1])
-        if theme:
-            apply_axis_theme(ax_strip, theme)
-    else:
-        ax = fig.add_subplot(111)
-        ax_strip = None
-
-    if theme:
-        apply_axis_theme(ax, theme)
+    fig, ax, ax_strip = create_landscape_axes(dpi=dpi, has_strip=has_strip, theme=theme)
 
     plot_optimization_landscape(
         ax,
@@ -337,9 +339,13 @@ def _plot_landscape(
         method=surface_type,
         cmap=cmap,
         label_mode="optimization",
+        energy_unit=energy_unit,
     )
 
     # Overlay paths from all trajectories
+    basis = None
+    if project_path:
+        _, _, basis = project_landscape_path(rmsd_a, rmsd_b, project_path=True)
     for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
         ra, rb = calculate_landscape_coords(
             t.atoms_list,
@@ -351,13 +357,9 @@ def _plot_landscape(
         m = min(len(ra), len(t.dat_df))
         ra, rb = ra[:m], rb[:m]
 
-        if project_path:
-            basis = compute_projection_basis(rmsd_a, rmsd_b)
-            px, py = project_to_sd(ra, rb, basis)
-        else:
-            px, py = ra, rb
+        px, py, _ = project_landscape_path(ra, rb, project_path=project_path, basis=basis)
 
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
+        color = OVERLAY_COLORS[idx % len(OVERLAY_COLORS)]
         if len(trajs) > 1:
             ax.plot(
                 px,
@@ -372,33 +374,11 @@ def _plot_landscape(
             )
 
     # Annotate endpoints
-    if project_path:
-        basis = compute_projection_basis(rmsd_a, rmsd_b)
-        s_all, d_all = project_to_sd(rmsd_a, rmsd_b, basis)
-        sx, sy = float(s_all[0]), float(d_all[0])
-        ex, ey = float(s_all[-1]), float(d_all[-1])
-    else:
-        sx, sy = float(rmsd_a[0]), float(rmsd_b[0])
-        ex, ey = float(rmsd_a[-1]), float(rmsd_b[-1])
-
-    ax.annotate(
-        "Init",
-        (sx, sy),
-        fontsize=10,
-        fontweight="bold",
-        ha="center",
-        va="bottom",
-        zorder=60,
+    plot_x, plot_y, _ = project_landscape_path(
+        rmsd_a, rmsd_b, project_path=project_path, basis=basis
     )
-    ax.annotate(
-        "Min",
-        (ex, ey),
-        fontsize=10,
-        fontweight="bold",
-        ha="center",
-        va="bottom",
-        zorder=60,
-    )
+    annotate_endpoint(ax, float(plot_x[0]), float(plot_y[0]), "Init", boxed=True)
+    annotate_endpoint(ax, float(plot_x[-1]), float(plot_y[-1]), "Min", boxed=True)
 
     if len(trajs) > 1:
         ax.legend(frameon=True, framealpha=0.9, loc="best")
@@ -413,41 +393,25 @@ def _plot_landscape(
             structs.append(traj.atoms_list[-1])
             strip_labels.append("Min")
 
-        # Scale zoom with atom count: small molecules (< 20 atoms) get 0.8,
-        # large systems (> 100 atoms) get 0.2, linear interpolation between
-        if strip_zoom is None:
-            max_atoms = max(len(s) for s in structs) if structs else 10
-            strip_zoom = max(0.25, 0.8 * (20 / max(max_atoms, 20)) ** 0.3)
-        plot_structure_strip(
+        render_endpoint_strip(
             ax_strip,
             structs,
             strip_labels,
-            zoom=strip_zoom,
+            strip_zoom=strip_zoom,
             rotation=rotation,
-            theme_color=theme.textcolor if theme else "black",
-            renderer=strip_renderer,
-            col_spacing=strip_spacing,
-            show_dividers=strip_dividers,
+            theme=theme,
+            strip_renderer=strip_renderer,
+            strip_spacing=strip_spacing,
+            strip_dividers=strip_dividers,
             perspective_tilt=perspective_tilt,
             xyzrender_config=xyzrender_config,
         )
 
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+    save_landscape_figure(fig, output, dpi=dpi, has_strip=has_strip, ax=ax, ax_strip=ax_strip)
 
 
 def _plot_convergence(trajs, labels, output, dpi):
-    fig, (ax_force, ax_step) = plt.subplots(1, 2, figsize=(10, 4), dpi=dpi)
-    for idx, (traj, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        color = _OVERLAY_COLORS[idx % len(_OVERLAY_COLORS)]
-        plot_convergence_panel(ax_force, ax_step, traj.dat_df, color=color)
-        ax_force.plot([], [], color=color, label=lbl)
-    if len(trajs) > 1:
-        ax_force.legend(frameon=False)
-    fig.tight_layout()
-    fig.savefig(str(output), dpi=dpi, bbox_inches="tight")
-    plt.close(fig)
+    plot_single_ended_convergence(trajs, labels, output, dpi)
 
 
 if __name__ == "__main__":

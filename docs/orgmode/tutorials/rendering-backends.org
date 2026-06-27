@@ -17,7 +17,7 @@ unique features. Each backend has different strengths.
 | xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | ~pip install xyzrender~ |
 | ASE | Space-filling | Fast | Built-in, no extra deps | Built-in |
 | solvis | Ball-and-stick | Medium | Transparent bg, PyVista 3D | ~pip install solvis-tools~ |
-| ovito | Configurable | Slow | Full MD viz, modifiers | ~pip install ovito~ |
+| ovito | Configurable | Slow | Full MD viz, modifiers | conda-forge / separate heavy install |
 
 * xyzrender
 
@@ -135,6 +135,11 @@ All backends share these controls:
 | ~--perspective-tilt N~ | Rodrigues off-axis tilt (degrees) |
 | ~--strip-spacing N~ | Horizontal gap between images |
 | ~--strip-dividers~ | Vertical separator lines |
+| ~--xyzrender-config NAME~ | xyzrender preset when that backend is active |
+
+All three eOn plotting CLIs (=plt-neb=, =plt-min=, and =plt-saddle=) now use
+the same renderer-option bundle, so these controls behave consistently across
+NEB, minimization, and saddle-search figure generation.
 
 * See Also
 

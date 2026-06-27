@@ -1,5 +1,6 @@
 import ast
 import re
+from functools import lru_cache
 from pathlib import Path
 
 import ase
@@ -12,21 +13,32 @@ from pyprotochemgp.systems.cuh2slab import prepare_scatter_points
 from rgpycrumbs._aux import get_gitroot, getstrform
 from rgpycrumbs.xts.cuh2.datgen import get_from_gitroot_con
 
-TRUE_E_DAT = get_from_gitroot_con(
-    fname="cuh2.con",
-    hh_range=cuh2slab.PltRange(low=-0.05, high=5),
-    h2slab_range=cuh2slab.PltRange(low=-0.05, high=5),
-    n_points=cuh2slab.PlotPoints(x_npt=40, y_npt=40),
-)
 
-CUH2_MIN = ase.io.read(getstrform(get_gitroot() / "cuh2.con"))
+def cuh2_potential():
+    """Return the CuH2 slab potential used by the XTS examples."""
+    return cuh2slab.CuH2PotSlab()
+
+
+@lru_cache(maxsize=1)
+def _true_e_dat():
+    return get_from_gitroot_con(
+        fname="cuh2.con",
+        hh_range=cuh2slab.PltRange(low=-0.05, high=5),
+        h2slab_range=cuh2slab.PltRange(low=-0.05, high=5),
+        n_points=cuh2slab.PlotPoints(x_npt=40, y_npt=40),
+    )
+
+
+@lru_cache(maxsize=1)
+def _cuh2_min():
+    return ase.io.read(getstrform(get_gitroot() / "cuh2.con"))
 
 
 def plot_band(_index, _band, _k, _method="xts", _opt="SD", _ci="False"):
     plot_last = _band
     cuh2slab.contour_plot(
-        TRUE_E_DAT.pltpts,
-        scatter_points=prepare_scatter_points(plot_last, CUH2_MIN),
+        _true_e_dat().pltpts,
+        scatter_points=prepare_scatter_points(plot_last, _cuh2_min()),
         title=f"({_opt}, CI: {_ci}, {_k})\n Band {_index} ({_method})",
     )
     oname = f"{_method}_{_opt}_{_ci}"

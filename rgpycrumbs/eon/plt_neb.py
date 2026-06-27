@@ -37,7 +37,7 @@ https://realpython.com/python-script-structure/
 #   "ase",
 #   "polars",
 #   "h5py",
-#   "chemparseplot",
+#   "chemparseplot>=1.7.0",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.7.0",
 # ]
@@ -54,12 +54,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from adjustText import adjust_text
+
+try:
+    from rgpycrumbs._aux import warn_on_direct_script_import
+except ImportError:  # pragma: no cover - direct script execution without package root
+    warn_on_direct_script_import = None
+
+if warn_on_direct_script_import is not None:
+    warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
+
+try:
+    from ._render_cli import add_render_options
+except ImportError:  # pragma: no cover - direct script execution
+    from rgpycrumbs.eon._render_cli import add_render_options
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
     estimate_rbf_smoothing,
     load_structures_and_calculate_additional_rmsd,
 )
+from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 
 # --- Library Imports ---
 from chemparseplot.parse.file_ import find_file_paths
@@ -91,13 +105,24 @@ except ImportError:
     compute_projection_basis = None
     project_to_sd = None
 from chemparseplot.plot.neb import (
+    convert_neb_values,
+    default_neb_ylabel,
+    landscape_half_span,
+    landscape_projection_basis,
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
-    plot_mmf_peaks_overlay,
+    plot_phase_points_overlay,
     plot_neb_evolution,
+    profile_strip_payload,
+    profile_structure_indices,
+    save_plot,
     plot_structure_inset,
     plot_structure_strip,
+)
+from chemparseplot.plot.structs import (
+    StructurePlacement,
+    convert_energy,
 )
 from chemparseplot.plot.theme import (
     apply_axis_theme,
@@ -117,7 +142,9 @@ log = logging.getLogger("rich")
 # --- Constants ---
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
-IRA_KMAX_DEFAULT = 1.8
+IRA_KMAX_DEFAULT = 14.0
+NEB_LANDSCAPE_STRIP_ZOOM_MULT = 1.95
+NEB_PROFILE_STRIP_ZOOM_MULT = 2.95
 
 
 # --- CLI ---
@@ -279,6 +306,13 @@ IRA_KMAX_DEFAULT = 1.8
 @click.option("--title", default="NEB Path", help="Plot title.")
 @click.option("--xlabel", default=None, help="X-axis label.")
 @click.option("--ylabel", default=None, help="Y-axis label.")
+@click.option(
+    "--energy-unit",
+    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
+    default="eV",
+    show_default=True,
+    help="Presentation unit for energy-like axes and color scales.",
+)
 # --- Theme and Override Options ---
 @click.option(
     "--theme",
@@ -320,52 +354,11 @@ IRA_KMAX_DEFAULT = 1.8
 @click.option(
     "--zoom-ratio",
     type=float,
-    default=0.4,
+    default=0.5,
     show_default=True,
     help="Scale the inset image.",
 )
-@click.option(
-    "--rotation",
-    "ase_rotation",
-    type=str,
-    default="auto",
-    show_default=True,
-    help="Viewing rotation. 'auto' lets xyzrender auto-orient (default). ASE-style string e.g. '0x,90y,0z' for manual control.",
-)
-@click.option(
-    "--perspective-tilt",
-    type=float,
-    default=0.0,
-    show_default=True,
-    help="Small off-axis tilt (degrees) to reveal occluded atoms. 5-10 is typical.",
-)
-@click.option(
-    "--strip-renderer",
-    type=click.Choice(["ase", "xyzrender", "solvis", "ovito"]),
-    default="xyzrender",
-    show_default=True,
-    help="Rendering backend for structure images (falls back to ASE if unavailable).",
-)
-@click.option(
-    "--xyzrender-config",
-    type=str,
-    default="paton",
-    show_default=True,
-    help="xyzrender preset (paton, bubble, flat, tube, wire, skeletal).",
-)
-@click.option(
-    "--strip-spacing",
-    type=float,
-    default=1.5,
-    show_default=True,
-    help="Horizontal spacing between structure images.",
-)
-@click.option(
-    "--strip-dividers/--no-strip-dividers",
-    is_flag=True,
-    default=False,
-    help="Draw vertical divider lines between structures.",
-)
+@add_render_options
 @click.option(
     "--arrow-head-length",
     type=float,
@@ -441,13 +434,13 @@ IRA_KMAX_DEFAULT = 1.8
     "--mmf-peaks/--no-mmf-peaks",
     is_flag=True,
     default=None,
-    help="Overlay MMF peak positions on landscape (auto-detected if peak files exist).",
+    help="Overlay OCI/MMF refinement samples on landscape (auto-detected from climb movies).",
 )
 @click.option(
     "--peak-dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     default=None,
-    help="Directory containing peak{NN}_pos.con files for MMF overlay.",
+    help="Directory containing OCI/MMF refinement outputs (for example climb/climb.con).",
 )
 @click.option(
     "--show-evolution",
@@ -496,6 +489,7 @@ def main(
     title,
     xlabel,
     ylabel,
+    energy_unit,
     highlight_last,
     # --- Theme ---
     theme,
@@ -509,7 +503,7 @@ def main(
     aspect_ratio,
     dpi,
     zoom_ratio,
-    ase_rotation,
+    rotation,
     perspective_tilt,
     strip_renderer,
     xyzrender_config,
@@ -559,7 +553,10 @@ def main(
     fig = plt.figure(figsize=figsize, dpi=dpi)
 
     # Layout Logic
-    has_strip = plot_structures in ["all", "crit_points"] and plot_type == "landscape"
+    has_strip = plot_structures in ["all", "crit_points"] and plot_type in {
+        "landscape",
+        "profile",
+    }
 
     if has_strip:
         # Heuristic layout adjustment
@@ -568,9 +565,14 @@ def main(
         )
         max_cols = 6
         n_rows = (n_expected + max_cols - 1) // max_cols
-        calc_hspace = 0.8 if n_rows > 1 else 0.3
+        if plot_type == "profile":
+            calc_hspace = 0.85 if n_rows > 1 else 0.30
+            height_ratios = [1, 0.72]
+        else:
+            calc_hspace = 0.75 if n_rows > 1 else 0.20
+            height_ratios = [1, 0.60]
 
-        gs = GridSpec(2, 1, height_ratios=[1, 0.25], hspace=calc_hspace, figure=fig)
+        gs = GridSpec(2, 1, height_ratios=height_ratios, hspace=calc_hspace, figure=fig)
         ax = fig.add_subplot(gs[0])
         ax_strip = fig.add_subplot(gs[1])
         apply_axis_theme(ax_strip, active_theme)
@@ -587,11 +589,12 @@ def main(
     # Only attempt to load structures if specifically requested or needed for the plot type
     if con_file:
         try:
-            atoms_list, additional_atoms_data, sp_data = (
-                load_structures_and_calculate_additional_rmsd(
-                    con_file, additional_con, ira_kmax, sp_file
-                )
+            overlay_bundle = load_structures_and_calculate_additional_rmsd(
+                con_file, additional_con, ira_kmax, sp_file
             )
+            atoms_list = overlay_bundle.atoms_list
+            additional_atoms_data = overlay_bundle.additional_structures
+            sp_data = overlay_bundle.saddle_point
         except Exception as e:
             log.error(f"Error loading structures: {e}")
             # Critical failure for landscape/RMSD modes
@@ -609,11 +612,7 @@ def main(
 
     if plot_type == "landscape":
         # --- Landscape Plot ---
-        z_label = (
-            "Relative Energy (eV)"
-            if plot_mode == "energy"
-            else r"Lowest Eigenvalue (eV/$\AA^2$)"
-        )
+        z_label = default_neb_ylabel(plot_mode, energy_unit)
 
         if source == "traj":
             df = trajectory_to_landscape_df(traj_atoms_list, ira_kmax=ira_kmax)
@@ -687,9 +686,13 @@ def main(
             # Prepare arrays
             r_all = df_surface["r"].to_numpy()
             p_all = df_surface["p"].to_numpy()
-            z_all = df_surface["z"].to_numpy()
-            gr_all = df_surface["grad_r"].to_numpy()
-            gp_all = df_surface["grad_p"].to_numpy()
+            z_all = convert_neb_values(df_surface["z"].to_numpy(), plot_mode, energy_unit)
+            gr_all = convert_neb_values(
+                df_surface["grad_r"].to_numpy(), plot_mode, energy_unit
+            )
+            gp_all = convert_neb_values(
+                df_surface["grad_p"].to_numpy(), plot_mode, energy_unit
+            )
             step_all = df_surface["step"].to_numpy()
 
             # Heuristic for RBF smoothing if missing
@@ -699,9 +702,9 @@ def main(
 
             extra_pts = []
             if sp_data:
-                extra_pts.append([sp_data["r"], sp_data["p"]])
-            for _, add_r, add_p, _ in additional_atoms_data:
-                extra_pts.append([add_r, add_p])
+                extra_pts.append([sp_data.r, sp_data.p])
+            for overlay in additional_atoms_data:
+                extra_pts.append([overlay.r, overlay.p])
             extra_pts_arr = np.array(extra_pts) if extra_pts else None
 
             # Pre-compute viewport from FULL data (not filtered surface data)
@@ -711,9 +714,16 @@ def main(
                 _s_pad = (_s.max() - _s.min()) * 0.1
                 vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
                 _half = (vp_xlim[1] - vp_xlim[0]) / 2
-                for _, add_r, add_p, _ in additional_atoms_data:
+                # Make sure the trajectory itself fits inside the symmetric
+                # d window before considering additional structures, so the
+                # converged path and saddle marker do not get clipped at
+                # the top/bottom of the viewport.
+                _half = max(
+                    _half, abs(float(_d.max())) * 1.15, abs(float(_d.min())) * 1.15
+                )
+                for overlay in additional_atoms_data:
                     _, _ad = project_to_sd(
-                        np.array([add_r]), np.array([add_p]), global_basis
+                        np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.15)
                 vp_ylim = (-_half, _half)
@@ -751,7 +761,7 @@ def main(
         df_final = df.filter(pl.col("step") == max_step)
         final_r = df_final["r"].to_numpy()
         final_p = df_final["p"].to_numpy()
-        final_z = df_final["z"].to_numpy()
+        final_z = convert_neb_values(df_final["z"].to_numpy(), plot_mode, energy_unit)
 
         # Pass all-iteration data for triangulated background when no GP surface
         bg_kwargs = {}
@@ -759,7 +769,7 @@ def main(
             bg_kwargs = {
                 "all_r": df["r"].to_numpy(),
                 "all_p": df["p"].to_numpy(),
-                "all_z": df["z"].to_numpy(),
+                "all_z": convert_neb_values(df["z"].to_numpy(), plot_mode, energy_unit),
             }
 
         plot_landscape_path_overlay(
@@ -774,51 +784,66 @@ def main(
             **bg_kwargs,
         )
 
-        # --- OCI-NEB/RONEB: MMF Peaks Overlay ---
+        # --- OCI-NEB/RONEB: refinement-sample overlay ---
         _show_mmf = mmf_peaks
         _peak_search_dir = peak_dir or Path(".")
         if _show_mmf is None:
-            # Auto-detect: check if peak files exist
-            _show_mmf = len(list(_peak_search_dir.glob("peak*_pos.con"))) > 0
+            _show_mmf = any(
+                (_peak_search_dir / name).exists() for name in ("climb", "climb.con")
+            )
         if _show_mmf:
-            peak_files = sorted(_peak_search_dir.glob("peak*_pos.con"))
-            if peak_files:
-                import readcon
+            from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
 
-                from rgpycrumbs.geom.api.alignment import calculate_rmsd_from_ref
+            try:
+                from rgpycrumbs._aux import _import_from_parent_env
 
+                _ira_mod = _import_from_parent_env("ira_mod")
+                ira_instance = _ira_mod.IRA()
+            except (ImportError, AttributeError):
+                ira_instance = None
+
+            # Use same references as the main path
+            ref_r = atoms_list[0] if atoms_list else None
+            ref_p = atoms_list[-1] if atoms_list else None
+            if ref_r is not None and ref_p is not None:
                 try:
-                    from rgpycrumbs._aux import _import_from_parent_env
+                    dimer_traj = load_dimer_trajectory(_peak_search_dir)
+                except (FileNotFoundError, ValueError):
+                    dimer_traj = None
 
-                    _ira_mod = _import_from_parent_env("ira_mod")
-                    ira_instance = _ira_mod.IRA()
-                except (ImportError, AttributeError):
-                    ira_instance = None
-                peak_atoms = [readcon.read_con_as_ase(str(pf))[0] for pf in peak_files]
-                # Use same references as the main path
-                ref_r = atoms_list[0] if atoms_list else None
-                ref_p = atoms_list[-1] if atoms_list else None
-                if ref_r is not None and ref_p is not None:
-                    peak_rmsd_r = calculate_rmsd_from_ref(
-                        peak_atoms, ira_instance, ref_atom=ref_r, ira_kmax=ira_kmax
-                    )
-                    peak_rmsd_p = calculate_rmsd_from_ref(
-                        peak_atoms, ira_instance, ref_atom=ref_p, ira_kmax=ira_kmax
-                    )
-                    # Energies from peak structures (if available)
-                    peak_e = np.array(
-                        [a.get_potential_energy() if a.calc else 0.0 for a in peak_atoms]
-                    )
-                    plot_mmf_peaks_overlay(
-                        ax,
-                        peak_rmsd_r,
-                        peak_rmsd_p,
-                        peak_e,
-                        project_path=project_path,
-                        path_rmsd_r=final_r,
-                        path_rmsd_p=final_p,
-                    )
-                    log.info("Plotted %d MMF peak(s)", len(peak_files))
+                if dimer_traj is not None and dimer_traj.atoms_list:
+                    try:
+                        dimer_rmsd_r = calculate_rmsd_from_ref(
+                            dimer_traj.atoms_list,
+                            ira_instance,
+                            ref_atom=ref_r,
+                            ira_kmax=ira_kmax,
+                        )
+                        dimer_rmsd_p = calculate_rmsd_from_ref(
+                            dimer_traj.atoms_list,
+                            ira_instance,
+                            ref_atom=ref_p,
+                            ira_kmax=ira_kmax,
+                        )
+                    except ValueError as exc:
+                        log.warning(
+                            "Skipping MMF refinement overlay from %s: %s",
+                            _peak_search_dir,
+                            exc,
+                        )
+                    else:
+                        plot_phase_points_overlay(
+                            ax,
+                            dimer_rmsd_r,
+                            dimer_rmsd_p,
+                            project_path=project_path,
+                            path_rmsd_r=final_r,
+                            path_rmsd_p=final_p,
+                        )
+                        log.info(
+                            "Plotted %d MMF refinement frame(s)",
+                            len(dimer_traj.atoms_list),
+                        )
 
         # --- OCI-NEB/RONEB: Band Evolution ---
         if show_evolution:
@@ -841,7 +866,7 @@ def main(
         # Saddle Point Marker
         if sp_data:
             # Use explicit SP coordinates
-            sp_x_raw, sp_y_raw = sp_data["r"], sp_data["p"]
+            sp_x_raw, sp_y_raw = sp_data.r, sp_data.p
             log.info(f"Plotting explicit SP at R={sp_x_raw:.3f}, P={sp_y_raw:.3f}")
         else:
             # Fallback to heuristic
@@ -853,11 +878,7 @@ def main(
 
         # Apply projection to saddle point if enabled
         if project_path:
-            _sp_basis = (
-                global_basis
-                if global_basis is not None
-                else compute_projection_basis(final_r, final_p)
-            )
+            _sp_basis = landscape_projection_basis(global_basis, final_r, final_p)
             sp_sd = project_to_sd(np.array([sp_x_raw]), np.array([sp_y_raw]), _sp_basis)
             sp_x, sp_y = float(sp_sd[0][0]), float(sp_sd[1][0])
         else:
@@ -866,8 +887,8 @@ def main(
         ax.scatter(
             sp_x,
             sp_y,
-            marker="s",
-            s=int(active_theme.font_size * 2),
+            marker="*",
+            s=int(active_theme.font_size**2 * 1.5),
             c="white",
             edgecolors="black",
             linewidths=1.5,
@@ -877,21 +898,19 @@ def main(
 
         if additional_atoms_data:
             marker_cmap = mpl.colormaps.get_cmap("tab10")
-            for i, (_, add_r, add_p, add_label) in enumerate(additional_atoms_data):
+            for i, overlay in enumerate(additional_atoms_data):
                 color = marker_cmap(i % 10)
 
                 if project_path:
-                    _add_basis = (
-                        global_basis
-                        if global_basis is not None
-                        else compute_projection_basis(final_r, final_p)
+                    _add_basis = landscape_projection_basis(
+                        global_basis, final_r, final_p
                     )
                     _s, _d = project_to_sd(
-                        np.array([add_r]), np.array([add_p]), _add_basis
+                        np.array([overlay.r]), np.array([overlay.p]), _add_basis
                     )
                     plot_add_r, plot_add_p = float(_s[0]), float(_d[0])
                 else:
-                    plot_add_r, plot_add_p = add_r, add_p
+                    plot_add_r, plot_add_p = overlay.r, overlay.p
 
                 ax.plot(
                     plot_add_r,
@@ -903,7 +922,7 @@ def main(
                     markeredgewidth=1.0,
                     linestyle="None",
                     zorder=102,
-                    label=add_label,
+                    label=overlay.label,
                 )
 
         if has_strip and atoms_list:
@@ -912,11 +931,7 @@ def main(
             # Helper to calculate projected coordinates for labels
             def get_projected_coords(r_val, p_val):
                 if project_path:
-                    _pc_basis = (
-                        global_basis
-                        if global_basis is not None
-                        else compute_projection_basis(final_r, final_p)
-                    )
+                    _pc_basis = landscape_projection_basis(global_basis, final_r, final_p)
                     _s, _d = project_to_sd(
                         np.array([r_val]), np.array([p_val]), _pc_basis
                     )
@@ -925,13 +940,20 @@ def main(
 
             # Add Reactant
             rx, ry = get_projected_coords(final_r[0], final_p[0])
-            strip_payload.append({"atoms": atoms_list[0], "x": rx, "y": ry, "label": "R"})
+            strip_payload.append(
+                StructurePlacement(atoms=atoms_list[0], x=rx, y=ry, label="R")
+            )
 
             # Add Saddle (Explicit or Heuristic)
             if sp_data:
-                sx, sy = get_projected_coords(sp_data["r"], sp_data["p"])
+                sx, sy = get_projected_coords(sp_data.r, sp_data.p)
                 strip_payload.append(
-                    {"atoms": sp_data["atoms"], "x": sx, "y": sy, "label": "SP"}
+                    StructurePlacement(
+                        atoms=sp_data.atoms,
+                        x=sx,
+                        y=sy,
+                        label=sp_data.label,
+                    )
                 )
             else:
                 s_idx = (
@@ -941,13 +963,18 @@ def main(
                 )
                 sx, sy = get_projected_coords(final_r[s_idx], final_p[s_idx])
                 strip_payload.append(
-                    {"atoms": atoms_list[s_idx], "x": sx, "y": sy, "label": "SP"}
+                    StructurePlacement(
+                        atoms=atoms_list[s_idx],
+                        x=sx,
+                        y=sy,
+                        label="SP",
+                    )
                 )
 
             # Add Product
             px, py = get_projected_coords(final_r[-1], final_p[-1])
             strip_payload.append(
-                {"atoms": atoms_list[-1], "x": px, "y": py, "label": "P"}
+                StructurePlacement(atoms=atoms_list[-1], x=px, y=py, label="P")
             )
 
             # Add intermediate points if 'all' requested
@@ -955,37 +982,40 @@ def main(
                 for i in range(1, len(atoms_list) - 1):
                     ix, iy = get_projected_coords(final_r[i], final_p[i])
                     strip_payload.append(
-                        {"atoms": atoms_list[i], "x": ix, "y": iy, "label": str(i)}
+                        StructurePlacement(
+                            atoms=atoms_list[i],
+                            x=ix,
+                            y=iy,
+                            label=str(i),
+                        )
                     )
 
             # Add additional structures
-            for add_atoms, add_r, add_p, add_label in additional_atoms_data:
-                ax_r, ax_p = get_projected_coords(add_r, add_p)
+            for overlay in additional_atoms_data:
+                ax_r, ax_p = get_projected_coords(overlay.r, overlay.p)
                 strip_payload.append(
-                    {
-                        "atoms": add_atoms,
-                        "x": ax_r,
-                        "y": ax_p,
-                        "label": add_label,
-                    }
+                    StructurePlacement(
+                        atoms=overlay.atoms,
+                        x=ax_r,
+                        y=ax_p,
+                        label=overlay.label,
+                    )
                 )
 
-            strip_payload.sort(key=lambda d: d["x"])
-            labels = [d["label"] for d in strip_payload]
-            structs = [d["atoms"] for d in strip_payload]
+            strip_payload.sort(key=lambda entry: entry.x)
 
             plot_structure_strip(
                 ax_strip,
-                structs,
-                labels,
-                zoom=zoom_ratio,
-                rotation=ase_rotation,
+                strip_payload,
+                zoom=zoom_ratio * NEB_LANDSCAPE_STRIP_ZOOM_MULT,
+                rotation=rotation,
                 theme_color=active_theme.textcolor,
                 renderer=strip_renderer,
                 xyzrender_config=xyzrender_config,
                 col_spacing=strip_spacing,
                 show_dividers=strip_dividers,
                 perspective_tilt=perspective_tilt,
+                width_fill_fraction=0.94,
             )
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
@@ -993,12 +1023,12 @@ def main(
             main_plot_texts = []
             main_labels = {"R", "SP", "P"}
             for d in strip_payload:
-                if d["label"] not in main_labels:
+                if d.label not in main_labels:
                     continue
                 t = ax.text(
-                    d["x"],
-                    d["y"],
-                    d["label"],
+                    d.x,
+                    d.y,
+                    d.label,
                     fontsize=11,
                     fontweight="bold",
                     color="white",
@@ -1033,6 +1063,7 @@ def main(
 
     else:
         # --- Profile Plot ---
+        strip_payload = []
         if source == "hdf5":
             if not input_h5:
                 log.critical("--input-h5 is required when --source hdf5 is used.")
@@ -1053,6 +1084,9 @@ def main(
                 data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
 
             y_col = 2 if plot_mode == "energy" else 4
+            data[y_col] = convert_neb_values(data[y_col], plot_mode, energy_unit)
+            if plot_mode == "energy":
+                data[3] = convert_energy(data[3], energy_unit)
             color = active_theme.highlight_color
             plot_energy_path(
                 ax,
@@ -1076,6 +1110,9 @@ def main(
                 data[1] = data[1] / data[1].max() if data[1].max() > 0 else data[1]
 
             y_col = 2 if plot_mode == "energy" else 4
+            data[y_col] = convert_neb_values(data[y_col], plot_mode, energy_unit)
+            if plot_mode == "energy":
+                data[3] = convert_energy(data[3], energy_unit)
             color = active_theme.highlight_color
             plot_energy_path(
                 ax,
@@ -1089,44 +1126,45 @@ def main(
             )
 
             if atoms_list and plot_structures != "none":
-                indices = (
-                    list(range(len(atoms_list)))
-                    if plot_structures == "all"
-                    else sorted(
-                        {
-                            0,
-                            np.argmax(data[y_col][1:-1]) + 1
-                            if plot_mode == "energy"
-                            else np.argmin(data[y_col]),
-                            len(atoms_list) - 1,
-                        }
+                if has_strip:
+                    strip_payload.extend(
+                        profile_strip_payload(
+                            atoms_list,
+                            data[1],
+                            data[y_col],
+                            plot_structures,
+                            plot_mode,
+                        )
                     )
-                )
-                for i in indices:
-                    if i == 0:
-                        xybox, rad = draw_reactant[:2], draw_reactant[2]
-                    elif i == len(atoms_list) - 1:
-                        xybox, rad = draw_product[:2], draw_product[2]
-                    else:
-                        xybox, rad = draw_saddle[:2], draw_saddle[2]
-
-                    if plot_structures == "all":
-                        xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
-                        rad = 0.1 if i % 2 == 0 else -0.1
-
-                    plot_structure_inset(
-                        ax,
-                        atoms_list[i],
-                        data[1][i],
-                        data[y_col][i],
-                        xybox,
-                        rad,
-                        zoom=zoom_ratio,
-                        rotation=ase_rotation,
-                        renderer=strip_renderer,
-                        xyzrender_config=xyzrender_config,
-                        perspective_tilt=perspective_tilt,
+                else:
+                    indices = profile_structure_indices(
+                        atoms_list, data[y_col], plot_structures, plot_mode
                     )
+                    for i in indices:
+                        if i == 0:
+                            xybox, rad = draw_reactant[:2], draw_reactant[2]
+                        elif i == len(atoms_list) - 1:
+                            xybox, rad = draw_product[:2], draw_product[2]
+                        else:
+                            xybox, rad = draw_saddle[:2], draw_saddle[2]
+
+                        if plot_structures == "all":
+                            xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
+                            rad = 0.1 if i % 2 == 0 else -0.1
+
+                        plot_structure_inset(
+                            ax,
+                            atoms_list[i],
+                            data[1][i],
+                            data[y_col][i],
+                            xybox,
+                            rad,
+                            zoom=zoom_ratio,
+                            rotation=rotation,
+                            renderer=strip_renderer,
+                            xyzrender_config=xyzrender_config,
+                            perspective_tilt=perspective_tilt,
+                        )
         else:
             # eOn source: multiple .dat files
             dat_paths = find_file_paths(input_dat_pattern)
@@ -1183,6 +1221,9 @@ def main(
                     step_label = f"Step {idx + 1}" if idx == 0 else None
 
                 # Plot
+                data[y_col] = convert_neb_values(data[y_col], plot_mode, energy_unit)
+                if plot_mode == "energy":
+                    data[3] = convert_energy(data[3], energy_unit)
                 plot_energy_path(
                     ax,
                     data[1],
@@ -1201,62 +1242,71 @@ def main(
                     and atoms_list
                     and plot_structures != "none"
                 ):
-                    indices = (
-                        list(range(len(atoms_list)))
-                        if plot_structures == "all"
-                        else sorted(
-                            {
-                                0,
-                                np.argmax(data[y_col][1:-1]) + 1
-                                if plot_mode == "energy"
-                                else np.argmin(data[y_col]),
-                                len(atoms_list) - 1,
-                            }
+                    if has_strip:
+                        strip_payload.extend(
+                            profile_strip_payload(
+                                atoms_list,
+                                data[1],
+                                data[y_col],
+                                plot_structures,
+                                plot_mode,
+                            )
                         )
-                    )
-                    for i in indices:
-                        if i == 0:
-                            xybox, rad = draw_reactant[:2], draw_reactant[2]
-                        elif i == len(atoms_list) - 1:
-                            xybox, rad = draw_product[:2], draw_product[2]
-                        else:
-                            xybox, rad = draw_saddle[:2], draw_saddle[2]
-
-                        if plot_structures == "all":
-                            xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
-                            rad = 0.1 if i % 2 == 0 else -0.1
-
-                        # Call library function
-                        plot_structure_inset(
-                            ax,
-                            atoms_list[i],
-                            data[1][i],
-                            data[y_col][i],
-                            xybox,
-                            rad,
-                            zoom=zoom_ratio,
-                            rotation=ase_rotation,
-                            renderer=strip_renderer,
-                            xyzrender_config=xyzrender_config,
+                    else:
+                        indices = profile_structure_indices(
+                            atoms_list, data[y_col], plot_structures, plot_mode
                         )
+                        for i in indices:
+                            if i == 0:
+                                xybox, rad = draw_reactant[:2], draw_reactant[2]
+                            elif i == len(atoms_list) - 1:
+                                xybox, rad = draw_product[:2], draw_product[2]
+                            else:
+                                xybox, rad = draw_saddle[:2], draw_saddle[2]
+
+                            if plot_structures == "all":
+                                xybox = (15.0, 60.0 if i % 2 == 0 else -60.0)
+                                rad = 0.1 if i % 2 == 0 else -0.1
+
+                            # Call library function
+                            plot_structure_inset(
+                                ax,
+                                atoms_list[i],
+                                data[1][i],
+                                data[y_col][i],
+                                xybox,
+                                rad,
+                                zoom=zoom_ratio,
+                                rotation=rotation,
+                                renderer=strip_renderer,
+                                xyzrender_config=xyzrender_config,
+                            )
 
         # --- Profile Additional Structures ---
         if additional_atoms_data and rc_mode == "rmsd":
-            for i, (add_atoms, add_r, _) in enumerate(additional_atoms_data):
+            for i, overlay in enumerate(additional_atoms_data):
                 ax.axvline(
-                    add_r,
+                    overlay.r,
                     color=active_theme.gridcolor,
                     linestyle=":",
                     linewidth=2,
                     zorder=90,
                 )
-                if plot_structures != "none":
+                if has_strip:
+                    strip_payload.append(
+                        StructurePlacement(
+                            atoms=overlay.atoms,
+                            x=float(overlay.r),
+                            label=overlay.label,
+                        )
+                    )
+                elif plot_structures != "none":
                     y_span = ax.get_ylim()[1] - ax.get_ylim()[0]
                     y_pos = ax.get_ylim()[0] + 0.9 * y_span
                     plot_structure_inset(
                         ax,
-                        add_atoms,
-                        add_r,
+                        overlay.atoms,
+                        overlay.r,
                         y_pos,
                         xybox=(
                             draw_saddle[0] + (i * 15),
@@ -1264,7 +1314,7 @@ def main(
                         ),  # Stagger slightly
                         rad=draw_saddle[2],
                         zoom=zoom_ratio,
-                        rotation=ase_rotation,
+                        rotation=rotation,
                         renderer=strip_renderer,
                         xyzrender_config=xyzrender_config,
                         arrow_props={
@@ -1281,11 +1331,35 @@ def main(
                         },
                     )
 
+        if has_strip and strip_payload:
+            deduped_payload = []
+            seen = set()
+            for entry in sorted(strip_payload, key=lambda d: d.x):
+                key = (entry.label, round(entry.x, 8))
+                if key in seen:
+                    continue
+                seen.add(key)
+                deduped_payload.append(entry)
+
+            plot_structure_strip(
+                ax_strip,
+                deduped_payload,
+                zoom=zoom_ratio * NEB_PROFILE_STRIP_ZOOM_MULT,
+                rotation=rotation,
+                theme_color=active_theme.textcolor,
+                renderer=strip_renderer,
+                xyzrender_config=xyzrender_config,
+                col_spacing=strip_spacing,
+                show_dividers=strip_dividers,
+                perspective_tilt=perspective_tilt,
+                width_fill_fraction=0.97,
+            )
+
         # Profile Labels
         final_xlabel = xlabel or (
             r"RMSD ($\AA$)" if rc_mode == "rmsd" else r"Reaction Coordinate ($\AA$)"
         )
-        final_ylabel = ylabel or "Relative Energy (eV)"
+        final_ylabel = ylabel or default_neb_ylabel(plot_mode, energy_unit)
         final_title = title
 
     # Final Aesthetics
@@ -1300,13 +1374,13 @@ def main(
             # Force Y-axis to be symmetric and match the X-axis span,
             # but expand if additional structures fall outside
             x_min, x_max = ax.get_xlim()
-            x_span = x_max - x_min
-            half_span = x_span / 2
-            if additional_atoms_data:
-                _basis = compute_projection_basis(final_r, final_p)
-                for _, add_r, add_p, _ in additional_atoms_data:
-                    _, add_d = project_to_sd(np.array([add_r]), np.array([add_p]), _basis)
-                    half_span = max(half_span, abs(float(add_d[0])) * 1.15)
+            half_span = landscape_half_span(
+                (x_min, x_max),
+                final_r,
+                final_p,
+                additional_atoms_data,
+                global_basis,
+            )
             ax.set_ylim(-half_span, half_span)
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
 
@@ -1324,7 +1398,8 @@ def main(
             fontsize=int(active_theme.font_size * 0.8),
         ).set_zorder(101)
 
-    plt.tight_layout(pad=0.5)
+    if not ax_strip:
+        plt.tight_layout(pad=0.5)
 
     if ax_strip:
         pos_main = ax.get_position()
@@ -1343,9 +1418,7 @@ def main(
                 artist.set_clip_on(True)
 
     if output_file:
-        plt.savefig(
-            output_file, transparent=False, bbox_inches="tight", pad_inches=0.1, dpi=dpi
-        )
+        save_plot(output_file, dpi, has_strip=ax_strip is not None)
     else:
         plt.show()
 

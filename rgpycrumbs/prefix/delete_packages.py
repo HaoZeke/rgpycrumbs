@@ -6,7 +6,7 @@
 # https://github.com/prefix-dev/prefix-dev/issues/29
 
 # /// script
-# requires-python = ">=3.8"
+# requires-python = ">=3.11"
 # dependencies = [
 #   "click==8.1.6",
 #   "requests==2.31.0",

@@ -1,10 +1,11 @@
 import sys
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
 
-from rgpycrumbs.cli import _make_script_command, main
+from rgpycrumbs.cli import _dispatch, _make_script_command, main
 
 pytestmark = pytest.mark.pure
 
@@ -39,7 +40,7 @@ def test_cli_standard_execution(mock_run, runner, mock_script_group):
 
     assert executed_command[0] == "uv"
     assert executed_command[1] == "run"
-    assert "dummy_script.py" in str(executed_command[2])
+    assert any("dummy_script.py" in str(part) for part in executed_command)
     assert "arg1" in executed_command
 
 
@@ -66,3 +67,66 @@ def test_cli_verbose_output(mock_run, runner, mock_script_group):
     # Check that our verbose click.echo statements fired
     assert "VERBOSE: Resolved script path ->" in result.output
     assert "VERBOSE: Constructed command -> uv run" in result.output
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_preserves_user_site_package_path(mock_run, monkeypatch):
+    """_dispatch should join parent site-packages paths, not split strings."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.site.getsitepackages",
+        lambda: ["/global/site-packages"],
+    )
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.site.getusersitepackages",
+        lambda: "/user/site-packages",
+    )
+
+    _dispatch("group", "script", ())
+
+    env = mock_run.call_args.kwargs["env"]
+    assert env["RGPYCRUMBS_PARENT_SITE_PACKAGES"] == (
+        "/global/site-packages:/user/site-packages"
+    )
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatch):
+    """_dispatch should satisfy local linked deps via --with-editable."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.importlib.util.find_spec",
+        lambda name: SimpleNamespace(
+            origin="/tmp/chemparseplot/chemparseplot/__init__.py",
+            submodule_search_locations=["/tmp/chemparseplot/chemparseplot"],
+        )
+        if name == "chemparseplot"
+        else None,
+    )
+
+    _dispatch("group", "script", ("--flag",))
+
+    executed_command = mock_run.call_args[0][0]
+    assert executed_command[:2] == ["uv", "run"]
+    assert "--with-editable" in executed_command
+    editable_idx = executed_command.index("--with-editable")
+    # Prefer package dir when submodule_search_locations is set; fall back to repo root.
+    assert executed_command[editable_idx + 1] in {
+        "/tmp/chemparseplot",
+        "/tmp/chemparseplot/chemparseplot",
+    }
+    assert str(executed_command[-2]).endswith("script.py")
+    assert executed_command[-1] == "--flag"
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_skips_editable_sources_when_absent(mock_run, monkeypatch):
+    """_dispatch should not add editable flags without a linked checkout."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setattr("rgpycrumbs.cli.importlib.util.find_spec", lambda name: None)
+
+    _dispatch("group", "script", ())
+
+    executed_command = mock_run.call_args[0][0]
+    assert executed_command[:2] == ["uv", "run"]
+    assert "--with-editable" not in executed_command

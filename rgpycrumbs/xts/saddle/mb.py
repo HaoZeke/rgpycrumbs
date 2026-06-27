@@ -9,10 +9,13 @@ import numpy as np
 
 from rgpycrumbs.func.muller_brown import muller_brown
 
-x = np.linspace(-1.5, 1.2, 400)
-y = np.linspace(-0.2, 2.0, 400)
-X, Y = np.meshgrid(x, y)
-Z = muller_brown([X, Y])
+
+def _surface_grid():
+    x = np.linspace(-1.5, 1.2, 400)
+    y = np.linspace(-0.2, 2.0, 400)
+    X, Y = np.meshgrid(x, y)
+    Z = muller_brown([X, Y])
+    return X, Y, Z
 
 
 if __name__ == "__main__":
@@ -33,6 +36,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     nimgs = int(args.nimgs)
+    X, Y, Z = _surface_grid()
 
     otext = Path(args.ifile).open().readlines()
     ilines = [x for x in otext if "Iteration" in x]

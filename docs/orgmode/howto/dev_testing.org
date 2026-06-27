@@ -72,4 +72,4 @@ digraph coverage_flow {
 - New modules must have tests in the same PR
 - Plot functions: at least smoke tests
 - Parsers: synthetic input + output schema validation
-- Conda-only deps (IRA, jax, tblite): tested in their pixi env, not mocked
+- Pixi-only or heavyweight deps (IRA, tblite, pyvista, ovito): tested in their dedicated envs, not mocked

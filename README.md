@@ -16,6 +16,9 @@
     -   [Release Process](#release-notes)
 -   [License](#license)
 
+> Canonical source note: this Org file is authoritative for contributor-facing
+> documentation. Rendered Markdown files are derived artifacts and should not be
+> edited separately.
 
 
 <a id="about"></a>
@@ -171,7 +174,7 @@ You can see the list of available command groups:
     
     -   Basic Usage
     
-            python -m rgpycrumbs eon plt-neb --con-file trajectory.con --plot-type landscape -o neb_landscape.png
+            python -m rgpycrumbs.cli eon plt-neb --con-file trajectory.con --plot-type landscape -o neb_landscape.png
     
     -   Key Options
     
@@ -224,6 +227,24 @@ You can see the list of available command groups:
         </tr>
         
         <tr>
+        <td class="org-left"><code>--energy-unit</code></td>
+        <td class="org-left">Presentation unit: <code>eV</code>, <code>kcal/mol</code>, <code>kJ/mol</code></td>
+        <td class="org-left"><code>eV</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--strip-renderer</code></td>
+        <td class="org-left">Structure renderer backend</td>
+        <td class="org-left"><code>xyzrender</code></td>
+        </tr>
+        
+        <tr>
+        <td class="org-left"><code>--xyzrender-config</code></td>
+        <td class="org-left">xyzrender preset used for strips</td>
+        <td class="org-left"><code>paton</code></td>
+        </tr>
+        
+        <tr>
         <td class="org-left"><code>--show-legend</code></td>
         <td class="org-left">Show colorbar legend</td>
         <td class="org-left">Off</td>
@@ -244,7 +265,7 @@ You can see the list of available command groups:
         <tr>
         <td class="org-left"><code>--ira-kmax</code></td>
         <td class="org-left">kmax factor for IRA RMSD calculation</td>
-        <td class="org-left">1.8</td>
+        <td class="org-left">14.0</td>
         </tr>
         
         <tr>
@@ -257,55 +278,25 @@ You can see the list of available command groups:
         
         Use `--landscape-path all` to overlay all optimization steps and visualize convergence.
         This shows the full trajectory from initial guess to final path [1].
-        
-        <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-        
-        
-        <colgroup>
-        <col  class="org-left" />
-        
-        <col  class="org-left" />
-        
-        <col  class="org-left" />
-        </colgroup>
-        <tbody>
-        <tr>
-        <td class="org-left"><code>--show-pts</code> / <code>--no-show-pts</code></td>
-        <td class="org-left">Show data points on surface</td>
-        <td class="org-left"><code>--show-pts</code></td>
-        </tr>
-        
-        <tr>
-        <td class="org-left"><code>--ira-kmax</code></td>
-        <td class="org-left">kmax factor for IRA RMSD calculation</td>
-        <td class="org-left">1.8</td>
-        </tr>
-        
-        <tr>
-        <td class="org-left"><code>-o PATH</code></td>
-        <td class="org-left">Output image filename</td>
-        <td class="org-left">None (display)</td>
-        </tr>
-        </tbody>
-        </table>
     
     -   Examples
     
         Full landscape with gradient-enhanced IMQ surface and critical point structures:
         
-            python -m rgpycrumbs eon plt-neb \
+            python -m rgpycrumbs.cli eon plt-neb \
               --con-file neb.con \
               --plot-type landscape \
               --project-path \
               --plot-structures crit_points \
-              --surface-type grad_imq \
+              --surface-type grad_matern \
               --ira-kmax 14 \
+              --energy-unit kJ/mol \
               --show-legend \
               -o neb_landscape.png
         
         Surface-only plot without structure strip:
         
-            python -m rgpycrumbs eon plt-neb \
+            python -m rgpycrumbs.cli eon plt-neb \
               --plot-type landscape \
               --surface-type grad_matern \
               --no-show-pts \
@@ -313,7 +304,7 @@ You can see the list of available command groups:
         
         Convergence visualization with all optimization steps:
         
-            python -m rgpycrumbs eon plt-neb \
+            python -m rgpycrumbs.cli eon plt-neb \
               --con-file neb.con \
               --plot-type landscape \
               --landscape-path all \
@@ -380,11 +371,10 @@ assets; it is the GitHub default branch.
 
 ### When is pixi needed?
 
-[Pixi](https://prefix.dev/) is only needed for features that require **conda-only** packages (not
-available on PyPI):
+[Pixi](https://prefix.dev/) is mainly needed for pixi-only or heavy optional packages that we do not auto-install by default:
 
--   `fragments` tests: need `tblite`, `ira`, `pyvista` (conda)
--   `surfaces` tests: may prefer conda `jax` builds
+-   `fragments` tests: need `tblite`, `ira_mod`, and `pyvista`
+-   some heavy visualization workflows may still be easier to manage in pixi
 
 For everything else, `uv` is sufficient.
 
@@ -403,21 +393,32 @@ automatically (e.g. `1.0.1.dev3+gabcdef`).
 
 ## Release Process
 
-    # 1. Ensure tests pass
+    # 1. Run the same checks the tag-triggered release workflow expects
+    uv sync --extra test --extra release
     uv run --extra test pytest -m pure
+    uv run --extra test pytest --pep723-check -m pep723 --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
+    uvx prek run -a -vvv
+    pixi run -e docs docbld
     
-    # 2. Build changelog (uses towncrier fragments in docs/newsfragments/)
-    uvx towncrier build --version "v1.0.0"
+    # 2. Preview the next semantic version from Conventional Commits
+    uvx cocogitto cog bump --dry-run --auto
     
-    # 3. Commit the changelog
-    git add CHANGELOG.rst && git commit -m "doc: release notes for v1.0.0"
+    # 3. Build the release notes from towncrier fragments
+    #    towncrier headings use X.Y.Z, while the git tag stays vX.Y.Z
+    uvx towncrier build --version "1.7.1"
     
-    # 4. Tag the release (hatch-vcs derives the version from this tag)
-    git tag -a v1.0.0 -m "Version 1.0.0"
+    # 4. Commit the release notes (historically: release: vX.Y.Z)
+    git add CHANGELOG.rst docs/newsfragments
+    git commit -m "release: v1.7.1"
     
-    # 5. Build and publish
-    uv build
-    uvx twine upload dist/*
+    # 5. Tag the release commit (hatch-vcs derives the package version from tags)
+    uvx cocogitto cog bump --auto
+    
+    # 6. Push main and tags; GitHub Actions handles build/publish/release
+    git push origin main --tags
+
+The existing `.github/workflows/release.yml` publishes to PyPI and creates the
+GitHub release when a `v*` tag is pushed.
 
 
 <a id="license"></a>
