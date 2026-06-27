@@ -16,7 +16,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
-      - run: uv sync --all-extras
+      - run: uv sync --extra test --extra all
       - run: uv run --extra test pytest -m pure
       - name: Check PEP 723 inline deps
         run: uv run --extra test pytest --pep723-check -m pep723 --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
