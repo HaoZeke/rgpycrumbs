@@ -157,7 +157,10 @@ You can see the list of available command groups:
 
 ### eOn
 
--   Plotting NEB Paths (`plt-neb`)
+-   Plotting NEB Paths (`plt-neb`), including energy-unit selection and xyzrender strips
+-   Stitch multi-segment NEB bands (`plt-neb-stitch`) for full-path 1D/2D views (v1.8+)
+-   Seed dimer searches from NEB peaks (`gen-dimer`) and KMC timeline plots (`plt-kmc`)
+-   Single-ended minimization landscapes (`plt-min`) with optional `--energy-cap` windows
 
     This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations,
     generating 2D surface plots with optional structure rendering.

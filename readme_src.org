@@ -140,7 +140,14 @@ Commands:
 :PROPERTIES:
 :CUSTOM_ID: cli-eon
 :END:
-**** Plotting NEB Paths (~plt-neb~)
+**** Plotting NEB Paths (~plt-neb~), stitch (~plt-neb-stitch~), dimers (~gen-dimer~), KMC (~plt-kmc~)
+
+NEB landscapes support energy-unit selection and xyzrender profile strips.
+~plt-neb-stitch~ builds a continuous band from multi-segment minimizations (v1.8+).
+~gen-dimer~ seeds saddle searches from NEB peaks; ~plt-kmc~ plots KMC timelines.
+~plt-min~ accepts ~--energy-cap~ / ~--energy-cap-window~ for landscape scales.
+
+**** Plotting NEB Paths (~plt-neb~) detail
 :PROPERTIES:
 :CUSTOM_ID: cli-eon-neb
 :END:
