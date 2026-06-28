@@ -36,10 +36,14 @@ image -- requires substantial post-processing before it can be interpreted:
 energy profiles must be interpolated with force consistency, paths must be
 projected into low-dimensional coordinate systems, chemical transformations at
 the transition state must be identified, and sparse landscape data must be
-interpolated onto grids for visualization. ~rgpycrumbs~ provides the
-computational modules for these tasks, together with a PEP 723-based CLI
-dispatcher that manages the execution of analysis scripts whose binary
-dependencies would otherwise conflict.
+interpolated onto grids for visualization. ~rgpycrumbs~ provides the computational kernels for these
+tasks (surface fitting, alignment, force-consistent interpolation) together
+with a PEP 723-based CLI dispatcher that runs analysis scripts under ~uv~ in
+isolated environments so heavy optional dependencies (JAX, ASE, ~readcon~,
+plotting stacks) do not pollute a minimal install. Format-specific parsing,
+unit-aware NEB and single-ended figures, multi-segment NEB stitching, and
+metadata-native eOn ~.con~ energies live in the companion ~chemparseplot~
+package; input generation for ORCA and eOn is handled by ~pychum~.
 
 * Statement of need
 
@@ -224,6 +228,12 @@ present, avoiding unnecessary downloads of GPU-specific binary dependencies.
 This means ~pip install rgpycrumbs~ provides the full import surface; heavy
 dependencies materialize only when first accessed.
 
+Plot and CON-facing scripts pin ~chemparseplot>=1.8~ and ~readcon>=0.7.0~ in
+their PEP 723 ~dependencies~ lists so isolated ~uv run~ environments receive
+metadata-native CON I/O and the centralized unit-aware plot helpers; the
+lightweight core install still omits those packages until a script or
+~ensure_import~ path requests them.
+
 The correctness of the PEP 723 metadata is enforced by ~pytest-pep723~
 {{{cite(@pytest_pep723)}}}, a pytest plugin developed alongside ~rgpycrumbs~ that
 statically verifies every import in a dispatched script is declared in its
@@ -337,16 +347,29 @@ computation (`rgpycrumbs`) to visualization.](figures/dataflow.pdf){width="100%"
 
 ** Companion libraries
 
-~chemparseplot~ {{{cite(@chemparseplot)}}} handles file parsing (eOn ~.dat~ / ~.con~, ORCA
-output, ChemGP HDF5 and JSONL, PLUMED HILLS, ASE trajectory formats) and
-plotting, including publication-quality NEB landscape and energy profile CLIs.
-The separation follows a clear boundary: ~rgpycrumbs~ provides computational
-kernels (surface fitting, alignment, interpolation) and ~chemparseplot~
-provides I/O, visualization, and format-specific logic. ~pychum~ generates
-input files for ORCA and eOn. The three packages form a pipeline from input
-generation through computation to visualization, with ChemGP
-{{{cite(@chemgp)}}} providing the GP-accelerated optimization loop that produces
-the data these tools analyze.
+The suite is three packages with a fixed role split (JOSS scope as implemented
+in the 1.8 / 1.4.2 line on PyPI):
+
+- *~rgpycrumbs~* -- computational kernels (JAX surface fitting, IRA alignment,
+  Hermite interpolation) and the PEP 723 / ~uv~ CLI dispatcher that orchestrates
+  eOn visualization scripts (~plt-neb~, ~plt-neb-stitch~, ~plt-min~, ~plt-saddle~,
+  ~gen-dimer~, ~plt-kmc~). Plot CLIs are thin orchestrators; they do not own a
+  second NEB render implementation.
+- *~chemparseplot~* {{{cite(@chemparseplot)}}} -- parsers (eOn ~.dat~ / ~.con~ via
+  ~readcon>=0.7~ with CON JSON metadata preferred over legacy tables, ORCA,
+  ChemGP HDF5/JSONL, PLUMED, ASE trajectories), unit-aware plotting APIs
+  (profiles, landscapes, structure strips, themes), and ~stitch_neb_segments~
+  for multi-segment NEB bands. It does *not* implement heavy numerics; those
+  stay in ~rgpycrumbs~.
+- *~pychum~* -- input generation only (ORCA blocks and eOn templates from TOML);
+  not a parser or plotter.
+
+Optional peers such as ~chemparseplot>=1.8~ and ~readcon>=0.7~ are declared in
+PEP 723 script blocks and in ~ensure_import~'s dependency map so ~uv~ can
+materialize them on demand. Conda-only binaries (~ira_mod~, ~tblite~, ~ovito~)
+remain explicit/pixi installs. ChemGP {{{cite(@chemgp)}}} supplies the
+GP-accelerated optimization loop that produces the trajectories these tools
+analyze.
 
 * State of the field
 

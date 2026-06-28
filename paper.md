@@ -17,7 +17,7 @@ affiliations:
     index: 1
   - name: "EPFL - Ecole Polytechnique Federale de Lausanne, Switzerland"
     index: 2
-date: 7 April 2026
+date: 28 June 2026
 bibliography: paper.bib
 ---
 
@@ -31,10 +31,14 @@ image &#x2013; requires substantial post-processing before it can be interpreted
 energy profiles must be interpolated with force consistency, paths must be
 projected into low-dimensional coordinate systems, chemical transformations at
 the transition state must be identified, and sparse landscape data must be
-interpolated onto grids for visualization. `rgpycrumbs` provides the
-computational modules for these tasks, together with a PEP 723-based CLI
-dispatcher that manages the execution of analysis scripts whose binary
-dependencies would otherwise conflict.
+interpolated onto grids for visualization. `rgpycrumbs` provides the computational kernels for these
+tasks (surface fitting, alignment, force-consistent interpolation) together
+with a PEP 723-based CLI dispatcher that runs analysis scripts under `uv` in
+isolated environments so heavy optional dependencies (JAX, ASE, `readcon`,
+plotting stacks) do not pollute a minimal install. Format-specific parsing,
+unit-aware NEB and single-ended figures, multi-segment NEB stitching, and
+metadata-native eOn `.con` energies live in the companion `chemparseplot`
+package; input generation for ORCA and eOn is handled by `pychum`.
 
 
 # Statement of need
@@ -163,16 +167,23 @@ computation (`rgpycrumbs`) to visualization.](figures/dataflow.pdf){width="100%"
 
 ## Companion libraries
 
-`chemparseplot` handles file parsing (eOn `.dat` / `.con`, ORCA
-output, ChemGP HDF5 and JSONL, PLUMED HILLS, ASE trajectory formats) and
-plotting, including publication-quality NEB landscape and energy profile CLIs.
-The separation follows a clear boundary: `rgpycrumbs` provides computational
-kernels (surface fitting, alignment, interpolation) and `chemparseplot`
-provides I/O, visualization, and format-specific logic. `pychum` generates
-input files for ORCA and eOn. The three packages form a pipeline from input
-generation through computation to visualization, with ChemGP
-providing the GP-accelerated optimization loop that produces
-the data these tools analyze.
+The suite is three packages with a fixed role split (1.8 / 1.4.2 on PyPI):
+
+- *`rgpycrumbs`* -- computational kernels and the PEP 723 / `uv` CLI dispatcher
+  that orchestrates eOn visualization scripts (`plt-neb`, `plt-neb-stitch`,
+  `plt-min`, `plt-saddle`, `gen-dimer`, `plt-kmc`). Plot CLIs orchestrate I/O
+  and call `chemparseplot.plot` APIs rather than reimplementing NEB renders.
+- *`chemparseplot`* -- parsers (eOn via `readcon>=0.7` with CON JSON metadata
+  preferred over legacy tables, ORCA, ChemGP, PLUMED, ASE trajectories),
+  unit-aware plotting, and `stitch_neb_segments` for multi-segment NEB bands.
+  It does not implement heavy numerics.
+- *`pychum`* -- input generation only (ORCA/eOn templates); not a parser or plotter.
+
+Optional peers (`chemparseplot>=1.8`, `readcon>=0.7`) are declared in PEP 723
+script blocks and `ensure_import`'s map so `uv` can install them on demand.
+Conda-only binaries (`ira_mod`, `tblite`, `ovito`) remain explicit/pixi installs.
+ChemGP supplies the GP-accelerated optimization loop that produces the data
+these tools analyze.
 
 
 # State of the field
