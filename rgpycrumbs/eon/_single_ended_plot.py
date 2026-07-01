@@ -6,6 +6,7 @@ existing rgpycrumbs imports continue to resolve while the CLI layer is thinned.
 """
 
 from chemparseplot.plot.optimization import (
+    render_single_ended_landscape,
     OVERLAY_COLORS,
     annotate_endpoint,
     create_landscape_axes,
@@ -19,6 +20,7 @@ from chemparseplot.plot.optimization import (
 )
 
 __all__ = [
+    "render_single_ended_landscape",
     "OVERLAY_COLORS",
     "annotate_endpoint",
     "create_landscape_axes",

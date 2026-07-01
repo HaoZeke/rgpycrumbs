@@ -57,23 +57,10 @@ except ImportError:  # pragma: no cover - direct script execution
         overlay_labels,
     )
 from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
-from chemparseplot.parse.neb_utils import (
-    calculate_landscape_coords,
-    compute_synthetic_gradients,
-)
 from chemparseplot.plot.optimization import (
-    OVERLAY_COLORS,
-    annotate_endpoint,
-    create_landscape_axes,
-    plot_optimization_landscape,
     plot_single_ended_convergence,
     plot_single_ended_profile,
-    project_landscape_path,
-    render_endpoint_strip,
-    save_landscape_figure,
-)
-from chemparseplot.plot.structs import (
-    convert_energy,
+    render_single_ended_landscape,
 )
 from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
@@ -299,7 +286,6 @@ def _plot_landscape(
     ira_instance = ira_mod.IRA() if ira_mod else None
     traj = trajs[0]
 
-    # Determine reference B from primary trajectory
     if ref_product is not None:
         ref_b = readcon.read_con_as_ase(str(ref_product))[0]
     elif traj.saddle_atoms is not None:
@@ -307,108 +293,45 @@ def _plot_landscape(
     else:
         ref_b = traj.atoms_list[-1]
 
-    has_strip = plot_structures == "endpoints"
-    fig, ax, ax_strip = create_landscape_axes(dpi=dpi, has_strip=has_strip, theme=theme)
+    end_label = "SP" if traj.saddle_atoms is not None else "End"
+    strip_structs = None
+    strip_labels = None
+    if plot_structures == "endpoints":
+        strip_structs = [traj.initial_atoms, ref_b]
+        strip_labels = ["R", end_label]
 
-    # Plot surface from primary trajectory
-    rmsd_a, rmsd_b = calculate_landscape_coords(
-        traj.atoms_list,
-        ira_instance,
-        ira_kmax,
+    render_single_ended_landscape(
+        atoms_list=traj.atoms_list,
+        energies_eV=traj.dat_df["delta_e"].to_numpy(),
         ref_a=traj.initial_atoms,
         ref_b=ref_b,
-    )
-    energies = convert_energy(traj.dat_df["delta_e"].to_numpy(), energy_unit)
-    n = min(len(rmsd_a), len(energies))
-    rmsd_a, rmsd_b, energies = rmsd_a[:n], rmsd_b[:n], energies[:n]
-    f_para = -np.gradient(energies)
-    grad_a, grad_b = compute_synthetic_gradients(rmsd_a, rmsd_b, f_para)
-
-    plot_optimization_landscape(
-        ax,
-        rmsd_a,
-        rmsd_b,
-        grad_a,
-        grad_b,
-        energies,
+        overlay_atom_lists=[t.atoms_list for t in trajs],
+        overlay_labels=labels,
+        ira_instance=ira_instance,
+        ira_kmax=ira_kmax,
         project_path=project_path,
-        method=surface_type,
-        cmap=cmap,
-        label_mode="optimization",
+        surface_type=surface_type,
         energy_unit=energy_unit,
+        cmap=cmap,
+        output=output,
+        dpi=dpi,
+        theme=theme,
+        plot_structures=plot_structures,
+        strip_structs=strip_structs,
+        strip_labels=strip_labels,
+        endpoint_start_label="R",
+        endpoint_end_label=end_label,
+        endpoint_boxed=False,
+        annotate_overlay_starts=True,
+        overlay_start_label="R",
+        strip_renderer=strip_renderer,
+        xyzrender_config=xyzrender_config,
+        strip_spacing=strip_spacing,
+        strip_zoom=strip_zoom,
+        strip_dividers=strip_dividers,
+        rotation=rotation,
+        perspective_tilt=perspective_tilt,
     )
-
-    # Overlay paths from all trajectories
-    basis = None
-    if project_path:
-        _, _, basis = project_landscape_path(rmsd_a, rmsd_b, project_path=True)
-    for idx, (t, lbl) in enumerate(zip(trajs, labels, strict=False)):
-        ra, rb = calculate_landscape_coords(
-            t.atoms_list,
-            ira_instance,
-            ira_kmax,
-            ref_a=traj.initial_atoms,
-            ref_b=ref_b,
-        )
-        e = t.dat_df["delta_e"].to_numpy()
-        m = min(len(ra), len(e))
-        ra, rb = ra[:m], rb[:m]
-
-        px, py, _ = project_landscape_path(ra, rb, project_path=project_path, basis=basis)
-
-        color = OVERLAY_COLORS[idx % len(OVERLAY_COLORS)]
-        if len(trajs) > 1:
-            ax.plot(
-                px,
-                py,
-                "o-",
-                color=color,
-                markersize=3,
-                linewidth=1.5,
-                alpha=0.8,
-                zorder=55,
-                label=lbl,
-            )
-        annotate_endpoint(ax, float(px[0]), float(py[0]), "R", boxed=False)
-
-    # Label final point of primary trajectory
-    plot_x, plot_y, _ = project_landscape_path(
-        rmsd_a, rmsd_b, project_path=project_path, basis=basis
-    )
-    ex, ey = float(plot_x[-1]), float(plot_y[-1])
-
-    label_b = "SP" if traj.saddle_atoms is not None else "End"
-    annotate_endpoint(ax, ex, ey, label_b, boxed=False)
-
-    if len(trajs) > 1:
-        ax.legend(frameon=True, framealpha=0.9, loc="best")
-
-    # Structure strip
-    if has_strip and ax_strip is not None:
-        structs = [traj.initial_atoms]
-        strip_labels = ["R"]
-        if traj.saddle_atoms is not None:
-            structs.append(traj.saddle_atoms)
-            strip_labels.append("SP")
-        else:
-            structs.append(traj.atoms_list[-1])
-            strip_labels.append("End")
-
-        render_endpoint_strip(
-            ax_strip,
-            structs,
-            strip_labels,
-            strip_zoom=strip_zoom,
-            rotation=rotation,
-            theme=theme,
-            strip_renderer=strip_renderer,
-            strip_spacing=strip_spacing,
-            strip_dividers=strip_dividers,
-            perspective_tilt=perspective_tilt,
-            xyzrender_config=xyzrender_config,
-        )
-
-    save_landscape_figure(fig, output, dpi=dpi, has_strip=has_strip, ax=ax, ax_strip=ax_strip)
 
 
 def _plot_convergence(trajs, labels, output, dpi):
