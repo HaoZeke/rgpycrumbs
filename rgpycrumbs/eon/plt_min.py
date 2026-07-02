@@ -46,15 +46,17 @@ if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-min")
 
 try:
-    from ._render_cli import add_render_options
+    from ._render_cli import add_config_option, add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
+    from .plot_config import resolve_from_click
 except ImportError:  # pragma: no cover - direct script execution
-    from rgpycrumbs.eon._render_cli import add_render_options
+    from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
     from rgpycrumbs.eon._single_ended_cli import (
         default_output_path,
         load_trajectories,
         overlay_labels,
     )
+    from rgpycrumbs.eon.plot_config import resolve_from_click
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.plot.optimization import (
     plot_single_ended_convergence,
@@ -75,12 +77,15 @@ IRA_KMAX_DEFAULT = 14.0
 
 
 @click.command()
+@click.pass_context
+@add_config_option
 @click.option(
     "--job-dir",
     type=click.Path(exists=True, file_okay=False, path_type=Path),
-    required=True,
+    required=False,
     multiple=True,
-    help="Path to eOn minimization output directory. Repeat for overlay.",
+    help="Path to eOn minimization output directory. Repeat for overlay. "
+    "Optional when [min].job_dir is set in --config.",
 )
 @click.option(
     "--label",
@@ -174,6 +179,8 @@ IRA_KMAX_DEFAULT = 14.0
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
 def main(  # noqa: PLR0913
+    ctx,
+    config,
     job_dir,
     label,
     prefix,
@@ -197,6 +204,59 @@ def main(  # noqa: PLR0913
     dpi,
     verbose,
 ):
+    settings = resolve_from_click(
+        "min",
+        ctx,
+        config=config,
+        job_dir=job_dir,
+        label=label,
+        prefix=prefix,
+        plot_type=plot_type,
+        project_path=project_path,
+        surface_type=surface_type,
+        ira_kmax=ira_kmax,
+        energy_unit=energy_unit,
+        energy_cap=energy_cap,
+        energy_cap_window=energy_cap_window,
+        theme=theme,
+        plot_structures=plot_structures,
+        strip_renderer=strip_renderer,
+        xyzrender_config=xyzrender_config,
+        strip_spacing=strip_spacing,
+        strip_zoom=strip_zoom,
+        strip_dividers=strip_dividers,
+        rotation=rotation,
+        perspective_tilt=perspective_tilt,
+        output=output,
+        dpi=dpi,
+        verbose=verbose,
+    )
+    job_dir = settings.get("job_dir") or ()
+    if not job_dir:
+        raise click.UsageError(
+            "Provide --job-dir and/or set [min].job_dir in --config"
+        )
+    label = settings.get("label") or ()
+    prefix = settings["prefix"]
+    plot_type = settings["plot_type"]
+    project_path = settings["project_path"]
+    surface_type = settings["surface_type"]
+    ira_kmax = settings["ira_kmax"]
+    energy_unit = settings["energy_unit"]
+    energy_cap = settings.get("energy_cap")
+    energy_cap_window = settings.get("energy_cap_window")
+    theme = settings["theme"]
+    plot_structures = settings["plot_structures"]
+    strip_renderer = settings["strip_renderer"]
+    xyzrender_config = settings["xyzrender_config"]
+    strip_spacing = settings["strip_spacing"]
+    strip_zoom = settings.get("strip_zoom")
+    strip_dividers = settings["strip_dividers"]
+    rotation = settings["rotation"]
+    perspective_tilt = settings["perspective_tilt"]
+    output = settings.get("output")
+    dpi = settings["dpi"]
+    verbose = settings["verbose"]
     """Plot minimization trajectory visualization.
 
     Use --job-dir multiple times to overlay trajectories from different

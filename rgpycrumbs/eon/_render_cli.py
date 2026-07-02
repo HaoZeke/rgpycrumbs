@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import TypeVar
 
 import click
@@ -11,6 +12,20 @@ F = TypeVar("F", bound=Callable[..., object])
 
 RENDERER_CHOICES = ("ase", "xyzrender", "solvis", "ovito")
 
+CONFIG_HELP = (
+    "TOML plot config. Shared style/render settings live under [shared]; "
+    "command inputs under [neb], [min], or [saddle]. Explicit CLI flags override "
+    "the file. Example:\n\n"
+    "  [shared]\n"
+    "  energy_unit = \"eV\"\n"
+    "  dpi = 200\n"
+    "  strip_renderer = \"xyzrender\"\n\n"
+    "  [neb]\n"
+    "  con_file = \"neb.con\"\n"
+    "  plot_type = \"landscape\"\n"
+    "  output_file = \"neb.pdf\"\n"
+)
+
 
 def _apply(options: list[Callable[[F], F]], func: F) -> F:
     """Apply Click decorators in source order."""
@@ -18,6 +33,18 @@ def _apply(options: list[Callable[[F], F]], func: F) -> F:
     for option in reversed(options):
         func = option(func)
     return func
+
+
+def add_config_option(func: F) -> F:
+    """Attach ``--config`` for declarative TOML plot settings."""
+
+    return click.option(
+        "--config",
+        "config",
+        type=click.Path(exists=True, dir_okay=False, path_type=Path),
+        default=None,
+        help=CONFIG_HELP,
+    )(func)
 
 
 def add_render_options(func: F) -> F:
@@ -32,7 +59,8 @@ def add_render_options(func: F) -> F:
             help=(
                 "Rendering backend for structure images. "
                 "xyzrender/ase work with the default dispatcher setup; "
-                "solvis and ovito require separate heavy installs."
+                "solvis and ovito require separate heavy installs. "
+                "Prefer [shared] strip_renderer in --config for suites."
             ),
         ),
         click.option(

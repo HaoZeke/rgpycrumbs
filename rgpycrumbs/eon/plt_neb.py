@@ -64,9 +64,11 @@ if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
 
 try:
-    from ._render_cli import add_render_options
+    from ._render_cli import add_config_option, add_render_options
+    from .plot_config import resolve_from_click
 except ImportError:  # pragma: no cover - direct script execution
-    from rgpycrumbs.eon._render_cli import add_render_options
+    from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
+    from rgpycrumbs.eon.plot_config import resolve_from_click
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -149,6 +151,8 @@ NEB_PROFILE_STRIP_ZOOM_MULT = 2.95
 
 # --- CLI ---
 @click.command()
+@click.pass_context
+@add_config_option
 @click.option(
     "--input-dat-pattern",
     default=DEFAULT_INPUT_PATTERN,
@@ -459,6 +463,8 @@ NEB_PROFILE_STRIP_ZOOM_MULT = 2.95
     help="kmax factor for IRA.",
 )
 def main(
+    ctx,
+    config,
     # --- Input Files ---
     input_dat_pattern,
     input_path_pattern,
@@ -531,7 +537,137 @@ def main(
     augment_dat,
     augment_con,
 ):
-    """Main entry point for NEB plot script."""
+    """Main entry point for NEB plot script.
+
+    Prefer ``--config plot.toml`` for shared style/render settings and inputs;
+    explicit flags override the file (see ``rgpycrumbs.eon.plot_config``).
+    """
+
+    settings = resolve_from_click(
+        "neb",
+        ctx,
+        config=config,
+        input_dat_pattern=input_dat_pattern,
+        input_path_pattern=input_path_pattern,
+        con_file=con_file,
+        additional_con=additional_con,
+        source=source,
+        input_traj=input_traj,
+        input_h5=input_h5,
+        plot_type=plot_type,
+        landscape_mode=landscape_mode,
+        landscape_path=landscape_path,
+        project_path=project_path,
+        rc_mode=rc_mode,
+        plot_structures=plot_structures,
+        rbf_smoothing=rbf_smoothing,
+        show_pts=show_pts,
+        plot_mode=plot_mode,
+        surface_type=surface_type,
+        n_inducing=n_inducing,
+        output_file=output_file,
+        start=start,
+        end=end,
+        normalize_rc=normalize_rc,
+        title=title,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        energy_unit=energy_unit,
+        highlight_last=highlight_last,
+        theme=theme,
+        cmap_profile=cmap_profile,
+        cmap_landscape=cmap_landscape,
+        facecolor=facecolor,
+        fontsize_base=fontsize_base,
+        figsize=figsize,
+        fig_height=fig_height,
+        aspect_ratio=aspect_ratio,
+        dpi=dpi,
+        zoom_ratio=zoom_ratio,
+        rotation=rotation,
+        perspective_tilt=perspective_tilt,
+        strip_renderer=strip_renderer,
+        xyzrender_config=xyzrender_config,
+        strip_spacing=strip_spacing,
+        strip_dividers=strip_dividers,
+        arrow_head_length=arrow_head_length,
+        arrow_head_width=arrow_head_width,
+        arrow_tail_width=arrow_tail_width,
+        spline_method=spline_method,
+        draw_reactant=draw_reactant,
+        draw_saddle=draw_saddle,
+        draw_product=draw_product,
+        mmf_peaks=mmf_peaks,
+        peak_dir=peak_dir,
+        show_evolution=show_evolution,
+        show_legend=show_legend,
+        cache_file=cache_file,
+        force_recompute=force_recompute,
+        ira_kmax=ira_kmax,
+        sp_file=sp_file,
+        augment_dat=augment_dat,
+        augment_con=augment_con,
+    )
+    input_dat_pattern = settings["input_dat_pattern"]
+    input_path_pattern = settings["input_path_pattern"]
+    con_file = settings.get("con_file")
+    additional_con = settings.get("additional_con")
+    source = settings["source"]
+    input_traj = settings.get("input_traj")
+    input_h5 = settings.get("input_h5")
+    plot_type = settings["plot_type"]
+    landscape_mode = settings["landscape_mode"]
+    landscape_path = settings["landscape_path"]
+    project_path = settings["project_path"]
+    rc_mode = settings["rc_mode"]
+    plot_structures = settings["plot_structures"]
+    rbf_smoothing = settings.get("rbf_smoothing")
+    show_pts = settings["show_pts"]
+    plot_mode = settings["plot_mode"]
+    surface_type = settings["surface_type"]
+    n_inducing = settings.get("n_inducing")
+    output_file = settings.get("output_file")
+    start = settings.get("start")
+    end = settings.get("end")
+    normalize_rc = settings["normalize_rc"]
+    title = settings["title"]
+    xlabel = settings.get("xlabel")
+    ylabel = settings.get("ylabel")
+    energy_unit = settings["energy_unit"]
+    highlight_last = settings["highlight_last"]
+    theme = settings["theme"]
+    cmap_profile = settings.get("cmap_profile")
+    cmap_landscape = settings.get("cmap_landscape")
+    facecolor = settings.get("facecolor")
+    fontsize_base = settings.get("fontsize_base")
+    figsize = settings["figsize"]
+    fig_height = settings.get("fig_height")
+    aspect_ratio = settings.get("aspect_ratio")
+    dpi = settings["dpi"]
+    zoom_ratio = settings["zoom_ratio"]
+    rotation = settings["rotation"]
+    perspective_tilt = settings["perspective_tilt"]
+    strip_renderer = settings["strip_renderer"]
+    xyzrender_config = settings["xyzrender_config"]
+    strip_spacing = settings["strip_spacing"]
+    strip_dividers = settings["strip_dividers"]
+    arrow_head_length = settings.get("arrow_head_length", 0.2)
+    arrow_head_width = settings.get("arrow_head_width", 0.3)
+    arrow_tail_width = settings.get("arrow_tail_width", 0.1)
+    spline_method = settings["spline_method"]
+    draw_reactant = settings.get("draw_reactant", (15, 60, 0.1))
+    draw_saddle = settings.get("draw_saddle", (15, 60, 0.1))
+    draw_product = settings.get("draw_product", (15, 60, 0.1))
+    mmf_peaks = settings.get("mmf_peaks")
+    peak_dir = settings.get("peak_dir")
+    show_evolution = settings["show_evolution"]
+    show_legend = settings["show_legend"]
+    cache_file = settings["cache_file"]
+    force_recompute = settings["force_recompute"]
+    ira_kmax = settings["ira_kmax"]
+    sp_file = settings["sp_file"]
+    augment_dat = settings.get("augment_dat")
+    augment_con = settings.get("augment_con")
 
     # 1. Setup Theme
     active_theme = get_theme(
