@@ -14,10 +14,17 @@ from click.testing import CliRunner
 pytest.importorskip("ase")
 readcon = pytest.importorskip("readcon")
 
+from ase import Atoms
+from ase.calculators.singlepoint import SinglePointCalculator
+
+from rgpycrumbs.eon import con_splitter as mod
 from rgpycrumbs.eon.con_splitter import (
+    _apply_frame_energy,
+    _energy_from_atoms,
     _is_con_path,
     _read_trajectory_frames,
     _write_con_atoms,
+    _write_con_frame,
     con_splitter,
 )
 
@@ -46,21 +53,118 @@ def _write_band(path: Path, frames: list[tuple[float, float]]) -> None:
     path.write_text("\n".join(blocks) + "\n")
 
 
+def _h_atoms(z: float = 0.0, energy: float | None = None) -> Atoms:
+    atoms = Atoms("H", positions=[[0.0, 0.0, z]], cell=[10, 10, 10], pbc=True)
+    if energy is not None:
+        atoms.info["energy"] = energy
+    return atoms
+
+
 def test_is_con_path_helper():
     assert _is_con_path(Path("neb.con"))
     assert _is_con_path(Path("x.convel"))
     assert not _is_con_path(Path("neb.traj"))
 
 
-def test_write_con_atoms_roundtrip_energy(tmp_path: Path):
-    from ase import Atoms
+def test_energy_from_atoms_info_calc_and_invalid():
+    atoms = _h_atoms(energy=-1.25)
+    assert _energy_from_atoms(atoms) == pytest.approx(-1.25)
 
-    atoms = Atoms("H", positions=[[0, 0, 0.25]], cell=[10, 10, 10], pbc=True)
+    calc_atoms = _h_atoms()
+    calc_atoms.calc = SinglePointCalculator(calc_atoms, energy=2.5)
+    assert _energy_from_atoms(calc_atoms) == pytest.approx(2.5)
+
+    bad = _h_atoms()
+    bad.info["energy"] = object()
+    assert _energy_from_atoms(bad) is None
+    assert _energy_from_atoms(_h_atoms()) is None
+
+
+def test_apply_frame_energy_none_and_setters(tmp_path: Path):
+    _write_band(tmp_path / "one.con", [(1.0, 0.0)])
+    frame = readcon.read_con(str(tmp_path / "one.con"))[0]
+    assert _apply_frame_energy(frame, None) is frame
+    updated = _apply_frame_energy(frame, -4.0)
+    assert updated.energy == pytest.approx(-4.0)
+
+
+def test_apply_frame_energy_scalar_and_string_fallbacks(tmp_path: Path):
+    _write_band(tmp_path / "one.con", [(0.5, 0.0)])
+    inner = readcon.read_con(str(tmp_path / "one.con"))[0]
+
+    class _ScalarOnly:
+        def __init__(self, src):
+            self.cell = src.cell
+            self.angles = src.angles
+            self.atoms = src.atoms
+            self.prebox_header = src.prebox_header
+            self.postbox_header = src.postbox_header
+            self.metadata = src.metadata
+            self._energy = src.energy
+
+        def set_scalar_metadata(self, key, value):
+            assert key == "energy"
+            self._energy = float(value)
+
+        @property
+        def energy(self):
+            return self._energy
+
+    scalar_frame = _ScalarOnly(inner)
+    out = _apply_frame_energy(scalar_frame, 8.0)
+    assert out.energy == pytest.approx(8.0)
+
+    class _Legacy:
+        def __init__(self, src):
+            self.cell = src.cell
+            self.angles = src.angles
+            self.atoms = src.atoms
+            self.prebox_header = src.prebox_header
+            self.postbox_header = src.postbox_header
+            self.metadata = {str(k): v for k, v in src.metadata.items()}
+
+        @property
+        def energy(self):
+            raw = self.metadata.get("energy")
+            return float(raw) if raw is not None else None
+
+    legacy = _Legacy(inner)
+    reconstructed = _apply_frame_energy(legacy, 3.25)
+    assert reconstructed.energy == pytest.approx(3.25)
+    dest = tmp_path / "legacy.con"
+    readcon.write_con(str(dest), [reconstructed])
+    assert readcon.read_con(str(dest))[0].energy == pytest.approx(3.25)
+
+
+def test_write_con_atoms_roundtrip_energy(tmp_path: Path):
+    atoms = _h_atoms(z=0.25)
     dest = tmp_path / "one.con"
     _write_con_atoms(dest, atoms, energy=-7.5)
     frame = readcon.read_con(str(dest))[0]
     assert frame.energy == pytest.approx(-7.5)
     assert frame.to_ase().get_positions()[0, 2] == pytest.approx(0.25)
+
+
+def test_write_con_atoms_uses_atoms_info_energy(tmp_path: Path):
+    atoms = _h_atoms(z=0.5, energy=1.125)
+    dest = tmp_path / "info.con"
+    _write_con_atoms(dest, atoms)
+    assert readcon.read_con(str(dest))[0].energy == pytest.approx(1.125)
+
+
+def test_write_con_frame_with_and_without_geometry_update(tmp_path: Path):
+    _write_band(tmp_path / "src.con", [(2.0, 0.0)])
+    frame = readcon.read_con(str(tmp_path / "src.con"))[0]
+    plain = tmp_path / "plain.con"
+    _write_con_frame(plain, frame)
+    assert readcon.read_con(str(plain))[0].energy == pytest.approx(2.0)
+
+    moved = _h_atoms(z=1.25)
+    updated = tmp_path / "moved.con"
+    _write_con_frame(updated, frame, atoms=moved, energy=None)
+    back = readcon.read_con(str(updated))[0]
+    assert back.energy == pytest.approx(2.0)
+    assert back.to_ase().get_positions()[0, 2] == pytest.approx(1.25)
 
 
 def test_read_trajectory_frames_attaches_energy_info(tmp_path: Path):
@@ -71,6 +175,17 @@ def test_read_trajectory_frames_attaches_energy_info(tmp_path: Path):
     assert len(atoms_list) == 2 == len(con_frames)
     assert atoms_list[0].info["energy"] == pytest.approx(0.5)
     assert con_frames[1].energy == pytest.approx(1.5)
+
+
+def test_read_trajectory_frames_non_con_returns_no_metadata(tmp_path: Path):
+    from ase.io import write as ase_write
+
+    traj = tmp_path / "neb.traj"
+    frames = [_h_atoms(z=float(i)) for i in range(4)]
+    ase_write(str(traj), frames)
+    atoms_list, con_frames = _read_trajectory_frames(traj)
+    assert con_frames is None
+    assert len(atoms_list) == 4
 
 
 def test_split_con_input_preserves_energies(tmp_path: Path):
@@ -97,8 +212,107 @@ def test_split_con_input_preserves_energies(tmp_path: Path):
     assert len(cons) == 2
     energies = [readcon.read_con(str(p))[0].energy for p in cons]
     assert energies == pytest.approx([2.0, 3.0])
-    for p in cons:
-        assert readcon.read_con(str(p))[0].to_ase().get_chemical_symbols() == ["H"]
+    listing = (out / "ipath.dat").read_text().strip().splitlines()
+    assert len(listing) == 2
+    for line, con in zip(listing, cons, strict=True):
+        assert Path(line) == con.resolve()
+
+
+def test_split_traj_writes_con_via_readcon(tmp_path: Path):
+    from ase.io import write as ase_write
+
+    traj = tmp_path / "neb.traj"
+    frames = []
+    for i in range(6):
+        atoms = Atoms("H2", positions=[[0, 0, 0], [0.74 + 0.01 * i, 0, 0]])
+        atoms.set_cell([10, 10, 10])
+        atoms.set_pbc(True)
+        atoms.info["energy"] = float(i)
+        frames.append(atoms)
+    ase_write(str(traj), frames)
+    out = tmp_path / "from_traj"
+    runner = CliRunner()
+    result = runner.invoke(
+        con_splitter,
+        [
+            str(traj),
+            "--images-per-path",
+            "3",
+            "--output-dir",
+            str(out),
+            "--path-index",
+            "0",
+            "--align-type",
+            "none",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    cons = sorted(out.glob("ipath_*.con"))
+    assert len(cons) == 3
+    for con in cons:
+        assert readcon.read_con(str(con))[0].to_ase().get_chemical_symbols() == ["H", "H"]
+
+
+def test_split_con_with_centering_preserves_energy(tmp_path: Path):
+    band = tmp_path / "neb.con"
+    _write_band(band, [(0.0, 0.0), (1.0, 0.5), (2.0, 1.0)])
+    out = tmp_path / "centered"
+    runner = CliRunner()
+    result = runner.invoke(
+        con_splitter,
+        [
+            str(band),
+            "--images-per-path",
+            "3",
+            "--output-dir",
+            str(out),
+            "--center",
+            "--box-diagonal",
+            "10",
+            "10",
+            "10",
+            "--align-type",
+            "none",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    energies = [
+        readcon.read_con(str(p))[0].energy for p in sorted(out.glob("ipath_*.con"))
+    ]
+    assert energies == pytest.approx([0.0, 1.0, 2.0])
+
+
+def test_split_rejects_too_few_frames_and_bad_index(tmp_path: Path):
+    band = tmp_path / "neb.con"
+    _write_band(band, [(0.0, 0.0), (1.0, 0.5)])
+    runner = CliRunner()
+    too_few = runner.invoke(
+        con_splitter,
+        [str(band), "--images-per-path", "3", "--output-dir", str(tmp_path / "a")],
+    )
+    assert too_few.exit_code != 0
+    bad_idx = runner.invoke(
+        con_splitter,
+        [
+            str(band),
+            "--images-per-path",
+            "2",
+            "--path-index",
+            "5",
+            "--output-dir",
+            str(tmp_path / "b"),
+        ],
+    )
+    assert bad_idx.exit_code != 0
+
+
+def test_split_missing_input_fails(tmp_path: Path):
+    runner = CliRunner()
+    result = runner.invoke(
+        con_splitter,
+        [str(tmp_path / "missing.con"), "--images-per-path", "2", "--output-dir", str(tmp_path / "o")],
+    )
+    assert result.exit_code != 0
 
 
 def test_con_splitter_source_has_no_asewrite():
@@ -110,3 +324,25 @@ def test_con_splitter_source_has_no_asewrite():
     text = src.read_text()
     assert "readcon>=0.7.0" in text
     assert "asewrite" not in text
+
+
+def test_rgpycrumbs_eon_con_writers_avoid_ase_io_write():
+    eon_dir = Path(mod.__file__).resolve().parent
+    offenders: list[str] = []
+    watched = {
+        "con_splitter.py",
+        "seed_dimers.py",
+        "plt_neb_stitch.py",
+        "gen_dimer.py",
+        "plt_kmc.py",
+    }
+    for path in sorted(eon_dir.glob("*.py")):
+        if path.name not in watched:
+            continue
+        tree = ast.parse(path.read_text(), filename=str(path))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module == "ase.io":
+                names = {alias.name for alias in node.names}
+                if "write" in names:
+                    offenders.append(path.name)
+    assert offenders == []

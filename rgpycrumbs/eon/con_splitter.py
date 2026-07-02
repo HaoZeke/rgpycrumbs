@@ -91,6 +91,19 @@ def _apply_frame_energy(frame, energy: float | None):
         metadata_dict = {str(k): v for k, v in metadata.items()}
     else:
         metadata_dict = dict(metadata or {})
+    metadata_dict.pop("energy", None)
+    clone = ConFrame(
+        frame.cell,
+        frame.angles,
+        frame.atoms,
+        frame.prebox_header,
+        frame.postbox_header,
+        metadata_dict,
+    )
+    clone_setter = getattr(clone, "set_energy", None)
+    if callable(clone_setter):
+        clone_setter(value)
+        return clone
     metadata_dict["energy"] = str(value)
     return ConFrame(
         frame.cell,
