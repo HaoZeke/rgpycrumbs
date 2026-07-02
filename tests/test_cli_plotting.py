@@ -752,7 +752,7 @@ class TestPltSaddlePlotting:
             ),
         ]
         monkeypatch.setattr(
-            "chemparseplot.parse.eon._trajectory_common.readcon.read_con",
+            "chemparseplot.parse.eon.con_io.read_con_frames",
             lambda _: frames,
         )
 
@@ -927,7 +927,7 @@ class TestPltMinPlotting:
             ),
         ]
         monkeypatch.setattr(
-            "chemparseplot.parse.eon._trajectory_common.readcon.read_con",
+            "chemparseplot.parse.eon.con_io.read_con_frames",
             lambda _: frames,
         )
 

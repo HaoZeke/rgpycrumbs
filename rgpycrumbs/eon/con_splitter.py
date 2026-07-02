@@ -10,6 +10,7 @@
 #   "click",
 #   "ase",
 #   "rich",
+#   "readcon>=0.7.0",
 # ]
 # ///
 
@@ -20,11 +21,110 @@ from pathlib import Path
 
 import click
 from ase.io import read as aseread
-from ase.io import write as asewrite
 from rich.console import Console
 from rich.logging import RichHandler
 
 from rgpycrumbs.geom.api.alignment import IRAConfig, align_structure_robust
+
+_CON_SUFFIXES = {".con", ".convel"}
+
+
+def _is_con_path(path: Path) -> bool:
+    return path.suffix.lower() in _CON_SUFFIXES
+
+
+def _read_trajectory_frames(path: Path) -> tuple[list, list | None]:
+    """Load trajectory frames; CON/convel go through readcon to keep metadata.
+
+    Returns ``(ase_atoms_list, con_frames_or_none)``. ``con_frames`` is populated
+    only for ``.con``/``.convel`` inputs so writers can preserve per-frame energy.
+    """
+    if _is_con_path(path):
+        from readcon import read_con
+
+        con_frames = list(read_con(str(path)))
+        atoms_list = [frame.to_ase() for frame in con_frames]
+        for atoms, frame in zip(atoms_list, con_frames, strict=True):
+            if frame.energy is not None:
+                atoms.info["energy"] = float(frame.energy)
+        return atoms_list, con_frames
+    return list(aseread(path, index=":")), None
+
+
+def _energy_from_atoms(atoms) -> float | None:
+    energy = atoms.info.get("energy") if getattr(atoms, "info", None) else None
+    if energy is None and getattr(atoms, "calc", None) is not None:
+        try:
+            energy = atoms.get_potential_energy()
+        except Exception:
+            energy = None
+    if energy is None:
+        return None
+    try:
+        return float(energy)
+    except (TypeError, ValueError):
+        return None
+
+
+def _apply_frame_energy(frame, energy: float | None):
+    """Set per-frame total energy on a ``ConFrame`` copy-friendly handle.
+
+    Prefers ``set_energy`` / ``set_scalar_metadata`` (readcon>=0.13). Older
+    wheels that expose only a read-only ``energy`` property are reconstructed
+    with string metadata values accepted by the constructor.
+    """
+    if energy is None:
+        return frame
+    value = float(energy)
+    setter = getattr(frame, "set_energy", None)
+    if callable(setter):
+        setter(value)
+        return frame
+    scalar = getattr(frame, "set_scalar_metadata", None)
+    if callable(scalar):
+        scalar("energy", value)
+        return frame
+    from readcon import ConFrame
+
+    metadata = frame.metadata
+    if hasattr(metadata, "items"):
+        metadata_dict = {str(k): v for k, v in metadata.items()}
+    else:
+        metadata_dict = dict(metadata or {})
+    metadata_dict["energy"] = str(value)
+    return ConFrame(
+        frame.cell,
+        frame.angles,
+        frame.atoms,
+        frame.prebox_header,
+        frame.postbox_header,
+        metadata_dict,
+    )
+
+
+def _write_con_atoms(dest: Path, atoms, energy: float | None = None) -> None:
+    """Write one ASE structure as a CON file via readcon."""
+    from readcon import ConFrame, write_con
+
+    if energy is None:
+        energy = _energy_from_atoms(atoms)
+    frame = _apply_frame_energy(ConFrame.from_ase(atoms), energy)
+    write_con(str(dest), [frame])
+
+
+def _write_con_frame(dest: Path, frame, atoms=None, energy: float | None = None) -> None:
+    """Write a readcon ``ConFrame``, optionally replacing positions from *atoms*."""
+    from readcon import ConFrame, write_con
+
+    if atoms is not None:
+        if energy is None:
+            energy = frame.energy if frame.energy is not None else _energy_from_atoms(atoms)
+        updated = _apply_frame_energy(ConFrame.from_ase(atoms), energy)
+        write_con(str(dest), [updated])
+        return
+    if energy is not None:
+        frame = _apply_frame_energy(frame, energy)
+    write_con(str(dest), [frame])
 
 # Optional IRA import logic
 try:
@@ -203,7 +303,7 @@ def con_splitter(
         sys.exit(1)
 
     try:
-        all_frames = aseread(neb_trajectory_file, index=":")
+        all_frames, all_con_frames = _read_trajectory_frames(Path(neb_trajectory_file))
         if not all_frames:
             logging.error("No frames found in input file.")
             sys.exit(1)
@@ -239,13 +339,16 @@ def con_splitter(
 
     start, end = target_idx * images_per_path, (target_idx + 1) * images_per_path
     frames = all_frames[start:end]
+    con_frames = all_con_frames[start:end] if all_con_frames is not None else None
     logging.info(f"Extracted [cyan]Path {target_idx}[/cyan] with {len(frames)} images.")
 
+    geometry_mutated = False
     if center:
         logging.info("Centering structures...")
     if box_diagonal:
         logging.info("Overriding box...")
     if center and len(frames) > 0:
+        geometry_mutated = True
         ref_atoms = frames[0].copy()
         ref_center = ref_atoms.get_center_of_mass()
         box_center = [d / 2.0 for d in box_diagonal]
@@ -256,6 +359,7 @@ def con_splitter(
 
     align_strategy = AlignMode(align_type)
     if align_strategy != AlignMode.NONE:
+        geometry_mutated = True
         frames = align_path(
             frames, align_strategy, IRAConfig(enabled=use_ira, kmax=ira_kmax)
         )
@@ -264,7 +368,15 @@ def con_splitter(
     for i, atoms in enumerate(frames):
         name = f"ipath_{i:03d}.con"
         dest = output_dir / name
-        asewrite(dest, atoms)
+        energy = _energy_from_atoms(atoms)
+        if con_frames is not None and not geometry_mutated:
+            _write_con_frame(dest, con_frames[i], energy=energy)
+        elif con_frames is not None:
+            if energy is None and con_frames[i].energy is not None:
+                energy = float(con_frames[i].energy)
+            _write_con_frame(dest, con_frames[i], atoms=atoms, energy=energy)
+        else:
+            _write_con_atoms(dest, atoms, energy=energy)
         created_paths.append(str(dest.resolve()))
         logging.info(f"  - Saved [green]{name}[/green]")
 
