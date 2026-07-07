@@ -1026,13 +1026,15 @@ def main(
         else:
             sp_x, sp_y = sp_x_raw, sp_y_raw
 
+        # Star only on the landscape — R/SP/P text already comes from the
+        # strip-driven main-axes labels (avoids a second floating SP box).
         mark_saddle_point(
             ax,
             sp_x,
             sp_y,
             font_size=active_theme.font_size,
             vline=False,
-            annotate=True,
+            annotate=False,
         )
 
         if additional_atoms_data:
@@ -1560,60 +1562,97 @@ def main(
                 )
                 half_span = max(half_span, abs(float(_spd[0])) * 1.12)
             ax.set_ylim(-half_span, half_span)
+            x_min, x_max = ax.get_xlim()
+            y_min, y_max = -half_span, half_span
             # s and d are both Å from the same RMSD metric — equal aspect is
-            # mandatory so orthogonal distance is not visually distorted.
-            # adjustable='box' shrinks the axes box to the data (does not expand
-            # datalim back into empty d bands). Figure whitespace is cropped by
-            # save_plot(..., bbox_inches='tight'). Anchor north so a strip
-            # under a wide/short (s,d) panel sits tight against the map.
-            ax.set_aspect(
-                "equal",
-                adjustable="box",
-                anchor="N" if has_strip else "C",
-            )
+            # mandatory. Resize the figure so the map box matches the data
+            # aspect (no aspect='auto', no empty d-bands from square frames).
+            data_aspect = (x_max - x_min) / max(y_max - y_min, 1e-9)
+            map_h_in = 1.55
+            map_w_in = map_h_in * data_aspect
+            # Keep gallery figures printable; scale height if the path is very wide.
+            max_map_w_in = 11.0
+            if map_w_in > max_map_w_in:
+                map_w_in = max_map_w_in
+                map_h_in = map_w_in / data_aspect
+            strip_h_in = 1.85 if has_strip else 0.0
+            y_label_in = 0.85
+            cbar_in = 1.05  # bar + "Relative Energy (eV)" label
+            top_in = 0.45
+            bottom_in = 0.25
+            fig_w = y_label_in + map_w_in + cbar_in
+            fig_h = top_in + map_h_in + strip_h_in + bottom_in
+            fig.set_size_inches(fig_w, fig_h)
+
+            left = y_label_in / fig_w
+            map_w_frac = map_w_in / fig_w
+            map_h_frac = map_h_in / fig_h
+            map_bottom = (bottom_in + strip_h_in) / fig_h
+            ax.set_position([left, map_bottom, map_w_frac, map_h_frac])
+            ax.set_aspect("equal", adjustable="box", anchor="C")
+
+            cbar_left = left + map_w_frac + 0.008
+            cbar_w_frac = 0.012
+            for other in fig.axes:
+                if other is ax or other is ax_strip:
+                    continue
+                other.set_position(
+                    [cbar_left, map_bottom, cbar_w_frac, map_h_frac]
+                )
+
+            if ax_strip is not None:
+                strip_bottom = bottom_in / fig_h
+                strip_h_frac = (strip_h_in * 0.92) / fig_h
+                ax_strip.set_position(
+                    [left, strip_bottom, map_w_frac, strip_h_frac]
+                )
+                from matplotlib.offsetbox import AnnotationBbox
+
+                for artist in ax_strip.get_children():
+                    if isinstance(artist, AnnotationBbox):
+                        artist.set_clip_on(True)
+
             log.info(
-                "Set equal-aspect (s,d) limits: s=[%.3f, %.3f], "
-                "d=[%.3f, %.3f]",
+                "Set equal-aspect (s,d) layout: s=[%.3f, %.3f], "
+                "d=[%.3f, %.3f], data_aspect=%.2f, figsize=(%.2f, %.2f) in",
                 x_min,
                 x_max,
-                -half_span,
-                half_span,
+                y_min,
+                y_max,
+                data_aspect,
+                fig_w,
+                fig_h,
             )
         else:
             # Raw RMSD(R) vs RMSD(P) is also Å–Å.
-            ax.set_aspect(
-                "equal",
-                adjustable="box",
-                anchor="N" if has_strip else "C",
-            )
+            ax.set_aspect("equal", adjustable="box", anchor="C")
 
     if show_legend:
         ax.legend(
-            # In (s,d) space markers can appear anywhere, so let
-            # matplotlib pick the least-overlapping corner.
-            # In raw RMSD-RMSD the lower left is always empty.
-            loc="best" if project_path else "lower left",
-            borderaxespad=0.5,
+            # Path usually sits at d ≳ 0; lower-left negative-d corner is free.
+            # Avoid loc='best' on wide equal-aspect maps (drops on the band).
+            loc="lower left",
+            borderaxespad=0.3,
             frameon=True,
             framealpha=1.0,
             facecolor="white",
             edgecolor="black",
-            fontsize=int(active_theme.font_size * 0.8),
+            fontsize=int(active_theme.font_size * 0.75),
         ).set_zorder(101)
 
-    if not ax_strip:
+    if not ax_strip and not (
+        plot_type == "landscape" and project_path and not aspect_ratio
+    ):
         plt.tight_layout(pad=0.5)
 
-    if ax_strip:
-        # Apply equal-aspect box geometry before measuring positions.
+    if ax_strip and not (
+        plot_type == "landscape" and project_path and not aspect_ratio
+    ):
         fig.canvas.draw()
         pos_main = ax.get_position()
         pos_strip = ax_strip.get_position()
-
-        # Align strip width with the (possibly equal-aspect-shrunk) main axes;
-        # park it just under the map with a small gap.
-        gap = 0.02
-        strip_h = min(pos_strip.height, 0.22)
+        gap = 0.025
+        strip_h = min(pos_strip.height, 0.20)
         strip_y = max(0.02, pos_main.y0 - gap - strip_h)
         ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, strip_h])
         from matplotlib.offsetbox import AnnotationBbox

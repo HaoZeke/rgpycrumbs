@@ -1,12 +1,21 @@
-rgpycrumbs 1.9.4 (2026-07-07)
+rgpycrumbs 1.9.5 (2026-07-07)
 =============================
 
 Fixed
 -----
 
 - ``plt-neb`` projected landscapes always use equal aspect (``s`` and ``d`` are
-  both Å from the same RMSD metric). Whitespace is handled by path-driven
-  ``d`` limits and ``bbox_inches='tight'``, never by ``aspect='auto'``.
+  both Å from the same RMSD metric). Figure size follows the data aspect so the
+  map is not stretched; colorbar/strip are placed against that box. Never use
+  ``aspect='auto'`` for (s, d).
+
+rgpycrumbs 1.9.4 (2026-07-07)
+=============================
+
+Fixed
+-----
+
+- First pass at equal-aspect (s, d) landscapes (superseded by 1.9.5 layout).
 
 rgpycrumbs 1.9.3 (2026-07-07)
 =============================
