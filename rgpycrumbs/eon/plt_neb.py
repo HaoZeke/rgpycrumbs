@@ -851,16 +851,14 @@ def main(
             vp_xlim = vp_ylim = None
             if project_path and global_basis is not None:
                 _s, _d = project_to_sd(r_full, p_full, global_basis)
-                # Tight s padding — large pads only grow empty GP-masked margins.
+                # Modest s pad; d half-span matches s so Δs=Δd (true 1:1 Å).
                 _s_pad = max((_s.max() - _s.min()) * 0.04, 0.02)
                 vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
-                # Symmetric d about zero from the *actual* path extent (plus pad),
-                # not from s-span/2 — the latter forced a square and left a tall
-                # empty band above/below a near-linear path.
+                _s_half = 0.5 * (vp_xlim[1] - vp_xlim[0])
                 _half = max(
-                    abs(float(_d.max())) * 1.18,
-                    abs(float(_d.min())) * 1.18,
-                    0.04 * (_s.max() - _s.min()),
+                    _s_half,
+                    abs(float(_d.max())) * 1.12,
+                    abs(float(_d.min())) * 1.12,
                     0.02,
                 )
                 if sp_data is not None:
@@ -873,8 +871,6 @@ def main(
                         np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.12)
-                # Never inflate d to s/2 for a square frame: s and d are both Å
-                # (same RMSD metric), so equal-aspect + path-driven d is required.
                 vp_ylim = (-_half, _half)
 
             plot_landscape_surface(
@@ -1549,7 +1545,8 @@ def main(
     projected_layout_done = False
     if plot_type == "landscape" and not aspect_ratio:
         if project_path:
-            # Path-driven symmetric d limits (never inflate to s/2).
+            # True 1:1 metric: Δd window = Δs window so set_aspect('equal') is a
+            # square panel where 1 Å of s matches 1 Å of d (same RMSD unit).
             x_min, x_max = ax.get_xlim()
             half_span = landscape_half_span(
                 (x_min, x_max),
@@ -1557,6 +1554,7 @@ def main(
                 final_p,
                 additional_atoms_data,
                 global_basis,
+                equal_metric=True,
             )
             if sp_data is not None and global_basis is not None:
                 _sp_basis = landscape_projection_basis(
@@ -1567,48 +1565,34 @@ def main(
                 )
                 half_span = max(half_span, abs(float(_spd[0])) * 1.12)
             ax.set_ylim(-half_span, half_span)
+            # Center s so the data window is exactly square (Δs == Δd == 2*half).
+            s_mid = 0.5 * (x_min + x_max)
+            ax.set_xlim(s_mid - half_span, s_mid + half_span)
             x_min, x_max = ax.get_xlim()
             y_min, y_max = -half_span, half_span
-            # s and d are both Å — equal aspect is mandatory. Size the *figure*
-            # to the map+strip so equal aspect does not leave a white void in a
-            # leftover 12×8 GridSpec cell.
-            data_aspect = (x_max - x_min) / max(y_max - y_min, 1e-9)
-            # Width-first: readable gallery width, height follows equal aspect.
-            map_w_in = 10.5
-            map_h_in = map_w_in / data_aspect
-            # Keep the map tall enough for tick labels when the path is flat.
-            min_map_h_in = 1.35
-            if map_h_in < min_map_h_in:
-                map_h_in = min_map_h_in
-                map_w_in = map_h_in * data_aspect
-            max_map_w_in = 14.0
-            if map_w_in > max_map_w_in:
-                map_w_in = max_map_w_in
-                map_h_in = map_w_in / data_aspect
-            # Tall strip under the full map width so structures are large.
-            strip_h_in = 2.55 if has_strip else 0.0
+            # Square map panel + strip under it; figure sized to content only
+            # (no leftover 12×8 white void on the left).
+            map_in = 5.8  # square: map_w_in == map_h_in
+            strip_h_in = 2.35 if has_strip else 0.0
             y_label_in = 0.95
-            cbar_in = 1.15  # bar + energy label
-            top_in = 0.50
-            gap_map_strip_in = 0.18 if has_strip else 0.0
-            bottom_in = 0.20
-            fig_w = y_label_in + map_w_in + cbar_in
-            fig_h = (
-                top_in + map_h_in + gap_map_strip_in + strip_h_in + bottom_in
-            )
+            cbar_in = 1.20
+            top_in = 0.55
+            gap_map_strip_in = 0.22 if has_strip else 0.0
+            bottom_in = 0.18
+            fig_w = y_label_in + map_in + cbar_in
+            fig_h = top_in + map_in + gap_map_strip_in + strip_h_in + bottom_in
             fig.set_size_inches(fig_w, fig_h, forward=True)
 
-            # Position boxes whose display aspect matches data_aspect exactly so
-            # adjustable='box' fills the slot (no internal white margins).
             left = y_label_in / fig_w
-            map_w_frac = map_w_in / fig_w
-            map_h_frac = map_h_in / fig_h
+            map_w_frac = map_in / fig_w
+            map_h_frac = map_in / fig_h
             map_bottom = (bottom_in + strip_h_in + gap_map_strip_in) / fig_h
             ax.set_position([left, map_bottom, map_w_frac, map_h_frac])
+            # Square data window + square axes box → equal aspect fills the panel.
             ax.set_aspect("equal", adjustable="box", anchor="C")
 
-            cbar_left = left + map_w_frac + 0.01
-            cbar_w_frac = max(0.012, 0.18 / fig_w)
+            cbar_left = left + map_w_frac + 0.012
+            cbar_w_frac = max(0.015, 0.20 / fig_w)
             for other in list(fig.axes):
                 if other is ax or other is ax_strip:
                     continue
@@ -1645,20 +1629,19 @@ def main(
                         "width_fill_fraction"
                     ],
                 )
-                # Keep strip width locked to the map after imshow layout.
                 ax_strip.set_position(
                     [left, strip_bottom, map_w_frac, strip_h_frac]
                 )
 
             projected_layout_done = True
             log.info(
-                "Set equal-aspect (s,d) layout: s=[%.3f, %.3f], "
-                "d=[%.3f, %.3f], data_aspect=%.2f, figsize=(%.2f, %.2f) in",
+                "Set 1:1 (s,d) square panel: s=[%.3f, %.3f], "
+                "d=[%.3f, %.3f], half=%.3f Å, figsize=(%.2f, %.2f) in",
                 x_min,
                 x_max,
                 y_min,
                 y_max,
-                data_aspect,
+                half_span,
                 fig_w,
                 fig_h,
             )

@@ -1,3 +1,14 @@
+rgpycrumbs 1.9.7 (2026-07-07)
+=============================
+
+Fixed
+-----
+
+- ``plt-neb`` projected landscapes use a **square** equal-aspect panel with
+  ``Δd = Δs`` so 1 Å of progress matches 1 Å of orthogonal deviation (true 1:1
+  RMSD metric). Figure is still sized to map+strip (no left void); structure
+  strip is re-rendered after layout.
+
 rgpycrumbs 1.9.6 (2026-07-07)
 =============================
 
