@@ -871,13 +871,8 @@ def main(
                         np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.12)
-                if not has_strip:
-                    # No strip: optional square frame for equal-aspect figures.
-                    _half = max(_half, (vp_xlim[1] - vp_xlim[0]) / 2)
-                    x_span = vp_xlim[1] - vp_xlim[0]
-                    if 2 * _half > x_span:
-                        x_center = (vp_xlim[0] + vp_xlim[1]) / 2
-                        vp_xlim = (x_center - _half, x_center + _half)
+                # Never inflate d to s/2 for a square frame: s and d are both Å
+                # (same RMSD metric), so equal-aspect + path-driven d is required.
                 vp_ylim = (-_half, _half)
 
             plot_landscape_surface(
@@ -1565,15 +1560,32 @@ def main(
                 )
                 half_span = max(half_span, abs(float(_spd[0])) * 1.12)
             ax.set_ylim(-half_span, half_span)
-            if has_strip:
-                # With a structure strip, auto aspect fills the axes; equal aspect
-                # in a wide figure leaves large left/right whitespace.
-                ax.set_aspect("auto")
-            else:
-                ax.set_aspect("equal")
-            log.info(f"Set symmetric Y-axis limits: [-{half_span:.3f}, {half_span:.3f}]")
+            # s and d are both Å from the same RMSD metric — equal aspect is
+            # mandatory so orthogonal distance is not visually distorted.
+            # adjustable='box' shrinks the axes box to the data (does not expand
+            # datalim back into empty d bands). Figure whitespace is cropped by
+            # save_plot(..., bbox_inches='tight'). Anchor north so a strip
+            # under a wide/short (s,d) panel sits tight against the map.
+            ax.set_aspect(
+                "equal",
+                adjustable="box",
+                anchor="N" if has_strip else "C",
+            )
+            log.info(
+                "Set equal-aspect (s,d) limits: s=[%.3f, %.3f], "
+                "d=[%.3f, %.3f]",
+                x_min,
+                x_max,
+                -half_span,
+                half_span,
+            )
         else:
-            ax.set_aspect("equal")
+            # Raw RMSD(R) vs RMSD(P) is also Å–Å.
+            ax.set_aspect(
+                "equal",
+                adjustable="box",
+                anchor="N" if has_strip else "C",
+            )
 
     if show_legend:
         ax.legend(
@@ -1593,13 +1605,17 @@ def main(
         plt.tight_layout(pad=0.5)
 
     if ax_strip:
+        # Apply equal-aspect box geometry before measuring positions.
+        fig.canvas.draw()
         pos_main = ax.get_position()
         pos_strip = ax_strip.get_position()
 
-        # Align strip width with main axes; keep it just under the xlabel
-        # (small gap only — large downward shifts created empty canvas).
-        strip_y = max(0.02, pos_strip.y0 - 0.01)
-        ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, pos_strip.height])
+        # Align strip width with the (possibly equal-aspect-shrunk) main axes;
+        # park it just under the map with a small gap.
+        gap = 0.02
+        strip_h = min(pos_strip.height, 0.22)
+        strip_y = max(0.02, pos_main.y0 - gap - strip_h)
+        ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, strip_h])
         from matplotlib.offsetbox import AnnotationBbox
 
         for artist in ax_strip.get_children():
