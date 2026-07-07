@@ -1,3 +1,14 @@
+rgpycrumbs 1.9.8 (2026-07-07)
+=============================
+
+Fixed
+-----
+
+- Landscape structure strip uses **two rows** (``max_cols=6``) with a taller
+  strip panel and higher zoom so molecules are larger and readable.
+- Keep square 1:1 (s, d) panel: ``Δs = Δd`` (e.g. both 1.34 Å); d ticks show
+  ``±half`` while s shows ``0→span`` — same physical length on both axes.
+
 rgpycrumbs 1.9.7 (2026-07-07)
 =============================
 

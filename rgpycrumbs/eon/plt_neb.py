@@ -146,8 +146,10 @@ log = logging.getLogger("rich")
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 IRA_KMAX_DEFAULT = 14.0
-NEB_LANDSCAPE_STRIP_ZOOM_MULT = 2.35
+NEB_LANDSCAPE_STRIP_ZOOM_MULT = 3.15
 NEB_PROFILE_STRIP_ZOOM_MULT = 2.95
+# Landscape "all" strip: two rows of six so each molecule is larger.
+NEB_LANDSCAPE_STRIP_MAX_COLS = 6
 
 
 # --- CLI ---
@@ -1164,7 +1166,10 @@ def main(
                 "col_spacing": strip_spacing,
                 "show_dividers": strip_dividers,
                 "perspective_tilt": perspective_tilt,
-                "width_fill_fraction": 0.96,
+                "width_fill_fraction": 0.92,
+                # Two rows (e.g. 12 → 6+6) for larger per-cell molecules.
+                "max_cols": NEB_LANDSCAPE_STRIP_MAX_COLS,
+                "prefer_single_row": False,
             }
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
@@ -1570,14 +1575,34 @@ def main(
             ax.set_xlim(s_mid - half_span, s_mid + half_span)
             x_min, x_max = ax.get_xlim()
             y_min, y_max = -half_span, half_span
-            # Square map panel + strip under it; figure sized to content only
-            # (no leftover 12×8 white void on the left).
-            map_in = 5.8  # square: map_w_in == map_h_in
-            strip_h_in = 2.35 if has_strip else 0.0
+            # Square data window (Δs == Δd == 2*half) + square axes box so
+            # 1 Å of s equals 1 Å of d on screen (true 1:1 RMSD metric).
+            # Note: d ticks show ±half (e.g. ±0.67), not 0→1.34 — the *span*
+            # matches s (e.g. 0→1.34); both windows are the same length in Å.
+            map_in = 6.2  # square: map_w_in == map_h_in
+            # Two-row strip needs real height so molecules stay large.
+            n_strip = (
+                len(landscape_strip_render["payload"])
+                if landscape_strip_render is not None
+                else 0
+            )
+            n_strip_rows = (
+                max(
+                    1,
+                    (
+                        n_strip + NEB_LANDSCAPE_STRIP_MAX_COLS - 1
+                    )
+                    // NEB_LANDSCAPE_STRIP_MAX_COLS,
+                )
+                if n_strip and landscape_strip_render is not None
+                and not landscape_strip_render.get("prefer_single_row", True)
+                else (1 if n_strip else 0)
+            )
+            strip_h_in = (3.35 if n_strip_rows >= 2 else 2.2) if has_strip else 0.0
             y_label_in = 0.95
             cbar_in = 1.20
             top_in = 0.55
-            gap_map_strip_in = 0.22 if has_strip else 0.0
+            gap_map_strip_in = 0.20 if has_strip else 0.0
             bottom_in = 0.18
             fig_w = y_label_in + map_in + cbar_in
             fig_h = top_in + map_in + gap_map_strip_in + strip_h_in + bottom_in
@@ -1588,7 +1613,6 @@ def main(
             map_h_frac = map_in / fig_h
             map_bottom = (bottom_in + strip_h_in + gap_map_strip_in) / fig_h
             ax.set_position([left, map_bottom, map_w_frac, map_h_frac])
-            # Square data window + square axes box → equal aspect fills the panel.
             ax.set_aspect("equal", adjustable="box", anchor="C")
 
             cbar_left = left + map_w_frac + 0.012
@@ -1628,6 +1652,12 @@ def main(
                     width_fill_fraction=landscape_strip_render[
                         "width_fill_fraction"
                     ],
+                    max_cols=landscape_strip_render.get(
+                        "max_cols", NEB_LANDSCAPE_STRIP_MAX_COLS
+                    ),
+                    prefer_single_row=landscape_strip_render.get(
+                        "prefer_single_row", False
+                    ),
                 )
                 ax_strip.set_position(
                     [left, strip_bottom, map_w_frac, strip_h_frac]
@@ -1635,13 +1665,15 @@ def main(
 
             projected_layout_done = True
             log.info(
-                "Set 1:1 (s,d) square panel: s=[%.3f, %.3f], "
-                "d=[%.3f, %.3f], half=%.3f Å, figsize=(%.2f, %.2f) in",
+                "Set 1:1 (s,d) square panel: Δs=Δd=%.3f Å "
+                "(s=[%.3f, %.3f], d=[%.3f, %.3f]); strip_rows=%d; "
+                "figsize=(%.2f, %.2f) in",
+                2.0 * half_span,
                 x_min,
                 x_max,
                 y_min,
                 y_max,
-                half_span,
+                n_strip_rows,
                 fig_w,
                 fig_h,
             )
