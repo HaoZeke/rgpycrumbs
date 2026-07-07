@@ -1,3 +1,13 @@
+rgpycrumbs 1.9.9 (2026-07-07)
+=============================
+
+Fixed
+-----
+
+- ``plt-min`` landscapes: title from job label (e.g. ``Reactant minimization``),
+  ``initial`` / ``minimized`` endpoint and strip labels, relative-energy colorbar,
+  and readable axis labels (via chemparseplot 1.9.7 single-ended pipeline).
+
 rgpycrumbs 1.9.8 (2026-07-07)
 =============================
 

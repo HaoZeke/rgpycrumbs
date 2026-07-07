@@ -354,19 +354,26 @@ def _plot_landscape(
     ira_instance = ira_mod.IRA() if ira_mod else None
     traj = trajs[0]
     ref_b = traj.final_atoms if traj.final_atoms is not None else traj.atoms_list[-1]
+    # Primary label for this figure (single-job landscapes are the usual case).
+    job_name = (labels[0] if labels else "minimization").strip() or "minimization"
+    job_title = job_name[:1].upper() + job_name[1:]
     strip_structs = None
     strip_labels = None
     if plot_structures == "endpoints":
         strip_structs = [traj.initial_atoms, ref_b]
-        strip_labels = ["Init", "Min"]
+        # Short strip captions (job name is in the figure title already).
+        strip_labels = ["initial", "minimized"]
 
     render_single_ended_landscape(
         atoms_list=traj.atoms_list,
         energies_eV=traj.dat_df["energy"].to_numpy(),
         ref_a=traj.initial_atoms,
         ref_b=ref_b,
-        overlay_atom_lists=[t.atoms_list for t in trajs],
-        overlay_labels=labels,
+        # Single-trajectory figures: do not re-plot the primary path as an overlay
+        # (avoids a useless legend and double-drawing). Multi-job overlays still
+        # pass every trajectory.
+        overlay_atom_lists=[t.atoms_list for t in trajs] if len(trajs) > 1 else None,
+        overlay_labels=labels if len(trajs) > 1 else None,
         ira_instance=ira_instance,
         ira_kmax=ira_kmax,
         project_path=project_path,
@@ -374,6 +381,8 @@ def _plot_landscape(
         energy_unit=energy_unit,
         energy_cap=energy_cap,
         energy_cap_window=energy_cap_window,
+        relative_energy=True,
+        title=f"{job_title} minimization",
         cmap=cmap,
         output=output,
         dpi=dpi,
@@ -381,12 +390,12 @@ def _plot_landscape(
         plot_structures=plot_structures,
         strip_structs=strip_structs,
         strip_labels=strip_labels,
-        endpoint_start_label="Init",
-        endpoint_end_label="Min",
+        endpoint_start_label="initial",
+        endpoint_end_label="minimized",
         endpoint_boxed=True,
         strip_renderer=strip_renderer,
         xyzrender_config=xyzrender_config,
-        strip_spacing=strip_spacing,
+        strip_spacing=max(strip_spacing, 2.2),
         strip_zoom=strip_zoom,
         strip_dividers=strip_dividers,
         rotation=rotation,
