@@ -1074,57 +1074,65 @@ def main(
                     return float(_s[0]), float(_d[0])
                 return r_val, p_val
 
-            # Add Reactant
-            rx, ry = get_projected_coords(final_r[0], final_p[0])
-            strip_payload.append(
-                StructurePlacement(atoms=atoms_list[0], x=rx, y=ry, label="R")
-            )
-
-            # Add Saddle (Explicit or Heuristic)
-            if sp_data:
-                sx, sy = get_projected_coords(sp_data.r, sp_data.p)
-                strip_payload.append(
-                    StructurePlacement(
-                        atoms=sp_data.atoms,
-                        x=sx,
-                        y=sy,
-                        label=sp_data.label,
-                    )
-                )
+            # Saddle index for labels (explicit SP may still be a separate geometry).
+            if plot_mode == "energy":
+                s_idx = int(np.argmax(final_z[1:-1]) + 1)
             else:
-                s_idx = (
-                    (np.argmax(final_z[1:-1]) + 1)
-                    if plot_mode == "energy"
-                    else np.argmin(final_z)
-                )
-                sx, sy = get_projected_coords(final_r[s_idx], final_p[s_idx])
-                strip_payload.append(
-                    StructurePlacement(
-                        atoms=atoms_list[s_idx],
-                        x=sx,
-                        y=sy,
-                        label="SP",
-                    )
-                )
+                s_idx = int(np.argmin(final_z))
 
-            # Add Product
-            px, py = get_projected_coords(final_r[-1], final_p[-1])
-            strip_payload.append(
-                StructurePlacement(atoms=atoms_list[-1], x=px, y=py, label="P")
-            )
-
-            # Add intermediate points if 'all' requested
             if plot_structures == "all":
-                for i in range(1, len(atoms_list) - 1):
+                # One entry per band image (no R/SP/P *and* numeric duplicates at
+                # the same x, which stacked strip captions on top of each other).
+                for i, atoms_i in enumerate(atoms_list):
                     ix, iy = get_projected_coords(final_r[i], final_p[i])
+                    if i == 0:
+                        label = "R"
+                    elif i == len(atoms_list) - 1:
+                        label = "P"
+                    elif i == s_idx:
+                        label = "SP"
+                    else:
+                        label = str(i)
                     strip_payload.append(
                         StructurePlacement(
-                            atoms=atoms_list[i],
+                            atoms=atoms_i,
                             x=ix,
                             y=iy,
-                            label=str(i),
+                            label=label,
                         )
                     )
+                # Explicit SP is marked on the main axes; the band already has an
+                # SP-labeled image so we do not double it in the strip.
+            else:
+                # Crit points only: R, SP, P.
+                rx, ry = get_projected_coords(final_r[0], final_p[0])
+                strip_payload.append(
+                    StructurePlacement(atoms=atoms_list[0], x=rx, y=ry, label="R")
+                )
+                if sp_data:
+                    sx, sy = get_projected_coords(sp_data.r, sp_data.p)
+                    strip_payload.append(
+                        StructurePlacement(
+                            atoms=sp_data.atoms,
+                            x=sx,
+                            y=sy,
+                            label=sp_data.label,
+                        )
+                    )
+                else:
+                    sx, sy = get_projected_coords(final_r[s_idx], final_p[s_idx])
+                    strip_payload.append(
+                        StructurePlacement(
+                            atoms=atoms_list[s_idx],
+                            x=sx,
+                            y=sy,
+                            label="SP",
+                        )
+                    )
+                px, py = get_projected_coords(final_r[-1], final_p[-1])
+                strip_payload.append(
+                    StructurePlacement(atoms=atoms_list[-1], x=px, y=py, label="P")
+                )
 
             # Add additional structures
             for overlay in additional_atoms_data:
