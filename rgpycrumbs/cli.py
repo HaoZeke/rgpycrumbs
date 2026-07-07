@@ -1,6 +1,7 @@
 import importlib.util
 import logging
 import os
+import shutil
 import site
 import subprocess
 import sys
@@ -13,6 +14,40 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # The directory where cli.py is located
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+
+# Modules that signal a usable in-env eOn/plot stack (readcon-native CON I/O).
+_IN_ENV_STACK_MODULES = ("readcon", "matplotlib", "polars", "ase", "chemparseplot")
+
+
+def _env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _in_env_stack_ready() -> bool:
+    """True when the active interpreter already has the eOn plot/readcon stack.
+
+    Prefer this over ``uv run`` isolation: a host ``uv`` cache can pull a different
+    Python (e.g. 3.12) while site-packages still hold 3.13 extension modules
+    (numpy), which breaks plotting of readcon-core CON outputs from eOn 2.16+.
+    """
+    for mod in _IN_ENV_STACK_MODULES:
+        try:
+            importlib.import_module(mod)
+        except ImportError:
+            return False
+    return True
+
+
+def _prefer_in_env_interpreter(is_dev: bool) -> bool:
+    """Decide whether to run scripts with ``sys.executable`` instead of ``uv run``."""
+    if is_dev or _env_flag("RGPYCRUMBS_DEV"):
+        return True
+    if _env_flag("RGPYCRUMBS_FORCE_UV"):
+        return False
+    if shutil.which("uv") is None:
+        return True
+    # Active env already has readcon + plot deps: use it for CON metadata fidelity.
+    return _in_env_stack_ready()
 
 
 def _find_editable_source(package_name: str) -> Path | None:
@@ -95,13 +130,19 @@ def _dispatch(
         click.echo(f"Error: Script not found at '{script_path}'", err=True)
         sys.exit(1)
 
-    if not is_dev:
+    use_in_env = _prefer_in_env_interpreter(is_dev)
+    if use_in_env:
+        command = [sys.executable, str(script_path), *script_args]
+        if is_verbose or (not is_dev and _in_env_stack_ready()):
+            click.echo(
+                "--> Using active interpreter (readcon/plot stack present or --dev)",
+                err=True,
+            )
+    else:
         command = ["uv", "run"]
         for source in _uv_editable_sources():
             command.extend(["--with-editable", str(source)])
         command.extend([str(script_path), *script_args])
-    else:
-        command = [sys.executable, str(script_path), *script_args]
 
     if is_verbose:
         click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
