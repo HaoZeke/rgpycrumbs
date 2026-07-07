@@ -146,7 +146,7 @@ log = logging.getLogger("rich")
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 IRA_KMAX_DEFAULT = 14.0
-NEB_LANDSCAPE_STRIP_ZOOM_MULT = 1.95
+NEB_LANDSCAPE_STRIP_ZOOM_MULT = 2.35
 NEB_PROFILE_STRIP_ZOOM_MULT = 2.95
 
 
@@ -723,6 +723,8 @@ def main(
     atoms_list = None
     additional_atoms_data = []
     sp_data = None
+    # Filled for projected landscape so the strip can re-render after layout.
+    landscape_strip_render = None
 
     # Only attempt to load structures if specifically requested or needed for the plot type
     if con_file:
@@ -1153,19 +1155,21 @@ def main(
 
             strip_payload.sort(key=lambda entry: entry.x)
 
-            plot_structure_strip(
-                ax_strip,
-                strip_payload,
-                zoom=zoom_ratio * NEB_LANDSCAPE_STRIP_ZOOM_MULT,
-                rotation=rotation,
-                theme_color=active_theme.textcolor,
-                renderer=strip_renderer,
-                xyzrender_config=xyzrender_config,
-                col_spacing=strip_spacing,
-                show_dividers=strip_dividers,
-                perspective_tilt=perspective_tilt,
-                width_fill_fraction=0.94,
-            )
+            # Defer strip drawing until after equal-aspect figure layout so
+            # structures are rendered at the final (large) strip pixel size.
+            # A first draw on the small GridSpec cell left tiny molecules.
+            landscape_strip_render = {
+                "payload": strip_payload,
+                "zoom": zoom_ratio * NEB_LANDSCAPE_STRIP_ZOOM_MULT,
+                "rotation": rotation,
+                "theme_color": active_theme.textcolor,
+                "renderer": strip_renderer,
+                "xyzrender_config": xyzrender_config,
+                "col_spacing": strip_spacing,
+                "show_dividers": strip_dividers,
+                "perspective_tilt": perspective_tilt,
+                "width_fill_fraction": 0.96,
+            }
 
             # Annotate Main Plot -- only label R, SP, P (not additional con;
             # those are identified by the legend markers instead)
@@ -1542,6 +1546,7 @@ def main(
     ax.set_title(final_title)
     ax.minorticks_on()
 
+    projected_layout_done = False
     if plot_type == "landscape" and not aspect_ratio:
         if project_path:
             # Path-driven symmetric d limits (never inflate to s/2).
@@ -1564,36 +1569,47 @@ def main(
             ax.set_ylim(-half_span, half_span)
             x_min, x_max = ax.get_xlim()
             y_min, y_max = -half_span, half_span
-            # s and d are both Å from the same RMSD metric — equal aspect is
-            # mandatory. Resize the figure so the map box matches the data
-            # aspect (no aspect='auto', no empty d-bands from square frames).
+            # s and d are both Å — equal aspect is mandatory. Size the *figure*
+            # to the map+strip so equal aspect does not leave a white void in a
+            # leftover 12×8 GridSpec cell.
             data_aspect = (x_max - x_min) / max(y_max - y_min, 1e-9)
-            map_h_in = 1.55
-            map_w_in = map_h_in * data_aspect
-            # Keep gallery figures printable; scale height if the path is very wide.
-            max_map_w_in = 11.0
+            # Width-first: readable gallery width, height follows equal aspect.
+            map_w_in = 10.5
+            map_h_in = map_w_in / data_aspect
+            # Keep the map tall enough for tick labels when the path is flat.
+            min_map_h_in = 1.35
+            if map_h_in < min_map_h_in:
+                map_h_in = min_map_h_in
+                map_w_in = map_h_in * data_aspect
+            max_map_w_in = 14.0
             if map_w_in > max_map_w_in:
                 map_w_in = max_map_w_in
                 map_h_in = map_w_in / data_aspect
-            strip_h_in = 1.85 if has_strip else 0.0
-            y_label_in = 0.85
-            cbar_in = 1.05  # bar + "Relative Energy (eV)" label
-            top_in = 0.45
-            bottom_in = 0.25
+            # Tall strip under the full map width so structures are large.
+            strip_h_in = 2.55 if has_strip else 0.0
+            y_label_in = 0.95
+            cbar_in = 1.15  # bar + energy label
+            top_in = 0.50
+            gap_map_strip_in = 0.18 if has_strip else 0.0
+            bottom_in = 0.20
             fig_w = y_label_in + map_w_in + cbar_in
-            fig_h = top_in + map_h_in + strip_h_in + bottom_in
-            fig.set_size_inches(fig_w, fig_h)
+            fig_h = (
+                top_in + map_h_in + gap_map_strip_in + strip_h_in + bottom_in
+            )
+            fig.set_size_inches(fig_w, fig_h, forward=True)
 
+            # Position boxes whose display aspect matches data_aspect exactly so
+            # adjustable='box' fills the slot (no internal white margins).
             left = y_label_in / fig_w
             map_w_frac = map_w_in / fig_w
             map_h_frac = map_h_in / fig_h
-            map_bottom = (bottom_in + strip_h_in) / fig_h
+            map_bottom = (bottom_in + strip_h_in + gap_map_strip_in) / fig_h
             ax.set_position([left, map_bottom, map_w_frac, map_h_frac])
             ax.set_aspect("equal", adjustable="box", anchor="C")
 
-            cbar_left = left + map_w_frac + 0.008
-            cbar_w_frac = 0.012
-            for other in fig.axes:
+            cbar_left = left + map_w_frac + 0.01
+            cbar_w_frac = max(0.012, 0.18 / fig_w)
+            for other in list(fig.axes):
                 if other is ax or other is ax_strip:
                     continue
                 other.set_position(
@@ -1602,16 +1618,39 @@ def main(
 
             if ax_strip is not None:
                 strip_bottom = bottom_in / fig_h
-                strip_h_frac = (strip_h_in * 0.92) / fig_h
+                strip_h_frac = strip_h_in / fig_h
                 ax_strip.set_position(
                     [left, strip_bottom, map_w_frac, strip_h_frac]
                 )
-                from matplotlib.offsetbox import AnnotationBbox
+                ax_strip.set_navigate(False)
 
-                for artist in ax_strip.get_children():
-                    if isinstance(artist, AnnotationBbox):
-                        artist.set_clip_on(True)
+            # Re-render structure strip at the final large axes size.
+            if landscape_strip_render is not None and ax_strip is not None:
+                ax_strip.clear()
+                apply_axis_theme(ax_strip, active_theme)
+                ax_strip.axis("off")
+                fig.canvas.draw()
+                plot_structure_strip(
+                    ax_strip,
+                    landscape_strip_render["payload"],
+                    zoom=landscape_strip_render["zoom"],
+                    rotation=landscape_strip_render["rotation"],
+                    theme_color=landscape_strip_render["theme_color"],
+                    renderer=landscape_strip_render["renderer"],
+                    xyzrender_config=landscape_strip_render["xyzrender_config"],
+                    col_spacing=landscape_strip_render["col_spacing"],
+                    show_dividers=landscape_strip_render["show_dividers"],
+                    perspective_tilt=landscape_strip_render["perspective_tilt"],
+                    width_fill_fraction=landscape_strip_render[
+                        "width_fill_fraction"
+                    ],
+                )
+                # Keep strip width locked to the map after imshow layout.
+                ax_strip.set_position(
+                    [left, strip_bottom, map_w_frac, strip_h_frac]
+                )
 
+            projected_layout_done = True
             log.info(
                 "Set equal-aspect (s,d) layout: s=[%.3f, %.3f], "
                 "d=[%.3f, %.3f], data_aspect=%.2f, figsize=(%.2f, %.2f) in",
@@ -1640,29 +1679,40 @@ def main(
             fontsize=int(active_theme.font_size * 0.75),
         ).set_zorder(101)
 
-    if not ax_strip and not (
-        plot_type == "landscape" and project_path and not aspect_ratio
-    ):
-        plt.tight_layout(pad=0.5)
+    if not projected_layout_done:
+        if not ax_strip:
+            plt.tight_layout(pad=0.5)
+        elif ax_strip:
+            fig.canvas.draw()
+            pos_main = ax.get_position()
+            pos_strip = ax_strip.get_position()
+            gap = 0.025
+            strip_h = min(pos_strip.height, 0.20)
+            strip_y = max(0.02, pos_main.y0 - gap - strip_h)
+            ax_strip.set_position(
+                [pos_main.x0, strip_y, pos_main.width, strip_h]
+            )
+            from matplotlib.offsetbox import AnnotationBbox
 
-    if ax_strip and not (
-        plot_type == "landscape" and project_path and not aspect_ratio
-    ):
-        fig.canvas.draw()
-        pos_main = ax.get_position()
-        pos_strip = ax_strip.get_position()
-        gap = 0.025
-        strip_h = min(pos_strip.height, 0.20)
-        strip_y = max(0.02, pos_main.y0 - gap - strip_h)
-        ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, strip_h])
-        from matplotlib.offsetbox import AnnotationBbox
-
-        for artist in ax_strip.get_children():
-            if isinstance(artist, AnnotationBbox):
-                artist.set_clip_on(True)
+            for artist in ax_strip.get_children():
+                if isinstance(artist, AnnotationBbox):
+                    artist.set_clip_on(True)
 
     if output_file:
-        save_plot(output_file, dpi, has_strip=ax_strip is not None)
+        # Projected landscape already has a content-sized figure; skip a loose
+        # tight crop that can re-introduce empty canvas from stale artists.
+        if projected_layout_done:
+            fig.canvas.draw()
+            fig.savefig(
+                output_file,
+                transparent=False,
+                dpi=dpi,
+                bbox_inches="tight",
+                pad_inches=0.12,
+                facecolor=fig.get_facecolor(),
+            )
+        else:
+            save_plot(output_file, dpi, has_strip=ax_strip is not None)
     else:
         plt.show()
 

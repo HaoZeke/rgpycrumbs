@@ -1,3 +1,13 @@
+rgpycrumbs 1.9.6 (2026-07-07)
+=============================
+
+Fixed
+-----
+
+- ``plt-neb`` projected landscape layout: size the figure to map+strip (no left
+  void in a leftover 12×8 cell), re-render the structure strip *after* layout so
+  molecules use the final large axes, keep equal aspect for (s, d).
+
 rgpycrumbs 1.9.5 (2026-07-07)
 =============================
 
