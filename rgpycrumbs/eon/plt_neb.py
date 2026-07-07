@@ -695,18 +695,19 @@ def main(
     }
 
     if has_strip:
-        # Heuristic layout adjustment
-        n_expected = (3 if plot_structures == "crit_points" else 10) + len(
+        # Single-row strips need little vertical gap; multi-row needs more.
+        n_expected = (3 if plot_structures == "crit_points" else 12) + len(
             additional_con or []
         )
-        max_cols = 6
-        n_rows = (n_expected + max_cols - 1) // max_cols
+        # Prefer one strip row (matches plot_structure_strip single-row preference).
+        n_rows = 1 if n_expected <= 16 else 2
         if plot_type == "profile":
-            calc_hspace = 0.85 if n_rows > 1 else 0.30
-            height_ratios = [1, 0.72]
+            calc_hspace = 0.35 if n_rows > 1 else 0.18
+            height_ratios = [1, 0.42 if n_rows == 1 else 0.55]
         else:
-            calc_hspace = 0.75 if n_rows > 1 else 0.20
-            height_ratios = [1, 0.60]
+            # Landscape: keep strip close; avoid a tall empty canvas under the map.
+            calc_hspace = 0.28 if n_rows > 1 else 0.12
+            height_ratios = [1, 0.32 if n_rows == 1 else 0.45]
 
         gs = GridSpec(2, 1, height_ratios=height_ratios, hspace=calc_hspace, figure=fig)
         ax = fig.add_subplot(gs[0])
@@ -849,25 +850,27 @@ def main(
                 _s, _d = project_to_sd(r_full, p_full, global_basis)
                 _s_pad = (_s.max() - _s.min()) * 0.1
                 vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
-                _half = (vp_xlim[1] - vp_xlim[0]) / 2
-                # Make sure the trajectory itself fits inside the symmetric
-                # d window before considering additional structures, so the
-                # converged path and saddle marker do not get clipped at
-                # the top/bottom of the viewport.
+                # Symmetric d about zero from the *actual* path extent (plus pad),
+                # not from s-span/2 — the latter forced a square and left a tall
+                # empty band above/below a near-linear path.
                 _half = max(
-                    _half, abs(float(_d.max())) * 1.15, abs(float(_d.min())) * 1.15
+                    abs(float(_d.max())) * 1.35,
+                    abs(float(_d.min())) * 1.35,
+                    0.08,
                 )
                 for overlay in additional_atoms_data:
                     _, _ad = project_to_sd(
                         np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
                     _half = max(_half, abs(float(_ad[0])) * 1.15)
+                if not has_strip:
+                    # No strip: optional square frame for equal-aspect figures.
+                    _half = max(_half, (vp_xlim[1] - vp_xlim[0]) / 2)
+                    x_span = vp_xlim[1] - vp_xlim[0]
+                    if 2 * _half > x_span:
+                        x_center = (vp_xlim[0] + vp_xlim[1]) / 2
+                        vp_xlim = (x_center - _half, x_center + _half)
                 vp_ylim = (-_half, _half)
-                # Expand X to match Y so equal-aspect produces a square plot
-                x_span = vp_xlim[1] - vp_xlim[0]
-                if 2 * _half > x_span:
-                    x_center = (vp_xlim[0] + vp_xlim[1]) / 2
-                    vp_xlim = (x_center - _half, x_center + _half)
 
             plot_landscape_surface(
                 ax,
@@ -1336,6 +1339,8 @@ def main(
             )
 
             y_col = 2 if plot_mode == "energy" else 4
+            last_profile_rc = None
+            last_profile_y = None
 
             for idx, fpath in enumerate(file_paths_to_plot):
                 try:
@@ -1379,6 +1384,10 @@ def main(
                     method=spline_method,
                     label=step_label,
                 )
+
+                if is_last or last_profile_rc is None:
+                    last_profile_rc = np.asarray(data[1], dtype=float)
+                    last_profile_y = np.asarray(data[y_col], dtype=float)
 
                 if (
                     highlight_last
@@ -1425,6 +1434,37 @@ def main(
                                 renderer=strip_renderer,
                                 xyzrender_config=xyzrender_config,
                             )
+
+            # Saddle marker on the (final) 1D profile — matches landscape SP star.
+            if (
+                last_profile_rc is not None
+                and last_profile_y is not None
+                and len(last_profile_y) > 2
+            ):
+                if plot_mode == "energy":
+                    s_idx = int(np.argmax(last_profile_y[1:-1]) + 1)
+                else:
+                    s_idx = int(np.argmin(last_profile_y))
+                ax.scatter(
+                    float(last_profile_rc[s_idx]),
+                    float(last_profile_y[s_idx]),
+                    marker="*",
+                    s=int(active_theme.font_size**2 * 1.5),
+                    c="white",
+                    edgecolors="black",
+                    linewidths=1.5,
+                    zorder=100,
+                    label="SP",
+                )
+                ax.annotate(
+                    "SP",
+                    xy=(float(last_profile_rc[s_idx]), float(last_profile_y[s_idx])),
+                    xytext=(8, 12),
+                    textcoords="offset points",
+                    fontsize=int(active_theme.font_size * 0.9),
+                    fontweight="bold",
+                    zorder=101,
+                )
 
         # --- Profile Additional Structures ---
         if additional_atoms_data and rc_mode == "rmsd":
@@ -1513,10 +1553,12 @@ def main(
     ax.minorticks_on()
 
     if plot_type == "landscape" and not aspect_ratio:
-        ax.set_aspect("equal")
         if project_path:
-            # Force Y-axis to be symmetric and match the X-axis span,
-            # but expand if additional structures fall outside
+            # Symmetric d about zero, but do not force a square equal to the full
+            # s-span: that left huge empty canvas when the path stays near d=0.
+            y_min, y_max = ax.get_ylim()
+            d_data = max(abs(y_min), abs(y_max), 0.05)
+            # Slight pad; also respect any extra structures.
             x_min, x_max = ax.get_xlim()
             half_span = landscape_half_span(
                 (x_min, x_max),
@@ -1525,8 +1567,18 @@ def main(
                 additional_atoms_data,
                 global_basis,
             )
+            # Cap equal-aspect inflation: use data d-range with pad, not full s/2.
+            half_span = min(half_span, max(d_data * 1.35, 0.08))
             ax.set_ylim(-half_span, half_span)
+            if has_strip:
+                # With a structure strip, auto aspect fills the axes; equal aspect
+                # in a wide figure leaves large left/right whitespace.
+                ax.set_aspect("auto")
+            else:
+                ax.set_aspect("equal")
             log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
+        else:
+            ax.set_aspect("equal")
 
     if show_legend:
         ax.legend(
@@ -1549,12 +1601,10 @@ def main(
         pos_main = ax.get_position()
         pos_strip = ax_strip.get_position()
 
-        # Force strip to match the main plot's Left and Width exactly,
-        # and push it down slightly to avoid overlapping the xlabel
-        strip_y = pos_strip.y0 - 0.02
+        # Align strip width with main axes; keep it just under the xlabel
+        # (small gap only — large downward shifts created empty canvas).
+        strip_y = max(0.02, pos_strip.y0 - 0.01)
         ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, pos_strip.height])
-        # Clip AnnotationBbox images to prevent bbox_inches="tight" from
-        # expanding the figure, but leave Text labels unclipped.
         from matplotlib.offsetbox import AnnotationBbox
 
         for artist in ax_strip.get_children():
