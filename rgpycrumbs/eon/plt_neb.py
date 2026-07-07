@@ -111,6 +111,7 @@ from chemparseplot.plot.neb import (
     default_neb_ylabel,
     landscape_half_span,
     landscape_projection_basis,
+    mark_saddle_point,
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
@@ -848,21 +849,28 @@ def main(
             vp_xlim = vp_ylim = None
             if project_path and global_basis is not None:
                 _s, _d = project_to_sd(r_full, p_full, global_basis)
-                _s_pad = (_s.max() - _s.min()) * 0.1
+                # Tight s padding — large pads only grow empty GP-masked margins.
+                _s_pad = max((_s.max() - _s.min()) * 0.04, 0.02)
                 vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
                 # Symmetric d about zero from the *actual* path extent (plus pad),
                 # not from s-span/2 — the latter forced a square and left a tall
                 # empty band above/below a near-linear path.
                 _half = max(
-                    abs(float(_d.max())) * 1.35,
-                    abs(float(_d.min())) * 1.35,
-                    0.08,
+                    abs(float(_d.max())) * 1.18,
+                    abs(float(_d.min())) * 1.18,
+                    0.04 * (_s.max() - _s.min()),
+                    0.02,
                 )
+                if sp_data is not None:
+                    _, _sd = project_to_sd(
+                        np.array([sp_data.r]), np.array([sp_data.p]), global_basis
+                    )
+                    _half = max(_half, abs(float(_sd[0])) * 1.12)
                 for overlay in additional_atoms_data:
                     _, _ad = project_to_sd(
                         np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
-                    _half = max(_half, abs(float(_ad[0])) * 1.15)
+                    _half = max(_half, abs(float(_ad[0])) * 1.12)
                 if not has_strip:
                     # No strip: optional square frame for equal-aspect figures.
                     _half = max(_half, (vp_xlim[1] - vp_xlim[0]) / 2)
@@ -1023,16 +1031,13 @@ def main(
         else:
             sp_x, sp_y = sp_x_raw, sp_y_raw
 
-        ax.scatter(
+        mark_saddle_point(
+            ax,
             sp_x,
             sp_y,
-            marker="*",
-            s=int(active_theme.font_size**2 * 1.5),
-            c="white",
-            edgecolors="black",
-            linewidths=1.5,
-            zorder=100,
-            label="SP",
+            font_size=active_theme.font_size,
+            vline=False,
+            annotate=True,
         )
 
         if additional_atoms_data:
@@ -1435,7 +1440,7 @@ def main(
                                 xyzrender_config=xyzrender_config,
                             )
 
-            # Saddle marker on the (final) 1D profile — matches landscape SP star.
+            # Saddle marker on the (final) 1D profile — gold star + vertical guide.
             if (
                 last_profile_rc is not None
                 and last_profile_y is not None
@@ -1445,25 +1450,13 @@ def main(
                     s_idx = int(np.argmax(last_profile_y[1:-1]) + 1)
                 else:
                     s_idx = int(np.argmin(last_profile_y))
-                ax.scatter(
+                mark_saddle_point(
+                    ax,
                     float(last_profile_rc[s_idx]),
                     float(last_profile_y[s_idx]),
-                    marker="*",
-                    s=int(active_theme.font_size**2 * 1.5),
-                    c="white",
-                    edgecolors="black",
-                    linewidths=1.5,
-                    zorder=100,
-                    label="SP",
-                )
-                ax.annotate(
-                    "SP",
-                    xy=(float(last_profile_rc[s_idx]), float(last_profile_y[s_idx])),
-                    xytext=(8, 12),
-                    textcoords="offset points",
-                    fontsize=int(active_theme.font_size * 0.9),
-                    fontweight="bold",
-                    zorder=101,
+                    font_size=active_theme.font_size,
+                    vline=True,
+                    annotate=True,
                 )
 
         # --- Profile Additional Structures ---
@@ -1554,11 +1547,7 @@ def main(
 
     if plot_type == "landscape" and not aspect_ratio:
         if project_path:
-            # Symmetric d about zero, but do not force a square equal to the full
-            # s-span: that left huge empty canvas when the path stays near d=0.
-            y_min, y_max = ax.get_ylim()
-            d_data = max(abs(y_min), abs(y_max), 0.05)
-            # Slight pad; also respect any extra structures.
+            # Path-driven symmetric d limits (never inflate to s/2).
             x_min, x_max = ax.get_xlim()
             half_span = landscape_half_span(
                 (x_min, x_max),
@@ -1567,8 +1556,14 @@ def main(
                 additional_atoms_data,
                 global_basis,
             )
-            # Cap equal-aspect inflation: use data d-range with pad, not full s/2.
-            half_span = min(half_span, max(d_data * 1.35, 0.08))
+            if sp_data is not None and global_basis is not None:
+                _sp_basis = landscape_projection_basis(
+                    global_basis, final_r, final_p
+                )
+                _, _spd = project_to_sd(
+                    np.array([sp_data.r]), np.array([sp_data.p]), _sp_basis
+                )
+                half_span = max(half_span, abs(float(_spd[0])) * 1.12)
             ax.set_ylim(-half_span, half_span)
             if has_strip:
                 # With a structure strip, auto aspect fills the axes; equal aspect
@@ -1576,7 +1571,7 @@ def main(
                 ax.set_aspect("auto")
             else:
                 ax.set_aspect("equal")
-            log.info(f"Set symmetric Y-axis limits: [-{half_span:.2f}, {half_span:.2f}]")
+            log.info(f"Set symmetric Y-axis limits: [-{half_span:.3f}, {half_span:.3f}]")
         else:
             ax.set_aspect("equal")
 

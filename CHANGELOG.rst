@@ -1,3 +1,33 @@
+rgpycrumbs 1.9.3 (2026-07-07)
+=============================
+
+Fixed
+-----
+
+- ``plt-neb`` 1D profiles mark the saddle with a gold star, ``SP`` label box, and
+  a vertical guide line (was a small white star easy to miss).
+- ``plt-neb`` 2D landscapes use path-driven ``d`` limits and tighter save padding
+  so GP-masked margins no longer dominate the frame.
+
+rgpycrumbs 1.9.0 (2026-07-07)
+=============================
+
+Added
+-----
+
+- Prefer the active interpreter for PEP 723 script dispatch when the readcon/plot
+  stack is already importable (avoids broken isolated ``uv run`` Python ABIs when
+  plotting eOn 2.16 ``con_spec_version=2`` outputs). Override with
+  ``RGPYCRUMBS_FORCE_UV=1``; force in-env with ``RGPYCRUMBS_DEV=1`` or ``--dev``.
+- Declarative TOML plot config for NEB/min/saddle CLIs; CON trajectory splitter
+  via readcon.
+
+Changed
+-------
+
+- Analysis extras require ``readcon>=0.13.1`` and ``chemparseplot[neb,plot]>=1.8.0``.
+
+
 rgpycrumbs 1.8.0 (2026-06-27)
 =============================
 
