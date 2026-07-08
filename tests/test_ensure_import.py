@@ -341,16 +341,18 @@ class TestDependencyMap:
     @pytest.mark.skipif(
         sys.version_info < (3, 11), reason="tomllib requires Python 3.11+"
     )
-    def test_analysis_extra_includes_plot_hard_deps(self):
-        """analysis extra must hard-pin adjustText + jax for host envs."""
+    def test_analysis_extra_keeps_heavies_optional(self):
+        """analysis stays light; jax/adjustText resolve via AUTO_DEPS / uv."""
         import tomllib
 
         pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
         with open(pyproject, "rb") as f:
             data = tomllib.load(f)
         analysis = data["project"]["optional-dependencies"]["analysis"]
-        joined = " ".join(analysis)
-        assert "adjustText" in joined
-        assert "jax" in joined
+        joined = " ".join(analysis).lower()
+        assert "adjusttext" not in joined
+        assert "jax" not in joined
         assert "readcon" in joined
         assert "chemparseplot" in joined
+        assert "jax" in _DEPENDENCY_MAP
+        assert "adjustText" in _DEPENDENCY_MAP

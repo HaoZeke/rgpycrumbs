@@ -168,6 +168,13 @@ def _dispatch(
     current_pythonpath = env.get("PYTHONPATH", "")
     env["PYTHONPATH"] = f"{project_root}{os.pathsep}{current_pythonpath}"
 
+    # CLI owns dependency resolution for dispatched scripts:
+    # - uv run → PEP 723 header deps
+    # - in-env  → ensure_import cache installs for heavies (jax, adjustText)
+    # Do not force hosts to pre-declare those. Explicit 0/false still disables.
+    if env.get("RGPYCRUMBS_AUTO_DEPS", "").strip() == "":
+        env["RGPYCRUMBS_AUTO_DEPS"] = "1"
+
     click.echo(f"--> Dispatching to: {' '.join(command)}")
 
     try:

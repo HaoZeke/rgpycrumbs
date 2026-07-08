@@ -1,17 +1,25 @@
+rgpycrumbs 1.9.11 (2026-07-08)
+==============================
+
+Fixed
+-----
+
+- Restore auto-deps design: ``[analysis]`` does **not** hard-depend on
+  ``jax`` / ``adjustText``. Those stay optional and resolve via uv PEP 723
+  (isolated dispatch) or ``ensure_import`` (in-env).
+- CLI dispatch now defaults ``RGPYCRUMBS_AUTO_DEPS=1`` so in-env ``plt-*``
+  can cache-install heavies without host env pins. Set ``=0`` to disable.
+- ``plt-neb`` loads ``adjustText`` via ``ensure_import`` (not a bare import).
+
 rgpycrumbs 1.9.10 (2026-07-08)
 ==============================
 
 Changed
 -------
 
-- ``[analysis]`` extra now hard-depends on ``adjustText`` and ``jax`` (plus the
-  existing readcon/chemparseplot stack) so host envs only need
-  ``pip install "rgpycrumbs[analysis]"`` for eOn plot CLIs. ``[surfaces]``
-  remains a thin jax alias for ensure_import hints.
-- ``plt-neb`` loads ``adjustText`` via ``ensure_import`` so in-env dispatch with
-  ``RGPYCRUMBS_AUTO_DEPS=1`` (or uv PEP 723) can resolve it without a separate
-  host pin. PEP 723 pins for plot scripts use readcon>=0.13.1 and
-  chemparseplot[neb,plot].
+- PEP 723 pins for plot scripts: readcon>=0.13.1, chemparseplot[neb,plot].
+- (Yanked design) briefly hard-pinned jax/adjustText on ``[analysis]``;
+  corrected in 1.9.11 — use auto-deps / uv instead.
 
 rgpycrumbs 1.9.9 (2026-07-07)
 =============================

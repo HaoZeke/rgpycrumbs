@@ -130,3 +130,27 @@ def test_dispatch_skips_editable_sources_when_absent(mock_run, monkeypatch):
     executed_command = mock_run.call_args[0][0]
     assert executed_command[:2] == ["uv", "run"]
     assert "--with-editable" not in executed_command
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_defaults_auto_deps(mock_run, monkeypatch):
+    """CLI dispatch enables ensure_import auto-install unless user set it."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+
+    _dispatch("group", "script", ())
+
+    env = mock_run.call_args.kwargs["env"]
+    assert env["RGPYCRUMBS_AUTO_DEPS"] == "1"
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_respects_explicit_auto_deps_off(mock_run, monkeypatch):
+    """Explicit RGPYCRUMBS_AUTO_DEPS=0 must not be overridden by dispatch."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setenv("RGPYCRUMBS_AUTO_DEPS", "0")
+
+    _dispatch("group", "script", ())
+
+    env = mock_run.call_args.kwargs["env"]
+    assert env["RGPYCRUMBS_AUTO_DEPS"] == "0"

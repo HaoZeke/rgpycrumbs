@@ -221,11 +221,10 @@ def ensure_import(module_name: str):
             msg = """
 JAX is required for surface fitting and Gaussian Process models.
 
-Quick install (analysis includes jax; surfaces is a thin alias):
-  pip install "rgpycrumbs[analysis]"
+Quick install:
   pip install "rgpycrumbs[surfaces]"
 
-Or enable auto-install (uv cache / PEP 723 dispatch):
+Or enable auto-install (CLI dispatch does this by default):
   export RGPYCRUMBS_AUTO_DEPS=1
 
 For GPU support:

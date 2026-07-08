@@ -30,16 +30,15 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
-# [all] / [analysis] pre-install pip-available optional deps as a convenience.
-# analysis = eOn/plot stack (readcon, chemparseplot, adjustText) + jax for
-# landscape GPs so host envs (e.g. cookbook) need only rgpycrumbs[analysis].
-# Without extras, deps still auto-resolve via uv PEP 723 dispatch or
-# RGPYCRUMBS_AUTO_DEPS=1 (ensure_import). ira_mod/tblite stay pixi-only;
-# heavy tools like ovito stay explicit.
-all           = [ "ase>=3.22", "scipy>=1.11", "jax[cpu]>=0.4", "adjustText>=1.0", "readcon>=0.13.1", "chemparseplot[neb,plot]>=1.8.0,<2" ]
-analysis      = [ "ase>=3.22", "scipy>=1.11", "jax>=0.4", "adjustText>=1.0", "readcon>=0.13.1", "chemparseplot[neb,plot]>=1.8.0,<2" ]
+# [all] pre-installs pip-available optional deps as a convenience.
+# analysis = light eOn/plot stack (readcon, chemparseplot, ase, scipy).
+# Heavy optionals (jax, adjustText) are NOT hard-deps: resolve via
+#   - uv PEP 723 on `rgpycrumbs eon plt-*` when not in-env, or
+#   - ensure_import + RGPYCRUMBS_AUTO_DEPS=1 (CLI dispatch enables this).
+# ira_mod/tblite stay pixi-only; heavy tools like ovito stay explicit.
+all           = [ "ase>=3.22", "scipy>=1.11", "jax[cpu]>=0.4", "readcon>=0.13.1", "chemparseplot[neb,plot]>=1.8.0,<2" ]
+analysis      = [ "ase>=3.22", "scipy>=1.11", "readcon>=0.13.1", "chemparseplot[neb,plot]>=1.8.0,<2" ]
 interpolation = [ "scipy>=1.11" ]
-# Thin alias kept for pip install rgpycrumbs[surfaces] / ensure_import hints.
 surfaces      = [ "jax>=0.4" ]
 # ira_mod remains pixi-only; it is not exposed as a pip extra
 lint    = [ "ruff>=0.1.6" ]
