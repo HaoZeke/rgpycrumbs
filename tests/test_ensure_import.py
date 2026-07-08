@@ -332,7 +332,25 @@ class TestDependencyMap:
         assert "jax" in _DEPENDENCY_MAP
         assert "scipy" in _DEPENDENCY_MAP
         assert "ase" in _DEPENDENCY_MAP
+        assert "adjustText" in _DEPENDENCY_MAP
         # Special-case deps intentionally stay out of the default auto-install map
         assert "ira_mod" not in _DEPENDENCY_MAP
         assert "tblite" not in _DEPENDENCY_MAP
         assert "ovito" not in _DEPENDENCY_MAP
+
+    @pytest.mark.skipif(
+        sys.version_info < (3, 11), reason="tomllib requires Python 3.11+"
+    )
+    def test_analysis_extra_includes_plot_hard_deps(self):
+        """analysis extra must hard-pin adjustText + jax for host envs."""
+        import tomllib
+
+        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        with open(pyproject, "rb") as f:
+            data = tomllib.load(f)
+        analysis = data["project"]["optional-dependencies"]["analysis"]
+        joined = " ".join(analysis)
+        assert "adjustText" in joined
+        assert "jax" in joined
+        assert "readcon" in joined
+        assert "chemparseplot" in joined

@@ -31,17 +31,25 @@ https://realpython.com/python-script-structure/
 #   "numpy",
 #   "scipy",
 #   "jax",
-#   "adjustText",
+#   "adjustText>=1.0",
 #   "cmcrameri",
 #   "rich",
 #   "ase",
 #   "polars",
 #   "h5py",
-#   "chemparseplot>=1.8.0",
+#   "chemparseplot[neb,plot]>=1.8.0,<2",
 #   "xyzrender>=0.1.3",
-#   "readcon>=0.7.0",
+#   "readcon>=0.13.1",
 # ]
 # ///
+#
+# Dispatch model (rgpycrumbs.cli):
+# - ``uv run`` (default when the active env lacks the readcon/plot stack):
+#   PEP 723 deps above are installed into the uv env.
+# - In-env / ``--dev`` (preferred when the stack is already importable, e.g.
+#   cookbook conda env): optional heavy imports go through
+#   ``ensure_import`` so RGPYCRUMBS_AUTO_DEPS=1 can cache-install, or a clear
+#   install hint is raised. Do not force host envs to pre-declare jax/adjustText.
 
 import logging
 import sys
@@ -53,15 +61,21 @@ import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
-from adjustText import adjust_text
 
 try:
-    from rgpycrumbs._aux import warn_on_direct_script_import
+    from rgpycrumbs._aux import ensure_import, warn_on_direct_script_import
 except ImportError:  # pragma: no cover - direct script execution without package root
+    ensure_import = None
     warn_on_direct_script_import = None
 
 if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
+
+# Optional: uv PEP 723 / AUTO_DEPS / analysis-extra environments.
+if ensure_import is not None:
+    adjust_text = ensure_import("adjustText").adjust_text
+else:  # pragma: no cover
+    from adjustText import adjust_text
 
 try:
     from ._render_cli import add_config_option, add_render_options

@@ -24,11 +24,12 @@ valley projection. Supports:
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot>=1.8.0",
+#   "chemparseplot[neb,plot]>=1.8.0,<2",
 #   "xyzrender>=0.1.3",
-#   "readcon>=0.7.0",
+#   "readcon>=0.13.1",
 # ]
 # ///
+# Optional deps (jax for landscapes) via uv PEP 723 or RGPYCRUMBS_AUTO_DEPS=1.
 
 import logging
 from pathlib import Path

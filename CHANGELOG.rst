@@ -1,3 +1,18 @@
+rgpycrumbs 1.9.10 (2026-07-08)
+==============================
+
+Changed
+-------
+
+- ``[analysis]`` extra now hard-depends on ``adjustText`` and ``jax`` (plus the
+  existing readcon/chemparseplot stack) so host envs only need
+  ``pip install "rgpycrumbs[analysis]"`` for eOn plot CLIs. ``[surfaces]``
+  remains a thin jax alias for ensure_import hints.
+- ``plt-neb`` loads ``adjustText`` via ``ensure_import`` so in-env dispatch with
+  ``RGPYCRUMBS_AUTO_DEPS=1`` (or uv PEP 723) can resolve it without a separate
+  host pin. PEP 723 pins for plot scripts use readcon>=0.13.1 and
+  chemparseplot[neb,plot].
+
 rgpycrumbs 1.9.9 (2026-07-07)
 =============================
 

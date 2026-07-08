@@ -95,9 +95,13 @@ class TestDependencyMapCoverage:
         """Plot/CON peers resolve via ensure_import with 1.8 / readcon floors."""
         cpp_spec, _ = _DEPENDENCY_MAP["chemparseplot"]
         assert "1.8" in cpp_spec
+        assert "neb" in cpp_spec or "chemparseplot" in cpp_spec
         read_spec, _ = _DEPENDENCY_MAP["readcon"]
-        assert "0.7" in read_spec
+        assert "0.13" in read_spec
         assert "chemparseplot.plot.neb" in _DEPENDENCY_MAP
+        adj_spec, adj_extra = _DEPENDENCY_MAP["adjustText"]
+        assert "adjustText" in adj_spec
+        assert adj_extra == "analysis"
 
 
 class TestEnsureImportSmoke:

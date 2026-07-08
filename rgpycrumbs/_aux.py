@@ -28,13 +28,13 @@ _DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
     "ase.data": ("ase>=3.22", "analysis"),
     "ase.neighborlist": ("ase>=3.22", "analysis"),
     "adjustText": ("adjustText>=1.0", "analysis"),
-    "chemparseplot": ("chemparseplot>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot": ("chemparseplot>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot.chemgp": ("chemparseplot>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot.neb": ("chemparseplot>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot.optimization": ("chemparseplot>=1.8.0,<2", "analysis"),
-    "chemparseplot.parse": ("chemparseplot>=1.8.0,<2", "analysis"),
-    "readcon": ("readcon>=0.7.0", "analysis"),
+    "chemparseplot": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
+    "chemparseplot.plot": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
+    "chemparseplot.plot.chemgp": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
+    "chemparseplot.plot.neb": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
+    "chemparseplot.plot.optimization": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
+    "chemparseplot.parse": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
+    "readcon": ("readcon>=0.13.1", "analysis"),
     "h5py": ("h5py", "analysis"),
     "matplotlib": ("matplotlib>=3.7", "analysis"),
     "matplotlib.pyplot": ("matplotlib>=3.7", "analysis"),
@@ -221,10 +221,11 @@ def ensure_import(module_name: str):
             msg = """
 JAX is required for surface fitting and Gaussian Process models.
 
-Quick install:
+Quick install (analysis includes jax; surfaces is a thin alias):
+  pip install "rgpycrumbs[analysis]"
   pip install "rgpycrumbs[surfaces]"
 
-Or enable auto-install:
+Or enable auto-install (uv cache / PEP 723 dispatch):
   export RGPYCRUMBS_AUTO_DEPS=1
 
 For GPU support:
