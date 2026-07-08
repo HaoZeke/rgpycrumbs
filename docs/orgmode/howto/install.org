@@ -13,23 +13,19 @@ pip install rgpycrumbs
 
 ** Optional Dependencies
 
-#+begin_src bash
-# Surface fitting (JAX)
-pip install "rgpycrumbs[surfaces]"
-
-# Interpolation (scipy)
-pip install "rgpycrumbs[interpolation]"
-
-# All optional
-pip install "rgpycrumbs[all]"
-#+end_src
-
-** Auto-Install
-
-Enable automatic dependency installation:
+There are **no runtime feature extras**. Scientific backends (jax, scipy, ase,
+chemparseplot, …) resolve on demand:
 
 #+begin_src bash
 export RGPYCRUMBS_AUTO_DEPS=1
+# library: ensure_import installs into the uv/cache on first use
+# CLI:     PEP 723 + uv run (dispatch defaults AUTO_DEPS=1)
+#+end_src
+
+Or install specific packages yourself when you prefer an explicit host env:
+
+#+begin_src bash
+pip install jax scipy ase
 #+end_src
 
 ** Platform Notes
@@ -54,11 +50,11 @@ python -c "import rgpycrumbs; print(rgpycrumbs.__version__)"
 For Gaussian Process surface fitting and landscape visualization:
 
 #+begin_src bash
-# Recommended: Install with surfaces extra
-pip install "rgpycrumbs[surfaces]"
+# JAX for surface fitting
+pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or with uv
-uv pip install "rgpycrumbs[surfaces]"
+uv pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or enable auto-install (installs on first use)
 export RGPYCRUMBS_AUTO_DEPS=1
@@ -179,7 +175,7 @@ Use user installation:
 
 #+begin_src bash
 export RGPYCRUMBS_AUTO_DEPS=1
-pip install --user "rgpycrumbs[surfaces]"
+pip install --user jax  # or AUTO_DEPS
 #+end_src
 
 ** Examples

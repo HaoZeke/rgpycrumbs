@@ -13,33 +13,32 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Dependency registry
 # ---------------------------------------------------------------------------
-# Maps importable module names to (pip_spec, extra_name).
-# Special-case deps are intentionally absent from the default auto-install map.
-# ira_mod/tblite require pixi, while heavy tools like ovito are left to
-# explicit user installation.
-_DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
-    "jax": ("jax>=0.4", "surfaces"),
-    "jaxlib": ("jax>=0.4", "surfaces"),
-    "scipy": ("scipy>=1.11", "interpolation"),
-    "scipy.interpolate": ("scipy>=1.11", "interpolation"),
-    "scipy.spatial": ("scipy>=1.11", "analysis"),
-    "scipy.spatial.distance": ("scipy>=1.11", "analysis"),
-    "ase": ("ase>=3.22", "analysis"),
-    "ase.data": ("ase>=3.22", "analysis"),
-    "ase.neighborlist": ("ase>=3.22", "analysis"),
-    "adjustText": ("adjustText>=1.0", "analysis"),
-    "chemparseplot": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot.chemgp": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot.neb": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
-    "chemparseplot.plot.optimization": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
-    "chemparseplot.parse": ("chemparseplot[neb,plot]>=1.8.0,<2", "analysis"),
-    "readcon": ("readcon>=0.13.1", "analysis"),
-    "h5py": ("h5py", "analysis"),
-    "matplotlib": ("matplotlib>=3.7", "analysis"),
-    "matplotlib.pyplot": ("matplotlib>=3.7", "analysis"),
-    "pandas": ("pandas>=2.0", "analysis"),
-    "polars": ("polars>=1.0", "analysis"),
+# Maps importable module names to a pip install spec for ensure_import /
+# RGPYCRUMBS_AUTO_DEPS. No feature extras: CLI uses PEP 723 + uv; library uses
+# this map. ira_mod/tblite stay pixi-only; ovito stays explicit.
+_DEPENDENCY_MAP: dict[str, str] = {
+    "jax": "jax>=0.4",
+    "jaxlib": "jax>=0.4",
+    "scipy": "scipy>=1.11",
+    "scipy.interpolate": "scipy>=1.11",
+    "scipy.spatial": "scipy>=1.11",
+    "scipy.spatial.distance": "scipy>=1.11",
+    "ase": "ase>=3.22",
+    "ase.data": "ase>=3.22",
+    "ase.neighborlist": "ase>=3.22",
+    "adjustText": "adjustText>=1.0",
+    "chemparseplot": "chemparseplot[neb,plot]>=1.8.0,<2",
+    "chemparseplot.plot": "chemparseplot[neb,plot]>=1.8.0,<2",
+    "chemparseplot.plot.chemgp": "chemparseplot[neb,plot]>=1.8.0,<2",
+    "chemparseplot.plot.neb": "chemparseplot[neb,plot]>=1.8.0,<2",
+    "chemparseplot.plot.optimization": "chemparseplot[neb,plot]>=1.8.0,<2",
+    "chemparseplot.parse": "chemparseplot[neb,plot]>=1.8.0,<2",
+    "readcon": "readcon>=0.13.1",
+    "h5py": "h5py",
+    "matplotlib": "matplotlib>=3.7",
+    "matplotlib.pyplot": "matplotlib>=3.7",
+    "pandas": "pandas>=2.0",
+    "polars": "polars>=1.0",
 }
 
 # CPU-only pip spec overrides for packages with heavy GPU backends.
@@ -131,7 +130,7 @@ def _resolve_pip_spec(module_name: str) -> str:
     If the host lacks a CUDA device and a CPU-only override exists, the
     override is returned instead of the default spec.
     """
-    spec, _extra = _DEPENDENCY_MAP[module_name]
+    spec = _DEPENDENCY_MAP[module_name]
     if not _has_cuda():
         base_pkg = module_name.split(".", maxsplit=1)[0]
         spec = _CPU_OVERRIDES.get(base_pkg, spec)
@@ -212,17 +211,16 @@ def ensure_import(module_name: str):
         except ImportError:
             pass
 
-    # Step 5: actionable error
+    # Step 5: actionable error (no feature extras — pip the dep or AUTO_DEPS)
     if module_name in _DEPENDENCY_MAP:
-        _spec, extra = _DEPENDENCY_MAP[module_name]
+        spec = _resolve_pip_spec(module_name)
 
-        # Special handling for JAX with detailed instructions
         if module_name in ("jax", "jaxlib"):
-            msg = """
+            msg = f"""
 JAX is required for surface fitting and Gaussian Process models.
 
-Quick install:
-  pip install "rgpycrumbs[surfaces]"
+Install the package:
+  pip install "{spec}"
 
 Or enable auto-install (CLI dispatch does this by default):
   export RGPYCRUMBS_AUTO_DEPS=1
@@ -237,7 +235,7 @@ See: https://jax.readthedocs.io/en/latest/installation.html
             msg = (
                 f"Module '{module_name}' is required.\n\n"
                 f"Install with:\n"
-                f"  pip install rgpycrumbs[{extra}]\n\n"
+                f'  pip install "{spec}"\n\n'
                 f"Or enable auto-install:\n"
                 f"  export RGPYCRUMBS_AUTO_DEPS=1"
             )

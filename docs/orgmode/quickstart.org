@@ -33,25 +33,11 @@ The resolver is CUDA-aware: on machines without an NVIDIA GPU it installs
 CPU-only variants (e.g. ~jax[cpu]~) to avoid pulling hundreds of megabytes of
 unused CUDA libraries.
 
-** Pre-install pip-available extras
+** Optional backends
 
-#+begin_src bash
-# Surface fitting (JAX)
-pip install rgpycrumbs[surfaces]
-
-# Spline interpolation (SciPy)
-pip install rgpycrumbs[interpolation]
-
-# Structure analysis (ASE + SciPy)
-pip install rgpycrumbs[analysis]
-
-# Everything pip-installable at once
-pip install rgpycrumbs[all]
-#+end_src
-
-The ~[all]~ extra pre-installs ~ase~, ~scipy~, and ~jax[cpu]~. Pixi-only
-packages such as ~ira_mod~ and ~tblite~, plus heavy optional tools like ~ovito~,
-are intentionally not included.
+No feature extras. Use ~export RGPYCRUMBS_AUTO_DEPS=1~ (library) or the
+CLI ~uv~ PEP 723 path. Install ~jax~/~scipy~/~ase~ yourself only if you
+want them preloaded in the host env.
 
 ** Full stack (including pixi-only and heavy deps)
 

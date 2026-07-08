@@ -11,7 +11,7 @@
 
 #+begin_src bash
 pip install rgpycrumbs
-pip install "rgpycrumbs[surfaces]"  # With JAX
+pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1  # With JAX
 #+end_src
 
 *** How do I enable auto-install?
@@ -41,7 +41,7 @@ rgpycrumbs chemgp match-atoms -s pos.con -t targets.txt
 Install surfaces extra:
 
 #+begin_src bash
-pip install "rgpycrumbs[surfaces]"
+pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
 #+end_src
 
 Or enable auto-install:

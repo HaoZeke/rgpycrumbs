@@ -1,3 +1,16 @@
+rgpycrumbs 1.9.12 (2026-07-08)
+==============================
+
+Removed
+-------
+
+- Runtime feature extras ``[analysis]``, ``[surfaces]``, ``[interpolation]``,
+  and ``[all]``. They diluted the real design: CLI deps via PEP 723 + ``uv``,
+  library deps via ``ensure_import`` + ``RGPYCRUMBS_AUTO_DEPS=1``. Dev extras
+  (``test`` / ``lint`` / ``release``) remain.
+- ``_DEPENDENCY_MAP`` no longer stores fake extra names; values are pip specs
+  only, and error messages say ``pip install "<spec>"`` or enable AUTO_DEPS.
+
 rgpycrumbs 1.9.11 (2026-07-08)
 ==============================
 

@@ -89,13 +89,12 @@ The library is designed with the following principles in mind:
     between different tools in the collection.
 
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
-    package has minimal core dependencies (`click`, `numpy`). Heavy scientific
-    libraries are available as optional extras (e.g. `pip install
-      rgpycrumbs[surfaces]` for JAX). For CLI tools, dependencies are fetched by
-    `uv` only when a script that needs them is executed. For library modules,
-    `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1`
-    is set, with CUDA-aware resolution that avoids pulling GPU libraries on
-    CPU-only machines. The base installation stays lightweight either way.
+    package has minimal core dependencies (`click`, `numpy`, `rich`). There are
+    **no runtime feature extras**. CLI tools fetch deps via PEP 723 + `uv run`.
+    Library modules use `ensure_import` when `RGPYCRUMBS_AUTO_DEPS=1` (CLI
+    dispatch enables this by default), with CUDA-aware resolution so CPU hosts
+    do not pull GPU JAX. Install only `rgpycrumbs`; optional packages arrive on
+    demand.
 
 -   **Modular & Extensible Tooling:** Each utility is an independent script. This
     modularity simplifies development, testing, and maintenance, as changes to one
@@ -114,20 +113,21 @@ The library is designed with the following principles in mind:
 ## Library API
 
 The library modules can be imported directly. Dependencies resolve
-automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH),
-or install extras explicitly:
+automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH):
 
-    # Surface fitting (requires jax: pip install rgpycrumbs[surfaces])
+    export RGPYCRUMBS_AUTO_DEPS=1
+
+    # Surface fitting (jax via ensure_import)
     from rgpycrumbs.surfaces import get_surface_model
     model = get_surface_model("tps")
-    
-    # Structure analysis (requires ase, scipy: pip install rgpycrumbs[analysis])
+
+    # Structure analysis (ase/scipy via ensure_import)
     from rgpycrumbs.geom.analysis import analyze_structure
-    
-    # Spline interpolation (requires scipy: pip install rgpycrumbs[interpolation])
+
+    # Spline interpolation (scipy via ensure_import)
     from rgpycrumbs.interpolation import spline_interp
-    
-    # Data types (no extra deps)
+
+    # Data types (core only)
     from rgpycrumbs.basetypes import nebpath, SaddleMeasure
 
 

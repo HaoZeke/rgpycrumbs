@@ -71,17 +71,15 @@ class TestDependencyMapCoverage:
         )
 
     def test_map_entries_have_valid_pip_specs(self) -> None:
-        """Every _DEPENDENCY_MAP entry must have a non-empty pip spec
-        and extra name."""
-        for mod, (pip_spec, extra) in _DEPENDENCY_MAP.items():
-            assert pip_spec, f"{mod}: empty pip spec"
-            assert extra, f"{mod}: empty extra name"
+        """Every _DEPENDENCY_MAP entry must be a non-empty pip spec string."""
+        for mod, pip_spec in _DEPENDENCY_MAP.items():
+            assert isinstance(pip_spec, str) and pip_spec, f"{mod}: empty pip spec"
 
     def test_no_duplicate_top_level_with_submodule(self) -> None:
         """If both 'foo' and 'foo.bar' are in the map, they should
         resolve to the same pip package."""
         top_levels: dict[str, str] = {}
-        for mod, (pip_spec, _) in _DEPENDENCY_MAP.items():
+        for mod, pip_spec in _DEPENDENCY_MAP.items():
             top = mod.split(".")[0]
             pkg = pip_spec.split(">=")[0].split("[")[0].strip()
             if top in top_levels:
@@ -93,15 +91,14 @@ class TestDependencyMapCoverage:
 
     def test_optional_peers_pinned_for_uv_and_readcon(self) -> None:
         """Plot/CON peers resolve via ensure_import with 1.8 / readcon floors."""
-        cpp_spec, _ = _DEPENDENCY_MAP["chemparseplot"]
+        cpp_spec = _DEPENDENCY_MAP["chemparseplot"]
         assert "1.8" in cpp_spec
         assert "neb" in cpp_spec or "chemparseplot" in cpp_spec
-        read_spec, _ = _DEPENDENCY_MAP["readcon"]
+        read_spec = _DEPENDENCY_MAP["readcon"]
         assert "0.13" in read_spec
         assert "chemparseplot.plot.neb" in _DEPENDENCY_MAP
-        adj_spec, adj_extra = _DEPENDENCY_MAP["adjustText"]
+        adj_spec = _DEPENDENCY_MAP["adjustText"]
         assert "adjustText" in adj_spec
-        assert adj_extra == "analysis"
 
 
 class TestEnsureImportSmoke:

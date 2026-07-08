@@ -56,8 +56,7 @@ The library is designed with the following principles in mind:
 
 - Lightweight Core, On-Demand Dependencies :: The installable ~rgpycrumbs~
   package has minimal core dependencies (~click~, ~numpy~). Heavy scientific
-  libraries are available as optional extras (e.g. ~pip install
-  rgpycrumbs[surfaces]~ for JAX). For CLI tools, dependencies are fetched by
+  there are no runtime feature extras. CLI tools fetch deps via PEP 723 + uv; library modules use ensure_import + AUTO_DEPS. Dependencies are fetched by
   ~uv~ only when a script that needs them is executed. For library modules,
   ~ensure_import~ resolves dependencies at first use when ~RGPYCRUMBS_AUTO_DEPS=1~
   is set, with CUDA-aware resolution. The base installation stays lightweight
@@ -101,13 +100,13 @@ pulling hundreds of megabytes of unused CUDA libraries.
 ** Dependency Registry
 
 ~_DEPENDENCY_MAP~ in ~rgpycrumbs/_aux.py~ maps importable module names to their
-pip install spec and the corresponding optional extra:
+pip install spec (no feature extras):
 
 #+begin_src python
 _DEPENDENCY_MAP = {
-    "jax":              ("jax>=0.4",    "surfaces"),
-    "scipy":            ("scipy>=1.11", "interpolation"),
-    "ase":              ("ase>=3.22",   "analysis"),
+    "jax":   "jax>=0.4",
+    "scipy": "scipy>=1.11",
+    "ase":   "ase>=3.22",
 }
 #+end_src
 

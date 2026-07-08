@@ -35,7 +35,7 @@ evolution plots.
 
 #+begin_src bash
 # Core package with all rendering backends
-pip install "rgpycrumbs[all]" xyzrender solvis-tools ovito
+pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1 xyzrender solvis-tools ovito
 #+end_src
 
 The tutorial data ships with the rgpycrumbs source tree at

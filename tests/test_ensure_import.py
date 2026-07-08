@@ -310,23 +310,10 @@ class TestWarnOnDirectScriptImport:
 # Dependency map consistency
 # ---------------------------------------------------------------------------
 class TestDependencyMap:
-    @pytest.mark.skipif(
-        sys.version_info < (3, 11), reason="tomllib requires Python 3.11+"
-    )
-    def test_all_extras_match_pyproject(self):
-        """Every extra name in _DEPENDENCY_MAP must exist in pyproject.toml."""
-        import tomllib
-
-        pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
-        with open(pyproject, "rb") as f:
-            data = tomllib.load(f)
-
-        extras = set(data["project"]["optional-dependencies"].keys())
-        for _spec, extra_name in _DEPENDENCY_MAP.values():
-            assert extra_name in extras, (
-                f"Extra '{extra_name}' from _DEPENDENCY_MAP "
-                f"not found in pyproject.toml (available: {extras})"
-            )
+    def test_map_values_are_pip_specs(self):
+        """Map is module → pip spec only (no feature-extra names)."""
+        for mod, pip_spec in _DEPENDENCY_MAP.items():
+            assert isinstance(pip_spec, str) and pip_spec, f"{mod}: empty/invalid spec"
 
     def test_map_has_expected_entries(self):
         assert "jax" in _DEPENDENCY_MAP
@@ -341,18 +328,13 @@ class TestDependencyMap:
     @pytest.mark.skipif(
         sys.version_info < (3, 11), reason="tomllib requires Python 3.11+"
     )
-    def test_analysis_extra_keeps_heavies_optional(self):
-        """analysis stays light; jax/adjustText resolve via AUTO_DEPS / uv."""
+    def test_no_runtime_feature_extras(self):
+        """Feature extras are gone; only dev extras may remain."""
         import tomllib
 
         pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
         with open(pyproject, "rb") as f:
             data = tomllib.load(f)
-        analysis = data["project"]["optional-dependencies"]["analysis"]
-        joined = " ".join(analysis).lower()
-        assert "adjusttext" not in joined
-        assert "jax" not in joined
-        assert "readcon" in joined
-        assert "chemparseplot" in joined
-        assert "jax" in _DEPENDENCY_MAP
-        assert "adjustText" in _DEPENDENCY_MAP
+        extras = set(data["project"]["optional-dependencies"].keys())
+        assert not extras & {"analysis", "surfaces", "interpolation", "all"}
+        assert extras <= {"lint", "release", "test"}

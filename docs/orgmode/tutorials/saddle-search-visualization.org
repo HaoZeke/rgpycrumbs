@@ -30,7 +30,7 @@ and optionally =mode.dat=. Metadata-rich full CON frames are treated as the
 canonical source of per-iteration metrics.
 
 #+begin_src bash
-pip install "rgpycrumbs[all]"
+pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1
 #+end_src
 
 The expected directory layout:

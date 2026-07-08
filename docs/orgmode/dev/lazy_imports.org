@@ -118,10 +118,10 @@ def ensure_import(module_name: str):
 * Dependency Map*
 
 #+begin_src python
-_DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
-    "jax": ("jax>=0.4", "surfaces"),
-    "scipy": ("scipy>=1.11", "interpolation"),
-    "ase": ("ase>=3.22", "analysis"),
+_DEPENDENCY_MAP: dict[str, str] = {
+    "jax": "jax>=0.4",
+    "scipy": "scipy>=1.11",
+    "ase": "ase>=3.22",
     # ...
 }
 #+end_src
@@ -183,16 +183,16 @@ to an ImportError.
 * Adding a new entry
 
 #+begin_src python
-_DEPENDENCY_MAP: dict[str, tuple[str, str]] = {
+_DEPENDENCY_MAP: dict[str, str] = {
     # ...
-    "newpkg": ("newpkg>=1.0", "extra_name"),
-    "newpkg.submod": ("newpkg>=1.0", "extra_name"),
+    "newpkg": "newpkg>=1.0",
+    "newpkg.submod": "newpkg>=1.0",
 }
 #+end_src
 
 The tuple fields:
 - First: pip install spec (with version constraint)
-- Second: the pyproject.toml optional extra that includes this dep
+- Spec only: install via AUTO_DEPS or `pip install "<spec>"`
 
 If the module is a submodule (e.g. =scipy.interpolate=), add both the
 submodule and the top-level package to the map. Both must point to the

@@ -17,7 +17,7 @@ diffusion problem as our example.
 
 #+begin_src bash
 # Core package with all pip-available extras
-pip install "rgpycrumbs[all]"
+pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or for development
 git clone https://github.com/HaoZeke/rgpycrumbs

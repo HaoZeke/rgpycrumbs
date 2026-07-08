@@ -24,7 +24,7 @@ python -m pip install rgpycrumbs
 
 *Solution:*
 #+begin_src bash
-pip install "rgpycrumbs[surfaces]"
+pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
 # Or enable auto-install
 export RGPYCRUMBS_AUTO_DEPS=1
 #+end_src
@@ -61,7 +61,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 *Solution:*
 #+begin_src bash
-pip install "rgpycrumbs[analysis]"
+export RGPYCRUMBS_AUTO_DEPS=1  # ase/scipy via ensure_import
 #+end_src
 
 ** Problem: Parallel processing not working

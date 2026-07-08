@@ -2127,9 +2127,8 @@ class TestInitErrorPaths:
         try:
             _ = rgpycrumbs.surfaces
         except ImportError as e:
-            # Verify the hint message (lines 20-24)
-            assert "pip install" in str(e)
-            assert "surfaces" in str(e)
+            # Verify the hint message (AUTO_DEPS / no feature extras)
+            assert "AUTO_DEPS" in str(e) or "optional deps" in str(e)
         # If no ImportError, surfaces is available (jax installed) -- ok
 
     def test_interpolation_error_with_mock(self):
@@ -2144,10 +2143,10 @@ class TestInitErrorPaths:
                 # Force re-evaluation of __getattr__
                 rgpycrumbs.__getattr__("interpolation")
             except ImportError as e:
-                assert "pip install" in str(e) or "fake" in str(e)
+                assert "AUTO_DEPS" in str(e) or "optional deps" in str(e) or "fake" in str(e)
 
-    def test_geom_error_reraise(self):
-        """Cover line 26 (re-raise without hint for geom)."""
+    def test_geom_error_gets_same_hint(self):
+        """All lazy submodules share the AUTO_DEPS hint (no feature extras)."""
         from unittest.mock import patch
 
         import rgpycrumbs
@@ -2156,8 +2155,7 @@ class TestInitErrorPaths:
             try:
                 rgpycrumbs.__getattr__("geom")
             except ImportError as e:
-                # Line 26: re-raise without custom message (geom not in hints)
-                assert "no geom" in str(e)
+                assert "AUTO_DEPS" in str(e) or "optional deps" in str(e)
 
 
 @pytest.mark.skipif(not _HAS_PLT_MIN, reason="plt_min not importable")

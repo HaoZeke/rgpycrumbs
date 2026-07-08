@@ -29,7 +29,7 @@ Catch specific exceptions:
 try:
     module = ensure_import("jax")
 except ImportError as e:
-    print(f"Install with: pip install rgpycrumbs[surfaces]")
+    print(f"Install with: pip install jax  # or AUTO_DEPS")
 #+end_src
 
 ** CLI Design
