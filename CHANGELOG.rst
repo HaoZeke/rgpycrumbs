@@ -1,3 +1,17 @@
+rgpycrumbs 1.9.13 (2026-07-08)
+==============================
+
+Added
+-----
+
+- Optional **CycloneDX SBOM consume** on the CLI: ``--sbom PATH`` or
+  ``RGPYCRUMBS_SBOM``. PyPI components (``pkg:pypi/...``) become install pins for
+  ``uv run --constraints`` and ``ensure_import`` / AUTO_DEPS. Non-PyPI entries
+  (e.g. eb-stack ``pkg:generic/...``) are skipped. Missing path fails clearly;
+  unset SBOM leaves default floating resolution.
+- PEP 723 headers declare ``rgpycrumbs>=1.9.13`` so standalone ``uv run`` of a
+  plot script can resolve the package (dispatcher remains preferred entry).
+
 rgpycrumbs 1.9.12 (2026-07-08)
 ==============================
 

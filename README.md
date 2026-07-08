@@ -75,18 +75,20 @@ The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`
 
 The library is designed with the following principles in mind:
 
--   **Dispatcher-Based Architecture:** The top-level `rgpycrumbs.cli` command acts as a
-    lightweight dispatcher. It does not contain the core logic of the tools
-    itself. Instead, it parses user commands to identify the target script and
-    then invokes it in an isolated subprocess using the `uv` runner. This provides
-    a unified command-line interface while keeping the tools decoupled.
+-   **Dispatcher-Based Architecture (preferred entry):** Use
+    `rgpycrumbs <group> <tool>` or `python -m rgpycrumbs.cli ...` — **not** raw
+    `uv run path/to/script.py` as the primary path. The dispatcher sets
+    `PYTHONPATH`, defaults `RGPYCRUMBS_AUTO_DEPS=1`, optional editable peers, and
+    optional SBOM pins. Scripts remain self-contained PEP 723 units invoked in a
+    subprocess via `uv run` when isolation is chosen.
 
--   **Isolated & Reproducible Execution:** Each script is a self-contained unit that
-    declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata. The `uv` runner uses this
-    information to resolve and install the exact required packages into a
-    temporary, cached environment on-demand. This design guarantees
-    reproducibility and completely eliminates the risk of dependency conflicts
-    between different tools in the collection.
+-   **Isolated & Reproducible Execution:** Each script declares dependencies via
+    [PEP 723](https://peps.python.org/pep-0723/) (including a `rgpycrumbs` floor so
+    standalone `uv run` can resolve the package). For **stack-level** pins, pass a
+    CycloneDX JSON SBOM (e.g. eb-stack `--sbom-out`) with `--sbom PATH` or
+    `RGPYCRUMBS_SBOM=PATH`. PyPI components become
+    `name==version` constraints for `uv` / `ensure_import`; non-PyPI entries
+    (`pkg:generic/...`) are skipped. No SBOM → floating PEP 723 / AUTO_DEPS.
 
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
     package has minimal core dependencies (`click`, `numpy`, `rich`). There are

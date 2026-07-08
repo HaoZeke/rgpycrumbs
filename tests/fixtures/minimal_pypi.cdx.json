@@ -1,0 +1,43 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "rgpycrumbs-test-sbom",
+      "version": "0"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "numpy",
+      "version": "2.0.2",
+      "purl": "pkg:pypi/numpy@2.0.2"
+    },
+    {
+      "type": "library",
+      "name": "jax",
+      "version": "0.4.31",
+      "purl": "pkg:pypi/jax@0.4.31"
+    },
+    {
+      "type": "library",
+      "name": "adjustText",
+      "version": "1.2.0",
+      "purl": "pkg:pypi/adjusttext@1.2.0"
+    },
+    {
+      "type": "library",
+      "name": "GROMACS",
+      "version": "2025.0",
+      "purl": "pkg:generic/GROMACS@2025.0?toolchain=foss-2025b"
+    },
+    {
+      "type": "library",
+      "name": "noversion",
+      "purl": "pkg:pypi/noversion"
+    }
+  ]
+}

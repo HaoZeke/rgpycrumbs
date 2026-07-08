@@ -28,6 +28,7 @@ using the generalized (s, d) reaction valley projection. Supports:
 #   "chemparseplot[neb,plot]>=1.8.0,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
+#   "rgpycrumbs>=1.9.13",
 # ]
 # ///
 # Optional deps (jax for landscapes) via uv PEP 723 or RGPYCRUMBS_AUTO_DEPS=1.

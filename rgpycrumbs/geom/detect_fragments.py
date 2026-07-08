@@ -26,6 +26,7 @@ uv run python detect_fragments.py batch ./your_folder/ --method geometric --min-
 #     "pyvista~=0.43",
 #     "matplotlib~=3.9",
 #     "cmcrameri~=1.8",
+#   "rgpycrumbs>=1.9.13",
 # ]
 # ///
 

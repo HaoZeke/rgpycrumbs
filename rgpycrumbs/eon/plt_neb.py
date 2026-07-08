@@ -40,16 +40,16 @@ https://realpython.com/python-script-structure/
 #   "chemparseplot[neb,plot]>=1.8.0,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
+#   "rgpycrumbs>=1.9.13",
 # ]
 # ///
 #
-# Dispatch model (rgpycrumbs.cli):
-# - ``uv run`` (default when the active env lacks the readcon/plot stack):
-#   PEP 723 deps above are installed into the uv env.
-# - In-env / ``--dev`` (preferred when the stack is already importable, e.g.
-#   cookbook conda env): optional heavy imports go through
-#   ``ensure_import`` so RGPYCRUMBS_AUTO_DEPS=1 can cache-install, or a clear
-#   install hint is raised. Do not force host envs to pre-declare jax/adjustText.
+# Dispatch model (prefer ``rgpycrumbs eon plt-neb`` / ``python -m rgpycrumbs.cli``;
+# not raw ``uv run plt_neb.py`` as the primary path):
+# - ``uv run`` (default when the active env lacks the readcon/plot stack, or
+#   RGPYCRUMBS_FORCE_UV=1): PEP 723 deps above + optional SBOM constraints.
+# - In-env / ``--dev``: ensure_import + AUTO_DEPS (CLI defaults AUTO_DEPS=1).
+# - Optional CycloneDX SBOM: ``--sbom`` / RGPYCRUMBS_SBOM (PyPI pins only).
 
 import logging
 import sys

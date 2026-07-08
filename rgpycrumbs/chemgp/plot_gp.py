@@ -13,6 +13,7 @@
 #   "plotnine",
 #   "rich",
 #   "chemparseplot",
+#   "rgpycrumbs>=1.9.13",
 # ]
 # ///
 """ChemGP CLI - Plot generation from HDF5 data.

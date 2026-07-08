@@ -1,3 +1,4 @@
+import contextlib
 import importlib.util
 import logging
 import os
@@ -112,16 +113,52 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
     return sorted(scripts)
 
 
+def _resolve_sbom_path(explicit: str | None = None) -> str | None:
+    """Return SBOM path from *explicit* CLI value or ``RGPYCRUMBS_SBOM``."""
+    from rgpycrumbs.sbom import SBOM_PATH_ENV
+
+    if explicit is not None and str(explicit).strip():
+        return str(explicit).strip()
+    env_path = os.environ.get(SBOM_PATH_ENV, "").strip()
+    return env_path or None
+
+
+def _load_sbom_pins_or_exit(sbom_path: str) -> dict[str, str]:
+    """Load PyPI pins from CycloneDX path; exit with a clear error on failure."""
+    from rgpycrumbs.sbom import load_pypi_pins
+
+    try:
+        pins = load_pypi_pins(sbom_path)
+    except FileNotFoundError as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+    except ValueError as exc:
+        click.echo(f"Error: invalid SBOM: {exc}", err=True)
+        sys.exit(1)
+    return pins
+
+
 def _dispatch(
     group: str,
     script_name: str,
     script_args: tuple,
     is_dev: bool = False,
     is_verbose: bool = False,
+    sbom_path: str | None = None,
 ):
     """
     Sets up the environment and runs the target script via 'uv run'.
+
+    Preferred entry is this dispatcher (``rgpycrumbs`` / ``python -m
+    rgpycrumbs.cli``). Raw ``uv run <script.py>`` is not the primary path.
+    Optional CycloneDX SBOM (``--sbom`` / ``RGPYCRUMBS_SBOM``) constrains
+    PyPI installs when provided.
     """
+    import json
+    import tempfile
+
+    from rgpycrumbs.sbom import SBOM_PINS_ENV, pins_to_constraint_lines
+
     # Convert script-name to filename (e.g., plt-neb -> plt_neb.py)
     filename = f"{script_name.replace('-', '_')}.py"
     script_path = PACKAGE_ROOT / group / filename
@@ -130,23 +167,14 @@ def _dispatch(
         click.echo(f"Error: Script not found at '{script_path}'", err=True)
         sys.exit(1)
 
-    use_in_env = _prefer_in_env_interpreter(is_dev)
-    if use_in_env:
-        command = [sys.executable, str(script_path), *script_args]
-        if is_verbose or (not is_dev and _in_env_stack_ready()):
-            click.echo(
-                "--> Using active interpreter (readcon/plot stack present or --dev)",
-                err=True,
-            )
-    else:
-        command = ["uv", "run"]
-        for source in _uv_editable_sources():
-            command.extend(["--with-editable", str(source)])
-        command.extend([str(script_path), *script_args])
-
-    if is_verbose:
-        click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
-        click.echo(f"VERBOSE: Constructed command -> {' '.join(command)}", err=True)
+    resolved_sbom = _resolve_sbom_path(sbom_path)
+    pins: dict[str, str] = {}
+    if resolved_sbom is not None:
+        pins = _load_sbom_pins_or_exit(resolved_sbom)
+        click.echo(
+            f"--> SBOM {resolved_sbom}: {len(pins)} PyPI pin(s) for install constraints",
+            err=True,
+        )
 
     # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
@@ -169,11 +197,43 @@ def _dispatch(
     env["PYTHONPATH"] = f"{project_root}{os.pathsep}{current_pythonpath}"
 
     # CLI owns dependency resolution for dispatched scripts:
-    # - uv run → PEP 723 header deps
+    # - uv run → PEP 723 header deps (+ optional SBOM constraints)
     # - in-env  → ensure_import cache installs for heavies (jax, adjustText)
     # Do not force hosts to pre-declare those. Explicit 0/false still disables.
     if env.get("RGPYCRUMBS_AUTO_DEPS", "").strip() == "":
         env["RGPYCRUMBS_AUTO_DEPS"] = "1"
+
+    if pins:
+        env[SBOM_PINS_ENV] = json.dumps(pins)
+
+    use_in_env = _prefer_in_env_interpreter(is_dev)
+    constraints_path: Path | None = None
+    if use_in_env:
+        command = [sys.executable, str(script_path), *script_args]
+        if is_verbose or (not is_dev and _in_env_stack_ready()):
+            click.echo(
+                "--> Using active interpreter (readcon/plot stack present or --dev)",
+                err=True,
+            )
+    else:
+        command = ["uv", "run"]
+        if pins:
+            # Ephemeral constraints file for uv; cleaned after process exits.
+            fd, tmp_name = tempfile.mkstemp(prefix="rgpycrumbs-sbom-", suffix=".txt")
+            os.close(fd)
+            constraints_path = Path(tmp_name)
+            constraints_path.write_text(
+                "\n".join(pins_to_constraint_lines(pins)) + "\n",
+                encoding="utf-8",
+            )
+            command.extend(["--constraints", str(constraints_path)])
+        for source in _uv_editable_sources():
+            command.extend(["--with-editable", str(source)])
+        command.extend([str(script_path), *script_args])
+
+    if is_verbose:
+        click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
+        click.echo(f"VERBOSE: Constructed command -> {' '.join(command)}", err=True)
 
     click.echo(f"--> Dispatching to: {' '.join(command)}")
 
@@ -186,6 +246,10 @@ def _dispatch(
         sys.exit(e.returncode)
     except KeyboardInterrupt:
         sys.exit(130)
+    finally:
+        if constraints_path is not None:
+            with contextlib.suppress(OSError):
+                constraints_path.unlink(missing_ok=True)
 
 
 def _make_script_command(group_name: str, script_stem: str) -> click.Command:
@@ -203,9 +267,10 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
     )
     @click.pass_context
     def cmd(ctx):
-        # Retrieve the dev flag safely from the parent context
+        # Retrieve flags safely from the parent context
         is_dev = ctx.obj.get("is_dev", False) if ctx.obj else False
         is_verbose = ctx.obj.get("is_verbose", False) if ctx.obj else False
+        sbom_path = ctx.obj.get("sbom_path") if ctx.obj else None
 
         # Pass through --help to underlying script
         if "--help" in ctx.args or "-h" in ctx.args:
@@ -216,6 +281,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
                 tuple(ctx.args),
                 is_dev=is_dev,
                 is_verbose=False,  # Don't add verbose noise to help output
+                sbom_path=sbom_path,
             )
             return
 
@@ -225,6 +291,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
             tuple(ctx.args),
             is_dev=is_dev,
             is_verbose=is_verbose,
+            sbom_path=sbom_path,
         )
 
     cmd.help = f"""Run the {display_name} script.
@@ -250,14 +317,35 @@ Or use --help flag which will be passed to the script:
     is_flag=True,
     help="Print script paths and constructed commands before execution.",
 )
+@click.option(
+    "--sbom",
+    "sbom_path",
+    type=click.Path(path_type=str),
+    default=None,
+    help=(
+        "Optional CycloneDX JSON SBOM path (e.g. eb-stack --sbom-out). "
+        "PyPI components become install pins for uv/AUTO_DEPS. "
+        "Also set via RGPYCRUMBS_SBOM. Missing path fails clearly."
+    ),
+)
 @click.version_option(package_name="rgpycrumbs")
 @click.pass_context
-def main(ctx, dev, verbose):
-    """A dispatcher that runs self-contained PEP 723 scripts using 'uv'."""
+def main(ctx, dev, verbose, sbom_path):
+    """Dispatcher for PEP 723 scripts (preferred entry; not raw uv run).
+
+    Each tool is a self-contained script. Prefer::
+
+        rgpycrumbs eon plt-neb ...
+        python -m rgpycrumbs.cli eon plt-neb ...
+
+    over ``uv run path/to/plt_neb.py`` (the dispatcher sets PYTHONPATH,
+    AUTO_DEPS, optional SBOM pins, and editable peers).
+    """
     # Ensure ctx.obj is a dictionary so we can store state in it
     ctx.ensure_object(dict)
     ctx.obj["is_dev"] = dev
     ctx.obj["is_verbose"] = verbose
+    ctx.obj["sbom_path"] = sbom_path
 
 
 # --- DYNAMIC DISCOVERY ---

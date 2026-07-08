@@ -10,6 +10,7 @@
 #   "click",
 #   "rich",
 #   "pychum",
+#   "rgpycrumbs>=1.9.13",
 # ]
 # ///
 
