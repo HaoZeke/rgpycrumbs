@@ -71,7 +71,7 @@ except ImportError:  # pragma: no cover - direct script execution without packag
 if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
 
-# Optional: uv PEP 723 / AUTO_DEPS / analysis-extra environments.
+# Optional heavy: ensure_import + AUTO_DEPS when in-env; uv PEP 723 when isolated.
 if ensure_import is not None:
     adjust_text = ensure_import("adjustText").adjust_text
 else:  # pragma: no cover

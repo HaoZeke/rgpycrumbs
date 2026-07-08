@@ -154,3 +154,29 @@ def test_dispatch_respects_explicit_auto_deps_off(mock_run, monkeypatch):
 
     env = mock_run.call_args.kwargs["env"]
     assert env["RGPYCRUMBS_AUTO_DEPS"] == "0"
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_force_uv_uses_uv_run(mock_run, monkeypatch):
+    """RGPYCRUMBS_FORCE_UV=1 must prefer uv run even if stack could be in-env."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setenv("RGPYCRUMBS_FORCE_UV", "1")
+    monkeypatch.setattr("rgpycrumbs.cli._in_env_stack_ready", lambda: True)
+    monkeypatch.setattr("rgpycrumbs.cli.shutil.which", lambda name: "/usr/bin/uv")
+
+    _dispatch("group", "script", ())
+
+    executed = mock_run.call_args[0][0]
+    assert executed[:2] == ["uv", "run"]
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_dispatch_dev_uses_active_interpreter(mock_run, monkeypatch):
+    """--dev / is_dev uses sys.executable (in-env), not uv."""
+    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    monkeypatch.setenv("RGPYCRUMBS_FORCE_UV", "0")
+
+    _dispatch("group", "script", (), is_dev=True)
+
+    executed = mock_run.call_args[0][0]
+    assert executed[0] == sys.executable
