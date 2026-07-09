@@ -1,3 +1,12 @@
+rgpycrumbs 1.9.19 (2026-07-09)
+==============================
+
+Added
+-----
+
+- Docs: consumer path documents ``chemparseplot.api.extract_orca_geomscan_energy``
+  as the stable parse→typed library path (with ``rgpycrumbs.api`` for config/pins).
+
 rgpycrumbs 1.9.18 (2026-07-09)
 ==============================
 
