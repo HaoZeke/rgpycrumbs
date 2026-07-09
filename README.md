@@ -107,6 +107,12 @@ The library is designed with the following principles in mind:
     Shared `[pins]` / `[pins.packages]`; tool keys under `[rgpycrumbs.dispatch]`.
     Example: `docs/examples/rgpkgs.config.toml`.
 
+    **Stable consumer API** (chemparseplot, pychum, wailord):
+
+        from rgpycrumbs.api import load_config, load_pypi_pins, ensure_import
+
+    See `docs/orgmode/explanation/public_api.org`. Debug: `rgpycrumbs config show`.
+
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
     package has minimal core dependencies (`click`, `numpy`, `rich`). There are
     **no runtime feature extras**. CLI tools fetch deps via PEP 723 + `uv run`.
