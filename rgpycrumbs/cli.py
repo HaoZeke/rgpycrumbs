@@ -113,28 +113,43 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
     return sorted(scripts)
 
 
-def _resolve_sbom_path(explicit: str | None = None) -> str | None:
-    """Return SBOM path from *explicit* CLI value or ``RGPYCRUMBS_SBOM``."""
-    from rgpycrumbs.sbom import SBOM_PATH_ENV
+def _resolve_lock_path(
+    explicit_lock: str | None = None,
+    explicit_sbom: str | None = None,
+) -> str | None:
+    """Return lock/SBOM path from CLI flags or env (``RGPYCRUMBS_LOCK`` / ``_SBOM``)."""
+    from rgpycrumbs.locks import LOCK_PATH_ENV, SBOM_PATH_ENV
 
-    if explicit is not None and str(explicit).strip():
-        return str(explicit).strip()
-    env_path = os.environ.get(SBOM_PATH_ENV, "").strip()
-    return env_path or None
+    for candidate in (explicit_lock, explicit_sbom):
+        if candidate is not None and str(candidate).strip():
+            return str(candidate).strip()
+    for env_name in (LOCK_PATH_ENV, SBOM_PATH_ENV):
+        env_path = os.environ.get(env_name, "").strip()
+        if env_path:
+            return env_path
+    return None
 
 
-def _load_sbom_pins_or_exit(sbom_path: str) -> dict[str, str]:
-    """Load PyPI pins from CycloneDX path; exit with a clear error on failure."""
-    from rgpycrumbs.sbom import load_pypi_pins
+def _load_lock_pins_or_exit(lock_path: str) -> dict[str, str]:
+    """Load PyPI pins from uv.lock / pylock / CycloneDX; exit on failure."""
+    from rgpycrumbs.locks import detect_lock_format, load_pypi_pins
 
     try:
-        pins = load_pypi_pins(sbom_path)
+        pins = load_pypi_pins(lock_path)
     except FileNotFoundError as exc:
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
     except ValueError as exc:
-        click.echo(f"Error: invalid SBOM: {exc}", err=True)
+        click.echo(f"Error: invalid lock/SBOM: {exc}", err=True)
         sys.exit(1)
+    except ImportError as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+    fmt = detect_lock_format(lock_path)
+    click.echo(
+        f"--> Lock ({fmt.value}) {lock_path}: {len(pins)} PyPI pin(s) for constraints",
+        err=True,
+    )
     return pins
 
 
@@ -144,6 +159,7 @@ def _dispatch(
     script_args: tuple,
     is_dev: bool = False,
     is_verbose: bool = False,
+    lock_path: str | None = None,
     sbom_path: str | None = None,
 ):
     """
@@ -151,13 +167,14 @@ def _dispatch(
 
     Preferred entry is this dispatcher (``rgpycrumbs`` / ``python -m
     rgpycrumbs.cli``). Raw ``uv run <script.py>`` is not the primary path.
-    Optional CycloneDX SBOM (``--sbom`` / ``RGPYCRUMBS_SBOM``) constrains
-    PyPI installs when provided.
+    Optional lock/SBOM (``--lock`` / ``RGPYCRUMBS_LOCK``, or ``--sbom`` /
+    ``RGPYCRUMBS_SBOM``) constrains PyPI installs: uv.lock, PEP 751 pylock,
+    or CycloneDX JSON.
     """
     import json
     import tempfile
 
-    from rgpycrumbs.sbom import SBOM_PINS_ENV, pins_to_constraint_lines
+    from rgpycrumbs.locks import PINS_ENV, SBOM_PINS_ENV, pins_to_constraint_lines
 
     # Convert script-name to filename (e.g., plt-neb -> plt_neb.py)
     filename = f"{script_name.replace('-', '_')}.py"
@@ -167,14 +184,10 @@ def _dispatch(
         click.echo(f"Error: Script not found at '{script_path}'", err=True)
         sys.exit(1)
 
-    resolved_sbom = _resolve_sbom_path(sbom_path)
+    resolved_lock = _resolve_lock_path(lock_path, sbom_path)
     pins: dict[str, str] = {}
-    if resolved_sbom is not None:
-        pins = _load_sbom_pins_or_exit(resolved_sbom)
-        click.echo(
-            f"--> SBOM {resolved_sbom}: {len(pins)} PyPI pin(s) for install constraints",
-            err=True,
-        )
+    if resolved_lock is not None:
+        pins = _load_lock_pins_or_exit(resolved_lock)
 
     # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
@@ -204,7 +217,9 @@ def _dispatch(
         env["RGPYCRUMBS_AUTO_DEPS"] = "1"
 
     if pins:
-        env[SBOM_PINS_ENV] = json.dumps(pins)
+        pin_json = json.dumps(pins)
+        env[PINS_ENV] = pin_json
+        env[SBOM_PINS_ENV] = pin_json  # legacy alias for ensure_import / older envs
 
     use_in_env = _prefer_in_env_interpreter(is_dev)
     constraints_path: Path | None = None
@@ -218,8 +233,8 @@ def _dispatch(
     else:
         command = ["uv", "run"]
         if pins:
-            # Ephemeral constraints file for uv; cleaned after process exits.
-            fd, tmp_name = tempfile.mkstemp(prefix="rgpycrumbs-sbom-", suffix=".txt")
+            # Ephemeral constraints for uv resolver; cleaned after process exits.
+            fd, tmp_name = tempfile.mkstemp(prefix="rgpycrumbs-lock-", suffix=".txt")
             os.close(fd)
             constraints_path = Path(tmp_name)
             constraints_path.write_text(
@@ -227,6 +242,7 @@ def _dispatch(
                 encoding="utf-8",
             )
             command.extend(["--constraints", str(constraints_path)])
+            env["UV_CONSTRAINT"] = str(constraints_path)
         for source in _uv_editable_sources():
             command.extend(["--with-editable", str(source)])
         command.extend([str(script_path), *script_args])
@@ -270,6 +286,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
         # Retrieve flags safely from the parent context
         is_dev = ctx.obj.get("is_dev", False) if ctx.obj else False
         is_verbose = ctx.obj.get("is_verbose", False) if ctx.obj else False
+        lock_path = ctx.obj.get("lock_path") if ctx.obj else None
         sbom_path = ctx.obj.get("sbom_path") if ctx.obj else None
 
         # Pass through --help to underlying script
@@ -281,6 +298,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
                 tuple(ctx.args),
                 is_dev=is_dev,
                 is_verbose=False,  # Don't add verbose noise to help output
+                lock_path=lock_path,
                 sbom_path=sbom_path,
             )
             return
@@ -291,6 +309,7 @@ def _make_script_command(group_name: str, script_stem: str) -> click.Command:
             tuple(ctx.args),
             is_dev=is_dev,
             is_verbose=is_verbose,
+            lock_path=lock_path,
             sbom_path=sbom_path,
         )
 
@@ -318,19 +337,29 @@ Or use --help flag which will be passed to the script:
     help="Print script paths and constructed commands before execution.",
 )
 @click.option(
+    "--lock",
+    "lock_path",
+    type=click.Path(path_type=str),
+    default=None,
+    help=(
+        "Optional lock path: uv.lock, PEP 751 pylock.toml, or CycloneDX JSON. "
+        "PyPI packages become install pins for uv/AUTO_DEPS. "
+        "Also set via RGPYCRUMBS_LOCK. Missing path fails clearly."
+    ),
+)
+@click.option(
     "--sbom",
     "sbom_path",
     type=click.Path(path_type=str),
     default=None,
     help=(
-        "Optional CycloneDX JSON SBOM path (e.g. eb-stack --sbom-out). "
-        "PyPI components become install pins for uv/AUTO_DEPS. "
-        "Also set via RGPYCRUMBS_SBOM. Missing path fails clearly."
+        "Alias for --lock (CycloneDX JSON, e.g. eb-stack --sbom-out). "
+        "Also set via RGPYCRUMBS_SBOM."
     ),
 )
 @click.version_option(package_name="rgpycrumbs")
 @click.pass_context
-def main(ctx, dev, verbose, sbom_path):
+def main(ctx, dev, verbose, lock_path, sbom_path):
     """Dispatcher for PEP 723 scripts (preferred entry; not raw uv run).
 
     Each tool is a self-contained script. Prefer::
@@ -339,12 +368,13 @@ def main(ctx, dev, verbose, sbom_path):
         python -m rgpycrumbs.cli eon plt-neb ...
 
     over ``uv run path/to/plt_neb.py`` (the dispatcher sets PYTHONPATH,
-    AUTO_DEPS, optional SBOM pins, and editable peers).
+    AUTO_DEPS, optional lock/SBOM pins, and editable peers).
     """
     # Ensure ctx.obj is a dictionary so we can store state in it
     ctx.ensure_object(dict)
     ctx.obj["is_dev"] = dev
     ctx.obj["is_verbose"] = verbose
+    ctx.obj["lock_path"] = lock_path
     ctx.obj["sbom_path"] = sbom_path
 
 

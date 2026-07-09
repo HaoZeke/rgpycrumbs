@@ -84,11 +84,17 @@ The library is designed with the following principles in mind:
 
 -   **Isolated & Reproducible Execution:** Each script declares dependencies via
     [PEP 723](https://peps.python.org/pep-0723/) (including a `rgpycrumbs` floor so
-    standalone `uv run` can resolve the package). For **stack-level** pins, pass a
-    CycloneDX JSON SBOM (e.g. eb-stack `--sbom-out`) with `--sbom PATH` or
-    `RGPYCRUMBS_SBOM=PATH`. PyPI components become
-    `name==version` constraints for `uv` / `ensure_import`; non-PyPI entries
-    (`pkg:generic/...`) are skipped. No SBOM → floating PEP 723 / AUTO_DEPS.
+    standalone `uv run` can resolve the package). For **pinned** installs, pass a
+    lock the uv resolver already understands:
+
+    * `uv.lock` (native)
+    * PEP 751 `pylock.toml` / `pylock.*.toml` (e.g. `uv export --format pylock.toml`)
+    * CycloneDX JSON (e.g. eb-stack `--sbom-out`, `uv export --format cyclonedx1.5`)
+
+    via `--lock PATH` / `RGPYCRUMBS_LOCK` (or `--sbom` / `RGPYCRUMBS_SBOM`).
+    PyPI packages become `name==version` constraints for `uv` / `ensure_import`;
+    non-PyPI CDX rows (`pkg:generic/...`) are skipped. No lock → floating PEP 723
+    / AUTO_DEPS.
 
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
     package has minimal core dependencies (`click`, `numpy`, `rich`). There are

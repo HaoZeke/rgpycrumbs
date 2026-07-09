@@ -129,15 +129,15 @@ def _resolve_pip_spec(module_name: str) -> str:
 
     If the host lacks a CUDA device and a CPU-only override exists, the
     override is returned instead of the default spec. When
-    ``RGPYCRUMBS_SBOM_PINS`` is set (dispatch after consuming a CycloneDX
-    SBOM), matching packages become ``name==version``.
+    ``RGPYCRUMBS_LOCK_PINS`` / ``RGPYCRUMBS_SBOM_PINS`` is set (dispatch after
+    uv.lock / pylock / CycloneDX), matching packages become ``name==version``.
     """
     spec = _DEPENDENCY_MAP[module_name]
     if not _has_cuda():
         base_pkg = module_name.split(".", maxsplit=1)[0]
         spec = _CPU_OVERRIDES.get(base_pkg, spec)
     try:
-        from rgpycrumbs.sbom import apply_pin_to_spec, pins_from_env
+        from rgpycrumbs.locks import apply_pin_to_spec, pins_from_env
     except ImportError:  # pragma: no cover
         return spec
     return apply_pin_to_spec(spec, pins_from_env())

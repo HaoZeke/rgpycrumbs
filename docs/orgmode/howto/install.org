@@ -21,15 +21,25 @@ python -m rgpycrumbs.cli eon plt-neb --help
 #+end_src
 
 The dispatcher sets ~PYTHONPATH~, defaults ~RGPYCRUMBS_AUTO_DEPS=1~, and can
-honor an optional CycloneDX SBOM for PyPI pins:
+honor an optional **Python lock** the uv resolver already uses:
 
 #+begin_src bash
-export RGPYCRUMBS_SBOM=/path/to/stack.cdx.json   # e.g. eb-stack --sbom-out
-rgpycrumbs --sbom "$RGPYCRUMBS_SBOM" eon plt-neb ...
+# Any of: uv.lock | pylock.toml | CycloneDX JSON
+export RGPYCRUMBS_LOCK=/path/to/uv.lock
+# or: RGPYCRUMBS_LOCK=pylock.toml
+# or: RGPYCRUMBS_SBOM=stack.cdx.json   # alias for --sbom
+rgpycrumbs --lock "$RGPYCRUMBS_LOCK" eon plt-neb ...
 #+end_src
 
-Only ~pkg:pypi/...~ components become ~name==version~ constraints; EasyBuild
-~pkg:generic/...~ inventory rows are skipped. No SBOM → floating PEP 723 / AUTO_DEPS.
+Formats (auto-detected):
+
+- ~uv.lock~ — native uv lock
+- ~pylock.toml~ / ~pylock.*.toml~ — PEP 751 (e.g. ~uv export --format pylock.toml~)
+- CycloneDX JSON — e.g. eb-stack ~--sbom-out~, ~uv export --format cyclonedx1.5~
+
+PyPI packages become ~name==version~ constraints for ~uv run --constraints~ and
+~ensure_import~. Non-PyPI CDX rows (~pkg:generic/...~) are skipped. No lock →
+floating PEP 723 / AUTO_DEPS.
 
 ** Optional Dependencies
 

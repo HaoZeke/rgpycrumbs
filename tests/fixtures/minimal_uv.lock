@@ -1,0 +1,18 @@
+version = 1
+revision = 1
+requires-python = ">=3.10"
+
+[[package]]
+name = "numpy"
+version = "2.0.2"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "jax"
+version = "0.4.31"
+source = { registry = "https://pypi.org/simple" }
+
+[[package]]
+name = "click"
+version = "8.1.8"
+source = { registry = "https://pypi.org/simple" }

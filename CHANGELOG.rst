@@ -1,3 +1,15 @@
+rgpycrumbs 1.9.14 (2026-07-09)
+==============================
+
+Added
+-----
+
+- Optional lock consume is not SBOM-only: ``--lock`` / ``RGPYCRUMBS_LOCK`` accepts
+  **uv.lock**, **PEP 751** ``pylock.toml`` / ``pylock.*.toml``, and **CycloneDX**
+  JSON. Pins feed ``uv run --constraints`` / ``UV_CONSTRAINT`` and
+  ``ensure_import`` (``RGPYCRUMBS_LOCK_PINS``). ``--sbom`` / ``RGPYCRUMBS_SBOM``
+  remain aliases. Auto-detect by path/content; non-PyPI CDX rows still skipped.
+
 rgpycrumbs 1.9.13 (2026-07-08)
 ==============================
 
