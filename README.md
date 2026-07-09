@@ -96,15 +96,16 @@ The library is designed with the following principles in mind:
     non-PyPI CDX rows (`pkg:generic/...`) are skipped. No lock → floating PEP 723
     / AUTO_DEPS.
 
-    **Config files** (TOML) set defaults without flags:
+    **Suite config** (TOML; shared with chemparseplot / other rgpkgs — not a
+    per-package silo):
 
-    * User: `~/.config/rgpycrumbs/config.toml` (`$XDG_CONFIG_HOME/...`)
-    * Project: `rgpycrumbs.toml` or `.rgpycrumbs.toml` (walk up from CWD)
-    * Override file: `RGPYCRUMBS_CONFIG=/path/to.toml`
+    * User: `~/.config/rgpkgs/config.toml`
+    * Project: `rgpkgs.toml` or `.rgpkgs.toml` (walk up from CWD)
+    * Override: `RGPKGS_CONFIG=/path/to.toml`
+    * Legacy: `rgpycrumbs.toml` and `~/.config/rgpycrumbs/` still work
 
-    Precedence: CLI → env → project TOML → user TOML. Example schema in
-    `docs/examples/rgpycrumbs.config.toml` (`[dispatch]`, `[pins]`,
-    `[pins.packages]`).
+    Shared `[pins]` / `[pins.packages]`; tool keys under `[rgpycrumbs.dispatch]`.
+    Example: `docs/examples/rgpkgs.config.toml`.
 
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
     package has minimal core dependencies (`click`, `numpy`, `rich`). There are

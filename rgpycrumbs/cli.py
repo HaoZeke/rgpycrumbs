@@ -245,12 +245,15 @@ def _dispatch(
         env["RGPYCRUMBS_AUTO_DEPS"] = resolve_auto_deps_default(config=cfg)
 
     if pins:
-        # ensure_import expects normalized or raw; store normalized keys
+        # ensure_import expects normalized keys; write all known env aliases
+        from rgpycrumbs.locks import PINS_ENV_LEGACY
+
         pin_json = json.dumps(
             {normalize_pypi_name(k): v for k, v in pins.items()}
         )
         env[PINS_ENV] = pin_json
-        env[SBOM_PINS_ENV] = pin_json  # legacy alias
+        env[PINS_ENV_LEGACY] = pin_json
+        env[SBOM_PINS_ENV] = pin_json
 
     force_uv = resolve_force_uv(is_dev=is_dev, config=cfg)
     use_in_env = _prefer_in_env_interpreter(is_dev, force_uv=force_uv)
@@ -375,8 +378,8 @@ Or use --help flag which will be passed to the script:
     default=None,
     help=(
         "Optional lock path: uv.lock, PEP 751 pylock.toml, or CycloneDX JSON. "
-        "Precedence: CLI > env RGPYCRUMBS_LOCK > project rgpycrumbs.toml > "
-        "~/.config/rgpycrumbs/config.toml. Missing path fails clearly."
+        "Precedence: CLI > env RGPKGS_LOCK > project rgpkgs.toml > "
+        "~/.config/rgpkgs/config.toml (suite-wide). Missing path fails clearly."
     ),
 )
 @click.option(
@@ -399,9 +402,9 @@ def main(ctx, dev, verbose, lock_path, sbom_path):
         rgpycrumbs eon plt-neb ...
         python -m rgpycrumbs.cli eon plt-neb ...
 
-    Config (TOML): project ``rgpycrumbs.toml`` and user
-    ``~/.config/rgpycrumbs/config.toml`` set default lock, force_uv, auto_deps,
-    and ``[pins.packages]``. See docs for the full precedence stack.
+    Suite config (shared with chemparseplot and other rgpkgs): project
+    ``rgpkgs.toml`` and user ``~/.config/rgpkgs/config.toml`` for lock pins
+    and dispatch defaults. Legacy ``rgpycrumbs.toml`` paths still work.
     """
     # Ensure ctx.obj is a dictionary so we can store state in it
     ctx.ensure_object(dict)

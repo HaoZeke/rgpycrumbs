@@ -1,0 +1,36 @@
+# Ecosystem config for the rgpkgs suite (rgpycrumbs, chemparseplot, …).
+#
+# Install:
+#   mkdir -p ~/.config/rgpkgs
+#   cp docs/examples/rgpkgs.config.toml ~/.config/rgpkgs/config.toml
+# Project:
+#   cp docs/examples/rgpkgs.config.toml ./rgpkgs.toml
+#
+# Precedence: CLI > env (RGPKGS_* / RGPYCRUMBS_*) > project TOML > this file.
+# Legacy ~/.config/rgpycrumbs/ and rgpycrumbs.toml are still read as fallbacks.
+
+# --- shared pins (all tools) ---
+[pins]
+# Default lock: uv.lock | pylock.toml | CycloneDX JSON
+# Relative paths resolve against this file's directory.
+# lock = "uv.lock"
+
+[pins.packages]
+# Explicit pins (override lock-file versions for ensure_import / uv constraints)
+# jax = "0.4.31"
+# numpy = "2.2.6"
+# chemparseplot = "1.9.7"
+
+# --- rgpycrumbs CLI ---
+[rgpycrumbs.dispatch]
+auto_deps = true
+force_uv = false
+
+# Flat aliases also work:
+# [dispatch]
+# auto_deps = true
+# force_uv = false
+
+# --- future tool tables (read by those packages; ignored by rgpycrumbs CLI) ---
+# [chemparseplot.plot]
+# default_theme = "default"

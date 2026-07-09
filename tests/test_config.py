@@ -26,20 +26,34 @@ pytestmark = pytest.mark.pure
 class TestConfigDiscovery:
     def test_user_config_path_xdg(self, monkeypatch, tmp_path):
         monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-        assert user_config_path() == tmp_path / "rgpycrumbs" / "config.toml"
+        assert user_config_path() == tmp_path / "rgpkgs" / "config.toml"
+
+    def test_legacy_rgpycrumbs_config_still_loads(self, monkeypatch, tmp_path):
+        xdg = tmp_path / "xdg"
+        (xdg / "rgpycrumbs").mkdir(parents=True)
+        legacy = xdg / "rgpycrumbs" / "config.toml"
+        legacy.write_text(
+            "[pins.packages]\nase = \"3.23.0\"\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
+        monkeypatch.chdir(tmp_path)
+        cfg = load_config(cwd=tmp_path)
+        assert cfg.package_pins["ase"] == "3.23.0"
+        assert legacy in cfg.sources
 
     def test_find_project_config_walks_up(self, tmp_path):
         root = tmp_path / "proj"
         nested = root / "a" / "b"
         nested.mkdir(parents=True)
-        cfg = root / "rgpycrumbs.toml"
+        cfg = root / "rgpkgs.toml"
         cfg.write_text("[dispatch]\nforce_uv = true\n", encoding="utf-8")
         assert find_project_config(nested) == cfg
 
     def test_load_merges_global_then_project(self, monkeypatch, tmp_path):
         xdg = tmp_path / "xdg"
-        (xdg / "rgpycrumbs").mkdir(parents=True)
-        user = xdg / "rgpycrumbs" / "config.toml"
+        (xdg / "rgpkgs").mkdir(parents=True)
+        user = xdg / "rgpkgs" / "config.toml"
         user.write_text(
             "[dispatch]\nauto_deps = false\nforce_uv = false\n"
             "[pins]\nlock = \"global.lock\"\n"
@@ -48,7 +62,7 @@ class TestConfigDiscovery:
         )
         proj = tmp_path / "work"
         proj.mkdir()
-        (proj / "rgpycrumbs.toml").write_text(
+        (proj / "rgpkgs.toml").write_text(
             "[dispatch]\nforce_uv = true\n"
             "[pins.packages]\njax = \"0.4.31\"\n",
             encoding="utf-8",
@@ -89,8 +103,8 @@ class TestConfigDiscovery:
 class TestResolveLayers:
     def test_cli_beats_env_beats_config(self, monkeypatch, tmp_path):
         xdg = tmp_path / "xdg"
-        (xdg / "rgpycrumbs").mkdir(parents=True)
-        (xdg / "rgpycrumbs" / "config.toml").write_text(
+        (xdg / "rgpkgs").mkdir(parents=True)
+        (xdg / "rgpkgs" / "config.toml").write_text(
             '[pins]\nlock = "from-config.lock"\n',
             encoding="utf-8",
         )
@@ -114,8 +128,8 @@ class TestResolveLayers:
 
     def test_force_uv_and_auto_deps(self, monkeypatch, tmp_path):
         xdg = tmp_path / "xdg"
-        (xdg / "rgpycrumbs").mkdir(parents=True)
-        (xdg / "rgpycrumbs" / "config.toml").write_text(
+        (xdg / "rgpkgs").mkdir(parents=True)
+        (xdg / "rgpkgs" / "config.toml").write_text(
             "[dispatch]\nforce_uv = true\nauto_deps = false\n",
             encoding="utf-8",
         )
@@ -139,8 +153,8 @@ class TestDispatchUsesConfig:
         import json
 
         xdg = tmp_path / "xdg"
-        (xdg / "rgpycrumbs").mkdir(parents=True)
-        (xdg / "rgpycrumbs" / "config.toml").write_text(
+        (xdg / "rgpkgs").mkdir(parents=True)
+        (xdg / "rgpkgs" / "config.toml").write_text(
             "[pins.packages]\njax = \"0.4.31\"\n",
             encoding="utf-8",
         )

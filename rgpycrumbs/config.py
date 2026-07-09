@@ -1,37 +1,45 @@
 # SPDX-FileCopyrightText: 2023-present Rohit Goswami <rog32@hi.is>
 # SPDX-License-Identifier: MIT
-"""Layered TOML config for dispatch pins and defaults.
+"""Ecosystem-wide layered TOML config (rgpkgs suite).
 
-Search order for config *files* (later overrides earlier on a per-key basis
-when merged; lock path is last-writer-wins):
+Shared by **rgpycrumbs**, **chemparseplot**, and siblings — not a
+package-private silo. One pin/lock policy for the whole stack.
 
-1. User global: ``$XDG_CONFIG_HOME/rgpycrumbs/config.toml``
-   (default ``~/.config/rgpycrumbs/config.toml``)
-2. Project: walk upward from CWD for ``rgpycrumbs.toml`` or ``.rgpycrumbs.toml``
-3. ``RGPYCRUMBS_CONFIG`` — explicit file (merged last among files)
+Search order for config *files* (later merges override earlier):
+
+1. User global: ``$XDG_CONFIG_HOME/rgpkgs/config.toml``
+   (default ``~/.config/rgpkgs/config.toml``)
+2. Legacy user: ``~/.config/rgpycrumbs/config.toml`` (still read)
+3. Project: walk upward for ``rgpkgs.toml`` / ``.rgpkgs.toml``, then legacy
+   ``rgpycrumbs.toml`` / ``.rgpycrumbs.toml``
+4. ``RGPKGS_CONFIG`` or ``RGPYCRUMBS_CONFIG`` — explicit file (merged last)
 
 Runtime precedence for values (highest first):
 
 * CLI flags (``--lock``, ``--sbom``, ``--dev``, …)
-* Environment variables (``RGPYCRUMBS_LOCK``, ``RGPYCRUMBS_FORCE_UV``, …)
+* Environment (``RGPKGS_LOCK`` / ``RGPYCRUMBS_LOCK``, ``RGPKGS_FORCE_UV``, …)
 * Merged TOML (project overrides global)
 * Built-in defaults
 
-Example ``~/.config/rgpycrumbs/config.toml``::
+Example ``~/.config/rgpkgs/config.toml``::
 
-    [dispatch]
+    # Shared across the suite (chemparseplot, rgpycrumbs, …)
+    [pins]
+    lock = "uv.lock"   # or pylock.toml / CycloneDX JSON
+
+    [pins.packages]
+    jax = "0.4.31"
+
+    # Tool-specific (optional)
+    [rgpycrumbs.dispatch]
     auto_deps = true
     force_uv = false
 
-    [pins]
-    # optional default lock (uv.lock | pylock.toml | CycloneDX JSON)
-    lock = ""
-
-    [pins.packages]
-    # explicit pins always applied (override lock file versions)
-    # jax = "0.4.31"
+    # Future: [chemparseplot.plot] theme = "…"
 
 .. versionadded:: 1.9.15
+.. versionchanged:: 1.9.16
+   Ecosystem identity is **rgpkgs** (not per-package config trees).
 """
 
 from __future__ import annotations
@@ -50,10 +58,22 @@ else:  # pragma: no cover
     except ImportError:  # pragma: no cover
         tomllib = None  # type: ignore[assignment]
 
-# Well-known names
-PROJECT_CONFIG_NAMES = ("rgpycrumbs.toml", ".rgpycrumbs.toml")
-USER_CONFIG_REL = Path("rgpycrumbs") / "config.toml"
-CONFIG_PATH_ENV = "RGPYCRUMBS_CONFIG"
+# --- well-known paths (ecosystem first, legacy second) ---
+PROJECT_CONFIG_NAMES = (
+    "rgpkgs.toml",
+    ".rgpkgs.toml",
+    "rgpycrumbs.toml",  # legacy
+    ".rgpycrumbs.toml",
+)
+USER_CONFIG_REL = Path("rgpkgs") / "config.toml"
+USER_CONFIG_LEGACY_REL = Path("rgpycrumbs") / "config.toml"
+CONFIG_PATH_ENV = "RGPKGS_CONFIG"
+CONFIG_PATH_ENV_LEGACY = "RGPYCRUMBS_CONFIG"
+# lock path envs (also used by locks.py / CLI)
+LOCK_PATH_ENVS = ("RGPKGS_LOCK", "RGPYCRUMBS_LOCK", "RGPYCRUMBS_SBOM")
+FORCE_UV_ENVS = ("RGPKGS_FORCE_UV", "RGPYCRUMBS_FORCE_UV")
+AUTO_DEPS_ENVS = ("RGPKGS_AUTO_DEPS", "RGPYCRUMBS_AUTO_DEPS")
+DEV_ENVS = ("RGPKGS_DEV", "RGPYCRUMBS_DEV")
 
 
 def _xdg_config_home() -> Path:
@@ -64,27 +84,35 @@ def _xdg_config_home() -> Path:
 
 
 def user_config_path() -> Path:
-    """``~/.config/rgpycrumbs/config.toml`` (or ``$XDG_CONFIG_HOME/...``)."""
+    """Preferred global config: ``~/.config/rgpkgs/config.toml``."""
     return _xdg_config_home() / USER_CONFIG_REL
 
 
+def user_config_path_legacy() -> Path:
+    """Legacy global: ``~/.config/rgpycrumbs/config.toml``."""
+    return _xdg_config_home() / USER_CONFIG_LEGACY_REL
+
+
+def _is_file(path: Path) -> bool:
+    """Existence check via os.path (not Path.is_file) to avoid class mocks."""
+    return os.path.isfile(path)
+
+
 def find_project_config(start: Path | None = None) -> Path | None:
-    """Walk from *start* (default CWD) upward for a project config file."""
+    """Walk from *start* (default CWD) upward for a project config file.
+
+    Prefers ``rgpkgs.toml`` over legacy ``rgpycrumbs.toml`` in the same
+    directory.
+    """
     cur = (start or Path.cwd()).resolve()
     for directory in (cur, *cur.parents):
         for name in PROJECT_CONFIG_NAMES:
             candidate = directory / name
             if _is_file(candidate):
                 return candidate
-        # stop at filesystem root
         if directory.parent == directory:
             break
     return None
-
-
-def _is_file(path: Path) -> bool:
-    """Existence check via os.path (not Path.is_file) to avoid class mocks."""
-    return os.path.isfile(path)
 
 
 def _load_toml_file(path: Path) -> dict[str, Any]:
@@ -128,7 +156,6 @@ def _normalize_packages(raw: Any) -> dict[str, str]:
     for k, v in raw.items():
         if k is None or v is None:
             continue
-        # allow "jax = '0.4.31'" or jax = { version = "..." }
         if isinstance(v, dict):
             ver = v.get("version") or v.get("pin")
             if ver is None:
@@ -146,17 +173,42 @@ def _resolve_path(raw: str, base_dir: Path) -> Path:
     return (base_dir / p).resolve()
 
 
+def _first_env(*names: str) -> str:
+    for name in names:
+        val = os.environ.get(name, "").strip()
+        if val:
+            return val
+    return ""
+
+
+def _env_flag_any(*names: str) -> bool | None:
+    """Return True/False if any env is set; None if all unset."""
+    for name in names:
+        raw = os.environ.get(name, "").strip().lower()
+        if raw == "":
+            continue
+        if raw in {"1", "true", "yes", "on"}:
+            return True
+        if raw in {"0", "false", "no", "off"}:
+            return False
+    return None
+
+
 @dataclass
 class RgpycrumbsConfig:
-    """Resolved configuration (files + defaults; env/CLI applied separately)."""
+    """Resolved configuration (files + defaults; env/CLI applied separately).
+
+    Shared pin fields apply suite-wide; dispatch fields are rgpycrumbs CLI
+    defaults (other tools may ignore them).
+    """
 
     auto_deps: bool | None = None
     force_uv: bool | None = None
     lock_path: Path | None = None
-    # explicit package pins from [pins.packages] (merged global→project)
     package_pins: dict[str, str] = field(default_factory=dict)
-    # which config files contributed (for diagnostics)
     sources: list[Path] = field(default_factory=list)
+    # reserved for future tool tables (chemparseplot, …)
+    tool_tables: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def merged_package_pins_normalized(self) -> dict[str, str]:
         from rgpycrumbs.locks import normalize_pypi_name
@@ -166,6 +218,20 @@ class RgpycrumbsConfig:
         }
 
 
+def _extract_dispatch(data: dict[str, Any]) -> dict[str, Any]:
+    """Return dispatch table from top-level or [rgpycrumbs.dispatch]."""
+    out: dict[str, Any] = {}
+    top = data.get("dispatch")
+    if isinstance(top, dict):
+        out.update(top)
+    rgp = data.get("rgpycrumbs")
+    if isinstance(rgp, dict):
+        nested = rgp.get("dispatch")
+        if isinstance(nested, dict):
+            out.update(nested)
+    return out
+
+
 def _merge_section(
     cfg: RgpycrumbsConfig,
     data: dict[str, Any],
@@ -173,16 +239,15 @@ def _merge_section(
     base_dir: Path,
     source: Path,
 ) -> None:
-    dispatch = data.get("dispatch") or {}
-    if isinstance(dispatch, dict):
-        if "auto_deps" in dispatch:
-            b = _as_bool(dispatch.get("auto_deps"))
-            if b is not None:
-                cfg.auto_deps = b
-        if "force_uv" in dispatch:
-            b = _as_bool(dispatch.get("force_uv"))
-            if b is not None:
-                cfg.force_uv = b
+    dispatch = _extract_dispatch(data)
+    if "auto_deps" in dispatch:
+        b = _as_bool(dispatch.get("auto_deps"))
+        if b is not None:
+            cfg.auto_deps = b
+    if "force_uv" in dispatch:
+        b = _as_bool(dispatch.get("force_uv"))
+        if b is not None:
+            cfg.force_uv = b
 
     pins = data.get("pins") or {}
     if isinstance(pins, dict):
@@ -205,6 +270,11 @@ def _merge_section(
         if b is not None:
             cfg.auto_deps = b
 
+    # stash other tool tables for future consumers
+    for key in ("chemparseplot", "pychum", "readcon"):
+        if key in data and isinstance(data[key], dict):
+            cfg.tool_tables[key] = data[key]
+
     cfg.sources.append(source)
 
 
@@ -216,14 +286,15 @@ def load_config(
     """Load and merge global + project + optional explicit config files."""
     cfg = RgpycrumbsConfig()
 
-    user_path = user_config_path()
-    if _is_file(user_path):
-        _merge_section(
-            cfg,
-            _load_toml_file(user_path),
-            base_dir=user_path.parent,
-            source=user_path,
-        )
+    # Preferred global, then legacy global
+    for path in (user_config_path(), user_config_path_legacy()):
+        if _is_file(path):
+            _merge_section(
+                cfg,
+                _load_toml_file(path),
+                base_dir=path.parent,
+                source=path,
+            )
 
     project_path = find_project_config(cwd)
     if project_path is not None:
@@ -234,12 +305,11 @@ def load_config(
             source=project_path,
         )
 
-    # explicit path: CLI/env RGPYCRUMBS_CONFIG
     exp: Path | None = None
     if explicit_config is not None and str(explicit_config).strip():
         exp = Path(str(explicit_config).strip()).expanduser()
     else:
-        env_cfg = os.environ.get(CONFIG_PATH_ENV, "").strip()
+        env_cfg = _first_env(CONFIG_PATH_ENV, CONFIG_PATH_ENV_LEGACY)
         if env_cfg:
             exp = Path(env_cfg).expanduser()
     if exp is not None:
@@ -263,17 +333,14 @@ def resolve_lock_path_layered(
     config: RgpycrumbsConfig | None = None,
     cwd: Path | None = None,
 ) -> Path | None:
-    """CLI → env → config file lock path."""
-    from rgpycrumbs.locks import LOCK_PATH_ENV, SBOM_PATH_ENV
-
+    """CLI → env (RGPKGS_* / RGPYCRUMBS_*) → config file lock path."""
     for candidate in (cli_lock, cli_sbom):
         if candidate is not None and str(candidate).strip():
             return Path(str(candidate).strip()).expanduser().resolve()
 
-    for env_name in (LOCK_PATH_ENV, SBOM_PATH_ENV):
-        env_path = os.environ.get(env_name, "").strip()
-        if env_path:
-            return Path(env_path).expanduser().resolve()
+    env_path = _first_env(*LOCK_PATH_ENVS)
+    if env_path:
+        return Path(env_path).expanduser().resolve()
 
     cfg = config if config is not None else load_config(cwd=cwd)
     if cfg.lock_path is not None:
@@ -287,25 +354,18 @@ def resolve_force_uv(
     config: RgpycrumbsConfig | None = None,
     cwd: Path | None = None,
 ) -> bool:
-    """Whether to force uv isolation (False if --dev / RGPYCRUMBS_DEV)."""
+    """Whether to force uv isolation (False if --dev / DEV env)."""
     if is_dev:
         return False
-    if os.environ.get("RGPYCRUMBS_DEV", "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }:
+    if _env_flag_any(*DEV_ENVS) is True:
         return False
-    env = os.environ.get("RGPYCRUMBS_FORCE_UV", "").strip().lower()
-    if env in {"1", "true", "yes", "on"}:
-        return True
-    if env in {"0", "false", "no", "off"}:
-        return False
+    forced = _env_flag_any(*FORCE_UV_ENVS)
+    if forced is not None:
+        return forced
     cfg = config if config is not None else load_config(cwd=cwd)
     if cfg.force_uv is not None:
         return cfg.force_uv
-    return False  # default: may still prefer in-env when stack ready
+    return False
 
 
 def resolve_auto_deps_default(
@@ -314,10 +374,11 @@ def resolve_auto_deps_default(
     cwd: Path | None = None,
 ) -> str:
     """Return ``'1'`` or ``'0'`` for default AUTO_DEPS when env unset."""
-    env = os.environ.get("RGPYCRUMBS_AUTO_DEPS", "").strip()
-    if env != "":
-        return env
+    for name in AUTO_DEPS_ENVS:
+        env = os.environ.get(name, "").strip()
+        if env != "":
+            return env
     cfg = config if config is not None else load_config(cwd=cwd)
     if cfg.auto_deps is False:
         return "0"
-    return "1"  # default on for CLI dispatch
+    return "1"

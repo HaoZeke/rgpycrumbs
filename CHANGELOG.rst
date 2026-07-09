@@ -1,3 +1,16 @@
+rgpycrumbs 1.9.16 (2026-07-09)
+==============================
+
+Changed
+-------
+
+- Config identity is **ecosystem-wide ``rgpkgs``**, not package-private:
+  ``~/.config/rgpkgs/config.toml`` and project ``rgpkgs.toml`` (shared with
+  chemparseplot and other suite tools). Legacy ``rgpycrumbs.toml`` /
+  ``~/.config/rgpycrumbs/`` still load as fallbacks. Env aliases:
+  ``RGPKGS_LOCK``, ``RGPKGS_CONFIG``, ``RGPKGS_FORCE_UV``, ``RGPKGS_AUTO_DEPS``
+  (``RGPYCRUMBS_*`` kept).
+
 rgpycrumbs 1.9.15 (2026-07-09)
 ==============================
 

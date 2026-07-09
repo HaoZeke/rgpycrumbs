@@ -39,13 +39,15 @@ else:  # pragma: no cover
     else:
         _TOML_IMPORT_ERROR = None
 
-# Primary path env (any supported format).
-LOCK_PATH_ENV = "RGPYCRUMBS_LOCK"
+# Primary path env (any supported format). Ecosystem name first.
+LOCK_PATH_ENV = "RGPKGS_LOCK"
+LOCK_PATH_ENV_LEGACY = "RGPYCRUMBS_LOCK"
 # Backward-compatible alias (CycloneDX or any format — same loader).
 SBOM_PATH_ENV = "RGPYCRUMBS_SBOM"
 # JSON object {normalized_name: version} for child ensure_import / AUTO_DEPS.
-PINS_ENV = "RGPYCRUMBS_LOCK_PINS"
-# Legacy name still read (dispatch writes both).
+PINS_ENV = "RGPKGS_LOCK_PINS"
+PINS_ENV_LEGACY = "RGPYCRUMBS_LOCK_PINS"
+# Older SBOM-era name still read (dispatch writes all).
 SBOM_PINS_ENV = "RGPYCRUMBS_SBOM_PINS"
 
 _VERSION_OPS = re.compile(r"(==|>=|<=|~=|!=|>|<)")
@@ -338,11 +340,15 @@ def apply_pin_to_spec(pip_spec: str, pins: dict[str, str]) -> str:
 
 
 def pins_from_env(env: dict[str, str] | None = None) -> dict[str, str]:
-    """Read pin map from ``RGPYCRUMBS_LOCK_PINS`` or legacy ``RGPYCRUMBS_SBOM_PINS``."""
+    """Read pin map from ``RGPKGS_LOCK_PINS`` / legacy pin envs."""
     import os
 
     environ = env if env is not None else os.environ
-    raw = environ.get(PINS_ENV, "").strip() or environ.get(SBOM_PINS_ENV, "").strip()
+    raw = (
+        environ.get(PINS_ENV, "").strip()
+        or environ.get(PINS_ENV_LEGACY, "").strip()
+        or environ.get(SBOM_PINS_ENV, "").strip()
+    )
     if not raw:
         return {}
     try:

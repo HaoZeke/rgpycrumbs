@@ -25,10 +25,10 @@ honor an optional **Python lock** the uv resolver already uses:
 
 #+begin_src bash
 # Any of: uv.lock | pylock.toml | CycloneDX JSON
-export RGPYCRUMBS_LOCK=/path/to/uv.lock
-# or: RGPYCRUMBS_LOCK=pylock.toml
+export RGPKGS_LOCK=/path/to/uv.lock
+# or: RGPKGS_LOCK=pylock.toml
 # or: RGPYCRUMBS_SBOM=stack.cdx.json   # alias for --sbom
-rgpycrumbs --lock "$RGPYCRUMBS_LOCK" eon plt-neb ...
+rgpycrumbs --lock "$RGPKGS_LOCK" eon plt-neb ...
 #+end_src
 
 Formats (auto-detected):
@@ -45,11 +45,11 @@ floating PEP 723 / AUTO_DEPS.
 
 #+begin_src bash
 # global
-mkdir -p ~/.config/rgpycrumbs
-cp docs/examples/rgpycrumbs.config.toml ~/.config/rgpycrumbs/config.toml
+mkdir -p ~/.config/rgpkgs
+cp docs/examples/rgpkgs.config.toml ~/.config/rgpkgs/config.toml
 
 # project (overrides global; walk-up from CWD)
-cp docs/examples/rgpycrumbs.config.toml ./rgpycrumbs.toml
+cp docs/examples/rgpkgs.config.toml ./rgpkgs.toml
 #+end_src
 
 | Layer | Location |
@@ -57,8 +57,8 @@ cp docs/examples/rgpycrumbs.config.toml ./rgpycrumbs.toml
 | ~[pins]~ | default ~lock~ path (uv.lock / pylock / CDX) |
 | ~[pins.packages]~ | explicit ~name = "version"~ overrides |
 
-Precedence: CLI ~--lock~ → env ~RGPYCRUMBS_LOCK~ → project TOML →
-~/.config/rgpycrumbs/config.toml~. Optional ~RGPYCRUMBS_CONFIG~ merges last among
+Precedence: CLI ~--lock~ → env ~RGPKGS_LOCK~ → project TOML →
+~/.config/rgpkgs/config.toml~. Optional ~RGPKGS_CONFIG~ merges last among
 files.
 
 ** Optional Dependencies
