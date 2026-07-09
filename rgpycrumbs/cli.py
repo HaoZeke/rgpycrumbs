@@ -39,12 +39,20 @@ def _in_env_stack_ready() -> bool:
     return True
 
 
-def _prefer_in_env_interpreter(is_dev: bool) -> bool:
+def _prefer_in_env_interpreter(
+    is_dev: bool,
+    *,
+    force_uv: bool | None = None,
+) -> bool:
     """Decide whether to run scripts with ``sys.executable`` instead of ``uv run``."""
     if is_dev or _env_flag("RGPYCRUMBS_DEV"):
         return True
-    if _env_flag("RGPYCRUMBS_FORCE_UV"):
+    # force_uv: CLI/env/config layer (None → re-read env only for back-compat)
+    if force_uv is True or (force_uv is None and _env_flag("RGPYCRUMBS_FORCE_UV")):
         return False
+    if force_uv is False:
+        # config explicitly disabled force_uv; still allow stack-ready in-env
+        pass
     if shutil.which("uv") is None:
         return True
     # Active env already has readcon + plot deps: use it for CON metadata fidelity.
@@ -113,29 +121,13 @@ def _get_scripts_in_folder(folder_name: str) -> list[str]:
     return sorted(scripts)
 
 
-def _resolve_lock_path(
-    explicit_lock: str | None = None,
-    explicit_sbom: str | None = None,
-) -> str | None:
-    """Return lock/SBOM path from CLI flags or env (``RGPYCRUMBS_LOCK`` / ``_SBOM``)."""
-    from rgpycrumbs.locks import LOCK_PATH_ENV, SBOM_PATH_ENV
-
-    for candidate in (explicit_lock, explicit_sbom):
-        if candidate is not None and str(candidate).strip():
-            return str(candidate).strip()
-    for env_name in (LOCK_PATH_ENV, SBOM_PATH_ENV):
-        env_path = os.environ.get(env_name, "").strip()
-        if env_path:
-            return env_path
-    return None
-
-
-def _load_lock_pins_or_exit(lock_path: str) -> dict[str, str]:
+def _load_lock_pins_or_exit(lock_path: str | Path) -> dict[str, str]:
     """Load PyPI pins from uv.lock / pylock / CycloneDX; exit on failure."""
     from rgpycrumbs.locks import detect_lock_format, load_pypi_pins
 
+    path_str = str(lock_path)
     try:
-        pins = load_pypi_pins(lock_path)
+        pins = load_pypi_pins(path_str)
     except FileNotFoundError as exc:
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
@@ -145,9 +137,9 @@ def _load_lock_pins_or_exit(lock_path: str) -> dict[str, str]:
     except ImportError as exc:
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
-    fmt = detect_lock_format(lock_path)
+    fmt = detect_lock_format(path_str)
     click.echo(
-        f"--> Lock ({fmt.value}) {lock_path}: {len(pins)} PyPI pin(s) for constraints",
+        f"--> Lock ({fmt.value}) {path_str}: {len(pins)} PyPI pin(s) for constraints",
         err=True,
     )
     return pins
@@ -167,14 +159,27 @@ def _dispatch(
 
     Preferred entry is this dispatcher (``rgpycrumbs`` / ``python -m
     rgpycrumbs.cli``). Raw ``uv run <script.py>`` is not the primary path.
-    Optional lock/SBOM (``--lock`` / ``RGPYCRUMBS_LOCK``, or ``--sbom`` /
-    ``RGPYCRUMBS_SBOM``) constrains PyPI installs: uv.lock, PEP 751 pylock,
-    or CycloneDX JSON.
+
+    Pins/lock resolution (highest wins): CLI ``--lock``/``--sbom`` → env
+    ``RGPYCRUMBS_LOCK``/``_SBOM`` → project ``rgpycrumbs.toml`` → user
+    ``~/.config/rgpycrumbs/config.toml``. Formats: uv.lock, PEP 751 pylock,
+    CycloneDX. TOML ``[pins.packages]`` merge on top of the lock file.
     """
     import json
     import tempfile
 
-    from rgpycrumbs.locks import PINS_ENV, SBOM_PINS_ENV, pins_to_constraint_lines
+    from rgpycrumbs.config import (
+        load_config,
+        resolve_auto_deps_default,
+        resolve_force_uv,
+        resolve_lock_path_layered,
+    )
+    from rgpycrumbs.locks import (
+        PINS_ENV,
+        SBOM_PINS_ENV,
+        normalize_pypi_name,
+        pins_to_constraint_lines,
+    )
 
     # Convert script-name to filename (e.g., plt-neb -> plt_neb.py)
     filename = f"{script_name.replace('-', '_')}.py"
@@ -184,10 +189,34 @@ def _dispatch(
         click.echo(f"Error: Script not found at '{script_path}'", err=True)
         sys.exit(1)
 
-    resolved_lock = _resolve_lock_path(lock_path, sbom_path)
+    try:
+        cfg = load_config()
+    except (FileNotFoundError, ValueError, ImportError) as exc:
+        click.echo(f"Error: config: {exc}", err=True)
+        sys.exit(1)
+
+    if is_verbose and cfg.sources:
+        click.echo(
+            "VERBOSE: config sources -> " + ", ".join(str(p) for p in cfg.sources),
+            err=True,
+        )
+
+    resolved_lock = resolve_lock_path_layered(
+        cli_lock=lock_path,
+        cli_sbom=sbom_path,
+        config=cfg,
+    )
     pins: dict[str, str] = {}
     if resolved_lock is not None:
         pins = _load_lock_pins_or_exit(resolved_lock)
+    # [pins.packages] from TOML override lock-file versions
+    for name, ver in cfg.merged_package_pins_normalized().items():
+        pins[name] = ver
+    if cfg.package_pins and is_verbose:
+        click.echo(
+            f"VERBOSE: TOML package pins -> {cfg.merged_package_pins_normalized()}",
+            err=True,
+        )
 
     # --- SETUP ENVIRONMENT ---
     env = os.environ.copy()
@@ -210,18 +239,21 @@ def _dispatch(
     env["PYTHONPATH"] = f"{project_root}{os.pathsep}{current_pythonpath}"
 
     # CLI owns dependency resolution for dispatched scripts:
-    # - uv run → PEP 723 header deps (+ optional SBOM constraints)
+    # - uv run → PEP 723 header deps (+ optional lock/SBOM constraints)
     # - in-env  → ensure_import cache installs for heavies (jax, adjustText)
-    # Do not force hosts to pre-declare those. Explicit 0/false still disables.
     if env.get("RGPYCRUMBS_AUTO_DEPS", "").strip() == "":
-        env["RGPYCRUMBS_AUTO_DEPS"] = "1"
+        env["RGPYCRUMBS_AUTO_DEPS"] = resolve_auto_deps_default(config=cfg)
 
     if pins:
-        pin_json = json.dumps(pins)
+        # ensure_import expects normalized or raw; store normalized keys
+        pin_json = json.dumps(
+            {normalize_pypi_name(k): v for k, v in pins.items()}
+        )
         env[PINS_ENV] = pin_json
-        env[SBOM_PINS_ENV] = pin_json  # legacy alias for ensure_import / older envs
+        env[SBOM_PINS_ENV] = pin_json  # legacy alias
 
-    use_in_env = _prefer_in_env_interpreter(is_dev)
+    force_uv = resolve_force_uv(is_dev=is_dev, config=cfg)
+    use_in_env = _prefer_in_env_interpreter(is_dev, force_uv=force_uv)
     constraints_path: Path | None = None
     if use_in_env:
         command = [sys.executable, str(script_path), *script_args]
@@ -343,8 +375,8 @@ Or use --help flag which will be passed to the script:
     default=None,
     help=(
         "Optional lock path: uv.lock, PEP 751 pylock.toml, or CycloneDX JSON. "
-        "PyPI packages become install pins for uv/AUTO_DEPS. "
-        "Also set via RGPYCRUMBS_LOCK. Missing path fails clearly."
+        "Precedence: CLI > env RGPYCRUMBS_LOCK > project rgpycrumbs.toml > "
+        "~/.config/rgpycrumbs/config.toml. Missing path fails clearly."
     ),
 )
 @click.option(
@@ -367,8 +399,9 @@ def main(ctx, dev, verbose, lock_path, sbom_path):
         rgpycrumbs eon plt-neb ...
         python -m rgpycrumbs.cli eon plt-neb ...
 
-    over ``uv run path/to/plt_neb.py`` (the dispatcher sets PYTHONPATH,
-    AUTO_DEPS, optional lock/SBOM pins, and editable peers).
+    Config (TOML): project ``rgpycrumbs.toml`` and user
+    ``~/.config/rgpycrumbs/config.toml`` set default lock, force_uv, auto_deps,
+    and ``[pins.packages]``. See docs for the full precedence stack.
     """
     # Ensure ctx.obj is a dictionary so we can store state in it
     ctx.ensure_object(dict)

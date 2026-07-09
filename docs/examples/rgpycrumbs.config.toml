@@ -1,0 +1,21 @@
+# Example: copy to ~/.config/rgpycrumbs/config.toml (global)
+# or ./rgpycrumbs.toml (project — project overrides global).
+#
+# Precedence for lock path:
+#   CLI --lock/--sbom > env RGPYCRUMBS_LOCK/_SBOM > project TOML > this file
+
+[dispatch]
+# Default AUTO_DEPS when env RGPYCRUMBS_AUTO_DEPS is unset (CLI dispatch).
+auto_deps = true
+# Prefer isolated uv run even when the plot stack is importable in-env.
+force_uv = false
+
+[pins]
+# Optional default lock: uv.lock | pylock.toml | CycloneDX JSON
+# Relative paths resolve against this file's directory.
+# lock = "uv.lock"
+
+[pins.packages]
+# Explicit pins always applied (override versions from the lock file).
+# jax = "0.4.31"
+# numpy = "2.2.6"

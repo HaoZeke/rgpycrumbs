@@ -96,6 +96,16 @@ The library is designed with the following principles in mind:
     non-PyPI CDX rows (`pkg:generic/...`) are skipped. No lock → floating PEP 723
     / AUTO_DEPS.
 
+    **Config files** (TOML) set defaults without flags:
+
+    * User: `~/.config/rgpycrumbs/config.toml` (`$XDG_CONFIG_HOME/...`)
+    * Project: `rgpycrumbs.toml` or `.rgpycrumbs.toml` (walk up from CWD)
+    * Override file: `RGPYCRUMBS_CONFIG=/path/to.toml`
+
+    Precedence: CLI → env → project TOML → user TOML. Example schema in
+    `docs/examples/rgpycrumbs.config.toml` (`[dispatch]`, `[pins]`,
+    `[pins.packages]`).
+
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
     package has minimal core dependencies (`click`, `numpy`, `rich`). There are
     **no runtime feature extras**. CLI tools fetch deps via PEP 723 + `uv run`.

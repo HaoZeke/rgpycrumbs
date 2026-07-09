@@ -1,3 +1,16 @@
+rgpycrumbs 1.9.15 (2026-07-09)
+==============================
+
+Added
+-----
+
+- Layered **TOML config** for pins and dispatch defaults:
+  ``~/.config/rgpycrumbs/config.toml`` (global), project ``rgpycrumbs.toml`` /
+  ``.rgpycrumbs.toml`` (walk-up from CWD), optional ``RGPYCRUMBS_CONFIG``.
+  Sections: ``[dispatch]`` (``auto_deps``, ``force_uv``), ``[pins]`` (``lock``),
+  ``[pins.packages]`` (explicit overrides). Precedence: CLI > env > project >
+  global. Example: ``docs/examples/rgpycrumbs.config.toml``.
+
 rgpycrumbs 1.9.14 (2026-07-09)
 ==============================
 

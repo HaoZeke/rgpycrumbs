@@ -41,6 +41,26 @@ PyPI packages become ~name==version~ constraints for ~uv run --constraints~ and
 ~ensure_import~. Non-PyPI CDX rows (~pkg:generic/...~) are skipped. No lock →
 floating PEP 723 / AUTO_DEPS.
 
+** Layered TOML config
+
+#+begin_src bash
+# global
+mkdir -p ~/.config/rgpycrumbs
+cp docs/examples/rgpycrumbs.config.toml ~/.config/rgpycrumbs/config.toml
+
+# project (overrides global; walk-up from CWD)
+cp docs/examples/rgpycrumbs.config.toml ./rgpycrumbs.toml
+#+end_src
+
+| Layer | Location |
+| ~[dispatch]~ | ~auto_deps~, ~force_uv~ |
+| ~[pins]~ | default ~lock~ path (uv.lock / pylock / CDX) |
+| ~[pins.packages]~ | explicit ~name = "version"~ overrides |
+
+Precedence: CLI ~--lock~ → env ~RGPYCRUMBS_LOCK~ → project TOML →
+~/.config/rgpycrumbs/config.toml~. Optional ~RGPYCRUMBS_CONFIG~ merges last among
+files.
+
 ** Optional Dependencies
 
 There are **no runtime feature extras**. Scientific backends (jax, scipy, ase,
