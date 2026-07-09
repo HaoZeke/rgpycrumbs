@@ -180,3 +180,15 @@ def test_dispatch_dev_uses_active_interpreter(mock_run, monkeypatch):
 
     executed = mock_run.call_args[0][0]
     assert executed[0] == sys.executable
+
+
+def test_config_show_command():
+    """rgpycrumbs config show runs without error and prints lock_path key."""
+    from click.testing import CliRunner
+
+    from rgpycrumbs.cli import main
+
+    result = CliRunner().invoke(main, ["config", "show"])
+    assert result.exit_code == 0
+    assert "lock_path:" in result.output
+    assert "package_pins:" in result.output

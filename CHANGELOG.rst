@@ -1,3 +1,13 @@
+rgpycrumbs 1.9.17 (2026-07-09)
+==============================
+
+Added
+-----
+
+- ``rgpycrumbs config show`` prints merged suite config (sources, lock path,
+  force_uv, package pins). Suite architecture notes under
+  ``docs/orgmode/explanation/suite_architecture.org``.
+
 rgpycrumbs 1.9.16 (2026-07-09)
 ==============================
 

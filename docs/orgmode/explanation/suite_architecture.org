@@ -1,0 +1,26 @@
+#+TITLE: rgpkgs suite architecture
+#+AUTHOR: Rohit Goswami
+
+* Roles
+
+| Package | Role |
+|---------+------|
+| rgpycrumbs | Hub: CLI, ensure_import, locks, suite TOML |
+| chemparseplot | Parse + plot library (no second config tree) |
+| pychum | Input generators |
+
+* Config
+
+One tree: ~/~/.config/rgpkgs/config.toml~, project ~rgpkgs.toml~.
+See ~docs/examples/rgpkgs.config.toml~.
+
+* Deps
+
+Hub: no runtime feature extras. CLI PEP 723 + uv; library AUTO_DEPS.
+chemparseplot: extras transitional; migrate to same uv/on-demand design.
+Cookbook: prefer library API when plot pipelines are exposed as stable
+functions; today full pipelines still go through ~rgpycrumbs eon plt-*~.
+
+* Locks
+
+Consume (not produce): uv.lock, PEP 751 pylock, CycloneDX (eb-stack / uv export).

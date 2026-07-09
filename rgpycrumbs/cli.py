@@ -436,5 +436,37 @@ for _group in _valid_groups:
     main.add_command(_group_cmd)
 
 
+@main.command("config")
+@click.argument("action", default="show", type=click.Choice(["show"]))
+def config_cmd(action: str) -> None:
+    """Show merged suite config (rgpkgs.toml + ~/.config/rgpkgs/…)."""
+    from rgpycrumbs.config import (
+        load_config,
+        resolve_auto_deps_default,
+        resolve_force_uv,
+        resolve_lock_path_layered,
+        user_config_path,
+    )
+
+    if action != "show":
+        return
+    try:
+        cfg = load_config()
+    except (FileNotFoundError, ValueError, ImportError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        raise SystemExit(1) from exc
+
+    lock = resolve_lock_path_layered(config=cfg)
+    click.echo(f"user_config:     {user_config_path()}")
+    click.echo(f"sources:         {', '.join(str(p) for p in cfg.sources) or '(none)'}")
+    click.echo(f"lock_path:       {lock or '(none)'}")
+    click.echo(f"force_uv:        {resolve_force_uv(is_dev=False, config=cfg)}")
+    click.echo(f"auto_deps_def:   {resolve_auto_deps_default(config=cfg)}")
+    pins = cfg.merged_package_pins_normalized()
+    click.echo(f"package_pins:    {pins or '{}'}")
+    if cfg.tool_tables:
+        click.echo(f"tool_tables:     {list(cfg.tool_tables)}")
+
+
 if __name__ == "__main__":
     main()
