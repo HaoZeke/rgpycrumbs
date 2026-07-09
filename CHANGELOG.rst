@@ -1,3 +1,13 @@
+rgpycrumbs 1.9.18 (2026-07-09)
+==============================
+
+Added
+-----
+
+- Stable public suite surface ``rgpycrumbs.api`` (config, locks, ensure_import)
+  for consumers (chemparseplot, pychum, wailord). Documented in
+  ``docs/orgmode/explanation/public_api.org``.
+
 rgpycrumbs 1.9.17 (2026-07-09)
 ==============================
 
