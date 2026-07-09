@@ -29,16 +29,32 @@ from rgpycrumbs.api import (
 
 CLI debug: ~rgpycrumbs config show~
 
-* chemparseplot (library)
+* chemparseplot (~chemparseplot.api~)
 
-Bare install; extras transitional.
+Bare install; extras transitional. Prefer ~chemparseplot.api~ for new consumers.
+
+** Representative library path: parse → typed result
 
 #+BEGIN_SRC python
-from chemparseplot.units import convert_energy_magnitude, normalize_energy_unit
-# parse / plot submodules as needed:
-# from chemparseplot.parse import eon, orca
-# from chemparseplot.plot import neb  # needs plot stack
+from chemparseplot.api import extract_orca_geomscan_energy
+
+dist_bohr, energy_Eh = extract_orca_geomscan_energy(orca_out_text, "Actual Energy")
+# pint Quantities: distance (bohr), energy (hartree); non-empty on real scan output
+assert dist_bohr.size > 0
+assert str(energy_Eh.units) == "hartree"
 #+END_SRC
+
+Also re-exported:
+
+| Symbol | Role |
+|--------+------|
+| ~extract_orca_geomscan_energy~ | ORCA geomscan surface → ~(Q_ bohr, Q_ hartree)~ |
+| ~convert_energy_magnitude~ | eV ↔ kcal/mol ↔ kJ/mol |
+| ~normalize_energy_unit~ | Alias normalization |
+| ~suite_pins~ | Shared rgpkgs package pins via hub |
+
+Submodules (~chemparseplot.parse~, ~chemparseplot.plot~) remain available for
+advanced use; plot stacks may need optional deps until fully on-demand.
 
 * Config files (suite-wide)
 
