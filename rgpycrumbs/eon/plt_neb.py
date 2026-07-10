@@ -410,9 +410,13 @@ NEB_LANDSCAPE_STRIP_MAX_COLS = 6
 )
 @click.option(
     "--spline-method",
-    type=click.Choice(["hermite", "spline"]),
+    type=click.Choice(["hermite", "spline", "none"]),
     default="hermite",
-    help="Spline interpolation method.",
+    help=(
+        "Profile interpolant: hermite (uses -f_para as dE/drc; path RC only), "
+        "spline (cubic through energies), none (markers + straight segments). "
+        "Image-index RC defaults to none (Hermite is meaningless there)."
+    ),
 )
 # --- Inset Position Options ---
 @click.option(
@@ -672,6 +676,17 @@ def main(
     arrow_head_width = settings.get("arrow_head_width", 0.3)
     arrow_tail_width = settings.get("arrow_tail_width", 0.1)
     spline_method = settings["spline_method"]
+    # Hermite uses -f_para as dE/d(rc). With image index that derivative is
+    # not dE/dindex, so the interpolant overshoots and looks jerky. Default
+    # to piecewise-linear markers for index profiles unless the user forced
+    # another method explicitly via config/CLI after this override...
+    # If hermite (default) + index → none. Explicit spline|none left alone.
+    if rc_mode == "index" and spline_method == "hermite":
+        log.info(
+            "rc-mode=index: switching spline-method hermite → none "
+            "(force-based Hermite is meaningless on image index)"
+        )
+        spline_method = "none"
     draw_reactant = settings.get("draw_reactant", (15, 60, 0.1))
     draw_saddle = settings.get("draw_saddle", (15, 60, 0.1))
     draw_product = settings.get("draw_product", (15, 60, 0.1))
@@ -1549,9 +1564,14 @@ def main(
             )
 
         # Profile Labels
-        final_xlabel = xlabel or (
-            r"RMSD ($\AA$)" if rc_mode == "rmsd" else r"Reaction Coordinate ($\AA$)"
-        )
+        if xlabel:
+            final_xlabel = xlabel
+        elif rc_mode == "rmsd":
+            final_xlabel = r"RMSD ($\AA$)"
+        elif rc_mode == "index":
+            final_xlabel = "Image index"
+        else:
+            final_xlabel = r"Reaction Coordinate ($\AA$)"
         final_ylabel = ylabel or default_neb_ylabel(plot_mode, energy_unit)
         final_title = title
 
