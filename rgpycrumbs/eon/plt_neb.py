@@ -161,9 +161,12 @@ DEFAULT_INPUT_PATTERN = "neb_*.dat"
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 IRA_KMAX_DEFAULT = 14.0
 NEB_LANDSCAPE_STRIP_ZOOM_MULT = 3.15
-NEB_PROFILE_STRIP_ZOOM_MULT = 2.95
+NEB_PROFILE_STRIP_ZOOM_MULT = 3.4
 # Landscape "all" strip: two rows of six so each molecule is larger.
 NEB_LANDSCAPE_STRIP_MAX_COLS = 6
+# Profile strip needs real inches so R/SP/P stay legible under the curve.
+NEB_PROFILE_STRIP_HEIGHT_IN = 1.95
+NEB_PROFILE_MAIN_HEIGHT_IN = 3.55
 
 
 # --- CLI ---
@@ -734,8 +737,10 @@ def main(
         # Prefer one strip row (matches plot_structure_strip single-row preference).
         n_rows = 1 if n_expected <= 16 else 2
         if plot_type == "profile":
-            calc_hspace = 0.35 if n_rows > 1 else 0.18
-            height_ratios = [1, 0.42 if n_rows == 1 else 0.55]
+            # Temporary GridSpec; profile uses content-sized layout later so the
+            # strip is re-rendered at final pixel height (not crushed by a cap).
+            calc_hspace = 0.22 if n_rows > 1 else 0.12
+            height_ratios = [1, 0.62 if n_rows == 1 else 0.75]
         else:
             # Landscape: keep strip close; avoid a tall empty canvas under the map.
             calc_hspace = 0.28 if n_rows > 1 else 0.12
@@ -754,8 +759,9 @@ def main(
     atoms_list = None
     additional_atoms_data = []
     sp_data = None
-    # Filled for projected landscape so the strip can re-render after layout.
+    # Filled so strips re-render after content-sized layout (profile + landscape).
     landscape_strip_render = None
+    profile_strip_render = None
 
     # Only attempt to load structures if specifically requested or needed for the plot type
     if con_file:
@@ -1487,7 +1493,8 @@ def main(
                     float(last_profile_y[s_idx]),
                     font_size=active_theme.font_size,
                     vline=True,
-                    annotate=True,
+                    # Strip already labels SP; skip the floating box on the curve.
+                    annotate=not has_strip,
                 )
 
         # --- Profile Additional Structures ---
@@ -1549,31 +1556,38 @@ def main(
                 seen.add(key)
                 deduped_payload.append(entry)
 
-            plot_structure_strip(
-                ax_strip,
-                deduped_payload,
-                zoom=zoom_ratio * NEB_PROFILE_STRIP_ZOOM_MULT,
-                rotation=rotation,
-                theme_color=active_theme.textcolor,
-                renderer=strip_renderer,
-                xyzrender_config=xyzrender_config,
-                col_spacing=strip_spacing,
-                show_dividers=strip_dividers,
-                perspective_tilt=perspective_tilt,
-                width_fill_fraction=0.97,
-            )
+            # Defer strip draw until content-sized layout (same as landscape).
+            profile_strip_render = {
+                "payload": deduped_payload,
+                "zoom": zoom_ratio * NEB_PROFILE_STRIP_ZOOM_MULT,
+                "rotation": rotation,
+                "theme_color": active_theme.textcolor,
+                "renderer": strip_renderer,
+                "xyzrender_config": xyzrender_config,
+                "col_spacing": strip_spacing,
+                "show_dividers": strip_dividers,
+                "perspective_tilt": perspective_tilt,
+                "width_fill_fraction": 0.72,
+            }
 
         # Profile Labels
         if xlabel:
             final_xlabel = xlabel
         elif rc_mode == "rmsd":
-            final_xlabel = r"RMSD ($\AA$)"
+            final_xlabel = r"RMSD from reactant ($\AA$)"
         elif rc_mode == "index":
             final_xlabel = "Image index"
         else:
-            final_xlabel = r"Reaction Coordinate ($\AA$)"
+            final_xlabel = r"Path length ($\AA$)"
         final_ylabel = ylabel or default_neb_ylabel(plot_mode, energy_unit)
-        final_title = title
+        if title == "NEB Path":
+            final_title = {
+                "path": "Energy against path length",
+                "index": "Energy against image index",
+                "rmsd": "Energy against reactant RMSD",
+            }.get(rc_mode, title)
+        else:
+            final_title = title
 
     # Final Aesthetics
     ax.set_xlabel(final_xlabel, weight="bold")
@@ -1729,14 +1743,69 @@ def main(
         ).set_zorder(101)
 
     if not projected_layout_done:
-        if not ax_strip:
+        if plot_type == "profile" and ax_strip is not None and profile_strip_render:
+            # Content-sized profile: main panel + dedicated strip inches so R/SP/P
+            # are large enough to read. Re-render the strip at the final pixel size
+            # (the old min(height, 0.20) cap crushed molecules after a first draw).
+            y_label_in = 0.85
+            right_in = 0.35
+            top_in = 0.55
+            bottom_in = 0.28
+            # Room for the main-axes xlabel between the curve and R/SP/P strip.
+            gap_main_strip_in = 0.58
+            main_h_in = NEB_PROFILE_MAIN_HEIGHT_IN
+            strip_h_in = NEB_PROFILE_STRIP_HEIGHT_IN
+            # Prefer the requested width when provided; grow only if too narrow.
+            fig_w = max(float(figsize[0]), 6.4)
+            fig_h = top_in + main_h_in + gap_main_strip_in + strip_h_in + bottom_in
+            fig.set_size_inches(fig_w, fig_h, forward=True)
+
+            left = y_label_in / fig_w
+            main_w_frac = max(0.55, 1.0 - (y_label_in + right_in) / fig_w)
+            main_h_frac = main_h_in / fig_h
+            strip_h_frac = strip_h_in / fig_h
+            strip_bottom = bottom_in / fig_h
+            main_bottom = (bottom_in + strip_h_in + gap_main_strip_in) / fig_h
+            ax.set_position([left, main_bottom, main_w_frac, main_h_frac])
+            ax.xaxis.labelpad = 6
+            ax_strip.set_position([left, strip_bottom, main_w_frac, strip_h_frac])
+            ax_strip.set_navigate(False)
+
+            ax_strip.clear()
+            apply_axis_theme(ax_strip, active_theme)
+            ax_strip.axis("off")
+            fig.canvas.draw()
+            plot_structure_strip(
+                ax_strip,
+                profile_strip_render["payload"],
+                zoom=profile_strip_render["zoom"],
+                rotation=profile_strip_render["rotation"],
+                theme_color=profile_strip_render["theme_color"],
+                renderer=profile_strip_render["renderer"],
+                xyzrender_config=profile_strip_render["xyzrender_config"],
+                col_spacing=profile_strip_render["col_spacing"],
+                show_dividers=profile_strip_render["show_dividers"],
+                perspective_tilt=profile_strip_render["perspective_tilt"],
+                width_fill_fraction=profile_strip_render["width_fill_fraction"],
+            )
+            ax_strip.set_position([left, strip_bottom, main_w_frac, strip_h_frac])
+            projected_layout_done = True
+            log.info(
+                "Profile content layout: main=%.2f in, strip=%.2f in, figsize=(%.2f, %.2f)",
+                main_h_in,
+                strip_h_in,
+                fig_w,
+                fig_h,
+            )
+        elif not ax_strip:
             plt.tight_layout(pad=0.5)
         elif ax_strip:
+            # Fallback for non-profile strips without a deferred payload.
             fig.canvas.draw()
             pos_main = ax.get_position()
             pos_strip = ax_strip.get_position()
-            gap = 0.025
-            strip_h = min(pos_strip.height, 0.20)
+            gap = 0.04
+            strip_h = max(pos_strip.height, 0.28)
             strip_y = max(0.02, pos_main.y0 - gap - strip_h)
             ax_strip.set_position(
                 [pos_main.x0, strip_y, pos_main.width, strip_h]
@@ -1748,8 +1817,7 @@ def main(
                     artist.set_clip_on(True)
 
     if output_file:
-        # Projected landscape already has a content-sized figure; skip a loose
-        # tight crop that can re-introduce empty canvas from stale artists.
+        # Content-sized layouts already set figure inches; tight crop is still fine.
         if projected_layout_done:
             fig.canvas.draw()
             fig.savefig(
