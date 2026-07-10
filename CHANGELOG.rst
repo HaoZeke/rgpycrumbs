@@ -1,3 +1,12 @@
+rgpycrumbs 1.9.20 (2026-07-10)
+==============================
+
+Fixed
+-----
+
+- Profile panels with crit_points use a content-sized structure strip under the axes (re-rendered after layout) instead of crushed insets on the energy curve. (plt-neb-profile-strip)
+
+
 rgpycrumbs 1.9.19 (2026-07-09)
 ==============================
 
