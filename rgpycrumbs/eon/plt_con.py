@@ -80,12 +80,20 @@ log = logging.getLogger("rich")
 def main(con_file, output, energy_unit, absolute, no_forces, dpi, title):
     """Plot energy (and force) profiles for a general CON trajectory."""
     traj = load_con_trajectory(con_file)
+    e = traj.energies
+    n_e = int(sum(1 for v in e if v == v))  # NaN-safe
+    has_f = (
+        traj.table is not None
+        and not traj.table.is_empty()
+        and "fmax" in traj.table.columns
+        and traj.table["fmax"].null_count() < traj.table.height
+    )
     log.info(
         "Loaded %s: %d frames, energy finite=%d, forces=%s",
         con_file.name,
         traj.n_frames,
-        int(sum(1 for e in traj.energies if e == e)),  # NaN-safe count
-        "yes" if (traj.table is not None and "fmax" in traj.table.columns) else "no",
+        n_e,
+        "yes" if has_f else "no",
     )
     fig = plot_con_overview(
         traj,
