@@ -162,8 +162,6 @@ def _coerce_value(key: str, value: Any) -> Any:
         return (value,)
     if key == "label" and isinstance(value, list):
         return tuple(value)
-    if key == "job_dir" and isinstance(value, list):
-        return tuple(Path(item) for item in value)
     return value
 
 
@@ -257,17 +255,14 @@ def merge_plot_settings(
     if "job_dir" in settings and settings["job_dir"] is not None:
         jd = settings["job_dir"]
         if isinstance(jd, (str, Path)):
-            settings["job_dir"] = (Path(jd),)
-        elif isinstance(jd, list):
-            settings["job_dir"] = tuple(Path(p) for p in jd)
-        elif isinstance(jd, tuple):
-            settings["job_dir"] = tuple(Path(p) for p in jd)
+            jd = [jd]
+        settings["job_dir"] = tuple(Path(p) for p in jd)
 
     if "label" in settings and settings["label"] is not None:
         lab = settings["label"]
         if isinstance(lab, str):
-            settings["label"] = (lab,)
-        elif isinstance(lab, list):
+            lab = [lab]
+        if isinstance(lab, (list, tuple)):
             settings["label"] = tuple(lab)
 
     return settings
@@ -305,6 +300,35 @@ def resolve_from_click(
         cli_overrides=overrides,
         passthrough=params,
     )
+
+
+
+def surface_fit_config(settings: dict[str, Any]):
+    """Build chemparseplot ``SurfaceFitConfig`` from a resolved settings dict.
+
+    Single place that maps TOML / CLI ``auto_thin`` and ``max_surface_points``
+    onto the library plot type. Falls back to a tiny namespace if chemparseplot
+    is not installed (CLI pure-config tests).
+    """
+    auto_thin = bool(settings.get("auto_thin", SHARED_DEFAULTS["auto_thin"]))
+    max_surface_points = int(
+        settings.get("max_surface_points", SHARED_DEFAULTS["max_surface_points"])
+    )
+    try:
+        from chemparseplot.plot.neb import SurfaceFitConfig
+
+        return SurfaceFitConfig(
+            auto_thin=auto_thin,
+            max_surface_points=max_surface_points,
+        )
+    except ImportError:  # pragma: no cover
+        from types import SimpleNamespace
+
+        return SimpleNamespace(
+            auto_thin=auto_thin,
+            max_surface_points=max_surface_points,
+        )
+
 
 
 MINIMAL_CONFIG_EXAMPLE = """\

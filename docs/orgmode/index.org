@@ -37,6 +37,7 @@ digraph G {
     rgpycrumbs [label="rgpycrumbs\n(Core Utilities & Dispatcher)", fillcolor="#fff9c4"];
     pychum [label="pychum\n(Input Generation)", fillcolor="#e1f5fe"];
     chemparseplot [label="chemparseplot\n(Parsers & Plotting)", fillcolor="#e1f5fe"];
+    readcon [label="readcon-core\n(CON / convel I/O)", fillcolor="#e8f5e9", URL="https://github.com/lode-org/readcon-core"];
 
     eon [label="eOn", fillcolor="#f5f5f5"];
     orca [label="ORCA", fillcolor="#f5f5f5"];
@@ -47,12 +48,15 @@ digraph G {
 
     chemparseplot -> rgpycrumbs [label="imports from"];
     pychum -> rgpycrumbs [label="imports from"];
+    chemparseplot -> readcon [label="CON frames", color="#2e7d32"];
+    rgpycrumbs -> readcon [label="eOn movies", color="#2e7d32", style=dashed];
 
     pychum -> eon [label="generates input for", style=dashed];
     pychum -> orca [label="generates input for", style=dashed];
 
     chemparseplot -> eon [label="parses output from", style=dashed];
     chemparseplot -> orca [label="parses output from", style=dashed];
+    eon -> readcon [label="writes CON", style=dashed];
 
     rgpycrumbs -> eon [label="manages / visualizes", color="#4caf50"];
 }

@@ -169,6 +169,7 @@ class TestEnsureImport:
     def test_uv_install_triggered(self, monkeypatch, tmp_path):
         """With RGPYCRUMBS_AUTO_DEPS=1, triggers uv install."""
         monkeypatch.setenv("RGPYCRUMBS_AUTO_DEPS", "1")
+        monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
 
         cache_dir = tmp_path / "rgpycrumbs" / "deps"
@@ -214,6 +215,7 @@ class TestEnsureImport:
     def test_no_auto_deps_raises(self, mock_import, monkeypatch):
         """Without RGPYCRUMBS_AUTO_DEPS, raises ImportError with message."""
         monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
         monkeypatch.setattr(sys, "path", ["/local/lib"])
         mock_import.side_effect = ImportError("nope")
@@ -221,10 +223,46 @@ class TestEnsureImport:
         with pytest.raises(ImportError, match="pip install"):
             ensure_import("jax")
 
+    def test_rgpkgs_auto_deps_triggers_uv_install(self, monkeypatch, tmp_path):
+        """Ecosystem RGPKGS_AUTO_DEPS=1 alone enables auto-install (no legacy env)."""
+        monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
+        monkeypatch.setenv("RGPKGS_AUTO_DEPS", "1")
+
+        cache_dir = tmp_path / "rgpycrumbs" / "deps"
+        monkeypatch.setattr("rgpycrumbs._aux._get_dep_cache_dir", lambda: cache_dir)
+
+        original_import = importlib.import_module
+        uv_called_with = []
+        fake_mod = types.ModuleType("scipy")
+        installed = False
+
+        def mock_import(name):
+            if name == "scipy" and not installed:
+                raise ImportError("not installed")
+            if name == "scipy" and installed:
+                return fake_mod
+            return original_import(name)
+
+        def uv_install_and_toggle(spec, target):
+            nonlocal installed
+            uv_called_with.append((spec, target))
+            target.mkdir(parents=True, exist_ok=True)
+            installed = True
+
+        monkeypatch.setattr("rgpycrumbs._aux._uv_install", uv_install_and_toggle)
+        monkeypatch.setattr(importlib, "import_module", mock_import)
+
+        result = ensure_import("scipy")
+        assert result is fake_mod
+        assert len(uv_called_with) == 1
+        assert "scipy" in uv_called_with[0][0]
+
     @patch("importlib.import_module")
     def test_unknown_module_message(self, mock_import, monkeypatch):
         """Unknown modules get a conda/pixi suggestion."""
         monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
         monkeypatch.setattr(sys, "path", ["/local/lib"])
         mock_import.side_effect = ImportError("nope")
@@ -275,6 +313,7 @@ class TestLazyModule:
 class TestWarnOnDirectScriptImport:
     def test_warns_when_imported_without_dispatch_env(self, monkeypatch):
         monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", raising=False)
 
@@ -285,6 +324,7 @@ class TestWarnOnDirectScriptImport:
 
     def test_no_warning_for_main_execution(self, monkeypatch):
         monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
         monkeypatch.delenv("RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING", raising=False)
 

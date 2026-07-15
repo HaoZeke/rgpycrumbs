@@ -649,8 +649,11 @@ def main(
     show_pts = settings["show_pts"]
     plot_mode = settings["plot_mode"]
     surface_type = settings["surface_type"]
-    auto_thin = bool(settings.get("auto_thin", False))
-    max_surface_points = int(settings.get("max_surface_points", 64))
+    from rgpycrumbs.eon.plot_config import surface_fit_config
+
+    fit_cfg = surface_fit_config(settings)
+    auto_thin = fit_cfg.auto_thin
+    max_surface_points = fit_cfg.max_surface_points
     n_inducing = settings.get("n_inducing")
     output_file = settings.get("output_file")
     start = settings.get("start")
@@ -935,6 +938,7 @@ def main(
                 basis=global_basis,
                 auto_thin=auto_thin,
                 max_surface_points=max_surface_points,
+                surface_fit=fit_cfg,
             )
 
         # Path Overlay (Final Step)

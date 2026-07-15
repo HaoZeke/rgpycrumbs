@@ -116,6 +116,12 @@ html_theme_options = {
                     "summary": "Input file generation for ORCA and NWChem",
                     "external": True,
                 },
+                {
+                    "title": "readcon-core",
+                    "url": "https://github.com/lode-org/readcon-core",
+                    "summary": "CON/convel I/O (Rust core; PyPI: readcon)",
+                    "external": True,
+                },
             ],
         },
         {
