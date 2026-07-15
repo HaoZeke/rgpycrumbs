@@ -1,18 +1,25 @@
-rgpycrumbs 1.9.21 (2026-07-15)
+rgpycrumbs 1.9.22 (2026-07-15)
 ==============================
 
-Added
------
+Changed
+-------
 
-- ``plt-min --auto-thin`` / ``--max-surface-points`` (default off) forward to
-  chemparseplot ``auto_thin`` for dense min movies. Requires
-  ``chemparseplot>=1.9.9``.
+- Surface-fit knobs ``auto_thin`` / ``max_surface_points`` are **TOML-only**
+  (``[shared]`` or ``[min]`` / ``[neb]`` via ``--config``), not CLI flags.
+  Defaults remain off / 64. Example in ``eon/examples/plot_config.example.toml``.
+- ``plt-neb`` and ``plt-min`` forward those keys to chemparseplot>=1.9.10
+  ``SurfaceFitConfig`` / ``plot_landscape_surface``.
+
+rgpycrumbs 1.9.21 (2026-07-15)
+==============================
 
 Changed
 -------
 
 - Floor ``chemparseplot[neb,plot]`` to ``>=1.9.9`` in PEP 723 scripts and
   ``ensure_import`` pins.
+- Plot TOML keys for surface fit (defaults off); see 1.9.22 for TOML-only
+  policy.
 
 rgpycrumbs 1.9.20 (2026-07-10)
 ==============================

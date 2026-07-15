@@ -311,6 +311,9 @@ MINIMAL_CONFIG_EXAMPLE = """\
 # Minimal rgpkgs eOn plot config (TOML)
 # Use: rgpycrumbs eon plt-neb --config plot.toml
 #      rgpycrumbs eon plt-min --config plot.toml
+#
+# Prefer this file for surface-fit knobs instead of growing CLI flags.
+# auto_thin defaults to false (opt-in); max_surface_points caps the GP fit set.
 
 [shared]
 energy_unit = "eV"
@@ -320,6 +323,9 @@ figsize = [5.37, 5.37]
 strip_renderer = "xyzrender"
 xyzrender_config = "paton"
 ira_kmax = 14.0
+# Surface fit (chemparseplot plot_landscape_surface / single-ended landscapes)
+auto_thin = false
+max_surface_points = 64
 
 [neb]
 con_file = "neb.con"
@@ -327,12 +333,17 @@ plot_type = "landscape"
 output_file = "neb_landscape.pdf"
 title = "NEB path"
 plot_structures = "crit_points"
+surface_type = "grad_imq"
 
 [min]
 job_dir = ["minimization_run"]
-plot_type = "profile"
-output = "min_profile.pdf"
+plot_type = "landscape"
+output = "min_landscape.pdf"
 prefix = "minimization"
+surface_type = "grad_imq"
+# Opt in for dense eOn write_movies force-eval clouds:
+# auto_thin = true
+# max_surface_points = 64
 
 [saddle]
 job_dir = ["saddle_run"]

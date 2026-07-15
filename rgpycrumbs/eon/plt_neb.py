@@ -37,7 +37,7 @@ https://realpython.com/python-script-structure/
 #   "ase",
 #   "polars",
 #   "h5py",
-#   "chemparseplot[neb,plot]>=1.9.9,<2",
+#   "chemparseplot[neb,plot]>=1.9.10,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
 #   "rgpycrumbs>=1.9.13",
@@ -649,6 +649,8 @@ def main(
     show_pts = settings["show_pts"]
     plot_mode = settings["plot_mode"]
     surface_type = settings["surface_type"]
+    auto_thin = bool(settings.get("auto_thin", False))
+    max_surface_points = int(settings.get("max_surface_points", 64))
     n_inducing = settings.get("n_inducing")
     output_file = settings.get("output_file")
     start = settings.get("start")
@@ -931,6 +933,8 @@ def main(
                 xlim=vp_xlim,
                 ylim=vp_ylim,
                 basis=global_basis,
+                auto_thin=auto_thin,
+                max_surface_points=max_surface_points,
             )
 
         # Path Overlay (Final Step)

@@ -127,7 +127,7 @@ class TestPinApply:
         pins = {"jax": "0.4.31", "scipy": "1.14.0"}
         assert apply_pin_to_spec("jax>=0.4", pins) == "jax==0.4.31"
         assert package_name_from_spec("scipy>=1.11") == "scipy"
-        assert package_name_from_spec("chemparseplot[neb,plot]>=1.9.9,<2") == (
+        assert package_name_from_spec("chemparseplot[neb,plot]>=1.9.10,<2") == (
             "chemparseplot"
         )
         assert apply_pin_to_spec("scipy>=1.11", pins) == "scipy==1.14.0"

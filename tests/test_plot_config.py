@@ -213,3 +213,39 @@ def test_cli_help_mentions_config():
         assert "add_config_option" in src
         assert "resolve_from_click" in src
         assert "@click.pass_context" in src or "pass_context" in src
+
+
+def test_surface_fit_keys_from_toml_default_off(tmp_path: Path):
+    path = tmp_path / "plot.toml"
+    path.write_text(
+        """
+[shared]
+auto_thin = false
+max_surface_points = 64
+
+[min]
+job_dir = ["run"]
+plot_type = "landscape"
+surface_type = "grad_imq"
+"""
+    )
+    settings = merge_plot_settings("min", config_path=path)
+    assert settings["auto_thin"] is False
+    assert settings["max_surface_points"] == 64
+    assert settings["surface_type"] == "grad_imq"
+
+
+def test_surface_fit_keys_opt_in_via_min_section(tmp_path: Path):
+    path = tmp_path / "plot.toml"
+    path.write_text(
+        """
+[min]
+job_dir = ["run"]
+plot_type = "landscape"
+auto_thin = true
+max_surface_points = 48
+"""
+    )
+    settings = merge_plot_settings("min", config_path=path)
+    assert settings["auto_thin"] is True
+    assert settings["max_surface_points"] == 48

@@ -24,7 +24,7 @@ valley projection. Supports:
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot[neb,plot]>=1.9.9,<2",
+#   "chemparseplot[neb,plot]>=1.9.10,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
 #   "rgpycrumbs>=1.9.13",
@@ -117,21 +117,8 @@ IRA_KMAX_DEFAULT = 14.0
     "--surface-type",
     type=click.Choice(["grad_matern", "grad_imq", "rbf"]),
     default="grad_matern",
-    help="Surface fitting method for landscape plot.",
-)
-@click.option(
-    "--auto-thin/--no-auto-thin",
-    is_flag=True,
-    default=False,
-    help="Subsample dense force-eval movies for the GP surface fit only "
-    "(first/last + evenly spaced; default off). Requires chemparseplot>=1.9.9.",
-)
-@click.option(
-    "--max-surface-points",
-    type=int,
-    default=64,
-    show_default=True,
-    help="Max fit observations when --auto-thin is enabled.",
+    help="Surface fitting method for landscape plot. Dense-fit knobs "
+    "(auto_thin, max_surface_points) are set only via --config TOML, not CLI.",
 )
 @click.option(
     "--ira-kmax",
@@ -203,8 +190,6 @@ def main(  # noqa: PLR0913
     plot_type,
     project_path,
     surface_type,
-    auto_thin,
-    max_surface_points,
     ira_kmax,
     energy_unit,
     energy_cap,
@@ -232,8 +217,6 @@ def main(  # noqa: PLR0913
         plot_type=plot_type,
         project_path=project_path,
         surface_type=surface_type,
-        auto_thin=auto_thin,
-        max_surface_points=max_surface_points,
         ira_kmax=ira_kmax,
         energy_unit=energy_unit,
         energy_cap=energy_cap,
@@ -422,8 +405,11 @@ def _plot_landscape(
         strip_renderer=strip_renderer,
         xyzrender_config=xyzrender_config,
         strip_spacing=max(strip_spacing, 2.2),
-        auto_thin=auto_thin,
-        max_surface_points=max_surface_points,
+        # TOML plot config keys (not CLI flags): auto_thin, max_surface_points
+        surface_fit={
+            "auto_thin": auto_thin,
+            "max_surface_points": max_surface_points,
+        },
         strip_zoom=strip_zoom,
         strip_dividers=strip_dividers,
         rotation=rotation,
