@@ -90,3 +90,24 @@ rgpycrumbs chemgp batch -c config.toml -j 2
 - [[file:faq.org][FAQ]] - Common questions
 - [[file:../reference/glossary.org][Glossary]] - Term definitions
 - [[https://github.com/HaoZeke/rgpycrumbs/issues][GitHub Issues]] - Report bugs
+
+** "Surface prediction produced no finite values for contourf" (plt-min / plt-neb)
+
+*Cause:* Gradient surface models (especially ~grad_imq~) can return a non-finite
+grid when the observation cloud is very dense (e.g. eOn ~write_movies~ dumps
+every force evaluation during LBFGS).
+
+*Solution:* Prefer TOML, not new CLI flags:
+
+#+begin_src toml
+[shared]
+auto_thin = true
+max_surface_points = 64
+#+end_src
+
+#+begin_src bash
+rgpycrumbs eon plt-min --config plot.toml --plot-type landscape
+#+end_src
+
+Default remains ~auto_thin = false~. Requires chemparseplot ≥ 1.9.10.
+See [[file:../tools/eon/plot_config.org][eOn plot TOML config]].

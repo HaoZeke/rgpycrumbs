@@ -98,6 +98,33 @@ energy valley from the initial displaced geometry toward the minimum.
 Large lateral deviations indicate the optimizer is exploring
 off-pathway configurations.
 
+** Dense movies and TOML surface fit
+
+eOn ~write_movies~ can record every force evaluation, so LBFGS paths may
+exceed ~100 frames. GradientIMQ surfaces can then raise a non-finite
+contourf error. Prefer a plot TOML over more CLI flags:
+
+#+begin_src toml
+# plot.toml
+[shared]
+auto_thin = true
+max_surface_points = 64
+
+[min]
+job_dir = ["min_job"]
+plot_type = "landscape"
+surface_type = "grad_imq"
+output = "min_landscape.pdf"
+#+end_src
+
+#+begin_src shell
+rgpycrumbs eon plt-min --config plot.toml
+#+end_src
+
+~auto_thin~ defaults to *false* (opt-in). When enabled, chemparseplot
+subsamples the GP fit set only; the path scatter still shows the full
+trajectory. See [[file:../tools/eon/plot_config.org][eOn plot TOML config]].
+
 * Step 3: Convergence Panel
 
 The convergence panel monitors the force norm and step size to diagnose
@@ -160,8 +187,8 @@ rgpycrumbs eon plt-min \
 
 * Summary
 
-| Feature | Flag | Notes |
-|---------+------+-------|
+| Feature | Flag / TOML | Notes |
+|---------+-------------+-------|
 | Energy profile | =--plot-type profile= | Energy vs iteration |
 | 2D landscape | =--plot-type landscape= | GP surface fit |
 | Convergence | =--plot-type convergence= | Force + step size |
@@ -169,6 +196,8 @@ rgpycrumbs eon plt-min \
 | Structure strip | =--plot-structures endpoints= | Init and Min below |
 | Custom prefix | =--prefix qm_min= | For non-default file names |
 | Projection toggle | =--project-path / --no-project-path= | Default: on |
+| Dense-fit thin | TOML =auto_thin= | Default off; not a CLI flag |
+| Plot suite config | =--config plot.toml= | Preferred for many options |
 
 * See Also
 
@@ -176,3 +205,4 @@ rgpycrumbs eon plt-min \
 - [[file:neb-visualization.org][NEB Visualization Tutorial]]
 - [[file:saddle-search-visualization.org][Saddle Search Visualization Tutorial]]
 - [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]
+- [[file:../tools/eon/plot_config.org][eOn plot TOML config]]

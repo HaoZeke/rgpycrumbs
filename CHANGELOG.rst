@@ -1,3 +1,14 @@
+rgpycrumbs 1.9.23 (2026-07-15)
+==============================
+
+Documentation
+-------------
+
+- Full orgmode pass: new ``tools/eon/plot_config.org``; ``plt-min`` /
+  ``plt-neb`` / minimization tutorial / FAQ / troubleshooting / glossary
+  document TOML-only ``auto_thin`` (default off) and ``--config`` workflow.
+- ``--config`` help text lists surface-fit keys and min/neb examples.
+
 rgpycrumbs 1.9.22 (2026-07-15)
 ==============================
 

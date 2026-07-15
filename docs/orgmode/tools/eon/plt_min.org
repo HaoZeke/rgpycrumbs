@@ -14,6 +14,48 @@ Requires eOn output with ~write_movies=true~ and a concatenated
 canonical structured source; ~minimization.dat~ is retained as a compatibility
 and export layer when present.
 
+** Prefer TOML for dense option sets
+
+Long option lists belong in a plot config file (~--config plot.toml~), not
+ever-growing CLI flags. Shared style, strip rendering, and *surface-fit*
+knobs live under ~[shared]~; job paths and plot type under ~[min]~. Explicit
+CLI flags still override the file for one-off runs.
+
+Surface-fit keys (~auto_thin~, ~max_surface_points~) are *TOML-only*
+(defaults: ~auto_thin = false~, ~max_surface_points = 64~). They forward to
+chemparseplot ~SurfaceFitConfig~ / ~plot_landscape_surface~ (requires
+chemparseplot ≥ 1.9.10).
+
+Example package path: ~rgpycrumbs/eon/examples/plot_config.example.toml~.
+
+#+BEGIN_SRC toml
+# plot.toml — dense min movies (eOn write_movies force-eval dumps)
+[shared]
+energy_unit = "eV"
+theme = "ruhi"
+dpi = 200
+strip_renderer = "xyzrender"
+xyzrender_config = "paton"
+ira_kmax = 14.0
+auto_thin = false
+max_surface_points = 64
+
+[min]
+job_dir = ["min_reactant"]
+plot_type = "landscape"
+prefix = "minimization"
+surface_type = "grad_imq"
+plot_structures = "endpoints"
+# Opt in when LBFGS movies are very dense (~100+ force evals):
+# auto_thin = true
+# max_surface_points = 64
+output = "min_2D.pdf"
+#+END_SRC
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-min --config plot.toml
+#+END_SRC
+
 ** Plot Types
 
 *** Energy Profile
@@ -32,6 +74,10 @@ rgpycrumbs eon plt-min --job-dir results/ --plot-type landscape
 
 Projects the minimization trajectory into (s, d) coordinates. A good optimizer produces a path with d near zero (straight line to the minimum).
 
+For dense force-eval movies that make GradientIMQ surfaces non-finite, set
+~auto_thin = true~ in the TOML config (see above) rather than adding more CLI
+flags.
+
 *** Convergence Panel
 
 #+BEGIN_SRC shell
@@ -40,15 +86,18 @@ rgpycrumbs eon plt-min --job-dir results/ --plot-type convergence
 
 Side-by-side plots of force norm and step size vs iteration.
 
-** Options
+** Options (CLI)
+
+Common one-off flags. Prefer ~--config~ for surface-fit and suite style.
 
 | Option | Default | Description |
 |--------+---------+-------------|
-| ~--job-dir~ | (required) | eOn output directory |
+| ~--config~ | (none) | TOML plot config (~[shared]~ / ~[min]~) |
+| ~--job-dir~ | (required*) | eOn output directory (*or ~[min].job_dir~ in config) |
 | ~--prefix~ | ~minimization~ | Movie file prefix |
 | ~--plot-type~ | ~profile~ | ~profile~, ~landscape~, ~convergence~ |
 | ~--project-path~ | True | Project into (s, d) coordinates |
-| ~--surface-type~ | ~grad_matern~ | Surface fitting method |
+| ~--surface-type~ | ~grad_matern~ | Surface method; dense-fit knobs only via TOML |
 | ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
 | ~--energy-unit~ | ~eV~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ |
 | ~--theme~ | ~ruhi~ | Plot theme |
@@ -59,6 +108,15 @@ Side-by-side plots of force norm and step size vs iteration.
 | ~--perspective-tilt~ | 0.0 | Small off-axis tilt to reveal occluded atoms |
 | ~-o~ | ~min_{type}.pdf~ | Output file path |
 | ~--dpi~ | 200 | Resolution |
+
+** TOML surface-fit keys (not CLI)
+
+| Key | Default | Description |
+|-----+---------+-------------|
+| ~auto_thin~ | ~false~ | Subsample dense movies for the GP *fit* only (endpoints kept; scatter/viewport stay full) |
+| ~max_surface_points~ | ~64~ | Cap on fit observations when ~auto_thin~ is true |
+
+Keys may appear under ~[shared]~ or override under ~[min]~ / ~[neb]~.
 
 ** Structure Rendering
 
@@ -89,5 +147,6 @@ lets xyzrender choose a good view, while ASE-style strings such as
 
 ** See Also
 
+- [[file:plot_config.org][eOn plot TOML config]]
 - [[file:plt_neb.org][Plotting NEB paths]] for double-ended method visualization
 - [[file:plt_saddle.org][Plotting saddle search trajectories]] for dimer visualization

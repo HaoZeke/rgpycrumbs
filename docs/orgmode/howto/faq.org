@@ -65,3 +65,24 @@ rgpycrumbs chemgp batch -c config.toml -j 8
 - [[file:install.org][Installation Guide]]
 - [[file:../reference/glossary.org][Glossary]]
 - [[file:troubleshooting.org][Troubleshooting]]
+
+** How do I set landscape surface options without more CLI flags?
+
+Use a plot TOML with ~--config~:
+
+#+begin_src toml
+[shared]
+auto_thin = true
+max_surface_points = 64
+
+[min]
+job_dir = ["min_job"]
+plot_type = "landscape"
+surface_type = "grad_imq"
+#+end_src
+
+#+begin_src bash
+rgpycrumbs eon plt-min --config plot.toml
+#+end_src
+
+~auto_thin~ defaults to false (opt-in). See [[file:../tools/eon/plot_config.org][eOn plot TOML config]].

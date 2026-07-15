@@ -12,6 +12,7 @@
    con_splitter
    generate_nwchem_input
    mlflow
+   plot_config
    plt_min
    plt_neb
    plt_saddle

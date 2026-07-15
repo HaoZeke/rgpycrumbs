@@ -1,0 +1,81 @@
+#+TITLE: eOn plot TOML config
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Declarative plot configuration
+
+~plt-neb~, ~plt-min~, and ~plt-saddle~ share a TOML plot config via
+~--config path.toml~. Prefer this over long CLI flag lists for suite and CI
+runs.
+
+** Merge order
+
+1. Built-in shared defaults
+2. Built-in per-command defaults (~neb~ / ~min~ / ~saddle~)
+3. File layers: top-level keys and ~[shared]~, then ~[neb]~ / ~[min]~ / ~[saddle]~
+4. Explicit CLI flags (Click parameter source ≠ default) win last
+
+** Example
+
+Package example: ~rgpycrumbs/eon/examples/plot_config.example.toml~.
+
+#+BEGIN_SRC toml
+[shared]
+energy_unit = "eV"
+theme = "ruhi"
+dpi = 200
+figsize = [5.37, 5.37]
+strip_renderer = "xyzrender"
+xyzrender_config = "paton"
+ira_kmax = 14.0
+# Surface fit (chemparseplot; default off)
+auto_thin = false
+max_surface_points = 64
+
+[neb]
+con_file = "neb.con"
+plot_type = "landscape"
+output_file = "neb_landscape.pdf"
+surface_type = "grad_imq"
+plot_structures = "crit_points"
+
+[min]
+job_dir = ["min_reactant"]
+plot_type = "landscape"
+prefix = "minimization"
+surface_type = "grad_imq"
+plot_structures = "endpoints"
+# Opt in for dense eOn write_movies clouds:
+# auto_thin = true
+output = "min_landscape.pdf"
+
+[saddle]
+job_dir = ["saddle_run"]
+plot_type = "profile"
+output = "saddle_profile.pdf"
+#+END_SRC
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --config plot.toml
+rgpycrumbs eon plt-min --config plot.toml
+#+END_SRC
+
+** Surface-fit keys
+
+| Key | Default | Scope | Notes |
+|-----+---------+-------+-------|
+| ~auto_thin~ | ~false~ | shared or command | TOML-only; not a CLI flag |
+| ~max_surface_points~ | ~64~ | shared or command | Used when ~auto_thin~ is true |
+| ~surface_type~ | command-dependent | shared or command | Also available as ~--surface-type~ |
+
+When ~auto_thin~ is true, chemparseplot subsamples the GP *training* cloud
+(first/last + evenly spaced intermediates) while the path scatter and viewport
+still use the full trajectory. This avoids non-finite GradientIMQ grids on
+dense force-eval movies without silently changing default behaviour.
+
+Requires ~chemparseplot>=1.9.10~ (~SurfaceFitConfig~).
+
+** See Also
+
+- [[file:plt_min.org][plt-min]]
+- [[file:plt_neb.org][plt-neb]]
+- [[file:plt_saddle.org][plt-saddle]]

@@ -35,10 +35,21 @@ To show the plot interactively without saving:
 python -m rgpycrumbs.cli eon plt-neb --plot-type profile
 #+END_SRC
 
+* Prefer TOML for suite options
+
+Use ~--config plot.toml~ for shared style, strip rendering, and surface-fit
+settings (~auto_thin~, ~max_surface_points~). Those surface-fit knobs are
+*TOML-only* (default ~auto_thin = false~). See [[file:plot_config.org][eOn plot TOML config]].
+
+#+BEGIN_SRC shell
+rgpycrumbs eon plt-neb --config plot.toml
+#+END_SRC
+
 * Key Options
 
 | Option | Default | Description |
 |--------+---------+-------------|
+| ~--config~ | (none) | TOML plot config (~[shared]~ / ~[neb]~) |
 | ~--plot-type~ | ~profile~ | ~profile~, ~landscape~, or ~evolution~ |
 | ~--surface-type~ | ~grad_matern~ | Surface fitting method for landscapes |
 | ~--plot-mode~ | ~energy~ | Plot ~energy~ or ~curvature~ |
@@ -52,6 +63,8 @@ python -m rgpycrumbs.cli eon plt-neb --plot-type profile
 | ~--mmf-peaks~ | Off | Overlay OCI-NEB/RONEB refinement samples |
 | ~--show-evolution~ | Off | Fade earlier optimization bands behind final path |
 
+Dense-fit keys (~auto_thin~, ~max_surface_points~) are *not* CLI flags; set them
+in the TOML file only.
 
 * Troubleshooting
 
@@ -97,6 +110,16 @@ python -m rgpycrumbs.cli eon plt-neb --plot-type profile
 1. Ensure you have at least 3 data points
 2. Check that force data (column 4 in .dat) is present
 3. The script falls back to raw lines if spline fails - this is expected behavior
+
+** "Surface prediction produced no finite values for contourf"
+
+*Problem:* Gradient surface fit (often ~grad_imq~) returns a non-finite grid on a
+dense observation cloud (many NEB or min force evaluations).
+
+*Solution:* In plot TOML set ~auto_thin = true~ (and optionally
+~max_surface_points = 64~) under ~[shared]~ or ~[neb]~, then re-run with
+~--config~. Default remains off so behaviour is opt-in. See
+[[file:plot_config.org][eOn plot TOML config]].
 
 * OCI-NEB/RONEB Options
 

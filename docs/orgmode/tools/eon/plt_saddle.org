@@ -83,6 +83,8 @@ rgpycrumbs eon plt-saddle \
 
 This shared renderer contract is identical to =plt-min= and =plt-neb=.
 
+Prefer ~--config plot.toml~ for surface-fit knobs (~auto_thin~, default off); see [[file:plot_config.org][eOn plot TOML config]].
+
 ** Required eOn Output Files
 
 | File | Required | Description |

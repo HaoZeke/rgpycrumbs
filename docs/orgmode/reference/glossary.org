@@ -107,3 +107,21 @@ Pint object for unit-aware calculations.
 - [[file:../howto/faq.org][FAQ]]
 - [[file:../tutorials/index.org][Tutorials]]
 - [[file:../dev/lazy_imports.org][Lazy Import Pattern]]
+
+* auto_thin
+
+Opt-in plot TOML key (default false). When true, chemparseplot evenly
+subsamples dense landscape observations for the GP surface *fit* only
+(endpoints kept). Set under ~[shared]~ or ~[min]~ / ~[neb]~; not a CLI flag.
+
+* SurfaceFitConfig
+
+chemparseplot dataclass for TOML-friendly surface-fit knobs
+(~auto_thin~, ~max_surface_points~). Built via ~from_mapping~ or kwargs;
+passed as ~surface_fit=~ to ~plot_landscape_surface~.
+
+* plot.toml
+
+Declarative eOn plot config for ~plt-neb~, ~plt-min~, and ~plt-saddle~
+(~--config~). Shared style under ~[shared]~; command inputs under
+~[neb]~ / ~[min]~ / ~[saddle]~.

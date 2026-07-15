@@ -1,3 +1,6 @@
+* 1.9.22
+Surface-fit knobs (auto_thin) are TOML-only; see tools/eon/plot_config.org.
+
 #+TITLE: Changelog
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+EMAIL: rgoswami@ieee.org

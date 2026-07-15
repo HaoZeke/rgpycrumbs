@@ -13,17 +13,26 @@ F = TypeVar("F", bound=Callable[..., object])
 RENDERER_CHOICES = ("ase", "xyzrender", "solvis", "ovito")
 
 CONFIG_HELP = (
-    "TOML plot config. Shared style/render settings live under [shared]; "
-    "command inputs under [neb], [min], or [saddle]. Explicit CLI flags override "
-    "the file. Example:\n\n"
+    "TOML plot config. Prefer this over long CLI flag lists for suite runs. "
+    "Shared style/render/surface-fit settings live under [shared]; command "
+    "inputs under [neb], [min], or [saddle]. Explicit CLI flags override the "
+    "file. Surface-fit knobs (auto_thin, max_surface_points) are TOML-only "
+    "(default auto_thin=false). Example:\n\n"
     "  [shared]\n"
     "  energy_unit = \"eV\"\n"
     "  dpi = 200\n"
-    "  strip_renderer = \"xyzrender\"\n\n"
+    "  strip_renderer = \"xyzrender\"\n"
+    "  auto_thin = false\n"
+    "  max_surface_points = 64\n\n"
     "  [neb]\n"
     "  con_file = \"neb.con\"\n"
     "  plot_type = \"landscape\"\n"
-    "  output_file = \"neb.pdf\"\n"
+    "  output_file = \"neb.pdf\"\n\n"
+    "  [min]\n"
+    "  job_dir = [\"min_reactant\"]\n"
+    "  plot_type = \"landscape\"\n"
+    "  surface_type = \"grad_imq\"\n"
+    "  auto_thin = true\n"
 )
 
 
