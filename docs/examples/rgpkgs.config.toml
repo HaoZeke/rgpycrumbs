@@ -1,4 +1,5 @@
-# Ecosystem config for the rgpkgs suite (rgpycrumbs, chemparseplot, …).
+# Ecosystem config for the rgpkgs suite (rgpycrumbs, chemparseplot, pychum, …).
+# CON/convel I/O: readcon-core (https://github.com/lode-org/readcon-core).
 #
 # Install:
 #   mkdir -p ~/.config/rgpkgs

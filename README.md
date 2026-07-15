@@ -66,6 +66,11 @@ The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`
 
 `rgpycrumbs` is the central hub of an interlinked suite of libraries.
 
+- Parse/plot: [`chemparseplot`](https://github.com/HaoZeke/chemparseplot)
+- Inputs: [`pychum`](https://github.com/HaoZeke/pychum)
+- CON/convel I/O: [`readcon-core`](https://github.com/lode-org/readcon-core) (PyPI: [`readcon`](https://pypi.org/project/readcon/))
+- Engine: [eOn](https://eondocs.org)
+
 ![img](branding/logo/ecosystem.png)
 
 

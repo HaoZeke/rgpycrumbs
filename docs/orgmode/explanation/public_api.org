@@ -63,3 +63,18 @@ advanced use; plot stacks may need optional deps until fully on-demand.
 - Env ~RGPKGS_LOCK~, ~RGPKGS_CONFIG~, ~RGPKGS_FORCE_UV~, ~RGPKGS_AUTO_DEPS~
 
 Hub has *no* runtime feature extras. Do not ~pip install "rgpycrumbs[analysis]"~.
+
+
+* CON I/O (~readcon-core~ / ~chemparseplot.parse.con~)
+
+eOn CON/convel frames use [[https://github.com/lode-org/readcon-core][readcon-core]]
+(PyPI package name ~readcon~). Prefer:
+
+#+BEGIN_SRC python
+from chemparseplot.api import load_trajectory, plot_con_overview
+
+traj = load_trajectory("movie.con")
+fig = plot_con_overview(traj, structures="endpoints")
+#+END_SRC
+
+CLI: ~rgpycrumbs eon plt-con movie.con~
