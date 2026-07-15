@@ -1,3 +1,19 @@
+rgpycrumbs 1.9.21 (2026-07-15)
+==============================
+
+Added
+-----
+
+- ``plt-min --auto-thin`` / ``--max-surface-points`` (default off) forward to
+  chemparseplot ``auto_thin`` for dense min movies. Requires
+  ``chemparseplot>=1.9.9``.
+
+Changed
+-------
+
+- Floor ``chemparseplot[neb,plot]`` to ``>=1.9.9`` in PEP 723 scripts and
+  ``ensure_import`` pins.
+
 rgpycrumbs 1.9.20 (2026-07-10)
 ==============================
 

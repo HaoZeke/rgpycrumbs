@@ -50,6 +50,8 @@ SHARED_KEYS: frozenset[str] = frozenset(
         "surface_type",
         "project_path",
         "plot_structures",
+        "auto_thin",
+        "max_surface_points",
         "verbose",
     }
 )
@@ -72,6 +74,8 @@ SHARED_DEFAULTS: dict[str, Any] = {
     "surface_type": "rbf",
     "project_path": True,
     "plot_structures": "none",
+    "auto_thin": False,
+    "max_surface_points": 64,
     "verbose": False,
 }
 
@@ -103,6 +107,8 @@ COMMAND_DEFAULTS: dict[str, dict[str, Any]] = {
         "prefix": "minimization",
         "surface_type": "grad_matern",
         "plot_structures": "none",
+        "auto_thin": False,
+        "max_surface_points": 64,
     },
     "saddle": {
         "plot_type": "profile",
