@@ -4,6 +4,22 @@
 * Surface Fitting with Kernel Methods
   The ~rgpycrumbs.surfaces~ module provides high-performance, differentiable surface models using [[https://github.com/google/jax][JAX]]. These models are designed for constructing Potential Energy Surfaces (PES) and other multidimensional functions, supporting both standard observations and gradient-enhanced data.
 
+#+begin_export rst
+.. mermaid::
+
+   flowchart LR
+     OBS[x, y, optional gradients] --> MODEL[get_surface_model]
+     MODEL --> OPT[hyperparameter fit]
+     OPT --> PRED[predict / predict_var]
+     PRED --> PLOT[chemparseplot contourf]
+
+.. note::
+
+   Callers in chemparseplot may opt into observation thinning via
+   ``SurfaceFitConfig(auto_thin=True)`` before the model is built. That step is
+   **off by default** and lives above this module.
+#+end_export
+
 ** Available Models
    A variety of kernel-based models are provided via a unified interface:
    - *TPS/RBF*: Thin Plate Splines, standard for smooth interpolation.

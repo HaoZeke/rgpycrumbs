@@ -7,6 +7,72 @@
 ~--config path.toml~. Prefer this over long CLI flag lists for suite and CI
 runs.
 
+** Architecture
+
+#+begin_export rst
+.. mermaid::
+
+   flowchart TB
+     subgraph cli["rgpycrumbs CLI"]
+       FLAG["CLI flags\n(job-dir, plot-type, …)"]
+       CFG["--config plot.toml"]
+     end
+     subgraph merge["plot_config.merge_plot_settings"]
+       DEF[Built-in defaults]
+       TOML["[shared] + [min]/[neb]"]
+       OV[CLI overrides win]
+     end
+     subgraph cpp["chemparseplot"]
+       SFC[SurfaceFitConfig]
+       PLS[plot_landscape_surface]
+     end
+     FLAG --> OV
+     CFG --> TOML
+     DEF --> merge
+     TOML --> merge
+     OV --> merge
+     merge -->|"auto_thin, max_surface_points"| SFC
+     SFC --> PLS
+     PLS --> GP[rgpycrumbs.surfaces GP]
+
+.. grid:: 2
+   :gutter: 2
+
+   .. grid-item-card:: Prefer TOML
+      :class-card: sd-shadow-sm
+
+      Long option sets (surface fit, strips, theme) live in ``plot.toml``.
+
+   .. grid-item-card:: Defaults stay safe
+      :class-card: sd-shadow-sm
+
+      ``auto_thin = false`` unless you opt in for dense force-eval movies.
+
+.. tab-set::
+
+   .. tab-item:: Dense min landscape
+
+      .. code-block:: toml
+
+         [shared]
+         auto_thin = true
+         max_surface_points = 64
+
+         [min]
+         job_dir = ["min_reactant"]
+         plot_type = "landscape"
+         surface_type = "grad_imq"
+
+   .. tab-item:: Library Python
+
+      .. code-block:: python
+
+         from chemparseplot.plot.neb import SurfaceFitConfig
+         cfg = SurfaceFitConfig(auto_thin=True, max_surface_points=64)
+
+#+end_export
+
+
 ** Merge order
 
 1. Built-in shared defaults

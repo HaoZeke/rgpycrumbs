@@ -10,6 +10,35 @@ Quickstart
 This page walks through the main features of ~rgpycrumbs~ with minimal
 examples.
 
+#+begin_export rst
+.. mermaid::
+
+   flowchart TB
+     subgraph install["Install"]
+       CORE[pip install rgpycrumbs]
+       AUTO[RGPYCRUMBS_AUTO_DEPS / uv PEP 723]
+     end
+     subgraph use["Use"]
+       SURF[surfaces GP]
+       CLI[eon plt-neb / plt-min]
+       TOML[--config plot.toml]
+     end
+     CORE --> AUTO
+     AUTO --> SURF
+     AUTO --> CLI
+     TOML --> CLI
+     CLI --> CPP[chemparseplot plot APIs]
+
+.. grid:: 2
+   :gutter: 2
+
+   .. grid-item-card:: Surfaces
+      JAX kernel models for PES-style interpolation.
+
+   .. grid-item-card:: eOn plot CLIs
+      Prefer TOML for surface-fit knobs (``auto_thin`` default off).
+#+end_export
+
 * Installation
 
 There are three installation modes depending on your needs.

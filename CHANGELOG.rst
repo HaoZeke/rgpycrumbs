@@ -1,3 +1,13 @@
+rgpycrumbs 1.9.24 (2026-07-15)
+==============================
+
+Documentation
+-------------
+
+- Sphinx: enable ``sphinx-design`` and ``sphinxcontrib-mermaid`` alongside
+  Shibuya; richer theme options (toctree collapse, maxdepth).
+- Mermaid + cards/tabs on plot config, plt-min, surfaces, and quickstart pages.
+
 rgpycrumbs 1.9.23 (2026-07-15)
 ==============================
 

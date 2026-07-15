@@ -21,6 +21,8 @@ extensions = [
     "autoapi.extension",
     "sphinxcontrib.autodoc_pydantic",
     "sphinx_sitemap",
+    "sphinx_design",  # grids, cards, tabs, dropdowns (Shibuya-friendly)
+    "sphinxcontrib.mermaid",  # architecture / data-flow diagrams
 ]
 
 templates_path = ["_templates"]
@@ -67,6 +69,7 @@ autodoc_mock_imports = [
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
 html_static_path = ["_static"]
+html_css_files = []  # sphinx-design ships its own CSS
 html_js_files = [
     ("https://antics-api.turtletech.us/antics.js", {"defer": "defer"}),
 ]
@@ -79,11 +82,18 @@ html_context = {
     "source_docs_path": "/docs/source/",
 }
 
+# Mermaid: use default CDN; diagrams authorable via ``.. mermaid::`` (from Org RST export).
+mermaid_version = "11.4.0"
+mermaid_init_js = "mermaid.initialize({startOnLoad:true, theme:'neutral'});"
+
 html_theme_options = {
     "github_url": "https://github.com/HaoZeke/rgpycrumbs",
     "accent_color": "teal",
     "dark_code": True,
     "globaltoc_expand_depth": 1,
+    "toctree_collapse": True,
+    "toctree_maxdepth": 3,
+    "toctree_titles_only": True,
     "nav_links": [
         {
             "title": "Ecosystem",

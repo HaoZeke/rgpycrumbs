@@ -16,6 +16,26 @@ and export layer when present.
 
 ** Prefer TOML for dense option sets
 
+** Pipeline
+
+#+begin_export rst
+.. mermaid::
+
+   flowchart LR
+     JOB[job-dir movie.con] --> LOAD[load_min_trajectory]
+     LOAD --> CFG{plot.toml\nauto_thin?}
+     CFG -->|false| FULL[full frames]
+     CFG -->|true| THIN[fit subsample]
+     FULL --> RENDER[render_single_ended_landscape]
+     THIN --> RENDER
+     RENDER --> PNG[min_2D.png]
+
+.. important::
+
+   Surface-fit knobs are **TOML-only**. Do not expect ``--auto-thin`` on the CLI.
+#+end_export
+
+
 Long option lists belong in a plot config file (~--config plot.toml~), not
 ever-growing CLI flags. Shared style, strip rendering, and *surface-fit*
 knobs live under ~[shared]~; job paths and plot type under ~[min]~. Explicit
