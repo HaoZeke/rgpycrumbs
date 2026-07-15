@@ -148,7 +148,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/79/4f/a6a2e2b202d7fd97eadfe90979845b8706676b41cbd3b42ba75adf329d1f/Pympler-1.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
@@ -193,6 +192,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ca/87/060293295a556e54b48aaa3e3165b2ffc3aca8494c1bd963d8775791ed2e/resvg_py-0.2.6-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d7/9e/038522f50ceb7e74f1f991bf1b699f24b0c2bbe7c390dd36ad69f4582258/json5-0.13.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
@@ -594,16 +594,18 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2c/97/840be4a99531292f8f41069bfcd0654f68296ef4089bfe828607d63ee0ff/sphobjinv-2.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2f/3a/8923a543fa2422d32be4c5311f488e4f275acde263c811e4d5d22bb544cb/sphinx_autoapi-3.8.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/30/cf/45dd359f6ca0c3762ce0490f681da242f0530c49c81050c035c016bfdd3a/sphinx_design-0.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/44/bd/cb244695f67f77b0a36200ce1670fc42a6fe2770847e870daab99cc2b177/sphinx_click-6.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/54/97/4ee9b0438e85bf0a808a89ef0be357319252ab27e1b313ae0aef7aeaa5a6/astroid-4.1.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/63/d7/97f7e3a6abb67d8080dd406fd4df842c2be0efaf712d1c899c32a075027c/platformdirs-4.9.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/df/87120e2195f08d760bc5cf8a31cfa2381a6887517aa89453b23f1ae3354f/autodoc_pydantic-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8f/64/7e0266f0c541e26df86c31d2add9be3dd9914ae83785ce0aba7cbb693667/pygments_styles-0.3.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/a9/af/2d14e79fe962119d536f66428a01c8de169b22f70e1d96ae6abfd42dfe13/shibuya-2025.12.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ce/81/9a91c0111ce1758c92516a3e44776920b579d9a7c09b2b06b642d4de3f0f/rpds_py-0.30.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/d1/39/8b54299ffa00e597d3b0b4d042241a0a0b22cb429ad007ccfb9c1745b4d1/sphinxcontrib_mermaid-1.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e1/fb/e496f16fa11fbe2dbdd0b5e306ede153dfed050aae4766fc89d500720dc7/sphinx_last_updated_by_git-0.3.8-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e4/94/3c57e8b1985e755c48972e2ecd59526d4bf0b52a1fe805bc52a8e98cb92d/sphinx_sitemap-2.9.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e7/04/7d2933821077fddc92d779eca1bed205f0fdfbd4187002df5d73129455a6/pychum-0.1.0-py3-none-any.whl
@@ -952,7 +954,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/63/d7/97f7e3a6abb67d8080dd406fd4df842c2be0efaf712d1c899c32a075027c/platformdirs-4.9.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
@@ -986,6 +987,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c6/bb/82c7dcf38070b46172a517e2334e665c5bf374a262f99a283ea454bece7c/ml_dtypes-0.5.4-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/ca/87/060293295a556e54b48aaa3e3165b2ffc3aca8494c1bd963d8775791ed2e/resvg_py-0.2.6-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d9/33/1f075bf72b0b747cb3288d011319aaf64083cf2efef8354174e3ed4540e2/ipython_pygments_lexers-1.1.1-py3-none-any.whl
@@ -1265,7 +1267,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/68/5a/199c59e0a824a3db2b89c5d2dade7ab5f9624dbf6448dc291b46d5ec94d3/wcwidth-0.6.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
@@ -1295,6 +1296,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d9/33/1f075bf72b0b747cb3288d011319aaf64083cf2efef8354174e3ed4540e2/ipython_pygments_lexers-1.1.1-py3-none-any.whl
@@ -1577,7 +1579,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
@@ -1615,6 +1616,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ca/87/060293295a556e54b48aaa3e3165b2ffc3aca8494c1bd963d8775791ed2e/resvg_py-0.2.6-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d9/33/1f075bf72b0b747cb3288d011319aaf64083cf2efef8354174e3ed4540e2/ipython_pygments_lexers-1.1.1-py3-none-any.whl
@@ -1768,7 +1770,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
@@ -1806,6 +1807,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ca/87/060293295a556e54b48aaa3e3165b2ffc3aca8494c1bd963d8775791ed2e/resvg_py-0.2.6-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d9/33/1f075bf72b0b747cb3288d011319aaf64083cf2efef8354174e3ed4540e2/ipython_pygments_lexers-1.1.1-py3-none-any.whl
@@ -1959,7 +1961,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/76/7e/bc8911719f7084f72fd545f647601ea3532363927f807d296a8c88a62c0d/charset_normalizer-3.4.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
@@ -1997,6 +1998,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ca/87/060293295a556e54b48aaa3e3165b2ffc3aca8494c1bd963d8775791ed2e/resvg_py-0.2.6-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d9/33/1f075bf72b0b747cb3288d011319aaf64083cf2efef8354174e3ed4540e2/ipython_pygments_lexers-1.1.1-py3-none-any.whl
@@ -9787,20 +9789,11 @@ packages:
   - click>=8.1
   - numpy>=1.24
   - rich>=13.0
-  - ase>=3.22 ; extra == 'all'
-  - jax[cpu]>=0.4 ; extra == 'all'
-  - readcon>=0.7.0 ; extra == 'all'
-  - scipy>=1.11 ; extra == 'all'
-  - ase>=3.22 ; extra == 'analysis'
-  - readcon>=0.7.0 ; extra == 'analysis'
-  - scipy>=1.11 ; extra == 'analysis'
-  - scipy>=1.11 ; extra == 'interpolation'
   - ruff>=0.1.6 ; extra == 'lint'
   - build>=0.10 ; extra == 'release'
   - towncrier>=24.8.0 ; extra == 'release'
   - twine>=4.0 ; extra == 'release'
   - wheel>=0.40 ; extra == 'release'
-  - jax>=0.4 ; extra == 'surfaces'
   - pytest-cov>=4.1.0 ; extra == 'test'
   - pytest-pep723>=0.1.0 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
@@ -10178,6 +10171,29 @@ packages:
   - pyyaml
   - sphinx>=7.4.0
   requires_python: '>=3.10'
+- pypi: https://files.pythonhosted.org/packages/30/cf/45dd359f6ca0c3762ce0490f681da242f0530c49c81050c035c016bfdd3a/sphinx_design-0.7.0-py3-none-any.whl
+  name: sphinx-design
+  version: 0.7.0
+  sha256: f82bf179951d58f55dca78ab3706aeafa496b741a91b1911d371441127d64282
+  requires_dist:
+  - sphinx>=7,<10
+  - pre-commit>=3,<4 ; extra == 'code-style'
+  - myst-parser>=4,<6 ; extra == 'rtd'
+  - myst-parser>=4,<6 ; extra == 'testing'
+  - pytest~=8.3 ; extra == 'testing'
+  - pytest-cov ; extra == 'testing'
+  - pytest-regressions ; extra == 'testing'
+  - defusedxml ; extra == 'testing'
+  - pytest~=8.3 ; extra == 'testing-no-myst'
+  - pytest-cov ; extra == 'testing-no-myst'
+  - pytest-regressions ; extra == 'testing-no-myst'
+  - defusedxml ; extra == 'testing-no-myst'
+  - furo~=2024.7.18 ; extra == 'theme-furo'
+  - sphinx-immaterial~=0.12.2 ; extra == 'theme-im'
+  - pydata-sphinx-theme~=0.15.2 ; extra == 'theme-pydata'
+  - sphinx-rtd-theme~=2.0 ; extra == 'theme-rtd'
+  - sphinx-book-theme~=1.1 ; extra == 'theme-sbt'
+  requires_python: '>=3.11'
 - pypi: https://files.pythonhosted.org/packages/33/34/c4f14007e42bb44f65667789d04ed93349038b3fccac6c3cad07fbdf122b/resvg_py-0.2.6-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   name: resvg-py
   version: 0.2.6
@@ -10702,41 +10718,6 @@ packages:
   requires_dist:
   - pywin32>=226 ; sys_platform == 'win32'
   requires_python: '>=3.6'
-- pypi: https://files.pythonhosted.org/packages/7a/37/10e148e75db47fc0ae98cedbca9778f394c5c85788664b0da897ddf09b2b/chemparseplot-1.7.0-py3-none-any.whl
-  name: chemparseplot
-  version: 1.7.0
-  sha256: dec32cbe4f6416338201bf903209089c314a3d6a105ef7e586ee3f3e2c027cf1
-  requires_dist:
-  - numpy>=1.26.2
-  - pint>=0.22
-  - ase>=3.22 ; extra == 'all'
-  - cmcrameri>=1.7 ; extra == 'all'
-  - h5py>=3.0 ; extra == 'all'
-  - matplotlib>=3.8.2 ; extra == 'all'
-  - polars>=0.20 ; extra == 'all'
-  - readcon>=0.7.0 ; extra == 'all'
-  - xyzrender>=0.1.2 ; extra == 'all'
-  - mdit-py-plugins>=0.3.4 ; extra == 'doc'
-  - myst-nb>=1 ; extra == 'doc'
-  - myst-parser>=2 ; extra == 'doc'
-  - sphinx-autodoc2>=0.5 ; extra == 'doc'
-  - sphinx-copybutton>=0.5.2 ; extra == 'doc'
-  - sphinx-library>=1.1.2 ; extra == 'doc'
-  - sphinx-sitemap>=2.5.1 ; extra == 'doc'
-  - sphinx-togglebutton>=0.3.2 ; extra == 'doc'
-  - sphinx>=7.2.6 ; extra == 'doc'
-  - sphinxcontrib-apidoc>=0.4 ; extra == 'doc'
-  - ruff>=0.1.6 ; extra == 'lint'
-  - ase>=3.22 ; extra == 'neb'
-  - h5py>=3.0 ; extra == 'neb'
-  - polars>=0.20 ; extra == 'neb'
-  - readcon>=0.7.0 ; extra == 'neb'
-  - cmcrameri>=1.7 ; extra == 'plot'
-  - matplotlib>=3.8.2 ; extra == 'plot'
-  - pytest-cov>=4.1.0 ; extra == 'test'
-  - pytest>=7.4.3 ; extra == 'test'
-  - xyzrender>=0.1.2 ; extra == 'xyzrender'
-  requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/7b/df/87120e2195f08d760bc5cf8a31cfa2381a6887517aa89453b23f1ae3354f/autodoc_pydantic-2.2.0-py3-none-any.whl
   name: autodoc-pydantic
   version: 2.2.0
@@ -11526,6 +11507,72 @@ packages:
   version: 0.30.0
   sha256: 47e77dc9822d3ad616c3d5759ea5631a75e5809d5a28707744ef79d7a1bcfcad
   requires_python: '>=3.10'
+- pypi: https://files.pythonhosted.org/packages/ce/9c/4a598516fba194d60753071ec8c75ee8f54896377a25b7d2231ef6ad870b/chemparseplot-1.9.12-py3-none-any.whl
+  name: chemparseplot
+  version: 1.9.12
+  sha256: cb9e889bb26cd195d40a05fe8f740a16835560c40e2f89bee3fa5521712d3d7b
+  requires_dist:
+  - numpy>=1.26.2
+  - pint>=0.22
+  - ase>=3.22 ; extra == 'all'
+  - cmcrameri>=1.7 ; extra == 'all'
+  - h5py>=3.0 ; extra == 'all'
+  - matplotlib>=3.8.2 ; extra == 'all'
+  - orca-pi>=0.1.0 ; extra == 'all'
+  - parsimonious>=0.10.0 ; extra == 'all'
+  - polars>=0.20 ; extra == 'all'
+  - readcon>=0.13.1 ; extra == 'all'
+  - xyzrender>=0.1.2 ; extra == 'all'
+  - mdit-py-plugins>=0.3.4 ; extra == 'doc'
+  - myst-nb>=1 ; extra == 'doc'
+  - myst-parser>=2 ; extra == 'doc'
+  - shibuya>=2025.12.13 ; extra == 'doc'
+  - sphinx-autodoc2>=0.5 ; extra == 'doc'
+  - sphinx-copybutton>=0.5.2 ; extra == 'doc'
+  - sphinx-design>=0.6 ; extra == 'doc'
+  - sphinx-sitemap>=2.5.1 ; extra == 'doc'
+  - sphinx-togglebutton>=0.3.2 ; extra == 'doc'
+  - sphinx>=7.2.6 ; extra == 'doc'
+  - sphinxcontrib-apidoc>=0.4 ; extra == 'doc'
+  - sphinxcontrib-mermaid>=1.0 ; extra == 'doc'
+  - parsimonious>=0.10.0 ; extra == 'grammar'
+  - ruff>=0.1.6 ; extra == 'lint'
+  - ase>=3.22 ; extra == 'neb'
+  - h5py>=3.0 ; extra == 'neb'
+  - polars>=0.20 ; extra == 'neb'
+  - readcon>=0.13.1 ; extra == 'neb'
+  - orca-pi>=0.1.0 ; extra == 'opi'
+  - cmcrameri>=1.7 ; extra == 'plot'
+  - matplotlib>=3.8.2 ; extra == 'plot'
+  - build>=0.10 ; extra == 'release'
+  - towncrier>=24.8.0 ; extra == 'release'
+  - twine>=4.0 ; extra == 'release'
+  - wheel>=0.40 ; extra == 'release'
+  - ase>=3.22 ; extra == 'test'
+  - h5py>=3.0 ; extra == 'test'
+  - matplotlib>=3.8.2 ; extra == 'test'
+  - parsimonious>=0.10.0 ; extra == 'test'
+  - polars>=0.20 ; extra == 'test'
+  - pytest-cov>=4.1.0 ; extra == 'test'
+  - pytest>=7.4.3 ; extra == 'test'
+  - readcon>=0.13.1 ; extra == 'test'
+  - rgpycrumbs ; extra == 'test'
+  - scipy>=1.11 ; extra == 'test'
+  - xyzrender>=0.1.2 ; extra == 'xyzrender'
+  requires_python: '>=3.10'
+- pypi: https://files.pythonhosted.org/packages/d1/39/8b54299ffa00e597d3b0b4d042241a0a0b22cb429ad007ccfb9c1745b4d1/sphinxcontrib_mermaid-1.2.3-py3-none-any.whl
+  name: sphinxcontrib-mermaid
+  version: 1.2.3
+  sha256: 5be782b27026bef97bfb15ccb2f7868b674a1afc0982b54cb149702cfc25aa02
+  requires_dist:
+  - sphinx
+  - pyyaml
+  - defusedxml ; extra == 'test'
+  - myst-parser ; extra == 'test'
+  - pytest ; extra == 'test'
+  - ruff ; extra == 'test'
+  - sphinx ; extra == 'test'
+  requires_python: '>=3.8'
 - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
   name: asttokens
   version: 3.0.1
