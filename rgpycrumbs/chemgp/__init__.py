@@ -25,27 +25,33 @@ warnings.warn(
     stacklevel=2,
 )
 
-from chemparseplot.parse.chemgp_hdf5 import (
-    read_h5_grid,
-    read_h5_metadata,
-    read_h5_path,
-    read_h5_points,
-    read_h5_table,
-)
-from chemparseplot.plot.chemgp import (
-    detect_clamp,
-    plot_convergence_curve,
-    plot_energy_profile,
-    plot_fps_projection,
-    plot_gp_progression,
-    plot_hyperparameter_sensitivity,
-    plot_nll_landscape,
-    plot_rff_quality,
-    plot_surface_contour,
-    plot_trust_region,
-    plot_variance_overlay,
-    save_plot,
-)
+try:
+    from chemparseplot.parse.chemgp_hdf5 import (
+        read_h5_grid,
+        read_h5_metadata,
+        read_h5_path,
+        read_h5_points,
+        read_h5_table,
+    )
+    from chemparseplot.plot.chemgp import (
+        detect_clamp,
+        plot_convergence_curve,
+        plot_energy_profile,
+        plot_fps_projection,
+        plot_gp_progression,
+        plot_hyperparameter_sensitivity,
+        plot_nll_landscape,
+        plot_rff_quality,
+        plot_surface_contour,
+        plot_trust_region,
+        plot_variance_overlay,
+        save_plot,
+    )
+except ImportError as exc:  # pragma: no cover - env without plot stack
+    raise ImportError(
+        "rgpycrumbs.chemgp requires chemparseplot[plot,neb] (and pandas). "
+        "Prefer importing chemparseplot.plot.chemgp directly."
+    ) from exc
 
 # Backward-compatible aliases for old names
 plot_convergence = plot_convergence_curve

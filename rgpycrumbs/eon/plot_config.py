@@ -162,8 +162,6 @@ def _coerce_value(key: str, value: Any) -> Any:
         return (value,)
     if key == "label" and isinstance(value, list):
         return tuple(value)
-    if key == "job_dir" and isinstance(value, list):
-        return tuple(Path(item) for item in value)
     return value
 
 
@@ -257,17 +255,14 @@ def merge_plot_settings(
     if "job_dir" in settings and settings["job_dir"] is not None:
         jd = settings["job_dir"]
         if isinstance(jd, (str, Path)):
-            settings["job_dir"] = (Path(jd),)
-        elif isinstance(jd, list):
-            settings["job_dir"] = tuple(Path(p) for p in jd)
-        elif isinstance(jd, tuple):
-            settings["job_dir"] = tuple(Path(p) for p in jd)
+            jd = [jd]
+        settings["job_dir"] = tuple(Path(p) for p in jd)
 
     if "label" in settings and settings["label"] is not None:
         lab = settings["label"]
         if isinstance(lab, str):
-            settings["label"] = (lab,)
-        elif isinstance(lab, list):
+            lab = [lab]
+        if isinstance(lab, (list, tuple)):
             settings["label"] = tuple(lab)
 
     return settings
