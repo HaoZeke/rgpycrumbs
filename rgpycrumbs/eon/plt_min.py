@@ -244,8 +244,11 @@ def main(  # noqa: PLR0913
     plot_type = settings["plot_type"]
     project_path = settings["project_path"]
     surface_type = settings["surface_type"]
-    auto_thin = bool(settings.get("auto_thin", False))
-    max_surface_points = int(settings.get("max_surface_points", 64))
+    from rgpycrumbs.eon.plot_config import surface_fit_config
+
+    fit_cfg = surface_fit_config(settings)
+    auto_thin = fit_cfg.auto_thin
+    max_surface_points = fit_cfg.max_surface_points
     ira_kmax = settings["ira_kmax"]
     energy_unit = settings["energy_unit"]
     energy_cap = settings.get("energy_cap")
@@ -405,7 +408,7 @@ def _plot_landscape(
         strip_renderer=strip_renderer,
         xyzrender_config=xyzrender_config,
         strip_spacing=max(strip_spacing, 2.2),
-        # TOML plot config keys (not CLI flags): auto_thin, max_surface_points
+        # TOML plot config keys via surface_fit_config / SurfaceFitConfig
         surface_fit={
             "auto_thin": auto_thin,
             "max_surface_points": max_surface_points,

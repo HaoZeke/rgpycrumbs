@@ -1,13 +1,29 @@
 # SPDX-FileCopyrightText: 2023-present Rohit Goswami <rog32@hi.is>
 #
 # SPDX-License-Identifier: MIT
+"""ChemGP plotting and I/O utilities (compatibility re-exports).
 
-"""ChemGP plotting and I/O utilities.
+Parsing and plotting live in **chemparseplot**. This package re-exports them
+for backward compatibility. Prefer::
 
-Parsing and plotting functions live in chemparseplot. This module
-re-exports them for backward compatibility. The CLI entry point
-is plot_gp.py (PEP 723 script dispatched by rgpycrumbs.cli).
+    from chemparseplot.plot.chemgp import plot_surface_contour
+    from chemparseplot.parse.chemgp_hdf5 import read_h5_points
+
+The CLI entry point remains ``plot_gp.py`` (PEP 723, dispatched by
+``rgpycrumbs.cli``).
 """
+
+from __future__ import annotations
+
+import warnings
+
+warnings.warn(
+    "rgpycrumbs.chemgp library re-exports are deprecated; import from "
+    "chemparseplot.plot.chemgp / chemparseplot.parse.chemgp_hdf5 instead. "
+    "The plot_gp CLI under rgpycrumbs remains supported.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from chemparseplot.parse.chemgp_hdf5 import (
     read_h5_grid,

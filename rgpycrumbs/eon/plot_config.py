@@ -307,6 +307,35 @@ def resolve_from_click(
     )
 
 
+
+def surface_fit_config(settings: dict[str, Any]):
+    """Build chemparseplot ``SurfaceFitConfig`` from a resolved settings dict.
+
+    Single place that maps TOML / CLI ``auto_thin`` and ``max_surface_points``
+    onto the library plot type. Falls back to a tiny namespace if chemparseplot
+    is not installed (CLI pure-config tests).
+    """
+    auto_thin = bool(settings.get("auto_thin", SHARED_DEFAULTS["auto_thin"]))
+    max_surface_points = int(
+        settings.get("max_surface_points", SHARED_DEFAULTS["max_surface_points"])
+    )
+    try:
+        from chemparseplot.plot.neb import SurfaceFitConfig
+
+        return SurfaceFitConfig(
+            auto_thin=auto_thin,
+            max_surface_points=max_surface_points,
+        )
+    except ImportError:  # pragma: no cover
+        from types import SimpleNamespace
+
+        return SimpleNamespace(
+            auto_thin=auto_thin,
+            max_surface_points=max_surface_points,
+        )
+
+
+
 MINIMAL_CONFIG_EXAMPLE = """\
 # Minimal rgpkgs eOn plot config (TOML)
 # Use: rgpycrumbs eon plt-neb --config plot.toml
