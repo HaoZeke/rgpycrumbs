@@ -165,8 +165,6 @@ def main(
             raise click.UsageError(
                 f"--label count ({len(labels)}) must match files ({len(trajs)})"
             )
-        import matplotlib.pyplot as plt
-
         fig, ax = plt.subplots(figsize=(5.37, 3.8), constrained_layout=True)
         plot_con_overlay(
             trajs,
