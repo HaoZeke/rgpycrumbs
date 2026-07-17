@@ -27,13 +27,14 @@ valley projection. Supports:
 #   "chemparseplot[neb,plot]>=1.9.13,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 # Optional deps (jax for landscapes) via uv PEP 723 or RGPYCRUMBS_AUTO_DEPS=1.
 
 import logging
 from pathlib import Path
+from typing import Any
 
 import click
 import matplotlib.pyplot as plt
@@ -181,62 +182,17 @@ IRA_KMAX_DEFAULT = 14.0
     help="Output resolution.",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
-def main(  # noqa: PLR0913
-    ctx,
-    config,
-    job_dir,
-    label,
-    prefix,
-    plot_type,
-    project_path,
-    surface_type,
-    ira_kmax,
-    energy_unit,
-    energy_cap,
-    energy_cap_window,
-    theme,
-    plot_structures,
-    strip_renderer,
-    xyzrender_config,
-    strip_spacing,
-    strip_zoom,
-    strip_dividers,
-    rotation,
-    perspective_tilt,
-    output,
-    dpi,
-    verbose,
-):
-    settings = resolve_from_click(
-        "min",
-        ctx,
-        config=config,
-        job_dir=job_dir,
-        label=label,
-        prefix=prefix,
-        plot_type=plot_type,
-        project_path=project_path,
-        surface_type=surface_type,
-        ira_kmax=ira_kmax,
-        energy_unit=energy_unit,
-        energy_cap=energy_cap,
-        energy_cap_window=energy_cap_window,
-        theme=theme,
-        plot_structures=plot_structures,
-        strip_renderer=strip_renderer,
-        xyzrender_config=xyzrender_config,
-        strip_spacing=strip_spacing,
-        strip_zoom=strip_zoom,
-        strip_dividers=strip_dividers,
-        rotation=rotation,
-        perspective_tilt=perspective_tilt,
-        output=output,
-        dpi=dpi,
-        verbose=verbose,
-    )
+
+def plot_min_from_settings(settings: dict[str, Any]) -> Path | None:
+    """Run the eOn min plot pipeline from a resolved settings mapping.
+
+    Prefer :func:`plot_min` for library callers. Shared by the Click CLI.
+
+    .. versionadded:: 1.10.3
+    """
     job_dir = settings.get("job_dir") or ()
     if not job_dir:
-        raise click.UsageError(
+        raise ValueError(
             "Provide --job-dir and/or set [min].job_dir in --config"
         )
     label = settings.get("label") or ()
@@ -315,6 +271,84 @@ def main(  # noqa: PLR0913
 
     log.info("Saved %s", output)
 
+    return Path(output) if output else None
+
+
+def plot_min(
+    *,
+    config: str | Path | None = None,
+    **overrides: Any,
+) -> Path | None:
+    """Library entry for eOn min plots (no Click argv).
+
+    Same pipeline as ``rgpycrumbs eon plt-min``.
+
+    .. versionadded:: 1.10.3
+    """
+    from rgpycrumbs.eon.plot_config import merge_plot_settings
+
+    settings = merge_plot_settings(
+        "min",
+        config_path=config,
+        cli_overrides=overrides or None,
+    )
+    return plot_min_from_settings(settings)
+
+
+def main(  # noqa: PLR0913
+    ctx,
+    config,
+    job_dir,
+    label,
+    prefix,
+    plot_type,
+    project_path,
+    surface_type,
+    ira_kmax,
+    energy_unit,
+    energy_cap,
+    energy_cap_window,
+    theme,
+    plot_structures,
+    strip_renderer,
+    xyzrender_config,
+    strip_spacing,
+    strip_zoom,
+    strip_dividers,
+    rotation,
+    perspective_tilt,
+    output,
+    dpi,
+    verbose,
+):
+    settings = resolve_from_click(
+        "min",
+        ctx,
+        config=config,
+        job_dir=job_dir,
+        label=label,
+        prefix=prefix,
+        plot_type=plot_type,
+        project_path=project_path,
+        surface_type=surface_type,
+        ira_kmax=ira_kmax,
+        energy_unit=energy_unit,
+        energy_cap=energy_cap,
+        energy_cap_window=energy_cap_window,
+        theme=theme,
+        plot_structures=plot_structures,
+        strip_renderer=strip_renderer,
+        xyzrender_config=xyzrender_config,
+        strip_spacing=strip_spacing,
+        strip_zoom=strip_zoom,
+        strip_dividers=strip_dividers,
+        rotation=rotation,
+        perspective_tilt=perspective_tilt,
+        output=output,
+        dpi=dpi,
+        verbose=verbose,
+    )
+    return plot_min_from_settings(settings)
 
 def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
     plot_single_ended_profile(

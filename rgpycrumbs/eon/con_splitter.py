@@ -11,7 +11,7 @@
 #   "ase",
 #   "rich",
 #   "readcon>=0.7.0",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 

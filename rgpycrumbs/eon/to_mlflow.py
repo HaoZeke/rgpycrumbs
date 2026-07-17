@@ -12,7 +12,7 @@
 #     "rich",
 #     "ase",
 #     "mlflow",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 

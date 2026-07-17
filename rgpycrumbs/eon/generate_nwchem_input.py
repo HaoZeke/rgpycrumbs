@@ -11,7 +11,7 @@
 #   "click>=8.2.1",
 #   "rich",
 #   "pychum",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 

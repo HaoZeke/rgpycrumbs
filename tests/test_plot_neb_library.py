@@ -12,6 +12,21 @@ from tests._optional_imports import has_module_spec
 pytestmark = pytest.mark.pure
 
 
+def test_plot_min_saddle_merge_settings():
+    from rgpycrumbs.eon.plot_config import merge_plot_settings
+
+    smin = merge_plot_settings(
+        "min",
+        cli_overrides={"job_dir": "minimization_run", "plot_type": "landscape"},
+    )
+    assert smin["plot_type"] == "landscape"
+    ssad = merge_plot_settings(
+        "saddle",
+        cli_overrides={"job_dir": "saddle_run", "plot_type": "profile"},
+    )
+    assert ssad["plot_type"] == "profile"
+
+
 def test_plot_neb_merge_settings():
     """Library path is merge_plot_settings + plot_neb_from_settings (no argv)."""
     from rgpycrumbs.eon.plot_config import merge_plot_settings

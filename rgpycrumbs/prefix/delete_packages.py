@@ -11,7 +11,7 @@
 #   "click==8.1.6",
 #   "requests==2.31.0",
 #   "rich==13.7.1",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 

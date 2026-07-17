@@ -1,3 +1,21 @@
+rgpycrumbs 1.10.3 (2026-07-17)
+==============================
+
+Added
+-----
+
+- Library APIs ``plot_min`` / ``plot_saddle`` (and ``*_from_settings``) alongside
+  ``plot_neb`` — same pipelines as the Click CLIs, no argv.
+
+Changed
+-------
+
+- ``seed_dimers`` writes a minimal explicit INI (eon-schema ``write_ini`` +
+  L0 validation), not a full L1 default dump.
+- NEB plot failures raise informative ``RuntimeError`` messages instead of
+  generic ``exit 1`` strings.
+- PEP 723 script headers require ``rgpycrumbs>=1.10.2``.
+
 rgpycrumbs 1.10.2 (2026-07-17)
 ==============================
 

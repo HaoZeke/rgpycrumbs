@@ -40,7 +40,7 @@ https://realpython.com/python-script-structure/
 #   "chemparseplot[neb,plot]>=1.9.13,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 #
@@ -653,15 +653,19 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             log.error(f"Error loading structures: {e}")
             # Critical failure for landscape/RMSD modes
             if plot_type == "landscape" or rc_mode == "rmsd":
-                log.critical("Cannot proceed without structures. Exiting.")
-                raise RuntimeError(f'NEB plot failed (exit 1)')
+                log.critical("Cannot proceed without structures.")
+                raise RuntimeError(
+                    "Cannot proceed without structures "
+                    f"(plot_type={plot_type!r}, rc_mode={rc_mode!r}): {e}"
+                ) from e
 
     # --- Trajectory source: load once if applicable ---
     traj_atoms_list = None
     if source == "traj":
         if not input_traj:
-            log.critical("--input-traj is required when --source traj is used.")
-            raise RuntimeError(f'NEB plot failed (exit 1)')
+            msg = "--input-traj is required when --source traj is used"
+            log.critical(msg)
+            raise RuntimeError(msg)
         traj_atoms_list = load_trajectory(str(input_traj))
 
     if plot_type == "landscape":
@@ -675,8 +679,9 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
                 atoms_list = traj_atoms_list
         elif source == "hdf5":
             if not input_h5:
-                log.critical("--input-h5 is required when --source hdf5 is used.")
-                raise RuntimeError(f'NEB plot failed (exit 1)')
+                msg = "--input-h5 is required when --source hdf5 is used"
+                log.critical(msg)
+                raise RuntimeError(msg)
             h5_str = str(input_h5)
             # Prefer history file for multi-step landscape
             try:
@@ -699,8 +704,9 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             con_paths = find_file_paths(str(input_path_pattern))
 
             if not dat_paths:
-                log.critical(f"No data files found for pattern: {input_dat_pattern}")
-                raise RuntimeError(f'NEB plot failed (exit 1)')
+                msg = f"No data files found for pattern: {input_dat_pattern}"
+                log.critical(msg)
+                raise RuntimeError(msg)
 
             # Fallback if no path files found but main file exists
             if not con_paths and con_file:
@@ -1134,8 +1140,9 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
         strip_payload = []
         if source == "hdf5":
             if not input_h5:
-                log.critical("--input-h5 is required when --source hdf5 is used.")
-                raise RuntimeError(f'NEB plot failed (exit 1)')
+                msg = "--input-h5 is required when --source hdf5 is used"
+                log.critical(msg)
+                raise RuntimeError(msg)
             h5_str = str(input_h5)
             # Use history final step if available, else result
             try:
@@ -1239,8 +1246,9 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             file_paths_to_plot = dat_paths[start:end]
 
             if not file_paths_to_plot:
-                log.error("No files found in range.")
-                raise RuntimeError(f'NEB plot failed (exit 1)')
+                msg = "No profile data files found in the requested start:end range"
+                log.error(msg)
+                raise RuntimeError(msg)
 
             # Optional: Load RMSD for X-axis
             rmsd_rc = None

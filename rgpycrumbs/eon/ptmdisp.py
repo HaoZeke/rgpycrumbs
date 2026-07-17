@@ -8,7 +8,7 @@
 #   "numpy",
 #   "ovito",
 #   "rich",
-#   "rgpycrumbs>=1.9.13",
+#   "rgpycrumbs>=1.10.2",
 # ]
 # ///
 """Identifies non-crystalline atoms using polyhedral template matching.
