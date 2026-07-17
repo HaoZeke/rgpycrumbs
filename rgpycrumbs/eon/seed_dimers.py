@@ -14,6 +14,8 @@ The initial mode prefers a matching eOn ``peak{MM}_mode.dat`` (paired by RMSD of
 otherwise it uses the normalized NEB tangent ``pos[i+1] - pos[i-1]``.
 
 .. versionadded:: 1.8.0
+.. versionchanged:: 1.9.x
+    Seed ``config.ini`` is built from eon-schema L1 models (``write_models_ini``), not a hand-maintained dict.
 """
 
 from __future__ import annotations
@@ -133,42 +135,64 @@ def _match_eon_mode(
     return mode
 
 
-def _dimer_config(settings_name: str, socket: str) -> dict[str, dict[str, object]]:
-    """eOn dimer saddle-search config, mirroring scripts/dimer_from_peak.py."""
-    return {
-        "Main": {"job": "saddle_search", "random_seed": _RANDOM_SEED},
-        "Potential": {"potential": "SocketNWChem"},
-        "SocketNWChemPot": {
-            "unix_socket_path": socket,
-            "unix_socket_mode": "true",
-            "nwchem_settings": settings_name,
-            "make_template_input": "false",
-        },
-        "Saddle Search": {
-            "min_mode_method": "dimer",
-            "displace_magnitude": 0.0,
-            "max_energy": 50.0,
-        },
-        "Dimer": {
-            "improved": "true",
-            "opt_method": "cg",
-            "remove_rotation": "false",
-            "converged_angle": 0.5,
-        },
-        "Optimizer": {
-            "opt_method": "lbfgs",
-            "max_iterations": 1000,
-            "max_move": 0.05,
-            "convergence_metric": "norm",
-            "converged_force": 0.05,
-        },
-        "LBFGS": {
-            "lbfgs_memory": 25,
-            "lbfgs_inverse_curvature": 0.01,
-            "lbfgs_auto_scale": "true",
-        },
-        "Debug": {"write_movies": "true"},
-    }
+def _dimer_config_models(settings_name: str, socket: str):
+    """L1 models + pot extra for a dimer saddle-search seed (eon-schema).
+
+    Aligns improved-dimer defaults with L2 :class:`eon_schema.api.DimerSpec`
+    (method=improved). Requires ``eon-schema>=0.2``.
+    """
+    try:
+        from eon_schema.config import (
+            DebugConfig,
+            DimerConfig,
+            LBFGSConfig,
+            MainConfig,
+            OptimizerConfig,
+            PotentialConfig,
+            SaddleSearchConfig,
+            SocketNWChemPot,
+        )
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError(
+            "seed_dimers requires eon-schema>=0.2.\n"
+            "  pip install 'rgpycrumbs[eon]'\n"
+            "  # or: pip install 'eon-schema>=0.2'"
+        ) from exc
+
+    return (
+        MainConfig(job="saddle_search", random_seed=_RANDOM_SEED),
+        PotentialConfig(potential="socket_nwchem"),
+        SocketNWChemPot(
+            unix_socket_path=socket,
+            unix_socket_mode=True,
+            nwchem_settings=settings_name,
+            make_template_input=False,
+        ),
+        SaddleSearchConfig(
+            min_mode_method="dimer",
+            displace_magnitude=0.0,
+            max_energy=50.0,
+        ),
+        DimerConfig(
+            dimer_improved=True,
+            opt_method="cg",
+            dimer_remove_rotation=False,
+            converged_angle=0.5,
+        ),
+        OptimizerConfig(
+            opt_method="lbfgs",
+            max_iterations=1000,
+            max_move=0.05,
+            convergence_metric="norm",
+            converged_force=0.05,
+        ),
+        LBFGSConfig(
+            lbfgs_memory=25,
+            lbfgs_inverse_curvature=0.01,
+            lbfgs_auto_scale=True,
+        ),
+        DebugConfig(write_movies=True),
+    )
 
 
 def find_neb_peaks(energies: np.ndarray, prominence: float) -> list[int]:
@@ -233,7 +257,7 @@ def seed_dimers_from_peaks(
     peak_indices = find_neb_peaks(energies, prominence)
     log.info("Found %d interior peak(s): %s", len(peak_indices), peak_indices)
 
-    config = _dimer_config(settings_name, socket)
+    models = _dimer_config_models(settings_name, socket)
 
     seed_dirs: list[Path] = []
     summary: list[PeakSeed] = []
@@ -260,7 +284,7 @@ def seed_dimers_from_peaks(
         disp.set_positions(peak_atoms.get_positions() + _DISPLACE_MAGNITUDE * mode)
         write_con(str(seed_dir / "displacement.con"), [ConFrame.from_ase(disp)])
 
-        _write_config(seed_dir / "config.ini", config)
+        _write_dimer_config(seed_dir / "config.ini", models)
 
         e_img = float(energies[idx])
         summary.append(
@@ -286,13 +310,8 @@ def seed_dimers_from_peaks(
     return seed_dirs, summary
 
 
-def _write_config(path: Path, config: dict[str, dict[str, object]]) -> None:
-    """Write an eOn config.ini, preserving key case and section order."""
-    import configparser
+def _write_dimer_config(path: Path, models: tuple) -> None:
+    """Write seed config.ini via eon-schema L1 models."""
+    from eon_schema.config import write_models_ini
 
-    parser = configparser.ConfigParser()
-    parser.optionxform = str
-    for section, options in config.items():
-        parser[section] = {k: str(v) for k, v in options.items()}
-    with open(path, "w") as fh:
-        parser.write(fh)
+    write_models_ini(path, *models, validate=True)

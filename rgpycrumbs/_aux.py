@@ -39,6 +39,8 @@ _DEPENDENCY_MAP: dict[str, str] = {
     "matplotlib.pyplot": "matplotlib>=3.7",
     "pandas": "pandas>=2.0",
     "polars": "polars>=1.0",
+    "eon_schema": "eon-schema>=0.2.0",
+    "eon_schema.config": "eon-schema>=0.2.0",
 }
 
 # CPU-only pip spec overrides for packages with heavy GPU backends.

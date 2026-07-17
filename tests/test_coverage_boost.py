@@ -1647,42 +1647,35 @@ class TestMlflowLogParams:
         sys.modules.pop("rgpycrumbs.eon._mlflow", None)
 
     def test_log_config_ini(self, tmp_path):
-        with patch(
-            "rgpycrumbs._aux._import_from_parent_env",
-            return_value=sys.modules["eon.config"],
-        ):
-            # Force reimport with mocks in place
-            sys.modules.pop("rgpycrumbs.eon._mlflow.log_params", None)
-            from rgpycrumbs.eon._mlflow.log_params import log_config_ini
+        pytest.importorskip("eon_schema")
+        # Force reimport with mocks in place
+        sys.modules.pop("rgpycrumbs.eon._mlflow.log_params", None)
+        from rgpycrumbs.eon._mlflow.log_params import log_config_ini
 
-            # Create a config.ini
-            config = configparser.ConfigParser()
-            config.add_section("Main")
-            config.set("Main", "method", "dimer")
-            conf_file = tmp_path / "config.ini"
-            with open(conf_file, "w") as f:
-                config.write(f)
+        config = configparser.ConfigParser()
+        config.add_section("Main")
+        config.set("Main", "job", "saddle_search")
+        conf_file = tmp_path / "config.ini"
+        with open(conf_file, "w") as f:
+            config.write(f)
 
-            log_config_ini(conf_file, w_artifact=False, track_overrides=True)
+        log_config_ini(conf_file, w_artifact=False, track_overrides=True)
 
-            import mlflow
+        import mlflow
 
-            assert mlflow.log_param.called
+        assert mlflow.log_param.called
 
     def test_log_config_ini_no_file(self, tmp_path):
-        with patch(
-            "rgpycrumbs._aux._import_from_parent_env",
-            return_value=sys.modules["eon.config"],
-        ):
-            sys.modules.pop("rgpycrumbs.eon._mlflow.log_params", None)
-            from rgpycrumbs.eon._mlflow.log_params import log_config_ini
+        pytest.importorskip("eon_schema")
+        sys.modules.pop("rgpycrumbs.eon._mlflow.log_params", None)
+        from rgpycrumbs.eon._mlflow.log_params import log_config_ini
 
-            conf_file = tmp_path / "nonexistent.ini"
-            log_config_ini(conf_file, w_artifact=False)
+        conf_file = tmp_path / "nonexistent.ini"
+        log_config_ini(conf_file, w_artifact=False)
 
-            import mlflow
+        import mlflow
 
-            assert mlflow.log_param.called
+        assert mlflow.log_param.called
 
 
 # ======================================================================

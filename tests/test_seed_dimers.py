@@ -76,7 +76,8 @@ def test_two_maxima_create_two_seed_dirs(tmp_path):
     cfg = (seed_dirs[0] / "config.ini").read_text()
     assert "job = saddle_search" in cfg
     assert "min_mode_method = dimer" in cfg
-    assert "potential = SocketNWChem" in cfg
+    assert "potential = socket_nwchem" in cfg
+    assert "improved = true" in cfg
     assert "nwchem_settings = nwchem_blyp.nwi" in cfg
     assert "unix_socket_path = nwsock" in cfg
 

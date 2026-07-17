@@ -187,6 +187,9 @@ You can see the list of available command groups:
 -   Seed dimer searches from NEB peaks (`gen-dimer`) and KMC timeline plots (`plt-kmc`)
 -   Single-ended minimization landscapes (`plt-min`) with optional `--energy-cap` windows
 
+eOn job-config authorship (`write_eon_config`, `seed_dimers`, MLflow hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`). Plotting still uses `chemparseplot`; eon-akmc is not required for INI tooling.
+
+
     This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations,
     generating 2D surface plots with optional structure rendering.
     

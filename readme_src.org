@@ -146,6 +146,10 @@ NEB landscapes support energy-unit selection and xyzrender profile strips.
 ~gen-dimer~ seeds saddle searches from NEB peaks; ~plt-kmc~ plots KMC timelines.
 ~plt-min~ accepts ~--energy-cap~ / ~--energy-cap-window~ for landscape scales.
 
+eOn *job-config* authorship (~write_eon_config~, ~seed_dimers~, MLflow
+hydrate) needs ~eon-schema>=0.2~ (~pip install 'rgpycrumbs[eon]'~). Plotting
+still goes through ~chemparseplot~; eon-akmc is *not* required for INI tooling.
+
 **** Plotting NEB Paths (~plt-neb~) detail
 :PROPERTIES:
 :CUSTOM_ID: cli-eon-neb
