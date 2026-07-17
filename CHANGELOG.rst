@@ -1,3 +1,13 @@
+rgpycrumbs 1.10.6 (2026-07-17)
+==============================
+
+Fixed
+-----
+
+- Drop mistaken ``[plot]`` optional extra that hard-declared chemparseplot.
+  Plot deps stay lazy: PEP 723 on CLI scripts and ``ensure_import`` /
+  ``RGPYCRUMBS_AUTO_DEPS`` (same model as jax).
+
 rgpycrumbs 1.10.5 (2026-07-17)
 ==============================
 
@@ -6,7 +16,7 @@ Fixed
 
 - Pure test collection no longer imports ``plt_neb`` (avoid adjustText hard fail
   when ``[plot]`` extra is installed).
-- Refresh ``pixi.lock`` for the new ``[plot]`` optional extra.
+- Refresh ``pixi.lock`` after transient ``[plot]`` extra experiment.
 
 rgpycrumbs 1.10.4 (2026-07-17)
 ==============================
@@ -30,7 +40,7 @@ Changed
   ``trajectory=``; ``plot_neb_from_settings`` accepts ``frames=`` / in-memory
   atoms (ConFrame object-plot path).
 - Floor ``chemparseplot[neb,plot]`` to ``>=1.9.14`` (frame_series) in
-  ``_aux`` AUTO_DEPS, PEP 723 headers, and optional ``[plot]`` extra.
+  ``_aux`` AUTO_DEPS and PEP 723 headers (lazy; no plot feature extra).
 
 rgpycrumbs 1.10.3 (2026-07-17)
 ==============================
