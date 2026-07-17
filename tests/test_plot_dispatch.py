@@ -248,3 +248,39 @@ def test_plot_neb_frames_real_entry_pure(monkeypatch, tmp_path):
     from rgpycrumbs.eon.plot_dispatch import adapt_plot_source
     cmd, payload = adapt_plot_source(frames, kind="neb")
     assert cmd == "neb" and len(payload["frames"]) == 2
+
+
+def test_enable_library_auto_deps_defaults_on(monkeypatch):
+    """Library plot path matches CLI: AUTO_DEPS defaults on when unset."""
+    import os
+
+    monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+    monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
+    assert os.environ.get("RGPYCRUMBS_AUTO_DEPS") == "1"
+
+
+def test_run_plot_enables_auto_deps(monkeypatch):
+    import os
+
+    monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+    monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
+    from rgpycrumbs.eon.plot_config import run_plot
+
+    def runner(settings):
+        return settings.get("plot_type")
+
+    run_plot("neb", runner, plot_type="profile")
+    assert os.environ.get("RGPYCRUMBS_AUTO_DEPS") == "1"
+
+
+def test_enable_library_auto_deps_respects_explicit_off(monkeypatch):
+    import os
+
+    monkeypatch.setenv("RGPYCRUMBS_AUTO_DEPS", "0")
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
+    assert os.environ.get("RGPYCRUMBS_AUTO_DEPS") == "0"

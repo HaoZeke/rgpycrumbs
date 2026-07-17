@@ -72,11 +72,18 @@ except ImportError:  # pragma: no cover - direct script execution without packag
 if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
 
-# Optional heavy: ensure_import + AUTO_DEPS when in-env; uv PEP 723 when isolated.
-if ensure_import is not None:
-    adjust_text = ensure_import("adjustText").adjust_text
-else:  # pragma: no cover
-    from adjustText import adjust_text
+# Optional heavy: resolve at use site so library import does not require
+# adjustText / AUTO_DEPS until a plot actually needs label adjustment.
+def adjust_text(*args, **kwargs):
+    """Lazy adjustText (ensure_import when AUTO_DEPS is on)."""
+    if ensure_import is not None:
+        from rgpycrumbs._aux import enable_library_auto_deps
+
+        enable_library_auto_deps()
+        return ensure_import("adjustText").adjust_text(*args, **kwargs)
+    from adjustText import adjust_text as _adjust_text  # pragma: no cover
+
+    return _adjust_text(*args, **kwargs)
 
 try:
     from ._render_cli import add_config_option, add_render_options
@@ -172,6 +179,9 @@ NEB_PROFILE_MAIN_HEIGHT_IN = 3.55
 
 # --- CLI ---
 def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     """Run the eOn NEB plot pipeline from a resolved settings mapping.
 
     Prefer :func:`plot_neb` for library callers. This entry is the shared

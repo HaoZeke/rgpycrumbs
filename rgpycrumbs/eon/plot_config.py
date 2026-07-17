@@ -319,6 +319,9 @@ def run_plot(
     Shared by the library ``plot_*`` entry points. *runner* is typically
     ``plot_*_from_settings``.
     """
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     settings = merge_plot_settings(
         command,
         config_path=config,

@@ -80,6 +80,9 @@ IRA_KMAX_DEFAULT = 14.0
 
 
 def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     """Run the eOn saddle plot pipeline from a resolved settings mapping.
 
     Prefer :func:`plot_saddle` for library callers. Shared by the Click CLI.

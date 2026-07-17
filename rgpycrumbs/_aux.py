@@ -89,6 +89,25 @@ def warn_on_direct_script_import(
     )
 
 
+def enable_library_auto_deps() -> None:
+    """Default AUTO_DEPS for library plot APIs (match CLI dispatch).
+
+    CLI sets ``RGPYCRUMBS_AUTO_DEPS`` from config (default on) before running
+    scripts. Direct ``from rgpycrumbs.eon import plot_neb`` never did, so
+    ``ensure_import("jax")`` / ``adjustText`` failed unless the host pinned
+    them. Call this at library plot entry before heavy imports.
+    """
+    for name in ("RGPYCRUMBS_AUTO_DEPS", "RGPKGS_AUTO_DEPS"):
+        if os.environ.get(name, "").strip() != "":
+            return
+    try:
+        from rgpycrumbs.config import resolve_auto_deps_default
+
+        os.environ["RGPYCRUMBS_AUTO_DEPS"] = resolve_auto_deps_default()
+    except Exception:  # pragma: no cover - config optional at bootstrap
+        os.environ["RGPYCRUMBS_AUTO_DEPS"] = "1"
+
+
 def _has_cuda() -> bool:
     """Return True when a usable NVIDIA GPU is present.
 

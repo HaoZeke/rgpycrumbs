@@ -78,6 +78,9 @@ IRA_KMAX_DEFAULT = 14.0
 
 
 def plot_min_from_settings(settings: dict[str, Any]) -> Path | None:
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     """Run the eOn min plot pipeline from a resolved settings mapping.
 
     Prefer :func:`plot_min` for library callers. Shared by the Click CLI.

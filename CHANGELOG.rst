@@ -4,9 +4,13 @@ rgpycrumbs 1.10.6 (2026-07-17)
 Fixed
 -----
 
-- Drop mistaken ``[plot]`` optional extra that hard-declared chemparseplot.
-  Plot deps stay lazy: PEP 723 on CLI scripts and ``ensure_import`` /
-  ``RGPYCRUMBS_AUTO_DEPS`` (same model as jax).
+- Library ``plot_*`` / ``run_plot`` / ``plot()`` call
+  ``enable_library_auto_deps()`` so ``RGPYCRUMBS_AUTO_DEPS`` defaults on
+  (same as CLI). Gallery imports no longer need a hard ``jax`` /
+  ``adjustText`` pin for ``grad_imq`` landscapes.
+- Defer ``adjustText`` until label adjustment in ``plt_neb`` (not at import).
+- Drop mistaken ``[plot]`` optional extra if present; floors stay in ``_aux``
+  AUTO_DEPS and PEP 723 only.
 
 rgpycrumbs 1.10.5 (2026-07-17)
 ==============================

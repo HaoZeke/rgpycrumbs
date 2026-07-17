@@ -216,6 +216,9 @@ def plot(
     >>> plot(frames, kind="neb", plot_type="profile", output_file="1d.pdf")
     >>> plot(matter, plot_type="profile", output="min.pdf")  # after retain_frames
     """
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     command, payload = adapt_plot_source(obj, kind=kind)
     # frames → trajectory DTOs for min/saddle (chemparseplot)
     if "frames" in payload and command in {"min", "saddle"}:
