@@ -1,3 +1,15 @@
+rgpycrumbs 1.10.0 (2026-07-17)
+==============================
+
+Changed
+-------
+
+- eOn job-config tooling uses ``eon-schema>=0.2`` (``write_eon_config``,
+  ``seed_dimers``, MLflow hydrate) instead of eon-akmc ``ConfigClass``.
+  Install with ``pip install 'rgpycrumbs[eon]'`` (Python >= 3.11).
+- CLI no longer treats site-packages wheels as monorepo editables when
+  resolving ``uv --with-editable`` peers (avoids eon-akmc false positives).
+
 rgpycrumbs 1.9.24 (2026-07-15)
 ==============================
 
