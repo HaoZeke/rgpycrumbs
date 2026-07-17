@@ -4,6 +4,8 @@ rgpycrumbs 1.10.8 (2026-07-17)
 Fixed
 -----
 
+- Floor chemparseplot to ``>=1.9.15`` (xyzrender Python API strips).
+
 - Map ``xyzrender`` in ``ensure_import``; plot modules ``ensure_import``
   chemparseplot before hard imports (lazy stack, no host pins for plot heavies).
 
