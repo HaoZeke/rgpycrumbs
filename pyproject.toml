@@ -39,7 +39,9 @@ requires-python = ">=3.10"
 eon     = [ "eon-schema>=0.2.0" ]
 lint    = [ "ruff>=0.1.6" ]
 release = [ "build>=0.10", "towncrier>=24.8.0", "twine>=4.0", "wheel>=0.40" ]
-test    = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0", "eon-schema>=0.2.0" ]
+test    = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
+# eon-schema needs Python>=3.11; install separately for eOn config tests:
+#   uv pip install "eon-schema>=0.2"  or  uv sync --extra test --extra eon
 
 [project.scripts]
 rgpycrumbs = "rgpycrumbs.cli:main"
