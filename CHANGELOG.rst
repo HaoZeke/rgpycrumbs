@@ -1,3 +1,12 @@
+rgpycrumbs 1.10.1 (2026-07-17)
+==============================
+
+Changed
+-------
+
+- Floor ``chemparseplot[neb,plot]`` to ``>=1.9.13`` (fixes SurfaceFitConfig
+  NameError on 1.9.10–1.9.12).
+
 rgpycrumbs 1.10.0 (2026-07-17)
 ==============================
 
