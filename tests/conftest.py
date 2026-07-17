@@ -29,7 +29,8 @@ def _try_import(module_name):
 # individual package names).
 _GUARDED_IMPORTS = {
     "test_detect_fragments.py": "rgpycrumbs.geom.detect_fragments",
-    "test_eon_cli.py": "rgpycrumbs.eon.plt_neb",
+    # Do not import plt_neb at collection (PEP 723 script pulls adjustText/etc.).
+    "test_eon_cli.py": "chemparseplot",
     "test_ptmdisp.py": "rgpycrumbs.eon.ptmdisp",
     "test_ira.py": "rgpycrumbs.geom.ira",
     "test_surfaces.py": "jax",
