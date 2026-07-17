@@ -87,10 +87,6 @@ def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
     .. versionadded:: 1.10.3
     """
     job_dir = settings.get("job_dir") or ()
-    if not job_dir:
-        raise ValueError(
-            "Provide --job-dir and/or set [saddle].job_dir in --config"
-        )
     label = settings.get("label") or ()
     plot_type = settings["plot_type"]
     ref_product = settings.get("ref_product")
@@ -114,17 +110,27 @@ def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
         logging.getLogger().setLevel(logging.DEBUG)
 
     output = default_output_path("saddle", plot_type, output)
-    trajs = load_trajectories(
-        job_dir,
-        load_dimer_trajectory,
-        log_info=log.info,
-        noun="trajectory",
-        detail=lambda traj: (
-            f"{len(traj.atoms_list)} frames, saddle="
-            f"{'yes' if traj.saddle_atoms is not None else 'no'}"
-        ),
-    )
-    labels = overlay_labels(job_dir, label)
+    trajectory = settings.get("trajectory")
+    if trajectory is not None:
+        trajs = [trajectory]
+        labels = list(label) if label else ["saddle"]
+    else:
+        if not job_dir:
+            raise ValueError(
+                "Provide --job-dir and/or set [saddle].job_dir in --config "
+                "(or pass trajectory= / plot(frames, kind='saddle'))"
+            )
+        trajs = load_trajectories(
+            job_dir,
+            load_dimer_trajectory,
+            log_info=log.info,
+            noun="trajectory",
+            detail=lambda traj: (
+                f"{len(traj.atoms_list)} frames, saddle="
+                f"{'yes' if traj.saddle_atoms is not None else 'no'}"
+            ),
+        )
+        labels = overlay_labels(job_dir, label)
 
     traj = trajs[0]  # primary trajectory for single-traj plot types
 

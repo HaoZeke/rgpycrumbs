@@ -1,6 +1,13 @@
 rgpycrumbs 1.10.4 (2026-07-17)
 ==============================
 
+Added
+-----
+
+- ``from rgpycrumbs.eon import plot``: type-dispatch on pyeonclient objects
+  (``path_frames`` / ``movie_frames`` / ``climb_frames``) and ConFrame
+  sequences (``kind=`` required). Shares ``run_plot`` + existing runners.
+
 Changed
 -------
 
@@ -9,6 +16,9 @@ Changed
   Click ``main`` is ``run_from_click(..., **params)``.
 - ``plot_*_from_settings`` are plain callables again (Click decorators sit on
   ``main`` only), so library callers are not handed a Click Command.
+- ``plot_min_from_settings`` / ``plot_saddle_from_settings`` accept
+  ``trajectory=``; ``plot_neb_from_settings`` accepts ``frames=`` / in-memory
+  atoms (ConFrame object-plot path).
 
 rgpycrumbs 1.10.3 (2026-07-17)
 ==============================

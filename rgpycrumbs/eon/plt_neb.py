@@ -343,8 +343,15 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
                 ) from e
 
     # --- Trajectory source: load once if applicable ---
-    traj_atoms_list = None
-    if source == "traj":
+    # In-memory ConFrame path (path_frames / plot(frames, kind="neb")): treat as traj.
+    frames = settings.get("frames")
+    traj_atoms_list = settings.get("atoms_list")
+    if traj_atoms_list is None and frames is not None:
+        from chemparseplot.parse.eon.frame_series import atoms_list_from_frames
+
+        traj_atoms_list = atoms_list_from_frames(frames)
+        source = "traj"
+    if source == "traj" and traj_atoms_list is None:
         if not input_traj:
             msg = "--input-traj is required when --source traj is used"
             log.critical(msg)

@@ -85,10 +85,6 @@ def plot_min_from_settings(settings: dict[str, Any]) -> Path | None:
     .. versionadded:: 1.10.3
     """
     job_dir = settings.get("job_dir") or ()
-    if not job_dir:
-        raise ValueError(
-            "Provide --job-dir and/or set [min].job_dir in --config"
-        )
     label = settings.get("label") or ()
     prefix = settings["prefix"]
     plot_type = settings["plot_type"]
@@ -116,14 +112,24 @@ def plot_min_from_settings(settings: dict[str, Any]) -> Path | None:
         logging.getLogger().setLevel(logging.DEBUG)
 
     output = default_output_path("min", plot_type, output)
-    trajs = load_trajectories(
-        job_dir,
-        lambda jd: load_min_trajectory(jd, prefix=prefix),
-        log_info=log.info,
-        noun="minimization trajectory",
-        detail=lambda traj: f"{len(traj.atoms_list)} frames",
-    )
-    labels = overlay_labels(job_dir, label)
+    trajectory = settings.get("trajectory")
+    if trajectory is not None:
+        trajs = [trajectory]
+        labels = list(label) if label else ["min"]
+    else:
+        if not job_dir:
+            raise ValueError(
+                "Provide --job-dir and/or set [min].job_dir in --config "
+                "(or pass trajectory= / plot(frames, kind='min'))"
+            )
+        trajs = load_trajectories(
+            job_dir,
+            lambda jd: load_min_trajectory(jd, prefix=prefix),
+            log_info=log.info,
+            noun="minimization trajectory",
+            detail=lambda traj: f"{len(traj.atoms_list)} frames",
+        )
+        labels = overlay_labels(job_dir, label)
 
     active_theme = get_theme(theme)
     setup_global_theme(active_theme)
