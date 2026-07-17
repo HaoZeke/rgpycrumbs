@@ -1,3 +1,15 @@
+rgpycrumbs 1.10.7 (2026-07-17)
+==============================
+
+Fixed
+-----
+
+- Library ``plot_*`` / ``run_plot`` / ``plot()`` call
+  ``enable_library_auto_deps()`` so ``RGPYCRUMBS_AUTO_DEPS`` defaults on
+  (same as CLI). No host ``jax`` / ``adjustText`` pin for gallery
+  ``plot_neb`` landscapes.
+- Defer ``adjustText`` until label adjustment in ``plt_neb``.
+
 rgpycrumbs 1.10.6 (2026-07-17)
 ==============================
 
