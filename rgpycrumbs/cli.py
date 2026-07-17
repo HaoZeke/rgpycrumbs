@@ -59,8 +59,60 @@ def _prefer_in_env_interpreter(
     return _in_env_stack_ready()
 
 
+def _normalize_dist_name(name: str) -> str:
+    """PEP 503-ish normalize for comparing package names."""
+    return name.strip().lower().replace("_", "-")
+
+
+def _pyproject_project_name(pyproject: Path) -> str | None:
+    """Return ``[project].name`` from a pyproject.toml, if present."""
+    try:
+        text = pyproject.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    # Prefer tomllib when available (3.11+); fall back to a tiny scan.
+    try:
+        import tomllib
+    except ImportError:  # pragma: no cover - py310
+        tomllib = None  # type: ignore[assignment]
+    if tomllib is not None:
+        try:
+            data = tomllib.loads(text)
+        except Exception:
+            data = None
+        if isinstance(data, dict):
+            project = data.get("project")
+            if isinstance(project, dict):
+                name = project.get("name")
+                if isinstance(name, str) and name.strip():
+                    return name.strip()
+    # Minimal fallback: first bare name = "..." under [project]
+    in_project = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_project = stripped == "[project]"
+            continue
+        if in_project and stripped.startswith("name"):
+            _, _, rhs = stripped.partition("=")
+            name = rhs.strip().strip("\"'")
+            if name:
+                return name
+    return None
+
+
 def _find_editable_source(package_name: str) -> Path | None:
-    """Return the local project root for an editable package, if any."""
+    """Return the local project root for an *editable* install of *package_name*.
+
+    Wheel installs under ``site-packages`` must never map to an unrelated
+    monorepo ``pyproject.toml`` above the env (e.g. eOn root named
+    ``eon-akmc`` when looking up ``chemparseplot``). Only return a path when:
+
+    1. The module lives outside site-/dist-packages (true editable / src layout), and
+    2. The nearest ``pyproject.toml`` has ``[project].name`` matching *package_name*.
+
+    eOn tooling only needs ``eon-schema`` + ``pyeonclient``; never imply ``eon-akmc``.
+    """
     try:
         spec = importlib.util.find_spec(package_name)
     except (ImportError, ModuleNotFoundError, ValueError):
@@ -68,6 +120,7 @@ def _find_editable_source(package_name: str) -> Path | None:
     if spec is None:
         return None
 
+    want = _normalize_dist_name(package_name)
     candidates: list[Path] = []
     if spec.origin:
         candidates.append(Path(spec.origin).resolve())
@@ -76,14 +129,29 @@ def _find_editable_source(package_name: str) -> Path | None:
 
     for candidate in candidates:
         search_root = candidate if candidate.is_dir() else candidate.parent
+        # Regular wheels live under site-packages / dist-packages — not editable.
+        if any(part in {"site-packages", "dist-packages"} for part in search_root.parts):
+            continue
         for parent in (search_root, *search_root.parents):
-            if (parent / "pyproject.toml").is_file():
+            pyproject = parent / "pyproject.toml"
+            if not pyproject.is_file():
+                continue
+            proj_name = _pyproject_project_name(pyproject)
+            if proj_name is None:
+                return None
+            if _normalize_dist_name(proj_name) == want:
                 return parent
+            # First pyproject is a different project — do not climb further.
+            return None
     return None
 
 
 def _uv_editable_sources() -> list[Path]:
-    """Return local editable roots that should satisfy script dependencies."""
+    """Return local editable roots that should satisfy script dependencies.
+
+    Only true editable checkouts of chemparseplot (name-matched). Never the
+    eOn monorepo / eon-akmc tree.
+    """
     sources: list[Path] = []
     for package_name in ("chemparseplot",):
         source = _find_editable_source(package_name)
