@@ -1,3 +1,13 @@
+rgpycrumbs 1.10.2 (2026-07-17)
+==============================
+
+Added
+-----
+
+- Library API ``plot_neb`` / ``plot_neb_from_settings`` (``from rgpycrumbs.eon
+  import plot_neb``) — same pipeline as ``rgpycrumbs eon plt-neb`` without
+  Click argv. CLI now calls the shared settings-driven implementation.
+
 rgpycrumbs 1.10.1 (2026-07-17)
 ==============================
 

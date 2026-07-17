@@ -189,6 +189,8 @@ You can see the list of available command groups:
 
 eOn job-config authorship (`write_eon_config`, `seed_dimers`, MLflow hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`). Plotting still uses `chemparseplot`; eon-akmc is not required for INI tooling.
 
+Library NEB plots (no Click argv): `from rgpycrumbs.eon import plot_neb` then `plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")`.
+
 
     This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations,
     generating 2D surface plots with optional structure rendering.

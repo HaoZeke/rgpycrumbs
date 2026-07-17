@@ -141,6 +141,9 @@ Commands:
 :END:
 **** Plotting NEB Paths (~plt-neb~), stitch (~plt-neb-stitch~), dimers (~gen-dimer~), KMC (~plt-kmc~)
 
+Library (no CLI argv): ~from rgpycrumbs.eon import plot_neb~ then
+~plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")~.
+
 NEB landscapes support energy-unit selection and xyzrender profile strips.
 ~plt-neb-stitch~ builds a continuous band from multi-segment minimizations (v1.8+).
 ~gen-dimer~ seeds saddle searches from NEB peaks; ~plt-kmc~ plots KMC timelines.
