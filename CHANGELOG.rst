@@ -1,3 +1,13 @@
+rgpycrumbs 1.10.5 (2026-07-17)
+==============================
+
+Fixed
+-----
+
+- Pure test collection no longer imports ``plt_neb`` (avoid adjustText hard fail
+  when ``[plot]`` extra is installed).
+- Refresh ``pixi.lock`` for the new ``[plot]`` optional extra.
+
 rgpycrumbs 1.10.4 (2026-07-17)
 ==============================
 
