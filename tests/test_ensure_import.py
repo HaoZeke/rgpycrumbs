@@ -337,4 +337,4 @@ class TestDependencyMap:
             data = tomllib.load(f)
         extras = set(data["project"]["optional-dependencies"].keys())
         assert not extras & {"analysis", "surfaces", "interpolation", "all"}
-        assert extras <= {"lint", "release", "test"}
+        assert extras <= {"lint", "release", "test", "eon"}

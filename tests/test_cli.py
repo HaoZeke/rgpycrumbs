@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -91,14 +92,33 @@ def test_dispatch_preserves_user_site_package_path(mock_run, monkeypatch):
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatch):
+def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatch, tmp_path):
     """_dispatch should satisfy local linked deps via --with-editable."""
-    monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
+    # True editable: checkout outside site-packages with matching project name.
+    root = tmp_path / "chemparseplot"
+    (root / "chemparseplot").mkdir(parents=True)
+    (root / "pyproject.toml").write_text(
+        '[project]\nname = "chemparseplot"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+    init = root / "chemparseplot" / "__init__.py"
+    init.write_text("# editable\n", encoding="utf-8")
+
+    # Only pretend the *script* path exists; keep real is_file for pyproject walk.
+    real_is_file = Path.is_file
+
+    def _is_file(self: Path) -> bool:
+        s = str(self)
+        if s.endswith("script.py") or s.endswith("group/script.py"):
+            return True
+        return real_is_file(self)
+
+    monkeypatch.setattr(Path, "is_file", _is_file)
     monkeypatch.setattr(
         "rgpycrumbs.cli.importlib.util.find_spec",
         lambda name: SimpleNamespace(
-            origin="/tmp/chemparseplot/chemparseplot/__init__.py",
-            submodule_search_locations=["/tmp/chemparseplot/chemparseplot"],
+            origin=str(init),
+            submodule_search_locations=[str(init.parent)],
         )
         if name == "chemparseplot"
         else None,
@@ -110,11 +130,7 @@ def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatc
     assert executed_command[:2] == ["uv", "run"]
     assert "--with-editable" in executed_command
     editable_idx = executed_command.index("--with-editable")
-    # Prefer package dir when submodule_search_locations is set; fall back to repo root.
-    assert executed_command[editable_idx + 1] in {
-        "/tmp/chemparseplot",
-        "/tmp/chemparseplot/chemparseplot",
-    }
+    assert Path(executed_command[editable_idx + 1]) == root
     assert str(executed_command[-2]).endswith("script.py")
     assert executed_command[-1] == "--flag"
 

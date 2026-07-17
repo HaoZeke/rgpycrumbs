@@ -90,9 +90,9 @@ class TestDependencyMapCoverage:
                 top_levels[top] = pkg
 
     def test_optional_peers_pinned_for_uv_and_readcon(self) -> None:
-        """Plot/CON peers resolve via ensure_import with 1.8 / readcon floors."""
+        """Plot/CON peers resolve via ensure_import with 1.9 / readcon floors."""
         cpp_spec = _DEPENDENCY_MAP["chemparseplot"]
-        assert "1.8" in cpp_spec
+        assert "1.9" in cpp_spec
         assert "neb" in cpp_spec or "chemparseplot" in cpp_spec
         read_spec = _DEPENDENCY_MAP["readcon"]
         assert "0.13" in read_spec
