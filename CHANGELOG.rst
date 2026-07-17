@@ -1,3 +1,15 @@
+rgpycrumbs 1.10.4 (2026-07-17)
+==============================
+
+Changed
+-------
+
+- DRY eOn plot wiring: ``run_plot`` / ``run_from_click`` / ``library_plot`` in
+  ``plot_config``; ``plot_{neb,min,saddle}`` are factory products;
+  Click ``main`` is ``run_from_click(..., **params)``.
+- ``plot_*_from_settings`` are plain callables again (Click decorators sit on
+  ``main`` only), so library callers are not handed a Click Command.
+
 rgpycrumbs 1.10.3 (2026-07-17)
 ==============================
 

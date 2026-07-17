@@ -37,8 +37,6 @@ from pathlib import Path
 from typing import Any
 
 import click
-import matplotlib.pyplot as plt
-import numpy as np
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -51,7 +49,7 @@ if warn_on_direct_script_import is not None:
 try:
     from ._render_cli import add_config_option, add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
-    from .plot_config import resolve_from_click
+    from .plot_config import library_plot, run_from_click
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
     from rgpycrumbs.eon._single_ended_cli import (
@@ -59,7 +57,7 @@ except ImportError:  # pragma: no cover - direct script execution
         load_trajectories,
         overlay_labels,
     )
-    from rgpycrumbs.eon.plot_config import resolve_from_click
+    from rgpycrumbs.eon.plot_config import library_plot, run_from_click
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
 from chemparseplot.plot.optimization import (
     plot_single_ended_convergence,
@@ -78,6 +76,93 @@ log = logging.getLogger("rich")
 
 IRA_KMAX_DEFAULT = 14.0
 
+
+def plot_min_from_settings(settings: dict[str, Any]) -> Path | None:
+    """Run the eOn min plot pipeline from a resolved settings mapping.
+
+    Prefer :func:`plot_min` for library callers. Shared by the Click CLI.
+
+    .. versionadded:: 1.10.3
+    """
+    job_dir = settings.get("job_dir") or ()
+    if not job_dir:
+        raise ValueError(
+            "Provide --job-dir and/or set [min].job_dir in --config"
+        )
+    label = settings.get("label") or ()
+    prefix = settings["prefix"]
+    plot_type = settings["plot_type"]
+    project_path = settings["project_path"]
+    surface_type = settings["surface_type"]
+    auto_thin = bool(settings.get("auto_thin", False))
+    max_surface_points = int(settings.get("max_surface_points", 64))
+    ira_kmax = settings["ira_kmax"]
+    energy_unit = settings["energy_unit"]
+    energy_cap = settings.get("energy_cap")
+    energy_cap_window = settings.get("energy_cap_window")
+    theme = settings["theme"]
+    plot_structures = settings["plot_structures"]
+    strip_renderer = settings["strip_renderer"]
+    xyzrender_config = settings["xyzrender_config"]
+    strip_spacing = settings["strip_spacing"]
+    strip_zoom = settings.get("strip_zoom")
+    strip_dividers = settings["strip_dividers"]
+    rotation = settings["rotation"]
+    perspective_tilt = settings["perspective_tilt"]
+    output = settings.get("output")
+    dpi = settings["dpi"]
+    verbose = settings["verbose"]
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    output = default_output_path("min", plot_type, output)
+    trajs = load_trajectories(
+        job_dir,
+        lambda jd: load_min_trajectory(jd, prefix=prefix),
+        log_info=log.info,
+        noun="minimization trajectory",
+        detail=lambda traj: f"{len(traj.atoms_list)} frames",
+    )
+    labels = overlay_labels(job_dir, label)
+
+    active_theme = get_theme(theme)
+    setup_global_theme(active_theme)
+
+    if plot_type == "profile":
+        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
+    elif plot_type == "landscape":
+        _plot_landscape(
+            trajs,
+            labels,
+            output,
+            dpi,
+            project_path=project_path,
+            surface_type=surface_type,
+            ira_kmax=ira_kmax,
+            energy_unit=energy_unit,
+            energy_cap=energy_cap,
+            energy_cap_window=energy_cap_window,
+            cmap=active_theme.cmap_landscape,
+            plot_structures=plot_structures,
+            strip_renderer=strip_renderer,
+            xyzrender_config=xyzrender_config,
+            strip_spacing=strip_spacing,
+            strip_zoom=strip_zoom,
+            strip_dividers=strip_dividers,
+            rotation=rotation,
+            perspective_tilt=perspective_tilt,
+            theme=active_theme,
+            auto_thin=auto_thin,
+            max_surface_points=max_surface_points,
+        )
+    elif plot_type == "convergence":
+        _plot_convergence(trajs, labels, output, dpi)
+
+    log.info("Saved %s", output)
+
+    return Path(output) if output else None
+
+plot_min = library_plot("min", plot_min_from_settings)
 
 @click.command()
 @click.pass_context
@@ -182,173 +267,11 @@ IRA_KMAX_DEFAULT = 14.0
     help="Output resolution.",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
-
-def plot_min_from_settings(settings: dict[str, Any]) -> Path | None:
-    """Run the eOn min plot pipeline from a resolved settings mapping.
-
-    Prefer :func:`plot_min` for library callers. Shared by the Click CLI.
-
-    .. versionadded:: 1.10.3
-    """
-    job_dir = settings.get("job_dir") or ()
-    if not job_dir:
-        raise ValueError(
-            "Provide --job-dir and/or set [min].job_dir in --config"
-        )
-    label = settings.get("label") or ()
-    prefix = settings["prefix"]
-    plot_type = settings["plot_type"]
-    project_path = settings["project_path"]
-    surface_type = settings["surface_type"]
-    auto_thin = bool(settings.get("auto_thin", False))
-    max_surface_points = int(settings.get("max_surface_points", 64))
-    ira_kmax = settings["ira_kmax"]
-    energy_unit = settings["energy_unit"]
-    energy_cap = settings.get("energy_cap")
-    energy_cap_window = settings.get("energy_cap_window")
-    theme = settings["theme"]
-    plot_structures = settings["plot_structures"]
-    strip_renderer = settings["strip_renderer"]
-    xyzrender_config = settings["xyzrender_config"]
-    strip_spacing = settings["strip_spacing"]
-    strip_zoom = settings.get("strip_zoom")
-    strip_dividers = settings["strip_dividers"]
-    rotation = settings["rotation"]
-    perspective_tilt = settings["perspective_tilt"]
-    output = settings.get("output")
-    dpi = settings["dpi"]
-    verbose = settings["verbose"]
-    """Plot minimization trajectory visualization.
-
-    Use --job-dir multiple times to overlay trajectories from different
-    optimizers (e.g. FIRE, LBFGS, SD) on the same landscape or profile.
-    """
-    if verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-
-    output = default_output_path("min", plot_type, output)
-    trajs = load_trajectories(
-        job_dir,
-        lambda jd: load_min_trajectory(jd, prefix=prefix),
-        log_info=log.info,
-        noun="minimization trajectory",
-        detail=lambda traj: f"{len(traj.atoms_list)} frames",
+def main(ctx, config, **params):
+    """CLI entry: merge flags/config then run plot_min_from_settings."""
+    return run_from_click(
+        "min", plot_min_from_settings, ctx, config=config, **params
     )
-    labels = overlay_labels(job_dir, label)
-
-    active_theme = get_theme(theme)
-    setup_global_theme(active_theme)
-
-    if plot_type == "profile":
-        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
-    elif plot_type == "landscape":
-        _plot_landscape(
-            trajs,
-            labels,
-            output,
-            dpi,
-            project_path=project_path,
-            surface_type=surface_type,
-            ira_kmax=ira_kmax,
-            energy_unit=energy_unit,
-            energy_cap=energy_cap,
-            energy_cap_window=energy_cap_window,
-            cmap=active_theme.cmap_landscape,
-            plot_structures=plot_structures,
-            strip_renderer=strip_renderer,
-            xyzrender_config=xyzrender_config,
-            strip_spacing=strip_spacing,
-            strip_zoom=strip_zoom,
-            strip_dividers=strip_dividers,
-            rotation=rotation,
-            perspective_tilt=perspective_tilt,
-            theme=active_theme,
-            auto_thin=auto_thin,
-            max_surface_points=max_surface_points,
-        )
-    elif plot_type == "convergence":
-        _plot_convergence(trajs, labels, output, dpi)
-
-    log.info("Saved %s", output)
-
-    return Path(output) if output else None
-
-
-def plot_min(
-    *,
-    config: str | Path | None = None,
-    **overrides: Any,
-) -> Path | None:
-    """Library entry for eOn min plots (no Click argv).
-
-    Same pipeline as ``rgpycrumbs eon plt-min``.
-
-    .. versionadded:: 1.10.3
-    """
-    from rgpycrumbs.eon.plot_config import merge_plot_settings
-
-    settings = merge_plot_settings(
-        "min",
-        config_path=config,
-        cli_overrides=overrides or None,
-    )
-    return plot_min_from_settings(settings)
-
-
-def main(  # noqa: PLR0913
-    ctx,
-    config,
-    job_dir,
-    label,
-    prefix,
-    plot_type,
-    project_path,
-    surface_type,
-    ira_kmax,
-    energy_unit,
-    energy_cap,
-    energy_cap_window,
-    theme,
-    plot_structures,
-    strip_renderer,
-    xyzrender_config,
-    strip_spacing,
-    strip_zoom,
-    strip_dividers,
-    rotation,
-    perspective_tilt,
-    output,
-    dpi,
-    verbose,
-):
-    settings = resolve_from_click(
-        "min",
-        ctx,
-        config=config,
-        job_dir=job_dir,
-        label=label,
-        prefix=prefix,
-        plot_type=plot_type,
-        project_path=project_path,
-        surface_type=surface_type,
-        ira_kmax=ira_kmax,
-        energy_unit=energy_unit,
-        energy_cap=energy_cap,
-        energy_cap_window=energy_cap_window,
-        theme=theme,
-        plot_structures=plot_structures,
-        strip_renderer=strip_renderer,
-        xyzrender_config=xyzrender_config,
-        strip_spacing=strip_spacing,
-        strip_zoom=strip_zoom,
-        strip_dividers=strip_dividers,
-        rotation=rotation,
-        perspective_tilt=perspective_tilt,
-        output=output,
-        dpi=dpi,
-        verbose=verbose,
-    )
-    return plot_min_from_settings(settings)
 
 def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
     plot_single_ended_profile(

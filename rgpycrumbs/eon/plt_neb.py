@@ -80,10 +80,10 @@ else:  # pragma: no cover
 
 try:
     from ._render_cli import add_config_option, add_render_options
-    from .plot_config import resolve_from_click
+    from .plot_config import library_plot, run_from_click
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
-    from rgpycrumbs.eon.plot_config import resolve_from_click
+    from rgpycrumbs.eon.plot_config import library_plot, run_from_click
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -171,323 +171,6 @@ NEB_PROFILE_MAIN_HEIGHT_IN = 3.55
 
 
 # --- CLI ---
-@click.command()
-@click.pass_context
-@add_config_option
-@click.option(
-    "--input-dat-pattern",
-    default=DEFAULT_INPUT_PATTERN,
-    help="Glob pattern for input data files.",
-)
-@click.option(
-    "--input-path-pattern",
-    default=DEFAULT_PATH_PATTERN,
-    help="Glob pattern for input path files.",
-)
-@click.option(
-    "--con-file",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=None,
-    help="Path to .con trajectory file.",
-)
-@click.option(
-    "--additional-con",
-    type=(
-        click.Path(exists=True, dir_okay=False, path_type=Path),
-        str,
-    ),  # Takes (Path, Label)
-    multiple=True,
-    default=None,
-    help="Path(s) to additional .con file(s) and label.",
-)
-@click.option(
-    "--augment-dat",
-    type=str,
-    default=None,
-    help="Glob pattern for extra .dat files for surface fitting.",
-)
-@click.option(
-    "--augment-con",
-    type=str,
-    default=None,
-    help="Glob pattern for extra .con files for surface fitting.",
-)
-@click.option(
-    "--sp-file",
-    type=click.Path(exists=False, dir_okay=False, path_type=Path),
-    default=Path("sp.con"),
-    help="Path to explicit saddle point file (eOn sp.con).",
-)
-@click.option(
-    "--source",
-    type=click.Choice(["eon", "traj", "hdf5"]),
-    default="eon",
-    help="Data source: 'eon' for .dat/.con pairs, 'traj' for extxyz, 'hdf5' for ChemGP HDF5.",
-)
-@click.option(
-    "--input-h5",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=None,
-    help="Path to ChemGP NEB HDF5 file (result or history).",
-)
-@click.option(
-    "--input-traj",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=None,
-    help="Path to extxyz trajectory file (used with --source traj).",
-)
-@click.option(
-    "--plot-type",
-    type=click.Choice(["profile", "landscape"]),
-    default="profile",
-    help="Type of plot to generate.",
-)
-@click.option(
-    "--rbf-smoothing",
-    type=float,
-    default=None,
-    show_default=True,
-    help="Smoothing term for 2D RBF.",
-)
-@click.option(
-    "--landscape-mode",
-    type=click.Choice(["path", "surface"]),
-    default="surface",
-    help="For landscape plot: 'path' or 'surface'.",
-)
-@click.option(
-    "--landscape-path",
-    type=click.Choice(["last", "all"]),
-    default="all",
-    help="Last uses an interpolation only on the last path, otherwise use all points.",
-)
-@click.option(
-    "--project-path/--no-project-path",
-    is_flag=True,
-    default=True,
-    help="Project landscape coordinates into the reaction valley (s, d).",
-)
-@click.option(
-    "--rc-mode",
-    type=click.Choice(["path", "rmsd", "index"]),
-    default="path",
-    help="Reaction coordinate for profile plot.",
-)
-@click.option(
-    "--plot-structures",
-    type=click.Choice(["none", "all", "crit_points"]),
-    default="none",
-    help="Structures to render on the path. Requires --con-file.",
-)
-@click.option(
-    "--surface-type",
-    type=click.Choice(
-        [
-            "grid",
-            "rbf",
-            "grad_matern",
-            "grad_imq",
-            "grad_imq_ny",
-            "matern",
-            "imq",
-            "grad_rq",
-            "grad_se",
-        ]
-    ),
-    default="rbf",
-    help="Interpolation method for the 2D surface.",
-)
-@click.option(
-    "--n-inducing",
-    type=int,
-    default=None,
-    help="Number of inducing points for Nystrom or RFF features. Defaults to 300 (Nystrom) or 500 (RFF).",
-)
-@click.option(
-    "--show-pts/--no-show-pts",
-    default=True,
-    help="Show all paths from the optimization on the RMSD 2D plot.",
-)
-@click.option(
-    "--plot-mode",
-    type=click.Choice(["energy", "eigenvalue"]),
-    default="energy",
-    help="Quantity to plot.",
-)
-@click.option(
-    "-o",
-    "--output-file",
-    type=click.Path(path_type=Path),
-    default=None,
-    help="Output image filename.",
-)
-@click.option(
-    "--start", type=int, default=None, help="Start file index for profile plot."
-)
-@click.option("--end", type=int, default=None, help="End file index for profile plot.")
-@click.option(
-    "--normalize-rc", is_flag=True, default=False, help="Normalize reaction coordinate."
-)
-@click.option("--title", default="NEB Path", help="Plot title.")
-@click.option("--xlabel", default=None, help="X-axis label.")
-@click.option("--ylabel", default=None, help="Y-axis label.")
-@click.option(
-    "--energy-unit",
-    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
-    default="eV",
-    show_default=True,
-    help="Presentation unit for energy-like axes and color scales.",
-)
-# --- Theme and Override Options ---
-@click.option(
-    "--theme",
-    default="ruhi",
-    help="The plotting theme to use.",
-)
-@click.option("--cmap-profile", default=None, help="Colormap for profile plot.")
-@click.option("--cmap-landscape", default=None, help="Colormap for landscape plot.")
-@click.option("--facecolor", type=str, default=None, help="Background color.")
-@click.option("--fontsize-base", type=int, default=None, help="Base font size.")
-# --- Figure and Inset Options ---
-@click.option(
-    "--figsize",
-    nargs=2,
-    type=(float, float),
-    default=(5.37, 5.37),
-    show_default=True,
-    help="Figure width, height in inches.",
-)
-@click.option(
-    "--fig-height",
-    type=float,
-    default=None,
-    help="Figure height in inches.",
-)
-@click.option(
-    "--aspect-ratio",
-    type=float,
-    default=None,
-    help="Figure aspect ratio.",
-)
-@click.option(
-    "--dpi",
-    type=int,
-    default=200,
-    show_default=True,
-    help="Resolution in Dots Per Inch.",
-)
-@click.option(
-    "--zoom-ratio",
-    type=float,
-    default=0.5,
-    show_default=True,
-    help="Scale the inset image.",
-)
-@add_render_options
-@click.option(
-    "--arrow-head-length",
-    type=float,
-    default=0.2,
-    show_default=True,
-    help="Arrow head length.",
-)
-@click.option(
-    "--arrow-head-width",
-    type=float,
-    default=0.3,
-    show_default=True,
-    help="Arrow head width.",
-)
-@click.option(
-    "--arrow-tail-width",
-    type=float,
-    default=0.1,
-    show_default=True,
-    help="Arrow tail width.",
-)
-# --- Path/Spline Options ---
-@click.option(
-    "--highlight-last/--no-highlight-last",
-    is_flag=True,
-    default=True,
-    help="Highlight last path.",
-)
-@click.option(
-    "--spline-method",
-    type=click.Choice(["hermite", "spline", "none"]),
-    default="hermite",
-    help=(
-        "Profile interpolant: hermite (uses -f_para as dE/drc; path RC only), "
-        "spline (cubic through energies), none (markers + straight segments). "
-        "Image-index RC defaults hermite→spline (force slopes are not dE/dindex)."
-    ),
-)
-# --- Inset Position Options ---
-@click.option(
-    "--draw-reactant",
-    type=(float, float, float),
-    nargs=3,
-    default=(15, 60, 0.1),
-    show_default=True,
-    help="Reactant inset pos (x, y, rad).",
-)
-@click.option(
-    "--draw-saddle",
-    type=(float, float, float),
-    nargs=3,
-    default=(15, 60, 0.1),
-    show_default=True,
-    help="Saddle inset pos (x, y, rad).",
-)
-@click.option(
-    "--draw-product",
-    type=(float, float, float),
-    nargs=3,
-    default=(15, 60, 0.1),
-    show_default=True,
-    help="Product inset pos (x, y, rad).",
-)
-@click.option(
-    "--cache-file",
-    type=click.Path(path_type=Path),
-    default=Path(".neb_landscape.parquet"),
-    help="Parquet cache file.",
-)
-@click.option(
-    "--force-recompute",
-    is_flag=True,
-    default=False,
-    help="Force re-calculation of RMSD.",
-)
-@click.option(
-    "--mmf-peaks/--no-mmf-peaks",
-    is_flag=True,
-    default=None,
-    help="Overlay OCI/MMF refinement samples on landscape (auto-detected from climb movies).",
-)
-@click.option(
-    "--peak-dir",
-    type=click.Path(exists=True, file_okay=False, path_type=Path),
-    default=None,
-    help="Directory containing OCI/MMF refinement outputs (for example climb/climb.con).",
-)
-@click.option(
-    "--show-evolution",
-    is_flag=True,
-    default=False,
-    help="Show band evolution across iterations (requires write_movies data).",
-)
-@click.option(
-    "--show-legend/--no-legend",
-    default=True,
-    help="Show the legends.",
-)
-@click.option(
-    "--ira-kmax",
-    default=IRA_KMAX_DEFAULT,
-    help="kmax factor for IRA.",
-)
-
 def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
     """Run the eOn NEB plot pipeline from a resolved settings mapping.
 
@@ -1722,188 +1405,330 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
 
     return Path(output_file) if output_file else None
 
+plot_neb = library_plot("neb", plot_neb_from_settings)
 
-def plot_neb(
-    *,
-    config: str | Path | None = None,
-    **overrides: Any,
-) -> Path | None:
-    """Library entry for eOn NEB profile / landscape plots (no Click argv).
-
-    Builds settings via :func:`merge_plot_settings` then runs the same pipeline
-    as ``rgpycrumbs eon plt-neb``.
-
-    Examples
-    --------
-    >>> plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")
-    >>> plot_neb(
-    ...     plot_type="landscape",
-    ...     con_file="neb.con",
-    ...     output_file="2D.png",
-    ...     surface_type="grad_imq",
-    ...     landscape_path="all",
-    ...     project_path=True,
-    ... )
-
-    Cookbook-style defaults can be passed as keyword overrides; a TOML file
-    via *config* still works.
-
-    .. versionadded:: 1.10.2
-    """
-    from rgpycrumbs.eon.plot_config import merge_plot_settings
-
-    settings = merge_plot_settings(
-        "neb",
-        config_path=config,
-        cli_overrides=overrides or None,
+@click.command()
+@click.pass_context
+@add_config_option
+@click.option(
+    "--input-dat-pattern",
+    default=DEFAULT_INPUT_PATTERN,
+    help="Glob pattern for input data files.",
+)
+@click.option(
+    "--input-path-pattern",
+    default=DEFAULT_PATH_PATTERN,
+    help="Glob pattern for input path files.",
+)
+@click.option(
+    "--con-file",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Path to .con trajectory file.",
+)
+@click.option(
+    "--additional-con",
+    type=(
+        click.Path(exists=True, dir_okay=False, path_type=Path),
+        str,
+    ),  # Takes (Path, Label)
+    multiple=True,
+    default=None,
+    help="Path(s) to additional .con file(s) and label.",
+)
+@click.option(
+    "--augment-dat",
+    type=str,
+    default=None,
+    help="Glob pattern for extra .dat files for surface fitting.",
+)
+@click.option(
+    "--augment-con",
+    type=str,
+    default=None,
+    help="Glob pattern for extra .con files for surface fitting.",
+)
+@click.option(
+    "--sp-file",
+    type=click.Path(exists=False, dir_okay=False, path_type=Path),
+    default=Path("sp.con"),
+    help="Path to explicit saddle point file (eOn sp.con).",
+)
+@click.option(
+    "--source",
+    type=click.Choice(["eon", "traj", "hdf5"]),
+    default="eon",
+    help="Data source: 'eon' for .dat/.con pairs, 'traj' for extxyz, 'hdf5' for ChemGP HDF5.",
+)
+@click.option(
+    "--input-h5",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Path to ChemGP NEB HDF5 file (result or history).",
+)
+@click.option(
+    "--input-traj",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Path to extxyz trajectory file (used with --source traj).",
+)
+@click.option(
+    "--plot-type",
+    type=click.Choice(["profile", "landscape"]),
+    default="profile",
+    help="Type of plot to generate.",
+)
+@click.option(
+    "--rbf-smoothing",
+    type=float,
+    default=None,
+    show_default=True,
+    help="Smoothing term for 2D RBF.",
+)
+@click.option(
+    "--landscape-mode",
+    type=click.Choice(["path", "surface"]),
+    default="surface",
+    help="For landscape plot: 'path' or 'surface'.",
+)
+@click.option(
+    "--landscape-path",
+    type=click.Choice(["last", "all"]),
+    default="all",
+    help="Last uses an interpolation only on the last path, otherwise use all points.",
+)
+@click.option(
+    "--project-path/--no-project-path",
+    is_flag=True,
+    default=True,
+    help="Project landscape coordinates into the reaction valley (s, d).",
+)
+@click.option(
+    "--rc-mode",
+    type=click.Choice(["path", "rmsd", "index"]),
+    default="path",
+    help="Reaction coordinate for profile plot.",
+)
+@click.option(
+    "--plot-structures",
+    type=click.Choice(["none", "all", "crit_points"]),
+    default="none",
+    help="Structures to render on the path. Requires --con-file.",
+)
+@click.option(
+    "--surface-type",
+    type=click.Choice(
+        [
+            "grid",
+            "rbf",
+            "grad_matern",
+            "grad_imq",
+            "grad_imq_ny",
+            "matern",
+            "imq",
+            "grad_rq",
+            "grad_se",
+        ]
+    ),
+    default="rbf",
+    help="Interpolation method for the 2D surface.",
+)
+@click.option(
+    "--n-inducing",
+    type=int,
+    default=None,
+    help="Number of inducing points for Nystrom or RFF features. Defaults to 300 (Nystrom) or 500 (RFF).",
+)
+@click.option(
+    "--show-pts/--no-show-pts",
+    default=True,
+    help="Show all paths from the optimization on the RMSD 2D plot.",
+)
+@click.option(
+    "--plot-mode",
+    type=click.Choice(["energy", "eigenvalue"]),
+    default="energy",
+    help="Quantity to plot.",
+)
+@click.option(
+    "-o",
+    "--output-file",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Output image filename.",
+)
+@click.option(
+    "--start", type=int, default=None, help="Start file index for profile plot."
+)
+@click.option("--end", type=int, default=None, help="End file index for profile plot.")
+@click.option(
+    "--normalize-rc", is_flag=True, default=False, help="Normalize reaction coordinate."
+)
+@click.option("--title", default="NEB Path", help="Plot title.")
+@click.option("--xlabel", default=None, help="X-axis label.")
+@click.option("--ylabel", default=None, help="Y-axis label.")
+@click.option(
+    "--energy-unit",
+    type=click.Choice(["eV", "kcal/mol", "kJ/mol"]),
+    default="eV",
+    show_default=True,
+    help="Presentation unit for energy-like axes and color scales.",
+)
+# --- Theme and Override Options ---
+@click.option(
+    "--theme",
+    default="ruhi",
+    help="The plotting theme to use.",
+)
+@click.option("--cmap-profile", default=None, help="Colormap for profile plot.")
+@click.option("--cmap-landscape", default=None, help="Colormap for landscape plot.")
+@click.option("--facecolor", type=str, default=None, help="Background color.")
+@click.option("--fontsize-base", type=int, default=None, help="Base font size.")
+# --- Figure and Inset Options ---
+@click.option(
+    "--figsize",
+    nargs=2,
+    type=(float, float),
+    default=(5.37, 5.37),
+    show_default=True,
+    help="Figure width, height in inches.",
+)
+@click.option(
+    "--fig-height",
+    type=float,
+    default=None,
+    help="Figure height in inches.",
+)
+@click.option(
+    "--aspect-ratio",
+    type=float,
+    default=None,
+    help="Figure aspect ratio.",
+)
+@click.option(
+    "--dpi",
+    type=int,
+    default=200,
+    show_default=True,
+    help="Resolution in Dots Per Inch.",
+)
+@click.option(
+    "--zoom-ratio",
+    type=float,
+    default=0.5,
+    show_default=True,
+    help="Scale the inset image.",
+)
+@add_render_options
+@click.option(
+    "--arrow-head-length",
+    type=float,
+    default=0.2,
+    show_default=True,
+    help="Arrow head length.",
+)
+@click.option(
+    "--arrow-head-width",
+    type=float,
+    default=0.3,
+    show_default=True,
+    help="Arrow head width.",
+)
+@click.option(
+    "--arrow-tail-width",
+    type=float,
+    default=0.1,
+    show_default=True,
+    help="Arrow tail width.",
+)
+# --- Path/Spline Options ---
+@click.option(
+    "--highlight-last/--no-highlight-last",
+    is_flag=True,
+    default=True,
+    help="Highlight last path.",
+)
+@click.option(
+    "--spline-method",
+    type=click.Choice(["hermite", "spline", "none"]),
+    default="hermite",
+    help=(
+        "Profile interpolant: hermite (uses -f_para as dE/drc; path RC only), "
+        "spline (cubic through energies), none (markers + straight segments). "
+        "Image-index RC defaults hermite→spline (force slopes are not dE/dindex)."
+    ),
+)
+# --- Inset Position Options ---
+@click.option(
+    "--draw-reactant",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Reactant inset pos (x, y, rad).",
+)
+@click.option(
+    "--draw-saddle",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Saddle inset pos (x, y, rad).",
+)
+@click.option(
+    "--draw-product",
+    type=(float, float, float),
+    nargs=3,
+    default=(15, 60, 0.1),
+    show_default=True,
+    help="Product inset pos (x, y, rad).",
+)
+@click.option(
+    "--cache-file",
+    type=click.Path(path_type=Path),
+    default=Path(".neb_landscape.parquet"),
+    help="Parquet cache file.",
+)
+@click.option(
+    "--force-recompute",
+    is_flag=True,
+    default=False,
+    help="Force re-calculation of RMSD.",
+)
+@click.option(
+    "--mmf-peaks/--no-mmf-peaks",
+    is_flag=True,
+    default=None,
+    help="Overlay OCI/MMF refinement samples on landscape (auto-detected from climb movies).",
+)
+@click.option(
+    "--peak-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=None,
+    help="Directory containing OCI/MMF refinement outputs (for example climb/climb.con).",
+)
+@click.option(
+    "--show-evolution",
+    is_flag=True,
+    default=False,
+    help="Show band evolution across iterations (requires write_movies data).",
+)
+@click.option(
+    "--show-legend/--no-legend",
+    default=True,
+    help="Show the legends.",
+)
+@click.option(
+    "--ira-kmax",
+    default=IRA_KMAX_DEFAULT,
+    help="kmax factor for IRA.",
+)
+def main(ctx, config, **params):
+    """CLI entry: merge flags/config then run plot_neb_from_settings."""
+    return run_from_click(
+        "neb", plot_neb_from_settings, ctx, config=config, **params
     )
-    return plot_neb_from_settings(settings)
 
 
-def main(
-    ctx,
-    config,
-    # --- Input Files ---
-    input_dat_pattern,
-    input_path_pattern,
-    con_file,
-    additional_con,
-    # --- Data Source ---
-    source,
-    input_traj,
-    input_h5,
-    # --- Plot Behavior ---
-    plot_type,
-    landscape_mode,
-    landscape_path,
-    project_path,
-    rc_mode,
-    plot_structures,
-    rbf_smoothing,
-    show_pts,
-    plot_mode,
-    surface_type,
-    n_inducing,
-    # --- Output & Slicing ---
-    output_file,
-    start,
-    end,
-    # --- Plot Aesthetics ---
-    normalize_rc,
-    title,
-    xlabel,
-    ylabel,
-    energy_unit,
-    highlight_last,
-    # --- Theme ---
-    theme,
-    cmap_profile,
-    cmap_landscape,
-    facecolor,
-    fontsize_base,
-    # --- Figure & Inset ---
-    figsize,
-    fig_height,
-    aspect_ratio,
-    dpi,
-    zoom_ratio,
-    rotation,
-    perspective_tilt,
-    strip_renderer,
-    xyzrender_config,
-    strip_spacing,
-    strip_dividers,
-    arrow_head_length,
-    arrow_head_width,
-    arrow_tail_width,
-    # --- Spline ---
-    spline_method,
-    # --- Inset Positions ---
-    draw_reactant,
-    draw_saddle,
-    draw_product,
-    # --- OCI-NEB/RONEB ---
-    mmf_peaks,
-    peak_dir,
-    show_evolution,
-    show_legend,
-    # Caching
-    cache_file,
-    force_recompute,
-    ira_kmax,
-    sp_file,
-    augment_dat,
-    augment_con,
-):
-    """Main entry point for NEB plot script.
-
-    Prefer ``--config plot.toml`` for shared style/render settings and inputs;
-    explicit flags override the file (see ``rgpycrumbs.eon.plot_config``).
-    """
-
-    settings = resolve_from_click(
-        "neb",
-        ctx,
-        config=config,
-        input_dat_pattern=input_dat_pattern,
-        input_path_pattern=input_path_pattern,
-        con_file=con_file,
-        additional_con=additional_con,
-        source=source,
-        input_traj=input_traj,
-        input_h5=input_h5,
-        plot_type=plot_type,
-        landscape_mode=landscape_mode,
-        landscape_path=landscape_path,
-        project_path=project_path,
-        rc_mode=rc_mode,
-        plot_structures=plot_structures,
-        rbf_smoothing=rbf_smoothing,
-        show_pts=show_pts,
-        plot_mode=plot_mode,
-        surface_type=surface_type,
-        n_inducing=n_inducing,
-        output_file=output_file,
-        start=start,
-        end=end,
-        normalize_rc=normalize_rc,
-        title=title,
-        xlabel=xlabel,
-        ylabel=ylabel,
-        energy_unit=energy_unit,
-        highlight_last=highlight_last,
-        theme=theme,
-        cmap_profile=cmap_profile,
-        cmap_landscape=cmap_landscape,
-        facecolor=facecolor,
-        fontsize_base=fontsize_base,
-        figsize=figsize,
-        fig_height=fig_height,
-        aspect_ratio=aspect_ratio,
-        dpi=dpi,
-        zoom_ratio=zoom_ratio,
-        rotation=rotation,
-        perspective_tilt=perspective_tilt,
-        strip_renderer=strip_renderer,
-        xyzrender_config=xyzrender_config,
-        strip_spacing=strip_spacing,
-        strip_dividers=strip_dividers,
-        arrow_head_length=arrow_head_length,
-        arrow_head_width=arrow_head_width,
-        arrow_tail_width=arrow_tail_width,
-        spline_method=spline_method,
-        draw_reactant=draw_reactant,
-        draw_saddle=draw_saddle,
-        draw_product=draw_product,
-        mmf_peaks=mmf_peaks,
-        peak_dir=peak_dir,
-        show_evolution=show_evolution,
-        show_legend=show_legend,
-        cache_file=cache_file,
-        force_recompute=force_recompute,
-        ira_kmax=ira_kmax,
-        sp_file=sp_file,
-        augment_dat=augment_dat,
-        augment_con=augment_con,
-    )
-    return plot_neb_from_settings(settings)
+if __name__ == "__main__":
+    main()

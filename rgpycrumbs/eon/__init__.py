@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 """eOn tools: CLI scripts and library plot entry points.
 
-Library (no Click argv)::
+::
 
     from rgpycrumbs.eon import plot_neb, plot_min, plot_saddle
 
@@ -11,42 +11,26 @@ Library (no Click argv)::
     plot_min(job_dir="minimization_run", plot_type="landscape", output="min.png")
     plot_saddle(job_dir="saddle_run", plot_type="profile", output="sad.png")
 
-CLI remains ``rgpycrumbs eon plt-{neb,min,saddle}`` (same pipelines).
-
-.. versionadded:: 1.7.0
+CLI: ``rgpycrumbs eon plt-{neb,min,saddle}`` (same pipelines).
 """
 
 from __future__ import annotations
 
 from typing import Any
 
+_COMMANDS = ("neb", "min", "saddle")
 __all__ = [
-    "plot_min",
-    "plot_min_from_settings",
-    "plot_neb",
-    "plot_neb_from_settings",
-    "plot_saddle",
-    "plot_saddle_from_settings",
+    name
+    for cmd in _COMMANDS
+    for name in (f"plot_{cmd}", f"plot_{cmd}_from_settings")
 ]
-
-_LAZY = {
-    "plot_neb": ("rgpycrumbs.eon.plt_neb", "plot_neb"),
-    "plot_neb_from_settings": ("rgpycrumbs.eon.plt_neb", "plot_neb_from_settings"),
-    "plot_min": ("rgpycrumbs.eon.plt_min", "plot_min"),
-    "plot_min_from_settings": ("rgpycrumbs.eon.plt_min", "plot_min_from_settings"),
-    "plot_saddle": ("rgpycrumbs.eon.plt_saddle", "plot_saddle"),
-    "plot_saddle_from_settings": (
-        "rgpycrumbs.eon.plt_saddle",
-        "plot_saddle_from_settings",
-    ),
-}
 
 
 def __getattr__(name: str) -> Any:
-    if name in _LAZY:
-        import importlib
+    for cmd in _COMMANDS:
+        if name in {f"plot_{cmd}", f"plot_{cmd}_from_settings"}:
+            import importlib
 
-        mod_name, attr = _LAZY[name]
-        mod = importlib.import_module(mod_name)
-        return getattr(mod, attr)
+            mod = importlib.import_module(f"rgpycrumbs.eon.plt_{cmd}")
+            return getattr(mod, name)
     raise AttributeError(name)

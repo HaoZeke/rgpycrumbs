@@ -307,6 +307,53 @@ def resolve_from_click(
     )
 
 
+def run_plot(
+    command: str,
+    runner: Any,
+    *,
+    config: str | Path | None = None,
+    **overrides: Any,
+) -> Any:
+    """Merge settings for *command* then call *runner*(settings).
+
+    Shared by the library ``plot_*`` entry points. *runner* is typically
+    ``plot_*_from_settings``.
+    """
+    settings = merge_plot_settings(
+        command,
+        config_path=config,
+        cli_overrides=overrides or None,
+    )
+    return runner(settings)
+
+
+def run_from_click(
+    command: str,
+    runner: Any,
+    ctx: Any,
+    *,
+    config: str | Path | None = None,
+    **params: Any,
+) -> Any:
+    """CLI path: ``resolve_from_click`` then *runner*(settings)."""
+    return runner(resolve_from_click(command, ctx, config=config, **params))
+
+
+def library_plot(command: str, runner: Any) -> Any:
+    """Build a keyword-only library entry that shares :func:`run_plot`."""
+
+    def plot(*, config: str | Path | None = None, **overrides: Any) -> Any:
+        return run_plot(command, runner, config=config, **overrides)
+
+    plot.__name__ = f"plot_{command}"
+    plot.__qualname__ = f"plot_{command}"
+    plot.__doc__ = (
+        f"Library entry for eOn {command} plots (no Click argv).\n\n"
+        f"Same pipeline as ``rgpycrumbs eon plt-{command}``."
+    )
+    return plot
+
+
 MINIMAL_CONFIG_EXAMPLE = """\
 # Minimal rgpkgs eOn plot config (TOML)
 # Use: rgpycrumbs eon plt-neb --config plot.toml

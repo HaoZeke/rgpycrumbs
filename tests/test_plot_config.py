@@ -211,7 +211,8 @@ def test_cli_help_mentions_config():
         tree = ast.parse((eon / name).read_text(), filename=name)
         src = (eon / name).read_text()
         assert "add_config_option" in src
-        assert "resolve_from_click" in src
+        assert "run_from_click" in src
+        assert "library_plot" in src
         assert "@click.pass_context" in src or "pass_context" in src
 
 

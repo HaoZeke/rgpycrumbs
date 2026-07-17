@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023-present Rohit Goswami <rog32@hi.is>
 #
 # SPDX-License-Identifier: MIT
-"""Library API for eOn NEB plots (no Click argv)."""
+"""Library API for eOn plot entry points (no Click argv)."""
 
 from __future__ import annotations
 
@@ -10,6 +10,25 @@ import pytest
 from tests._optional_imports import has_module_spec
 
 pytestmark = pytest.mark.pure
+
+
+def test_run_plot_dispatches_to_runner():
+    from rgpycrumbs.eon.plot_config import library_plot, run_plot
+
+    seen: list[dict] = []
+
+    def runner(settings):
+        seen.append(settings)
+        return settings["plot_type"]
+
+    assert run_plot("min", runner, plot_type="landscape") == "landscape"
+    assert seen[0]["plot_type"] == "landscape"
+    assert seen[0]["prefix"] == "minimization"
+
+    api = library_plot("saddle", runner)
+    assert api.__name__ == "plot_saddle"
+    assert api(plot_type="profile") == "profile"
+    assert seen[1]["plot_type"] == "profile"
 
 
 def test_plot_min_saddle_merge_settings():
@@ -28,7 +47,7 @@ def test_plot_min_saddle_merge_settings():
 
 
 def test_plot_neb_merge_settings():
-    """Library path is merge_plot_settings + plot_neb_from_settings (no argv)."""
+    """Library path is merge_plot_settings + runner (no argv)."""
     from rgpycrumbs.eon.plot_config import merge_plot_settings
 
     s = merge_plot_settings(
@@ -59,7 +78,11 @@ def test_plot_neb_merge_settings():
     reason="plot_neb import needs plot stack",
 )
 def test_plot_neb_importable():
+    import types
+
     from rgpycrumbs.eon import plot_neb, plot_neb_from_settings
 
     assert callable(plot_neb)
     assert callable(plot_neb_from_settings)
+    # from_settings must be a plain function (not a Click Command)
+    assert isinstance(plot_neb_from_settings, types.FunctionType)

@@ -39,7 +39,6 @@ from typing import Any
 
 import click
 import matplotlib.pyplot as plt
-import numpy as np
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -52,7 +51,7 @@ if warn_on_direct_script_import is not None:
 try:
     from ._render_cli import add_config_option, add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
-    from .plot_config import resolve_from_click
+    from .plot_config import library_plot, run_from_click
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
     from rgpycrumbs.eon._single_ended_cli import (
@@ -60,7 +59,7 @@ except ImportError:  # pragma: no cover - direct script execution
         load_trajectories,
         overlay_labels,
     )
-    from rgpycrumbs.eon.plot_config import resolve_from_click
+    from rgpycrumbs.eon.plot_config import library_plot, run_from_click
 from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 from chemparseplot.plot.optimization import (
     plot_single_ended_convergence,
@@ -79,6 +78,93 @@ log = logging.getLogger("rich")
 
 IRA_KMAX_DEFAULT = 14.0
 
+
+def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
+    """Run the eOn saddle plot pipeline from a resolved settings mapping.
+
+    Prefer :func:`plot_saddle` for library callers. Shared by the Click CLI.
+
+    .. versionadded:: 1.10.3
+    """
+    job_dir = settings.get("job_dir") or ()
+    if not job_dir:
+        raise ValueError(
+            "Provide --job-dir and/or set [saddle].job_dir in --config"
+        )
+    label = settings.get("label") or ()
+    plot_type = settings["plot_type"]
+    ref_product = settings.get("ref_product")
+    project_path = settings["project_path"]
+    surface_type = settings["surface_type"]
+    ira_kmax = settings["ira_kmax"]
+    energy_unit = settings["energy_unit"]
+    theme = settings["theme"]
+    plot_structures = settings["plot_structures"]
+    strip_renderer = settings["strip_renderer"]
+    xyzrender_config = settings["xyzrender_config"]
+    strip_spacing = settings["strip_spacing"]
+    strip_zoom = settings.get("strip_zoom")
+    strip_dividers = settings["strip_dividers"]
+    rotation = settings["rotation"]
+    perspective_tilt = settings["perspective_tilt"]
+    output = settings.get("output")
+    dpi = settings["dpi"]
+    verbose = settings["verbose"]
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    output = default_output_path("saddle", plot_type, output)
+    trajs = load_trajectories(
+        job_dir,
+        load_dimer_trajectory,
+        log_info=log.info,
+        noun="trajectory",
+        detail=lambda traj: (
+            f"{len(traj.atoms_list)} frames, saddle="
+            f"{'yes' if traj.saddle_atoms is not None else 'no'}"
+        ),
+    )
+    labels = overlay_labels(job_dir, label)
+
+    traj = trajs[0]  # primary trajectory for single-traj plot types
+
+    active_theme = get_theme(theme)
+    setup_global_theme(active_theme)
+
+    if plot_type == "profile":
+        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
+    elif plot_type == "landscape":
+        _plot_landscape(
+            trajs,
+            labels,
+            output,
+            dpi,
+            ref_product=ref_product,
+            project_path=project_path,
+            surface_type=surface_type,
+            ira_kmax=ira_kmax,
+            energy_unit=energy_unit,
+            cmap=active_theme.cmap_landscape,
+            plot_structures=plot_structures,
+            strip_renderer=strip_renderer,
+            xyzrender_config=xyzrender_config,
+            strip_spacing=strip_spacing,
+            strip_zoom=strip_zoom,
+            strip_dividers=strip_dividers,
+            rotation=rotation,
+            perspective_tilt=perspective_tilt,
+            theme=active_theme,
+        )
+    elif plot_type == "convergence":
+        _plot_convergence(trajs, labels, output, dpi)
+    elif plot_type == "mode-evolution":
+        _plot_mode_evolution(traj, output, dpi)
+
+    log.info("Saved %s", output)
+
+    return Path(output) if output else None
+
+plot_saddle = library_plot("saddle", plot_saddle_from_settings)
 
 @click.command()
 @click.pass_context
@@ -167,169 +253,11 @@ IRA_KMAX_DEFAULT = 14.0
     help="Output resolution.",
 )
 @click.option("-v", "--verbose", is_flag=True, help="Enable debug logging.")
-
-def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
-    """Run the eOn saddle plot pipeline from a resolved settings mapping.
-
-    Prefer :func:`plot_saddle` for library callers. Shared by the Click CLI.
-
-    .. versionadded:: 1.10.3
-    """
-    job_dir = settings.get("job_dir") or ()
-    if not job_dir:
-        raise ValueError(
-            "Provide --job-dir and/or set [saddle].job_dir in --config"
-        )
-    label = settings.get("label") or ()
-    plot_type = settings["plot_type"]
-    ref_product = settings.get("ref_product")
-    project_path = settings["project_path"]
-    surface_type = settings["surface_type"]
-    ira_kmax = settings["ira_kmax"]
-    energy_unit = settings["energy_unit"]
-    theme = settings["theme"]
-    plot_structures = settings["plot_structures"]
-    strip_renderer = settings["strip_renderer"]
-    xyzrender_config = settings["xyzrender_config"]
-    strip_spacing = settings["strip_spacing"]
-    strip_zoom = settings.get("strip_zoom")
-    strip_dividers = settings["strip_dividers"]
-    rotation = settings["rotation"]
-    perspective_tilt = settings["perspective_tilt"]
-    output = settings.get("output")
-    dpi = settings["dpi"]
-    verbose = settings["verbose"]
-    """Plot dimer/saddle search trajectory visualization.
-
-    Use --job-dir multiple times to overlay trajectories from different
-    optimizers (e.g. FIRE, LBFGS, SD) on the same landscape or profile.
-    """
-    if verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
-
-    output = default_output_path("saddle", plot_type, output)
-    trajs = load_trajectories(
-        job_dir,
-        load_dimer_trajectory,
-        log_info=log.info,
-        noun="trajectory",
-        detail=lambda traj: (
-            f"{len(traj.atoms_list)} frames, saddle="
-            f"{'yes' if traj.saddle_atoms is not None else 'no'}"
-        ),
+def main(ctx, config, **params):
+    """CLI entry: merge flags/config then run plot_saddle_from_settings."""
+    return run_from_click(
+        "saddle", plot_saddle_from_settings, ctx, config=config, **params
     )
-    labels = overlay_labels(job_dir, label)
-
-    traj = trajs[0]  # primary trajectory for single-traj plot types
-
-    active_theme = get_theme(theme)
-    setup_global_theme(active_theme)
-
-    if plot_type == "profile":
-        _plot_profile(trajs, labels, output, dpi, energy_unit=energy_unit)
-    elif plot_type == "landscape":
-        _plot_landscape(
-            trajs,
-            labels,
-            output,
-            dpi,
-            ref_product=ref_product,
-            project_path=project_path,
-            surface_type=surface_type,
-            ira_kmax=ira_kmax,
-            energy_unit=energy_unit,
-            cmap=active_theme.cmap_landscape,
-            plot_structures=plot_structures,
-            strip_renderer=strip_renderer,
-            xyzrender_config=xyzrender_config,
-            strip_spacing=strip_spacing,
-            strip_zoom=strip_zoom,
-            strip_dividers=strip_dividers,
-            rotation=rotation,
-            perspective_tilt=perspective_tilt,
-            theme=active_theme,
-        )
-    elif plot_type == "convergence":
-        _plot_convergence(trajs, labels, output, dpi)
-    elif plot_type == "mode-evolution":
-        _plot_mode_evolution(traj, output, dpi)
-
-    log.info("Saved %s", output)
-
-    return Path(output) if output else None
-
-
-def plot_saddle(
-    *,
-    config: str | Path | None = None,
-    **overrides: Any,
-) -> Path | None:
-    """Library entry for eOn saddle plots (no Click argv).
-
-    Same pipeline as ``rgpycrumbs eon plt-saddle``.
-
-    .. versionadded:: 1.10.3
-    """
-    from rgpycrumbs.eon.plot_config import merge_plot_settings
-
-    settings = merge_plot_settings(
-        "saddle",
-        config_path=config,
-        cli_overrides=overrides or None,
-    )
-    return plot_saddle_from_settings(settings)
-
-
-def main(
-    ctx,
-    config,
-    job_dir,
-    label,
-    plot_type,
-    ref_product,
-    project_path,
-    surface_type,
-    ira_kmax,
-    energy_unit,
-    theme,
-    plot_structures,
-    strip_renderer,
-    xyzrender_config,
-    strip_spacing,
-    strip_zoom,
-    strip_dividers,
-    rotation,
-    perspective_tilt,
-    output,
-    dpi,
-    verbose,
-):
-    settings = resolve_from_click(
-        "saddle",
-        ctx,
-        config=config,
-        job_dir=job_dir,
-        label=label,
-        plot_type=plot_type,
-        ref_product=ref_product,
-        project_path=project_path,
-        surface_type=surface_type,
-        ira_kmax=ira_kmax,
-        energy_unit=energy_unit,
-        theme=theme,
-        plot_structures=plot_structures,
-        strip_renderer=strip_renderer,
-        xyzrender_config=xyzrender_config,
-        strip_spacing=strip_spacing,
-        strip_zoom=strip_zoom,
-        strip_dividers=strip_dividers,
-        rotation=rotation,
-        perspective_tilt=perspective_tilt,
-        output=output,
-        dpi=dpi,
-        verbose=verbose,
-    )
-    return plot_saddle_from_settings(settings)
 
 def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
     plot_single_ended_profile(
