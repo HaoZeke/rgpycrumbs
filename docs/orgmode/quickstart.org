@@ -20,7 +20,7 @@ examples.
      end
      subgraph use["Use"]
        SURF[surfaces GP]
-       CLI[eon plt-neb / plt-min]
+       CLI[plot_neb / eon plt-neb]
        TOML[--config plot.toml]
      end
      CORE --> AUTO
@@ -35,8 +35,8 @@ examples.
    .. grid-item-card:: Surfaces
       JAX kernel models for PES-style interpolation.
 
-   .. grid-item-card:: eOn plot CLIs
-      Prefer TOML for surface-fit knobs (``auto_thin`` default off).
+   .. grid-item-card:: eOn library + CLI plots
+      ``from rgpycrumbs.eon import plot, plot_neb``; TOML for surface-fit knobs.
 #+end_export
 
 * Installation
@@ -83,6 +83,27 @@ and ~ira_mod~, plus heavier optional tools such as ~ovito~.
 |-------------------------------------+------------------------------------------------------|
 | ~RGPYCRUMBS_AUTO_DEPS=1~ | Enable on-demand dependency installation via uv/pip |
 | ~RGPYCRUMBS_PARENT_SITE_PACKAGES~ | Colon-separated paths to parent env site-packages |
+
+
+* Library eOn plots
+
+Prefer the Python API for notebooks and scripts (same pipelines as the CLI).
+Heavy deps (~chemparseplot~, ~jax~, ~xyzrender~, ~adjustText~) stage through
+~ensure_import~; library entry points enable ~RGPYCRUMBS_AUTO_DEPS~ by default.
+
+#+begin_src python
+from rgpycrumbs.eon import plot, plot_neb, plot_min
+
+plot_neb(plot_type="profile", con_file="neb.con", output_file="1d.pdf")
+plot_min(job_dir="minimization_run", plot_type="landscape", output="min.pdf")
+
+# Live pyeonclient objects or ConFrame lists
+# plot(neb, plot_type="profile", output_file="1d.pdf")
+# plot(frames, kind="neb", plot_type="profile", output_file="1d.pdf")
+#+end_src
+
+Use ~config="plot.toml"~ for strip / surface-fit settings. See
+[[file:tools/eon/plot_config.org][plot TOML config]] and the eOn tool pages under Tools.
 
 * Surface Fitting
 

@@ -67,6 +67,18 @@ runs.
 
       .. code-block:: python
 
+         from rgpycrumbs.eon import plot_neb, plot_min
+
+         plot_neb(
+             plot_type="landscape",
+             con_file="neb.con",
+             config="plot.toml",
+             output_file="neb.pdf",
+         )
+         # Live objects / ConFrames:
+         # plot(neb, plot_type="profile", output_file="1d.pdf")
+         # plot(frames, kind="min", plot_type="landscape", output="min.pdf")
+
          from chemparseplot.plot.neb import SurfaceFitConfig
          cfg = SurfaceFitConfig(auto_thin=True, max_surface_points=64)
 

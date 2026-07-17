@@ -2,7 +2,8 @@
 #+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
 
 * eOn Helpers
-  These tools work with [[https://eondocs.org][eOn output files]].
+  Tools for eOn job output, library plotting, and CON I/O. See
+  [[https://eondocs.org][eOn docs]] and [[https://pypi.org/project/pyeonclient/][pyeonclient]] for the client/runtime.
 
 #+BEGIN_EXPORT rst
 .. toctree::
@@ -18,6 +19,33 @@
    plt_saddle
    ptmdisp
 #+END_EXPORT
+
+** Library plot API (preferred for notebooks)
+
+Use the Python library instead of shelling out to the CLI when you already
+have paths, job directories, or live pyeonclient objects:
+
+#+begin_src python
+from rgpycrumbs.eon import plot, plot_neb, plot_min, plot_saddle
+
+# File / job-dir based (same pipelines as the CLI)
+plot_neb(plot_type="profile", con_file="neb.con", output_file="1d.pdf")
+plot_min(job_dir="minimization_run", plot_type="landscape", output="min.pdf")
+
+# Live pyeonclient objects (after compute / retain_frames)
+plot(neb, plot_type="profile", output_file="1d.pdf")          # path_frames()
+plot(matter, plot_type="profile", output="min.pdf")           # movie_frames()
+plot(ss, plot_type="profile", output="sad.pdf")               # climb_frames()
+
+# Or an explicit ConFrame sequence (kind required; no job-dir sniffing)
+plot(frames, kind="neb", plot_type="profile", output_file="1d.pdf")
+#+end_src
+
+Library plot entry points enable ~RGPYCRUMBS_AUTO_DEPS~ by default (same as the
+CLI dispatcher). Heavy deps (~chemparseplot~, ~jax~, ~adjustText~, ~xyzrender~)
+stage via ~ensure_import~ + ~uv~ when missing—no host env pins required for
+those. Prefer ~--config plot.toml~ / ~config=~ for surface-fit and strip knobs
+([[file:plot_config.org][plot TOML config]]).
 
 ** API Reference
 For developer details, see the @@rst::doc:`eOn Helper Reference

@@ -5,7 +5,24 @@
 
 This tool generates 2D optimization landscape plots and convergence profiles from dimer or saddle point search calculations. Like =plt-min= and =plt-neb=, it uses the shared renderer-option bundle for structure strips and viewing controls.
 
-** Method
+*
+* Library API
+
+#+begin_src python
+from rgpycrumbs.eon import plot_saddle, plot
+
+# Job directory (write_movies=true)
+plot_saddle(job_dir="results/", plot_type="profile", output="out.pdf")
+
+# Live object frames (Matter.movie_frames / MinModeSaddleSearch.climb_frames)
+# or a ConFrame sequence with kind="saddle"
+plot(frames, kind="saddle", plot_type="profile", output="out.pdf")
+#+end_src
+
+Same pipeline as the CLI. Heavy deps stage via ~ensure_import~ when
+~RGPYCRUMBS_AUTO_DEPS~ is on (library entries enable it by default).
+
+* Method
 
 Uses the same gradient-enhanced surface interpolation as NEB landscapes, but with different reference structures and axis labels. The (s, d) projection maps into optimization progress (s) and lateral deviation (d), where s represents how far along the path from initial to saddle, and d represents wasted sideways motion.
 

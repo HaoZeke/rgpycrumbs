@@ -29,7 +29,7 @@ final structure. Metadata-rich full CON frames are treated as the canonical
 source of per-iteration metrics.
 
 #+begin_src bash
-pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1
+pip install rgpycrumbs  # plot heavies via library AUTO_DEPS / ensure_import
 #+end_src
 
 The expected directory layout:

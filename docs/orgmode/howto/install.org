@@ -264,3 +264,11 @@ from rgpycrumbs.surfaces import FastTPS  # Auto-installs JAX
 
 - [[file:../dev/lazy_imports.org][Lazy Import Pattern]] - Technical implementation details
 - [[file:../reference/glossary.org][Glossary]] - Optional dependencies definition
+
+** Library plot entry points
+
+~from rgpycrumbs.eon import plot_neb~ / ~plot_min~ / ~plot()~ call
+~enable_library_auto_deps()~, so ~RGPYCRUMBS_AUTO_DEPS~ defaults on (same as
+CLI). That stages ~chemparseplot~, ~jax~, ~adjustText~, and ~xyzrender~ without
+host pins. Structure strips use the xyzrender Python API (not a PATH binary).
+

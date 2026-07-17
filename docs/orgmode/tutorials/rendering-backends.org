@@ -14,14 +14,18 @@ unique features. Each backend has different strengths.
 
 | Backend | Style | Speed | Features | Install |
 |---------+-------+-------+----------+---------|
-| xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | ~pip install xyzrender~ |
+| xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | ~ensure_import~ / AUTO_DEPS (or ~pip install xyzrender~) |
 | ASE | Space-filling | Fast | Built-in, no extra deps | Built-in |
 | solvis | Ball-and-stick | Medium | Transparent bg, PyVista 3D | ~pip install solvis-tools~ |
 | ovito | Configurable | Slow | Full MD viz, modifiers | conda-forge / separate heavy install |
 
 * xyzrender
 
-The default backend. Uses the [[https://github.com/aligfellow/xyzrender][xyzrender]] CLI with the ~paton~ preset.
+The default backend. Structure strips call the [[https://github.com/aligfellow/xyzrender][xyzrender]]
+**Python API** (~xyzrender.render~) with the ~paton~ preset. The package is
+staged via ~ensure_import("xyzrender")~ when ~RGPYCRUMBS_AUTO_DEPS=1~ (library
+plot entry points enable that by default). You do *not* need a ~xyzrender~
+binary on ~PATH~ for ~rgpycrumbs eon plt-*~ / ~plot_neb~.
 
 ** Auto-orientation
 
@@ -47,10 +51,12 @@ xyzrender supports bond order display and non-covalent interaction
 detection:
 
 #+begin_src shell
-# These are xyzrender CLI flags, not rgpycrumbs flags
-# For advanced rendering, use xyzrender directly:
+# Advanced one-off renders: optional CLI (same package as the Python API)
 xyzrender structure.xyz -o output.png --config paton --hy --bo --nci
 #+end_src
+
+For strips inside ~plt-neb~ / ~plot_neb~, only ~--strip-renderer~ /
+~--xyzrender-config~ (or TOML) matter; deps resolve lazily.
 
 ** VdW Spheres
 

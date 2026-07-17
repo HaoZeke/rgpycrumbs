@@ -5,7 +5,24 @@
 
 This tool generates energy profiles, 2D optimization landscapes, and convergence plots from minimization calculations. The CLI also shares the same structure-strip renderer contract as =plt-neb= and =plt-saddle=, so the same backend and viewing controls work across the full eOn plotting stack.
 
-** Method
+*
+* Library API
+
+#+begin_src python
+from rgpycrumbs.eon import plot_min, plot
+
+# Job directory (write_movies=true)
+plot_min(job_dir="results/", plot_type="profile", output="out.pdf")
+
+# Live object frames (Matter.movie_frames / MinModeSaddleSearch.climb_frames)
+# or a ConFrame sequence with kind="min"
+plot(frames, kind="min", plot_type="profile", output="out.pdf")
+#+end_src
+
+Same pipeline as the CLI. Heavy deps stage via ~ensure_import~ when
+~RGPYCRUMBS_AUTO_DEPS~ is on (library entries enable it by default).
+
+* Method
 
 Same projection approach as NEB/saddle search but using (initial, minimum) as references. The 2D landscape shows s = optimization progress toward the minimum and d = lateral deviation during optimization.
 

@@ -35,6 +35,33 @@ To show the plot interactively without saving:
 python -m rgpycrumbs.cli eon plt-neb --plot-type profile
 #+END_SRC
 
+
+* Library API
+
+#+begin_src python
+from rgpycrumbs.eon import plot_neb, plot
+
+# Job files / patterns (same as CLI)
+plot_neb(
+    plot_type="landscape",
+    con_file="neb.con",
+    surface_type="grad_imq",
+    plot_structures="crit_points",
+    output_file="neb_2d.pdf",
+    config="plot.toml",  # optional TOML
+)
+
+# Live pyeonclient NEB after compute()
+plot(neb, plot_type="profile", output_file="1d.pdf")
+
+# Stamped ConFrame list (e.g. neb.path_frames())
+plot(frames, kind="neb", plot_type="profile", output_file="1d.pdf")
+#+end_src
+
+Library calls enable ~RGPYCRUMBS_AUTO_DEPS~ automatically so ~jax~ (for
+~grad_imq~ surfaces) and ~xyzrender~ (structure strips) resolve through
+~ensure_import~ without declaring them in the host environment.
+
 * Prefer TOML for suite options
 
 Use ~--config plot.toml~ for shared style, strip rendering, and surface-fit

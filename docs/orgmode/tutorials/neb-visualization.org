@@ -34,8 +34,12 @@ evolution plots.
 * Prerequisites
 
 #+begin_src bash
-# Core package with all rendering backends
-pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1 xyzrender solvis-tools ovito
+pip install rgpycrumbs
+# Library/CLI plot paths enable AUTO_DEPS by default (jax, chemparseplot,
+# xyzrender, adjustText via ensure_import + uv on PATH).
+# Optional explicit backends only if you need them:
+#   pip install solvis-tools    # strip_renderer=solvis
+#   # ovito: conda-forge / separate heavy install
 #+end_src
 
 The tutorial data ships with the rgpycrumbs source tree at

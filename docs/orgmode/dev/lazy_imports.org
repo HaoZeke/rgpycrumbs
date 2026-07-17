@@ -269,3 +269,11 @@ from rgpycrumbs.interpolation import spline_interp
 - [[file:cli_architecture.org][CLI Architecture]] - How lazy imports work in PEP 723 scripts
 - [[file:../contributing/test_requirements.org][Test Requirements]] - Testing optional dependencies
 - [[file:../tools/index.org][Tools Documentation]] - Tools using lazy imports
+
+* Library plot path
+
+=plot_neb= / =plot_min= / =plot_saddle= / =plot()= call =enable_library_auto_deps()=
+so =RGPYCRUMBS_AUTO_DEPS= defaults on (same as CLI). That stages
+=chemparseplot=, =jax=, =adjustText=, and =xyzrender= through =ensure_import=
+without host environment pins. Structure strips use the xyzrender *Python API*
+(not a binary on =PATH=).
