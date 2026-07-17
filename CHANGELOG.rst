@@ -19,6 +19,8 @@ Changed
 - ``plot_min_from_settings`` / ``plot_saddle_from_settings`` accept
   ``trajectory=``; ``plot_neb_from_settings`` accepts ``frames=`` / in-memory
   atoms (ConFrame object-plot path).
+- Floor ``chemparseplot[neb,plot]`` to ``>=1.9.14`` (frame_series) in
+  ``_aux`` AUTO_DEPS, PEP 723 headers, and optional ``[plot]`` extra.
 
 rgpycrumbs 1.10.3 (2026-07-17)
 ==============================

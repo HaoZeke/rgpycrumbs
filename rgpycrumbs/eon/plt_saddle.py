@@ -25,10 +25,10 @@ using the generalized (s, d) reaction valley projection. Supports:
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot[neb,plot]>=1.9.13,<2",
+#   "chemparseplot[neb,plot]>=1.9.14,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
-#   "rgpycrumbs>=1.10.2",
+#   "rgpycrumbs>=1.10.4",
 # ]
 # ///
 # Optional deps (jax for landscapes) via uv PEP 723 or RGPYCRUMBS_AUTO_DEPS=1.

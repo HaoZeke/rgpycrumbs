@@ -29,9 +29,9 @@ Example::
 #   "click",
 #   "numpy",
 #   "ase",
-#   "chemparseplot>=1.8.0",
+#   "chemparseplot[neb,plot]>=1.9.14,<2",
 #   "readcon>=0.7.0",
-#   "rgpycrumbs>=1.10.2",
+#   "rgpycrumbs>=1.10.4",
 # ]
 # ///
 
