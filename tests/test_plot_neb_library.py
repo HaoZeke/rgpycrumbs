@@ -7,19 +7,13 @@ from __future__ import annotations
 
 import pytest
 
+from tests._optional_imports import has_module_spec
+
 pytestmark = pytest.mark.pure
 
 
-def test_plot_neb_exported():
-    from rgpycrumbs.eon import plot_neb, plot_neb_from_settings
-    from rgpycrumbs.eon.plt_neb import plot_neb as plot_neb2
-
-    assert callable(plot_neb)
-    assert plot_neb is plot_neb2
-    assert callable(plot_neb_from_settings)
-
-
 def test_plot_neb_merge_settings():
+    """Library path is merge_plot_settings + plot_neb_from_settings (no argv)."""
     from rgpycrumbs.eon.plot_config import merge_plot_settings
 
     s = merge_plot_settings(
@@ -32,6 +26,9 @@ def test_plot_neb_merge_settings():
             "landscape_path": "all",
             "project_path": True,
             "title": "NEB-RMSD Surface",
+            "figsize": (12, 8),
+            "plot_structures": "all",
+            "strip_renderer": "xyzrender",
         },
     )
     assert s["plot_type"] == "landscape"
@@ -39,3 +36,15 @@ def test_plot_neb_merge_settings():
     assert s["landscape_path"] == "all"
     assert s["project_path"] is True
     assert s["title"] == "NEB-RMSD Surface"
+    assert s["plot_structures"] == "all"
+
+
+@pytest.mark.skipif(
+    not all(has_module_spec(m) for m in ("polars", "chemparseplot", "click")),
+    reason="plot_neb import needs plot stack",
+)
+def test_plot_neb_importable():
+    from rgpycrumbs.eon import plot_neb, plot_neb_from_settings
+
+    assert callable(plot_neb)
+    assert callable(plot_neb_from_settings)
