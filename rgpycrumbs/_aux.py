@@ -41,6 +41,8 @@ _DEPENDENCY_MAP: dict[str, str] = {
     "polars": "polars>=1.0",
     "eon_schema": "eon-schema>=0.2.0",
     "eon_schema.config": "eon-schema>=0.2.0",
+    # Structure strips (chemparseplot uses Python API, not PATH binary)
+    "xyzrender": "xyzrender>=0.1.3",
 }
 
 # CPU-only pip spec overrides for packages with heavy GPU backends.

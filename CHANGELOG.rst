@@ -1,3 +1,12 @@
+rgpycrumbs 1.10.8 (2026-07-17)
+==============================
+
+Fixed
+-----
+
+- Map ``xyzrender`` in ``ensure_import``; plot modules ``ensure_import``
+  chemparseplot before hard imports (lazy stack, no host pins for plot heavies).
+
 rgpycrumbs 1.10.7 (2026-07-17)
 ==============================
 

@@ -60,6 +60,14 @@ except ImportError:  # pragma: no cover - direct script execution
         overlay_labels,
     )
     from rgpycrumbs.eon.plot_config import library_plot, run_from_click
+# Lazy plot stack: AUTO_DEPS + ensure_import (same as jax / adjustText)
+try:
+    from rgpycrumbs._aux import enable_library_auto_deps, ensure_import as _ei
+    enable_library_auto_deps()
+    _ei("chemparseplot")
+except ImportError:
+    pass
+
 from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 from chemparseplot.plot.optimization import (
     plot_single_ended_convergence,
@@ -80,15 +88,15 @@ IRA_KMAX_DEFAULT = 14.0
 
 
 def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
-    from rgpycrumbs._aux import enable_library_auto_deps
-
-    enable_library_auto_deps()
     """Run the eOn saddle plot pipeline from a resolved settings mapping.
 
     Prefer :func:`plot_saddle` for library callers. Shared by the Click CLI.
 
     .. versionadded:: 1.10.3
     """
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     job_dir = settings.get("job_dir") or ()
     label = settings.get("label") or ()
     plot_type = settings["plot_type"]

@@ -91,6 +91,14 @@ try:
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
     from rgpycrumbs.eon.plot_config import library_plot, run_from_click
+# Lazy plot stack: AUTO_DEPS + ensure_import (same as jax / adjustText)
+try:
+    from rgpycrumbs._aux import enable_library_auto_deps, ensure_import as _ei
+    enable_library_auto_deps()
+    _ei("chemparseplot")
+except ImportError:
+    pass
+
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
@@ -179,9 +187,6 @@ NEB_PROFILE_MAIN_HEIGHT_IN = 3.55
 
 # --- CLI ---
 def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
-    from rgpycrumbs._aux import enable_library_auto_deps
-
-    enable_library_auto_deps()
     """Run the eOn NEB plot pipeline from a resolved settings mapping.
 
     Prefer :func:`plot_neb` for library callers. This entry is the shared
@@ -200,6 +205,9 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
 
     .. versionadded:: 1.10.2
     """
+    from rgpycrumbs._aux import enable_library_auto_deps
+
+    enable_library_auto_deps()
     input_dat_pattern = settings["input_dat_pattern"]
     input_path_pattern = settings["input_path_pattern"]
     con_file = settings.get("con_file")
