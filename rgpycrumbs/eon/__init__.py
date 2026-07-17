@@ -1,17 +1,32 @@
 # SPDX-FileCopyrightText: 2023-present Rohit Goswami <rog32@hi.is>
 #
 # SPDX-License-Identifier: MIT
+"""eOn tools: CLI scripts and library plot entry points.
 
-"""EON NEB plotting utilities.
+Library (no Click argv)::
 
-This module provides CLI tools for visualizing Nudged Elastic Band (NEB)
-calculations from eOn, trajectories, or ChemGP HDF5 outputs.
+    from rgpycrumbs.eon import plot_neb
+
+    plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")
+
+CLI remains ``rgpycrumbs eon plt-neb`` (same pipeline).
 
 .. versionadded:: 1.7.0
-    Refactored from monolithic plt_neb.py to modular structure.
 """
 
+from __future__ import annotations
+
+from typing import Any
+
 __all__ = [
-    # CLI is the main interface for eon
-    # Library functions delegated to chemparseplot
+    "plot_neb",
+    "plot_neb_from_settings",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    if name in {"plot_neb", "plot_neb_from_settings"}:
+        from rgpycrumbs.eon.plt_neb import plot_neb, plot_neb_from_settings
+
+        return plot_neb if name == "plot_neb" else plot_neb_from_settings
+    raise AttributeError(name)

@@ -54,6 +54,7 @@ https://realpython.com/python-script-structure/
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 import matplotlib as mpl
@@ -486,152 +487,26 @@ NEB_PROFILE_MAIN_HEIGHT_IN = 3.55
     default=IRA_KMAX_DEFAULT,
     help="kmax factor for IRA.",
 )
-def main(
-    ctx,
-    config,
-    # --- Input Files ---
-    input_dat_pattern,
-    input_path_pattern,
-    con_file,
-    additional_con,
-    # --- Data Source ---
-    source,
-    input_traj,
-    input_h5,
-    # --- Plot Behavior ---
-    plot_type,
-    landscape_mode,
-    landscape_path,
-    project_path,
-    rc_mode,
-    plot_structures,
-    rbf_smoothing,
-    show_pts,
-    plot_mode,
-    surface_type,
-    n_inducing,
-    # --- Output & Slicing ---
-    output_file,
-    start,
-    end,
-    # --- Plot Aesthetics ---
-    normalize_rc,
-    title,
-    xlabel,
-    ylabel,
-    energy_unit,
-    highlight_last,
-    # --- Theme ---
-    theme,
-    cmap_profile,
-    cmap_landscape,
-    facecolor,
-    fontsize_base,
-    # --- Figure & Inset ---
-    figsize,
-    fig_height,
-    aspect_ratio,
-    dpi,
-    zoom_ratio,
-    rotation,
-    perspective_tilt,
-    strip_renderer,
-    xyzrender_config,
-    strip_spacing,
-    strip_dividers,
-    arrow_head_length,
-    arrow_head_width,
-    arrow_tail_width,
-    # --- Spline ---
-    spline_method,
-    # --- Inset Positions ---
-    draw_reactant,
-    draw_saddle,
-    draw_product,
-    # --- OCI-NEB/RONEB ---
-    mmf_peaks,
-    peak_dir,
-    show_evolution,
-    show_legend,
-    # Caching
-    cache_file,
-    force_recompute,
-    ira_kmax,
-    sp_file,
-    augment_dat,
-    augment_con,
-):
-    """Main entry point for NEB plot script.
 
-    Prefer ``--config plot.toml`` for shared style/render settings and inputs;
-    explicit flags override the file (see ``rgpycrumbs.eon.plot_config``).
+def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
+    """Run the eOn NEB plot pipeline from a resolved settings mapping.
+
+    Prefer :func:`plot_neb` for library callers. This entry is the shared
+    implementation used by the Click CLI after ``resolve_from_click``.
+
+    Parameters
+    ----------
+    settings:
+        Mapping from :func:`rgpycrumbs.eon.plot_config.merge_plot_settings`
+        (or ``resolve_from_click``).
+
+    Returns
+    -------
+    pathlib.Path | None
+        Output path when a figure is written.
+
+    .. versionadded:: 1.10.2
     """
-
-    settings = resolve_from_click(
-        "neb",
-        ctx,
-        config=config,
-        input_dat_pattern=input_dat_pattern,
-        input_path_pattern=input_path_pattern,
-        con_file=con_file,
-        additional_con=additional_con,
-        source=source,
-        input_traj=input_traj,
-        input_h5=input_h5,
-        plot_type=plot_type,
-        landscape_mode=landscape_mode,
-        landscape_path=landscape_path,
-        project_path=project_path,
-        rc_mode=rc_mode,
-        plot_structures=plot_structures,
-        rbf_smoothing=rbf_smoothing,
-        show_pts=show_pts,
-        plot_mode=plot_mode,
-        surface_type=surface_type,
-        n_inducing=n_inducing,
-        output_file=output_file,
-        start=start,
-        end=end,
-        normalize_rc=normalize_rc,
-        title=title,
-        xlabel=xlabel,
-        ylabel=ylabel,
-        energy_unit=energy_unit,
-        highlight_last=highlight_last,
-        theme=theme,
-        cmap_profile=cmap_profile,
-        cmap_landscape=cmap_landscape,
-        facecolor=facecolor,
-        fontsize_base=fontsize_base,
-        figsize=figsize,
-        fig_height=fig_height,
-        aspect_ratio=aspect_ratio,
-        dpi=dpi,
-        zoom_ratio=zoom_ratio,
-        rotation=rotation,
-        perspective_tilt=perspective_tilt,
-        strip_renderer=strip_renderer,
-        xyzrender_config=xyzrender_config,
-        strip_spacing=strip_spacing,
-        strip_dividers=strip_dividers,
-        arrow_head_length=arrow_head_length,
-        arrow_head_width=arrow_head_width,
-        arrow_tail_width=arrow_tail_width,
-        spline_method=spline_method,
-        draw_reactant=draw_reactant,
-        draw_saddle=draw_saddle,
-        draw_product=draw_product,
-        mmf_peaks=mmf_peaks,
-        peak_dir=peak_dir,
-        show_evolution=show_evolution,
-        show_legend=show_legend,
-        cache_file=cache_file,
-        force_recompute=force_recompute,
-        ira_kmax=ira_kmax,
-        sp_file=sp_file,
-        augment_dat=augment_dat,
-        augment_con=augment_con,
-    )
     input_dat_pattern = settings["input_dat_pattern"]
     input_path_pattern = settings["input_path_pattern"]
     con_file = settings.get("con_file")
@@ -779,14 +654,14 @@ def main(
             # Critical failure for landscape/RMSD modes
             if plot_type == "landscape" or rc_mode == "rmsd":
                 log.critical("Cannot proceed without structures. Exiting.")
-                sys.exit(1)
+                raise RuntimeError(f'NEB plot failed (exit 1)')
 
     # --- Trajectory source: load once if applicable ---
     traj_atoms_list = None
     if source == "traj":
         if not input_traj:
             log.critical("--input-traj is required when --source traj is used.")
-            sys.exit(1)
+            raise RuntimeError(f'NEB plot failed (exit 1)')
         traj_atoms_list = load_trajectory(str(input_traj))
 
     if plot_type == "landscape":
@@ -801,7 +676,7 @@ def main(
         elif source == "hdf5":
             if not input_h5:
                 log.critical("--input-h5 is required when --source hdf5 is used.")
-                sys.exit(1)
+                raise RuntimeError(f'NEB plot failed (exit 1)')
             h5_str = str(input_h5)
             # Prefer history file for multi-step landscape
             try:
@@ -825,7 +700,7 @@ def main(
 
             if not dat_paths:
                 log.critical(f"No data files found for pattern: {input_dat_pattern}")
-                sys.exit(1)
+                raise RuntimeError(f'NEB plot failed (exit 1)')
 
             # Fallback if no path files found but main file exists
             if not con_paths and con_file:
@@ -1260,7 +1135,7 @@ def main(
         if source == "hdf5":
             if not input_h5:
                 log.critical("--input-h5 is required when --source hdf5 is used.")
-                sys.exit(1)
+                raise RuntimeError(f'NEB plot failed (exit 1)')
             h5_str = str(input_h5)
             # Use history final step if available, else result
             try:
@@ -1365,7 +1240,7 @@ def main(
 
             if not file_paths_to_plot:
                 log.error("No files found in range.")
-                sys.exit(1)
+                raise RuntimeError(f'NEB plot failed (exit 1)')
 
             # Optional: Load RMSD for X-axis
             rmsd_rc = None
@@ -1837,6 +1712,190 @@ def main(
     else:
         plt.show()
 
+    return Path(output_file) if output_file else None
 
-if __name__ == "__main__":
-    main()
+
+def plot_neb(
+    *,
+    config: str | Path | None = None,
+    **overrides: Any,
+) -> Path | None:
+    """Library entry for eOn NEB profile / landscape plots (no Click argv).
+
+    Builds settings via :func:`merge_plot_settings` then runs the same pipeline
+    as ``rgpycrumbs eon plt-neb``.
+
+    Examples
+    --------
+    >>> plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")
+    >>> plot_neb(
+    ...     plot_type="landscape",
+    ...     con_file="neb.con",
+    ...     output_file="2D.png",
+    ...     surface_type="grad_imq",
+    ...     landscape_path="all",
+    ...     project_path=True,
+    ... )
+
+    Cookbook-style defaults can be passed as keyword overrides; a TOML file
+    via *config* still works.
+
+    .. versionadded:: 1.10.2
+    """
+    from rgpycrumbs.eon.plot_config import merge_plot_settings
+
+    settings = merge_plot_settings(
+        "neb",
+        config_path=config,
+        cli_overrides=overrides or None,
+    )
+    return plot_neb_from_settings(settings)
+
+
+def main(
+    ctx,
+    config,
+    # --- Input Files ---
+    input_dat_pattern,
+    input_path_pattern,
+    con_file,
+    additional_con,
+    # --- Data Source ---
+    source,
+    input_traj,
+    input_h5,
+    # --- Plot Behavior ---
+    plot_type,
+    landscape_mode,
+    landscape_path,
+    project_path,
+    rc_mode,
+    plot_structures,
+    rbf_smoothing,
+    show_pts,
+    plot_mode,
+    surface_type,
+    n_inducing,
+    # --- Output & Slicing ---
+    output_file,
+    start,
+    end,
+    # --- Plot Aesthetics ---
+    normalize_rc,
+    title,
+    xlabel,
+    ylabel,
+    energy_unit,
+    highlight_last,
+    # --- Theme ---
+    theme,
+    cmap_profile,
+    cmap_landscape,
+    facecolor,
+    fontsize_base,
+    # --- Figure & Inset ---
+    figsize,
+    fig_height,
+    aspect_ratio,
+    dpi,
+    zoom_ratio,
+    rotation,
+    perspective_tilt,
+    strip_renderer,
+    xyzrender_config,
+    strip_spacing,
+    strip_dividers,
+    arrow_head_length,
+    arrow_head_width,
+    arrow_tail_width,
+    # --- Spline ---
+    spline_method,
+    # --- Inset Positions ---
+    draw_reactant,
+    draw_saddle,
+    draw_product,
+    # --- OCI-NEB/RONEB ---
+    mmf_peaks,
+    peak_dir,
+    show_evolution,
+    show_legend,
+    # Caching
+    cache_file,
+    force_recompute,
+    ira_kmax,
+    sp_file,
+    augment_dat,
+    augment_con,
+):
+    """Main entry point for NEB plot script.
+
+    Prefer ``--config plot.toml`` for shared style/render settings and inputs;
+    explicit flags override the file (see ``rgpycrumbs.eon.plot_config``).
+    """
+
+    settings = resolve_from_click(
+        "neb",
+        ctx,
+        config=config,
+        input_dat_pattern=input_dat_pattern,
+        input_path_pattern=input_path_pattern,
+        con_file=con_file,
+        additional_con=additional_con,
+        source=source,
+        input_traj=input_traj,
+        input_h5=input_h5,
+        plot_type=plot_type,
+        landscape_mode=landscape_mode,
+        landscape_path=landscape_path,
+        project_path=project_path,
+        rc_mode=rc_mode,
+        plot_structures=plot_structures,
+        rbf_smoothing=rbf_smoothing,
+        show_pts=show_pts,
+        plot_mode=plot_mode,
+        surface_type=surface_type,
+        n_inducing=n_inducing,
+        output_file=output_file,
+        start=start,
+        end=end,
+        normalize_rc=normalize_rc,
+        title=title,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        energy_unit=energy_unit,
+        highlight_last=highlight_last,
+        theme=theme,
+        cmap_profile=cmap_profile,
+        cmap_landscape=cmap_landscape,
+        facecolor=facecolor,
+        fontsize_base=fontsize_base,
+        figsize=figsize,
+        fig_height=fig_height,
+        aspect_ratio=aspect_ratio,
+        dpi=dpi,
+        zoom_ratio=zoom_ratio,
+        rotation=rotation,
+        perspective_tilt=perspective_tilt,
+        strip_renderer=strip_renderer,
+        xyzrender_config=xyzrender_config,
+        strip_spacing=strip_spacing,
+        strip_dividers=strip_dividers,
+        arrow_head_length=arrow_head_length,
+        arrow_head_width=arrow_head_width,
+        arrow_tail_width=arrow_tail_width,
+        spline_method=spline_method,
+        draw_reactant=draw_reactant,
+        draw_saddle=draw_saddle,
+        draw_product=draw_product,
+        mmf_peaks=mmf_peaks,
+        peak_dir=peak_dir,
+        show_evolution=show_evolution,
+        show_legend=show_legend,
+        cache_file=cache_file,
+        force_recompute=force_recompute,
+        ira_kmax=ira_kmax,
+        sp_file=sp_file,
+        augment_dat=augment_dat,
+        augment_con=augment_con,
+    )
+    return plot_neb_from_settings(settings)
