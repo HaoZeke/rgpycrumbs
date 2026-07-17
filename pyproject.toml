@@ -36,7 +36,7 @@ requires-python = ">=3.10"
 # ira_mod/tblite stay pixi-only; heavy tools like ovito stay explicit.
 # eOn job-config authorship (write_eon_config, seed_dimers, MLflow hydrate)
 # uses eon-schema — not eon-akmc. Plotting still chemparseplot.
-eon     = [ "eon-schema>=0.2.0" ]
+eon     = [ "eon-schema>=0.2.0; python_version >= '3.11'" ]
 lint    = [ "ruff>=0.1.6" ]
 release = [ "build>=0.10", "towncrier>=24.8.0", "twine>=4.0", "wheel>=0.40" ]
 test    = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
