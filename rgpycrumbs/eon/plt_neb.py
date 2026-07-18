@@ -72,6 +72,7 @@ except ImportError:  # pragma: no cover - direct script execution without packag
 if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
 
+
 # Optional heavy: resolve at use site so library import does not require
 # adjustText / AUTO_DEPS until a plot actually needs label adjustment.
 def adjust_text(*args, **kwargs):
@@ -85,6 +86,7 @@ def adjust_text(*args, **kwargs):
 
     return _adjust_text(*args, **kwargs)
 
+
 try:
     from ._render_cli import add_config_option, add_render_options
     from .plot_config import library_plot, run_from_click
@@ -93,19 +95,21 @@ except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon.plot_config import library_plot, run_from_click
 # Lazy plot stack: AUTO_DEPS + ensure_import (same as jax / adjustText)
 try:
-    from rgpycrumbs._aux import enable_library_auto_deps, ensure_import as _ei
+    from rgpycrumbs._aux import enable_library_auto_deps
+    from rgpycrumbs._aux import ensure_import as _ei
+
     enable_library_auto_deps()
     _ei("chemparseplot")
 except ImportError:
     pass
 
+from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 from chemparseplot.parse.eon.neb import (
     aggregate_neb_landscape_data,
     compute_profile_rmsd,
     estimate_rbf_smoothing,
     load_structures_and_calculate_additional_rmsd,
 )
-from chemparseplot.parse.eon.dimer_trajectory import load_dimer_trajectory
 
 # --- Library Imports ---
 from chemparseplot.parse.file_ import find_file_paths
@@ -145,13 +149,13 @@ from chemparseplot.plot.neb import (
     plot_energy_path,
     plot_landscape_path_overlay,
     plot_landscape_surface,
-    plot_phase_points_overlay,
     plot_neb_evolution,
+    plot_phase_points_overlay,
+    plot_structure_inset,
+    plot_structure_strip,
     profile_strip_payload,
     profile_structure_indices,
     save_plot,
-    plot_structure_inset,
-    plot_structure_strip,
 )
 from chemparseplot.plot.structs import (
     StructurePlacement,
@@ -1205,9 +1209,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
                 equal_metric=True,
             )
             if sp_data is not None and global_basis is not None:
-                _sp_basis = landscape_projection_basis(
-                    global_basis, final_r, final_p
-                )
+                _sp_basis = landscape_projection_basis(global_basis, final_r, final_p)
                 _, _spd = project_to_sd(
                     np.array([sp_data.r]), np.array([sp_data.p]), _sp_basis
                 )
@@ -1232,12 +1234,11 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             n_strip_rows = (
                 max(
                     1,
-                    (
-                        n_strip + NEB_LANDSCAPE_STRIP_MAX_COLS - 1
-                    )
+                    (n_strip + NEB_LANDSCAPE_STRIP_MAX_COLS - 1)
                     // NEB_LANDSCAPE_STRIP_MAX_COLS,
                 )
-                if n_strip and landscape_strip_render is not None
+                if n_strip
+                and landscape_strip_render is not None
                 and not landscape_strip_render.get("prefer_single_row", True)
                 else (1 if n_strip else 0)
             )
@@ -1263,16 +1264,12 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             for other in list(fig.axes):
                 if other is ax or other is ax_strip:
                     continue
-                other.set_position(
-                    [cbar_left, map_bottom, cbar_w_frac, map_h_frac]
-                )
+                other.set_position([cbar_left, map_bottom, cbar_w_frac, map_h_frac])
 
             if ax_strip is not None:
                 strip_bottom = bottom_in / fig_h
                 strip_h_frac = strip_h_in / fig_h
-                ax_strip.set_position(
-                    [left, strip_bottom, map_w_frac, strip_h_frac]
-                )
+                ax_strip.set_position([left, strip_bottom, map_w_frac, strip_h_frac])
                 ax_strip.set_navigate(False)
 
             # Re-render structure strip at the final large axes size.
@@ -1292,9 +1289,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
                     col_spacing=landscape_strip_render["col_spacing"],
                     show_dividers=landscape_strip_render["show_dividers"],
                     perspective_tilt=landscape_strip_render["perspective_tilt"],
-                    width_fill_fraction=landscape_strip_render[
-                        "width_fill_fraction"
-                    ],
+                    width_fill_fraction=landscape_strip_render["width_fill_fraction"],
                     max_cols=landscape_strip_render.get(
                         "max_cols", NEB_LANDSCAPE_STRIP_MAX_COLS
                     ),
@@ -1302,9 +1297,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
                         "prefer_single_row", False
                     ),
                 )
-                ax_strip.set_position(
-                    [left, strip_bottom, map_w_frac, strip_h_frac]
-                )
+                ax_strip.set_position([left, strip_bottom, map_w_frac, strip_h_frac])
 
             projected_layout_done = True
             log.info(
@@ -1402,9 +1395,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             gap = 0.04
             strip_h = max(pos_strip.height, 0.28)
             strip_y = max(0.02, pos_main.y0 - gap - strip_h)
-            ax_strip.set_position(
-                [pos_main.x0, strip_y, pos_main.width, strip_h]
-            )
+            ax_strip.set_position([pos_main.x0, strip_y, pos_main.width, strip_h])
             from matplotlib.offsetbox import AnnotationBbox
 
             for artist in ax_strip.get_children():
@@ -1430,7 +1421,9 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
 
     return Path(output_file) if output_file else None
 
+
 plot_neb = library_plot("neb", plot_neb_from_settings)
+
 
 @click.command()
 @click.pass_context
@@ -1750,9 +1743,7 @@ plot_neb = library_plot("neb", plot_neb_from_settings)
 )
 def main(ctx, config, **params):
     """CLI entry: merge flags/config then run plot_neb_from_settings."""
-    return run_from_click(
-        "neb", plot_neb_from_settings, ctx, config=config, **params
-    )
+    return run_from_click("neb", plot_neb_from_settings, ctx, config=config, **params)
 
 
 if __name__ == "__main__":

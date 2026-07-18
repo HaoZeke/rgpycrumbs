@@ -67,7 +67,9 @@ class TestCycloneDXParse:
 
     def test_wrong_bom_format_raises(self, tmp_path):
         bad = tmp_path / "spdx.json"
-        bad.write_text(json.dumps({"bomFormat": "SPDX", "components": []}), encoding="utf-8")
+        bad.write_text(
+            json.dumps({"bomFormat": "SPDX", "components": []}), encoding="utf-8"
+        )
         with pytest.raises(ValueError, match="Unsupported bomFormat"):
             load_cyclonedx(bad)
 
@@ -110,7 +112,7 @@ class TestPylockAndUvLock:
         assert "numpy" in pins
 
     def test_direct_parsers(self):
-        import tomllib
+        tomllib = pytest.importorskip("tomllib")
 
         uv_doc = tomllib.loads(UV_LOCK.read_text(encoding="utf-8"))
         assert "numpy" in pypi_pins_from_uv_lock(uv_doc)

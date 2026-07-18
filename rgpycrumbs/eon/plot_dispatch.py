@@ -12,9 +12,9 @@ passed. Never sniffs mixed job directories for ``neb.con`` vs ``min.con``.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from rgpycrumbs.eon.plot_config import run_plot
 
@@ -140,10 +140,7 @@ def adapt_plot_source(
     ):
         frames = list(obj.movie_frames())
         if not frames:
-            msg = (
-                "Matter.movie_frames() is empty; "
-                "relax(..., retain_frames=True) first"
-            )
+            msg = "Matter.movie_frames() is empty; relax(..., retain_frames=True) first"
             raise ValueError(msg)
         return "min", {"frames": frames}
 
@@ -154,10 +151,7 @@ def adapt_plot_source(
     ):
         frames = list(obj.climb_frames())
         if not frames:
-            msg = (
-                "climb_frames() is empty; "
-                "run_retain_frames(...) first"
-            )
+            msg = "climb_frames() is empty; run_retain_frames(...) first"
             raise ValueError(msg)
         return "saddle", {"frames": frames}
 

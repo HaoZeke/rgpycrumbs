@@ -316,9 +316,7 @@ def _dispatch(
         # ensure_import expects normalized keys; write all known env aliases
         from rgpycrumbs.locks import PINS_ENV_LEGACY
 
-        pin_json = json.dumps(
-            {normalize_pypi_name(k): v for k, v in pins.items()}
-        )
+        pin_json = json.dumps({normalize_pypi_name(k): v for k, v in pins.items()})
         env[PINS_ENV] = pin_json
         env[PINS_ENV_LEGACY] = pin_json
         env[SBOM_PINS_ENV] = pin_json

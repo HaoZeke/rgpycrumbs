@@ -127,7 +127,9 @@ def _match_eon_mode(
 
     mode = np.loadtxt(best[1], dtype=float)
     if mode.shape != ref.shape:
-        log.warning("eOn mode %s shape %s != %s; ignoring", best[1], mode.shape, ref.shape)
+        log.warning(
+            "eOn mode %s shape %s != %s; ignoring", best[1], mode.shape, ref.shape
+        )
         return None
     norm = np.linalg.norm(mode)
     if norm > 0:
@@ -135,7 +137,9 @@ def _match_eon_mode(
     return mode
 
 
-def _dimer_config_sections(settings_name: str, socket: str) -> dict[str, dict[str, object]]:
+def _dimer_config_sections(
+    settings_name: str, socket: str
+) -> dict[str, dict[str, object]]:
     """Minimal eOn dimer saddle-search INI sections (explicit keys only).
 
     Aligns improved-dimer with L2 ``DimerSpec`` (method=improved). Written via

@@ -245,7 +245,11 @@ def merge_plot_settings(
             if value is None and key not in SHARED_KEYS:
                 # Keep explicit None only when meaningful; skip empty overrides.
                 continue
-            settings[key] = _coerce_value(key, value) if key in _PATH_KEYS | _LIST_PATH_KEYS | {"figsize", "label", "job_dir"} else value
+            settings[key] = (
+                _coerce_value(key, value)
+                if key in _PATH_KEYS | _LIST_PATH_KEYS | {"figsize", "label", "job_dir"}
+                else value
+            )
 
     if passthrough:
         for key, value in passthrough.items():

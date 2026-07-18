@@ -49,8 +49,9 @@ def _assert_dispatches(argv, expected_script, monkeypatch):
         result = CliRunner().invoke(main, argv)
     assert result.exit_code == 0, result.exception or result.output
     command = mock_run.call_args.args[0]
-    assert command[:2] == ["uv", "run"]
-    script_parts = [part for part in command[2:] if str(part).endswith(expected_script)]
+    # Dispatcher may use ``uv run`` or the active interpreter (in-env stack /
+    # missing uv / --dev). Only require the target script + trailing args.
+    script_parts = [part for part in command if str(part).endswith(expected_script)]
     assert script_parts, f"{expected_script} not in {command}"
     # Trailing argv after the script path matches CLI args after group/cmd.
     script_idx = command.index(script_parts[0])
@@ -163,6 +164,7 @@ def _make_chemparseplot_mocks():
         "default_neb_ylabel",
         "landscape_half_span",
         "landscape_projection_basis",
+        "mark_saddle_point",
         "plot_energy_path",
         "plot_landscape_path_overlay",
         "plot_landscape_surface",
@@ -311,6 +313,7 @@ class TestPltNeb:
     def test_help(self, monkeypatch):
         _assert_dispatches(["eon", "plt-neb", "--help"], "eon/plt_neb.py", monkeypatch)
 
+    @pytest.mark.skipif(not _has("matplotlib"), reason="plt_neb hard-imports matplotlib")
     def test_no_input_files(self, tmp_path):
         from rgpycrumbs.eon.plt_neb import main
 
@@ -320,6 +323,7 @@ class TestPltNeb:
         # The exit code may be non-zero if no data files found
         assert result.exit_code is not None
 
+    @pytest.mark.skipif(not _has("matplotlib"), reason="plt_neb hard-imports matplotlib")
     def test_constants(self):
         from rgpycrumbs.eon.plt_neb import (
             DEFAULT_INPUT_PATTERN,
@@ -474,6 +478,7 @@ class TestConSplitter:
             ["eon", "con-splitter", "--help"], "eon/con_splitter.py", monkeypatch
         )
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_split_synthetic_traj(self, tmp_path):
         """Create a synthetic trajectory and split it."""
         from ase import Atoms
@@ -512,6 +517,7 @@ class TestConSplitter:
         con_files = list(output_dir.glob("ipath_*.con"))
         assert len(con_files) == 3
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_split_last_path(self, tmp_path):
         """Test extracting the last path (default)."""
         from ase import Atoms
@@ -544,6 +550,7 @@ class TestConSplitter:
         )
         assert result.exit_code == 0
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_split_with_centering(self, tmp_path):
         """Test centering option."""
         from ase import Atoms
@@ -579,6 +586,7 @@ class TestConSplitter:
         )
         assert result.exit_code == 0
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_split_too_few_frames(self, tmp_path):
         """Test error when fewer frames than images_per_path."""
         from ase import Atoms
@@ -605,6 +613,7 @@ class TestConSplitter:
         )
         assert result.exit_code != 0
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_split_bad_path_index(self, tmp_path):
         """Test error when path_index is out of bounds."""
         from ase import Atoms
@@ -634,6 +643,7 @@ class TestConSplitter:
         )
         assert result.exit_code != 0
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_split_zero_images(self, tmp_path):
         """Test error when images_per_path is zero."""
         from ase import Atoms
@@ -660,6 +670,7 @@ class TestConSplitter:
         )
         assert result.exit_code != 0
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_enums(self):
         from rgpycrumbs.eon.con_splitter import AlignMode, SplitMode
 
@@ -669,6 +680,7 @@ class TestConSplitter:
         assert SplitMode.NEB.value == "neb"
         assert SplitMode.FLEX.value == "flex"
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_align_path_none(self):
         from ase import Atoms
 
@@ -682,6 +694,7 @@ class TestConSplitter:
         result = align_path(frames, AlignMode.NONE, IRAConfig(enabled=False, kmax=1.8))
         assert len(result) == 2
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_align_path_single_frame(self):
         from ase import Atoms
 
@@ -692,6 +705,7 @@ class TestConSplitter:
         result = align_path(frames, AlignMode.ALL, IRAConfig(enabled=False, kmax=1.8))
         assert len(result) == 1
 
+    @pytest.mark.skipif(not _has("ase"), reason="con_splitter needs ase")
     def test_neb_mode_warning_on_remainder(self, tmp_path):
         """NEB mode should warn when frame count is not a multiple of images_per_path."""
         from ase import Atoms
@@ -1378,6 +1392,7 @@ class TestGenerateNwchemInput:
             monkeypatch,
         )
 
+    @pytest.mark.skipif(not _has("ase"), reason="generate_nwchem_input needs ase")
     def test_generate_with_config(self, tmp_path):
         from ase import Atoms
         from ase.io import write

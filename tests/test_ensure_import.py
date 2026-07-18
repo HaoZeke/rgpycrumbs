@@ -141,12 +141,17 @@ class TestEnsureImport:
     @patch("importlib.import_module")
     def test_from_cache_dir(self, mock_import, monkeypatch, tmp_path):
         """Finds module in uv cache directory."""
+        import rgpycrumbs._aux as aux
+
         monkeypatch.delenv("RGPYCRUMBS_PARENT_SITE_PACKAGES", raising=False)
+        monkeypatch.delenv("RGPYCRUMBS_AUTO_DEPS", raising=False)
+        monkeypatch.delenv("RGPKGS_AUTO_DEPS", raising=False)
+        # Drop any prior real cache entry so only the temp cache is in play.
         monkeypatch.setattr(sys, "path", ["/local/lib"])
 
         cache_dir = tmp_path / "rgpycrumbs" / "deps"
         cache_dir.mkdir(parents=True)
-        monkeypatch.setattr("rgpycrumbs._aux._get_dep_cache_dir", lambda: cache_dir)
+        monkeypatch.setattr(aux, "_get_dep_cache_dir", lambda: cache_dir)
 
         fake_mod = types.ModuleType("jax")
         # step 1 fails, _import_from_parent_env returns None (no env var),

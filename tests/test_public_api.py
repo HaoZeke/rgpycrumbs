@@ -42,7 +42,7 @@ class TestPublicConfigApi:
     def test_resolve_lock_path_cli_wins(self, tmp_path, monkeypatch):
         monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
         lock = tmp_path / "cli.lock"
-        lock.write_text("version = 1\n[[package]]\nname = \"x\"\nversion = \"1\"\n")
+        lock.write_text('version = 1\n[[package]]\nname = "x"\nversion = "1"\n')
         # even empty config
         p = resolve_lock_path_layered(cli_lock=str(lock), cwd=tmp_path)
         assert p is not None

@@ -24,11 +24,7 @@ _COMMANDS = ("neb", "min", "saddle")
 __all__ = [
     "adapt_plot_source",
     "plot",
-    *[
-        name
-        for cmd in _COMMANDS
-        for name in (f"plot_{cmd}", f"plot_{cmd}_from_settings")
-    ],
+    *[name for cmd in _COMMANDS for name in (f"plot_{cmd}", f"plot_{cmd}_from_settings")],
 ]
 
 

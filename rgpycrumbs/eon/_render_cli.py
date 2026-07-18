@@ -19,19 +19,19 @@ CONFIG_HELP = (
     "file. Surface-fit knobs (auto_thin, max_surface_points) are TOML-only "
     "(default auto_thin=false). Example:\n\n"
     "  [shared]\n"
-    "  energy_unit = \"eV\"\n"
+    '  energy_unit = "eV"\n'
     "  dpi = 200\n"
-    "  strip_renderer = \"xyzrender\"\n"
+    '  strip_renderer = "xyzrender"\n'
     "  auto_thin = false\n"
     "  max_surface_points = 64\n\n"
     "  [neb]\n"
-    "  con_file = \"neb.con\"\n"
-    "  plot_type = \"landscape\"\n"
-    "  output_file = \"neb.pdf\"\n\n"
+    '  con_file = "neb.con"\n'
+    '  plot_type = "landscape"\n'
+    '  output_file = "neb.pdf"\n\n'
     "  [min]\n"
-    "  job_dir = [\"min_reactant\"]\n"
-    "  plot_type = \"landscape\"\n"
-    "  surface_type = \"grad_imq\"\n"
+    '  job_dir = ["min_reactant"]\n'
+    '  plot_type = "landscape"\n'
+    '  surface_type = "grad_imq"\n'
     "  auto_thin = true\n"
 )
 

@@ -1,3 +1,16 @@
+rgpycrumbs 1.10.10 (2026-07-18)
+===============================
+
+Fixed
+-----
+
+- Align ``save_plot`` tests with always-tight bbox (chemparseplot 1.9.17).
+- Pure CI: accept in-env or ``uv run`` dispatcher modes; skip plot/ase/eon
+  tests when optional stacks are absent; floor assert ``1.9.15``; cache-dir
+  ensure_import test isolation.
+- prek/ruff 0.15.2: expand per-file ignores for deferred imports / PEP 723
+  dual-import scripts (TID252, PLC0415, E402).
+
 rgpycrumbs 1.10.9 (2026-07-18)
 ==============================
 

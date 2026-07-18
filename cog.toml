@@ -1,6 +1,6 @@
-from_latest_tag = true
+branch_whitelist     = [ "main", "release/**" ]
+disable_bump_commit  = true
+disable_changelog    = true
+from_latest_tag      = true
 ignore_merge_commits = true
-tag_prefix = "v"
-branch_whitelist = ["main", "release/**"]
-disable_changelog = true
-disable_bump_commit = true
+tag_prefix           = "v"

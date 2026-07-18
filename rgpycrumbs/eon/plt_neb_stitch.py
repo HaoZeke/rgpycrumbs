@@ -127,7 +127,9 @@ def _run_plt_neb(args: list[str]) -> int:
     help="Legend label for the overlaid saddle (sp.con) on the landscape.",
 )
 @click.option("--profile-title", default="Stitched NEB path", show_default=True)
-@click.option("--landscape-title", default="Reaction valley (stitched)", show_default=True)
+@click.option(
+    "--landscape-title", default="Reaction valley (stitched)", show_default=True
+)
 @click.option("--plot-structures", default="crit_points", show_default=True)
 @click.option("--strip-renderer", default="xyzrender", show_default=True)
 @click.option("--facecolor", default="white", show_default=True)
@@ -188,47 +190,74 @@ def main(
     fig_w, fig_h = figsize
 
     common = [
-        "--con-file", str(neb_con),
-        "--plot-structures", plot_structures,
-        "--strip-renderer", strip_renderer,
-        "--facecolor", facecolor,
-        "--input-dat-pattern", dat_pattern,
-        "--figsize", str(fig_w), str(fig_h),
-        "--dpi", str(dpi),
-        "--fontsize-base", str(fontsize_base),
-        "--zoom-ratio", str(zoom_ratio),
-        "--rotation", rotation,
+        "--con-file",
+        str(neb_con),
+        "--plot-structures",
+        plot_structures,
+        "--strip-renderer",
+        strip_renderer,
+        "--facecolor",
+        facecolor,
+        "--input-dat-pattern",
+        dat_pattern,
+        "--figsize",
+        str(fig_w),
+        str(fig_h),
+        "--dpi",
+        str(dpi),
+        "--fontsize-base",
+        str(fontsize_base),
+        "--zoom-ratio",
+        str(zoom_ratio),
+        "--rotation",
+        rotation,
     ]
 
     rc = 0
     if profile_output is not None:
         profile_args = [
             *common,
-            "--output-file", str(profile_output),
-            "--plot-type", "profile",
-            "--rc-mode", "path",
-            "--title", profile_title,
+            "--output-file",
+            str(profile_output),
+            "--plot-type",
+            "profile",
+            "--rc-mode",
+            "path",
+            "--title",
+            profile_title,
         ]
         rc |= _run_plt_neb(profile_args)
 
     if landscape_output is not None:
         landscape_args = [
             *common,
-            "--output-file", str(landscape_output),
-            "--plot-type", "landscape",
-            "--rc-mode", "path",
-            "--landscape-mode", "surface",
-            "--landscape-path", "all",
-            "--surface-type", "grad_imq",
+            "--output-file",
+            str(landscape_output),
+            "--plot-type",
+            "landscape",
+            "--rc-mode",
+            "path",
+            "--landscape-mode",
+            "surface",
+            "--landscape-path",
+            "all",
+            "--surface-type",
+            "grad_imq",
             "--project-path",
             "--show-pts",
             "--strip-dividers",
-            "--input-path-pattern", path_pattern,
-            "--additional-con", str(sp_con), sp_label,
-            "--ira-kmax", str(ira_kmax),
-            "--cache-file", str(out_dir / "2dcache.parquet"),
+            "--input-path-pattern",
+            path_pattern,
+            "--additional-con",
+            str(sp_con),
+            sp_label,
+            "--ira-kmax",
+            str(ira_kmax),
+            "--cache-file",
+            str(out_dir / "2dcache.parquet"),
             "--show-legend",
-            "--title", landscape_title,
+            "--title",
+            landscape_title,
         ]
         rc |= _run_plt_neb(landscape_args)
 

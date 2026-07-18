@@ -62,7 +62,9 @@ except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon.plot_config import library_plot, run_from_click
 # Lazy plot stack: AUTO_DEPS + ensure_import (same as jax / adjustText)
 try:
-    from rgpycrumbs._aux import enable_library_auto_deps, ensure_import as _ei
+    from rgpycrumbs._aux import enable_library_auto_deps
+    from rgpycrumbs._aux import ensure_import as _ei
+
     enable_library_auto_deps()
     _ei("chemparseplot")
 except ImportError:
@@ -181,7 +183,9 @@ def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
 
     return Path(output) if output else None
 
+
 plot_saddle = library_plot("saddle", plot_saddle_from_settings)
+
 
 @click.command()
 @click.pass_context
@@ -275,6 +279,7 @@ def main(ctx, config, **params):
     return run_from_click(
         "saddle", plot_saddle_from_settings, ctx, config=config, **params
     )
+
 
 def _plot_profile(trajs, labels, output, dpi, *, energy_unit):
     plot_single_ended_profile(

@@ -24,7 +24,7 @@
 # --- rgpycrumbs CLI ---
 [rgpycrumbs.dispatch]
 auto_deps = true
-force_uv = false
+force_uv  = false
 
 # Flat aliases also work:
 # [dispatch]

@@ -75,51 +75,26 @@ The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`
 
 The library is designed with the following principles in mind:
 
--   **Dispatcher-Based Architecture (preferred entry):** Use
-    `rgpycrumbs <group> <tool>` or `python -m rgpycrumbs.cli ...` — **not** raw
-    `uv run path/to/script.py` as the primary path. The dispatcher sets
-    `PYTHONPATH`, defaults `RGPYCRUMBS_AUTO_DEPS=1`, optional editable peers, and
-    optional SBOM pins. Scripts remain self-contained PEP 723 units invoked in a
-    subprocess via `uv run` when isolation is chosen.
+-   **Dispatcher-Based Architecture:** The top-level `rgpycrumbs.cli` command acts as a
+    lightweight dispatcher. It does not contain the core logic of the tools
+    itself. Instead, it parses user commands to identify the target script and
+    then invokes it in an isolated subprocess using the `uv` runner. This provides
+    a unified command-line interface while keeping the tools decoupled.
 
--   **Isolated & Reproducible Execution:** Each script declares dependencies via
-    [PEP 723](https://peps.python.org/pep-0723/) (including a `rgpycrumbs` floor so
-    standalone `uv run` can resolve the package). For **pinned** installs, pass a
-    lock the uv resolver already understands:
-
-    * `uv.lock` (native)
-    * PEP 751 `pylock.toml` / `pylock.*.toml` (e.g. `uv export --format pylock.toml`)
-    * CycloneDX JSON (e.g. eb-stack `--sbom-out`, `uv export --format cyclonedx1.5`)
-
-    via `--lock PATH` / `RGPYCRUMBS_LOCK` (or `--sbom` / `RGPYCRUMBS_SBOM`).
-    PyPI packages become `name==version` constraints for `uv` / `ensure_import`;
-    non-PyPI CDX rows (`pkg:generic/...`) are skipped. No lock → floating PEP 723
-    / AUTO_DEPS.
-
-    **Suite config** (TOML; shared with chemparseplot / other rgpkgs — not a
-    per-package silo):
-
-    * User: `~/.config/rgpkgs/config.toml`
-    * Project: `rgpkgs.toml` or `.rgpkgs.toml` (walk up from CWD)
-    * Override: `RGPKGS_CONFIG=/path/to.toml`
-    * Legacy: `rgpycrumbs.toml` and `~/.config/rgpycrumbs/` still work
-
-    Shared `[pins]` / `[pins.packages]`; tool keys under `[rgpycrumbs.dispatch]`.
-    Example: `docs/examples/rgpkgs.config.toml`.
-
-    **Stable consumer API** (chemparseplot, pychum, wailord):
-
-        from rgpycrumbs.api import load_config, load_pypi_pins, ensure_import
-
-    See `docs/orgmode/explanation/public_api.org`. Debug: `rgpycrumbs config show`.
+-   **Isolated & Reproducible Execution:** Each script is a self-contained unit that
+    declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata. The `uv` runner uses this
+    information to resolve and install the exact required packages into a
+    temporary, cached environment on-demand. This design guarantees
+    reproducibility and completely eliminates the risk of dependency conflicts
+    between different tools in the collection.
 
 -   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
-    package has minimal core dependencies (`click`, `numpy`, `rich`). There are
-    **no runtime feature extras**. CLI tools fetch deps via PEP 723 + `uv run`.
-    Library modules use `ensure_import` when `RGPYCRUMBS_AUTO_DEPS=1` (CLI
-    dispatch enables this by default), with CUDA-aware resolution so CPU hosts
-    do not pull GPU JAX. Install only `rgpycrumbs`; optional packages arrive on
-    demand.
+    package has minimal core dependencies (`click`, `numpy`). Heavy scientific
+    there are no runtime feature extras. CLI tools fetch deps via PEP 723 + uv; library modules use ensure<sub>import</sub> + AUTO<sub>DEPS</sub>. Dependencies are fetched by
+    `uv` only when a script that needs them is executed. For library modules,
+    `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1`
+    is set, with CUDA-aware resolution that avoids pulling GPU libraries on
+    CPU-only machines. The base installation stays lightweight either way.
 
 -   **Modular & Extensible Tooling:** Each utility is an independent script. This
     modularity simplifies development, testing, and maintenance, as changes to one
@@ -138,21 +113,20 @@ The library is designed with the following principles in mind:
 ## Library API
 
 The library modules can be imported directly. Dependencies resolve
-automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH):
+automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH),
+or install extras explicitly:
 
-    export RGPYCRUMBS_AUTO_DEPS=1
-
-    # Surface fitting (jax via ensure_import)
+    # Surface fitting (requires jax: pip install jax  # or AUTO_DEPS)
     from rgpycrumbs.surfaces import get_surface_model
     model = get_surface_model("tps")
-
-    # Structure analysis (ase/scipy via ensure_import)
+    
+    # Structure analysis (requires ase, scipy: export RGPYCRUMBS_AUTO_DEPS=1)
     from rgpycrumbs.geom.analysis import analyze_structure
-
-    # Spline interpolation (scipy via ensure_import)
+    
+    # Spline interpolation (requires scipy: pip install scipy  # or AUTO_DEPS)
     from rgpycrumbs.interpolation import spline_interp
-
-    # Data types (core only)
+    
+    # Data types (no extra deps)
     from rgpycrumbs.basetypes import nebpath, SaddleMeasure
 
 
@@ -182,15 +156,21 @@ You can see the list of available command groups:
 
 ### eOn
 
--   Plotting NEB Paths (`plt-neb`), including energy-unit selection and xyzrender strips
--   Stitch multi-segment NEB bands (`plt-neb-stitch`) for full-path 1D/2D views (v1.8+)
--   Seed dimer searches from NEB peaks (`gen-dimer`) and KMC timeline plots (`plt-kmc`)
--   Single-ended minimization landscapes (`plt-min`) with optional `--energy-cap` windows
+-   Plotting NEB Paths (`plt-neb`), stitch (`plt-neb-stitch`), dimers (`gen-dimer`), KMC (`plt-kmc`)
 
-eOn job-config authorship (`write_eon_config`, `seed_dimers`, MLflow hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`). Plotting still uses `chemparseplot`; eon-akmc is not required for INI tooling.
+    Library (no CLI argv): `from rgpycrumbs.eon import plot_neb` then
+    `plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")`.
+    
+    NEB landscapes support energy-unit selection and xyzrender profile strips.
+    `plt-neb-stitch` builds a continuous band from multi-segment minimizations (v1.8+).
+    `gen-dimer` seeds saddle searches from NEB peaks; `plt-kmc` plots KMC timelines.
+    `plt-min` accepts `--energy-cap` / `--energy-cap-window` for landscape scales.
+    
+    eOn **job-config** authorship (`write_eon_config`, `seed_dimers`, MLflow
+    hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`). Plotting
+    still goes through `chemparseplot`; eon-akmc is **not** required for INI tooling.
 
-Library NEB plots (no Click argv): `from rgpycrumbs.eon import plot_neb` then `plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")`.
-
+-   Plotting NEB Paths (`plt-neb`) detail
 
     This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations,
     generating 2D surface plots with optional structure rendering.

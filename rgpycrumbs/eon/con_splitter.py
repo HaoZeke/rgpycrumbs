@@ -132,13 +132,16 @@ def _write_con_frame(dest: Path, frame, atoms=None, energy: float | None = None)
 
     if atoms is not None:
         if energy is None:
-            energy = frame.energy if frame.energy is not None else _energy_from_atoms(atoms)
+            energy = (
+                frame.energy if frame.energy is not None else _energy_from_atoms(atoms)
+            )
         updated = _apply_frame_energy(ConFrame.from_ase(atoms), energy)
         write_con(str(dest), [updated])
         return
     if energy is not None:
         frame = _apply_frame_energy(frame, energy)
     write_con(str(dest), [frame])
+
 
 # Optional IRA import logic
 try:

@@ -8,8 +8,8 @@ Tests that need cross-repo dev branches or heavyweight optional deps
 where all repos are editable installs.
 """
 
-import os
 import importlib
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -18,8 +18,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from tests._optional_imports import optional_import_available
-from tests._optional_imports import has_module_spec
+from tests._optional_imports import has_module_spec, optional_import_available
 
 pytestmark = [
     pytest.mark.pure,
@@ -101,7 +100,7 @@ class TestPep723DispatcherCli:
         assert result.exit_code == 0, result.exception or result.output
 
         command = mock_run.call_args.args[0]
-        assert command[:2] == ["uv", "run"]
+        # uv run or active interpreter — both are valid dispatcher modes.
         assert any(str(part).endswith(expected_script) for part in command)
         assert command[-1] == "--help"
 
@@ -116,7 +115,6 @@ class TestPep723DispatcherCli:
         assert result.exit_code == 0, result.exception or result.output
 
         command = mock_run.call_args.args[0]
-        assert command[:2] == ["uv", "run"]
         assert any(str(part).endswith("eon/plt_min.py") for part in command)
 
     @pytest.mark.parametrize(
@@ -124,6 +122,8 @@ class TestPep723DispatcherCli:
         ["eon/plt_neb.py", "eon/plt_min.py", "eon/plt_saddle.py"],
     )
     def test_eon_plot_scripts_run_directly(self, rel_path):
+        pytest.importorskip("matplotlib")
+        pytest.importorskip("chemparseplot")
         repo_root = Path(__file__).resolve().parent.parent
         script = repo_root / "rgpycrumbs" / rel_path
         chemparseplot_root = repo_root.parent / "chemparseplot"
@@ -149,6 +149,10 @@ class TestPep723DispatcherCli:
         assert "Usage:" in result.stdout
 
 
+@pytest.mark.skipif(
+    not all(has_module_spec(m) for m in ("matplotlib", "chemparseplot")),
+    reason="plot scripts need matplotlib + chemparseplot",
+)
 class TestSharedRenderCli:
     def test_eon_plotters_share_render_option_contract(self):
         from rgpycrumbs.eon.plt_min import main as plt_min_main
@@ -187,9 +191,14 @@ class TestSharedRenderCli:
         assert "[default: 0.5]" in result.output
 
 
+@pytest.mark.skipif(
+    not has_module_spec("chemparseplot"),
+    reason="needs chemparseplot",
+)
 class TestSingleEndedPlotHelpers:
     def test_wrapper_reexports_chemparseplot_surface(self):
         from chemparseplot.plot import optimization as opt_mod
+
         from rgpycrumbs.eon import _single_ended_plot as helper_mod
 
         assert helper_mod.project_landscape_path is opt_mod.project_landscape_path

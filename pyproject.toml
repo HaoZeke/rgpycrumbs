@@ -141,7 +141,11 @@ ban-relative-imports = "all"
 ] # ASV convention: mutable class attrs, framework-injected args, deferred imports
 "docs/generate*.py" = [ "E402", "PLC0415", "S110", "T201" ]
 "docs/source/conf.py" = [ "A001" ] # Sphinx requires 'copyright' variable
-"rgpycrumbs/_aux.py" = [ "PLW0603" ] # global for _cuda_available cache
+"rgpycrumbs/_aux.py" = [
+  "PLC0415", # deferred import of locks / config
+  "PLW0603", # global for _cuda_available cache
+]
+"rgpycrumbs/basetypes.py" = [ "N801" ] # historical lowercase dataclasses
 "rgpycrumbs/chemgp/hdf5_io.py" = [ "PLW0603" ] # global for lazy-loaded modules
 "rgpycrumbs/chemgp/match_atoms.py" = [ "PLC0415" ] # deferred import
 "rgpycrumbs/chemgp/plot_gp.py" = [
@@ -152,24 +156,56 @@ ban-relative-imports = "all"
   "PLC0415",
   "PLR2004",
 ] # lazy loading pattern
-"rgpycrumbs/eon/plt_min.py" = [ "PLC0415", "PLR2004", "N806" ]
+"rgpycrumbs/cli.py" = [ "PLC0415" ] # deferred lock/config imports in dispatch
+"rgpycrumbs/config.py" = [
+  "PLC0415", # deferred tomllib
+  "UP038",   # isinstance tuples kept for 3.10
+]
+"rgpycrumbs/eon/__init__.py" = [ "F401", "PLC0415", "PLE0604" ]
+"rgpycrumbs/eon/_mlflow/log_params.py" = [ "PLC0415" ]
+"rgpycrumbs/eon/con_splitter.py" = [ "PLC0415" ] # deferred readcon
+"rgpycrumbs/eon/gen_dimer.py" = [
+  "PLC0415",
+  "TID252",  # dual import: relative package path + absolute for PEP 723
+]
+"rgpycrumbs/eon/helpers.py" = [ "PLC0415" ] # deferred eon-schema
+"rgpycrumbs/eon/plot_config.py" = [ "PLC0415", "S112", "UP038" ]
+"rgpycrumbs/eon/plot_dispatch.py" = [ "PLC0415", "S112", "UP038" ]
+"rgpycrumbs/eon/plt_kmc.py" = [ "B905", "ICN001", "PLC0415", "PLR2004" ]
+"rgpycrumbs/eon/plt_min.py" = [
+  "PLC0415",
+  "PLR2004",
+  "N806",
+  "TID252",  # dual import for PEP 723 / package
+]
 "rgpycrumbs/eon/plt_neb.py" = [
   "ARG001",  # unused title param kept for CLI API
+  "E402",    # dual-import preamble then chemparseplot stack
+  "F401",
   "PLW0603", # global for lazy-loaded modules
   "PLC0415", # deferred imports for ensure_import
   "PLR2004", # magic values for plot layout
   "N806",    # uppercase variable names for math
+  "RUF003",  # Å–Å comment uses en-dash intentionally
+  "TID252",  # dual import for PEP 723 / package
 ] # NEB plotting with lazy deps
-"rgpycrumbs/eon/plt_saddle.py" = [ "PLC0415", "PLR2004", "N806" ]
+"rgpycrumbs/eon/plt_saddle.py" = [
+  "PLC0415",
+  "PLR2004",
+  "N806",
+  "TID252",  # dual import for PEP 723 / package
+]
 "rgpycrumbs/eon/ptmdisp.py" = [
   "E402",    # Module level import not at top (for warnings suppression)
   "PLC0415", # Local import (for the Viewport GUI)
 ]
+"rgpycrumbs/eon/seed_dimers.py" = [ "PLC0415" ]
 "rgpycrumbs/geom/analysis.py" = [ "PLC0415" ]
 "rgpycrumbs/geom/api/alignment.py" = [ "PLC0415" ]
 "rgpycrumbs/interpolation.py" = [
   "PLC0415",
 ] # deferred imports for ensure_import
+"rgpycrumbs/locks.py" = [ "PLC0415" ]
 "run_cov.py" = [ "S603", "S607", "T201" ]
 "scripts/**/*" = [
   "PLC0415",

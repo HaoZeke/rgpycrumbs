@@ -241,9 +241,7 @@ def collect_kmc_n2_timeline(
     sequence = visited_state_sequence(steps)
     # Energy/time aligned with the visited-state sequence (initial state first).
     times = [0.0] + [s.total_time for s in steps]
-    energies = [steps[0].energy if steps else float("nan")] + [
-        s.energy for s in steps
-    ]
+    energies = [steps[0].energy if steps else float("nan")] + [s.energy for s in steps]
 
     counts: dict[int, int] = {}
     last_count = 0
@@ -259,7 +257,7 @@ def collect_kmc_n2_timeline(
                     last_count = count_ejected_n2(
                         frame.to_ase(), core_threshold, nn_cutoff
                     )
-                except Exception as exc:  # noqa: BLE001 - robust to bad/partial files
+                except Exception as exc:
                     log.warning("state %s: could not read %s (%s)", state_id, con, exc)
                 else:
                     counts[state_id] = last_count
@@ -407,9 +405,7 @@ def main(
 
     written = plot_kmc_timeline(timeline, out_path, log_time=log_time)
     final = timeline.cumulative_n2[-1] if timeline.cumulative_n2 else 0
-    click.echo(
-        f"Visited {len(timeline.state_ids)} state(s); final N2 ejected = {final}"
-    )
+    click.echo(f"Visited {len(timeline.state_ids)} state(s); final N2 ejected = {final}")
     click.echo(f"Wrote {written}")
 
 

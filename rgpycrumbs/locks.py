@@ -76,10 +76,7 @@ def package_name_from_spec(pip_spec: str) -> str:
 
 def _require_tomllib() -> Any:
     if tomllib is None:  # pragma: no cover
-        msg = (
-            "Reading TOML lock files requires Python 3.11+ tomllib "
-            "or the tomli package"
-        )
+        msg = "Reading TOML lock files requires Python 3.11+ tomllib or the tomli package"
         raise ImportError(msg) from _TOML_IMPORT_ERROR
     return tomllib
 
@@ -266,7 +263,7 @@ def load_toml_lock(path: str | Path) -> dict[str, Any]:
     toml = _require_tomllib()
     try:
         data = toml.loads(p.read_text(encoding="utf-8"))
-    except Exception as exc:  # noqa: BLE001 — tomllib raises various
+    except Exception as exc:
         msg = f"Lock file is not valid TOML: {p}: {exc}"
         raise ValueError(msg) from exc
     if not isinstance(data, dict):

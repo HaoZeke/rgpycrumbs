@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 """Backward-compatible CycloneDX helpers (see :mod:`rgpycrumbs.locks`)."""
 
-from rgpycrumbs.locks import (  # noqa: F401
+from rgpycrumbs.locks import (
     SBOM_PATH_ENV,
     SBOM_PINS_ENV,
     apply_pin_to_spec,

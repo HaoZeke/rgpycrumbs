@@ -19,7 +19,13 @@ import numpy as np
 import pytest
 from click.testing import CliRunner
 
+from tests._optional_imports import has_module_spec
+
 pytestmark = pytest.mark.pure
+
+_HAS_ASE = has_module_spec("ase")
+_HAS_SCIPY = has_module_spec("scipy")
+_HAS_FRAGMENT_STACK = _HAS_ASE and _HAS_SCIPY
 
 
 # ======================================================================
@@ -155,8 +161,13 @@ class TestMullerBrown:
 # ======================================================================
 # eon/helpers.py
 # ======================================================================
+@pytest.mark.skipif(
+    sys.version_info < (3, 11),
+    reason="eon-schema requires Python >= 3.11",
+)
 class TestEonHelpers:
     def test_write_eon_config_file(self, tmp_path):
+        pytest.importorskip("eon_schema")
         from rgpycrumbs.eon.helpers import write_eon_config
 
         settings = {
@@ -174,6 +185,7 @@ class TestEonHelpers:
         assert config["Optimizer"]["converged_force"] == "0.01"
 
     def test_write_eon_config_preserves_case(self, tmp_path):
+        pytest.importorskip("eon_schema")
         from rgpycrumbs.eon.helpers import write_eon_config
 
         settings = {"Section": {"CamelCase": "value"}}
@@ -187,6 +199,7 @@ class TestEonHelpers:
 
     def test_write_eon_config_dir_path(self, tmp_path):
         """When given a directory, should write config.ini inside it."""
+        pytest.importorskip("eon_schema")
         from rgpycrumbs.eon.helpers import write_eon_config
 
         settings = {"Main": {"job": "saddle_search"}}
@@ -389,6 +402,7 @@ class TestSurfacesInit:
 # ======================================================================
 # geom/fragments.py
 # ======================================================================
+@pytest.mark.skipif(not _HAS_FRAGMENT_STACK, reason="fragments needs ase + scipy")
 class TestFragments:
     def test_build_graph_single_atom(self):
         from rgpycrumbs.geom.fragments import build_graph_and_find_components
@@ -504,6 +518,7 @@ class TestFragments:
 # ======================================================================
 # geom/ira.py -- with mocked ira_mod
 # ======================================================================
+@pytest.mark.skipif(not _HAS_ASE, reason="ira helpers need ase")
 class TestIRAModule:
     def test_ira_comp_dataclass(self):
         """IRAComp can be imported (ira_mod import at module level will fail,
@@ -642,6 +657,7 @@ class TestIRAModule:
 # ======================================================================
 # geom/api/alignment.py -- data classes and non-IRA paths
 # ======================================================================
+@pytest.mark.skipif(not _HAS_ASE, reason="alignment API needs ase")
 class TestAlignmentAPI:
     def test_ira_config_defaults(self):
         from rgpycrumbs.geom.api.alignment import IRAConfig
@@ -850,6 +866,7 @@ class TestBasetypesExtended:
 # ======================================================================
 # geom/analysis.py -- test with real ASE atoms
 # ======================================================================
+@pytest.mark.skipif(not _HAS_FRAGMENT_STACK, reason="geom analysis needs ase + scipy")
 class TestGeomAnalysis:
     def test_analyze_single_molecule(self):
         from ase import Atoms

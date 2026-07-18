@@ -12,8 +12,9 @@ https://atomistic-cookbook.org/examples/eon-pet-neb/eon-pet-neb.html
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 
 def write_eon_config(
@@ -61,9 +62,7 @@ def write_eon_config(
     if validate:
         bad = unknown_ini_keys(settings, covered_only=True)
         if bad:
-            raise ValueError(
-                f"unknown INI keys for covered L0 sections: {bad}"
-            )
+            raise ValueError(f"unknown INI keys for covered L0 sections: {bad}")
 
     out = write_ini(path, settings)
     print(f"Wrote eOn config to '{out}'")

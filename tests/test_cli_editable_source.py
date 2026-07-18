@@ -10,7 +10,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from rgpycrumbs.cli import _find_editable_source, _normalize_dist_name, _pyproject_project_name
+from rgpycrumbs.cli import (
+    _find_editable_source,
+    _normalize_dist_name,
+    _pyproject_project_name,
+)
 
 
 def test_normalize_dist_name():

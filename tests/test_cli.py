@@ -92,7 +92,9 @@ def test_dispatch_preserves_user_site_package_path(mock_run, monkeypatch):
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatch, tmp_path):
+def test_dispatch_adds_editable_sources_for_linked_packages(
+    mock_run, monkeypatch, tmp_path
+):
     """_dispatch should satisfy local linked deps via --with-editable."""
     # True editable: checkout outside site-packages with matching project name.
     root = tmp_path / "chemparseplot"
@@ -116,12 +118,14 @@ def test_dispatch_adds_editable_sources_for_linked_packages(mock_run, monkeypatc
     monkeypatch.setattr(Path, "is_file", _is_file)
     monkeypatch.setattr(
         "rgpycrumbs.cli.importlib.util.find_spec",
-        lambda name: SimpleNamespace(
-            origin=str(init),
-            submodule_search_locations=[str(init.parent)],
-        )
-        if name == "chemparseplot"
-        else None,
+        lambda name: (
+            SimpleNamespace(
+                origin=str(init),
+                submodule_search_locations=[str(init.parent)],
+            )
+            if name == "chemparseplot"
+            else None
+        ),
     )
 
     _dispatch("group", "script", ("--flag",))

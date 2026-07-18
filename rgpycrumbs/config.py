@@ -125,7 +125,7 @@ def _load_toml_file(path: Path) -> dict[str, Any]:
         data = tomllib.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         return {}
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         msg = f"Invalid TOML config {path}: {exc}"
         raise ValueError(msg) from exc
     if not isinstance(data, dict):
@@ -213,9 +213,7 @@ class RgpycrumbsConfig:
     def merged_package_pins_normalized(self) -> dict[str, str]:
         from rgpycrumbs.locks import normalize_pypi_name
 
-        return {
-            normalize_pypi_name(k): v for k, v in self.package_pins.items() if v
-        }
+        return {normalize_pypi_name(k): v for k, v in self.package_pins.items() if v}
 
 
 def _extract_dispatch(data: dict[str, Any]) -> dict[str, Any]:

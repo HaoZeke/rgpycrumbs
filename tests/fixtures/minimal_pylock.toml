@@ -1,16 +1,16 @@
 # minimal PEP 751-style pylock
-lock-version = "1.0"
-created-by = "rgpycrumbs-tests"
+created-by      = "rgpycrumbs-tests"
+lock-version    = "1.0"
 requires-python = ">=3.10"
 
 [[packages]]
-name = "numpy"
+name    = "numpy"
 version = "2.0.2"
 
 [[packages]]
-name = "jax"
+name    = "jax"
 version = "0.4.31"
 
 [[packages]]
-name = "scipy"
+name    = "scipy"
 version = "1.14.1"

@@ -196,8 +196,10 @@ def test_plot_min_frames_builds_trajectory(monkeypatch, tmp_path):
     monkeypatch.setattr(
         plot_dispatch,
         "_runner_for",
-        lambda command: min_runner if command == "min" else (_ for _ in ()).throw(
-            AssertionError(command)
+        lambda command: (
+            min_runner
+            if command == "min"
+            else (_ for _ in ()).throw(AssertionError(command))
         ),
     )
     # keep real run_plot
@@ -236,16 +238,19 @@ def test_plot_neb_frames_real_entry_pure(monkeypatch, tmp_path):
 
     monkeypatch.setattr(
         "rgpycrumbs.eon.plot_dispatch._runner_for",
-        lambda command: runner if command == "neb" else (_ for _ in ()).throw(
-            AssertionError(command)
+        lambda command: (
+            runner if command == "neb" else (_ for _ in ()).throw(AssertionError(command))
         ),
     )
     frames = [_fake_frame(0.0, 0), _fake_frame(1.0, 1)]
-    out = plot(frames, kind="neb", plot_type="profile", output_file=tmp_path / "neb_out.pdf")
+    out = plot(
+        frames, kind="neb", plot_type="profile", output_file=tmp_path / "neb_out.pdf"
+    )
     assert out == tmp_path / "neb_out.pdf"
     assert len(calls) == 1
     # also: adapt used correct command
     from rgpycrumbs.eon.plot_dispatch import adapt_plot_source
+
     cmd, payload = adapt_plot_source(frames, kind="neb")
     assert cmd == "neb" and len(payload["frames"]) == 2
 

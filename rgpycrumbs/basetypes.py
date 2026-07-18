@@ -3,24 +3,25 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+
 @dataclass(frozen=True, slots=True)
 class nebiter:
     """
-    A typed record representing an iteration of a Nudged Elastic Band (NEB) calculation.
+        A typed record representing an iteration of a Nudged Elastic Band (NEB) calculation.
 
-.. versionadded:: 1.0.0
+    .. versionadded:: 1.0.0
 
-Parameters
-----------
-iteration : int
-    The iteration number of the NEB calculation.
-nebpath : nebpath
-    The data for the NEB path at this iteration.
+    Parameters
+    ----------
+    iteration : int
+        The iteration number of the NEB calculation.
+    nebpath : nebpath
+        The data for the NEB path at this iteration.
 
-See Also
---------
-nebpath : Stores the normalized arclength, actual arclength, and energy data for
-    the NEB path.
+    See Also
+    --------
+    nebpath : Stores the normalized arclength, actual arclength, and energy data for
+        the NEB path.
     """
 
     iteration: int
@@ -30,28 +31,28 @@ nebpath : Stores the normalized arclength, actual arclength, and energy data for
 @dataclass(frozen=True, slots=True)
 class nebpath:
     """
-    A typed record representing the NEB path data.
+        A typed record representing the NEB path data.
 
-.. versionadded:: 1.0.0
+    .. versionadded:: 1.0.0
 
-Parameters
-----------
-norm_dist : float
-    Normalized Arclength (0 to 1), representing the progression along the reaction path.
-    Calculated as xcoord2 = arcS[img] / arcS[nim-1].
-arc_dist : float
-    Actual Arclength at each point along the reaction path. Calculated as
-    xcoord = arcS[img] + dx(ii).
-energy : float
-    Interpolated Energy at each point, calculated using cubic polynomial
-    interpolation. The energy is calculated using the formula:
-    p = a*pow(dx(ii), 3.0) + b*pow(dx(ii), 2.0) + c*dx(ii) + d,
-    where a, b, c, and d are coefficients of the cubic polynomial.
+    Parameters
+    ----------
+    norm_dist : float
+        Normalized Arclength (0 to 1), representing the progression along the reaction path.
+        Calculated as xcoord2 = arcS[img] / arcS[nim-1].
+    arc_dist : float
+        Actual Arclength at each point along the reaction path. Calculated as
+        xcoord = arcS[img] + dx(ii).
+    energy : float
+        Interpolated Energy at each point, calculated using cubic polynomial
+        interpolation. The energy is calculated using the formula:
+        p = a*pow(dx(ii), 3.0) + b*pow(dx(ii), 2.0) + c*dx(ii) + d,
+        where a, b, c, and d are coefficients of the cubic polynomial.
 
-Notes
------
-The `nebpath` record is used within the `nebiter` record to store
-detailed path information for each NEB iteration.
+    Notes
+    -----
+    The `nebpath` record is used within the `nebiter` record to store
+    detailed path information for each NEB iteration.
     """
 
     norm_dist: float

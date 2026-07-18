@@ -33,7 +33,7 @@ class TestConfigDiscovery:
         (xdg / "rgpycrumbs").mkdir(parents=True)
         legacy = xdg / "rgpycrumbs" / "config.toml"
         legacy.write_text(
-            "[pins.packages]\nase = \"3.23.0\"\n",
+            '[pins.packages]\nase = "3.23.0"\n',
             encoding="utf-8",
         )
         monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
@@ -56,15 +56,14 @@ class TestConfigDiscovery:
         user = xdg / "rgpkgs" / "config.toml"
         user.write_text(
             "[dispatch]\nauto_deps = false\nforce_uv = false\n"
-            "[pins]\nlock = \"global.lock\"\n"
-            "[pins.packages]\njax = \"0.4.0\"\nnumpy = \"1.0.0\"\n",
+            '[pins]\nlock = "global.lock"\n'
+            '[pins.packages]\njax = "0.4.0"\nnumpy = "1.0.0"\n',
             encoding="utf-8",
         )
         proj = tmp_path / "work"
         proj.mkdir()
         (proj / "rgpkgs.toml").write_text(
-            "[dispatch]\nforce_uv = true\n"
-            "[pins.packages]\njax = \"0.4.31\"\n",
+            '[dispatch]\nforce_uv = true\n[pins.packages]\njax = "0.4.31"\n',
             encoding="utf-8",
         )
         monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
@@ -84,7 +83,7 @@ class TestConfigDiscovery:
     def test_explicit_config_env(self, monkeypatch, tmp_path):
         extra = tmp_path / "extra.toml"
         extra.write_text(
-            "[pins.packages]\nscipy = \"1.14.1\"\n",
+            '[pins.packages]\nscipy = "1.14.1"\n',
             encoding="utf-8",
         )
         monkeypatch.setenv(CONFIG_PATH_ENV, str(extra))
@@ -148,14 +147,15 @@ class TestResolveLayers:
 class TestDispatchUsesConfig:
     @patch("rgpycrumbs.cli.subprocess.run")
     def test_toml_package_pins_without_lock_file(self, mock_run, monkeypatch, tmp_path):
+        import json
+
         from rgpycrumbs.cli import _dispatch
         from rgpycrumbs.locks import PINS_ENV
-        import json
 
         xdg = tmp_path / "xdg"
         (xdg / "rgpkgs").mkdir(parents=True)
         (xdg / "rgpkgs" / "config.toml").write_text(
-            "[pins.packages]\njax = \"0.4.31\"\n",
+            '[pins.packages]\njax = "0.4.31"\n',
             encoding="utf-8",
         )
         monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
