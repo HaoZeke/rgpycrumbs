@@ -15,6 +15,7 @@ Fixed
 - Lazy ``rgpycrumbs.geom`` exports so PEP 723 collection works without ase.
 - Stop shipping ``tests/`` in the wheel; hatch copies were shadowing source
   probes and broke surfaces collection (libEGL / missing tblite).
+- CI: install scipy/ase via ``uv run --with`` after feature extras were dropped.
 
 rgpycrumbs 1.10.9 (2026-07-18)
 ==============================

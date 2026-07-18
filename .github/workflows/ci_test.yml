@@ -25,10 +25,12 @@ jobs:
         run: uv run --extra test pytest -m pure
       - name: Check PEP 723 inline deps
         run: uv run --extra test pytest --pep723-check -m pep723 --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
+      # Feature extras were dropped (PEP 723 / ensure_import). Install marker
+      # deps with --with so uv tests still cover interpolation + align suites.
       - name: Run interpolation tests
-        run: uv run --extra test --extra interpolation pytest -m interpolation
+        run: uv run --extra test --with "scipy>=1.11" pytest -m interpolation
       - name: Run align tests
-        run: uv run --extra test --extra analysis pytest -m align
+        run: uv run --extra test --with "ase>=3.22" --with "scipy>=1.11" pytest -m align
   test-pixi:
     runs-on: ${{ matrix.os }}
     name: pixi tests (${{ matrix.os }})
