@@ -113,6 +113,7 @@ class TestEnsureImportSmoke:
 
     def test_import_submodule(self) -> None:
         """Submodule imports should return the submodule, not the parent."""
+        pytest.importorskip("scipy")
         from rgpycrumbs._aux import ensure_import
 
         interp = ensure_import("scipy.interpolate")

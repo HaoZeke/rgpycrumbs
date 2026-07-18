@@ -20,18 +20,25 @@ ENVIRONMENT_REQUIREMENTS = {
 
 def _try_import(module_name):
     """Return True if *module_name* can actually be imported."""
-    return optional_import_available(module_name)
+    try:
+        return optional_import_available(module_name)
+    except Exception:
+        # Never let collection die on optional heavy stacks (ovito/Qt/libEGL).
+        return False
 
 
 # Test files that import PEP 723 dispatcher modules with heavy or
 # pixi-only dependencies.  Prevent pytest collection when the source
 # module itself cannot import (regardless of what find_spec reports for
 # individual package names).
+#
+# Prefer lightweight probes (package name) over importing full scripts that
+# pull GUI native libs at module level (ptmdisp → ovito → PySide6).
 _GUARDED_IMPORTS = {
     "test_detect_fragments.py": "rgpycrumbs.geom.detect_fragments",
     # Do not import plt_neb at collection (PEP 723 script pulls adjustText/etc.).
     "test_eon_cli.py": "chemparseplot",
-    "test_ptmdisp.py": "rgpycrumbs.eon.ptmdisp",
+    "test_ptmdisp.py": "ovito",
     "test_ira.py": "rgpycrumbs.geom.ira",
     "test_surfaces.py": "jax",
 }

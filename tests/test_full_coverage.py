@@ -211,6 +211,7 @@ class TestEonHelpers:
 # ======================================================================
 # interpolation.py
 # ======================================================================
+@pytest.mark.skipif(not _HAS_SCIPY, reason="spline_interp needs scipy")
 class TestInterpolation:
     def test_spline_interp_basic(self):
         from rgpycrumbs.interpolation import spline_interp
