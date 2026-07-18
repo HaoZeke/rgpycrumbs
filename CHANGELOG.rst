@@ -12,6 +12,9 @@ Fixed
   missing ``libEGL`` does not abort the suite.
 - prek/ruff 0.15.2: expand per-file ignores for deferred imports / PEP 723
   dual-import scripts (TID252, PLC0415, E402).
+- Lazy ``rgpycrumbs.geom`` exports so PEP 723 collection works without ase.
+- Stop shipping ``tests/`` in the wheel; hatch copies were shadowing source
+  probes and broke surfaces collection (libEGL / missing tblite).
 
 rgpycrumbs 1.10.9 (2026-07-18)
 ==============================

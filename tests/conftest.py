@@ -1,3 +1,20 @@
+# Prefer the repository tests/ package over any hatch-installed snapshot in
+# site-packages (force-include copies go stale across editable reinstalls).
+import sys
+from pathlib import Path as _Path
+
+_REPO_ROOT = str(_Path(__file__).resolve().parent.parent)
+if sys.path[:1] != [_REPO_ROOT]:
+    sys.path.insert(0, _REPO_ROOT)
+# Drop a previously imported wrong "tests" so subsequent imports re-resolve.
+_tests_mod = sys.modules.get("tests")
+if _tests_mod is not None:
+    _mod_file = getattr(_tests_mod, "__file__", None) or ""
+    if _mod_file and "site-packages" in _mod_file.replace("\\", "/"):
+        for key in list(sys.modules):
+            if key == "tests" or key.startswith("tests."):
+                del sys.modules[key]
+
 import importlib
 import importlib.util
 

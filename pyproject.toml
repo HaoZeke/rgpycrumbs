@@ -6,7 +6,7 @@ requires      = [ "hatch-vcs", "hatchling" ]
 version-file = "_version.py"
 
 [tool.hatch.build]
-include = [ "rgpycrumbs/**/*.py", "rgpycrumbs/*.py", "/tests" ]
+include = [ "rgpycrumbs/**/*.py", "rgpycrumbs/*.py" ]
 
 
 [project]
