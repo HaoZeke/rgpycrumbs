@@ -1,3 +1,13 @@
+rgpycrumbs 1.10.9 (2026-07-18)
+==============================
+
+Fixed
+-----
+
+- Floor chemparseplot to ``>=1.9.17`` (lazy ``frame_series``, SurfaceFitConfig).
+- Pure-env collection: plot CLI tests marked ``fragments`` (need matplotlib),
+  not ``pure``; importorskip matplotlib so pure jobs no longer ERROR.
+
 rgpycrumbs 1.10.8 (2026-07-17)
 ==============================
 

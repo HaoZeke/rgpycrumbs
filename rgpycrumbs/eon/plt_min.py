@@ -24,7 +24,7 @@ valley projection. Supports:
 #   "rich",
 #   "ase",
 #   "polars",
-#   "chemparseplot[neb,plot]>=1.9.15,<2",
+#   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "xyzrender>=0.1.3",
 #   "readcon>=0.13.1",
 #   "rgpycrumbs>=1.10.4",

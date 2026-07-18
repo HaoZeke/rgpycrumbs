@@ -12,13 +12,13 @@ import os
 import textwrap
 from pathlib import Path
 
-import matplotlib
+import pytest
 
+matplotlib = pytest.importorskip("matplotlib")
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pytest
 from click.testing import CliRunner
 
 from tests._optional_imports import has_module_spec, optional_import_available
@@ -31,7 +31,7 @@ except ImportError:
     h5py = None
     _HAS_H5PY = False
 
-pytestmark = pytest.mark.pure
+pytestmark = pytest.mark.fragments
 
 _HAS_CHEMPARSEPLOT_NEB = all(
     has_module_spec(mod) for mod in ("matplotlib", "polars", "ase")

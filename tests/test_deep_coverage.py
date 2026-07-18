@@ -7,19 +7,19 @@ Exercises the landscape, structure rendering, and additional code paths
 that need synthetic eOn data.
 """
 
+import importlib
 import os
 import shutil
 import textwrap
-import importlib
 from pathlib import Path
 
-import matplotlib
+import pytest
 
+matplotlib = pytest.importorskip("matplotlib")
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pytest
 from ase.build import molecule
 from ase.io import write as ase_write
 from click.testing import CliRunner
@@ -71,7 +71,7 @@ try:
 except ImportError:
     _HAS_PYVISTA = False
 
-pytestmark = pytest.mark.pure
+pytestmark = pytest.mark.fragments
 
 
 def _write_neb_dat(path, n_images=5, step=0):
@@ -367,9 +367,9 @@ class TestPltNebLandscape:
 @pytest.mark.skipif(not _HAS_PLT_NEB, reason="plt_neb not importable")
 class TestPltNebHelpers:
     def test_profile_strip_payload_returns_typed_entries(self):
+        from ase import Atoms
         from chemparseplot.plot.neb import profile_strip_payload
         from chemparseplot.plot.structs import StructurePlacement
-        from ase import Atoms
 
         atoms_list = [Atoms("H"), Atoms("H"), Atoms("H")]
         payload = profile_strip_payload(
@@ -2143,7 +2143,9 @@ class TestInitErrorPaths:
                 # Force re-evaluation of __getattr__
                 rgpycrumbs.__getattr__("interpolation")
             except ImportError as e:
-                assert "AUTO_DEPS" in str(e) or "optional deps" in str(e) or "fake" in str(e)
+                assert (
+                    "AUTO_DEPS" in str(e) or "optional deps" in str(e) or "fake" in str(e)
+                )
 
     def test_geom_error_gets_same_hint(self):
         """All lazy submodules share the AUTO_DEPS hint (no feature extras)."""

@@ -29,7 +29,7 @@ Example::
 #   "click",
 #   "numpy",
 #   "ase",
-#   "chemparseplot[neb,plot]>=1.9.15,<2",
+#   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "readcon>=0.7.0",
 #   "rgpycrumbs>=1.10.4",
 # ]
