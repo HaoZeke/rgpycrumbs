@@ -16,6 +16,8 @@ Fixed
 - Stop shipping ``tests/`` in the wheel; hatch copies were shadowing source
   probes and broke surfaces collection (libEGL / missing tblite).
 - CI: install scipy/ase via ``uv run --with`` after feature extras were dropped.
+- ``ensure_import``: failed AUTO_DEPS installs fall through to ImportError
+  (no bare RuntimeError) so optional probes do not abort collection.
 
 rgpycrumbs 1.10.9 (2026-07-18)
 ==============================

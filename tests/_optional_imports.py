@@ -39,3 +39,6 @@ def optional_import_available(module_name: str) -> bool:
     except OSError:
         # dlopen failures for optional GUI stacks (ovito / Qt).
         return False
+    except RuntimeError:
+        # ensure_import / AUTO_DEPS install failures must not abort collection.
+        return False

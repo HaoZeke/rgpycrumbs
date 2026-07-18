@@ -232,13 +232,19 @@ def ensure_import(module_name: str):
     auto = os.environ.get("RGPYCRUMBS_AUTO_DEPS", "").strip()
     if auto == "1" and module_name in _DEPENDENCY_MAP:
         spec = _resolve_pip_spec(module_name)
-        _uv_install(spec, cache_dir)
-        if cache_str not in sys.path:
-            sys.path.insert(0, cache_str)
         try:
-            return importlib.import_module(module_name)
-        except ImportError:
+            _uv_install(spec, cache_dir)
+        except RuntimeError:
+            # Installer missing or install failed (e.g. requires-python).
+            # Fall through to the actionable ImportError below.
             pass
+        else:
+            if cache_str not in sys.path:
+                sys.path.insert(0, cache_str)
+            try:
+                return importlib.import_module(module_name)
+            except ImportError:
+                pass
 
     # Step 5: actionable error (no feature extras — pip the dep or AUTO_DEPS)
     if module_name in _DEPENDENCY_MAP:
