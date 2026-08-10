@@ -18,7 +18,7 @@
 (setq org-rst-headline-underline ?-)
 
 (setq org-publish-project-alist
-      '(("sphinx-rst"
+      '(("rgpycrumbs-rst"
          :base-directory "./orgmode/"
          :base-extension "org"
          :publishing-directory "./source/"
@@ -29,4 +29,4 @@
          :section-numbers nil
          :with-author nil)))
 
-(org-publish "sphinx-rst" t)
+(org-publish "rgpycrumbs-rst" t)
