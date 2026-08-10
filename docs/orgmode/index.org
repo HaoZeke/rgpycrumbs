@@ -23,6 +23,11 @@ physics. It provides surface fitting (JAX kernels), structure analysis
 (IRA matching, fragment detection), and a dispatcher-based CLI for NEB
 visualization, saddle search analysis, and simulation setup.
 
+Sister libraries: [[https://chemparseplot.rgoswami.me][chemparseplot]]
+(parsers and plots) and [[https://pychum.rgoswami.me][pychum]] (input
+generation). The header *Ecosystem* menu on every page jumps between
+the three Shibuya sites.
+
 Start with the [[file:quickstart.org][quickstart]] or the
 [[file:tutorials/neb-visualization.org][NEB visualization tutorial]].
 
