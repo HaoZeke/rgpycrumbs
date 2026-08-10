@@ -23,7 +23,6 @@ extensions = [
     "sphinx_sitemap",
     "sphinx_design",  # grids, cards, tabs, dropdowns (Shibuya-friendly)
     "sphinxcontrib.mermaid",  # architecture / data-flow diagrams
-    "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
@@ -135,7 +134,3 @@ html_sidebars = {
 
 autoapi_dirs = ["../../rgpycrumbs"]
 html_baseurl = "https://rgpycrumbs.rgoswami.me/"
-
-copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
-copybutton_prompt_is_regexp = True
-copybutton_exclude = ".linenos, .gp, .go"
