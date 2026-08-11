@@ -14,7 +14,14 @@ import numpy as np
 import pytest
 
 from rgpycrumbs.api import suite_pins
-from rgpycrumbs.basetypes import DimerOpt, MolGeom, SaddleMeasure, SpinID, nebiter, nebpath
+from rgpycrumbs.basetypes import (
+    DimerOpt,
+    MolGeom,
+    SaddleMeasure,
+    SpinID,
+    nebiter,
+    nebpath,
+)
 from rgpycrumbs.eon.plot_config import (
     click_nondefault_overrides,
     extract_config_layers,
@@ -32,7 +39,7 @@ def test_suite_pins():
 
 
 def test_suite_pins_soft_fail(monkeypatch):
-    import rgpycrumbs.api as api
+    from rgpycrumbs import api
 
     def boom(*_a, **_k):
         raise RuntimeError("cfg")
@@ -111,7 +118,7 @@ def test_chemgp_deprecation_warning():
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         try:
-            import rgpycrumbs.chemgp as _cg  # noqa: F401
+            import rgpycrumbs.chemgp as _cg
         except ImportError as exc:
             pytest.skip(f"chemgp deps missing: {exc}")
         deps = [x for x in caught if issubclass(x.category, DeprecationWarning)]
