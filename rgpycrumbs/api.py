@@ -23,6 +23,8 @@ See ``docs/orgmode/explanation/public_api.org`` and suite architecture docs.
 
 from __future__ import annotations
 
+import logging
+
 from rgpycrumbs._aux import ensure_import, lazy_import
 from rgpycrumbs.config import (
     CONFIG_PATH_ENV,
@@ -72,6 +74,6 @@ def suite_pins() -> dict[str, str]:
     pins = dict(pins_from_env())
     try:
         pins.update(load_config().merged_package_pins_normalized())
-    except (OSError, ValueError, TypeError, AttributeError, ImportError):
-        return pins
+    except Exception as exc:
+        logging.getLogger(__name__).debug("suite_pins: config load skipped: %s", exc)
     return pins
