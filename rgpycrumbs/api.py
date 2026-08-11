@@ -55,5 +55,23 @@ __all__ = [
     "resolve_auto_deps_default",
     "resolve_force_uv",
     "resolve_lock_path_layered",
+    "suite_pins",
     "user_config_path",
 ]
+
+
+def suite_pins() -> dict[str, str]:
+    """Merged package pins: ``RGPKGS_LOCK_PINS`` / env pins ∪ layered config.
+
+    Single implementation for the suite. Consumers (chemparseplot, wailord)
+    should re-export or call this rather than reimplementing the merge.
+
+    Soft-fails to env-only pins if config load errors (never raises for missing
+    config files). Does not install packages and does not require uv.
+    """
+    pins = dict(pins_from_env())
+    try:
+        pins.update(load_config().merged_package_pins_normalized())
+    except Exception:  # noqa: BLE001 — soft fail for consumers
+        pass
+    return pins
