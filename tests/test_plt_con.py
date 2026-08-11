@@ -168,7 +168,17 @@ def test_multi_file_overlay_and_label_mismatch(monkeypatch, tmp_path):
 
     ok = runner.invoke(
         plt_con.main,
-        [str(a), str(b), "--label", "A", "--label", "B", "--absolute", "-o", str(tmp_path / "ov.pdf")],
+        [
+            str(a),
+            str(b),
+            "--label",
+            "A",
+            "--label",
+            "B",
+            "--absolute",
+            "-o",
+            str(tmp_path / "ov.pdf"),
+        ],
     )
     assert ok.exit_code == 0, ok.output
     cpp_api.plot_con_overlay.assert_called_once()

@@ -76,6 +76,7 @@ except ImportError:  # pragma: no cover - hub-only fallback
         scf: float = np.nan
         termination_status: str = "not set"
 
+
 __all__ = [
     "DimerOpt",
     "MolGeom",
