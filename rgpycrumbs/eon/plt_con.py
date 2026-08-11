@@ -25,6 +25,7 @@ Unlike ``plt-min`` / ``plt-neb``, no eOn job directory or sidecar ``.dat``.
 from __future__ import annotations
 
 import logging
+import math
 from pathlib import Path
 
 import click
@@ -139,7 +140,7 @@ def main(
     paths = list(con_files)
     trajs = [load_trajectory(p) for p in paths]
     for p, traj in zip(paths, trajs, strict=False):
-        n_e = int(sum(1 for v in traj.energies if v == v))
+        n_e = int(sum(1 for v in traj.energies if math.isfinite(v)))
         log.info(
             "Loaded %s: %d frames, energy finite=%d, forces=%s, source=%s",
             p.name,
