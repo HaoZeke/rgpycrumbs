@@ -1,4 +1,23 @@
 {
+  "$schema": "https://context7.com/schema/context7.json",
   "url": "https://context7.com/haozeke/rgpycrumbs",
-  "public_key": "pk_AJ7U5Y56IXKa8IgfEfaSl"
+  "public_key": "pk_AJ7U5Y56IXKa8IgfEfaSl",
+  "projectTitle": "rgpycrumbs",
+  "description": "Dispatcher-based analytical and visualization suite for chemical physics: eOn NEB/min/saddle plots, surfaces, geometry, ORCA helpers, and a Click CLI. Sibling of chemparseplot and pychum.",
+  "excludeFolders": [
+    "tests",
+    "benchmarks",
+    "branding",
+    "scripts"
+  ],
+  "excludeFiles": [
+    "CHANGELOG.rst",
+    "CODE_OF_CONDUCT.md"
+  ],
+  "rules": [
+    "Import the public surface from rgpycrumbs (see docs public API). Do not reach into private _modules.",
+    "CLI entry is rgpycrumbs. Sibling packages: chemparseplot (parse/plot) and pychum (input generation).",
+    "Prefer the documented Click commands under tools/eon, tools/geom, tools/orca, tools/surfaces.",
+    "Docs live at https://rgpycrumbs.rgoswami.me/ . Org source is under docs/orgmode/."
+  ]
 }

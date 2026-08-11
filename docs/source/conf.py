@@ -69,6 +69,7 @@ autodoc_mock_imports = [
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
 html_static_path = ["_static"]
+html_extra_path = ["llms.txt"]
 html_css_files = []  # sphinx-design ships its own CSS
 html_js_files = []  # Antics + Umami load from extra-head.html
 

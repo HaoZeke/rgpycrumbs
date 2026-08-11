@@ -1,0 +1,31 @@
+# rgpycrumbs
+
+> Dispatcher-based analytical and visualization suite for chemical physics: eOn NEB/min/saddle plots, analytic surfaces, geometry, ORCA helpers, Click CLI.
+
+Docs: https://rgpycrumbs.rgoswami.me/
+Repo: https://github.com/HaoZeke/rgpycrumbs
+PyPI / conda-forge: rgpycrumbs
+Context7: /haozeke/rgpycrumbs
+
+Use the public `rgpycrumbs` surface and the Click CLI. Do not import private `_` modules.
+
+## Docs
+
+- [Quickstart](https://rgpycrumbs.rgoswami.me/quickstart.html)
+- [Install](https://rgpycrumbs.rgoswami.me/howto/install.html)
+- [eOn tools](https://rgpycrumbs.rgoswami.me/tools/eon/index.html)
+- [Tutorials](https://rgpycrumbs.rgoswami.me/tutorials/first-project.html)
+- [Public API](https://rgpycrumbs.rgoswami.me/explanation/public_api.html)
+
+## Siblings
+
+- [chemparseplot](https://chemparseplot.rgoswami.me/): parse and plot chemistry outputs
+- [pychum](https://pychum.rgoswami.me/): ORCA / eOn input generation
+
+## Install
+
+```sh
+uv add rgpycrumbs
+# or
+pip install rgpycrumbs
+```
