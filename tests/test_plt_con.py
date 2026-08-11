@@ -176,3 +176,15 @@ def test_multi_file_overlay_and_label_mismatch(monkeypatch, tmp_path):
     assert kwargs["labels"] == ["A", "B"]
     assert kwargs["relative"] is False
     plt.subplots.assert_called_once()
+
+
+def test_plt_con_script_declares_python_floor():
+    script = Path(__file__).resolve().parent.parent / "rgpycrumbs" / "eon" / "plt_con.py"
+    text = script.read_text()
+    assert '# requires-python = ">=3.11"' in text
+
+
+def test_plt_con_is_discovered_as_eon_script():
+    from rgpycrumbs.cli import _get_scripts_in_folder
+
+    assert "plt_con" in _get_scripts_in_folder("eon")
