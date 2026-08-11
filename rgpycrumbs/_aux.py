@@ -79,6 +79,8 @@ def warn_on_direct_script_import(
         return
     if os.environ.get(auto_env, "").strip() == "1":
         return
+    if _auto_deps_enabled():
+        return
     warnings.warn(
         (
             f"{module_name} is a dispatched PEP 723 script. Direct imports bypass the "
@@ -89,6 +91,24 @@ def warn_on_direct_script_import(
         ),
         stacklevel=2,
     )
+
+
+# Keep in sync with rgpycrumbs.config.AUTO_DEPS_ENVS (avoid importing config
+# from _aux: ensure_import is used during early bootstrap / circular paths).
+_AUTO_DEPS_ENVS = ("RGPKGS_AUTO_DEPS", "RGPYCRUMBS_AUTO_DEPS")
+
+
+def _auto_deps_enabled() -> bool:
+    """True when suite AUTO_DEPS opt-in is set (RGPKGS_* first, then legacy).
+
+    Library callers should set ``RGPKGS_AUTO_DEPS=1`` (ecosystem name).
+    ``RGPYCRUMBS_AUTO_DEPS`` remains as a legacy alias. CLI dispatch still
+    materializes the resolved default into the process env before scripts run.
+
+    Does **not** change the PEP 723 + uv isolation design for CLIs, and does
+    not enable auto-install unless an env flag is explicitly ``1``.
+    """
+    return any(os.environ.get(name, "").strip() == "1" for name in _AUTO_DEPS_ENVS)
 
 
 def enable_library_auto_deps() -> None:
@@ -200,12 +220,16 @@ def ensure_import(module_name: str):
     1. Current environment (importlib)
     2. Parent environment (RGPYCRUMBS_PARENT_SITE_PACKAGES)
     3. uv cache directory on sys.path
-    4. uv/pip install into cache (opt-in via RGPYCRUMBS_AUTO_DEPS=1)
+    4. uv/pip install into cache (opt-in via ``RGPKGS_AUTO_DEPS=1`` or
+       legacy ``RGPYCRUMBS_AUTO_DEPS=1``)
     5. Raise ImportError with an actionable message
 
     Returns the imported module object.
 
     .. versionadded:: 1.3.0
+    .. versionchanged:: 1.10.5
+       Auto-deps respects ``RGPKGS_AUTO_DEPS`` (ecosystem) as well as the
+       legacy ``RGPYCRUMBS_AUTO_DEPS`` name, matching :data:`AUTO_DEPS_ENVS`.
     """
     # Step 1: current env
     try:
@@ -228,9 +252,8 @@ def ensure_import(module_name: str):
         except ImportError:
             pass
 
-    # Step 4: auto-install (opt-in)
-    auto = os.environ.get("RGPYCRUMBS_AUTO_DEPS", "").strip()
-    if auto == "1" and module_name in _DEPENDENCY_MAP:
+    # Step 4: auto-install (opt-in; never default-on for library imports)
+    if _auto_deps_enabled() and module_name in _DEPENDENCY_MAP:
         spec = _resolve_pip_spec(module_name)
         try:
             _uv_install(spec, cache_dir)
@@ -258,7 +281,8 @@ Install the package:
   pip install "{spec}"
 
 Or enable auto-install (CLI dispatch does this by default):
-  export RGPYCRUMBS_AUTO_DEPS=1
+  export RGPKGS_AUTO_DEPS=1
+  # legacy alias: RGPYCRUMBS_AUTO_DEPS=1
 
 For GPU support:
   pip install "jax[cuda12]"  # CUDA 12
@@ -272,7 +296,8 @@ See: https://jax.readthedocs.io/en/latest/installation.html
                 f"Install with:\n"
                 f'  pip install "{spec}"\n\n'
                 f"Or enable auto-install:\n"
-                f"  export RGPYCRUMBS_AUTO_DEPS=1"
+                f"  export RGPKGS_AUTO_DEPS=1\n"
+                f"  # legacy alias: RGPYCRUMBS_AUTO_DEPS=1"
             )
     else:
         msg = (

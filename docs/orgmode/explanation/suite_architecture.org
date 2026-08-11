@@ -8,6 +8,7 @@
 | rgpycrumbs | Hub: CLI, ensure_import, locks, suite TOML |
 | chemparseplot | Parse + plot library (no second config tree) |
 | pychum | Input generators |
+| [[https://github.com/lode-org/readcon-core][readcon-core]] | CON/convel I/O (Rust; PyPI: [[https://pypi.org/project/readcon/][readcon]]) |
 
 * Config
 
@@ -24,3 +25,8 @@ functions; today full pipelines still go through ~rgpycrumbs eon plt-*~.
 * Locks
 
 Consume (not produce): uv.lock, PEP 751 pylock, CycloneDX (eb-stack / uv export).
+
+* CON / structure I/O
+
+eOn movies and general CON trajectories use ~readcon-core~ (import name
+~readcon~) via ~chemparseplot.parse.con~. See also ~rgpycrumbs eon plt-con~.

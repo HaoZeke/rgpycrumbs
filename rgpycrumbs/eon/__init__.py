@@ -13,7 +13,7 @@
     plot_min(job_dir="minimization_run", plot_type="landscape", output="min.png")
     plot_saddle(job_dir="saddle_run", plot_type="profile", output="sad.png")
 
-CLI: ``rgpycrumbs eon plt-{neb,min,saddle}`` (same pipelines).
+CLI: ``rgpycrumbs eon plt-{neb,min,saddle,con}`` (same pipelines).
 """
 
 from __future__ import annotations

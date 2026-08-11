@@ -16,6 +16,7 @@ from rgpycrumbs.api import (
     normalize_pypi_name,
     pins_to_constraint_lines,
     resolve_lock_path_layered,
+    suite_pins,
     user_config_path,
 )
 
@@ -68,3 +69,19 @@ class TestPublicEnsureImport:
         np = ensure_import("numpy")
         assert hasattr(np, "array")
         assert np.array([1, 2]).sum() == 3
+
+
+class TestSuitePins:
+    def test_suite_pins_returns_dict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.delenv("RGPKGS_LOCK_PINS", raising=False)
+        pins = suite_pins()
+        assert isinstance(pins, dict)
+
+    def test_suite_pins_merges_env(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("RGPKGS_LOCK_PINS", '{"numpy": "2.0.0"}')
+        pins = suite_pins()
+        assert pins.get(normalize_pypi_name("numpy")) == "2.0.0"
