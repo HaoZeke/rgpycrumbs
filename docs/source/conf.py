@@ -70,9 +70,7 @@ autodoc_mock_imports = [
 html_theme = "shibuya"
 html_static_path = ["_static"]
 html_css_files = []  # sphinx-design ships its own CSS
-html_js_files = [
-    ("https://antics-api.turtletech.us/antics.js", {"defer": "defer"}),
-]
+html_js_files = []  # Antics + Umami load from extra-head.html
 
 html_context = {
     "source_type": "github",
@@ -112,7 +110,7 @@ html_theme_options = {
                 },
                 {
                     "title": "pychum",
-                    "url": "https://github.com/HaoZeke/pychum",
+                    "url": "https://pychum.rgoswami.me",
                     "summary": "Input file generation for ORCA and NWChem",
                     "external": True,
                 },
@@ -135,4 +133,4 @@ html_sidebars = {
 }
 
 autoapi_dirs = ["../../rgpycrumbs"]
-html_baseurl = "rgpycrumbs.rgoswami.me"
+html_baseurl = "https://rgpycrumbs.rgoswami.me/"
