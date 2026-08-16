@@ -10,7 +10,7 @@
 #   "click",
 #   "ase",
 #   "rich",
-#   "readcon>=0.7.0",
+#   "readcon>=0.14.5",
 #   "rgpycrumbs>=1.10.2",
 # ]
 # ///

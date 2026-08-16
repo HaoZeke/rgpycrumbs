@@ -26,7 +26,7 @@ valley projection. Supports:
 #   "polars",
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "xyzrender>=0.1.3",
-#   "readcon>=0.13.1",
+#   "readcon>=0.14.5",
 #   "rgpycrumbs>=1.10.4",
 # ]
 # ///

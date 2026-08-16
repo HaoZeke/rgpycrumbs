@@ -30,7 +30,7 @@ Example::
 #   "numpy",
 #   "ase",
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
-#   "readcon>=0.7.0",
+#   "readcon>=0.14.5",
 #   "rgpycrumbs>=1.10.4",
 # ]
 # ///
