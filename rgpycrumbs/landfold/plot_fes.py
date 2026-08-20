@@ -52,7 +52,15 @@ if warn_on_direct_script_import is not None:
     help="Output figure path (.png or .svg).",
 )
 @click.option("--kt", default=1.0, show_default=True, type=float, help="kT used for the invert.")
-@click.option("--fmax", default=None, type=float, help="Clip finite F to [0, fmax].")
+@click.option(
+    "--on",
+    type=click.Choice(["density", "free-energy"]),
+    default="density",
+    show_default=True,
+    help="Fit unclipped -kT ln(rho/rhomax) or landfold's F grid.",
+)
+@click.option("--floor", default=0.006, show_default=True, type=float)
+@click.option("--fmax", default=None, type=float, help="Drop z >= fmax from the fit set.")
 @click.option("--clabel", default=None, help="Colorbar label (default F/kT when kt=1).")
 @click.option("--xlabel", default=r"$s_1$", show_default=True)
 @click.option("--ylabel", default=r"$s_2$", show_default=True)
@@ -75,6 +83,8 @@ def main(
     inp,
     output,
     kt,
+    on,
+    floor,
     fmax,
     clabel,
     xlabel,
@@ -95,6 +105,8 @@ def main(
         xlabel=xlabel,
         ylabel=ylabel,
         clabel=clabel,
+        on=on,
+        floor=floor,
         fmax=fmax,
         method=method,
         surface_fit=SurfaceFitConfig(

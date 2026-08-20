@@ -11,11 +11,14 @@ same GP landscape stack as [[file:../eon/plt_neb.org][plt-neb]]:
 
 * Method
 
-Landfold writes a regular ~# x y F rho~ grid. Finite cells become
-=(s1, s2, F)= observations. Slopes are =np.gradient= on that lattice
-(the NEB path uses synthetic RMSD-R/P gradients because those points
-lie on a string). =project_path= is false: the plane is already the
-sketch-map.
+Default ~--on density~ fits unclipped
+=z = -kT ln(rho/rhomax)= on occupied bins. ~--on free-energy~ uses
+landfold's =F= grid. ~--fmax~ drops the ceiling from the fit set; it
+does not clip =z=. Slopes are =np.gradient= on the lattice.
+=project_path= is false: the plane is already the sketch-map.
+
+A notebook can pass =cloud=(s1, s2, z)= (frames, landmarks, or
+minima energies) instead of the histogram.
 
 The default surface is ~grad_imq~, the same kernel as the eOn NEB plot
 TOML. Dense clouds are thinned to 300 fit points
@@ -72,7 +75,9 @@ the CSV.
 | ~--input~ | (required) | CSV from =landfold fes --csv= |
 | ~--output~ | (required) | Figure path (~.png~ / ~.svg~) |
 | ~--kt~ | ~1.0~ | kT used for the invert (colorbar only) |
-| ~--fmax~ | (none) | Clip finite =F= to =[0, fmax]= before the fit |
+| ~--on~ | ~density~ | Fit unclipped log-density, or ~free-energy~ |
+| ~--floor~ | ~0~ | Occupied-bin floor as a fraction of =rho_max= |
+| ~--fmax~ | (none) | Drop =z >= fmax= from the fit set |
 | ~--method~ | ~grad_imq~ | =rgpycrumbs.surfaces= name |
 | ~--auto-thin / --no-auto-thin~ | on | Thin the histogram cloud for the GP fit |
 | ~--max-surface-points~ | ~300~ | Fit-set cap when thinning |
