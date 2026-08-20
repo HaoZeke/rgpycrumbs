@@ -328,7 +328,7 @@ def test_con_splitter_source_has_no_asewrite():
         if isinstance(node, ast.ImportFrom) and node.module == "ase.io":
             assert all(alias.name != "write" for alias in node.names)
     text = src.read_text()
-    assert "readcon>=0.7.0" in text
+    assert "readcon>=0.14.5" in text
     assert "asewrite" not in text
 
 
