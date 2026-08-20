@@ -124,6 +124,7 @@ eon-schema    = ">=0.2.0"
 [feature.test.dependencies]
 ase  = ">=3.23,<4"
 h5py = ">=3.0"
+libegl = ">=1.7"
 
 [feature.surfaces.pypi-dependencies]
 jax = ">=0.4"
