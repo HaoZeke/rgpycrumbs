@@ -20,6 +20,9 @@ jobs:
         shell: bash -el {0}
         run: |
           export LD_LIBRARY_PATH="$GITHUB_WORKSPACE/.pixi/envs/test/lib:${LD_LIBRARY_PATH:-}"
+          export QT_QPA_PLATFORM=offscreen
+          export LIBGL_ALWAYS_SOFTWARE=1
+          export QT_OPENGL=software
           pixi r -e test -- python -c 'import ovito; from ovito.data import DataCollection; print(f"OVITO {ovito.version} {ovito.__file__}; DataCollection={DataCollection.__module__}.{DataCollection.__name__}")'
           set -o pipefail
           pixi r -e test -- python -X faulthandler -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q 2>&1 | tee test-env.log
