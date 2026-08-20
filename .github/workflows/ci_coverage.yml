@@ -19,21 +19,21 @@ jobs:
       - name: Run test env
         shell: bash -el {0}
         run: |
-          pixi r -e test -- python -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q || true
+          pixi r -e test -- python -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q
       - name: Run surfaces env
         shell: bash -el {0}
         run: |
-          pixi r -e surfaces -- python -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q || true
+          pixi r -e surfaces -- python -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q
       - name: Run fragments env
         shell: bash -el {0}
         run: |
-          pixi r -e fragments -- python -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q || true
+          pixi r -e fragments -- python -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q
       - name: Run eonmlflow env
         shell: bash -el {0}
         run: |
-          pixi r -e eonmlflow -- python -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q || true
+          pixi r -e eonmlflow -- python -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q
       - name: Combine and report
         shell: bash -el {0}
         run: |
-          pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow || true
+          pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow
           pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=70
