@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.8.10
+      - uses: prefix-dev/setup-pixi@v0.9.4
         with:
           cache: true
           cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
@@ -19,19 +19,19 @@ jobs:
       - name: Run test env
         shell: bash -el {0}
         run: |
-          pixi r -e test -- python -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q
+          pixi r -e test -- python -X faulthandler -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q
       - name: Run surfaces env
         shell: bash -el {0}
         run: |
-          pixi r -e surfaces -- python -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q
+          pixi r -e surfaces -- python -X faulthandler -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q
       - name: Run fragments env
         shell: bash -el {0}
         run: |
-          pixi r -e fragments -- python -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q
+          pixi r -e fragments -- python -X faulthandler -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q
       - name: Run eonmlflow env
         shell: bash -el {0}
         run: |
-          pixi r -e eonmlflow -- python -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q
+          pixi r -e eonmlflow -- python -X faulthandler -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q
       - name: Combine and report
         shell: bash -el {0}
         run: |
