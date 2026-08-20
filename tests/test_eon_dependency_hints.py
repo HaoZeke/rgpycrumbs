@@ -14,3 +14,10 @@ def test_eon_readcon_hints_require_spec_three():
         if "readcon>=0.14." in text:
             assert "readcon>=0.14.7" in text, path
             assert "readcon>=0.14.5" not in text, path
+
+
+def test_chemparseplot_lazy_dependencies_require_current_eon_surface():
+    specs = [value for key, value in _DEPENDENCY_MAP.items() if "chemparseplot" in key]
+    assert specs
+    for spec in specs:
+        assert "chemparseplot[neb,plot]>=1.9.17,<2" == spec
