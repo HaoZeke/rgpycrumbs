@@ -150,7 +150,7 @@ When ~auto_thin~ is true, chemparseplot subsamples the GP *training* cloud
 still use the full trajectory. This avoids non-finite GradientIMQ grids on
 dense force-eval movies without silently changing default behaviour.
 
-Requires ~chemparseplot>=1.9.10~ (~SurfaceFitConfig~).
+Requires ~chemparseplot>=1.9.17~ (~SurfaceFitConfig~).
 
 ** See Also
 

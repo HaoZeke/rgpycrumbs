@@ -17,7 +17,7 @@ config.ini). See :mod:`rgpycrumbs.eon.seed_dimers` for the library API.
 #   "scipy",
 #   "rich",
 #   "ase",
-#   "readcon>=0.14.5",
+#   "readcon>=0.14.7",
 #   "rgpycrumbs>=1.10.2",
 # ]
 # ///

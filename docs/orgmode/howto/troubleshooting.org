@@ -109,5 +109,5 @@ max_surface_points = 64
 rgpycrumbs eon plt-min --config plot.toml --plot-type landscape
 #+end_src
 
-Default remains ~auto_thin = false~. Requires chemparseplot ≥ 1.9.10.
+Default remains ~auto_thin = false~. Requires chemparseplot ≥ 1.9.17.
 See [[file:../tools/eon/plot_config.org][eOn plot TOML config]].
