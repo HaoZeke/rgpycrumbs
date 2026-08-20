@@ -1,13 +1,3 @@
-rgpycrumbs 1.10.11 (unreleased)
-===============================
-
-Added
------
-
-- ``rgpycrumbs landfold plot-fes``: draw a ``landfold fes --csv`` grid through
-  ``chemparseplot.plot.landfold``. Landfold owns the invert; this command only
-  dispatches the figure.
-
 rgpycrumbs 1.10.10 (2026-07-18)
 ===============================
 
