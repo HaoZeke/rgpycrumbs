@@ -13,12 +13,13 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.9.4
         with:
-          cache: true
-          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+          cache: false
+          cache-write: false
           activate-environment: false
       - name: Run test env
         shell: bash -el {0}
         run: |
+          pixi r -e test -- python -c 'import ovito; from ovito.data import DataCollection; print(f"OVITO {ovito.version} {ovito.__file__}; DataCollection={DataCollection.__module__}.{DataCollection.__name__}")'
           set -o pipefail
           pixi r -e test -- python -X faulthandler -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q 2>&1 | tee test-env.log
       - name: Run surfaces env
