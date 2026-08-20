@@ -20,7 +20,7 @@
 # Explicit pins (override lock-file versions for ensure_import / uv constraints)
 # jax = "0.4.31"
 # numpy = "2.2.6"
-# chemparseplot = "1.9.7"
+# chemparseplot = "1.9.17"
 
 # --- rgpycrumbs CLI ---
 [rgpycrumbs.dispatch]
