@@ -7,7 +7,7 @@ platforms   = [ "linux-64" ]
 version     = "1.8.0"
 
 [feature.test.tasks.cov-clean]
-cmd = "find . -maxdepth 1 -name '.coverage*' -delete 2>/dev/null; true"
+cmd = "find . -maxdepth 1 -name '.coverage*' -delete 2>/dev/null"
 
 [feature.test.tasks.cov]
 cmd = "python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow .coverage.ptm 2>/dev/null; python -m coverage combine 2>/dev/null; python -m coverage report"
@@ -21,19 +21,19 @@ depends-on = [
 ]
 
 [feature.test.tasks.test-base]
-cmd = "bash -c 'export COVERAGE_FILE=.coverage.test && python -m coverage run --source=rgpycrumbs -m pytest tests/ -q; true'"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.test && python -m coverage run --source=rgpycrumbs -m pytest tests/ -q'"
 
 [feature.surfaces.tasks.test-surfaces]
-cmd = "bash -c 'export COVERAGE_FILE=.coverage.surfaces && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m surfaces -q; true'"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.surfaces && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m surfaces -q'"
 
 [feature.fragments.tasks.test-fragments]
-cmd = "bash -c 'export COVERAGE_FILE=.coverage.fragments && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m \"fragments or ira or align\" -q; true'"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.fragments && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m \"fragments or ira or align\" -q'"
 
 [feature.eonmlflow.tasks.test-eonmlflow]
-cmd = "bash -c 'export COVERAGE_FILE=.coverage.eonmlflow && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m eon -q; true'"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.eonmlflow && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m eon -q'"
 
 [feature.ptm.tasks.test-ptm]
-cmd = "bash -c 'export COVERAGE_FILE=.coverage.ptm && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m ptm -q; true'"
+cmd = "bash -c 'export COVERAGE_FILE=.coverage.ptm && python -m coverage run --source=rgpycrumbs -m pytest tests/ -m ptm -q'"
 
 [dependencies]
 python = ">=3.10"
