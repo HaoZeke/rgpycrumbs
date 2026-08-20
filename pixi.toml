@@ -118,7 +118,7 @@ xyzrender     = ">=0.1.3"
 rgpycrumbs    = { path = ".", editable = true }
 rich          = ">=13.0"
 scipy         = ">=1.11"
-readcon       = ">=0.14.5"
+readcon       = ">=0.14.7"
 eon-schema    = ">=0.2.0"
 
 [feature.test.dependencies]
