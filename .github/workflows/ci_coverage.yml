@@ -24,24 +24,27 @@ jobs:
       - name: Run surfaces env
         shell: bash -el {0}
         run: |
-          pixi r -e surfaces -- python -X faulthandler -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q
+          set -o pipefail
+          pixi r -e surfaces -- python -X faulthandler -m coverage run --data-file=.coverage.surfaces --source=rgpycrumbs -m pytest tests/ -m surfaces -q 2>&1 | tee surfaces-env.log
       - name: Run fragments env
         shell: bash -el {0}
         run: |
-          pixi r -e fragments -- python -X faulthandler -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q
+          set -o pipefail
+          pixi r -e fragments -- python -X faulthandler -m coverage run --data-file=.coverage.fragments --source=rgpycrumbs -m pytest tests/ -m "fragments or ira or align" -q 2>&1 | tee fragments-env.log
       - name: Run eonmlflow env
         shell: bash -el {0}
         run: |
-          pixi r -e eonmlflow -- python -X faulthandler -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q
+          set -o pipefail
+          pixi r -e eonmlflow -- python -X faulthandler -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q 2>&1 | tee eonmlflow-env.log
       - name: Combine and report
         shell: bash -el {0}
         run: |
-          pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow
-          pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=70
-      - name: Upload test environment log
+          set -o pipefail
+          { pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow && pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=70; } 2>&1 | tee combine-report.log
+      - name: Upload coverage logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-test-env-log
-          path: test-env.log
-          if-no-files-found: error
+          name: coverage-logs
+          path: '*-env.log,combine-report.log'
+          if-no-files-found: warn
