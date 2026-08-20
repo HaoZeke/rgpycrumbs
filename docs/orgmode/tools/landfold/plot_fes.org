@@ -1,0 +1,112 @@
+#+TITLE: ~plot-fes~
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Visualizing a landfold free-energy surface
+
+~rgpycrumbs landfold plot-fes~ draws a ~landfold fes --csv~ grid on the
+same GP landscape stack as [[file:../eon/plt_neb.org][plt-neb]]:
+=chemparseplot.plot.landfold.plot_fes= calls
+=plot_landscape_surface= with =rgpycrumbs.surfaces= (default
+~grad_imq~). The CLI does not invert the histogram.
+
+* Method
+
+Landfold writes a regular ~# x y F rho~ grid. Finite cells become
+=(s1, s2, F)= observations. Slopes are =np.gradient= on that lattice
+(the NEB path uses synthetic RMSD-R/P gradients because those points
+lie on a string). =project_path= is false: the plane is already the
+sketch-map.
+
+The default surface is ~grad_imq~, the same kernel as the eOn NEB plot
+TOML. Dense clouds are thinned to 300 fit points
+(=SurfaceFitConfig(auto_thin=True, max_surface_points=300)=). The IMQ
+length hint defaults to one-tenth of the =(s1, s2)= span; sketch-map
+coordinates are tens of units, not a few angstrom of RMSD.
+
+Dashed isolines are predictive variance, identical to a NEB landscape.
+
+* Usage
+
+Invert on the landfold binary, then dispatch the figure:
+
+#+BEGIN_SRC shell
+landfold fes --input protein-oos.proj --nx 280 --ny 280 --kt 1 \
+  --blur 4 --floor 0.004 --fmax 4 --csv fes.csv
+rgpycrumbs landfold plot-fes --input fes.csv --output fes.png \
+  --kt 1 --fmax 4 --method grad_imq
+#+END_SRC
+
+LJ38 teaching invert (=kT*= 0.168, JCTC 2013 clip 2):
+
+#+BEGIN_SRC shell
+landfold fes --input lj38-oos.proj --nx 240 --ny 240 --kt 0.168 \
+  --blur 7 --floor 0.006 --fmax 2 --csv lj38.fes.csv
+rgpycrumbs landfold plot-fes --input lj38.fes.csv --output lj38.png \
+  --kt 0.168 --fmax 2 --clabel '$F/\varepsilon$'
+#+END_SRC
+
+Library path (notebooks):
+
+#+begin_src python
+from chemparseplot.parse.landfold import load_fes_csv
+from chemparseplot.plot.landfold import plot_fes
+from chemparseplot.plot.neb import SurfaceFitConfig
+
+fes = load_fes_csv("fes.csv", kt=1.0)
+fig = plot_fes(
+    fes,
+    fmax=4.0,
+    method="grad_imq",
+    surface_fit=SurfaceFitConfig(auto_thin=True, max_surface_points=300),
+)
+fig.savefig("fes.png", dpi=170, facecolor="white")
+#+end_src
+
+A =landfold.fes.v1= dict from =fes_xy_result= is accepted in place of
+the CSV.
+
+* Key Options
+
+| Option | Default | Description |
+|--------+---------+-------------|
+| ~--input~ | (required) | CSV from =landfold fes --csv= |
+| ~--output~ | (required) | Figure path (~.png~ / ~.svg~) |
+| ~--kt~ | ~1.0~ | kT used for the invert (colorbar only) |
+| ~--fmax~ | (none) | Clip finite =F= to =[0, fmax]= before the fit |
+| ~--method~ | ~grad_imq~ | =rgpycrumbs.surfaces= name |
+| ~--auto-thin / --no-auto-thin~ | on | Thin the histogram cloud for the GP fit |
+| ~--max-surface-points~ | ~300~ | Fit-set cap when thinning |
+| ~--n-inducing~ | (none) | Nyström inducing count if the fit switches to ~grad_imq_ny~ |
+| ~--rbf-smooth~ | 0.1 of span | IMQ/Matern length hint |
+| ~--clabel~ | ~F/kT~ when ~kt=1~ | Colorbar label |
+| ~--xlabel~ / ~--ylabel~ | ~$s_1$~ / ~$s_2$~ | Axis labels |
+
+* Troubleshooting
+
+** "Surface prediction produced no finite values for contourf"
+
+*Cause:* ~grad_imq~ hyperparameter optimization can return a missing
+length scale on a sketch-map plane (span tens of units). The landscape
+helper then predicted an all-NaN grid.
+
+*Solution:* chemparseplot keeps the length hint when ~ls~ is missing.
+Pass ~--rbf-smooth~ explicitly if a custom scale is needed. Keep
+~--auto-thin~ on for 10k+ finite cells.
+
+** "not a regular grid"
+
+*Cause:* The CSV is not the ~iy~-major ~x y F rho~ layout from
+=landfold fes --csv=.
+
+*Solution:* Invert with landfold; do not feed a raw ~(s1, s2)~
+projection file to ~plot-fes~.
+
+* See Also
+
+- [[https://chemparseplot.rgoswami.me][chemparseplot]] =plot.landfold= / =parse.landfold=
+- [[file:../eon/plt_neb.org][plt-neb]] for the same GP landscape on RMSD-R/P
+- [[file:../surfaces.org][surfaces]] for kernel names
+
+** API Reference
+
+@@rst::mod:`rgpycrumbs.landfold.plot_fes`@@

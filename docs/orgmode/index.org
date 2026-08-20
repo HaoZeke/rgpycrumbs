@@ -113,6 +113,7 @@ digraph G {
 
      tools/eon/index
      tools/chemgp/index
+     tools/landfold/index
      tools/orca/index
      tools/geom/index
      tools/surfaces

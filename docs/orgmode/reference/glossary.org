@@ -125,3 +125,11 @@ passed as ~surface_fit=~ to ~plot_landscape_surface~.
 Declarative eOn plot config for ~plt-neb~, ~plt-min~, and ~plt-saddle~
 (~--config~). Shared style under ~[shared]~; command inputs under
 ~[neb]~ / ~[min]~ / ~[saddle]~.
+
+* landfold.fes.v1
+
+Versioned landfold free-energy result: bin centres ~x~ / ~y~, arrays
+~free_energy~ and ~density~ shaped ~(ny, nx)~, plus ~kt~. Produced by
+~fes_xy_result~ or ~landfold fes --csv~. chemparseplot
+~parse.landfold~ loads it; ~plot.landfold.plot_fes~ fits the NEB GP
+landscape. Dispatch: ~rgpycrumbs landfold plot-fes~.

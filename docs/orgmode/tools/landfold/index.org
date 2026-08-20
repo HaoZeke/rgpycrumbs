@@ -1,0 +1,16 @@
+#+TITLE: landfold Tools
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* landfold helpers
+
+Dispatch landfold artifacts to chemparseplot. Landfold owns the invert
+(=F = -kT ln(rho/rhomax)=). This group only loads the CSV and calls the
+GP landscape used by =plt-neb=.
+
+#+BEGIN_EXPORT rst
+.. toctree::
+   :maxdepth: 2
+   :caption: CLI Tools
+
+   plot_fes
+#+END_EXPORT

@@ -111,3 +111,8 @@ rgpycrumbs eon plt-min --config plot.toml --plot-type landscape
 
 Default remains ~auto_thin = false~. Requires chemparseplot ≥ 1.9.10.
 See [[file:../tools/eon/plot_config.org][eOn plot TOML config]].
+
+For ~rgpycrumbs landfold plot-fes~ the same message on a sketch-map
+plane is a missing IMQ length scale. The command defaults
+~--auto-thin~ and a span-based ~--rbf-smooth~. See
+[[file:../tools/landfold/plot_fes.org][plot-fes]].
