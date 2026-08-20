@@ -17,7 +17,7 @@ Unlike ``plt-min`` / ``plt-neb``, no eOn job directory or sidecar ``.dat``.
 #   "ase",
 #   "rich",
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
-#   "readcon>=0.13.1",
+#   "readcon>=0.14.5",
 #   "rgpycrumbs>=1.10.4",
 # ]
 # ///
