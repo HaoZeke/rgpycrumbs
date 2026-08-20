@@ -3,9 +3,11 @@
 
 * Visualizing energy on the representation plane
 
-~rgpycrumbs landfold plot-energy~ draws potential energy on a metric
-2D plane (MethodsX). The table is =chemparseplot.energy.v1=:
-=# x y energy [f_para] [step]=. Occupancy invert is
+~rgpycrumbs landfold plot-energy~ draws a physical field on a metric
+2D plane. On a NEB path that field is energy (MethodsX). On a landfold
+χ map it is a structural order parameter (fcc/ico basin coordinate of
+the n4..n13 counts). The table is =chemparseplot.energy.v1=:
+=# x y field [f_para] [step]=. Occupancy invert is
 [[file:plot_fes.org][plot-fes]], not this command.
 
 * Method
