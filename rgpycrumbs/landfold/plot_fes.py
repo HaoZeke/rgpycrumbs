@@ -65,6 +65,12 @@ if warn_on_direct_script_import is not None:
 @click.option("--auto-thin/--no-auto-thin", default=True, show_default=True)
 @click.option("--max-surface-points", default=300, show_default=True, type=int)
 @click.option("--n-inducing", default=None, type=int)
+@click.option(
+    "--rbf-smooth",
+    default=None,
+    type=float,
+    help="IMQ/Matern length hint. Default is 0.1 of the (s1,s2) span.",
+)
 def main(
     inp,
     output,
@@ -77,6 +83,7 @@ def main(
     auto_thin,
     max_surface_points,
     n_inducing,
+    rbf_smooth,
 ) -> None:
     from chemparseplot.parse.landfold import load_fes_csv
     from chemparseplot.plot.landfold import plot_fes
@@ -94,6 +101,7 @@ def main(
             auto_thin=auto_thin, max_surface_points=max_surface_points
         ),
         n_inducing=n_inducing,
+        rbf_smooth=rbf_smooth,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=170, facecolor="white")
