@@ -24,7 +24,7 @@ robust to partial aKMC directories (missing states are skipped).
 #   "scipy",
 #   "rich",
 #   "ase",
-#   "readcon>=0.14.5",
+#   "readcon>=0.14.7",
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "rgpycrumbs>=1.10.4",
 # ]
