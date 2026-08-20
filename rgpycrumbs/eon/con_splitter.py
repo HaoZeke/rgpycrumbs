@@ -10,7 +10,7 @@
 #   "click",
 #   "ase",
 #   "rich",
-#   "readcon>=0.14.5",
+#   "readcon>=0.14.7",
 #   "rgpycrumbs>=1.10.2",
 # ]
 # ///
@@ -70,7 +70,7 @@ def _energy_from_atoms(atoms) -> float | None:
 def _apply_frame_energy(frame, energy: float | None):
     """Set per-frame total energy on a ``ConFrame`` copy-friendly handle.
 
-    Prefers ``set_energy`` / ``set_scalar_metadata`` (readcon>=0.14.5). Older
+    Prefers ``set_energy`` / ``set_scalar_metadata`` (readcon>=0.14.7). Older
     wheels that expose only a read-only ``energy`` property are reconstructed
     with string metadata values accepted by the constructor.
     """
