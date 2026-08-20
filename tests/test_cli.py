@@ -19,6 +19,10 @@ def runner():
 @pytest.fixture
 def mock_script_group(monkeypatch):
     """Mock the script discovery so the CLI has a command to run."""
+    monkeypatch.setattr(
+        "rgpycrumbs.cli._prefer_in_env_interpreter",
+        lambda is_dev, *, force_uv=None: is_dev,
+    )
     # Temporarily add a dummy command to the main group for testing
     dummy_cmd = _make_script_command("dummy_group", "dummy_script.py")
     main.add_command(dummy_cmd, name="dummy_script")
@@ -117,6 +121,10 @@ def test_dispatch_adds_editable_sources_for_linked_packages(
 
     monkeypatch.setattr(Path, "is_file", _is_file)
     monkeypatch.setattr(
+        "rgpycrumbs.cli._prefer_in_env_interpreter",
+        lambda is_dev, *, force_uv=None: False,
+    )
+    monkeypatch.setattr(
         "rgpycrumbs.cli.importlib.util.find_spec",
         lambda name: (
             SimpleNamespace(
@@ -144,6 +152,10 @@ def test_dispatch_skips_editable_sources_when_absent(mock_run, monkeypatch):
     """_dispatch should not add editable flags without a linked checkout."""
     monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
     monkeypatch.setattr("rgpycrumbs.cli.importlib.util.find_spec", lambda name: None)
+    monkeypatch.setattr(
+        "rgpycrumbs.cli._prefer_in_env_interpreter",
+        lambda is_dev, *, force_uv=None: False,
+    )
 
     _dispatch("group", "script", ())
 
