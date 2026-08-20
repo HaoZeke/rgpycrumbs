@@ -61,7 +61,7 @@ CLI flags still override the file for one-off runs.
 Surface-fit keys (~auto_thin~, ~max_surface_points~) are *TOML-only*
 (defaults: ~auto_thin = false~, ~max_surface_points = 64~). They forward to
 chemparseplot ~SurfaceFitConfig~ / ~plot_landscape_surface~ (requires
-chemparseplot ≥ 1.9.10).
+chemparseplot ≥ 1.9.17).
 
 Example package path: ~rgpycrumbs/eon/examples/plot_config.example.toml~.
 
