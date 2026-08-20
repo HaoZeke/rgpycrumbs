@@ -19,7 +19,8 @@ jobs:
       - name: Run test env
         shell: bash -el {0}
         run: |
-          pixi r -e test -- python -X faulthandler -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q
+          set -o pipefail
+          pixi r -e test -- python -X faulthandler -m coverage run --data-file=.coverage.test --source=rgpycrumbs -m pytest tests/ -q 2>&1 | tee test-env.log
       - name: Run surfaces env
         shell: bash -el {0}
         run: |
@@ -37,3 +38,10 @@ jobs:
         run: |
           pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow
           pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=70
+      - name: Upload test environment log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-test-env-log
+          path: test-env.log
+          if-no-files-found: error
