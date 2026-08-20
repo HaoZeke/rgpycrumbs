@@ -1,0 +1,57 @@
+#+TITLE: ~plot-energy~
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Visualizing energy on the representation plane
+
+~rgpycrumbs landfold plot-energy~ draws potential energy on a metric
+2D plane (MethodsX). The table is =chemparseplot.energy.v1=:
+=# x y energy [f_para] [step]=. Occupancy invert is
+[[file:plot_fes.org][plot-fes]], not this command.
+
+* Method
+
+The plane is RMSD =(r, p)=, rotated =(s, d)=, or a landfold
+=(s1, s2)= map. The field is energy. When =f_para= is present, synthetic
+gradients use the Savitzky-Golay path tangent. Default ~--frame rmsd~
+rotates to =(s, d)=. ~--frame landfold~ keeps the sketch-map axes.
+
+Default kernel ~grad_imq~. Dashed isolines are predictive variance.
+
+* Usage
+
+#+BEGIN_SRC shell
+rgpycrumbs landfold plot-energy --input cloud.energy.csv \
+  --output energy.png --frame rmsd --method grad_imq
+#+END_SRC
+
+Library path:
+
+#+begin_src python
+from chemparseplot.parse.representation import from_path_forces
+from chemparseplot.plot.representation import plot_energy
+
+rep = from_path_forces(rmsd_r, rmsd_p, energies, f_para, frame="rmsd")
+fig = plot_energy(rep, method="grad_imq")
+fig.savefig("energy.png", dpi=170, facecolor="white")
+#+end_src
+
+* Key Options
+
+| Option | Default | Description |
+|--------+---------+-------------|
+| ~--input~ | (required) | =x y energy [f_para] [step]= |
+| ~--output~ | (required) | Figure path (~.png~ / ~.svg~) |
+| ~--frame~ | ~rmsd~ | ~rmsd~ / ~progress~ / ~landfold~ / ~plane~ |
+| ~--project-path / --no-project-path~ | from frame | Force or skip the =(s, d)= rotation |
+| ~--method~ | ~grad_imq~ | =rgpycrumbs.surfaces= name |
+| ~--clabel~ | ~$E$~ | Colorbar label |
+
+* See Also
+
+- [[https://chemparseplot.rgoswami.me][chemparseplot]] =plot.representation.plot_energy=
+- [[file:plot_fes.org][plot-fes]] for occupancy invert
+- [[file:../eon/plt_neb.org][plt-neb]] for the same landscape from eOn NEB files
+
+** API Reference
+
+@@rst::mod:`rgpycrumbs.landfold.plot_energy`@@

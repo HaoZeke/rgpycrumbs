@@ -126,6 +126,12 @@ Declarative eOn plot config for ~plt-neb~, ~plt-min~, and ~plt-saddle~
 (~--config~). Shared style under ~[shared]~; command inputs under
 ~[neb]~ / ~[min]~ / ~[saddle]~.
 
+* Energy representation
+
+MethodsX landscape: metric plane (RMSD ~(r, p)~, rotated ~(s, d)~, or
+landfold ~(s1, s2)~) plus potential energy and optional ~F_parallel~
+synthetic gradients. Dispatch: ~rgpycrumbs landfold plot-energy~.
+
 * landfold.fes.v1
 
 Versioned landfold free-energy result: bin centres ~x~ / ~y~, arrays

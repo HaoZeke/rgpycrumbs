@@ -3,14 +3,15 @@
 
 * landfold helpers
 
-Dispatch landfold artifacts to chemparseplot. Landfold owns the invert
-(=F = -kT ln(rho/rhomax)=). This group only loads the CSV and calls the
-GP landscape used by =plt-neb=.
+Dispatch landfold artifacts to chemparseplot. =plot-energy= is the
+MethodsX representation (energy on a metric 2D plane). =plot-fes= is
+the occupancy invert diagnostic.
 
 #+BEGIN_EXPORT rst
 .. toctree::
    :maxdepth: 2
    :caption: CLI Tools
 
+   plot_energy
    plot_fes
 #+END_EXPORT
