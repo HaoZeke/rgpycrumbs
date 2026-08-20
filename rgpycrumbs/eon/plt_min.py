@@ -69,11 +69,18 @@ except ImportError:
     pass
 
 from chemparseplot.parse.eon.min_trajectory import load_min_trajectory
-from chemparseplot.plot.optimization import (
-    plot_single_ended_convergence,
-    plot_single_ended_profile,
-    render_single_ended_landscape,
-)
+from chemparseplot.plot import optimization as _optimization
+
+plot_single_ended_convergence = _optimization.plot_single_ended_convergence
+plot_single_ended_profile = _optimization.plot_single_ended_profile
+try:
+    render_single_ended_landscape = _optimization.render_single_ended_landscape
+except AttributeError:
+    def render_single_ended_landscape(*args, **kwargs):
+        raise ImportError(
+            "chemparseplot.plot.optimization.render_single_ended_landscape "
+            "is required for landscape plots"
+        )
 from chemparseplot.plot.theme import get_theme, setup_global_theme
 from rich.logging import RichHandler
 

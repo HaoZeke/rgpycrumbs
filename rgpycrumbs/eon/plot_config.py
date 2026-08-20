@@ -365,7 +365,12 @@ def run_from_click(
     **params: Any,
 ) -> Any:
     """CLI path: ``resolve_from_click`` then *runner*(settings)."""
-    return runner(resolve_from_click(command, ctx, config=config, **params))
+    from click import ClickException
+
+    try:
+        return runner(resolve_from_click(command, ctx, config=config, **params))
+    except RuntimeError as exc:
+        raise ClickException(str(exc)) from exc
 
 
 def library_plot(command: str, runner: Any) -> Any:
