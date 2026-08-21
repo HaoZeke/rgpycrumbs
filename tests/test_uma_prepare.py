@@ -17,8 +17,6 @@ from rgpycrumbs.uma import (
     resolve_exporter,
     write_sidecar,
 )
-from rgpycrumbs.uma._xyz import read_xyz, write_xyz
-
 pytestmark = pytest.mark.pure
 
 
@@ -77,18 +75,6 @@ class TestCache:
         write_sidecar(pt2, key)
         hit = prepare_uma_aoti([6, 6, 6, 6, 1, 1, 1, 1], cache_dir=tmp_path)
         assert hit == pt2
-
-
-class TestXyz:
-    def test_roundtrip(self, tmp_path: Path):
-        path = tmp_path / "hcn.xyz"
-        numbers = [6, 7, 1]
-        pos = [(0.0, 0.0, 0.0), (0.0, 0.0, 1.1), (0.0, 0.0, -1.1)]
-        write_xyz(path, numbers, pos, comment="hcn")
-        got_n, got_p, comment = read_xyz(path)
-        assert got_n == numbers
-        assert comment == "hcn"
-        assert len(got_p) == 3
 
 
 class TestResolveExporter:

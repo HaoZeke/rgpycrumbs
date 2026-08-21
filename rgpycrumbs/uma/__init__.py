@@ -11,7 +11,7 @@ that key, not by atom count or geometry.
 
 from rgpycrumbs.uma._cache import find_package, write_sidecar
 from rgpycrumbs.uma._key import UmaMoleKey, mole_key, reduced_counts
-from rgpycrumbs.uma.prepare_aoti import prepare_uma_aoti, resolve_exporter
+from rgpycrumbs.uma._prepare import prepare_uma_aoti, resolve_exporter
 
 __all__ = [
     "UmaMoleKey",
