@@ -10,32 +10,60 @@ from pathlib import Path
 import pytest
 
 from rgpycrumbs.uma import (
+    exact_counts,
     find_package,
+    minimal_spin,
     mole_key,
     prepare_uma_aoti,
     reduced_counts,
     resolve_exporter,
+    validate_spin,
     write_sidecar,
 )
 pytestmark = pytest.mark.pure
 
 
-class TestReducedCounts:
-    def test_acetylene_shares_key_with_double(self):
+class TestCounts:
+    def test_reduced_is_model_side_only(self):
         c2h2 = reduced_counts([6, 6, 1, 1])
         c4h4 = reduced_counts([6, 6, 6, 6, 1, 1, 1, 1])
         assert c2h2 == ((1, 1), (6, 1))
         assert c2h2 == c4h4
 
-    def test_ethylene_does_not_share_acetylene(self):
-        assert reduced_counts([6, 6, 1, 1]) != reduced_counts([6, 6, 1, 1, 1, 1])
+    def test_exact_separates_acetylene_from_double(self):
+        assert exact_counts([6, 6, 1, 1]) == ((1, 2), (6, 2))
+        assert exact_counts([6, 6, 1, 1]) != exact_counts([6, 6, 6, 6, 1, 1, 1, 1])
 
     def test_hcn(self):
-        assert reduced_counts([6, 7, 1]) == ((1, 1), (6, 1), (7, 1))
+        assert exact_counts([6, 7, 1]) == ((1, 1), (6, 1), (7, 1))
 
     def test_empty_raises(self):
         with pytest.raises(ValueError, match="empty"):
-            reduced_counts([])
+            exact_counts([])
+
+
+class TestSpinParity:
+    def test_even_electrons_default_singlet(self):
+        assert minimal_spin([6, 7, 1]) == 1
+
+    def test_odd_electrons_default_doublet(self):
+        # cyclopropyl C3H5: 23 electrons
+        assert minimal_spin([6, 6, 6, 1, 1, 1, 1, 1]) == 2
+
+    def test_charge_flips_parity(self):
+        assert minimal_spin([6, 6, 6, 1, 1, 1, 1, 1], charge=1) == 1
+
+    def test_singlet_radical_rejected(self):
+        with pytest.raises(ValueError, match="impossible for 23 electrons"):
+            validate_spin([6, 6, 6, 1, 1, 1, 1, 1], spin=1)
+
+    def test_key_derives_doublet_for_radical(self):
+        key = mole_key([6, 6, 6, 1, 1, 1, 1, 1])
+        assert key.spin == 2
+
+    def test_key_rejects_parity_mismatch(self):
+        with pytest.raises(ValueError, match="impossible"):
+            mole_key([6, 7, 1], spin=2)
 
 
 class TestMoleKey:
@@ -45,10 +73,16 @@ class TestMoleKey:
         assert key.matches_numbers([1, 6, 7])
         assert not key.matches_numbers([6, 6, 1, 1])
 
+    def test_exact_key_never_matches_multiple(self):
+        key = mole_key([6, 6, 1, 1], charge=0, spin=1, task="omol")
+        assert not key.matches_numbers([6, 6, 6, 6, 1, 1, 1, 1])
+
     def test_charge_splits_key(self):
-        a = mole_key([6, 7, 1], charge=0, spin=1)
-        b = mole_key([6, 7, 1], charge=1, spin=1)
+        a = mole_key([6, 7, 1], charge=0)
+        b = mole_key([6, 7, 1], charge=1)
         assert a != b
+        assert a.spin == 1
+        assert b.spin == 2
 
 
 class TestCache:
@@ -73,8 +107,16 @@ class TestCache:
         pt2 = tmp_path / f"{key.slug()}.pt2"
         pt2.write_bytes(b"pt2")
         write_sidecar(pt2, key)
-        hit = prepare_uma_aoti([6, 6, 6, 6, 1, 1, 1, 1], cache_dir=tmp_path)
+        hit = prepare_uma_aoti([6, 6, 1, 1], cache_dir=tmp_path)
         assert hit == pt2
+
+    def test_prepare_misses_on_different_atom_count(self, tmp_path: Path):
+        key = mole_key([6, 6, 1, 1], charge=0, spin=1, task="omol")
+        pt2 = tmp_path / f"{key.slug()}.pt2"
+        pt2.write_bytes(b"pt2")
+        write_sidecar(pt2, key)
+        with pytest.raises(ValueError, match="cache miss"):
+            prepare_uma_aoti([6, 6, 6, 6, 1, 1, 1, 1], cache_dir=tmp_path)
 
 
 class TestResolveExporter:

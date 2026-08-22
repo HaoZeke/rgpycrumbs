@@ -57,7 +57,7 @@ def prepare_uma_aoti(
     atomic_numbers: list[int],
     *,
     charge: int = 0,
-    spin: int = 1,
+    spin: int | None = None,
     task: str = "omol",
     cache_dir: Path | None = None,
     atoms_path: Path | None = None,
@@ -66,7 +66,10 @@ def prepare_uma_aoti(
     force_export: bool = False,
     python: str | None = None,
 ) -> Path:
-    """Return a ``.pt2`` for this merge_mole key, exporting only on a miss."""
+    """Return a ``.pt2`` for this exact-composition key, exporting on a miss.
+
+    ``spin=None`` derives the minimal multiplicity from electron parity.
+    """
     key = mole_key(atomic_numbers, charge=charge, spin=spin, task=task)
     cache = Path(cache_dir) if cache_dir is not None else default_cache_dir()
     cache.mkdir(parents=True, exist_ok=True)
@@ -86,9 +89,9 @@ def prepare_uma_aoti(
         "--atoms",
         str(Path(atoms_path)),
         "--charge",
-        str(int(charge)),
+        str(key.charge),
         "--spin",
-        str(int(spin)),
+        str(key.spin),
         "--task",
         str(task),
         "--label",

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2023-present Rohit Goswami <rgoswami@ieee.org>
 # SPDX-License-Identifier: MIT
-"""Look up or mint a merge_mole UMA AOTI package for one system.
+"""Look up or mint a UMA AOTI package for one system.
 
-Cache key is reduced composition + charge + spin + task. Export is
+Cache key is exact composition + charge + spin + task. Export is
 delegated to rgpot ``scripts/export_uma_aoti.py``. Structures are read
 with ASE (or readcon for ``.con``) via the PEP 723 ``uv run`` env.
 """
