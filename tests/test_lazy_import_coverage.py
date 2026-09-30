@@ -90,9 +90,12 @@ class TestDependencyMapCoverage:
                 top_levels[top] = pkg
 
     def test_optional_peers_pinned_for_uv_and_readcon(self) -> None:
-        """Plot/CON peers resolve via ensure_import with 1.9 / readcon floors."""
+        """Plot/CON peers resolve via ensure_import with chemparseplot / readcon floors."""
         cpp_spec = _DEPENDENCY_MAP["chemparseplot"]
-        assert "1.9.15" in cpp_spec
+        # plt_min and plt_saddle import render_single_ended_landscape, which
+        # chemparseplot first ships in 1.11.0.
+        floor = cpp_spec.split(">=")[1].split(",")[0]
+        assert tuple(int(x) for x in floor.split(".")) >= (1, 11, 0), cpp_spec
         assert "neb" in cpp_spec or "chemparseplot" in cpp_spec
         read_spec = _DEPENDENCY_MAP["readcon"]
         # A floor is pinned, and it is at least the 0.13 that CON frame
