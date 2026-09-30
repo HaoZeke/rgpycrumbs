@@ -361,7 +361,9 @@ def _dispatch(
         run_path = script_path
         if os.path.isfile(script_path):
             script_copy_dir = Path(tempfile.mkdtemp(prefix="rgpycrumbs-script-"))
-            run_path = script_copy_dir / script_path.name
+            # Keep the group directory, so the path still names the script.
+            run_path = script_copy_dir / script_path.parent.name / script_path.name
+            run_path.parent.mkdir()
             shutil.copy2(script_path, run_path)
         command.extend(["--no-project", "--script", str(run_path), *script_args])
 
