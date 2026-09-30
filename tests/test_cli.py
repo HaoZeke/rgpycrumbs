@@ -64,6 +64,7 @@ def test_uv_runs_the_file_as_a_script(mock_run, runner, mock_script_group, uv_mo
     assert result.exit_code == 0
     command = [str(part) for part in mock_run.call_args[0][0]]
     at = command.index("--script")
+    assert command[at - 1] == "--no-project"
     assert "dummy_script.py" in command[at + 1]
     assert command[at + 2] == "arg1"
 

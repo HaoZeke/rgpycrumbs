@@ -353,10 +353,10 @@ def _dispatch(
             env["UV_CONSTRAINT"] = str(constraints_path)
         for source in _uv_editable_sources():
             command.extend(["--with-editable", str(source)])
-        # --script: the file is a PEP 723 script, so uv reads its header and
-        # looks for no project. Installed by uvx, the script sits in uv's
-        # cache, which uv refuses as a project directory.
-        command.extend(["--script", str(script_path), *script_args])
+        # --script: uv reads the file's PEP 723 header. --no-project: uv
+        # still looks for a project around the file, and a uvx install puts
+        # the file inside uv's cache, which uv refuses as a project.
+        command.extend(["--no-project", "--script", str(script_path), *script_args])
 
     if is_verbose:
         click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
