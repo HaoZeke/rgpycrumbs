@@ -203,7 +203,9 @@ def test_con_carries_centroid_and_spread(tmp_path):
                 cell=[10.0, 11.0, 12.0],
                 angles=[90.0, 90.0, 90.0],
                 atoms=[
-                    readcon.Atom(symbol="H", x=0.0, y=0.0, z=0.0, mass=1.008, fixed=True),
+                    readcon.Atom(
+                        symbol="H", x=0.0, y=0.0, z=0.0, mass=1.008, fixed=[True] * 3
+                    ),
                     readcon.Atom(symbol="O", x=1.0, y=0.0, z=0.0, mass=15.999, atom_id=1),
                 ],
             )
