@@ -90,9 +90,7 @@ def test_cli_writes_a_loadable_file(tmp_path):
     eigenvalues, modes = _two_atom_modes()
     _write_modes(tmp_path / "modes.con", eigenvalues, modes)
     out = tmp_path / "modes.mts"
-    result = CliRunner().invoke(
-        mod.main, [str(tmp_path / "modes.con"), "-o", str(out)]
-    )
+    result = CliRunner().invoke(mod.main, [str(tmp_path / "modes.con"), "-o", str(out)])
     assert result.exit_code == 0, result.output
     loaded = metatensor.load(str(out))
     np.testing.assert_allclose(loaded.block(block=0).values, modes, atol=1e-6)

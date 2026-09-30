@@ -370,7 +370,7 @@ def run_from_click(
     (``ValueError``) from *runner* exits through Click with its message,
     not a traceback. The library entry keeps the plain exceptions.
     """
-    import click  # noqa: PLC0415
+    import click
 
     settings = resolve_from_click(command, ctx, config=config, **params)
     try:

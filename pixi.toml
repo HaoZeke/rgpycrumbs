@@ -135,7 +135,7 @@ jax = ">=0.4"
 ovito = "*"
 
 [feature.ptm.pypi-dependencies]
-ase   = ">=3.26.0, <4"
+ase = ">=3.26.0, <4"
 
 [feature.bench.dependencies]
 pip = "*"
