@@ -95,7 +95,11 @@ class TestDependencyMapCoverage:
         assert "1.9.15" in cpp_spec
         assert "neb" in cpp_spec or "chemparseplot" in cpp_spec
         read_spec = _DEPENDENCY_MAP["readcon"]
-        assert "0.13" in read_spec
+        # A floor is pinned, and it is at least the 0.13 that CON frame
+        # metadata needs; raising it (0.14.5 today) keeps the guarantee.
+        assert read_spec.startswith("readcon>="), read_spec
+        floor = tuple(int(p) for p in read_spec.split(">=")[1].split(".")[:2])
+        assert floor >= (0, 13), read_spec
         assert "chemparseplot.plot.neb" in _DEPENDENCY_MAP
         adj_spec = _DEPENDENCY_MAP["adjustText"]
         assert "adjustText" in adj_spec

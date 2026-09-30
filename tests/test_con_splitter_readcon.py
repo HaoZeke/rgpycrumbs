@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import ast
+import re
 from pathlib import Path
 
 import pytest
@@ -328,7 +329,11 @@ def test_con_splitter_source_has_no_asewrite():
         if isinstance(node, ast.ImportFrom) and node.module == "ase.io":
             assert all(alias.name != "write" for alias in node.names)
     text = src.read_text()
-    assert "readcon>=0.7.0" in text
+    # The script's PEP 723 header pins a readcon floor of at least 0.7, the
+    # first readcon that writes CON without ase (0.14.5 today).
+    floors = re.findall(r'"readcon>=(\d+)\.(\d+)', text)
+    assert floors, "con_splitter declares no readcon floor"
+    assert all((int(a), int(b)) >= (0, 7) for a, b in floors), floors
     assert "asewrite" not in text
 
 
