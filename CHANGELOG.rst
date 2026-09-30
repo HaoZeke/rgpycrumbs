@@ -1,3 +1,60 @@
+rgpycrumbs 1.11.0 (2026-09-30)
+==============================
+
+Added
+-----
+
+- ``rgpycrumbs eon modes-tensormap modes.con`` turns the normal modes eOn's
+  Hessian job writes (one frame per mode, the mode in readcon's
+  ``displacements`` section) into a metatensor ``TensorMap``: one block of
+  modes over atoms, one block with eigenvalue, hbar omega and wavenumber. (modes-tensormap)
+- ``rgpycrumbs geom plt-rings STRUCTURE OUTPUT`` draws the primitive rings
+  ``ringNetwork`` returns and the bridges between them. The picture is
+  ``chemparseplot.plot.rings`` through xyzrender. An SDF carries its bonds.
+  An XYZ needs ``--cutoff`` inside the bond/nonbonded gap; 3.5 angstrom is
+  the ice neighbour list. (plt-rings)
+- ``rgpycrumbs eon tls-pairs AKMC_DIR`` writes the two-level-system pairs an
+  eOn aKMC run found: asymmetry, barrier, mass-weighted distance between the
+  minima, WKB tunnelling splitting and TLS energy, with units through pint.
+  With ``--neb-root`` a pair's splitting comes from the band eOn wrote into
+  ``neb.con``; without one it is a three-point screen through reactant, saddle
+  and product, marked ``three_point``. (tls-pairs)
+
+
+Developer
+---------
+
+- The pixi test environment takes OVITO from conda-forge, chemparseplot
+  1.11 and eon-schema, so the coverage suite runs without the import
+  failures the PyPI OVITO wheel caused inside a conda environment. (test-env-deps)
+
+
+Changed
+-------
+
+- ``eon plt_neb`` reads a band's profile from ``neb.con`` / ``neb_path_NNN.con``
+  frame metadata through readcon, so no ``.dat`` column order is assumed, and
+  falls back to those files when no ``neb_*.dat`` is written. ``--rc-mode mw``
+  plots against the mass-weighted arc length eOn writes into each frame. (neb-profile-from-con)
+- Shibuya docs: Ecosystem nav and intersphinx point at
+  https://chemparseplot.rgoswami.me and https://pychum.rgoswami.me,
+  ``html_baseurl`` is an absolute URL, and org-mode export uses
+  Sphinx-friendly RST (no section numbers / TOC / author). (shibuya-ecosystem)
+
+
+Fixed
+-----
+
+- Dispatched scripts run under ``uv run --script``, so an rgpycrumbs installed by
+  ``uvx`` dispatches at all: uv refused the script's directory inside its own
+  cache as a project. Without ``uv`` on ``PATH`` and without the plot stack in the
+  active interpreter, the dispatcher now says so before the script fails on its
+  first import. (dispatch-uv-script)
+- ``plt-neb`` with no matching profile files, or ``--source hdf5`` without
+  ``--input-h5``, exits through Click with the message instead of a
+  traceback; library callers keep ``FileNotFoundError`` and ``ValueError``. (plt-neb-cli-errors)
+
+
 rgpycrumbs 1.10.10 (2026-07-18)
 ===============================
 
