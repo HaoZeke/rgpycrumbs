@@ -12,6 +12,7 @@ https://atomistic-cookbook.org/examples/eon-pet-neb/eon-pet-neb.html
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -67,3 +68,53 @@ def write_eon_config(
     out = write_ini(path, settings)
     print(f"Wrote eOn config to '{out}'")
     return out
+
+
+log = logging.getLogger(__name__)
+
+
+#: neb.con frame metadata keys, in the column order the legacy neb_*.dat had.
+_PROFILE_KEYS = ("reaction_coordinate", "relative_energy", "parallel_force")
+
+
+def load_profile_rows(path: Path, mass_weighted: bool = False):
+    """One NEB step as rows ``[image, rc, energy, parallel_force, eigenvalue]``.
+
+    A ``.con`` band (``neb.con``, ``neb_path_NNN.con``) is read through readcon
+    from its frame metadata, where eOn writes the profile, so no column order
+    is assumed. With ``mass_weighted`` the coordinate is the frames'
+    ``reaction_coordinate_mw``. A legacy ``neb_*.dat`` is read by column, and
+    has no mass-weighted coordinate.
+    """
+    import numpy as np
+
+    path = Path(path)
+    if path.suffix != ".con":
+        if mass_weighted:
+            log.warning(
+                "%s has no mass-weighted coordinate; using the path one", path.name
+            )
+        return np.loadtxt(path, skiprows=1).T
+    from readcon import read_con
+
+    rows = []
+    for i, frame in enumerate(read_con(str(path))):
+        md = frame.metadata
+        missing = [k for k in _PROFILE_KEYS if k not in md]
+        if missing:
+            msg = f"{path.name} frame {i} lacks {', '.join(missing)}"
+            raise ValueError(msg)
+        rc_key = "reaction_coordinate_mw" if mass_weighted else "reaction_coordinate"
+        if rc_key not in md:
+            msg = f"{path.name} frame {i} lacks {rc_key}; eOn writes it from 3.4"
+            raise ValueError(msg)
+        rows.append(
+            [
+                float(md.get("neb_bead", i)),
+                float(md[rc_key]),
+                float(md["relative_energy"]),
+                float(md["parallel_force"]),
+                float(md.get("lowest_eigenvalue", np.nan)),
+            ]
+        )
+    return np.asarray(rows).T

@@ -132,6 +132,8 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import ArrowStyle
 from rich.logging import RichHandler
 
+from rgpycrumbs.eon.helpers import load_profile_rows
+
 try:
     from chemparseplot.parse.projection import (
         compute_projection_basis,
@@ -178,6 +180,7 @@ log = logging.getLogger("rich")
 
 # --- Constants ---
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
+
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
 IRA_KMAX_DEFAULT = 14.0
 NEB_LANDSCAPE_STRIP_ZOOM_MULT = 3.15
@@ -268,11 +271,11 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
     # not dE/dindex, so Hermite overshoots and looks jerky. Use a plain cubic
     # spline through the energies instead (smooth curve, no force slope).
     # Explicit none|spline from the user is left alone.
-    if rc_mode == "index" and spline_method == "hermite":
+    if rc_mode in ("index", "mw") and spline_method == "hermite":
         log.info(
-            "rc-mode=index: switching spline-method hermite → spline "
-            "(force-based Hermite is meaningless on image index; cubic "
-            "through energies keeps a smooth curve)"
+            f"rc-mode={rc_mode}: switching spline-method hermite → spline "
+            "(the parallel force is a Cartesian slope, not one along this "
+            "coordinate; a cubic through energies keeps a smooth curve)"
         )
         spline_method = "spline"
     draw_reactant = settings.get("draw_reactant", (15, 60, 0.1))
@@ -959,6 +962,14 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
         else:
             # eOn source: multiple .dat files
             dat_paths = find_file_paths(input_dat_pattern)
+            if not dat_paths and input_dat_pattern == DEFAULT_INPUT_PATTERN:
+                # The band's profile lives in neb.con metadata; the .dat files
+                # are the legacy copy and may not be written at all.
+                for pattern in ("neb_path_*.con", "neb.con"):
+                    dat_paths = find_file_paths(pattern)
+                    if dat_paths:
+                        log.info("No %s; reading %s", DEFAULT_INPUT_PATTERN, pattern)
+                        break
             file_paths_to_plot = dat_paths[start:end]
 
             if not file_paths_to_plot:
@@ -989,7 +1000,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
 
             for idx, fpath in enumerate(file_paths_to_plot):
                 try:
-                    data = np.loadtxt(fpath, skiprows=1).T
+                    data = load_profile_rows(Path(fpath), rc_mode == "mw")
                 except Exception as ex:
                     log.error(ex)
                     continue
@@ -1527,9 +1538,10 @@ plot_neb = library_plot("neb", plot_neb_from_settings)
 )
 @click.option(
     "--rc-mode",
-    type=click.Choice(["path", "rmsd", "index"]),
+    type=click.Choice(["path", "rmsd", "index", "mw"]),
     default="path",
-    help="Reaction coordinate for profile plot.",
+    help="Reaction coordinate for profile plot; mw is the mass-weighted arc "
+    "length eOn writes into neb.con frames.",
 )
 @click.option(
     "--plot-structures",
