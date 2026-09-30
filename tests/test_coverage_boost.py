@@ -219,6 +219,7 @@ def _make_chemparseplot_mocks():
         "plot_single_ended_convergence",
         "plot_single_ended_profile",
         "project_landscape_path",
+        "render_single_ended_landscape",
         "render_endpoint_strip",
         "save_landscape_figure",
         "save_standard_figure",

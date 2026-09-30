@@ -274,6 +274,8 @@ pep723_ignore_imports = [
   "tblite",
   "ovito",
   "eon",
+  # metatensor-core installs the metatensor package
+  "metatensor",
 ]
 pep723_paths = [ "rgpycrumbs" ]
 required_plugins = [ "pytest-pep723" ]
