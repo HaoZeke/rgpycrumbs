@@ -66,6 +66,7 @@ def test_uv_runs_the_file_as_a_script(mock_run, runner, mock_script_group, uv_mo
     at = command.index("--script")
     assert command[at - 1] == "--no-project"
     assert "dummy_script.py" in command[at + 1]
+
     assert command[at + 2] == "arg1"
 
 
@@ -251,3 +252,25 @@ def test_config_show_command():
     assert result.exit_code == 0
     assert "lock_path:" in result.output
     assert "package_pins:" in result.output
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_uv_runs_a_copy_outside_the_uv_cache(
+    mock_run, runner, mock_script_group, uv_mode, monkeypatch
+):
+    """uv 0.12 refuses a script inside its cache: the file runs from a copy."""
+    copies = []
+    monkeypatch.setattr("rgpycrumbs.cli.os.path.isfile", lambda path: True)
+    monkeypatch.setattr(
+        "rgpycrumbs.cli.shutil.copy2", lambda src, dst: copies.append((src, dst))
+    )
+    result = runner.invoke(main, ["dummy_script", "arg1"])
+    assert result.exit_code == 0
+    command = [str(part) for part in mock_run.call_args[0][0]]
+    at = command.index("--script")
+    assert len(copies) == 1
+    assert str(copies[0][1]) == command[at + 1]
+    assert "rgpycrumbs-script-" in command[at + 1]
+    assert "dummy_script.py" in Path(command[at + 1]).name
+    # The temporary directory is gone once the script returns.
+    assert not Path(command[at + 1]).parent.exists()

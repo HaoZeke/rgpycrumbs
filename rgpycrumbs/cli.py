@@ -324,6 +324,7 @@ def _dispatch(
     force_uv = resolve_force_uv(is_dev=is_dev, config=cfg)
     use_in_env = _prefer_in_env_interpreter(is_dev, force_uv=force_uv)
     constraints_path: Path | None = None
+    script_copy_dir: Path | None = None
     if use_in_env:
         if not is_dev and shutil.which("uv") is None and not _in_env_stack_ready():
             click.echo(
@@ -353,10 +354,16 @@ def _dispatch(
             env["UV_CONSTRAINT"] = str(constraints_path)
         for source in _uv_editable_sources():
             command.extend(["--with-editable", str(source)])
-        # --script: uv reads the file's PEP 723 header. --no-project: uv
-        # still looks for a project around the file, and a uvx install puts
-        # the file inside uv's cache, which uv refuses as a project.
-        command.extend(["--no-project", "--script", str(script_path), *script_args])
+        # --script: uv reads the file's PEP 723 header. A uvx install puts
+        # the file inside uv's cache, which uv 0.12 refuses as a project
+        # directory even with --no-project, so the file runs from a copy in
+        # a temporary directory.
+        run_path = script_path
+        if os.path.isfile(script_path):
+            script_copy_dir = Path(tempfile.mkdtemp(prefix="rgpycrumbs-script-"))
+            run_path = script_copy_dir / script_path.name
+            shutil.copy2(script_path, run_path)
+        command.extend(["--no-project", "--script", str(run_path), *script_args])
 
     if is_verbose:
         click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
@@ -377,6 +384,8 @@ def _dispatch(
         if constraints_path is not None:
             with contextlib.suppress(OSError):
                 constraints_path.unlink(missing_ok=True)
+        if script_copy_dir is not None:
+            shutil.rmtree(script_copy_dir, ignore_errors=True)
 
 
 def _make_script_command(group_name: str, script_stem: str) -> click.Command:
