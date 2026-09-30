@@ -1,0 +1,45 @@
+#+TITLE: ~pimd-centroid~
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* PIMD centroid and spread
+Collapses a path-integral molecular dynamics bead trajectory to one con frame
+per sampled step. The positions are the centroid over the P beads; the readcon
+~spreads~ section holds each atom's root-mean-square displacement from the
+centroid along x, y and z in Angstrom. Needs ~readcon>=0.16.0~.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.pimd_centroid:main
+   :prog: rgpycrumbs eon pimd-centroid
+   :nested: full
+#+END_EXPORT
+
+** Inputs
+CPMD ~TRAJECTORY~ text (step, x, y, z, vx, vy, vz per atom, positions in bohr)
+or extended xyz (Angstrom); the format follows from the first line.
+
+- One file per replica, same frame and atom count:
+  #+begin_src bash
+  rgpycrumbs eon pimd-centroid TRAJECTORY_* --reference reactant.con -o centroid.con
+  #+end_src
+- One file with P x N atoms per frame, replica-major:
+  #+begin_src bash
+  rgpycrumbs eon pimd-centroid TRAJECTORY --replicas 16 --every 10 --reference reactant.con
+  #+end_src
+
+The trajectory has no cell, masses or fixed flags. ~--reference~ supplies
+symbols, masses, cell and fixed flags from the first frame of a con file;
+without it, ~--symbols~ (a whitespace-separated list, or the symbols of an xyz
+trajectory) and ~--cell A B C~ do.
+
+** Time average
+~--time-average~ writes one frame: the centroid averaged over the sampled
+frames (~--every~ applies first). Its spread is the imaginary-time spread and
+the thermal spread of the centroid added in quadrature, and the frame metadata
+states both as ~spread_imaginary_time_rms~ and ~spread_thermal_rms~ (rms over
+atoms and components, Angstrom).
+
+Per-frame metadata: ~replicas~, ~frame_index~ (index in the input),
+~spread_max~.
+
+** API Reference
+For developer details and source code see @@rst::mod:`rgpycrumbs.eon.pimd_centroid`@@.
