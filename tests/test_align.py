@@ -107,16 +107,19 @@ class TestStructuralAlignment:
         assert np.allclose(rotated_water.positions, water_molecule.positions, atol=1e-5)
 
     @requires_ira
-    def test_ase_fails_on_permutation_but_ira_succeeds(self, water_molecule):
-        # Create a permuted water molecule
-        indices = [0, 2, 1]
+    def test_ase_fails_on_permutation_but_ira_succeeds(self):
+        # Ammonia: swapping two hydrogens is a mirror operation, which no
+        # proper rotation reproduces, so a rotation-only alignment keeps the
+        # mismatch that a permutation-aware one removes. (In water the same
+        # swap is a C2 rotation and both methods land on the same residual.)
+        water_molecule = molecule("NH3")
+        indices = [0, 2, 1, 3]
         permuted_water = Atoms(
             symbols=[water_molecule.get_chemical_symbols()[i] for i in indices],
             positions=water_molecule.positions[indices],
         )
 
-        # Break the C2v symmetry by slightly nudging one hydrogen atom.
-        # This prevents a pure 180-degree rotation from achieving zero RMSD.
+        # A small distortion keeps the residuals away from exact zero.
         permuted_water.positions[1] += [0.05, 0.05, 0.0]
 
         # 3. Force ASE to handle the permuted/distorted water (IRA disabled)
