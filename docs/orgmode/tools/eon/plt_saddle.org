@@ -65,7 +65,7 @@ Side-by-side plots of force norm and step size vs iteration.
 | ~--ref-product~ | None | Optional product .con for (initial, product) reference pair |
 | ~--project-path~ | True | Project into (s, d) coordinates |
 | ~--surface-type~ | ~grad_matern~ | Surface fitting method |
-| ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
+| ~--ira-kmax~ | 1.8 | Factor on the IRA basis cutoff |
 | ~--energy-unit~ | ~eV~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ |
 | ~--theme~ | ~ruhi~ | Plot theme |
 | ~--plot-structures~ | ~none~ | Structure strip below landscape: ~none~, ~endpoints~ |

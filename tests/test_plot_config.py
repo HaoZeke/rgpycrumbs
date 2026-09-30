@@ -113,6 +113,12 @@ plot_type = "landscape"
     assert settings["plot_type"] == "landscape"
 
 
+def test_default_ira_basis_factor():
+    assert SHARED_DEFAULTS["ira_kmax"] == 1.8
+    for command in ("neb", "min", "saddle"):
+        assert merge_plot_settings(command)["ira_kmax"] == 1.8
+
+
 def test_unknown_command_raises():
     with pytest.raises(ValueError, match="Unknown plot command"):
         merge_plot_settings("kmc")

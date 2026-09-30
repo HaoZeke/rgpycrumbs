@@ -73,7 +73,7 @@ theme = "ruhi"
 dpi = 200
 strip_renderer = "xyzrender"
 xyzrender_config = "paton"
-ira_kmax = 14.0
+ira_kmax = 1.8
 auto_thin = false
 max_surface_points = 64
 
@@ -135,7 +135,7 @@ Common one-off flags. Prefer ~--config~ for surface-fit and suite style.
 | ~--plot-type~ | ~profile~ | ~profile~, ~landscape~, ~convergence~ |
 | ~--project-path~ | True | Project into (s, d) coordinates |
 | ~--surface-type~ | ~grad_matern~ | Surface method; dense-fit knobs only via TOML |
-| ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
+| ~--ira-kmax~ | 1.8 | Factor on the IRA basis cutoff |
 | ~--energy-unit~ | ~eV~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ |
 | ~--theme~ | ~ruhi~ | Plot theme |
 | ~--plot-structures~ | ~none~ | Structure strip below landscape: ~none~, ~endpoints~ |

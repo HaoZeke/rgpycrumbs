@@ -182,7 +182,7 @@ log = logging.getLogger("rich")
 DEFAULT_INPUT_PATTERN = "neb_*.dat"
 
 DEFAULT_PATH_PATTERN = "neb_path_*.con"
-IRA_KMAX_DEFAULT = 14.0
+IRA_KMAX_DEFAULT = 1.8
 NEB_LANDSCAPE_STRIP_ZOOM_MULT = 3.15
 NEB_PROFILE_STRIP_ZOOM_MULT = 3.4
 # Landscape "all" strip: two rows of six so each molecule is larger.
@@ -1753,7 +1753,7 @@ plot_neb = library_plot("neb", plot_neb_from_settings)
 @click.option(
     "--ira-kmax",
     default=IRA_KMAX_DEFAULT,
-    help="kmax factor for IRA.",
+    help="Factor on the IRA basis cutoff.",
 )
 def main(ctx, config, **params):
     """CLI entry: merge flags/config then run plot_neb_from_settings."""

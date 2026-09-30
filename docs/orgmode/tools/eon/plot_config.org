@@ -104,7 +104,7 @@ dpi = 200
 figsize = [5.37, 5.37]
 strip_renderer = "xyzrender"
 xyzrender_config = "paton"
-ira_kmax = 14.0
+ira_kmax = 1.8
 # Surface fit (chemparseplot; default off)
 auto_thin = false
 max_surface_points = 64

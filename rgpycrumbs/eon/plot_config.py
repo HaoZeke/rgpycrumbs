@@ -56,6 +56,10 @@ SHARED_KEYS: frozenset[str] = frozenset(
     }
 )
 
+# Multiplies the IRA basis cutoff. 1.8 is the factor IRA uses for
+# similar structures. A larger factor widens the rotation search.
+IRA_KMAX_DEFAULT = 1.8
+
 SHARED_DEFAULTS: dict[str, Any] = {
     "energy_unit": "eV",
     "theme": "ruhi",
@@ -70,7 +74,7 @@ SHARED_DEFAULTS: dict[str, Any] = {
     "strip_zoom": None,
     "rotation": "auto",
     "perspective_tilt": 0.0,
-    "ira_kmax": 14.0,
+    "ira_kmax": IRA_KMAX_DEFAULT,
     "surface_type": "rbf",
     "project_path": True,
     "plot_structures": "none",
@@ -411,7 +415,7 @@ dpi = 200
 figsize = [5.37, 5.37]
 strip_renderer = "xyzrender"
 xyzrender_config = "paton"
-ira_kmax = 14.0
+ira_kmax = 1.8
 # Surface fit (chemparseplot plot_landscape_surface / single-ended landscapes)
 auto_thin = false
 max_surface_points = 64

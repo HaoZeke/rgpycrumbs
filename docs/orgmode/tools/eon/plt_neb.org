@@ -86,7 +86,7 @@ rgpycrumbs eon plt-neb --config plot.toml
 | ~--xyzrender-config~ | ~paton~ | xyzrender preset for strip rendering |
 | ~--rotation~ | ~auto~ | Shared viewing rotation control |
 | ~--perspective-tilt~ | 0.0 | Small off-axis tilt to reveal occluded atoms |
-| ~--ira-kmax~ | 14.0 | IRA kmax for RMSD calculation |
+| ~--ira-kmax~ | 1.8 | Factor on the IRA basis cutoff |
 | ~--mmf-peaks~ | Off | Overlay OCI-NEB/RONEB refinement samples |
 | ~--show-evolution~ | Off | Fade earlier optimization bands behind final path |
 

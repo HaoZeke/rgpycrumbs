@@ -138,7 +138,7 @@ def _run_plt_neb(args: list[str]) -> int:
 @click.option("--fontsize-base", type=int, default=16, show_default=True)
 @click.option("--zoom-ratio", type=float, default=0.4, show_default=True)
 @click.option("--rotation", default="auto", show_default=True)
-@click.option("--ira-kmax", type=float, default=14.0, show_default=True)
+@click.option("--ira-kmax", type=float, default=1.8, show_default=True)
 def main(
     segments,
     saddle_overrides,

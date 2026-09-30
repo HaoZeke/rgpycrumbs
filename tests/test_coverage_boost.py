@@ -788,9 +788,10 @@ class TestPltSaddle:
         )
 
     def test_constants(self):
+        from rgpycrumbs.eon.plot_config import IRA_KMAX_DEFAULT as SHARED_IRA_KMAX
         from rgpycrumbs.eon.plt_saddle import IRA_KMAX_DEFAULT
 
-        assert IRA_KMAX_DEFAULT == 14.0
+        assert IRA_KMAX_DEFAULT == SHARED_IRA_KMAX == 1.8
 
 
 # ======================================================================
@@ -835,9 +836,10 @@ class TestPltMin:
         _assert_dispatches(["eon", "plt-min", "--help"], "eon/plt_min.py", monkeypatch)
 
     def test_constants(self):
+        from rgpycrumbs.eon.plot_config import IRA_KMAX_DEFAULT as SHARED_IRA_KMAX
         from rgpycrumbs.eon.plt_min import IRA_KMAX_DEFAULT
 
-        assert IRA_KMAX_DEFAULT == 14.0
+        assert IRA_KMAX_DEFAULT == SHARED_IRA_KMAX == 1.8
 
 
 # ======================================================================

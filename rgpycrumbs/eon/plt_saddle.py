@@ -86,7 +86,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("rich")
 
-IRA_KMAX_DEFAULT = 14.0
+IRA_KMAX_DEFAULT = 1.8
 
 
 def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
@@ -232,7 +232,7 @@ plot_saddle = library_plot("saddle", plot_saddle_from_settings)
     "--ira-kmax",
     type=float,
     default=IRA_KMAX_DEFAULT,
-    help="IRA kmax parameter for RMSD calculation.",
+    help="Factor on the IRA basis cutoff.",
 )
 @click.option(
     "--energy-unit",

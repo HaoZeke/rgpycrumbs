@@ -1,3 +1,15 @@
+rgpycrumbs (unreleased)
+=======================
+
+Fixed
+-----
+
+- eOn plot commands use 1.8 as the IRA basis-search factor unless
+  ``--ira-kmax`` sets another value. The shared settings map is the value
+  the plot runs. Pass ``--ira-kmax 14`` for a wider rotation search.
+  (ira-kmax-default)
+
+
 rgpycrumbs 1.11.0 (2026-09-30)
 ==============================
 
