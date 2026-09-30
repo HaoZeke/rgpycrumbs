@@ -860,8 +860,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
         if source == "hdf5":
             if not input_h5:
                 msg = "--input-h5 is required when --source hdf5 is used"
-                log.critical(msg)
-                raise RuntimeError(msg)
+                raise ValueError(msg)
             h5_str = str(input_h5)
             # Use history final step if available, else result
             try:
@@ -974,8 +973,7 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
 
             if not file_paths_to_plot:
                 msg = "No profile data files found in the requested start:end range"
-                log.error(msg)
-                raise RuntimeError(msg)
+                raise FileNotFoundError(msg)
 
             # Optional: Load RMSD for X-axis
             rmsd_rc = None

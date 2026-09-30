@@ -364,8 +364,21 @@ def run_from_click(
     config: str | Path | None = None,
     **params: Any,
 ) -> Any:
-    """CLI path: ``resolve_from_click`` then *runner*(settings)."""
-    return runner(resolve_from_click(command, ctx, config=config, **params))
+    """CLI path: ``resolve_from_click`` then *runner*(settings).
+
+    A missing input (``FileNotFoundError``) or a bad option combination
+    (``ValueError``) from *runner* exits through Click with its message,
+    not a traceback. The library entry keeps the plain exceptions.
+    """
+    import click  # noqa: PLC0415
+
+    settings = resolve_from_click(command, ctx, config=config, **params)
+    try:
+        return runner(settings)
+    except FileNotFoundError as exc:
+        raise click.ClickException(str(exc)) from exc
+    except ValueError as exc:
+        raise click.UsageError(str(exc)) from exc
 
 
 def library_plot(command: str, runner: Any) -> Any:
