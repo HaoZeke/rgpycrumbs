@@ -17,6 +17,18 @@ def runner():
 
 
 @pytest.fixture
+def uv_mode(monkeypatch):
+    """Pin the dispatcher to ``uv run``.
+
+    Left to itself it runs the active interpreter when that already holds the
+    readcon and plot stack (the pixi test env does), so a test of the uv path
+    has to ask for it.
+    """
+    monkeypatch.setenv("RGPYCRUMBS_FORCE_UV", "1")
+    monkeypatch.delenv("RGPYCRUMBS_DEV", raising=False)
+
+
+@pytest.fixture
 def mock_script_group(monkeypatch):
     """Mock the script discovery so the CLI has a command to run."""
     # Temporarily add a dummy command to the main group for testing
@@ -30,7 +42,7 @@ def mock_script_group(monkeypatch):
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_standard_execution(mock_run, runner, mock_script_group):
+def test_cli_standard_execution(mock_run, runner, mock_script_group, uv_mode):
     """Test that default execution uses 'uv run'."""
     result = runner.invoke(main, ["dummy_script", "arg1"])
 
@@ -43,6 +55,32 @@ def test_cli_standard_execution(mock_run, runner, mock_script_group):
     assert executed_command[1] == "run"
     assert any("dummy_script.py" in str(part) for part in executed_command)
     assert "arg1" in executed_command
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_uv_runs_the_file_as_a_script(mock_run, runner, mock_script_group, uv_mode):
+    """uv reads the PEP 723 header and looks for no project around the file."""
+    result = runner.invoke(main, ["dummy_script", "arg1"])
+    assert result.exit_code == 0
+    command = [str(part) for part in mock_run.call_args[0][0]]
+    at = command.index("--script")
+    assert "dummy_script.py" in command[at + 1]
+    assert command[at + 2] == "arg1"
+
+
+@patch("rgpycrumbs.cli.subprocess.run")
+def test_missing_uv_says_why_the_script_may_fail(
+    mock_run, runner, mock_script_group, monkeypatch
+):
+    """Without uv and without the stack, the fallback names both."""
+    monkeypatch.delenv("RGPYCRUMBS_FORCE_UV", raising=False)
+    monkeypatch.delenv("RGPYCRUMBS_DEV", raising=False)
+    monkeypatch.setattr("rgpycrumbs.cli.shutil.which", lambda name: None)
+    monkeypatch.setattr("rgpycrumbs.cli._in_env_stack_ready", lambda: False)
+    result = runner.invoke(main, ["dummy_script"])
+    assert result.exit_code == 0
+    assert "uv is not on PATH" in result.output
+    assert mock_run.call_args[0][0][0] == sys.executable
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
@@ -60,7 +98,7 @@ def test_cli_dev_execution(mock_run, runner, mock_script_group):
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_cli_verbose_output(mock_run, runner, mock_script_group):
+def test_cli_verbose_output(mock_run, runner, mock_script_group, uv_mode):
     """Test that the --verbose flag prints the paths before execution."""
     result = runner.invoke(main, ["--verbose", "dummy_script"])
 
@@ -93,7 +131,7 @@ def test_dispatch_preserves_user_site_package_path(mock_run, monkeypatch):
 
 @patch("rgpycrumbs.cli.subprocess.run")
 def test_dispatch_adds_editable_sources_for_linked_packages(
-    mock_run, monkeypatch, tmp_path
+    mock_run, monkeypatch, tmp_path, uv_mode
 ):
     """_dispatch should satisfy local linked deps via --with-editable."""
     # True editable: checkout outside site-packages with matching project name.
@@ -140,7 +178,7 @@ def test_dispatch_adds_editable_sources_for_linked_packages(
 
 
 @patch("rgpycrumbs.cli.subprocess.run")
-def test_dispatch_skips_editable_sources_when_absent(mock_run, monkeypatch):
+def test_dispatch_skips_editable_sources_when_absent(mock_run, monkeypatch, uv_mode):
     """_dispatch should not add editable flags without a linked checkout."""
     monkeypatch.setattr("rgpycrumbs.cli.Path.is_file", lambda self: True)
     monkeypatch.setattr("rgpycrumbs.cli.importlib.util.find_spec", lambda name: None)

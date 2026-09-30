@@ -325,6 +325,13 @@ def _dispatch(
     use_in_env = _prefer_in_env_interpreter(is_dev, force_uv=force_uv)
     constraints_path: Path | None = None
     if use_in_env:
+        if not is_dev and shutil.which("uv") is None and not _in_env_stack_ready():
+            click.echo(
+                "--> uv is not on PATH, so the script runs in the active "
+                "interpreter, which lacks its dependencies; install uv (or the "
+                "packages the script's header lists)",
+                err=True,
+            )
         command = [sys.executable, str(script_path), *script_args]
         if is_verbose or (not is_dev and _in_env_stack_ready()):
             click.echo(
@@ -346,7 +353,10 @@ def _dispatch(
             env["UV_CONSTRAINT"] = str(constraints_path)
         for source in _uv_editable_sources():
             command.extend(["--with-editable", str(source)])
-        command.extend([str(script_path), *script_args])
+        # --script: the file is a PEP 723 script, so uv reads its header and
+        # looks for no project. Installed by uvx, the script sits in uv's
+        # cache, which uv refuses as a project directory.
+        command.extend(["--script", str(script_path), *script_args])
 
     if is_verbose:
         click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
