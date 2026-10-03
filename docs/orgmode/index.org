@@ -115,6 +115,7 @@ digraph G {
      tools/chemgp/index
      tools/orca/index
      tools/geom/index
+     tools/uma/index
      tools/surfaces
      tools/utils/index
      tools/prefix/index

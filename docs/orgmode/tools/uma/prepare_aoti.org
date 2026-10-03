@@ -1,0 +1,53 @@
+#+TITLE: ~prepare-aoti~
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Prepare a compiled UMA package
+Prints the path of the package rgpot's ~UmaPot~ loads for one structure. A
+cache miss compiles it first. The structure is read with readcon (~.con~) or
+ASE (anything else); ~atoms.info~ supplies charge and spin unless the options
+do.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.uma.prepare_aoti:main
+   :prog: rgpycrumbs uma prepare-aoti
+   :nested: full
+#+END_EXPORT
+
+** Usage
+#+begin_src bash
+export RGPOT_EXPORT_UMA=/path/to/rgpot/scripts/export_uma_aoti.py
+pt2=$(rgpycrumbs uma prepare-aoti reactant.con --molecular-box 25 | tail -n1)
+#+end_src
+
+The path is the last line on stdout; the exporter's progress and the key go
+to stderr. ~--dry-run~ prints the key, whether it hits, and the exporter
+command, and compiles nothing. ~--device cuda~ compiles for the GPU. It needs
+a CUDA build of torch on a node with a GPU. It also needs the CUDA toolkit
+(~CUDA_HOME~ or ~nvcc~ on ~PATH~), since AOTInductor compiles the kernels
+with nvcc.
+
+** Environment
+The dispatcher runs the script under ~uv run~ with fairchem-core, vesin, ASE
+and readcon from its inline metadata; torch comes with fairchem-core. The
+exporter runs in that interpreter, so the key's torch and fairchem versions
+are the ones that compile. ~--python~ runs the exporter in another
+interpreter instead, for example an rgpot pixi environment; that interpreter
+needs torch, fairchem-core, vesin and ASE.
+
+The first run in an environment imports torch once to read its versions and
+device target. The answer is kept until the installed packages change. After
+that a hit reads one sidecar.
+
+** Concurrency
+A miss takes a per-key ~flock~. Concurrent runs for one system wait for the
+first compile and then return its package; runs for different systems compile
+in parallel. The exporter writes into a private ~.partial-*~ directory and the
+finished package is renamed into place, so a reader never sees a partial
+~.pt2~. A killed run releases its lock, and the next run for that key removes
+its leftovers.
+
+** Failures
+The exporter compares the eager wrapper, the exported module and the compiled
+package with the fairchem ASE calculator. Its exit codes 2, 3 and 4 name the
+stage that disagreed. A package whose embedded metadata disagrees with its key
+is refused and not cached.

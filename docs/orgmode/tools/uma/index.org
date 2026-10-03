@@ -1,0 +1,70 @@
+#+TITLE: UMA AOTI packages
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* Compiled UMA packages
+  UMA (Universal Model for Atoms) is the fairchem model family. rgpot's
+  ~UmaPot~ runs a UMA checkpoint through an AOTInductor (AOTI) package, a
+  ~.pt2~ file that rgpot ~scripts/export_uma_aoti.py~ compiles for one
+  system. These tools key those compiles and keep them in a cache. The
+  exporter runs when no compatible package exists.
+
+#+BEGIN_EXPORT rst
+.. toctree::
+   :maxdepth: 2
+   :caption: UMA Tools
+
+   prepare_aoti
+   aoti_cache
+#+END_EXPORT
+
+** What a package depends on
+A compiled package fits one system and one compiler. The cache key
+therefore carries every input that changes the graph:
+
+| Field                    | Why it is in the key                                                      |
+|--------------------------+---------------------------------------------------------------------------|
+| exact composition        | per-atom buffers are frozen at the traced size; C2H2 and C4H4 differ       |
+| charge, spin, task       | ~merge_mole~ folds them into the merged weights                            |
+| model                    | the checkpoint, e.g. ~uma-s-1p1~                                           |
+| dtype                    | the traced position dtype (~pos_dtype~ in the package)                     |
+| molecular box, band size | static-shape options of the exporter (~--molecular-box~, ~--batch-max~)    |
+| device, target           | ~cpu~ or ~cuda~; the architecture, CPU vector instructions, CUDA capability     |
+| torch, fairchem          | the compiler and the model code that produced the graph                    |
+
+Spin defaults to the lowest multiplicity the electron count allows. That is
+a singlet for an even count and a doublet for an odd one. An explicit spin of
+the wrong parity is refused. The fairchem reduced composition is not a valid key: a
+package compiled for C2H2 aborts inside the graph on C4H4.
+
+** Cache layout
+The cache lives in ~$RGPYCRUMBS_UMA_CACHE~, else
+~$XDG_CACHE_HOME/rgpycrumbs/uma~ (~~/.cache/rgpycrumbs/uma~).
+
+#+begin_example
+omol-CHN-q0-s1-uma-s-1p1-cpu-<digest>.pt2        the package UmaPot loads
+omol-CHN-q0-s1-uma-s-1p1-cpu-<digest>.pt2.json   sidecar: key, embedded metadata, compile time
+.locks/<stem>.lock                               per-key lock during a compile
+.env/<hash>.json                                 remembered probe of an export interpreter
+#+end_example
+
+The digest is 80 bits of SHA-256 over the full key; the readable prefix is for
+people. A lookup reads one sidecar and compares the stored key field by field,
+so a digest collision cannot return the wrong package.
+
+** Contract with rgpot
+~UmaPot~ reads its runtime parameters from the metadata the exporter embeds in
+the package (~AOTIModelPackageLoader::get_metadata~), not from the sidecar:
+~cutoff~, ~molecular_box~, ~max_neighbors~, ~batch_max~ and ~pos_dtype~.
+Charge and spin are per-call inputs, so the ~UmaPot~ configuration must carry
+the charge and spin of the key, and its ~device~ must match the key's device.
+Before a package enters the cache, the embedded ~task_name~, ~charge~, ~spin~,
+~z_set~, traced atom count, ~pos_dtype~, ~molecular_box~, ~batch_max~ and the
+torch ~AOTI_*~ device fields are checked against the key.
+
+fairchem-core 2.22 and later pin torch 2.13. The key's ~torch~ field can
+therefore be newer than the libtorch rgpot links. A package compiled with torch
+2.13 loads under torch 2.10 and returns its metadata. Evaluate it once with
+the libtorch ~UmaPot~ uses before relying on that pairing.
+
+** API Reference
+For developer details, see the @@rst::doc:`UMA Reference <../../autoapi/rgpycrumbs/uma/index>`@@.
