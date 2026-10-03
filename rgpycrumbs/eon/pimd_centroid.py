@@ -308,9 +308,7 @@ def collapse(
     default=Path("centroid.con"),
     show_default=True,
 )
-def main(  # noqa: PLR0917
-    trajectories, replicas, every, reference, symbols_file, cell, average, out
-):
+def main(trajectories, replicas, every, reference, symbols_file, cell, average, out):
     """Write the bead centroid and spread of TRAJECTORIES as a con file."""
     logging.basicConfig(level="INFO", format="%(message)s")
     try:
