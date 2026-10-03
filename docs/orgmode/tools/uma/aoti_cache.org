@@ -1,0 +1,27 @@
+#+TITLE: ~aoti-cache~
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Inspect the compiled UMA cache
+Lists, inspects and clears the packages ~prepare-aoti~ wrote. It needs click
+and no torch: it reads the sidecars and the metadata embedded in each ~.pt2~ directly.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.uma.aoti_cache:main
+   :prog: rgpycrumbs uma aoti-cache
+   :nested: full
+#+END_EXPORT
+
+** Usage
+#+begin_src bash
+rgpycrumbs uma aoti-cache list
+rgpycrumbs uma aoti-cache list --json
+rgpycrumbs uma aoti-cache inspect omol-CHN-q0-s1
+rgpycrumbs uma aoti-cache clear omol-CHN-q0-s1 --dry-run
+rgpycrumbs uma aoti-cache clear --partial
+#+end_src
+
+Name an entry by its path, file name or stem. A stem prefix that matches one
+entry works too, and so does the digest at the end of the stem. ~inspect~ exits 1 when the embedded
+metadata disagrees with the sidecar's key. ~clear~ skips, and exits 1 for, an
+entry whose key is locked by a running ~prepare-aoti~; ~--partial~ removes the
+leftovers of interrupted compiles.
