@@ -257,6 +257,7 @@ def test_band_observation_options_exist():
     names = {p.name for p in _load("plt-band").params}
     assert {
         "profile_observations",
+        "landscape_labels",
         "observation_mode",
         "observation_distance",
         "title",

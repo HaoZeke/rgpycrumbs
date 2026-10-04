@@ -23,7 +23,7 @@ and ``<prefix>-efficiency``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@233c64a75eb6ea209503cc28baf9fbec174d061f",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@9b04270ae772c342714ada96ad36ea5ad11b2576",
 # ]
 # ///
 

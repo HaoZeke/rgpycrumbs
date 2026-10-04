@@ -35,7 +35,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@233c64a75eb6ea209503cc28baf9fbec174d061f",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@9b04270ae772c342714ada96ad36ea5ad11b2576",
 # ]
 # ///
 
@@ -123,6 +123,13 @@ if warn_on_direct_script_import is not None:
     help="Cartesian distance (angstrom) for --observation-mode near.",
 )
 @click.option(
+    "--landscape-labels/--no-landscape-labels",
+    "landscape_labels",
+    default=True,
+    show_default=True,
+    help="Number the evaluations on the landscape in order of evaluation.",
+)
+@click.option(
     "--title",
     default=None,
     help="Panel title; default the search label, '' for none.",
@@ -152,6 +159,7 @@ def main(
     font_dirs,
     title,
     profile_observations,
+    landscape_labels,
     observation_mode,
     observation_distance,
 ):
@@ -178,7 +186,12 @@ def main(
         elif panel == "evolution":
             fig = plot_band_evolution(s.band, energy_unit=energy_unit)
         else:
-            fig = plot_reduced_landscape(s.band, energy_unit=energy_unit, title=ttl)
+            fig = plot_reduced_landscape(
+                s.band,
+                energy_unit=energy_unit,
+                title=ttl,
+                label_numbers=landscape_labels,
+            )
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")
         save_with_provenance(fig, out, {}, command=command, hashes=s.provenance, dpi=dpi)
         click.echo(out)
