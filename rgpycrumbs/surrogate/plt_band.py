@@ -35,7 +35,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@98ada16feb4524bf362678d58abbc165574075b6",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@204944da6e74bc1bdad6de39de23c83662e31b7e",
 # ]
 # ///
 

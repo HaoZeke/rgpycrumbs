@@ -19,6 +19,7 @@
    | ~rgpycrumbs surrogate plt-history~  | a search directory; ~--against~ another | ~-convergence~, ~-diagnostics~, ~-comparison~       |
    | ~rgpycrumbs surrogate plt-dimer~    | a gpr_optim dimer cell                  | ~-dimer~                                          |
    | ~rgpycrumbs surrogate plt-campaign~ | a campaign record                       | ~-calls~, ~-matrix~, ~-walls~                       |
+   | ~rgpycrumbs surrogate plt-breakdown~ | a per-repetition wall-time CSV | ~-<cell>-breakdown~ |
    | ~rgpycrumbs surrogate plt-scaling~  | a per-repetition wall-time CSV or a JSON table | ~-speedup~, ~-efficiency~, ~-<cell>-strong~, ~-<cell>-pop~ |
 
    Every command takes ~--format png|pdf|svg~ and ~--dpi~. Run
@@ -83,3 +84,19 @@
    marks ~passed=False~. ~-efficiency~ has one row per layout. ~--pop~ takes a
    fixed-work CSV with ~ranks~, ~threads~, an optional ~cell~ and the columns
    named by ~--pop-metric~; each is drawn as an efficiency per layout.
+
+** Wall-time breakdown
+   #+BEGIN_SRC bash
+   rgpycrumbs surrogate plt-breakdown strong_scaling_wall.csv -o figs/bd \
+       --component band_oracle --component band_refit --component dimer_oracle
+   #+END_SRC
+   One figure per cell: median seconds of each ~--component~ stage stacked per
+   ranks x threads layout, the remainder of ~--total~ (default ~pipeline~) as
+   ~other~, the total printed above each bar. Components must not nest.
+
+** Fonts
+   Every command takes ~--font FAMILY~ and ~--font-dir DIR~ (repeatable). The
+   family is looked up through fontconfig, ~$CHEMPARSEPLOT_FONT_DIRS~, the
+   user and system font directories and ~--font-dir~; every face found is
+   registered with matplotlib, and text and math text use it. If no file for
+   the family exists, the command fails naming the family and where it looked.

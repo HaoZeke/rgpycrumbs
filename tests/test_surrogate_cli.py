@@ -13,7 +13,14 @@ import pytest
 from click.testing import CliRunner
 
 ROOT = Path(__file__).resolve().parent.parent
-COMMANDS = ["plt-band", "plt-history", "plt-dimer", "plt-campaign", "plt-scaling"]
+COMMANDS = [
+    "plt-band",
+    "plt-history",
+    "plt-dimer",
+    "plt-campaign",
+    "plt-scaling",
+    "plt-breakdown",
+]
 
 
 def _script(command):
@@ -170,3 +177,37 @@ def test_font_option_embeds_the_family_and_names_missing_ones(tmp_path):
         and "No Such 123" in str(bad.exception)
         and str(fonts) in str(bad.exception)
     )
+
+
+def test_breakdown_writes_one_figure_per_cell(tmp_path):
+    rows = ["cell,set,ranks,threads,repetition,stage,seconds,calls,partition"]
+    for cell in ("a", "b"):
+        for ranks, tot in ((1, 10), (2, 6)):
+            for stage, v in (
+                ("pipeline", tot),
+                ("band_oracle", tot / 2),
+                ("band_refit", tot / 4),
+            ):
+                rows.append(f"{cell},s,{ranks},1,1,{stage},{v},,p")
+    wall = tmp_path / "w.csv"
+    wall.write_text("\n".join(rows) + "\n")
+    result = CliRunner().invoke(
+        _load("plt-breakdown"),
+        [
+            str(wall),
+            "-o",
+            str(tmp_path / "b"),
+            "--component",
+            "band_oracle",
+            "--component",
+            "band_refit",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    for cell in ("a", "b"):
+        assert (tmp_path / f"b-{cell}-breakdown.png").is_file()
+    bad = CliRunner().invoke(
+        _load("plt-breakdown"),
+        [str(wall), "-o", str(tmp_path / "c"), "--component", "nope"],
+    )
+    assert bad.exit_code != 0
