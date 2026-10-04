@@ -23,7 +23,7 @@ and ``<prefix>-efficiency``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f57f5e9a5e35c38e227cebfbc900444e29389df2",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5b30fb53c12214486fbacb7a95f308d0f75a9a38",
 # ]
 # ///
 
@@ -43,6 +43,7 @@ from chemparseplot.plot.surrogate import (
     plot_scaling,
     plot_strong_scaling,
     set_font,
+    set_legend_fontsize,
 )
 
 try:
@@ -96,6 +97,12 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--legend-fontsize",
+    type=float,
+    default=None,
+    help="Legend font size in points (default: each figure's own, 8 or 9).",
+)
+@click.option(
     "--font-dir",
     "font_dirs",
     multiple=True,
@@ -121,9 +128,11 @@ def main(
     dpi,
     font,
     font_dirs,
+    legend_fontsize,
 ):
     """Draw scaling figures from TABLE."""
     set_font(font, font_dirs)
+    set_legend_fontsize(legend_fontsize)
     hashes = {table.name: file_sha256(table)}
     if counts is not None:
         hashes[counts.name] = file_sha256(counts)

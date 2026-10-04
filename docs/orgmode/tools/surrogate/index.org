@@ -158,3 +158,12 @@
    If neither source exists the command stops and names the files it looked
    for; it never draws a strip with guessed elements. ~--font~ applies to the
    captions.
+
+** Legend size and critical-point letters
+   Every figure command takes ~--legend-fontsize PT~ (default: each figure's
+   own 8 or 9 pt). The landscape and the profile with a strip size themselves
+   around the legend, choosing one or two columns and growing the figure, so a
+   larger legend is not cut off. ~--label-critical-points~ puts R, SP (or CI)
+   and P on the profile's curve and on the landscape's path; it is on whenever
+   the strip is drawn and can be selected with ~--plot-structures none~ when the
+   structures are shown in another figure.

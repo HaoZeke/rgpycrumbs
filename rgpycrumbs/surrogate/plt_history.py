@@ -30,7 +30,7 @@ where one run spent calls the other did not::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f57f5e9a5e35c38e227cebfbc900444e29389df2",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5b30fb53c12214486fbacb7a95f308d0f75a9a38",
 # ]
 # ///
 
@@ -47,6 +47,7 @@ from chemparseplot.plot.surrogate import (
     plot_search_comparison,
     plot_search_convergence,
     set_font,
+    set_legend_fontsize,
 )
 
 try:
@@ -104,6 +105,12 @@ if warn_on_direct_script_import is not None:
     help="Panel title; default the search label, '' for none.",
 )
 @click.option(
+    "--legend-fontsize",
+    type=float,
+    default=None,
+    help="Legend font size in points (default: each figure's own, 8 or 9).",
+)
+@click.option(
     "--font-dir",
     "font_dirs",
     multiple=True,
@@ -129,9 +136,11 @@ def main(
     font,
     font_dirs,
     title,
+    legend_fontsize,
 ):
     """Draw convergence and diagnostics for SEARCH."""
     set_font(font, font_dirs)
+    set_legend_fontsize(legend_fontsize)
     s = read_search(search, producer)
     ttl = (label or s.label) if title is None else title
     if s.search is None:

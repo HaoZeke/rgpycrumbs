@@ -23,7 +23,7 @@ the ``--total`` stage is drawn as ``other``. Components must not nest (pass
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f57f5e9a5e35c38e227cebfbc900444e29389df2",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5b30fb53c12214486fbacb7a95f308d0f75a9a38",
 # ]
 # ///
 
@@ -36,7 +36,11 @@ import click
 import numpy as np
 from chemparseplot.parse.surrogate.gpr_optim import parse_breakdown_csv
 from chemparseplot.plot.provenance import file_sha256, save_with_provenance
-from chemparseplot.plot.surrogate import plot_time_breakdown, set_font
+from chemparseplot.plot.surrogate import (
+    plot_time_breakdown,
+    set_font,
+    set_legend_fontsize,
+)
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -82,6 +86,12 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--legend-fontsize",
+    type=float,
+    default=None,
+    help="Legend font size in points (default: each figure's own, 8 or 9).",
+)
+@click.option(
     "--font-dir",
     "font_dirs",
     multiple=True,
@@ -93,9 +103,12 @@ if warn_on_direct_script_import is not None:
     default=None,
     help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
-def main(*, table, prefix, components, total, cells, fmt, dpi, font_dirs, font):
+def main(
+    *, table, prefix, components, total, cells, fmt, dpi, font_dirs, font, legend_fontsize
+):
     """Draw the wall-time breakdown of each cell in TABLE."""
     set_font(font, font_dirs)
+    set_legend_fontsize(legend_fontsize)
     data = parse_breakdown_csv(
         table,
         list(components),

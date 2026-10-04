@@ -45,7 +45,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "polars>=0.20",
 #   "rgpycrumbs>=1.10",
 #   "xyzrender>=0.3.8",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f57f5e9a5e35c38e227cebfbc900444e29389df2",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5b30fb53c12214486fbacb7a95f308d0f75a9a38",
 # ]
 # ///
 
@@ -63,6 +63,7 @@ from chemparseplot.plot.surrogate import (
     plot_band_profile,
     plot_reduced_landscape,
     set_font,
+    set_legend_fontsize,
 )
 
 try:
@@ -187,9 +188,21 @@ if warn_on_direct_script_import is not None:
     help="Structure renderer of the strip.",
 )
 @click.option(
+    "--label-critical-points/--no-label-critical-points",
+    "label_critical_points",
+    default=None,
+    help="Letter R, SP (or CI) and P on the curve and the landscape. Default: on when the strip is drawn; select it to keep the letters without the strip.",
+)
+@click.option(
     "--title",
     default=None,
     help="Panel title; default the search label, '' for none.",
+)
+@click.option(
+    "--legend-fontsize",
+    type=float,
+    default=None,
+    help="Legend font size in points (default: each figure's own, 8 or 9).",
 )
 @click.option(
     "--font-dir",
@@ -216,6 +229,7 @@ def main(
     font_dirs,
     title,
     profile_observations,
+    label_critical_points,
     plot_structures,
     n_structures,
     types_from,
@@ -226,9 +240,11 @@ def main(
     landscape_label_every,
     observation_mode,
     observation_distance,
+    legend_fontsize,
 ):
     """Draw the band profile, its evolution and the reaction-valley landscape."""
     set_font(font, font_dirs)
+    set_legend_fontsize(legend_fontsize)
     s = read_search(search, producer)
     ttl = s.label if title is None else title
     if s.band is None:
@@ -247,6 +263,7 @@ def main(
         "structures": None if plot_structures == "none" else plot_structures,
         "n_structures": n_structures,
         "strip_renderer": strip_renderer,
+        "label_critical_points": label_critical_points,
     }
     command = " ".join(["rgpycrumbs", "surrogate", "plt-band", *sys.argv[1:]])
     has_points = s.band.points is not None and s.band.points.positions is not None

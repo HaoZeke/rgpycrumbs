@@ -258,6 +258,7 @@ def test_band_observation_options_exist():
     assert {
         "profile_observations",
         "landscape_surface",
+        "label_critical_points",
         "plot_structures",
         "n_structures",
         "types_from",
@@ -307,3 +308,56 @@ def test_band_strip_needs_types_and_accepts_a_types_file(tmp_path):
     ok = CliRunner().invoke(main, [*args, "--types-from", str(xyz)])
     assert ok.exit_code == 0, ok.output
     assert (tmp_path / "b-profile.png").is_file()
+
+
+@pytest.mark.parametrize(
+    "command",
+    [c for c in COMMANDS if c != "plt-band"] + ["plt-band"],
+)
+def test_every_figure_command_takes_legend_fontsize(command):
+    assert "legend_fontsize" in {p.name for p in _load(command).params}
+
+
+def test_legend_fontsize_and_critical_labels_reach_the_figure(tmp_path):
+    import shutil
+
+    pytest.importorskip("ase")
+    pytest.importorskip("h5py")
+    pytest.importorskip("jax")
+    fixture = (
+        Path(__file__).resolve().parent.parent.parent
+        / "chemparseplot/tests/fixtures/surrogate/record/baker/25_hcnh2"
+    )
+    if not fixture.is_dir():
+        pytest.skip("chemparseplot fixture record not next to this checkout")
+    cell = tmp_path / "baker" / "25_hcnh2"
+    shutil.copytree(fixture, cell)
+    main = _load("plt-band")
+    args = [
+        str(cell),
+        "-o",
+        str(tmp_path / "b"),
+        "--panel",
+        "profile",
+        "--plot-structures",
+        "none",
+        "--format",
+        "svg",
+    ]
+    plain = CliRunner().invoke(main, args)
+    assert plain.exit_code == 0, plain.output
+    labelled = CliRunner().invoke(
+        main,
+        [
+            *args[:2],
+            str(tmp_path / "c"),
+            *args[3:],
+            "--label-critical-points",
+            "--legend-fontsize",
+            "10",
+        ],
+    )
+    assert labelled.exit_code == 0, labelled.output
+    a = (tmp_path / "b-profile.svg").read_text()
+    b = (tmp_path / "c-profile.svg").read_text()
+    assert a != b  # the letters and the larger legend change the drawing

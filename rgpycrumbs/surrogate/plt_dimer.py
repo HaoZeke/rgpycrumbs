@@ -21,7 +21,7 @@ oracle calls spent on a curvature spectrum marked on both panels::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f57f5e9a5e35c38e227cebfbc900444e29389df2",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5b30fb53c12214486fbacb7a95f308d0f75a9a38",
 # ]
 # ///
 
@@ -33,7 +33,7 @@ from pathlib import Path
 import click
 from chemparseplot.parse.surrogate import read_search
 from chemparseplot.plot.provenance import save_with_provenance
-from chemparseplot.plot.surrogate import plot_single_ended, set_font
+from chemparseplot.plot.surrogate import plot_single_ended, set_font, set_legend_fontsize
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -74,6 +74,12 @@ if warn_on_direct_script_import is not None:
     help="Panel title; default the search label, '' for none.",
 )
 @click.option(
+    "--legend-fontsize",
+    type=float,
+    default=None,
+    help="Legend font size in points (default: each figure's own, 8 or 9).",
+)
+@click.option(
     "--font-dir",
     "font_dirs",
     multiple=True,
@@ -85,9 +91,12 @@ if warn_on_direct_script_import is not None:
     default=None,
     help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
-def main(*, search, prefix, energy_unit, fmt, dpi, font, font_dirs, title):
+def main(
+    *, search, prefix, energy_unit, fmt, dpi, font, font_dirs, title, legend_fontsize
+):
     """Draw the single-ended history of SEARCH (a gpr_optim dimer cell)."""
     set_font(font, font_dirs)
+    set_legend_fontsize(legend_fontsize)
     s = read_search(search, "gpr_optim")
     ttl = s.label if title is None else title
     if s.single_ended is None:
