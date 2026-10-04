@@ -309,7 +309,7 @@ class TestEmbedded:
         key = aoti_key(HCN, ENV)
         bad = embedded_mismatches(_meta(key, **{field: value}), key)
         assert len(bad) == 1, bad
-        assert bad[0].startswith(("embedded natoms" if field == "natoms" else field))
+        assert bad[0].startswith("embedded natoms" if field == "natoms" else field)
 
     def test_counts_separate_compositions_with_one_element_set(self):
         # C3H3 and C2H4 share z_set [1, 6] and six atoms, so the element
