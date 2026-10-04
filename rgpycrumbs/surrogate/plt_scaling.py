@@ -23,7 +23,7 @@ and ``<prefix>-efficiency``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@b7e00af5563849419bd2463b0810745270dda180",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@952c0dcab8dcadcae1b17cc08a7376af2062ef4d",
 # ]
 # ///
 
@@ -35,9 +35,14 @@ from pathlib import Path
 
 import click
 from chemparseplot.parse.surrogate import ScalingTable
-from chemparseplot.parse.surrogate.gpr_optim import parse_scaling_csv
+from chemparseplot.parse.surrogate.gpr_optim import parse_pop_csv, parse_scaling_csv
 from chemparseplot.plot.provenance import file_sha256, save_with_provenance
-from chemparseplot.plot.surrogate import plot_efficiency_table, plot_scaling
+from chemparseplot.plot.surrogate import (
+    plot_efficiency_table,
+    plot_pop_efficiencies,
+    plot_scaling,
+    plot_strong_scaling,
+)
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -70,6 +75,18 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--cell", "cells", multiple=True, help="Cell of a CSV TABLE (repeatable).")
 @click.option(
+    "--pop",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Fixed-work CSV (ranks, threads, optional cell, efficiency columns).",
+)
+@click.option(
+    "--pop-metric",
+    "pop_metrics",
+    multiple=True,
+    help="Column of --pop to draw as an efficiency (repeatable).",
+)
+@click.option(
     "--format",
     "fmt",
     type=click.Choice(["png", "pdf", "svg"]),
@@ -77,7 +94,7 @@ if warn_on_direct_script_import is not None:
     show_default=True,
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
-def main(*, table, prefix, reference, counts, stage, cells, fmt, dpi):
+def main(*, table, prefix, reference, counts, stage, cells, pop, pop_metrics, fmt, dpi):
     """Draw scaling figures from TABLE."""
     hashes = {table.name: file_sha256(table)}
     if counts is not None:
@@ -101,20 +118,24 @@ def main(*, table, prefix, reference, counts, stage, cells, fmt, dpi):
         raise click.ClickException(
             f"--reference {reference!r} is not a series of {table}"
         )
+    figs = {"speedup": plot_scaling(t), "efficiency": plot_efficiency_table(t)}
+    if table.suffix == ".csv":
+        for name in t.series:
+            figs[f"{name}-strong"] = plot_strong_scaling(t, name)
+    if pop is not None:
+        if not pop_metrics:
+            raise click.ClickException("--pop needs at least one --pop-metric COLUMN")
+        hashes[pop.name] = file_sha256(pop)
+        for name in list(t.series) if table.suffix == ".csv" else [None]:
+            layouts, metrics = parse_pop_csv(pop, list(pop_metrics), cell=name)
+            if layouts:
+                figs[f"{name}-pop" if name else "pop"] = plot_pop_efficiencies(
+                    layouts, metrics, title=name
+                )
     command = " ".join(["rgpycrumbs", "surrogate", "plt-scaling", *sys.argv[1:]])
-    for panel, fig in (
-        ("speedup", plot_scaling(t)),
-        ("efficiency", plot_efficiency_table(t)),
-    ):
+    for panel, fig in figs.items():
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")
-        save_with_provenance(
-            fig,
-            out,
-            {},
-            command=command,
-            hashes=hashes,
-            dpi=dpi,
-        )
+        save_with_provenance(fig, out, {}, command=command, hashes=hashes, dpi=dpi)
         click.echo(out)
 
 

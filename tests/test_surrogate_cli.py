@@ -107,3 +107,33 @@ def test_scaling_reads_per_repetition_csv(tmp_path):
     )
     assert result.exit_code == 0, result.output
     assert (tmp_path / "s-speedup.png").is_file()
+
+
+def test_scaling_csv_writes_a_figure_per_cell_and_pop_panels(tmp_path):
+    wall = tmp_path / "w.csv"
+    rows = ["cell,set,ranks,threads,repetition,stage,seconds,calls,partition"]
+    for cell in ("a", "b"):
+        for ranks, thr, v, calls in ((1, 1, 10, 50), (2, 1, 6, 50), (1, 2, 7, 60)):
+            rows.append(f"{cell},s,{ranks},{thr},1,pipeline,{v},,p")
+            rows.append(f"{cell},s,{ranks},{thr},1,search,{v - 1},{calls},p")
+    wall.write_text("\n".join(rows) + "\n")
+    pop = tmp_path / "p.csv"
+    pop.write_text("cell,ranks,threads,lb\na,1,1,1\na,2,1,0.8\nb,1,1,1\nb,2,1,0.7\n")
+    result = CliRunner().invoke(
+        _load("plt-scaling"),
+        [str(wall), "-o", str(tmp_path / "s"), "--pop", str(pop), "--pop-metric", "lb"],
+    )
+    assert result.exit_code == 0, result.output
+    for name in ("speedup", "efficiency", "a-strong", "b-strong", "a-pop", "b-pop"):
+        assert (tmp_path / f"s-{name}.png").is_file(), name
+
+
+def test_scaling_pop_needs_a_metric(tmp_path):
+    t = tmp_path / "t.json"
+    t.write_text('{"x": {"workers": [1, 2], "time_s": [2, 1]}}')
+    p = tmp_path / "p.csv"
+    p.write_text("ranks,threads,lb\n1,1,1\n")
+    result = CliRunner().invoke(
+        _load("plt-scaling"), [str(t), "-o", str(tmp_path / "s"), "--pop", str(p)]
+    )
+    assert result.exit_code != 0 and "--pop-metric" in result.output

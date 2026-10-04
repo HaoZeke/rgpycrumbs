@@ -19,7 +19,7 @@
    | ~rgpycrumbs surrogate plt-history~  | a search directory; ~--against~ another | ~-convergence~, ~-diagnostics~, ~-comparison~       |
    | ~rgpycrumbs surrogate plt-dimer~    | a gpr_optim dimer cell                  | ~-dimer~                                          |
    | ~rgpycrumbs surrogate plt-campaign~ | a campaign record                       | ~-calls~, ~-matrix~, ~-walls~                       |
-   | ~rgpycrumbs surrogate plt-scaling~  | a JSON table of time against workers    | ~-speedup~, ~-efficiency~                          |
+   | ~rgpycrumbs surrogate plt-scaling~  | a per-repetition wall-time CSV or a JSON table | ~-speedup~, ~-efficiency~, ~-<cell>-strong~, ~-<cell>-pop~ |
 
    Every command takes ~--format png|pdf|svg~ and ~--dpi~. Run
    ~rgpycrumbs surrogate <command> --help~ for the options.
@@ -67,3 +67,19 @@
    The scripts pin chemparseplot to a commit in their inline metadata until
    the release carrying ~chemparseplot.plot.surrogate~ exists; the pin is then
    replaced by a version range.
+
+** Strong scaling
+   #+BEGIN_SRC bash
+   rgpycrumbs surrogate plt-scaling strong_scaling_wall.csv \
+       --counts strong_scaling_counts.csv --stage pipeline -o figs/strong \
+       --pop fixed_work.csv --pop-metric load_balance --pop-metric comm_eff
+   #+END_SRC
+   The wall CSV has ~cell, ranks, threads, repetition, stage, seconds, calls~;
+   the call count comes from the ~search~ rows. ~-<cell>-strong~ has four
+   panels per cell with one tick per ranks x threads layout: wall time with
+   the slowest and fastest repetition, speedup against the ideal line,
+   oracle calls in the search and seconds per call (the last two show when the
+   search path changes with the layout). Open markers are runs the counts file
+   marks ~passed=False~. ~-efficiency~ has one row per layout. ~--pop~ takes a
+   fixed-work CSV with ~ranks~, ~threads~, an optional ~cell~ and the columns
+   named by ~--pop-metric~; each is drawn as an efficiency per layout.
