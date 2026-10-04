@@ -44,7 +44,8 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "jax>=0.4",
 #   "polars>=0.20",
 #   "rgpycrumbs>=1.10",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@7b773c1321af0070919cbbfe8452269e165b540e",
+#   "xyzrender>=0.3.8",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@0bc6e14e8597444ec990b8e3a6158235097ac5a1",
 # ]
 # ///
 
@@ -55,7 +56,8 @@ from pathlib import Path
 
 import click
 from chemparseplot.parse.surrogate import read_search
-from chemparseplot.plot.provenance import save_with_provenance
+from chemparseplot.parse.surrogate.gpr_optim import read_atom_types
+from chemparseplot.plot.provenance import file_sha256, save_with_provenance
 from chemparseplot.plot.surrogate import (
     plot_band_evolution,
     plot_band_profile,
@@ -159,6 +161,32 @@ if warn_on_direct_script_import is not None:
     help="Number every K-th oracle evaluation (order of evaluation); default none.",
 )
 @click.option(
+    "--plot-structures",
+    type=click.Choice(["crit_points", "all", "none"]),
+    default="crit_points",
+    show_default=True,
+    help="Strip of structures under the profile and the landscape, as rgpycrumbs eon plt-neb draws: reactant, saddle (or climbing image) and product, every band image, or none.",
+)
+@click.option(
+    "--n-structures",
+    type=int,
+    default=None,
+    help="With crit_points: draw this many images, evenly spaced and always including reactant, saddle and product.",
+)
+@click.option(
+    "--types-from",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Geometry file (any ASE-readable file, or a .con) with the atoms in the band's order; supplies the elements for the strip when the cell holds none.",
+)
+@click.option(
+    "--strip-renderer",
+    type=click.Choice(["xyzrender", "ase", "solvis", "ovito"]),
+    default="xyzrender",
+    show_default=True,
+    help="Structure renderer of the strip.",
+)
+@click.option(
     "--title",
     default=None,
     help="Panel title; default the search label, '' for none.",
@@ -188,6 +216,10 @@ def main(
     font_dirs,
     title,
     profile_observations,
+    plot_structures,
+    n_structures,
+    types_from,
+    strip_renderer,
     landscape_surface,
     landscape_color,
     landscape_fade_variance,
@@ -201,36 +233,56 @@ def main(
     ttl = s.label if title is None else title
     if s.band is None:
         raise click.ClickException(f"{search} holds no band (no band.h5 or trajectories)")
+    hashes = dict(s.provenance)
+    if types_from is not None:
+        try:
+            s.band.numbers = read_atom_types(
+                types_from, s.band.final.positions.shape[1] // 3
+            )
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        s.band.numbers_source = str(types_from)
+        hashes[f"types:{types_from.name}"] = file_sha256(types_from)
+    strip = {
+        "structures": None if plot_structures == "none" else plot_structures,
+        "n_structures": n_structures,
+        "strip_renderer": strip_renderer,
+    }
     command = " ".join(["rgpycrumbs", "surrogate", "plt-band", *sys.argv[1:]])
     has_points = s.band.points is not None and s.band.points.positions is not None
     if panels and "landscape" in panels and not has_points:
         raise click.ClickException(f"{search} kept no geometries of its observations")
     wanted = panels or ("profile", "evolution", *(("landscape",) if has_points else ()))
     for panel in wanted:
-        if panel == "profile":
-            fig = plot_band_profile(
-                s.band,
-                energy_unit=energy_unit,
-                title=ttl,
-                observations=observation_mode if profile_observations else "none",
-                observation_distance=observation_distance,
-            )
-        elif panel == "evolution":
-            fig = plot_band_evolution(s.band, energy_unit=energy_unit)
-        else:
-            fig = plot_reduced_landscape(
-                s.band,
-                energy_unit=energy_unit,
-                title=ttl,
-                surface="grad_matern" if landscape_surface else None,
-                color_by=landscape_color,
-                fade_variance=landscape_fade_variance
-                if landscape_fade_variance < 1
-                else None,
-                label_every=landscape_label_every,
-            )
+        try:
+            if panel == "profile":
+                fig = plot_band_profile(
+                    s.band,
+                    energy_unit=energy_unit,
+                    title=ttl,
+                    observations=observation_mode if profile_observations else "none",
+                    observation_distance=observation_distance,
+                    **strip,
+                )
+            elif panel == "evolution":
+                fig = plot_band_evolution(s.band, energy_unit=energy_unit)
+            else:
+                fig = plot_reduced_landscape(
+                    s.band,
+                    energy_unit=energy_unit,
+                    title=ttl,
+                    surface="grad_matern" if landscape_surface else None,
+                    color_by=landscape_color,
+                    fade_variance=landscape_fade_variance
+                    if landscape_fade_variance < 1
+                    else None,
+                    label_every=landscape_label_every,
+                    **strip,
+                )
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")
-        save_with_provenance(fig, out, {}, command=command, hashes=s.provenance, dpi=dpi)
+        save_with_provenance(fig, out, {}, command=command, hashes=hashes, dpi=dpi)
         click.echo(out)
 
 

@@ -258,6 +258,10 @@ def test_band_observation_options_exist():
     assert {
         "profile_observations",
         "landscape_surface",
+        "plot_structures",
+        "n_structures",
+        "types_from",
+        "strip_renderer",
         "landscape_color",
         "landscape_fade_variance",
         "landscape_label_every",
@@ -265,3 +269,41 @@ def test_band_observation_options_exist():
         "observation_distance",
         "title",
     } <= names
+
+
+def test_band_strip_needs_types_and_accepts_a_types_file(tmp_path):
+    import shutil
+
+    pytest.importorskip("ase")
+    pytest.importorskip("h5py")
+    pytest.importorskip("jax")
+    fixture = (
+        Path(__file__).resolve().parent.parent.parent
+        / "chemparseplot/tests/fixtures/surrogate/record/baker/25_hcnh2"
+    )
+    if not fixture.is_dir():
+        pytest.skip("chemparseplot fixture record not next to this checkout")
+    cell = tmp_path / "baker" / "25_hcnh2"
+    shutil.copytree(fixture, cell)
+    (cell / "saddle" / "pos.con").unlink()
+    main = _load("plt-band")
+    args = [
+        str(cell),
+        "-o",
+        str(tmp_path / "b"),
+        "--panel",
+        "profile",
+        "--strip-renderer",
+        "ase",
+    ]
+    bad = CliRunner().invoke(main, args)
+    assert (
+        bad.exit_code != 0
+        and "no atom types" in bad.output
+        and "--types-from" in bad.output
+    )
+    xyz = tmp_path / "t.xyz"
+    xyz.write_text("5\n\nC 0 0 0\nN 1 0 0\nH 0 1 0\nH 0 0 1\nH 1 1 0\n")
+    ok = CliRunner().invoke(main, [*args, "--types-from", str(xyz)])
+    assert ok.exit_code == 0, ok.output
+    assert (tmp_path / "b-profile.png").is_file()

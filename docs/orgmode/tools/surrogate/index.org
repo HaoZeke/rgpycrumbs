@@ -140,3 +140,21 @@
    the surface is faded to the background, so no confident surface is drawn
    where nothing was evaluated; 1 keeps all of it. Use ~--title~, ~--font~ and ~--font-dir~ as for the
    other panels.
+
+** Structure strip
+   Under the profile and the landscape ~plt-band~ draws the strip of structures
+   ~rgpycrumbs eon plt-neb~ draws (the same ~plot_structure_strip~, renderer and
+   layout constants): ~--plot-structures crit_points~ (default) shows the
+   reactant R, the saddle SP (or the climbing image CI when it differs from the
+   reported saddle) and the product P; ~all~ shows every band image; ~none~
+   leaves the strip out. ~--n-structures N~ draws N evenly spaced images,
+   always including R, SP and P. R, SP and P are captioned on the strip and
+   labelled at their points on the curve or the landscape; the legend says what
+   the letters mean. ~--strip-renderer~ picks the backend (default xyzrender).
+
+   The elements come from the record: ~band/band.con~, then ~saddle/pos.con~
+   (checked for the band's atom count). ~--types-from FILE~ takes any
+   ASE-readable geometry file, or a ~.con~, with the atoms in the band's order.
+   If neither source exists the command stops and names the files it looked
+   for; it never draws a strip with guessed elements. ~--font~ applies to the
+   captions.
