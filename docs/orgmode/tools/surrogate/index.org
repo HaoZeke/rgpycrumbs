@@ -20,6 +20,7 @@
    | ~rgpycrumbs surrogate plt-dimer~    | a gpr_optim dimer cell                  | ~-dimer~                                          |
    | ~rgpycrumbs surrogate plt-campaign~ | a campaign record                       | ~-calls~, ~-matrix~, ~-walls~                       |
    | ~rgpycrumbs surrogate plt-breakdown~ | a per-repetition wall-time CSV | ~-<cell>-breakdown~ |
+   | ~rgpycrumbs surrogate plt-cases~ | a tidy per-case CSV (and a baseline CSV) | ~-calls~, ~-wall~ |
    | ~rgpycrumbs surrogate plt-scaling~  | a per-repetition wall-time CSV or a JSON table | ~-speedup~, ~-efficiency~, ~-<cell>-strong~, ~-<cell>-pop~ |
 
    Every command takes ~--format png|pdf|svg~ and ~--dpi~. Run
@@ -100,3 +101,17 @@
    user and system font directories and ~--font-dir~; every face found is
    registered with matplotlib, and text and math text use it. If no file for
    the family exists, the command fails naming the family and where it looked.
+
+** Per-case boards
+   #+BEGIN_SRC bash
+   rgpycrumbs surrogate plt-cases cases.csv -o figs/cases --baseline baselines.csv \
+       --reference-label "earlier record" --font Jost
+   #+END_SRC
+   ~cases.csv~ has one row per case: ~board, case, label, search_calls,
+   validation_calls, pipeline_wall_s, certified~ and optionally
+   ~reference_pipeline_wall_s~. One panel per board, rows in file order,
+   titled with the count of certified cases. ~-calls~ stacks search and
+   independent-validation evaluations; baseline markers (open where the
+   method did not converge) come from a long CSV ~board, case, method, calls,
+   converged~. ~-wall~ is a log-axis bar per case with a tick at the reference
+   time.
