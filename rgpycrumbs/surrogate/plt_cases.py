@@ -25,7 +25,7 @@ tick at the reference time)::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@b45e10a79ab0913df31735dddb7f59c5d27f01e3",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@a4415d3b4a51c6c07dcaa088b9d565c1261ab042",
 # ]
 # ///
 
