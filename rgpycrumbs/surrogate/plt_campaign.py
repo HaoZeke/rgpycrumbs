@@ -22,7 +22,7 @@ repeat it per method. Files are ``<prefix>-calls``, ``<prefix>-matrix`` and
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@59c1bf468f4d8087a8eec4c42b5022d60ccd2590",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@1a6993eb7942b734425549302bb9c66e2b8eb38b",
 # ]
 # ///
 
