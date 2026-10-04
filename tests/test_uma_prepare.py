@@ -282,6 +282,44 @@ class TestEmbedded:
         bad = embedded_mismatches(_meta(key, **{field: value}), key)
         assert len(bad) == 1
 
+    def test_exporter_provenance_is_checked_when_present(self):
+        key = aoti_key(HCN, ENV)
+        counts = json.dumps({str(z): n for z, n in key.counts})
+        full = _meta(
+            key,
+            natoms=str(key.natoms),
+            counts=counts,
+            model=key.model,
+            torch_version=key.torch,
+            fairchem_version=key.fairchem,
+        )
+        assert embedded_mismatches(full, key) == []
+
+    @pytest.mark.parametrize(
+        ("field", "value"),
+        [
+            ("natoms", "4"),
+            ("counts", json.dumps({"1": 2, "6": 1, "7": 1})),
+            ("model", "uma-m-1p1"),
+            ("torch_version", "0.0.1"),
+            ("fairchem_version", "0.0.1"),
+        ],
+    )
+    def test_each_exporter_field_is_checked(self, field, value):
+        key = aoti_key(HCN, ENV)
+        bad = embedded_mismatches(_meta(key, **{field: value}), key)
+        assert len(bad) == 1, bad
+        assert bad[0].startswith(("embedded natoms" if field == "natoms" else field))
+
+    def test_counts_separate_compositions_with_one_element_set(self):
+        # C3H3 and C2H4 share z_set [1, 6] and six atoms, so the element
+        # set and the traced atom count pass; only the counts, which
+        # UmaPot checks on every call, tell them apart.
+        key = aoti_key([6, 6, 6, 1, 1, 1], ENV)
+        meta = _meta(key, counts=json.dumps({"1": 4, "6": 2}))
+        bad = embedded_mismatches(meta, key)
+        assert len(bad) == 1 and bad[0].startswith("counts"), bad
+
     def test_band_package_counts_atoms_per_system(self):
         key = aoti_key(HCN, ENV, batch_max=4)
         meta = _meta(key, batch_max="4", shapes=str({"pos": [12, 3]}))
