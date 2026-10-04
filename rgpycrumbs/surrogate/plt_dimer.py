@@ -21,7 +21,7 @@ oracle calls spent on a curvature spectrum marked on both panels::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@432ecb487c4659319997b2d0c31c37d1d1e89a3f",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f0aa00d81c90ce795a8542f5fb244c828af6d092",
 # ]
 # ///
 
@@ -69,6 +69,11 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--title",
+    default=None,
+    help="Panel title; default the search label, '' for none.",
+)
+@click.option(
     "--font-dir",
     "font_dirs",
     multiple=True,
@@ -80,16 +85,17 @@ if warn_on_direct_script_import is not None:
     default=None,
     help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
-def main(*, search, prefix, energy_unit, fmt, dpi, font, font_dirs):
+def main(*, search, prefix, energy_unit, fmt, dpi, font, font_dirs, title):
     """Draw the single-ended history of SEARCH (a gpr_optim dimer cell)."""
     set_font(font, font_dirs)
     s = read_search(search, "gpr_optim")
+    ttl = s.label if title is None else title
     if s.single_ended is None:
         raise click.ClickException(
             f"{search} holds no dimer history (no saddle MLflow run)"
         )
     command = " ".join(["rgpycrumbs", "surrogate", "plt-dimer", *sys.argv[1:]])
-    fig = plot_single_ended(s.single_ended, energy_unit=energy_unit, title=s.label)
+    fig = plot_single_ended(s.single_ended, energy_unit=energy_unit, title=ttl)
     out = prefix.with_name(f"{prefix.name}-dimer.{fmt}")
     save_with_provenance(fig, out, {}, command=command, hashes=s.provenance, dpi=dpi)
     click.echo(out)

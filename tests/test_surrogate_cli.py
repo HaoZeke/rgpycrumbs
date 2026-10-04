@@ -245,3 +245,9 @@ def test_cases_writes_calls_and_wall_and_rejects_bad_baselines(tmp_path):
         main, [str(cases), "-o", str(tmp_path / "y"), "--baseline", str(base)]
     )
     assert bad.exit_code != 0 and "unknown case" in bad.output
+
+
+def test_title_option_is_accepted_by_the_search_commands():
+    for command in ("plt-band", "plt-history", "plt-dimer"):
+        main = _load(command)
+        assert "title" in {p.name for p in main.params}, command

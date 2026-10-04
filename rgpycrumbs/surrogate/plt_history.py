@@ -30,7 +30,7 @@ where one run spent calls the other did not::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@432ecb487c4659319997b2d0c31c37d1d1e89a3f",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f0aa00d81c90ce795a8542f5fb244c828af6d092",
 # ]
 # ///
 
@@ -99,6 +99,11 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--title",
+    default=None,
+    help="Panel title; default the search label, '' for none.",
+)
+@click.option(
     "--font-dir",
     "font_dirs",
     multiple=True,
@@ -123,15 +128,17 @@ def main(
     dpi,
     font,
     font_dirs,
+    title,
 ):
     """Draw convergence and diagnostics for SEARCH."""
     set_font(font, font_dirs)
     s = read_search(search, producer)
+    ttl = (label or s.label) if title is None else title
     if s.search is None:
         raise click.ClickException(f"{search} holds no per-iteration history")
     command = " ".join(["rgpycrumbs", "surrogate", "plt-history", *sys.argv[1:]])
     figs = {
-        "convergence": plot_search_convergence(s.search, x=xaxis, title=label or s.label),
+        "convergence": plot_search_convergence(s.search, x=xaxis, title=ttl),
         "diagnostics": plot_model_diagnostics(s.search, x="outer"),
     }
     hashes = dict(s.provenance)
