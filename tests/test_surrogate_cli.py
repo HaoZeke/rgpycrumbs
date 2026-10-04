@@ -20,6 +20,7 @@ COMMANDS = [
     "plt-campaign",
     "plt-scaling",
     "plt-breakdown",
+    "plt-cases",
 ]
 
 
@@ -211,3 +212,36 @@ def test_breakdown_writes_one_figure_per_cell(tmp_path):
         [str(wall), "-o", str(tmp_path / "c"), "--component", "nope"],
     )
     assert bad.exit_code != 0
+
+
+def test_cases_writes_calls_and_wall_and_rejects_bad_baselines(tmp_path):
+    cases = tmp_path / "c.csv"
+    cases.write_text(
+        "board,case,label,search_calls,validation_calls,pipeline_wall_s,certified,reference_pipeline_wall_s\n"
+        "B1,a,Alpha,30,20,6.5,true,8\nB1,b,Beta,50,25,12,true,\nB2,c,Gamma,90,30,300,true,\n"
+    )
+    base = tmp_path / "b.csv"
+    base.write_text("board,case,method,calls,converged\nB1,a,M,100,false\n")
+    main = _load("plt-cases")
+    ok = CliRunner().invoke(
+        main,
+        [
+            str(cases),
+            "-o",
+            str(tmp_path / "x"),
+            "--baseline",
+            str(base),
+            "--reference-label",
+            "earlier record",
+            "--format",
+            "svg",
+        ],
+    )
+    assert ok.exit_code == 0, ok.output
+    for name in ("calls", "wall"):
+        assert (tmp_path / f"x-{name}.svg").is_file()
+    base.write_text("board,case,method,calls,converged\nB1,zzz,M,1,true\n")
+    bad = CliRunner().invoke(
+        main, [str(cases), "-o", str(tmp_path / "y"), "--baseline", str(base)]
+    )
+    assert bad.exit_code != 0 and "unknown case" in bad.output
