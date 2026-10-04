@@ -21,7 +21,8 @@ repeat it per method. Files are ``<prefix>-calls``, ``<prefix>-matrix`` and
 #   "h5py>=3.0",
 #   "ase>=3.22",
 #   "pandas>=2.0",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ef29c8b4451cbe764e8ae3024726f3df9b1bd3ef",
+#   "cmcrameri>=1.7",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@7bf49780b8fa4a3b9fa807fc739be52dd15bd295",
 # ]
 # ///
 

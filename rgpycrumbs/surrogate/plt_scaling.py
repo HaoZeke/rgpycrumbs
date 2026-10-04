@@ -4,8 +4,8 @@
 .. versionadded:: 1.12.0
 
 TABLE is JSON ``{"<series>": {"workers": [...], "time_s": [...]}}``. Speedup
-is relative to the smallest worker count of the reference series (the first
-series unless ``--reference`` names another). Files are ``<prefix>-speedup``
+is relative to each series' own first point, or to the first point of the
+series ``--reference`` names. Files are ``<prefix>-speedup``
 and ``<prefix>-efficiency``::
 
     rgpycrumbs surrogate plt-scaling scaling.json -o figs/scaling
@@ -21,7 +21,8 @@ and ``<prefix>-efficiency``::
 #   "h5py>=3.0",
 #   "ase>=3.22",
 #   "pandas>=2.0",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ef29c8b4451cbe764e8ae3024726f3df9b1bd3ef",
+#   "cmcrameri>=1.7",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@7bf49780b8fa4a3b9fa807fc739be52dd15bd295",
 # ]
 # ///
 
