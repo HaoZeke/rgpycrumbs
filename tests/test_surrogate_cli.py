@@ -137,3 +137,23 @@ def test_scaling_pop_needs_a_metric(tmp_path):
         _load("plt-scaling"), [str(t), "-o", str(tmp_path / "s"), "--pop", str(p)]
     )
     assert result.exit_code != 0 and "--pop-metric" in result.output
+
+
+def test_font_option_reaches_the_pdf(tmp_path):
+    pytest.importorskip("matplotlib")
+    table = tmp_path / "t.json"
+    table.write_text('{"x": {"workers": [1, 2], "time_s": [2, 1]}}')
+    result = CliRunner().invoke(
+        _load("plt-scaling"),
+        [
+            str(table),
+            "-o",
+            str(tmp_path / "s"),
+            "--format",
+            "pdf",
+            "--font",
+            "DejaVu Serif",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert b"DejaVuSerif" in (tmp_path / "s-speedup.pdf").read_bytes()

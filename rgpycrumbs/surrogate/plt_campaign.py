@@ -22,7 +22,7 @@ repeat it per method. Files are ``<prefix>-calls``, ``<prefix>-matrix`` and
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@80a7579b87b8ff7230f5f3f21065df07eacaa04d",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@c4e2ccd2fea25f7f011624a437139b715dfede20",
 # ]
 # ///
 
@@ -39,6 +39,7 @@ from chemparseplot.plot.surrogate import (
     plot_campaign_calls,
     plot_campaign_matrix,
     plot_campaign_walls,
+    set_font,
 )
 
 try:
@@ -96,8 +97,14 @@ def _baseline(_ctx, _param, values):
     show_default=True,
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
-def main(*, record, prefix, baselines, calls, linear, name, fmt, dpi):
+@click.option(
+    "--font",
+    default=None,
+    help="Font family for all text (e.g. Jost). Default: the theme font.",
+)
+def main(*, record, prefix, baselines, calls, linear, name, fmt, dpi, font):
     """Draw campaign figures for RECORD."""
+    set_font(font)
     table = parse_gpr_optim_campaign(record, name=name)
     if not table.cells:
         raise click.ClickException(f"{record} holds no <set>/<cell>/result.json")

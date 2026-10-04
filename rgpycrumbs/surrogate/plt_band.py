@@ -35,7 +35,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@80a7579b87b8ff7230f5f3f21065df07eacaa04d",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@c4e2ccd2fea25f7f011624a437139b715dfede20",
 # ]
 # ///
 
@@ -51,6 +51,7 @@ from chemparseplot.plot.surrogate import (
     plot_band_evolution,
     plot_band_profile,
     plot_reduced_landscape,
+    set_font,
 )
 
 try:
@@ -100,8 +101,14 @@ if warn_on_direct_script_import is not None:
     show_default=True,
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
-def main(*, search, prefix, producer, panels, energy_unit, fmt, dpi):
+@click.option(
+    "--font",
+    default=None,
+    help="Font family for all text (e.g. Jost). Default: the theme font.",
+)
+def main(*, search, prefix, producer, panels, energy_unit, fmt, dpi, font):
     """Draw the band profile, its evolution and the observation landscape."""
+    set_font(font)
     s = read_search(search, producer)
     if s.band is None:
         raise click.ClickException(f"{search} holds no band (no band.h5 or trajectories)")

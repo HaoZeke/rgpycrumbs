@@ -21,7 +21,7 @@ oracle calls spent on a curvature spectrum marked on both panels::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@80a7579b87b8ff7230f5f3f21065df07eacaa04d",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@c4e2ccd2fea25f7f011624a437139b715dfede20",
 # ]
 # ///
 
@@ -33,7 +33,7 @@ from pathlib import Path
 import click
 from chemparseplot.parse.surrogate import read_search
 from chemparseplot.plot.provenance import save_with_provenance
-from chemparseplot.plot.surrogate import plot_single_ended
+from chemparseplot.plot.surrogate import plot_single_ended, set_font
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -68,8 +68,14 @@ if warn_on_direct_script_import is not None:
     show_default=True,
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
-def main(search, prefix, energy_unit, fmt, dpi):
+@click.option(
+    "--font",
+    default=None,
+    help="Font family for all text (e.g. Jost). Default: the theme font.",
+)
+def main(*, search, prefix, energy_unit, fmt, dpi, font):
     """Draw the single-ended history of SEARCH (a gpr_optim dimer cell)."""
+    set_font(font)
     s = read_search(search, "gpr_optim")
     if s.single_ended is None:
         raise click.ClickException(
