@@ -258,6 +258,9 @@ def test_band_observation_options_exist():
     assert {
         "profile_observations",
         "landscape_surface",
+        "landscape_window",
+        "landscape_xlim",
+        "landscape_ylim",
         "label_critical_points",
         "plot_structures",
         "n_structures",

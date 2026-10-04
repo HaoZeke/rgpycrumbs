@@ -45,7 +45,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "polars>=0.20",
 #   "rgpycrumbs>=1.10",
 #   "xyzrender>=0.3.8",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@68c0dfcaf16af2ff1d9ecd20bccaa64b9920cab8",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@b45e10a79ab0913df31735dddb7f59c5d27f01e3",
 # ]
 # ///
 
@@ -156,6 +156,27 @@ if warn_on_direct_script_import is not None:
     help="Fade the GP surface where its relative variance exceeds this level (0-1, the outermost labelled contour); 1 or more keeps all of it.",
 )
 @click.option(
+    "--landscape-window",
+    type=click.Choice(["square", "fit"]),
+    default="square",
+    show_default=True,
+    help="square: the equal-metric square window of plt-neb. fit: crop to the unfaded surface plus every evaluation, the path and the saddle (a rectangle, same angstrom scale on both axes).",
+)
+@click.option(
+    "--landscape-xlim",
+    nargs=2,
+    type=float,
+    default=None,
+    help="Landscape s window (angstrom), MIN MAX; wins over --landscape-window.",
+)
+@click.option(
+    "--landscape-ylim",
+    nargs=2,
+    type=float,
+    default=None,
+    help="Landscape d window (angstrom), MIN MAX; wins over --landscape-window.",
+)
+@click.option(
     "--landscape-label-every",
     type=int,
     default=None,
@@ -235,6 +256,9 @@ def main(
     types_from,
     strip_renderer,
     landscape_surface,
+    landscape_window,
+    landscape_xlim,
+    landscape_ylim,
     landscape_color,
     landscape_fade_variance,
     landscape_label_every,
@@ -294,6 +318,9 @@ def main(
                     if landscape_fade_variance < 1
                     else None,
                     label_every=landscape_label_every,
+                    window=landscape_window,
+                    xlim=tuple(landscape_xlim) if landscape_xlim else None,
+                    ylim=tuple(landscape_ylim) if landscape_ylim else None,
                     **strip,
                 )
         except ValueError as exc:

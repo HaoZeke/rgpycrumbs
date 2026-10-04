@@ -167,3 +167,12 @@
    and P on the profile's curve and on the landscape's path; it is on whenever
    the strip is drawn and can be selected with ~--plot-structures none~ when the
    structures are shown in another figure.
+
+** Landscape window
+   ~--landscape-window square~ (default) is the equal-metric square window of
+   ~plt-neb~. ~fit~ crops it to the part of the surface that is not faded plus
+   every oracle evaluation, the final path and the saddle, with a small margin,
+   and keeps the same angstrom scale on both axes: the map becomes a rectangle,
+   and the figure with its strip and legend gets shorter.
+   ~--landscape-xlim MIN MAX~ and ~--landscape-ylim MIN MAX~ set the window
+   explicitly. The legend wraps into two columns whatever ~--legend-fontsize~ is.
