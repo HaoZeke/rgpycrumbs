@@ -139,21 +139,34 @@ def test_scaling_pop_needs_a_metric(tmp_path):
     assert result.exit_code != 0 and "--pop-metric" in result.output
 
 
-def test_font_option_reaches_the_pdf(tmp_path):
-    pytest.importorskip("matplotlib")
+def test_font_option_embeds_the_family_and_names_missing_ones(tmp_path):
+    import re
+    import shutil
+
+    import matplotlib.font_manager as fm
+
+    fonts = tmp_path / "fonts"
+    fonts.mkdir()
+    shutil.copy(fm.findfont("DejaVu Serif"), fonts / "DejaVuSerif.ttf")
     table = tmp_path / "t.json"
     table.write_text('{"x": {"workers": [1, 2], "time_s": [2, 1]}}')
-    result = CliRunner().invoke(
-        _load("plt-scaling"),
-        [
-            str(table),
-            "-o",
-            str(tmp_path / "s"),
-            "--format",
-            "pdf",
-            "--font",
-            "DejaVu Serif",
-        ],
+    main = _load("plt-scaling")
+    args = [str(table), "-o", str(tmp_path / "s"), "--format", "pdf"]
+    ok = CliRunner().invoke(
+        main, [*args, "--font", "DejaVu Serif", "--font-dir", str(fonts)]
     )
-    assert result.exit_code == 0, result.output
-    assert b"DejaVuSerif" in (tmp_path / "s-speedup.pdf").read_bytes()
+    assert ok.exit_code == 0, ok.output
+    raw = (tmp_path / "s-speedup.pdf").read_bytes()
+    names = {
+        n.decode()
+        for n in re.findall(rb"/FontName\s*/(?:[A-Z]{6}\+)?([^\s/>\[\]]+)", raw)
+    }
+    assert names and all(n.startswith("DejaVuSerif") for n in names), names
+    bad = CliRunner().invoke(
+        main, [*args, "--font", "No Such 123", "--font-dir", str(fonts)]
+    )
+    assert (
+        bad.exit_code != 0
+        and "No Such 123" in str(bad.exception)
+        and str(fonts) in str(bad.exception)
+    )

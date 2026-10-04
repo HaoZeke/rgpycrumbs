@@ -22,7 +22,7 @@ repeat it per method. Files are ``<prefix>-calls``, ``<prefix>-matrix`` and
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@a8c7ed5b97f853d42c599a6b8b26e60e95b6d762",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@98ada16feb4524bf362678d58abbc165574075b6",
 # ]
 # ///
 
@@ -98,13 +98,20 @@ def _baseline(_ctx, _param, values):
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--font-dir",
+    "font_dirs",
+    multiple=True,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Extra directory searched for the --font faces (repeatable).",
+)
+@click.option(
     "--font",
     default=None,
-    help="Font family for all text (e.g. Jost). Default: the theme font.",
+    help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
-def main(*, record, prefix, baselines, calls, linear, name, fmt, dpi, font):
+def main(*, record, prefix, baselines, calls, linear, name, fmt, dpi, font, font_dirs):
     """Draw campaign figures for RECORD."""
-    set_font(font)
+    set_font(font, font_dirs)
     table = parse_gpr_optim_campaign(record, name=name)
     if not table.cells:
         raise click.ClickException(f"{record} holds no <set>/<cell>/result.json")

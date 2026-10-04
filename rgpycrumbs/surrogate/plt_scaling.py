@@ -23,7 +23,7 @@ and ``<prefix>-efficiency``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@a8c7ed5b97f853d42c599a6b8b26e60e95b6d762",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@98ada16feb4524bf362678d58abbc165574075b6",
 # ]
 # ///
 
@@ -96,15 +96,34 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--font-dir",
+    "font_dirs",
+    multiple=True,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Extra directory searched for the --font faces (repeatable).",
+)
+@click.option(
     "--font",
     default=None,
-    help="Font family for all text (e.g. Jost). Default: the theme font.",
+    help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
 def main(
-    *, table, prefix, reference, counts, stage, cells, pop, pop_metrics, fmt, dpi, font
+    *,
+    table,
+    prefix,
+    reference,
+    counts,
+    stage,
+    cells,
+    pop,
+    pop_metrics,
+    fmt,
+    dpi,
+    font,
+    font_dirs,
 ):
     """Draw scaling figures from TABLE."""
-    set_font(font)
+    set_font(font, font_dirs)
     hashes = {table.name: file_sha256(table)}
     if counts is not None:
         hashes[counts.name] = file_sha256(counts)

@@ -30,7 +30,7 @@ where one run spent calls the other did not::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@a8c7ed5b97f853d42c599a6b8b26e60e95b6d762",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@98ada16feb4524bf362678d58abbc165574075b6",
 # ]
 # ///
 
@@ -99,15 +99,33 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--font-dir",
+    "font_dirs",
+    multiple=True,
+    type=click.Path(file_okay=False, path_type=Path),
+    help="Extra directory searched for the --font faces (repeatable).",
+)
+@click.option(
     "--font",
     default=None,
-    help="Font family for all text (e.g. Jost). Default: the theme font.",
+    help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
 def main(
-    *, search, prefix, producer, against, label, against_label, xaxis, fmt, dpi, font
+    *,
+    search,
+    prefix,
+    producer,
+    against,
+    label,
+    against_label,
+    xaxis,
+    fmt,
+    dpi,
+    font,
+    font_dirs,
 ):
     """Draw convergence and diagnostics for SEARCH."""
-    set_font(font)
+    set_font(font, font_dirs)
     s = read_search(search, producer)
     if s.search is None:
         raise click.ClickException(f"{search} holds no per-iteration history")
