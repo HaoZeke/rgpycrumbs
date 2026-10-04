@@ -30,7 +30,7 @@ where one run spent calls the other did not::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@c4e2ccd2fea25f7f011624a437139b715dfede20",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@a8c7ed5b97f853d42c599a6b8b26e60e95b6d762",
 # ]
 # ///
 
