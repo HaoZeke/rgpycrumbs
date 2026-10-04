@@ -116,6 +116,7 @@ digraph G {
      tools/orca/index
      tools/geom/index
      tools/uma/index
+     tools/surrogate/index
      tools/surfaces
      tools/utils/index
      tools/prefix/index

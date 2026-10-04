@@ -1,0 +1,69 @@
+#+TITLE: Surrogate-assisted searches
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+* Surrogate-assisted saddle searches
+  These commands draw searches that answer most force calls from a fitted
+  surrogate and spend a counted number of calls on the true potential (the
+  /oracle/): a Gaussian-process NEB, a GP dimer, or ASE/CatLearn ML-NEB. The
+  drawing lives in ~chemparseplot.plot.surrogate~ and the records it takes in
+  ~chemparseplot.parse.surrogate~. The commands read a search directory,
+  call one function per figure, and save PNG, PDF or SVG.
+  #+BEGIN_EXPORT rst
+  .. versionadded:: 1.12.0
+  #+END_EXPORT
+
+** Commands
+   | Command                          | Input                                  | Files written (after ~-o PREFIX~)              |
+   |----------------------------------+----------------------------------------+------------------------------------------------|
+   | ~rgpycrumbs surrogate plt-band~     | a search directory (cell or ML-NEB run) | ~-profile~, ~-evolution~                          |
+   | ~rgpycrumbs surrogate plt-history~  | a search directory; ~--against~ another | ~-convergence~, ~-diagnostics~, ~-comparison~       |
+   | ~rgpycrumbs surrogate plt-dimer~    | a gpr_optim dimer cell                  | ~-dimer~                                          |
+   | ~rgpycrumbs surrogate plt-campaign~ | a campaign record                       | ~-calls~, ~-matrix~, ~-walls~                       |
+   | ~rgpycrumbs surrogate plt-scaling~  | a JSON table of time against workers    | ~-speedup~, ~-efficiency~                          |
+
+   Every command takes ~--format png|pdf|svg~ and ~--dpi~. Run
+   ~rgpycrumbs surrogate <command> --help~ for the options.
+
+** Example
+   A cell of a gpr_optim campaign, drawn two ways:
+   #+BEGIN_SRC bash
+   rgpycrumbs surrogate plt-band results/rec/baker/25_hcnh2 -o figs/hcnh2
+   rgpycrumbs surrogate plt-history results/rec/baker/25_hcnh2 -o figs/hcnh2
+   #+END_SRC
+   The first writes ~figs/hcnh2-profile.png~ and ~figs/hcnh2-evolution.png~,
+   the second ~figs/hcnh2-convergence.png~ and ~figs/hcnh2-diagnostics.png~.
+
+   To see where a run spent calls another did not, name both:
+   #+BEGIN_SRC bash
+   rgpycrumbs surrogate plt-history rec_old/baker/25_hcnh2 \
+       --against rec_new/baker/25_hcnh2 -o figs/hcnh2-regression
+   #+END_SRC
+   ~-comparison~ puts the true force of both runs on shared axes and stacks
+   their oracle calls by phase (endpoints, initial band, outer loop,
+   transition, dimer).
+
+   Baselines for a campaign come from JSON objects ~{"<cell label>": calls}~:
+   #+BEGIN_SRC bash
+   rgpycrumbs surrogate plt-campaign results/rec -o figs/rec \
+       --baseline "ASE ML-NEB=baselines/mlneb.json"
+   #+END_SRC
+
+** Producers
+   ~--producer gpr_optim~ (default) reads a campaign cell: ~result.json~,
+   ~band/band.h5~, ~band/gprn.log~ and the MLflow store at ~<record>/mlruns~.
+   ~--producer ml-neb~ reads ~predicted.traj~, ~evaluated.traj~ and
+   ~ml_summary.txt~. A producer that stores only the final band (gpr_optim)
+   gets the acquisition record in place of band snapshots in ~-evolution~;
+   quantities a producer did not write (predictive sigma, true profile) are
+   left out of the figure, not drawn as zero.
+
+** Reproducible output
+   Fonts are embedded, no timestamp is written, and the SVG id salt is fixed,
+   so the same inputs give the same bytes. Each file embeds a JSON description:
+   the SHA-256 of every input, the command line and the versions of
+   chemparseplot, matplotlib and numpy. The same description sits in
+   ~<file>.provenance.json~.
+
+   The scripts pin chemparseplot to a commit in their inline metadata until
+   the release carrying ~chemparseplot.plot.surrogate~ exists; the pin is then
+   replaced by a version range.

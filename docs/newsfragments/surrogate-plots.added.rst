@@ -1,0 +1,1 @@
+Added `rgpycrumbs surrogate` with `plt-band`, `plt-history`, `plt-dimer`, `plt-campaign` and `plt-scaling`. They draw surrogate-assisted saddle searches (Gaussian-process NEB, GP dimer, ASE ML-NEB) with `chemparseplot.plot.surrogate`, write deterministic PNG, PDF or SVG files, and record input hashes and tool versions in each.
