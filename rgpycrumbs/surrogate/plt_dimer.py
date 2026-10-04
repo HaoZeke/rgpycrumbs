@@ -21,7 +21,7 @@ oracle calls spent on a curvature spectrum marked on both panels::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@fe1c161871b3bc337a60dd18c3fc43f4340e5a52",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@b7e00af5563849419bd2463b0810745270dda180",
 # ]
 # ///
 

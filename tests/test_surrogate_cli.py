@@ -94,3 +94,16 @@ def test_campaign_baseline_option_must_name_a_file(tmp_path):
         [str(rec), "-o", str(tmp_path / "c"), "--baseline", "x=missing.json"],
     )
     assert result.exit_code != 0 and "NAME=FILE" in result.output
+
+
+def test_scaling_reads_per_repetition_csv(tmp_path):
+    wall = tmp_path / "w.csv"
+    rows = ["cell,set,ranks,threads,repetition,stage,seconds,calls,partition"]
+    for ranks, secs in ((1, (10, 11)), (2, (6, 7))):
+        rows += [f"c,s,{ranks},1,{i + 1},pipeline,{v},50,p" for i, v in enumerate(secs)]
+    wall.write_text("\n".join(rows) + "\n")
+    result = CliRunner().invoke(
+        _load("plt-scaling"), [str(wall), "-o", str(tmp_path / "s")]
+    )
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "s-speedup.png").is_file()

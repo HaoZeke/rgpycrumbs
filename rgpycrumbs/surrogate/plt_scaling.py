@@ -3,7 +3,8 @@
 
 .. versionadded:: 1.12.0
 
-TABLE is JSON ``{"<series>": {"workers": [...], "time_s": [...]}}``. Speedup
+TABLE is a CSV of per-repetition wall times (columns cell, ranks, threads,
+repetition, stage, seconds, calls; ``--counts`` adds the passed column) or JSON ``{"<series>": {"workers": [...], "time_s": [...]}}``. Speedup
 is relative to each series' own first point, or to the first point of the
 series ``--reference`` names. Files are ``<prefix>-speedup``
 and ``<prefix>-efficiency``::
@@ -22,7 +23,7 @@ and ``<prefix>-efficiency``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@fe1c161871b3bc337a60dd18c3fc43f4340e5a52",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@b7e00af5563849419bd2463b0810745270dda180",
 # ]
 # ///
 
@@ -34,6 +35,7 @@ from pathlib import Path
 
 import click
 from chemparseplot.parse.surrogate import ScalingTable
+from chemparseplot.parse.surrogate.gpr_optim import parse_scaling_csv
 from chemparseplot.plot.provenance import file_sha256, save_with_provenance
 from chemparseplot.plot.surrogate import plot_efficiency_table, plot_scaling
 
@@ -58,6 +60,16 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--reference", default=None, help="Series that defines speedup 1.")
 @click.option(
+    "--counts",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="CSV with a passed column per run (CSV input); false marks a capped run.",
+)
+@click.option(
+    "--stage", default="pipeline", show_default=True, help="Stage of a CSV TABLE."
+)
+@click.option("--cell", "cells", multiple=True, help="Cell of a CSV TABLE (repeatable).")
+@click.option(
     "--format",
     "fmt",
     type=click.Choice(["png", "pdf", "svg"]),
@@ -65,20 +77,30 @@ if warn_on_direct_script_import is not None:
     show_default=True,
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
-def main(table, prefix, reference, fmt, dpi):
+def main(*, table, prefix, reference, counts, stage, cells, fmt, dpi):
     """Draw scaling figures from TABLE."""
-    raw = json.loads(table.read_text())
-    try:
-        series = {k: (v["workers"], v["time_s"]) for k, v in raw.items()}
-    except (KeyError, TypeError, AttributeError) as exc:
-        raise click.ClickException(
-            'TABLE must be {"series": {"workers": [...], "time_s": [...]}}'
-        ) from exc
+    hashes = {table.name: file_sha256(table)}
+    if counts is not None:
+        hashes[counts.name] = file_sha256(counts)
+    if table.suffix == ".csv":
+        t = parse_scaling_csv(table, counts, stage=stage, cells=list(cells) or None)
+        series = t.series
+        if not series:
+            raise click.ClickException(f"no rows of stage {stage!r} in {table}")
+        t.reference = reference
+    else:
+        raw = json.loads(table.read_text())
+        try:
+            series = {k: (v["workers"], v["time_s"]) for k, v in raw.items()}
+        except (KeyError, TypeError, AttributeError) as exc:
+            raise click.ClickException(
+                'TABLE must be {"series": {"workers": [...], "time_s": [...]}}'
+            ) from exc
+        t = ScalingTable(series, reference)
     if reference is not None and reference not in series:
         raise click.ClickException(
             f"--reference {reference!r} is not a series of {table}"
         )
-    t = ScalingTable(series, reference)
     command = " ".join(["rgpycrumbs", "surrogate", "plt-scaling", *sys.argv[1:]])
     for panel, fig in (
         ("speedup", plot_scaling(t)),
@@ -90,7 +112,7 @@ def main(table, prefix, reference, fmt, dpi):
             out,
             {},
             command=command,
-            hashes={table.name: file_sha256(table)},
+            hashes=hashes,
             dpi=dpi,
         )
         click.echo(out)
