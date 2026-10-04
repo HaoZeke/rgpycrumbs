@@ -121,10 +121,14 @@ def _literal(text: Any) -> Any:
 def embedded_mismatches(meta: Mapping[str, Any], key: AotiKey) -> list[str]:
     """Fields where a package's embedded metadata disagrees with ``key``.
 
-    Embedded values are strings (torch stores ``str(value)``). The
-    package records ``z_set`` and the traced input shapes, not the
-    per-element counts, so the composition check is the element set
-    plus the atom count.
+    Embedded values are strings (torch stores ``str(value)``). Every
+    package records ``z_set`` and the traced input shapes. rgpot's
+    exporter also embeds ``natoms``, the per-element ``counts`` (JSON of
+    atomic number to count), and the ``model``, ``torch_version`` and
+    ``fairchem_version`` that compiled it; rgpot's ``UmaPot`` refuses an
+    input whose counts differ. Those fields are checked when present, so
+    a package from an older exporter still passes on the element set and
+    the traced atom count.
     """
     out: list[str] = []
 
@@ -148,6 +152,28 @@ def embedded_mismatches(meta: Mapping[str, Any], key: AotiKey) -> list[str]:
     if isinstance(shapes, dict) and shapes.get("pos"):
         natoms = int(shapes["pos"][0]) // systems
     check("natoms", natoms, key.natoms)
+    if "natoms" in meta:
+        check("embedded natoms", as_int("natoms"), key.natoms)
+    if "counts" in meta:
+        counts = _literal(meta.get("counts"))
+        if isinstance(counts, str):
+            try:
+                counts = json.loads(counts)
+            except ValueError:
+                pass
+        if isinstance(counts, dict):
+            try:
+                counts = tuple(sorted((int(z), int(n)) for z, n in counts.items()))
+            except (TypeError, ValueError):
+                pass
+        check("counts", counts, key.counts)
+    for field, want in (
+        ("model", key.model),
+        ("torch_version", key.torch),
+        ("fairchem_version", key.fairchem),
+    ):
+        if field in meta:
+            check(field, meta.get(field), want)
     check("pos_dtype", meta.get("pos_dtype"), key.dtype)
     box = meta.get("molecular_box")
     check(

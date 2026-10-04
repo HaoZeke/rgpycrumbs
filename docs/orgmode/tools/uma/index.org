@@ -57,9 +57,15 @@ the package (~AOTIModelPackageLoader::get_metadata~), not from the sidecar:
 ~cutoff~, ~molecular_box~, ~max_neighbors~, ~batch_max~ and ~pos_dtype~.
 Charge and spin are per-call inputs, so the ~UmaPot~ configuration must carry
 the charge and spin of the key, and its ~device~ must match the key's device.
+~UmaPot~ throws ~rgpot::UmaContractError~ when the configured charge, spin or
+task, or the input's atom counts, differ from the package's.
 Before a package enters the cache, the embedded ~task_name~, ~charge~, ~spin~,
 ~z_set~, traced atom count, ~pos_dtype~, ~molecular_box~, ~batch_max~ and the
-torch ~AOTI_*~ device fields are checked against the key.
+torch ~AOTI_*~ device fields are checked against the key. A package from rgpot's
+current exporter also embeds ~natoms~, the per-element ~counts~, ~model~,
+~torch_version~ and ~fairchem_version~; those are checked too, so a C2H4
+package cannot stand in for a C3H3 key, although both have six atoms and
+~z_set~ ~[1, 6]~.
 
 fairchem-core 2.22 and later pin torch 2.13. The key's ~torch~ field can
 therefore be newer than the libtorch rgpot links. A package compiled with torch
