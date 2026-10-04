@@ -44,7 +44,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "jax>=0.4",
 #   "polars>=0.20",
 #   "rgpycrumbs>=1.10",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@0b93a8789d2447660aa5be86a09f4e7dcc5e27a9",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@18b90ea7c5bb30fa668cd03678a6c5595ab7c97e",
 # ]
 # ///
 
@@ -146,6 +146,13 @@ if warn_on_direct_script_import is not None:
     help="Colour of the oracle evaluations: true energy or order of evaluation.",
 )
 @click.option(
+    "--landscape-fade-variance",
+    type=float,
+    default=0.95,
+    show_default=True,
+    help="Fade the GP surface where its relative variance exceeds this level (0-1, the outermost labelled contour); 1 or more keeps all of it.",
+)
+@click.option(
     "--landscape-label-every",
     type=int,
     default=None,
@@ -183,6 +190,7 @@ def main(
     profile_observations,
     landscape_surface,
     landscape_color,
+    landscape_fade_variance,
     landscape_label_every,
     observation_mode,
     observation_distance,
@@ -216,6 +224,9 @@ def main(
                 title=ttl,
                 surface="grad_matern" if landscape_surface else None,
                 color_by=landscape_color,
+                fade_variance=landscape_fade_variance
+                if landscape_fade_variance < 1
+                else None,
                 label_every=landscape_label_every,
             )
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")

@@ -133,6 +133,10 @@
    - the final path (coloured by the surrogate energy), the climbing image
      (ring) and the saddle the search reports (gold star, "certified" when the
      cell passed).
-   The surface is the fit to the evaluations, not the search's own model, which
-   the record does not store. Use ~--title~, ~--font~ and ~--font-dir~ as for the
+   The surface is a fresh GP fit to the oracle energies and the in-plane gradient
+   components in the reduced (s, d) plane; it is not the search's own model,
+   which the record does not store. Where the relative variance is above
+   ~--landscape-fade-variance~ (default 0.95, the outermost labelled contour)
+   the surface is faded to the background, so no confident surface is drawn
+   where nothing was evaluated; 1 keeps all of it. Use ~--title~, ~--font~ and ~--font-dir~ as for the
    other panels.

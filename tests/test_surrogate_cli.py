@@ -259,6 +259,7 @@ def test_band_observation_options_exist():
         "profile_observations",
         "landscape_surface",
         "landscape_color",
+        "landscape_fade_variance",
         "landscape_label_every",
         "observation_mode",
         "observation_distance",
