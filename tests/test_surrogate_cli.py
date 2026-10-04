@@ -251,3 +251,13 @@ def test_title_option_is_accepted_by_the_search_commands():
     for command in ("plt-band", "plt-history", "plt-dimer"):
         main = _load(command)
         assert "title" in {p.name for p in main.params}, command
+
+
+def test_band_observation_options_exist():
+    names = {p.name for p in _load("plt-band").params}
+    assert {
+        "profile_observations",
+        "observation_mode",
+        "observation_distance",
+        "title",
+    } <= names

@@ -35,7 +35,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f0aa00d81c90ce795a8542f5fb244c828af6d092",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@233c64a75eb6ea209503cc28baf9fbec174d061f",
 # ]
 # ///
 
@@ -102,6 +102,27 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 @click.option(
+    "--profile-observations/--no-profile-observations",
+    "profile_observations",
+    default=True,
+    show_default=True,
+    help="Draw the oracle evaluations on the profile (they stay in the landscape).",
+)
+@click.option(
+    "--observation-mode",
+    type=click.Choice(["fade", "near"]),
+    default="fade",
+    show_default=True,
+    help="fade: colour each evaluation by its distance from the final path; near: draw only those within --observation-distance and count the rest in the legend.",
+)
+@click.option(
+    "--observation-distance",
+    type=float,
+    default=0.1,
+    show_default=True,
+    help="Cartesian distance (angstrom) for --observation-mode near.",
+)
+@click.option(
     "--title",
     default=None,
     help="Panel title; default the search label, '' for none.",
@@ -119,7 +140,20 @@ if warn_on_direct_script_import is not None:
     help="Font family for text and math text (e.g. Jost); an unresolvable family is an error. Default: the theme font.",
 )
 def main(
-    *, search, prefix, producer, panels, energy_unit, fmt, dpi, font, font_dirs, title
+    *,
+    search,
+    prefix,
+    producer,
+    panels,
+    energy_unit,
+    fmt,
+    dpi,
+    font,
+    font_dirs,
+    title,
+    profile_observations,
+    observation_mode,
+    observation_distance,
 ):
     """Draw the band profile, its evolution and the observation landscape."""
     set_font(font, font_dirs)
@@ -134,7 +168,13 @@ def main(
     wanted = panels or ("profile", "evolution", *(("landscape",) if has_points else ()))
     for panel in wanted:
         if panel == "profile":
-            fig = plot_band_profile(s.band, energy_unit=energy_unit, title=ttl)
+            fig = plot_band_profile(
+                s.band,
+                energy_unit=energy_unit,
+                title=ttl,
+                observations=observation_mode if profile_observations else "none",
+                observation_distance=observation_distance,
+            )
         elif panel == "evolution":
             fig = plot_band_evolution(s.band, energy_unit=energy_unit)
         else:
