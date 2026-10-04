@@ -15,7 +15,11 @@ Prefer the dispatcher::
     rgpycrumbs surrogate plt-band results/rec/baker/25_hcnh2 -o figs/hcnh2
     rgpycrumbs surrogate plt-band run/ --producer ml-neb --panel profile
 
-Files are ``<prefix>-profile.<fmt>`` and ``<prefix>-evolution.<fmt>``. Output
+- ``landscape``: the retained observations in the (s, d) reaction-valley
+  plane, coloured by energy and numbered in acquisition order, with the band.
+
+Files are ``<prefix>-profile``, ``-evolution`` and ``-landscape`` (the last
+only when the producer kept geometries of the observations). Output
 is byte-reproducible; each file embeds the SHA-256 of the inputs and the tool
 versions, and a ``.provenance.json`` sits beside it.
 """
@@ -30,7 +34,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "h5py>=3.0",
 #   "ase>=3.22",
 #   "pandas>=2.0",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@4af4172c2fe7d43fae5630e3d2694ae62452c170",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ef29c8b4451cbe764e8ae3024726f3df9b1bd3ef",
 # ]
 # ///
 
@@ -42,7 +46,11 @@ from pathlib import Path
 import click
 from chemparseplot.parse.surrogate import read_search
 from chemparseplot.plot.provenance import save_with_provenance
-from chemparseplot.plot.surrogate import plot_band_evolution, plot_band_profile
+from chemparseplot.plot.surrogate import (
+    plot_band_evolution,
+    plot_band_profile,
+    plot_reduced_landscape,
+)
 
 try:
     from rgpycrumbs._aux import warn_on_direct_script_import
@@ -74,8 +82,8 @@ if warn_on_direct_script_import is not None:
     "--panel",
     "panels",
     multiple=True,
-    type=click.Choice(["profile", "evolution"]),
-    help="Panel to draw (repeatable). Default: both.",
+    type=click.Choice(["profile", "evolution", "landscape"]),
+    help="Panel to draw (repeatable). Default: all the record supports.",
 )
 @click.option(
     "--energy-unit",
@@ -92,16 +100,22 @@ if warn_on_direct_script_import is not None:
 )
 @click.option("--dpi", type=int, default=200, show_default=True)
 def main(*, search, prefix, producer, panels, energy_unit, fmt, dpi):
-    """Draw the band profile and its evolution for SEARCH."""
+    """Draw the band profile, its evolution and the observation landscape."""
     s = read_search(search, producer)
     if s.band is None:
         raise click.ClickException(f"{search} holds no band (no band.h5 or trajectories)")
     command = " ".join(["rgpycrumbs", "surrogate", "plt-band", *sys.argv[1:]])
-    for panel in panels or ("profile", "evolution"):
+    has_points = s.band.points is not None and s.band.points.positions is not None
+    if panels and "landscape" in panels and not has_points:
+        raise click.ClickException(f"{search} kept no geometries of its observations")
+    wanted = panels or ("profile", "evolution", *(("landscape",) if has_points else ()))
+    for panel in wanted:
         if panel == "profile":
             fig = plot_band_profile(s.band, energy_unit=energy_unit, title=s.label)
-        else:
+        elif panel == "evolution":
             fig = plot_band_evolution(s.band, energy_unit=energy_unit)
+        else:
+            fig = plot_reduced_landscape(s.band, energy_unit=energy_unit, title=s.label)
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")
         save_with_provenance(fig, out, {}, command=command, hashes=s.provenance, dpi=dpi)
         click.echo(out)

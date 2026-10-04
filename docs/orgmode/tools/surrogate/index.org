@@ -15,7 +15,7 @@
 ** Commands
    | Command                          | Input                                  | Files written (after ~-o PREFIX~)              |
    |----------------------------------+----------------------------------------+------------------------------------------------|
-   | ~rgpycrumbs surrogate plt-band~     | a search directory (cell or ML-NEB run) | ~-profile~, ~-evolution~                          |
+   | ~rgpycrumbs surrogate plt-band~     | a search directory (cell or ML-NEB run) | ~-profile~, ~-evolution~, ~-landscape~                |
    | ~rgpycrumbs surrogate plt-history~  | a search directory; ~--against~ another | ~-convergence~, ~-diagnostics~, ~-comparison~       |
    | ~rgpycrumbs surrogate plt-dimer~    | a gpr_optim dimer cell                  | ~-dimer~                                          |
    | ~rgpycrumbs surrogate plt-campaign~ | a campaign record                       | ~-calls~, ~-matrix~, ~-walls~                       |

@@ -20,7 +20,7 @@ oracle calls spent on a curvature spectrum marked on both panels::
 #   "h5py>=3.0",
 #   "ase>=3.22",
 #   "pandas>=2.0",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@4af4172c2fe7d43fae5630e3d2694ae62452c170",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ef29c8b4451cbe764e8ae3024726f3df9b1bd3ef",
 # ]
 # ///
 
