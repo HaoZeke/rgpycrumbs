@@ -44,7 +44,7 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "jax>=0.4",
 #   "polars>=0.20",
 #   "rgpycrumbs>=1.10",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@c11a5dd52e858863e2ea576e48ea551514ab230f",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@7b773c1321af0070919cbbfe8452269e165b540e",
 # ]
 # ///
 

@@ -123,7 +123,7 @@
    ~mark_saddle_point~): axes are the reaction progress s and the orthogonal
    deviation d (RMSD, angstrom) of the straight reactant-to-product line, the
    energy colour scale is the theme landscape map. The legend names every mark:
-   - the GP energy surface and its dashed relative variance contours, fitted
+   - the GP energy surface and its dashed relative-variance contours, fitted
      to the oracle evaluations (energy and the in-plane part of the true
      gradient); ~--no-landscape-surface~ omits both;
    - the oracle evaluations as dots, filled by true energy or, with
