@@ -6,21 +6,26 @@
 Reads one search directory with a chemparseplot parser and draws
 
 - ``profile``: surrogate mean along the path, uncertainty ribbon when the
-  producer recorded one, true evaluations, retained observations;
+  producer recorded one, the true energies at the images and the oracle
+  evaluations projected onto the path (``--observation-mode`` says how their
+  distance from the path is shown);
 - ``evolution``: the band over outer iterations (snapshots), or the record of
-  which image the oracle was called on when only the final band exists.
+  which image the oracle was called on when only the final band exists;
+- ``landscape``: the reaction-valley landscape of ``rgpycrumbs eon plt-neb``
+  (progress ``s`` against orthogonal deviation ``d``, drawn by the same
+  chemparseplot functions) with the GP energy surface fitted to the oracle
+  evaluations, the evaluations as dots, the final path, the climbing image and
+  the reported saddle, each in the legend. Needs ``jax`` (in the script
+  metadata).
 
 Prefer the dispatcher::
 
     rgpycrumbs surrogate plt-band results/rec/baker/25_hcnh2 -o figs/hcnh2
     rgpycrumbs surrogate plt-band run/ --producer ml-neb --panel profile
 
-- ``landscape``: the retained observations in the (s, d) reaction-valley
-  plane, coloured by energy and numbered in acquisition order, with the band.
-
 Files are ``<prefix>-profile``, ``-evolution`` and ``-landscape`` (the last
-only when the producer kept geometries of the observations). Output
-is byte-reproducible; each file embeds the SHA-256 of the inputs and the tool
+only when the producer kept the geometries of its evaluations). Output is
+byte-reproducible; each file embeds the SHA-256 of the inputs and the tool
 versions, and a ``.provenance.json`` sits beside it.
 """
 
@@ -35,7 +40,11 @@ versions, and a ``.provenance.json`` sits beside it.
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@9b04270ae772c342714ada96ad36ea5ad11b2576",
+#   "scipy>=1.11",
+#   "jax>=0.4",
+#   "polars>=0.20",
+#   "rgpycrumbs>=1.10",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@0b93a8789d2447660aa5be86a09f4e7dcc5e27a9",
 # ]
 # ///
 
@@ -123,11 +132,24 @@ if warn_on_direct_script_import is not None:
     help="Cartesian distance (angstrom) for --observation-mode near.",
 )
 @click.option(
-    "--landscape-labels/--no-landscape-labels",
-    "landscape_labels",
+    "--landscape-surface/--no-landscape-surface",
+    "landscape_surface",
     default=True,
     show_default=True,
-    help="Number the evaluations on the landscape in order of evaluation.",
+    help="Draw the GP energy surface fitted to the oracle evaluations.",
+)
+@click.option(
+    "--landscape-color",
+    type=click.Choice(["energy", "iteration"]),
+    default="energy",
+    show_default=True,
+    help="Colour of the oracle evaluations: true energy or order of evaluation.",
+)
+@click.option(
+    "--landscape-label-every",
+    type=int,
+    default=None,
+    help="Number every K-th oracle evaluation (order of evaluation); default none.",
 )
 @click.option(
     "--title",
@@ -159,11 +181,13 @@ def main(
     font_dirs,
     title,
     profile_observations,
-    landscape_labels,
+    landscape_surface,
+    landscape_color,
+    landscape_label_every,
     observation_mode,
     observation_distance,
 ):
-    """Draw the band profile, its evolution and the observation landscape."""
+    """Draw the band profile, its evolution and the reaction-valley landscape."""
     set_font(font, font_dirs)
     s = read_search(search, producer)
     ttl = s.label if title is None else title
@@ -190,7 +214,9 @@ def main(
                 s.band,
                 energy_unit=energy_unit,
                 title=ttl,
-                label_numbers=landscape_labels,
+                surface="grad_matern" if landscape_surface else None,
+                color_by=landscape_color,
+                label_every=landscape_label_every,
             )
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")
         save_with_provenance(fig, out, {}, command=command, hashes=s.provenance, dpi=dpi)

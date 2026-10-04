@@ -115,3 +115,24 @@
    method did not converge) come from a long CSV ~board, case, method, calls,
    converged~. ~-wall~ is a log-axis bar per case with a tick at the reference
    time.
+
+** Band landscape
+   ~plt-band --panel landscape~ draws the same progress/deviation landscape as
+   ~rgpycrumbs eon plt-neb~, through the same chemparseplot functions
+   (~plot_landscape_surface~, ~plot_landscape_path_overlay~,
+   ~mark_saddle_point~): axes are the reaction progress s and the orthogonal
+   deviation d (RMSD, angstrom) of the straight reactant-to-product line, the
+   energy colour scale is the theme landscape map. The legend names every mark:
+   - the GP energy surface and its dashed relative variance contours, fitted
+     to the oracle evaluations (energy and the in-plane part of the true
+     gradient); ~--no-landscape-surface~ omits both;
+   - the oracle evaluations as dots, filled by true energy or, with
+     ~--landscape-color iteration~, shaded by order of evaluation (with a
+     colourbar); ~--landscape-label-every K~ also numbers every K-th, and the
+     legend then says the numbers are the order of evaluation;
+   - the final path (coloured by the surrogate energy), the climbing image
+     (ring) and the saddle the search reports (gold star, "certified" when the
+     cell passed).
+   The surface is the fit to the evaluations, not the search's own model, which
+   the record does not store. Use ~--title~, ~--font~ and ~--font-dir~ as for the
+   other panels.
