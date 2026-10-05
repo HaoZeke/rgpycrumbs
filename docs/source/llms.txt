@@ -7,15 +7,92 @@ Repo: https://github.com/HaoZeke/rgpycrumbs
 PyPI / conda-forge: rgpycrumbs
 Context7: /haozeke/rgpycrumbs
 
+This file is a map of the published pages. It does not restate the API.
 Use the public `rgpycrumbs` surface and the Click CLI. Do not import private `_` modules.
 
-## Docs
+## eOn options
 
-- [Quickstart](https://rgpycrumbs.rgoswami.me/quickstart.html)
-- [Install](https://rgpycrumbs.rgoswami.me/howto/install.html)
-- [eOn tools](https://rgpycrumbs.rgoswami.me/tools/eon/index.html)
-- [Tutorials](https://rgpycrumbs.rgoswami.me/tutorials/first-project.html)
-- [Public API](https://rgpycrumbs.rgoswami.me/explanation/public_api.html)
+eOn configuration options are not listed here. The option schema is published with the eOn docs, not restated here: [eOn user guide](https://eondocs.org/user_guide/).
+
+## Start
+
+- [Home](https://rgpycrumbs.rgoswami.me/): suite overview
+- [Quickstart](https://rgpycrumbs.rgoswami.me/quickstart): main features with short examples
+
+## Tutorials
+
+- [NEB reaction path visualization](https://rgpycrumbs.rgoswami.me/tutorials/neb-visualization): profiles, landscapes, and backends
+- [Saddle search visualization](https://rgpycrumbs.rgoswami.me/tutorials/saddle-search-visualization): dimer and saddle trajectories
+- [Minimization visualization](https://rgpycrumbs.rgoswami.me/tutorials/minimization-visualization): minimization trajectories
+- [Rendering backends](https://rgpycrumbs.rgoswami.me/tutorials/rendering-backends): xyzrender, ASE, solvis, and ovito
+- [First project](https://rgpycrumbs.rgoswami.me/tutorials/first-project): NEB output to an energy-landscape figure
+
+## How-to
+
+- [Installation guide](https://rgpycrumbs.rgoswami.me/howto/install): install
+- [FAQ](https://rgpycrumbs.rgoswami.me/howto/faq): frequent questions
+- [Troubleshooting](https://rgpycrumbs.rgoswami.me/howto/troubleshooting): common failures
+- [Run tests and check coverage](https://rgpycrumbs.rgoswami.me/howto/dev_testing): test commands
+
+## Tools
+
+- [eOn tools](https://rgpycrumbs.rgoswami.me/tools/eon/): eOn output, library plots, and CON I/O
+- [con-splitter](https://rgpycrumbs.rgoswami.me/tools/eon/con_splitter): split CON files
+- [generate-nwchem](https://rgpycrumbs.rgoswami.me/tools/eon/generate_nwchem_input): NWChem input from eOn
+- [to-mlflow](https://rgpycrumbs.rgoswami.me/tools/eon/mlflow): log an eOn run to MLflow
+- [pimd-centroid](https://rgpycrumbs.rgoswami.me/tools/eon/pimd_centroid): PIMD centroid
+- [eOn plot TOML config](https://rgpycrumbs.rgoswami.me/tools/eon/plot_config): plot.toml knobs, not the eOn option schema
+- [plt-min](https://rgpycrumbs.rgoswami.me/tools/eon/plt_min): minimization figures
+- [plt-neb](https://rgpycrumbs.rgoswami.me/tools/eon/plt_neb): NEB figures
+- [plt-saddle](https://rgpycrumbs.rgoswami.me/tools/eon/plt_saddle): saddle-search figures
+- [ptmdisp](https://rgpycrumbs.rgoswami.me/tools/eon/ptmdisp): displacement plots
+- [ChemGP tools](https://rgpycrumbs.rgoswami.me/tools/chemgp/): figures from ChemGP HDF5
+- [plt-gp](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp): ChemGP figures
+- [batch](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_command): batch command
+- [Batch tutorial](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_tutorial): batch workflow
+- [HDF5 schema](https://rgpycrumbs.rgoswami.me/tools/chemgp/hdf5_schema): ChemGP HDF5 layout
+- [ORCA tools](https://rgpycrumbs.rgoswami.me/tools/orca/): ORCA helpers
+- [ORCA input generator](https://rgpycrumbs.rgoswami.me/tools/orca/generate_orca_input): write ORCA input
+- [Geometry processing](https://rgpycrumbs.rgoswami.me/tools/geom/): alignment and fragments
+- [alignment](https://rgpycrumbs.rgoswami.me/tools/geom/alignment): structure alignment
+- [detect-fragments](https://rgpycrumbs.rgoswami.me/tools/geom/detect_fragments): fragment detection
+- [UMA AOTI packages](https://rgpycrumbs.rgoswami.me/tools/uma/): compiled UMA packages
+- [prepare-aoti](https://rgpycrumbs.rgoswami.me/tools/uma/prepare_aoti): compile a package when none is cached
+- [aoti-cache](https://rgpycrumbs.rgoswami.me/tools/uma/aoti_cache): cache layout and lookup
+- [Surrogate-assisted searches](https://rgpycrumbs.rgoswami.me/tools/surrogate/): band, history, dimer, and campaign figures
+- [Surface models](https://rgpycrumbs.rgoswami.me/tools/surfaces): gradient-enhanced kernels
+- [Utilities](https://rgpycrumbs.rgoswami.me/tools/utils/): notebooks and workflow helpers
+- [jupyter](https://rgpycrumbs.rgoswami.me/tools/utils/jupyter): Jupyter helper
+- [Prefix tools](https://rgpycrumbs.rgoswami.me/tools/prefix/): prefix.dev package helpers
+- [delete-packages](https://rgpycrumbs.rgoswami.me/tools/prefix/delete_packages): delete prefix packages
+
+## Reference
+
+- [Glossary](https://rgpycrumbs.rgoswami.me/reference/glossary): terms
+- [Changelog](https://rgpycrumbs.rgoswami.me/changelog): release notes
+- [Used by](https://rgpycrumbs.rgoswami.me/used_by): downstream projects
+- [Generated API reference](https://rgpycrumbs.rgoswami.me/autoapi/): module pages built from the package; not copied into this map
+- [Stable public API](https://rgpycrumbs.rgoswami.me/explanation/public_api): which imports are stable
+- [Suite architecture](https://rgpycrumbs.rgoswami.me/explanation/suite_architecture): roles of the suite packages
+- [How to cite](https://rgpycrumbs.rgoswami.me/explanation/citation): citation
+
+## Contributing
+
+- [Contributing](https://rgpycrumbs.rgoswami.me/contributing/): how to contribute
+- [Documentation standards](https://rgpycrumbs.rgoswami.me/contributing/doc_builds): org source and the Sphinx build
+- [Testing and environment requirements](https://rgpycrumbs.rgoswami.me/contributing/test_requirements): pixi environments and tests
+- [Release management](https://rgpycrumbs.rgoswami.me/contributing/release): how a release is cut
+- [Code of conduct](https://rgpycrumbs.rgoswami.me/code_of_conduct): conduct
+- [Design and architecture notes](https://rgpycrumbs.rgoswami.me/devnotes): documentation pipeline and design
+- [Developer documentation](https://rgpycrumbs.rgoswami.me/dev/): developer index
+- [Best practices](https://rgpycrumbs.rgoswami.me/dev/best_practices): project practices
+- [CLI architecture](https://rgpycrumbs.rgoswami.me/dev/cli_architecture): dispatcher and PEP 723 scripts
+- [Contributing guidelines](https://rgpycrumbs.rgoswami.me/dev/contributing): developer contribution notes
+- [Lazy import pattern](https://rgpycrumbs.rgoswami.me/dev/lazy_imports): optional dependency loading
+- [Modular design](https://rgpycrumbs.rgoswami.me/dev/modular_design): CLI, I/O, and plotting split
+- [PEP 723 scripts](https://rgpycrumbs.rgoswami.me/dev/pep723_scripts): inline script metadata
+- [Testing](https://rgpycrumbs.rgoswami.me/dev/testing): test layout
+- [Testing pattern](https://rgpycrumbs.rgoswami.me/dev/testing_pattern): how CLI and plot tests are written
 
 ## Siblings
 
