@@ -5,7 +5,10 @@
 
 TABLE is a tidy CSV with one row per case: ``board, case, label,
 search_calls, validation_calls, pipeline_wall_s, certified`` and optionally
-``reference_pipeline_wall_s``. Boards and rows keep the order of the file.
+``reference_pipeline_wall_s`` and ``pipeline_wall_sd``. The last column is the
+sample standard deviation of repeated runs; the wall figure draws it as a
+horizontal bar and writes it beside the time. Boards and rows keep the order
+of the file.
 ``--baseline FILE`` adds comparison methods from a long CSV ``board, case,
 method, calls, converged``. Files are ``<prefix>-calls`` (stacked search and
 independent-validation bars, linear axis) and ``<prefix>-wall`` (log axis, a
