@@ -3,15 +3,17 @@
 
 .. versionadded:: 1.13.0
 
-TABLE is a CSV with one row per fixed-work run (columns ranks, threads, a
-wall column named by ``--time``, one column per factor named by ``--metric``
-and optionally cell). Each ``--metric COLUMN[=LABEL]`` is drawn as one line
-on a 0 to 1 axis, with the fixed-work efficiency (speedup per core ratio
-against the layout with the fewest cores) and the ``--guide`` level. Layouts
-sharing a core count are dodged; there is no ideal line. One figure per
-cell, ``<prefix>-<cell>-pop`` (``<prefix>-pop`` for a table without cells)::
+Each TABLE is a CSV with one row per fixed-work run (columns ranks, threads,
+a wall column named by ``--time``, one column per factor named by
+``--metric`` and optionally cell). Each ``--metric COLUMN[=LABEL]`` is drawn
+as one line on a 0 to 1 axis, with the fixed-work efficiency (speedup per
+core ratio against the layout with the fewest cores) and the ``--guide``
+level. ``--time COLUMN[=QUANTITY]`` names the timed column of the TABLEs in
+order (one value serves every table); the quantity titles the row. Layouts
+sharing a core count are dodged; there is no ideal line. One figure,
+``<prefix>-pop``, with one row per table and cell::
 
-    rgpycrumbs surrogate plt-pop pop_talp.csv -o figs/pop --metric parallel_eff="parallel efficiency" --metric load_balance="load balance" --metric comm_eff="communication efficiency"
+    rgpycrumbs surrogate plt-pop replay.csv fit.csv --time elapsed_s="process wall" --time fit_s=fit -o figs/pop --metric parallel_eff="parallel efficiency" --metric load_balance="load balance" --metric comm_eff="communication efficiency"
 """
 
 # /// script
@@ -25,7 +27,7 @@ cell, ``<prefix>-<cell>-pop`` (``<prefix>-pop`` for a table without cells)::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@738369598da9670ef53f35501f8038ffec657232",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@edd3752ee17dbc576f0d30ded2cafcd99547e9bf",
 # ]
 # ///
 
@@ -60,34 +62,40 @@ def _metric(spec: str) -> tuple[str, str]:
 
 
 @click.command()
-@click.argument("table", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument(
+    "tables",
+    nargs=-1,
+    required=True,
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+)
 @click.option(
     "-o",
     "--output",
     "prefix",
     required=True,
     type=click.Path(path_type=Path),
-    help="Output prefix; '-<cell>-pop' (or '-pop') and the format are appended.",
+    help="Output prefix; '-pop' and the format are appended.",
 )
 @click.option(
     "--metric",
     "metrics",
     multiple=True,
     required=True,
-    help="Factor column of TABLE as COLUMN or COLUMN=LABEL (repeatable, in legend order).",
+    help="Factor column as COLUMN or COLUMN=LABEL (repeatable, in legend order).",
 )
 @click.option(
     "--time",
-    "time_column",
-    default="elapsed_s",
+    "times",
+    multiple=True,
+    default=("elapsed_s=process wall",),
     show_default=True,
-    help="Column of TABLE holding the wall of each run in seconds.",
+    help="Timed column per TABLE as COLUMN or COLUMN=QUANTITY (repeatable, in TABLE order; one value serves all).",
 )
 @click.option(
     "--cell",
     "cells",
     multiple=True,
-    help="Cell to draw (repeatable). Default: every cell of TABLE.",
+    help="Cell to draw (repeatable). Default: every cell of every TABLE.",
 )
 @click.option(
     "--guide",
@@ -124,10 +132,10 @@ def _metric(spec: str) -> tuple[str, str]:
 )
 def main(
     *,
-    table,
+    tables,
     prefix,
     metrics,
-    time_column,
+    times,
     cells,
     guide,
     fmt,
@@ -136,38 +144,55 @@ def main(
     font,
     legend_fontsize,
 ):
-    """Draw the fixed-work efficiency figure of each cell in TABLE."""
+    """Draw the fixed-work efficiency figure of the TABLEs."""
     set_font(font, font_dirs)
     set_legend_fontsize(legend_fontsize)
     labels = dict(_metric(m) for m in metrics)
-    have = pop_csv_cells(table)
-    if have is None:
-        targets = [None]
-    else:
-        targets = list(cells) or have
-        absent = [c for c in targets if c not in have]
-        if absent:
-            raise click.ClickException(
-                f"{table} has no rows of cell(s) {absent}; its cells are {have}"
-            )
-    command = " ".join(["rgpycrumbs", "surrogate", "plt-pop", *sys.argv[1:]])
-    for cell in targets:
-        try:
-            t = parse_pop_factors(table, labels, time=time_column, cell=cell)
-        except ValueError as exc:
-            raise click.ClickException(str(exc)) from exc
-        fig = plot_pop_factors(t, guide=None if guide < 0 else guide, title=cell)
-        name = f"{prefix.name}-{cell}-pop" if cell else f"{prefix.name}-pop"
-        out = prefix.with_name(f"{name}.{fmt}")
-        save_with_provenance(
-            fig,
-            out,
-            {},
-            command=command,
-            hashes={table.name: file_sha256(table)},
-            dpi=dpi,
+    if len(times) == 1:
+        times = times * len(tables)
+    if len(times) != len(tables):
+        raise click.ClickException(
+            f"{len(times)} --time values for {len(tables)} tables; give one or one per table"
         )
-        click.echo(out)
+    series = []
+    seen: set[str] = set()
+    for table, spec in zip(tables, times, strict=True):
+        column, _, quantity = spec.partition("=")
+        have = pop_csv_cells(table)
+        targets = [None] if have is None else [c for c in have if not cells or c in cells]
+        seen.update(have or [])
+        for cell in targets:
+            try:
+                series.append(
+                    parse_pop_factors(
+                        table,
+                        labels,
+                        time=column,
+                        quantity=quantity or column,
+                        cell=cell,
+                    )
+                )
+            except ValueError as exc:
+                raise click.ClickException(str(exc)) from exc
+    absent = [c for c in cells if c not in seen]
+    if absent:
+        raise click.ClickException(
+            f"no table has rows of cell(s) {absent}; the tables hold {sorted(seen)}"
+        )
+    if not series:
+        raise click.ClickException("no series to draw")
+    fig = plot_pop_factors(series, guide=None if guide < 0 else guide)
+    command = " ".join(["rgpycrumbs", "surrogate", "plt-pop", *sys.argv[1:]])
+    out = prefix.with_name(f"{prefix.name}-pop.{fmt}")
+    save_with_provenance(
+        fig,
+        out,
+        {},
+        command=command,
+        hashes={t.name: file_sha256(t) for t in tables},
+        dpi=dpi,
+    )
+    click.echo(out)
 
 
 if __name__ == "__main__":

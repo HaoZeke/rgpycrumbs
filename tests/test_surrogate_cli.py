@@ -288,12 +288,21 @@ POP_CSV = (
 )
 
 
-def test_pop_writes_one_figure_per_cell_with_labelled_metrics(tmp_path):
+def test_pop_draws_one_row_per_table_and_cell(tmp_path):
     table = tmp_path / "p.csv"
     table.write_text(POP_CSV)
+    fit = tmp_path / "f.csv"
+    fit.write_text(
+        "cell,ranks,threads,fit_s,parallel_eff,load_balance\nfitcell,1,1,30,1,1\nfitcell,4,1,7,0.86,0.98\n"
+    )
     main = _load("plt-pop")
     args = [
         str(table),
+        str(fit),
+        "--time",
+        "elapsed_s=process wall",
+        "--time",
+        "fit_s=fit",
         "-o",
         str(tmp_path / "e"),
         "--metric",
@@ -305,22 +314,28 @@ def test_pop_writes_one_figure_per_cell_with_labelled_metrics(tmp_path):
     ]
     ok = CliRunner().invoke(main, args)
     assert ok.exit_code == 0, ok.output
-    for cell in ("16_oxirane", "11_grignard"):
-        f = tmp_path / f"e-{cell}-pop.svg"
-        assert f.is_file(), cell
-        side = json.loads((tmp_path / f"e-{cell}-pop.svg.provenance.json").read_text())
-        assert side["inputs"]["p.csv"]
-    assert "parallel efficiency" in (tmp_path / "e-16_oxirane-pop.svg").read_text()
+    svg = (tmp_path / "e-pop.svg").read_text()
+    side = json.loads((tmp_path / "e-pop.svg.provenance.json").read_text())
+    assert side["inputs"]["p.csv"] and side["inputs"]["f.csv"]
+    for text in (
+        "parallel efficiency",
+        "16_oxirane, process wall",
+        "11_grignard, process wall",
+        "fitcell, fit",
+    ):
+        assert text in svg, text
     one = CliRunner().invoke(main, [*args, "--cell", "11_grignard"])
     assert one.exit_code == 0, one.output
     bad = CliRunner().invoke(main, [*args, "--cell", "oxirane"])
     assert bad.exit_code != 0
     assert "['oxirane']" in bad.output and "'16_oxirane'" in bad.output
+    count = CliRunner().invoke(main, [*args, "--time", "x"])
+    assert count.exit_code != 0 and "3 --time values for 2 tables" in count.output
     nocol = CliRunner().invoke(
         main, [str(table), "-o", str(tmp_path / "f"), "--metric", "zz"]
     )
     assert nocol.exit_code != 0 and "zz" in nocol.output
-    table.write_text("ranks,threads,elapsed_s,lb\n1,1,10\n".replace("10\n", "10,1\n"))
+    table.write_text("ranks,threads,elapsed_s,lb\n1,1,10,1\n")
     plain = CliRunner().invoke(
         main, [str(table), "-o", str(tmp_path / "g"), "--metric", "lb"]
     )

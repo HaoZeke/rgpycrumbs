@@ -22,7 +22,7 @@
    | ~rgpycrumbs surrogate plt-breakdown~ | a per-repetition wall-time CSV | ~-<cell>-breakdown~ |
    | ~rgpycrumbs surrogate plt-cases~ | a tidy per-case CSV (and a baseline CSV) | ~-calls~, ~-wall~ |
    | ~rgpycrumbs surrogate plt-scaling~  | a per-repetition wall-time CSV or a JSON table | ~-speedup~, ~-efficiency~, ~-<cell>-strong~, ~-<cell>-pop~ |
-   | ~rgpycrumbs surrogate plt-pop~ | a fixed-work CSV (ranks, threads, wall, factor columns) | ~-<cell>-pop~: speedup and POP factors against cores |
+   | ~rgpycrumbs surrogate plt-pop~ | fixed-work CSVs (ranks, threads, wall, factor columns) | ~-pop~: speedup and POP factors against cores, one row per table and cell |
    | ~rgpycrumbs surrogate plt-components~ | a tidy per-component CSV (cell, ranks, threads, repetition, component, seconds) | ~-<layout>-components~: stacked wall per cell with the Amdahl bound |
 
    Every command takes ~--format png|pdf|svg~ and ~--dpi~. Run
