@@ -25,7 +25,7 @@ no time. The file is ``<prefix>-<layout>-components``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@edd3752ee17dbc576f0d30ded2cafcd99547e9bf",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5daf95d7741b2b5b5e1bd5b5b119ba221fa5b369",
 # ]
 # ///
 
