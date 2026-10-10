@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#  "pandas", "numpy", "matplotlib", "cmcrameri", "chemparseplot"
+#   "pandas", "numpy", "matplotlib", "cmcrameri", "chemparseplot",
 #   "rgpycrumbs>=1.10.2",
 # ]
 # ///
