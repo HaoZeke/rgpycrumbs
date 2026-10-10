@@ -21,6 +21,8 @@ COMMANDS = [
     "plt-scaling",
     "plt-breakdown",
     "plt-cases",
+    "plt-pop",
+    "plt-components",
 ]
 
 
@@ -136,6 +138,36 @@ def test_scaling_csv_writes_a_figure_per_cell_and_pop_panels(tmp_path):
         assert (tmp_path / f"s-{name}.png").is_file(), name
 
 
+def _wall_csv(path, cells=("16_oxirane",)):
+    rows = ["cell,set,ranks,threads,repetition,stage,seconds,calls,partition"]
+    for cell in cells:
+        for ranks, thr, v in ((1, 1, 10), (2, 1, 6), (4, 2, 4)):
+            rows.append(f"{cell},s,{ranks},{thr},1,pipeline,{v},,p")
+    path.write_text("\n".join(rows) + "\n")
+    return path
+
+
+def test_scaling_pop_refuses_a_cell_the_table_lacks_and_names_both(tmp_path):
+    wall = _wall_csv(tmp_path / "w.csv")
+    pop = tmp_path / "p.csv"
+    pop.write_text("cell,ranks,threads,lb\noxirane,1,1,1\noxirane,2,1,0.8\n")
+    result = CliRunner().invoke(
+        _load("plt-scaling"),
+        [str(wall), "-o", str(tmp_path / "s"), "--pop", str(pop), "--pop-metric", "lb"],
+    )
+    assert result.exit_code != 0
+    assert "['oxirane']" in result.output and "['16_oxirane']" in result.output
+    assert not list(tmp_path.glob("s-*-pop.png"))
+    # a POP file without a cell column applies to every cell of the table
+    pop.write_text("ranks,threads,lb\n1,1,1\n2,1,0.8\n")
+    ok = CliRunner().invoke(
+        _load("plt-scaling"),
+        [str(wall), "-o", str(tmp_path / "t"), "--pop", str(pop), "--pop-metric", "lb"],
+    )
+    assert ok.exit_code == 0, ok.output
+    assert (tmp_path / "t-16_oxirane-pop.png").is_file()
+
+
 def test_scaling_pop_needs_a_metric(tmp_path):
     t = tmp_path / "t.json"
     t.write_text('{"x": {"workers": [1, 2], "time_s": [2, 1]}}')
@@ -244,7 +276,101 @@ def test_cases_writes_calls_and_wall_and_rejects_bad_baselines(tmp_path):
     bad = CliRunner().invoke(
         main, [str(cases), "-o", str(tmp_path / "y"), "--baseline", str(base)]
     )
-    assert bad.exit_code != 0 and "unknown case" in bad.output
+    assert bad.exit_code != 0 and "unknown case B1/zzz" in bad.output
+    assert "'B1': ['a', 'b']" in bad.output and "'B2': ['c']" in bad.output
+
+
+POP_CSV = (
+    "cell,ranks,threads,elapsed_s,parallel_eff,load_balance\n"
+    "16_oxirane,1,1,100,1.0,1.0\n16_oxirane,2,1,60,0.9,1.0\n"
+    "16_oxirane,4,2,30,0.7,0.95\n16_oxirane,8,1,28,0.6,0.9\n"
+    "11_grignard,1,1,300,1.0,1.0\n11_grignard,4,2,100,0.8,0.9\n"
+)
+
+
+def test_pop_writes_one_figure_per_cell_with_labelled_metrics(tmp_path):
+    table = tmp_path / "p.csv"
+    table.write_text(POP_CSV)
+    main = _load("plt-pop")
+    args = [
+        str(table),
+        "-o",
+        str(tmp_path / "e"),
+        "--metric",
+        "parallel_eff=parallel efficiency",
+        "--metric",
+        "load_balance",
+        "--format",
+        "svg",
+    ]
+    ok = CliRunner().invoke(main, args)
+    assert ok.exit_code == 0, ok.output
+    for cell in ("16_oxirane", "11_grignard"):
+        f = tmp_path / f"e-{cell}-pop.svg"
+        assert f.is_file(), cell
+        side = json.loads((tmp_path / f"e-{cell}-pop.svg.provenance.json").read_text())
+        assert side["inputs"]["p.csv"]
+    assert "parallel efficiency" in (tmp_path / "e-16_oxirane-pop.svg").read_text()
+    one = CliRunner().invoke(main, [*args, "--cell", "11_grignard"])
+    assert one.exit_code == 0, one.output
+    bad = CliRunner().invoke(main, [*args, "--cell", "oxirane"])
+    assert bad.exit_code != 0
+    assert "['oxirane']" in bad.output and "'16_oxirane'" in bad.output
+    nocol = CliRunner().invoke(
+        main, [str(table), "-o", str(tmp_path / "f"), "--metric", "zz"]
+    )
+    assert nocol.exit_code != 0 and "zz" in nocol.output
+    table.write_text("ranks,threads,elapsed_s,lb\n1,1,10\n".replace("10\n", "10,1\n"))
+    plain = CliRunner().invoke(
+        main, [str(table), "-o", str(tmp_path / "g"), "--metric", "lb"]
+    )
+    assert plain.exit_code == 0, plain.output
+    assert (tmp_path / "g-pop.png").is_file()
+
+
+def test_components_draws_one_layout_for_the_named_cells(tmp_path):
+    table = tmp_path / "c.csv"
+    table.write_text(
+        "cell,ranks,threads,repetition,component,seconds\n"
+        "16_oxirane,4,2,1,total,100\n16_oxirane,4,2,1,oracle,30\n16_oxirane,4,2,1,fits,20\n"
+        "16_oxirane,4,2,2,total,110\n16_oxirane,4,2,2,oracle,34\n16_oxirane,4,2,2,fits,20\n"
+        "11_grignard,4,2,1,total,400\n11_grignard,4,2,1,oracle,50\n11_grignard,4,2,1,fits,120\n"
+        "11_grignard,1,1,1,total,900\n11_grignard,1,1,1,oracle,90\n"
+    )
+    main = _load("plt-components")
+    ok = CliRunner().invoke(
+        main,
+        [
+            str(table),
+            "-o",
+            str(tmp_path / "w"),
+            "--layout",
+            "4x2",
+            "--cell",
+            "16_oxirane",
+            "--cell",
+            "11_grignard",
+            "--format",
+            "svg",
+        ],
+    )
+    assert ok.exit_code == 0, ok.output
+    f = tmp_path / "w-4x2-components.svg"
+    assert f.is_file() and "unattributed" in f.read_text()
+    assert json.loads((tmp_path / "w-4x2-components.svg.provenance.json").read_text())[
+        "inputs"
+    ]["c.csv"]
+    missing = CliRunner().invoke(
+        main, [str(table), "-o", str(tmp_path / "x"), "--layout", "1x1"]
+    )
+    assert missing.exit_code != 0 and "16_oxirane has no layout '1x1'" in missing.output
+    bad = CliRunner().invoke(
+        main,
+        [str(table), "-o", str(tmp_path / "y"), "--layout", "4x2", "--cell", "oxirane"],
+    )
+    assert (
+        bad.exit_code != 0 and "['oxirane']" in bad.output and "16_oxirane" in bad.output
+    )
 
 
 def test_title_option_is_accepted_by_the_search_commands():

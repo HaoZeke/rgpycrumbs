@@ -6,7 +6,9 @@
 TABLE is a CSV of per-repetition wall times (columns cell, ranks, threads,
 repetition, stage, seconds, calls; ``--counts`` adds the passed column) or JSON ``{"<series>": {"workers": [...], "time_s": [...]}}``. Speedup
 is relative to each series' own first point, or to the first point of the
-series ``--reference`` names. Files are ``<prefix>-speedup``
+series ``--reference`` names. ``--pop FILE`` adds a ``<prefix>-<cell>-pop``
+panel per cell from a fixed-work CSV; a cell FILE names that TABLE does not
+hold is an error naming both. Files are ``<prefix>-speedup``
 and ``<prefix>-efficiency``::
 
     rgpycrumbs surrogate plt-scaling scaling.json -o figs/scaling
@@ -23,7 +25,7 @@ and ``<prefix>-efficiency``::
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@5799d90f6ba47702a0d176339cddaaab036fc92d",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@738369598da9670ef53f35501f8038ffec657232",
 # ]
 # ///
 
@@ -35,7 +37,11 @@ from pathlib import Path
 
 import click
 from chemparseplot.parse.surrogate import ScalingTable
-from chemparseplot.parse.surrogate.gpr_optim import parse_pop_csv, parse_scaling_csv
+from chemparseplot.parse.surrogate.gpr_optim import (
+    parse_pop_csv,
+    parse_scaling_csv,
+    pop_csv_cells,
+)
 from chemparseplot.plot.provenance import file_sha256, save_with_provenance
 from chemparseplot.plot.surrogate import (
     plot_efficiency_table,
@@ -163,12 +169,31 @@ def main(
         if not pop_metrics:
             raise click.ClickException("--pop needs at least one --pop-metric COLUMN")
         hashes[pop.name] = file_sha256(pop)
-        for name in list(t.series) if table.suffix == ".csv" else [None]:
-            layouts, metrics = parse_pop_csv(pop, list(pop_metrics), cell=name)
-            if layouts:
-                figs[f"{name}-pop" if name else "pop"] = plot_pop_efficiencies(
-                    layouts, metrics, title=name
+        pop_cells = pop_csv_cells(pop)
+        if pop_cells is not None and table.suffix == ".csv":
+            # every cell the POP file names must be a cell of TABLE, so a
+            # label that differs ("oxirane" against "16_oxirane") is refused
+            # instead of drawing nothing for it
+            strays = [c for c in pop_cells if c not in t.series]
+            if strays:
+                raise click.ClickException(
+                    f"--pop {pop} names cell(s) {strays} that {table} does not "
+                    f"hold; its cells are {list(t.series)}"
                 )
+        if table.suffix != ".csv":
+            targets = [None]
+        elif pop_cells is None:
+            targets = list(t.series)
+        else:
+            targets = [c for c in t.series if c in pop_cells]
+        for name in targets:
+            try:
+                layouts, metrics = parse_pop_csv(pop, list(pop_metrics), cell=name)
+            except ValueError as exc:
+                raise click.ClickException(str(exc)) from exc
+            figs[f"{name}-pop" if name else "pop"] = plot_pop_efficiencies(
+                layouts, metrics, title=name
+            )
     command = " ".join(["rgpycrumbs", "surrogate", "plt-scaling", *sys.argv[1:]])
     for panel, fig in figs.items():
         out = prefix.with_name(f"{prefix.name}-{panel}.{fmt}")

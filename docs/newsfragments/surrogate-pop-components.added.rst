@@ -1,0 +1,1 @@
+Added ``rgpycrumbs surrogate plt-pop`` (fixed-work speedup and the POP efficiency factors against cores, with the 0.8 guide) and ``plt-components`` (where the wall of one layout goes per cell, with the Amdahl bound per component). ``plt-scaling --pop`` and ``plt-cases --baseline`` refuse a cell or case the main table does not hold and name the values on both sides.
