@@ -168,23 +168,25 @@ def align_structure_robust(
     except Exception as e:
         logging.debug(f"IRA alignment failed: {e}. Proceeding to fallback.")
     if np.any(ref_atoms.pbc) or np.any(mobile_atoms.pbc):
-        from readcon_ops import Frame, internal_motion
+        from rgpycrumbs._aux import ensure_import
 
-        reference = Frame(
+        operations = ensure_import("readcon_ops")
+
+        reference = operations.Frame(
             ref_atoms.positions,
             ref_atoms.cell,
             ref_atoms.get_chemical_symbols(),
             None,
             ref_atoms.pbc,
         )
-        mobile = Frame(
+        mobile = operations.Frame(
             mobile_atoms.positions,
             mobile_atoms.cell,
             mobile_atoms.get_chemical_symbols(),
             None,
             mobile_atoms.pbc,
         )
-        aligned = internal_motion(reference, mobile)
+        aligned = operations.internal_motion(reference, mobile)
         mobile_atoms.positions[:] = aligned.r
         return AlignmentResult(
             atoms=mobile_atoms, method=AlignmentMethod.PERIODIC_TRANSLATION
