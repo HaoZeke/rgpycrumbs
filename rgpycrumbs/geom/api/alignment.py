@@ -170,14 +170,25 @@ def align_structure_robust(
     if np.any(ref_atoms.pbc) or np.any(mobile_atoms.pbc):
         from readcon_ops import Frame, internal_motion
 
-        reference = Frame(ref_atoms.positions, ref_atoms.cell,
-                          ref_atoms.get_chemical_symbols(), None, ref_atoms.pbc)
-        mobile = Frame(mobile_atoms.positions, mobile_atoms.cell,
-                       mobile_atoms.get_chemical_symbols(), None, mobile_atoms.pbc)
+        reference = Frame(
+            ref_atoms.positions,
+            ref_atoms.cell,
+            ref_atoms.get_chemical_symbols(),
+            None,
+            ref_atoms.pbc,
+        )
+        mobile = Frame(
+            mobile_atoms.positions,
+            mobile_atoms.cell,
+            mobile_atoms.get_chemical_symbols(),
+            None,
+            mobile_atoms.pbc,
+        )
         aligned = internal_motion(reference, mobile)
         mobile_atoms.positions[:] = aligned.r
-        return AlignmentResult(atoms=mobile_atoms,
-                               method=AlignmentMethod.PERIODIC_TRANSLATION)
+        return AlignmentResult(
+            atoms=mobile_atoms, method=AlignmentMethod.PERIODIC_TRANSLATION
+        )
     # Fallback to standard rigid superimposition
     minimize_rotation_and_translation(ref_atoms, mobile_atoms)
     return AlignmentResult(atoms=mobile_atoms, method=AlignmentMethod.ASE_PROCRUSTES)
@@ -196,7 +207,7 @@ def _rmsd_single(ref_atom, atom_i, config, coords_ref):
 
         periodic = ref_atom if np.any(ref_atom.pbc) else atom_i
         delta, _ = find_mic(delta, periodic.cell, periodic.pbc)
-    diff_sq = delta ** 2
+    diff_sq = delta**2
     return float(np.sqrt(np.mean(np.sum(diff_sq, axis=1))))
 
 

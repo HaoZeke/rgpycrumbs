@@ -211,12 +211,16 @@ def _template(reference, symbols, cell, n_atoms):
             raise ValueError(msg)
         physical = ref.to_ase()
         masses = physical.get_masses()
-        atoms = [(a.symbol, float(masses[i]), a.fixed, a.atom_id)
-                 for i, a in enumerate(ref.atoms)]
+        atoms = [
+            (a.symbol, float(masses[i]), a.fixed, a.atom_id)
+            for i, a in enumerate(ref.atoms)
+        ]
         cellpar = physical.cell.cellpar()
-        metadata = {"pbc": physical.pbc.tolist(),
-                    "lattice_vectors": physical.cell.tolist(),
-                    "units": {"length": "angstrom", "energy": "eV", "mass": "amu"}}
+        metadata = {
+            "pbc": physical.pbc.tolist(),
+            "lattice_vectors": physical.cell.tolist(),
+            "units": {"length": "angstrom", "energy": "eV", "mass": "amu"},
+        }
         if "potential_type" in ref.metadata:
             metadata["potential_type"] = ref.metadata["potential_type"]
         return atoms, cellpar[:3].tolist(), cellpar[3:].tolist(), metadata
@@ -229,8 +233,12 @@ def _template(reference, symbols, cell, n_atoms):
     if cell is None:
         msg = "no cell: give --reference or --cell"
         raise ValueError(msg)
-    return ([(s, None, None, i) for i, s in enumerate(symbols)], list(cell),
-            [90.0, 90.0, 90.0], {})
+    return (
+        [(s, None, None, i) for i, s in enumerate(symbols)],
+        list(cell),
+        [90.0, 90.0, 90.0],
+        {},
+    )
 
 
 def build_frames(
@@ -245,7 +253,9 @@ def build_frames(
     """readcon frames, one per row of *positions* ``(F, N, 3)``."""
     import readcon  # noqa: PLC0415
 
-    template, box, angles, base_metadata = _template(reference, symbols, cell, positions.shape[1])
+    template, box, angles, base_metadata = _template(
+        reference, symbols, cell, positions.shape[1]
+    )
     frames = []
     for pos, spr, md in zip(positions, spreads, metadata, strict=True):
         atoms = [
@@ -263,8 +273,11 @@ def build_frames(
             )
             for i, (sym, mass, fixed, atom_id) in enumerate(template)
         ]
-        frames.append(readcon.ConFrame(cell=box, angles=angles, atoms=atoms,
-                                      metadata={**base_metadata, **md}))
+        frames.append(
+            readcon.ConFrame(
+                cell=box, angles=angles, atoms=atoms, metadata={**base_metadata, **md}
+            )
+        )
     return frames
 
 
