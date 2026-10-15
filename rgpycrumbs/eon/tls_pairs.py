@@ -27,7 +27,7 @@ Quantities carry units through pint; the CSV states them in its header.
 #   "pint>=0.24",
 #   "rich",
 #   "ase",
-#   "readcon>=0.14.9",
+#   "readcon>=0.17.1",
 # ]
 # ///
 

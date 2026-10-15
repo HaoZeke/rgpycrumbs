@@ -23,7 +23,7 @@ consumer:
 # dependencies = [
 #   "click",
 #   "numpy",
-#   "readcon>=0.15.0",
+#   "readcon>=0.17.1",
 #   "metatensor-core>=0.1",
 # ]
 # ///
