@@ -63,6 +63,7 @@ class AlignmentMethod(Enum):
 
     ASE_PROCRUSTES = auto()  # Standard rigid rotation/translation
     IRA_PERMUTATION = auto()  # Isomorphic mapping + alignment
+    PERIODIC_TRANSLATION = auto()  # Mean minimum-image translation
     NONE = auto()  # No operation performed
 
 
@@ -166,6 +167,30 @@ def align_structure_robust(
 
     except Exception as e:
         logging.debug(f"IRA alignment failed: {e}. Proceeding to fallback.")
+    if np.any(ref_atoms.pbc) or np.any(mobile_atoms.pbc):
+        from rgpycrumbs._aux import ensure_import
+
+        operations = ensure_import("readcon_ops")
+
+        reference = operations.Frame(
+            ref_atoms.positions,
+            ref_atoms.cell,
+            ref_atoms.get_chemical_symbols(),
+            None,
+            ref_atoms.pbc,
+        )
+        mobile = operations.Frame(
+            mobile_atoms.positions,
+            mobile_atoms.cell,
+            mobile_atoms.get_chemical_symbols(),
+            None,
+            mobile_atoms.pbc,
+        )
+        aligned = operations.internal_motion(reference, mobile)
+        mobile_atoms.positions[:] = aligned.r
+        return AlignmentResult(
+            atoms=mobile_atoms, method=AlignmentMethod.PERIODIC_TRANSLATION
+        )
     # Fallback to standard rigid superimposition
     minimize_rotation_and_translation(ref_atoms, mobile_atoms)
     return AlignmentResult(atoms=mobile_atoms, method=AlignmentMethod.ASE_PROCRUSTES)
@@ -178,7 +203,13 @@ def _rmsd_single(ref_atom, atom_i, config, coords_ref):
     mobile_copy = atom_i.copy()
     align_structure_robust(ref_atom, mobile_copy, config)
     coords_aligned = mobile_copy.get_positions()
-    diff_sq = (coords_ref - coords_aligned) ** 2
+    delta = coords_ref - coords_aligned
+    if np.any(ref_atom.pbc) or np.any(atom_i.pbc):
+        from ase.geometry import find_mic
+
+        periodic = ref_atom if np.any(ref_atom.pbc) else atom_i
+        delta, _ = find_mic(delta, periodic.cell, periodic.pbc)
+    diff_sq = delta**2
     return float(np.sqrt(np.mean(np.sum(diff_sq, axis=1))))
 
 

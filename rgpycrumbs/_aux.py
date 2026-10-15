@@ -34,6 +34,7 @@ _DEPENDENCY_MAP: dict[str, str] = {
     "chemparseplot.plot.optimization": "chemparseplot[neb,plot]>=1.11.0,<2",
     "chemparseplot.parse": "chemparseplot[neb,plot]>=1.11.0,<2",
     "readcon": "readcon>=0.17.1",
+    "readcon_ops": "readcon-ops>=0.1.1",
     "h5py": "h5py",
     "matplotlib": "matplotlib>=3.7",
     "matplotlib.pyplot": "matplotlib>=3.7",
