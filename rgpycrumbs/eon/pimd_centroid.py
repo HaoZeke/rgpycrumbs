@@ -210,18 +210,19 @@ def _rms(a: np.ndarray) -> float:
 def _one_mass_per_symbol(rows):
     """Collapse to the first real mass of each symbol.
 
-    ``readcon`` fills a missing mass with ``0.0``. Mixing that with a real mass
-    for the same symbol is a mass mismatch. A reference that names no masses
-    stays all unset, so every atom of a symbol becomes ``0.0``.
+    ``readcon`` fills a missing mass with ``0.0``, so ``None`` and ``0.0`` are
+    both unset. The first other mass of a symbol is kept and a later different
+    mass is ignored. A symbol with no real mass stays unset, and a reference
+    that names none leaves every atom at ``0.0`` or ``None``.
     """
     chosen: dict[str, float] = {}
     for sym, mass, _fixed in rows:
-        if mass is None or sym in chosen:
+        if mass is None or mass == 0.0 or sym in chosen:
             continue
         chosen[sym] = float(mass)
     if not chosen:
         return rows
-    return [(sym, chosen.get(sym), fixed) for sym, mass, fixed in rows]
+    return [(sym, chosen.get(sym, mass), fixed) for sym, mass, fixed in rows]
 
 
 def _template(reference, symbols, cell, n_atoms):

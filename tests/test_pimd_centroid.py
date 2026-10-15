@@ -185,9 +185,52 @@ def test_one_mass_per_symbol_collapses_without_mixing_zero():
         ("H", 1.008, True),
     ]
     got = mod._one_mass_per_symbol(rows)
-    assert [row[1] for row in got] == [63.546, 1.008, 63.546, 1.008]
+    assert got == [
+        ("Cu", 63.546, False),
+        ("H", 1.008, False),
+        ("Cu", 63.546, False),
+        ("H", 1.008, True),
+    ]
+    # A readcon-filled 0.0 is unset, so the later real mass wins.
+    zero_then_real = [
+        ("H", 0.0, False),
+        ("O", 0.0, None),
+        ("H", 1.008, True),
+        ("O", 15.999, False),
+    ]
+    assert mod._one_mass_per_symbol(zero_then_real) == [
+        ("H", 1.008, False),
+        ("O", 15.999, None),
+        ("H", 1.008, True),
+        ("O", 15.999, False),
+    ]
+    # No real mass at all: leave every atom unset.
     missing = [("H", None, None), ("O", None, None), ("H", None, None)]
     assert mod._one_mass_per_symbol(missing) == missing
+    zeros = [("H", 0.0, False), ("O", 0.0, None), ("H", 0.0, True)]
+    assert mod._one_mass_per_symbol(zeros) == zeros
+    mixed_unset = [("H", 0.0, False), ("O", None, None), ("H", None, True)]
+    assert mod._one_mass_per_symbol(mixed_unset) == mixed_unset
+    # The first real mass sticks; a later different mass is ignored.
+    first_wins = [
+        ("H", 1.008, False),
+        ("H", 2.014, True),
+        ("Cu", 63.546, False),
+        ("Cu", 0.0, False),
+    ]
+    assert mod._one_mass_per_symbol(first_wins) == [
+        ("H", 1.008, False),
+        ("H", 1.008, True),
+        ("Cu", 63.546, False),
+        ("Cu", 63.546, False),
+    ]
+    # A symbol that never names a real mass stays unset beside one that does.
+    partial = [("H", 0.0, False), ("O", 15.999, False), ("H", None, True)]
+    assert mod._one_mass_per_symbol(partial) == [
+        ("H", 0.0, False),
+        ("O", 15.999, False),
+        ("H", None, True),
+    ]
 
 
 def test_cli_missing_file_is_a_click_error(tmp_path):
