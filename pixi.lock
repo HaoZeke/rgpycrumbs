@@ -240,6 +240,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wayland-protocols-1.49-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/werkzeug-3.1.7-pyhcf101f3_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+      - pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
@@ -268,7 +270,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/49/fa/391e437a34e55095173dca5f24070d89cbc233ff85bf1c29c93248c6588d/imageio-2.37.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4a/57/3b7d4dd193ade4641c865bc2b93aeeb71162e81fc348b8dad020215601ed/build-1.4.2-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/4c/87/0e14f30c1aa821d1bdcc83c8141ae8024e11788c041e809f432b2076052d/readcon-0.14.9-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4f/37/eea753bb94f3e48513092beee3d295dace2f60f26df8cfc6d9d5c2c38a28/graphrc-1.3.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/53/1c/8feedd607cc14c5df9aef74fe3af9a99bf660743b842a9b5b1865326b4aa/adjustText-1.3.0-py3-none-any.whl
@@ -290,7 +291,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/84/b4/d15567e78f1027a64d4469b19cabf86d9be642933169d38f0cbdaf3b4953/chemparseplot-1.11.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/50/f762be4ee8632d88aff4ba9e62e7c156a0684ef52db629c22bae24fda449/asv-0.6.5.tar.gz
       - pypi: https://files.pythonhosted.org/packages/88/f9/16491d7ed2a919954993e48aa941b200f38040928474c9e85ea9e64222c3/pyyaml-6.0.3-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
@@ -1185,6 +1185,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/yarl-1.23.0-pyh7db6752_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-3.23.0-pyhcf101f3_1.conda
       - pypi: ./
+      - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+      - pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
@@ -1202,7 +1204,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/44/0d/f494a2ec62ab56ffd44da4f236db374421fe0cd1e39d9ebc9785751eb432/periodictable-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/49/fa/391e437a34e55095173dca5f24070d89cbc233ff85bf1c29c93248c6588d/imageio-2.37.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/4c/87/0e14f30c1aa821d1bdcc83c8141ae8024e11788c041e809f432b2076052d/readcon-0.14.9-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4f/37/eea753bb94f3e48513092beee3d295dace2f60f26df8cfc6d9d5c2c38a28/graphrc-1.3.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/53/1c/8feedd607cc14c5df9aef74fe3af9a99bf660743b842a9b5b1865326b4aa/adjustText-1.3.0-py3-none-any.whl
@@ -1216,7 +1217,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/84/b4/d15567e78f1027a64d4469b19cabf86d9be642933169d38f0cbdaf3b4953/chemparseplot-1.11.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8a/0b/2261922126b2e50c601fe22d7ff5194e0a4d50e654836260c0665e24d862/cyclopts-4.10.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
@@ -1555,6 +1555,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/werkzeug-3.1.7-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wslink-2.5.6-pyhd8ed1ab_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+      - pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/10/8f/d3ddb16c5a4befdf31a23307f72828686ab2096f068eaf56631e136c1fdd/tomli-2.4.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
@@ -1583,7 +1585,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/78/39/f01cb130f528c89ade3005ab0ef542911ccf737a460d59ab44ff2e80d2d9/xyzrender-0.2.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/84/b4/d15567e78f1027a64d4469b19cabf86d9be642933169d38f0cbdaf3b4953/chemparseplot-1.11.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8e/37/efad0257dc6e593a18957422533ff0f87ede7c9c6ea010a2177d738fb82f/pure_eval-0.2.3-py3-none-any.whl
@@ -1611,7 +1612,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/c1/ea/53f2148663b321f21b5a606bd5f191517cf40b7072c0497d3c92c4a13b1e/executing-2.2.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cb/b1/3846dd7f199d53cb17f49cba7e651e9ce294d8497c8c150530ed11865bb8/iniconfig-2.3.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/ce/6c/1fa4e690a6090eb400aba8f0c08f09ed7cdc01b9d558b5f1124c6ba5558e/readcon-0.14.9-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d2/39/e7eaf1799466a4aef85b6a4fe7bd175ad2b1c6345066aa33f1f58d4b18d0/asttokens-3.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/d3/f2/9e4de77a6271e07a76d2d58b11c091a979c191ed2939bf80067568b369d2/pydantic_core-2.46.5-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d8/79/eb59d10e13b151a514a8af3b1dcefb5e998b6c8c26bf0cf82d2b98f02c23/plotnine-0.15.3-py3-none-any.whl
@@ -1854,6 +1854,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wayland-protocols-1.47-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/werkzeug-3.1.7-pyhcf101f3_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+      - pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
@@ -1878,7 +1880,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/44/0d/f494a2ec62ab56ffd44da4f236db374421fe0cd1e39d9ebc9785751eb432/periodictable-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/49/fa/391e437a34e55095173dca5f24070d89cbc233ff85bf1c29c93248c6588d/imageio-2.37.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/4c/87/0e14f30c1aa821d1bdcc83c8141ae8024e11788c041e809f432b2076052d/readcon-0.14.9-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4f/37/eea753bb94f3e48513092beee3d295dace2f60f26df8cfc6d9d5c2c38a28/graphrc-1.3.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/53/1c/8feedd607cc14c5df9aef74fe3af9a99bf660743b842a9b5b1865326b4aa/adjustText-1.3.0-py3-none-any.whl
@@ -1898,7 +1899,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/84/b4/d15567e78f1027a64d4469b19cabf86d9be642933169d38f0cbdaf3b4953/chemparseplot-1.11.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8a/0b/2261922126b2e50c601fe22d7ff5194e0a4d50e654836260c0665e24d862/cyclopts-4.10.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
@@ -2179,6 +2179,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wayland-protocols-1.49-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/werkzeug-3.1.7-pyhcf101f3_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+      - pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
@@ -2203,7 +2205,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/44/0d/f494a2ec62ab56ffd44da4f236db374421fe0cd1e39d9ebc9785751eb432/periodictable-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/49/fa/391e437a34e55095173dca5f24070d89cbc233ff85bf1c29c93248c6588d/imageio-2.37.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/4c/87/0e14f30c1aa821d1bdcc83c8141ae8024e11788c041e809f432b2076052d/readcon-0.14.9-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4f/37/eea753bb94f3e48513092beee3d295dace2f60f26df8cfc6d9d5c2c38a28/graphrc-1.3.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/53/1c/8feedd607cc14c5df9aef74fe3af9a99bf660743b842a9b5b1865326b4aa/adjustText-1.3.0-py3-none-any.whl
@@ -2223,7 +2224,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/84/b4/d15567e78f1027a64d4469b19cabf86d9be642933169d38f0cbdaf3b4953/chemparseplot-1.11.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8a/0b/2261922126b2e50c601fe22d7ff5194e0a4d50e654836260c0665e24d862/cyclopts-4.10.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
@@ -2504,6 +2504,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wayland-protocols-1.49-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/werkzeug-3.1.7-pyhcf101f3_0.conda
       - pypi: ./
+      - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+      - pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
       - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
@@ -2528,7 +2530,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/44/0d/f494a2ec62ab56ffd44da4f236db374421fe0cd1e39d9ebc9785751eb432/periodictable-2.1.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/47/d9/d83e293854571c877a92da46fdec39158f8d7e68da75bf73581225d28e90/cffi-2.0.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/49/fa/391e437a34e55095173dca5f24070d89cbc233ff85bf1c29c93248c6588d/imageio-2.37.3-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/4c/87/0e14f30c1aa821d1bdcc83c8141ae8024e11788c041e809f432b2076052d/readcon-0.14.9-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/4f/37/eea753bb94f3e48513092beee3d295dace2f60f26df8cfc6d9d5c2c38a28/graphrc-1.3.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/53/1c/8feedd607cc14c5df9aef74fe3af9a99bf660743b842a9b5b1865326b4aa/adjustText-1.3.0-py3-none-any.whl
@@ -2548,7 +2549,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/82/b9/e73d5d9f405cba7706c539aa8b311b49d4c2f3d698d9c12f815231169c71/ipykernel-7.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/03/0d3ce49e2505ae70cf43bc5bb3033955d2fc9f932163e84dc0779cc47f48/prompt_toolkit-3.0.52-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/84/52/a98dea948d9782b80e8e60804097fee7f7bd8fed92c9d4f0c657e4c3a6f8/pyvista-0.47.1-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/84/b4/d15567e78f1027a64d4469b19cabf86d9be642933169d38f0cbdaf3b4953/chemparseplot-1.11.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/88/39/fc3d4b9b6e23325c19e02668b91a9e938aaca3a35be754e2940b2e457718/xyzgraph-1.6.6-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8a/0b/2261922126b2e50c601fe22d7ff5194e0a4d50e654836260c0665e24d862/cyclopts-4.10.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/8b/bb/337b91e3657295753fd0a40f3446ff59d5a68a3131e6336122ae235c3979/pytest_pep723-0.1.0-py3-none-any.whl
@@ -13023,6 +13023,71 @@ packages:
   - pytest-pep723>=0.1.0 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
   requires_python: '>=3.10'
+- pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#0f1868dc562fc1ee948d12f0c3b449de119d7655
+  name: chemparseplot
+  version: 1.11.1.dev81+g0f1868dc5
+  requires_dist:
+  - numpy>=1.26.2
+  - pint>=0.22
+  - ase>=3.22 ; extra == 'all'
+  - cmcrameri>=1.7 ; extra == 'all'
+  - h5py>=3.0 ; extra == 'all'
+  - matplotlib>=3.8.2 ; extra == 'all'
+  - orca-pi>=0.1.0 ; extra == 'all'
+  - parsimonious>=0.10.0 ; extra == 'all'
+  - polars>=0.20 ; extra == 'all'
+  - pydseamslib>=2.9.1 ; python_full_version >= '3.12' and extra == 'all'
+  - readcon @ git+https://github.com/lode-org/readcon-core@main ; extra == 'all'
+  - xyzrender>=0.1.2 ; extra == 'all'
+  - xyzrender>=0.3.8 ; extra == 'all'
+  - mdit-py-plugins>=0.3.4 ; extra == 'doc'
+  - myst-nb>=1 ; extra == 'doc'
+  - myst-parser>=2 ; extra == 'doc'
+  - shibuya>=2025.12.13 ; extra == 'doc'
+  - sphinx-autodoc2>=0.5 ; extra == 'doc'
+  - sphinx-copybutton>=0.5.2 ; extra == 'doc'
+  - sphinx-design>=0.6 ; extra == 'doc'
+  - sphinx-sitemap>=2.5.1 ; extra == 'doc'
+  - sphinx-togglebutton>=0.3.2 ; extra == 'doc'
+  - sphinx>=7.2.6 ; extra == 'doc'
+  - sphinxcontrib-apidoc>=0.4 ; extra == 'doc'
+  - sphinxcontrib-mermaid>=1.0 ; extra == 'doc'
+  - parsimonious>=0.10.0 ; extra == 'grammar'
+  - ruff>=0.1.6 ; extra == 'lint'
+  - ase>=3.22 ; extra == 'neb'
+  - h5py>=3.0 ; extra == 'neb'
+  - polars>=0.20 ; extra == 'neb'
+  - readcon @ git+https://github.com/lode-org/readcon-core@main ; extra == 'neb'
+  - orca-pi>=0.1.0 ; extra == 'opi'
+  - cmcrameri>=1.7 ; extra == 'plot'
+  - matplotlib>=3.8.2 ; extra == 'plot'
+  - build>=0.10 ; extra == 'release'
+  - towncrier>=24.8.0 ; extra == 'release'
+  - twine>=4.0 ; extra == 'release'
+  - wheel>=0.40 ; extra == 'release'
+  - pydseamslib>=2.9.1 ; python_full_version >= '3.12' and extra == 'rings'
+  - xyzrender>=0.3.8 ; extra == 'rings'
+  - ase>=3.22 ; extra == 'test'
+  - h5py>=3.0 ; extra == 'test'
+  - jax[cpu]>=0.4 ; extra == 'test'
+  - matplotlib>=3.8.2 ; extra == 'test'
+  - parsimonious>=0.10.0 ; extra == 'test'
+  - polars>=0.20 ; extra == 'test'
+  - pydseamslib>=2.9.1 ; python_full_version >= '3.12' and extra == 'test'
+  - pytest-cov>=4.1.0 ; extra == 'test'
+  - pytest>=7.4.3 ; extra == 'test'
+  - readcon @ git+https://github.com/lode-org/readcon-core@main ; extra == 'test'
+  - rgpycrumbs ; extra == 'test'
+  - scipy>=1.11 ; extra == 'test'
+  - xyzrender>=0.3.8 ; extra == 'test'
+  - xyzrender>=0.1.2 ; extra == 'xyzrender'
+  requires_python: '>=3.11'
+- pypi: git+https://github.com/lode-org/readcon-core.git?branch=main#694e808080c49979ee3099afcfa18e5420c40433
+  name: readcon
+  version: 0.17.1
+  requires_dist:
+  - readcon-chemfiles==0.17.1 ; extra == 'chemfiles'
+  requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/00/c0/8f5d070730d7836adc9c9b6408dec68c6ced86b304a9b26a14df072a6e8c/traitlets-5.14.3-py3-none-any.whl
   name: traitlets
   version: 5.14.3
@@ -13597,13 +13662,6 @@ packages:
   - virtualenv>=20.17 ; python_full_version >= '3.10' and python_full_version < '3.14' and extra == 'virtualenv'
   - virtualenv>=20.31 ; python_full_version >= '3.14' and extra == 'virtualenv'
   requires_python: '>=3.9'
-- pypi: https://files.pythonhosted.org/packages/4c/87/0e14f30c1aa821d1bdcc83c8141ae8024e11788c041e809f432b2076052d/readcon-0.14.9-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  name: readcon
-  version: 0.14.9
-  sha256: 31f75c2e7582b9c11a6555bd22c3424eb6f078fd93371ee92f4739adc41323ab
-  requires_dist:
-  - readcon-chemfiles==0.14.9 ; extra == 'chemfiles'
-  requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
   name: decorator
   version: 5.2.1
@@ -14719,13 +14777,6 @@ packages:
   name: iniconfig
   version: 2.3.0
   sha256: f631c04d2c48c52b84d0d0549c99ff3859c98df65b3101406327ecc7d53fbf12
-  requires_python: '>=3.10'
-- pypi: https://files.pythonhosted.org/packages/ce/6c/1fa4e690a6090eb400aba8f0c08f09ed7cdc01b9d558b5f1124c6ba5558e/readcon-0.14.9-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-  name: readcon
-  version: 0.14.9
-  sha256: 7ddb9260fb7d753521e6a6a15b5b6f24919aa1331392487b70f7d02b610459da
-  requires_dist:
-  - readcon-chemfiles==0.14.9 ; extra == 'chemfiles'
   requires_python: '>=3.10'
 - pypi: https://files.pythonhosted.org/packages/ce/81/9a91c0111ce1758c92516a3e44776920b579d9a7c09b2b06b642d4de3f0f/rpds_py-0.30.0-cp314-cp314-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
   name: rpds-py

@@ -27,8 +27,15 @@ Quantities carry units through pint; the CSV states them in its header.
 #   "pint>=0.24",
 #   "rich",
 #   "ase",
+#   "chemparseplot>=1.11.0,<2",
 #   "readcon>=0.17.1",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations
@@ -43,7 +50,6 @@ from pathlib import Path
 import click
 import numpy as np
 import pint
-from readcon import read_con
 from rich.logging import RichHandler
 
 log = logging.getLogger("rich")
@@ -115,7 +121,9 @@ class Pair:
 
 
 def _atoms(con: Path):
-    return read_con(str(con))[0].to_ase()
+    from chemparseplot.parse.eon.con_io import read_first_atoms  # noqa: PLC0415
+
+    return read_first_atoms(con)
 
 
 def _displacement(a, b) -> np.ndarray:
@@ -162,7 +170,9 @@ def three_point_splitting(d1: float, d2: float, barrier: float, delta: float) ->
 
 def _band_values(neb_con: Path) -> dict[str, float] | None:
     """The tunnelling values eOn wrote on a band's first frame, if any."""
-    md = read_con(str(neb_con))[0].metadata
+    from chemparseplot.parse.eon.con_io import read_first_frame  # noqa: PLC0415
+
+    md = read_first_frame(neb_con).metadata
     return md if "tunnel_splitting" in md else None
 
 

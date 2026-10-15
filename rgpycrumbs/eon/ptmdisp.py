@@ -8,8 +8,16 @@
 #   "numpy",
 #   "ovito",
 #   "rich",
+#   "chemparseplot>=1.11.0,<2",
+#   "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.2",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 """Identifies non-crystalline atoms using polyhedral template matching.
 
@@ -32,6 +40,7 @@ warnings.filterwarnings(
 # Standard Library
 import logging
 import sys
+from pathlib import Path
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum
@@ -102,7 +111,13 @@ def find_mismatch_indices(
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
-        atoms = aseio.read(filename)
+        path = Path(filename)
+        if path.suffix.lower() in {".con", ".convel"}:
+            from chemparseplot.parse.eon.con_io import read_first_atoms
+
+            atoms = read_first_atoms(path)
+        else:
+            atoms = aseio.read(filename)
         # XXX(rg): con readers in ase somehow lose this information, seems like an ase bug
         atoms.set_pbc([True] * 3)
     except FileNotFoundError:

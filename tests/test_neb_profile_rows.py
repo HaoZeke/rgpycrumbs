@@ -11,7 +11,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-pytest.importorskip("readcon")
+pytest.importorskip("readcon", minversion="0.17.1")
+pytest.importorskip("chemparseplot")
 
 from rgpycrumbs.eon.helpers import load_profile_rows
 

@@ -28,7 +28,7 @@ def test_prepare_aoti_declares_the_export_stack():
     assert '# requires-python = ">=3.11"' in text
     assert "fairchem-core>=2.22" in text
     assert "vesin>=0.6" in text
-    assert "readcon>=0.14.5" in text
+    assert "readcon>=0.17.1" in text
 
 
 def test_core_dependencies_stay_light():

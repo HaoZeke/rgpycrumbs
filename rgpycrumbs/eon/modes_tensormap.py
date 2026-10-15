@@ -23,9 +23,16 @@ consumer:
 # dependencies = [
 #   "click",
 #   "numpy",
+#   "chemparseplot>=1.11.0,<2",
 #   "readcon>=0.17.1",
 #   "metatensor-core>=0.1",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations
@@ -44,9 +51,9 @@ QUANTITIES = ("mode_eigenvalue", "hbar_omega", "wavenumber")
 
 def read_modes(path: Path) -> tuple[np.ndarray, np.ndarray]:
     """Modes ``(n_atoms, 3, n_modes)`` and spectrum ``(n_modes, 3)``."""
-    from readcon import read_con  # noqa: PLC0415
+    from chemparseplot.parse.eon.con_io import read_con_frames  # noqa: PLC0415
 
-    frames = read_con(str(path))
+    frames = read_con_frames(path)
     if not frames:
         msg = f"{path} holds no frames"
         raise ValueError(msg)

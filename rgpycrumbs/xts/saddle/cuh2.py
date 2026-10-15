@@ -3,14 +3,12 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-import ase
-import ase.io
 import matplotlib.pyplot as plt
 import numpy as np
 from pypotlib.systems import cu_slab_h2 as cuh2slab
 from pyprotochemgp.systems.cuh2slab import prepare_scatter_points
 
-from rgpycrumbs._aux import get_gitroot, getstrform
+from rgpycrumbs._aux import get_gitroot
 from rgpycrumbs.xts.cuh2.datgen import get_from_gitroot_con
 
 
@@ -31,7 +29,9 @@ def _true_e_dat():
 
 @lru_cache(maxsize=1)
 def _cuh2_min():
-    return ase.io.read(getstrform(get_gitroot() / "cuh2.con"))
+    from chemparseplot.parse.eon.con_io import read_first_atoms  # noqa: PLC0415
+
+    return read_first_atoms(get_gitroot() / "cuh2.con")
 
 
 def plot_band(_index, _band, _k, _method="xts", _opt="SD", _ci="False"):

@@ -36,8 +36,15 @@ components in Angstrom.
 # dependencies = [
 #   "click",
 #   "numpy",
+#   "chemparseplot>=1.11.0,<2",
 #   "readcon>=0.17.1",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations
@@ -200,20 +207,41 @@ def _rms(a: np.ndarray) -> float:
     return float(np.sqrt((a**2).mean()))
 
 
+def _one_mass_per_symbol(rows):
+    """Collapse to the first real mass of each symbol.
+
+    ``readcon`` fills a missing mass with ``0.0``, so ``None`` and ``0.0`` are
+    both unset. The first other mass of a symbol is kept and a later different
+    mass is ignored. A symbol with no real mass stays unset, and a reference
+    that names none leaves every atom at ``0.0`` or ``None``.
+    """
+    chosen: dict[str, float] = {}
+    for sym, mass, _fixed in rows:
+        if mass is None or mass == 0.0 or sym in chosen:
+            continue
+        chosen[sym] = float(mass)
+    if not chosen:
+        return rows
+    return [(sym, chosen.get(sym, mass), fixed) for sym, mass, fixed in rows]
+
+
 def _template(reference, symbols, cell, n_atoms):
     """Per-atom identity and physical cell metadata in the output units."""
     if reference is not None:
-        from readcon import read_first_frame  # noqa: PLC0415
+        from chemparseplot.parse.eon.con_io import read_first_frame  # noqa: PLC0415
 
-        ref = read_first_frame(str(reference))
+        ref = read_first_frame(reference)
         if len(ref.atoms) != n_atoms:
             msg = f"{reference} has {len(ref.atoms)} atoms, trajectory has {n_atoms}"
             raise ValueError(msg)
         physical = ref.to_ase()
         masses = physical.get_masses()
+        collapsed = _one_mass_per_symbol(
+            [(a.symbol, float(masses[i]), a.fixed) for i, a in enumerate(ref.atoms)]
+        )
         atoms = [
-            (a.symbol, float(masses[i]), a.fixed, a.atom_id)
-            for i, a in enumerate(ref.atoms)
+            (sym, mass, fixed, ref.atoms[i].atom_id)
+            for i, (sym, mass, fixed) in enumerate(collapsed)
         ]
         cellpar = physical.cell.cellpar()
         metadata = {
@@ -233,8 +261,9 @@ def _template(reference, symbols, cell, n_atoms):
     if cell is None:
         msg = "no cell: give --reference or --cell"
         raise ValueError(msg)
+    rows = _one_mass_per_symbol([(s, None, None) for s in symbols])
     return (
-        [(s, None, None, i) for i, s in enumerate(symbols)],
+        [(sym, mass, fixed, i) for i, (sym, mass, fixed) in enumerate(rows)],
         list(cell),
         [90.0, 90.0, 90.0],
         {},
@@ -351,9 +380,9 @@ def main(trajectories, replicas, every, reference, symbols_file, cell, average, 
         raise click.ClickException(str(exc)) from exc
     except ValueError as exc:
         raise click.UsageError(str(exc)) from exc
-    import readcon  # noqa: PLC0415
+    from chemparseplot.parse.eon.con_io import write_con_frames  # noqa: PLC0415
 
-    readcon.write_con(str(out), frames)
+    write_con_frames(out, frames)
     log.info(
         "%d frame(s) of %d atoms from %d replicas to %s; largest spread %.4f A",
         len(frames),

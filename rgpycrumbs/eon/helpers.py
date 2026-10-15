@@ -95,10 +95,10 @@ def load_profile_rows(path: Path, mass_weighted: bool = False):
                 "%s has no mass-weighted coordinate; using the path one", path.name
             )
         return np.loadtxt(path, skiprows=1).T
-    from readcon import iter_con
+    from chemparseplot.parse.eon.con_io import read_con_frames
 
     rows = []
-    for i, frame in enumerate(iter_con(str(path))):
+    for i, frame in enumerate(read_con_frames(path)):
         md = frame.metadata
         missing = [k for k in _PROFILE_KEYS if k not in md]
         if missing:

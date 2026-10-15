@@ -33,6 +33,12 @@ Example::
 #   "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.4",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 import logging

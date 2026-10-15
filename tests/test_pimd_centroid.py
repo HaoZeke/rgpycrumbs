@@ -177,6 +177,62 @@ def test_cli_maps_a_mismatch_to_a_usage_error(tmp_path):
     assert "Traceback" not in result.output
 
 
+def test_one_mass_per_symbol_collapses_without_mixing_zero():
+    rows = [
+        ("Cu", 63.546, False),
+        ("H", None, False),
+        ("Cu", None, False),
+        ("H", 1.008, True),
+    ]
+    got = mod._one_mass_per_symbol(rows)
+    assert got == [
+        ("Cu", 63.546, False),
+        ("H", 1.008, False),
+        ("Cu", 63.546, False),
+        ("H", 1.008, True),
+    ]
+    # A readcon-filled 0.0 is unset, so the later real mass wins.
+    zero_then_real = [
+        ("H", 0.0, False),
+        ("O", 0.0, None),
+        ("H", 1.008, True),
+        ("O", 15.999, False),
+    ]
+    assert mod._one_mass_per_symbol(zero_then_real) == [
+        ("H", 1.008, False),
+        ("O", 15.999, None),
+        ("H", 1.008, True),
+        ("O", 15.999, False),
+    ]
+    # No real mass at all: leave every atom unset.
+    missing = [("H", None, None), ("O", None, None), ("H", None, None)]
+    assert mod._one_mass_per_symbol(missing) == missing
+    zeros = [("H", 0.0, False), ("O", 0.0, None), ("H", 0.0, True)]
+    assert mod._one_mass_per_symbol(zeros) == zeros
+    mixed_unset = [("H", 0.0, False), ("O", None, None), ("H", None, True)]
+    assert mod._one_mass_per_symbol(mixed_unset) == mixed_unset
+    # The first real mass sticks; a later different mass is ignored.
+    first_wins = [
+        ("H", 1.008, False),
+        ("H", 2.014, True),
+        ("Cu", 63.546, False),
+        ("Cu", 0.0, False),
+    ]
+    assert mod._one_mass_per_symbol(first_wins) == [
+        ("H", 1.008, False),
+        ("H", 1.008, True),
+        ("Cu", 63.546, False),
+        ("Cu", 63.546, False),
+    ]
+    # A symbol that never names a real mass stays unset beside one that does.
+    partial = [("H", 0.0, False), ("O", 15.999, False), ("H", None, True)]
+    assert mod._one_mass_per_symbol(partial) == [
+        ("H", 0.0, False),
+        ("O", 15.999, False),
+        ("H", None, True),
+    ]
+
+
 def test_cli_missing_file_is_a_click_error(tmp_path):
     result = CliRunner().invoke(mod.main, [str(tmp_path / "nope")])
     assert result.exit_code == 1
@@ -184,7 +240,8 @@ def test_cli_missing_file_is_a_click_error(tmp_path):
 
 
 def _readcon():
-    return pytest.importorskip("readcon", minversion="0.16.0")
+    pytest.importorskip("chemparseplot")
+    return pytest.importorskip("readcon", minversion="0.17.1")
 
 
 def test_con_carries_centroid_and_spread(tmp_path):
@@ -226,6 +283,12 @@ def test_con_carries_centroid_and_spread(tmp_path):
     assert frames[0].atoms[0].is_fixed
     assert frames[0].metadata["replicas"] == 4
     assert frames[1].metadata["frame_index"] == 2
+    assert frames[0].has_spreads
+    from chemparseplot.parse.eon.con_io import write_con_frames
+
+    second = tmp_path / "centroid_again.con"
+    write_con_frames(second, frames)
+    assert second.read_bytes() == out.read_bytes()
 
 
 def test_con_time_average_metadata(tmp_path):

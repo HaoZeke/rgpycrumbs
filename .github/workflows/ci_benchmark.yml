@@ -37,6 +37,8 @@ jobs:
           cp /tmp/_bench_preserve/pixi.toml pixi.toml
           cp /tmp/_bench_preserve/pixi.lock pixi.lock 2>/dev/null || true
 
+      # TODO: remove once readcon 0.17.1 is on PyPI and the git source is dropped.
+      - uses: dtolnay/rust-toolchain@stable
       - uses: prefix-dev/setup-pixi@v0.8.10
         with:
           environments: bench

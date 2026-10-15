@@ -12,8 +12,16 @@
 #     "rich",
 #     "ase",
 #     "mlflow",
+#     "chemparseplot>=1.11.0,<2",
+#     "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.2",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 import io
@@ -195,7 +203,14 @@ def main(log_file, config_file, traj_file, experiment, track_overrides):
         # 3. Handle trajectory visualization
         if traj_file:
             try:
-                atoms = ase.io.read(traj_file, index=":")
+                if Path(traj_file).suffix.lower() in {".con", ".convel"}:
+                    from chemparseplot.parse.eon.con_io import (  # noqa: PLC0415
+                        read_con_as_ase,
+                    )
+
+                    atoms = read_con_as_ase(traj_file)
+                else:
+                    atoms = ase.io.read(traj_file, index=":")
                 fig_struct = plot_structure_evolution(atoms)
                 if fig_struct:
                     mlflow.log_figure(fig_struct, "plots/structure_evolution.png")

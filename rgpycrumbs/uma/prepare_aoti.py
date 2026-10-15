@@ -29,10 +29,17 @@ inspects and clears the cache.
 #   "click>=8.1",
 #   "numpy>=1.26",
 #   "ase>=3.26",
-#   "readcon>=0.14.5",
+#   "chemparseplot>=1.11.0,<2",
+#   "readcon>=0.17.1",
 #   "fairchem-core>=2.22",
 #   "vesin>=0.6",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations

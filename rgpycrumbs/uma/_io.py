@@ -21,11 +21,11 @@ def load_atoms(path: Path):
     """
     path = Path(path)
     if path.suffix.lower() in _CON_SUFFIXES:
-        readcon = ensure_import("readcon")
-        frames = list(readcon.read_con(str(path)))
-        if not frames:
-            raise ValueError(f"{path} contains no CON frames")
-        return frames[0].to_ase()
+        ensure_import("readcon")
+        ensure_import("chemparseplot")
+        from chemparseplot.parse.eon.con_io import read_first_atoms  # noqa: PLC0415
+
+        return read_first_atoms(path)
     ase_io = ensure_import("ase.io")
     return ase_io.read(path)
 

@@ -26,8 +26,16 @@ uv run python detect_fragments.py batch ./your_folder/ --method geometric --min-
 #     "pyvista~=0.43",
 #     "matplotlib~=3.9",
 #     "cmcrameri~=1.8",
+#     "chemparseplot>=1.11.0,<2",
+#     "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.2",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 import csv
@@ -85,6 +93,16 @@ def print_results(
     console.print(table)
 
 
+def _read_structure(filename):
+    """``.con`` / ``.convel`` through readcon. Every other suffix stays on ASE."""
+    path = Path(filename)
+    if path.suffix.lower() in {".con", ".convel"}:
+        from chemparseplot.parse.eon.con_io import read_first_atoms  # noqa: PLC0415
+
+        return read_first_atoms(path)
+    return read(filename)
+
+
 @click.group()
 def main():
     """Fragment detection suite for physical chemistry simulations."""
@@ -104,7 +122,7 @@ def main():
 @click.option("--visualize", is_flag=True)
 def geometric(filename, multiplier, radius_type, min_dist, visualize):
     """Executes geometric fragment detection."""
-    atoms = read(filename)
+    atoms = _read_structure(filename)
 
     # Pass the new radius_type argument
     n, labels = find_fragments_geometric(atoms, multiplier, radius_type=radius_type)
@@ -139,7 +157,7 @@ def geometric(filename, multiplier, radius_type, min_dist, visualize):
 @click.option("--visualize", is_flag=True)
 def bond_order(filename, method, threshold, charge, multiplicity, min_dist, visualize):
     """Execute fragment detection using quantum mechanical bond orders."""
-    atoms = read(filename)
+    atoms = _read_structure(filename)
     n, labels, _, matrix = find_fragments_bond_order(
         atoms, threshold, charge, multiplicity, method=method
     )
@@ -174,7 +192,7 @@ def batch(directory, method, pattern, output, min_dist):
     results = []
 
     for f in files:
-        atoms = read(f)
+        atoms = _read_structure(f)
         if method == "geometric":
             n, labels = find_fragments_geometric(atoms, DEFAULT_BOND_MULTIPLIER)
         else:

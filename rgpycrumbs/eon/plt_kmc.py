@@ -28,6 +28,12 @@ robust to partial aKMC directories (missing states are skipped).
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "rgpycrumbs>=1.10.4",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations
@@ -234,7 +240,7 @@ def collect_kmc_n2_timeline(
 
     .. versionadded:: 1.8.0
     """
-    from readcon import read_con
+    from chemparseplot.parse.eon.con_io import read_first_atoms
 
     akmc_dir = Path(akmc_dir)
     steps = parse_dynamics(akmc_dir / "dynamics.txt")
@@ -253,10 +259,8 @@ def collect_kmc_n2_timeline(
             con = akmc_dir / "states" / str(state_id) / "reactant.con"
             if con.is_file():
                 try:
-                    frame = read_con(str(con))[0]
-                    last_count = count_ejected_n2(
-                        frame.to_ase(), core_threshold, nn_cutoff
-                    )
+                    atoms = read_first_atoms(con)
+                    last_count = count_ejected_n2(atoms, core_threshold, nn_cutoff)
                 except Exception as exc:
                     log.warning("state %s: could not read %s (%s)", state_id, con, exc)
                 else:
