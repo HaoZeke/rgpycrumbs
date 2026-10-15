@@ -36,7 +36,7 @@ components in Angstrom.
 # dependencies = [
 #   "click",
 #   "numpy",
-#   "readcon>=0.16.0",
+#   "readcon>=0.17.1",
 # ]
 # ///
 
