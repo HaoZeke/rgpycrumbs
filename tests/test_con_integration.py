@@ -2,7 +2,10 @@
 
 import numpy as np
 import pytest
-import readcon
+
+readcon = pytest.importorskip("readcon", minversion="0.17.1")
+pytest.importorskip("ase")
+
 from ase import Atoms, units
 
 from rgpycrumbs.eon.pimd_centroid import build_frames
