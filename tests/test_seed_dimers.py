@@ -11,8 +11,8 @@ import pytest
 from tests._optional_imports import has_module_spec
 
 pytestmark = pytest.mark.skipif(
-    not all(has_module_spec(m) for m in ("readcon", "ase", "scipy")),
-    reason="seed_dimers needs readcon + ase + scipy",
+    not all(has_module_spec(m) for m in ("readcon", "ase", "scipy", "chemparseplot")),
+    reason="seed_dimers needs readcon + ase + scipy + chemparseplot",
 )
 
 _TEST_NEB = Path(__file__).resolve().parent / "data" / "neb_test" / "neb.con"
@@ -84,6 +84,21 @@ def test_two_maxima_create_two_seed_dirs(tmp_path):
     # energy_vs_reactant uses image 0 as the reference.
     assert summary[0].energy_vs_reactant == pytest.approx(1.0)
     assert summary[0].mode_source == "neb_tangent"
+
+    from chemparseplot.parse.eon.con_io import read_con_frames, write_con_frames
+
+    from rgpycrumbs.eon.seed_dimers import _DISPLACE_MAGNITUDE, _neb_tangent
+
+    band = read_con_frames(neb_con)
+    peak = band[summary[0].image_index]
+    expected_pos = tmp_path / "expected_pos.con"
+    write_con_frames(expected_pos, [peak])
+    assert (seed_dirs[0] / "pos.con").read_bytes() == expected_pos.read_bytes()
+    disp = read_con_frames(seed_dirs[0] / "displacement.con")[0]
+    assert disp.has_forces is False
+    mode = _neb_tangent(band, summary[0].image_index)
+    expected_xyz = np.asarray(peak.xyz, dtype=np.float64) + _DISPLACE_MAGNITUDE * mode
+    assert np.array_equal(np.asarray(disp.xyz, dtype=np.float64), expected_xyz)
 
 
 def test_prefers_matching_eon_peak_mode(tmp_path):

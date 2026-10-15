@@ -5,8 +5,16 @@
 #   "click",
 #   "ase>=3.22",
 #   "numpy",
+#   "chemparseplot>=1.11.0,<2",
+#   "readcon>=0.17.1",
 #   "rgpycrumbs",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 """Match atoms in structure file to target coordinates.
 
@@ -110,7 +118,13 @@ def match_atoms(
         List of match results with atom info and distances
     """
     try:
-        atoms = read(structure_file)
+        path = Path(structure_file)
+        if path.suffix.lower() in {".con", ".convel"}:
+            from chemparseplot.parse.eon.con_io import read_first_atoms
+
+            atoms = read_first_atoms(path)
+        else:
+            atoms = read(structure_file)
         log.info("Successfully read %d atoms from %s.", len(atoms), structure_file)
     except FileNotFoundError:
         log.error("Error: File not found at %s", structure_file)

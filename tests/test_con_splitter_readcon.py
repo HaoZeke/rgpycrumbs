@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import ast
-import re
 from pathlib import Path
 
 import pytest
@@ -14,18 +13,19 @@ from click.testing import CliRunner
 
 pytest.importorskip("ase")
 readcon = pytest.importorskip("readcon")
+pytest.importorskip("chemparseplot")
 
 from ase import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 
 from rgpycrumbs.eon import con_splitter as mod
 from rgpycrumbs.eon.con_splitter import (
-    _apply_frame_energy,
     _energy_from_atoms,
     _is_con_path,
     _read_trajectory_frames,
-    _write_con_atoms,
-    _write_con_frame,
+    _with_energy,
+    _write_fresh_geometry,
+    _write_output_frame,
     con_splitter,
 )
 
@@ -81,88 +81,46 @@ def test_energy_from_atoms_info_calc_and_invalid():
     assert _energy_from_atoms(_h_atoms()) is None
 
 
-def test_apply_frame_energy_none_and_setters(tmp_path: Path):
+def test_with_energy_skips_unchanged_frame(tmp_path: Path):
     _write_band(tmp_path / "one.con", [(1.0, 0.0)])
     frame = readcon.read_con(str(tmp_path / "one.con"))[0]
-    assert _apply_frame_energy(frame, None) is frame
-    updated = _apply_frame_energy(frame, -4.0)
+    assert _with_energy(frame, None) is frame
+    assert _with_energy(frame, 1.0) is frame
+    updated = _with_energy(frame, -4.0)
+    assert updated is not frame
     assert updated.energy == pytest.approx(-4.0)
+    assert frame.energy == pytest.approx(1.0)
 
 
-def test_apply_frame_energy_scalar_and_string_fallbacks(tmp_path: Path):
-    _write_band(tmp_path / "one.con", [(0.5, 0.0)])
-    inner = readcon.read_con(str(tmp_path / "one.con"))[0]
-
-    class _ScalarOnly:
-        def __init__(self, src):
-            self.cell = src.cell
-            self.angles = src.angles
-            self.atoms = src.atoms
-            self.prebox_header = src.prebox_header
-            self.postbox_header = src.postbox_header
-            self.metadata = src.metadata
-            self._energy = src.energy
-
-        def set_scalar_metadata(self, key, value):
-            assert key == "energy"
-            self._energy = float(value)
-
-        @property
-        def energy(self):
-            return self._energy
-
-    scalar_frame = _ScalarOnly(inner)
-    out = _apply_frame_energy(scalar_frame, 8.0)
-    assert out.energy == pytest.approx(8.0)
-
-    class _Legacy:
-        def __init__(self, src):
-            self.cell = src.cell
-            self.angles = src.angles
-            self.atoms = src.atoms
-            self.prebox_header = src.prebox_header
-            self.postbox_header = src.postbox_header
-            self.metadata = {str(k): v for k, v in src.metadata.items()}
-
-        @property
-        def energy(self):
-            raw = self.metadata.get("energy")
-            return float(raw) if raw is not None else None
-
-    legacy = _Legacy(inner)
-    reconstructed = _apply_frame_energy(legacy, 3.25)
-    assert reconstructed.energy == pytest.approx(3.25)
-    dest = tmp_path / "legacy.con"
-    readcon.write_con(str(dest), [reconstructed])
-    assert readcon.read_con(str(dest))[0].energy == pytest.approx(3.25)
-
-
-def test_write_con_atoms_roundtrip_energy(tmp_path: Path):
+def test_write_fresh_geometry_sets_energy(tmp_path: Path):
     atoms = _h_atoms(z=0.25)
     dest = tmp_path / "one.con"
-    _write_con_atoms(dest, atoms, energy=-7.5)
+    _write_fresh_geometry(dest, atoms, -7.5)
     frame = readcon.read_con(str(dest))[0]
     assert frame.energy == pytest.approx(-7.5)
     assert frame.to_ase().get_positions()[0, 2] == pytest.approx(0.25)
+    assert frame.has_forces is False
 
 
-def test_write_con_atoms_uses_atoms_info_energy(tmp_path: Path):
+def test_write_fresh_geometry_uses_atoms_info_energy(tmp_path: Path):
     atoms = _h_atoms(z=0.5, energy=1.125)
     dest = tmp_path / "info.con"
-    _write_con_atoms(dest, atoms)
+    _write_output_frame(dest, atoms, None, None, preserve_source=False)
     assert readcon.read_con(str(dest))[0].energy == pytest.approx(1.125)
 
 
-def test_write_con_frame_with_and_without_geometry_update(tmp_path: Path):
+def test_write_output_frame_translation_keeps_sections(tmp_path: Path):
     _write_band(tmp_path / "src.con", [(2.0, 0.0)])
     frame = readcon.read_con(str(tmp_path / "src.con"))[0]
     plain = tmp_path / "plain.con"
-    _write_con_frame(plain, frame)
+    atoms = frame.to_ase()
+    _write_output_frame(plain, atoms, frame, None, preserve_source=True)
     assert readcon.read_con(str(plain))[0].energy == pytest.approx(2.0)
 
-    moved = _h_atoms(z=1.25)
+    moved = atoms.copy()
+    moved.translate([0.0, 0.0, 1.25])
     updated = tmp_path / "moved.con"
-    _write_con_frame(updated, frame, atoms=moved, energy=None)
+    _write_output_frame(updated, moved, frame, None, preserve_source=False)
     back = readcon.read_con(str(updated))[0]
     assert back.energy == pytest.approx(2.0)
     assert back.to_ase().get_positions()[0, 2] == pytest.approx(1.25)
@@ -329,11 +287,7 @@ def test_con_splitter_source_has_no_asewrite():
         if isinstance(node, ast.ImportFrom) and node.module == "ase.io":
             assert all(alias.name != "write" for alias in node.names)
     text = src.read_text()
-    # The script's PEP 723 header pins a readcon floor of at least 0.7, the
-    # first readcon that writes CON without ase (0.14.5 today).
-    floors = re.findall(r'"readcon>=(\d+)\.(\d+)', text)
-    assert floors, "con_splitter declares no readcon floor"
-    assert all((int(a), int(b)) >= (0, 7) for a, b in floors), floors
+    assert "readcon>=0.17.1" in text
     assert "asewrite" not in text
 
 

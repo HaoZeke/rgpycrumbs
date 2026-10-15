@@ -8,7 +8,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-readcon = pytest.importorskip("readcon", minversion="0.15.0")
+readcon = pytest.importorskip("readcon", minversion="0.17.1")
+pytest.importorskip("chemparseplot")
 metatensor = pytest.importorskip("metatensor")
 
 from click.testing import CliRunner
@@ -66,6 +67,12 @@ def test_modes_and_spectrum_round_trip(tmp_path):
     eigenvalues, modes = _two_atom_modes()
     _write_modes(tmp_path / "modes.con", eigenvalues, modes)
     got_modes, spectrum = mod.read_modes(tmp_path / "modes.con")
+    from chemparseplot.parse.eon.con_io import read_con_frames
+
+    for index, frame in enumerate(read_con_frames(tmp_path / "modes.con")):
+        disp = np.asarray(frame.disp, dtype=np.float64)
+        assert np.array_equal(got_modes[:, :, index], disp)
+        assert got_modes[:, :, index].tobytes() == disp.tobytes()
     np.testing.assert_allclose(got_modes, modes, atol=1e-6)
     np.testing.assert_allclose(spectrum[:, 0], eigenvalues)
     assert spectrum[0, 1] < 0 and spectrum[0, 2] < 0

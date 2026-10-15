@@ -60,10 +60,20 @@ def _import_attr(module_name: str, attr_name: str, reason: str):
 
 
 def _write_con_file(path, atoms_list):
-    """Write a list of ASE Atoms as a multi-frame eOn .con file."""
-    from ase.io import write
+    """Write ASE Atoms as CON with precision omitted and canonical left off."""
+    from chemparseplot.parse.eon.con_io import write_atoms_as_con
 
-    write(str(path), atoms_list, format="eon")
+    frames = atoms_list if isinstance(atoms_list, list | tuple) else [atoms_list]
+    prepared = []
+    for atoms in frames:
+        clone = atoms.copy()
+        clone.calc = None
+        cell = clone.cell
+        if cell.rank < 3 or cell.volume == 0:
+            clone.set_cell([20.0, 20.0, 20.0])
+            clone.set_pbc(True)
+        prepared.append(clone)
+    write_atoms_as_con(path, prepared)
 
 
 def _make_h2o_images(n_images=5, displacement_scale=0.05):

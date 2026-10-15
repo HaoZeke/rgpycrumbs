@@ -36,8 +36,15 @@ components in Angstrom.
 # dependencies = [
 #   "click",
 #   "numpy",
-#   "readcon>=0.16.0",
+#   "chemparseplot>=1.11.0,<2",
+#   "readcon>=0.17.1",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations
@@ -200,21 +207,34 @@ def _rms(a: np.ndarray) -> float:
     return float(np.sqrt((a**2).mean()))
 
 
+def _one_mass_per_symbol(rows):
+    """Collapse to the first real mass of each symbol.
+
+    ``readcon`` fills a missing mass with ``0.0``. Mixing that with a real mass
+    for the same symbol is a mass mismatch. A reference that names no masses
+    stays all unset, so every atom of a symbol becomes ``0.0``.
+    """
+    chosen: dict[str, float] = {}
+    for sym, mass, _fixed in rows:
+        if mass is None or sym in chosen:
+            continue
+        chosen[sym] = float(mass)
+    if not chosen:
+        return rows
+    return [(sym, chosen.get(sym), fixed) for sym, mass, fixed in rows]
+
+
 def _template(reference, symbols, cell, n_atoms):
     """Per-atom symbol, mass, fixed flags plus cell and angles."""
     if reference is not None:
-        from readcon import read_con  # noqa: PLC0415
+        from chemparseplot.parse.eon.con_io import read_first_frame  # noqa: PLC0415
 
-        frames = read_con(str(reference))
-        if not frames:
-            msg = f"{reference} holds no frames"
-            raise ValueError(msg)
-        ref = frames[0]
+        ref = read_first_frame(reference)
         if len(ref.atoms) != n_atoms:
             msg = f"{reference} has {len(ref.atoms)} atoms, trajectory has {n_atoms}"
             raise ValueError(msg)
         atoms = [(a.symbol, a.mass, a.fixed) for a in ref.atoms]
-        return atoms, list(ref.cell), list(ref.angles)
+        return _one_mass_per_symbol(atoms), list(ref.cell), list(ref.angles)
     if symbols is None:
         msg = "no species: give --reference, --symbols or an xyz trajectory"
         raise ValueError(msg)
@@ -224,7 +244,8 @@ def _template(reference, symbols, cell, n_atoms):
     if cell is None:
         msg = "no cell: give --reference or --cell"
         raise ValueError(msg)
-    return [(s, None, None) for s in symbols], list(cell), [90.0, 90.0, 90.0]
+    rows = [(s, None, None) for s in symbols]
+    return _one_mass_per_symbol(rows), list(cell), [90.0, 90.0, 90.0]
 
 
 def build_frames(
@@ -331,9 +352,9 @@ def main(trajectories, replicas, every, reference, symbols_file, cell, average, 
         raise click.ClickException(str(exc)) from exc
     except ValueError as exc:
         raise click.UsageError(str(exc)) from exc
-    import readcon  # noqa: PLC0415
+    from chemparseplot.parse.eon.con_io import write_con_frames  # noqa: PLC0415
 
-    readcon.write_con(str(out), frames)
+    write_con_frames(out, frames)
     log.info(
         "%d frame(s) of %d atoms from %d replicas to %s; largest spread %.4f A",
         len(frames),

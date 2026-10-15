@@ -97,7 +97,9 @@ tblite-python  = ">=0.5.0,<0.6"
 
 [feature.test.pypi-dependencies]
 adjusttext    = ">=1.3"
-chemparseplot = ">=1.11.0"
+# TODO: drop this git source once a chemparseplot release ships
+# frame_with_positions, read_first_frame, and the con overview plotters.
+chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot.git", branch = "main" }
 click         = ">=8.3.1, <9"
 eon-schema    = ">=0.2"
 cmcrameri     = ">=1.7"
@@ -118,7 +120,9 @@ xyzrender     = ">=0.1.3"
 rgpycrumbs    = { path = ".", editable = true }
 rich          = ">=13.0"
 scipy         = ">=1.11"
-readcon       = ">=0.14.5"
+# TODO: readcon 0.17.1 is not on PyPI yet. Install it from readcon-core main
+# until that wheel is published, then drop the git source.
+readcon = { git = "https://github.com/lode-org/readcon-core.git", branch = "main" }
 
 [feature.test.dependencies]
 ase  = ">=3.23,<4"

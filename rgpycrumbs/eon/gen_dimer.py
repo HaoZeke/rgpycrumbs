@@ -17,9 +17,16 @@ config.ini). See :mod:`rgpycrumbs.eon.seed_dimers` for the library API.
 #   "scipy",
 #   "rich",
 #   "ase",
-#   "readcon>=0.14.5",
+#   "chemparseplot>=1.11.0,<2",
+#   "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.2",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 import logging

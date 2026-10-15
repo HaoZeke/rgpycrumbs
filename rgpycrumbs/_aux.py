@@ -33,7 +33,7 @@ _DEPENDENCY_MAP: dict[str, str] = {
     "chemparseplot.plot.neb": "chemparseplot[neb,plot]>=1.11.0,<2",
     "chemparseplot.plot.optimization": "chemparseplot[neb,plot]>=1.11.0,<2",
     "chemparseplot.parse": "chemparseplot[neb,plot]>=1.11.0,<2",
-    "readcon": "readcon>=0.14.5",
+    "readcon": "readcon>=0.17.1",
     "h5py": "h5py",
     "matplotlib": "matplotlib>=3.7",
     "matplotlib.pyplot": "matplotlib>=3.7",
@@ -186,11 +186,31 @@ def _resolve_pip_spec(module_name: str) -> str:
     return apply_pin_to_spec(spec, pins_from_env())
 
 
+# TODO: drop once readcon 0.17.1 is on PyPI and a chemparseplot release ships
+# frame_with_positions, read_first_frame, and the con overview plotters.
+# The map keeps the version floor. The installer follows git so auto-deps does
+# not resolve the older PyPI wheels.
+_UNPUBLISHED_GIT = {
+    "readcon": "readcon @ git+https://github.com/lode-org/readcon-core.git@main",
+    "chemparseplot": (
+        "chemparseplot[neb,plot] @ git+https://github.com/HaoZeke/chemparseplot.git@main"
+    ),
+}
+
+
+def _install_spec(package_spec: str) -> str:
+    """Return the pip spec actually passed to uv, including unpublished git pins."""
+    name = package_spec.split("[", 1)[0].split(">", 1)[0]
+    name = name.split("=", 1)[0].split("<", 1)[0].split("@", 1)[0].strip()
+    return _UNPUBLISHED_GIT.get(name, package_spec)
+
+
 def _uv_install(package_spec: str, target: Path) -> None:
     """Install *package_spec* into *target* using uv (falling back to pip).
 
     Raises ``RuntimeError`` if both installers fail.
     """
+    package_spec = _install_spec(package_spec)
     target.mkdir(parents=True, exist_ok=True)
     for installer in ("uv", "pip"):
         exe = shutil.which(installer)

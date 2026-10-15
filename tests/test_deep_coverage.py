@@ -21,7 +21,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from ase.build import molecule
-from ase.io import write as ase_write
+from ase.io import write as _ase_write_real
 from click.testing import CliRunner
 
 from tests._optional_imports import has_module_spec, optional_import_available
@@ -87,6 +87,30 @@ def _write_neb_dat(path, n_images=5, step=0):
             f"{i}\t{rc:.6f}\t{energy:.6f}\t{f_para:.6f}\t{eigenval:.6f}\t{f_perp:.6f}"
         )
     path.write_text("\n".join(lines) + "\n")
+
+
+def ase_write(path, images, **kwargs):
+    """``.con`` fixtures go through readcon. Other formats stay on ASE."""
+    file_format = kwargs.pop("format", None)
+    if file_format == "eon":
+        from chemparseplot.parse.eon.con_io import write_atoms_as_con
+
+        frames = images if isinstance(images, list | tuple) else [images]
+        prepared = []
+        for atoms in frames:
+            clone = atoms.copy()
+            clone.calc = None
+            cell = clone.cell
+            if cell.rank < 3 or cell.volume == 0:
+                clone.set_cell([20.0, 20.0, 20.0])
+                clone.set_pbc(True)
+            prepared.append(clone)
+        write_atoms_as_con(path, prepared)
+        return
+    if file_format is None:
+        _ase_write_real(path, images, **kwargs)
+    else:
+        _ase_write_real(path, images, format=file_format, **kwargs)
 
 
 def _write_neb_con(path, n_images=5):
