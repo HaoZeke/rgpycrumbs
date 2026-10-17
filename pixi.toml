@@ -125,6 +125,9 @@ readcon       = ">=0.17.1"
 readcon-ops   = { git = "https://github.com/lode-org/readcon-ops.git", rev = "760ecf5b36e3f8e949c42c9eff40cc74b3b20825" }
 
 [feature.test.dependencies]
+# readcon-ops needs 3.11+, and its minimage dependency builds against PyO3
+# 0.23, which stops at 3.13.
+python = ">=3.11,<3.14"
 ase  = ">=3.23,<4"
 h5py = ">=3.0"
 # conda-forge's OVITO: the PyPI wheel inside a conda env loads Qt and
