@@ -37,6 +37,35 @@ def safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3):
     return jnp.zeros_like(y), jnp.nan
 
 
+def equilibrated_inverse_solve(K, y, noise_scalar, jitter=1e-6):
+    """
+    Inverse and weights of a gradient-enhanced covariance matrix.
+
+    .. versionadded:: 1.11.1
+
+    The value and gradient rows of ``K`` differ in scale by ``1 / l**2``, so a
+    short length scale and repeated inputs leave ``K`` too ill-conditioned for a
+    float32 inverse. The matrix is solved as ``K + noise * I + jitter * diag(K)``
+    after a symmetric diagonal scaling to unit diagonal, which keeps the jitter
+    relative to each row.
+
+    Args:
+        K: Covariance matrix without noise.
+        y: Observation vector.
+        noise_scalar: Noise level added to the diagonal.
+        jitter: Relative jitter applied to each diagonal entry.
+
+    Returns:
+        tuple: (alpha, K_inv) for the regularized matrix.
+    """
+    K_reg = K + jnp.diag(noise_scalar + jitter * jnp.diag(K))
+    scale = 1.0 / jnp.sqrt(jnp.diag(K_reg))
+    K_unit = scale[:, None] * K_reg * scale[None, :]
+    K_inv = scale[:, None] * jnp.linalg.inv(K_unit) * scale[None, :]
+    alpha = scale * jnp.linalg.solve(K_unit, scale * y.flatten())
+    return alpha, K_inv
+
+
 def generic_negative_mll(K, y, noise_scalar):
     """
     Calculates the negative Marginal Log-Likelihood (MLL).
