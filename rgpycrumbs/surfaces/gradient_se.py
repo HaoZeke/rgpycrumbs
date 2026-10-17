@@ -3,7 +3,11 @@ import jax.numpy as jnp
 import jax.scipy.optimize as jopt
 from jax import jit, vmap
 
-from rgpycrumbs.surfaces._base import BaseGradientSurface, generic_negative_mll
+from rgpycrumbs.surfaces._base import (
+    BaseGradientSurface,
+    equilibrated_inverse_solve,
+    generic_negative_mll,
+)
 from rgpycrumbs.surfaces._kernels import (
     k_matrix_se_grad_map,
     se_kernel_elem,
@@ -28,11 +32,7 @@ def _grad_se_solve(x, y_full, noise_scalar, length_scale):
     K_blocks = k_matrix_se_grad_map(x, x, length_scale)
     N, _, D_plus_1, _ = K_blocks.shape
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
-    diag_noise = (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
-    K_full = K_full + diag_noise
-    K_inv = jnp.linalg.inv(K_full)
-    alpha = jnp.linalg.solve(K_full, y_full.flatten())
-    return alpha, K_inv
+    return equilibrated_inverse_solve(K_full, y_full, noise_scalar)
 
 
 @jit
