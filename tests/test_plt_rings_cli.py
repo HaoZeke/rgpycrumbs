@@ -14,7 +14,7 @@ def test_plt_rings_targets_the_published_wheel():
     script = root / "rgpycrumbs" / "geom" / "plt_rings.py"
     text = script.read_text()
     assert '# requires-python = ">=3.12"' in text
-    assert "pydseamslib>=2.9.1" in text
+    assert "pydseamslib>=2.11.0" in text
     assert "xyzrender>=0.3.8" in text
 
 
