@@ -26,7 +26,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-from readcon import ConFrame, read_con, write_con
+from chemparseplot.parse.eon.con_io import (
+    read_con_frames,
+    read_first_frame,
+    write_atoms_as_con,
+    write_con_frames,
+)
 from scipy.signal import find_peaks
 
 log = logging.getLogger(__name__)
@@ -89,8 +94,8 @@ def _neb_tangent(frames, idx: int) -> np.ndarray:
     """Normalized central-difference tangent ``pos[i+1] - pos[i-1]``."""
     lo = max(0, idx - 1)
     hi = min(len(frames) - 1, idx + 1)
-    fwd = np.asarray(frames[hi].to_ase().get_positions())
-    bwd = np.asarray(frames[lo].to_ase().get_positions())
+    fwd = np.asarray(frames[hi].xyz, dtype=float)
+    bwd = np.asarray(frames[lo].xyz, dtype=float)
     tangent = fwd - bwd
     norm = np.linalg.norm(tangent)
     if norm > 0:
@@ -115,7 +120,7 @@ def _match_eon_mode(
         mode_file = pos_file.with_name(f"peak{match.group(1)}_mode.dat")
         if not mode_file.is_file():
             continue
-        cand = np.asarray(read_con(str(pos_file))[0].to_ase().get_positions())
+        cand = np.asarray(read_first_frame(pos_file).xyz, dtype=float)
         if cand.shape != ref.shape:
             continue
         rmsd = float(np.sqrt(np.mean(np.sum((cand - ref) ** 2, axis=1))))
@@ -234,7 +239,7 @@ def seed_dimers_from_peaks(
     out_dir = Path(out_dir)
     peak_files_dir = Path(peak_files_dir) if peak_files_dir is not None else None
 
-    frames = read_con(str(neb_con))
+    frames = read_con_frames(neb_con)
     if len(frames) < 3:
         msg = f"NEB band needs >= 3 images to have an interior peak, got {len(frames)}"
         raise ValueError(msg)
@@ -253,7 +258,7 @@ def seed_dimers_from_peaks(
         seed_dir.mkdir(parents=True, exist_ok=True)
 
         peak_frame = frames[idx]
-        write_con(str(seed_dir / "pos.con"), [peak_frame])
+        write_con_frames(seed_dir / "pos.con", [peak_frame])
         peak_atoms = peak_frame.to_ase()
 
         mode = None
@@ -268,8 +273,11 @@ def seed_dimers_from_peaks(
         np.savetxt(seed_dir / "direction.dat", mode, fmt="%18.12f")
 
         disp = peak_atoms.copy()
-        disp.set_positions(peak_atoms.get_positions() + _DISPLACE_MAGNITUDE * mode)
-        write_con(str(seed_dir / "displacement.con"), [ConFrame.from_ase(disp)])
+        disp.calc = None
+        disp.set_positions(
+            np.asarray(peak_frame.xyz, dtype=float) + _DISPLACE_MAGNITUDE * mode
+        )
+        write_atoms_as_con(seed_dir / "displacement.con", [disp])
 
         _write_dimer_config(seed_dir / "config.ini", sections)
 

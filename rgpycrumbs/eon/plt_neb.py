@@ -39,9 +39,15 @@ https://realpython.com/python-script-structure/
 #   "h5py",
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "xyzrender>=0.1.3",
-#   "readcon>=0.14.5",
+#   "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.4",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 #
 # Dispatch model (prefer ``rgpycrumbs eon plt-neb`` / ``python -m rgpycrumbs.cli``;

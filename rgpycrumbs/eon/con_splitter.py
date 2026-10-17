@@ -10,9 +10,16 @@
 #   "click",
 #   "ase",
 #   "rich",
-#   "readcon>=0.14.5",
+#   "chemparseplot[neb]>=1.11.0,<2",
+#   "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.2",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 import logging
@@ -35,15 +42,15 @@ def _is_con_path(path: Path) -> bool:
 
 
 def _read_trajectory_frames(path: Path) -> tuple[list, list | None]:
-    """Load trajectory frames; CON/convel go through readcon to keep metadata.
+    """Load trajectory frames.
 
-    Returns ``(ase_atoms_list, con_frames_or_none)``. ``con_frames`` is populated
-    only for ``.con``/``.convel`` inputs so writers can preserve per-frame energy.
+    ``.con`` / ``.convel`` stay ``ConFrame`` objects from ``con_io`` so a later
+    write can keep sections. Every other suffix stays on ``ase.io.read``.
     """
     if _is_con_path(path):
-        from readcon import read_con
+        from chemparseplot.parse.eon.con_io import read_con_frames
 
-        con_frames = list(read_con(str(path)))
+        con_frames = read_con_frames(path)
         atoms_list = [frame.to_ase() for frame in con_frames]
         for atoms, frame in zip(atoms_list, con_frames, strict=True):
             if frame.energy is not None:
@@ -67,80 +74,154 @@ def _energy_from_atoms(atoms) -> float | None:
         return None
 
 
-def _apply_frame_energy(frame, energy: float | None):
-    """Set per-frame total energy on a ``ConFrame`` copy-friendly handle.
+_POSITION_ATOL = 1e-8
 
-    Prefers ``set_energy`` / ``set_scalar_metadata`` (readcon>=0.13). Older
-    wheels that expose only a read-only ``energy`` property are reconstructed
-    with string metadata values accepted by the constructor.
-    """
+
+def _energy_changed(frame, energy: float | None) -> bool:
     if energy is None:
+        return False
+    current = getattr(frame, "energy", None)
+    if current is None:
+        return True
+    return float(energy) != float(current)
+
+
+def _with_energy(frame, energy: float | None):
+    """Copy *frame* through ``frame_with_energy`` only when the energy changes."""
+    if not _energy_changed(frame, energy):
         return frame
-    value = float(energy)
-    setter = getattr(frame, "set_energy", None)
-    if callable(setter):
-        setter(value)
+    from chemparseplot.parse.eon.con_io import frame_with_energy
+
+    return frame_with_energy(frame, float(energy))
+
+
+def _same_symbol_order(frame, atoms) -> bool:
+    return [atom.symbol for atom in frame.atoms] == list(atoms.get_chemical_symbols())
+
+
+def _is_pure_translation(src, dst) -> bool:
+    """True when every atom moved by the same vector, including the zero vector."""
+    if len(src) != len(dst):
+        return False
+    if len(src) == 0:
+        return True
+    dx = float(dst[0][0]) - float(src[0][0])
+    dy = float(dst[0][1]) - float(src[0][1])
+    dz = float(dst[0][2]) - float(src[0][2])
+    for origin, moved in zip(src, dst, strict=True):
+        if abs((float(moved[0]) - float(origin[0])) - dx) > _POSITION_ATOL:
+            return False
+        if abs((float(moved[1]) - float(origin[1])) - dy) > _POSITION_ATOL:
+            return False
+        if abs((float(moved[2]) - float(origin[2])) - dz) > _POSITION_ATOL:
+            return False
+    return True
+
+
+def _positions_unmoved(frame, atoms) -> bool:
+    src = frame.xyz
+    dst = atoms.get_positions()
+    if len(src) != len(dst):
+        return False
+    for origin, moved in zip(src, dst, strict=True):
+        if abs(float(moved[0]) - float(origin[0])) > _POSITION_ATOL:
+            return False
+        if abs(float(moved[1]) - float(origin[1])) > _POSITION_ATOL:
+            return False
+        if abs(float(moved[2]) - float(origin[2])) > _POSITION_ATOL:
+            return False
+    return True
+
+
+def _cell_changed(frame, atoms) -> bool:
+    lengths = [float(value) for value in atoms.cell.lengths()]
+    angles = [float(value) for value in atoms.cell.angles()]
+    for got, old in zip(lengths, frame.cell, strict=True):
+        if abs(got - float(old)) > _POSITION_ATOL:
+            return True
+    for got, old in zip(angles, frame.angles, strict=True):
+        if abs(got - float(old)) > _POSITION_ATOL:
+            return True
+    return False
+
+
+def _sections_still_true(frame, atoms) -> bool:
+    """Forces, displacements, and spreads still describe *atoms*.
+
+    A pure translation keeps them. A rotation or a reorder does not.
+    """
+    if not _same_symbol_order(frame, atoms):
+        return False
+    return _is_pure_translation(frame.xyz, atoms.get_positions())
+
+
+def _with_cell(frame, atoms):
+    if not _cell_changed(frame, atoms):
         return frame
-    scalar = getattr(frame, "set_scalar_metadata", None)
-    if callable(scalar):
-        scalar("energy", value)
-        return frame
-    from readcon import ConFrame
+    import readcon
 
     metadata = frame.metadata
     if hasattr(metadata, "items"):
-        metadata_dict = {str(k): v for k, v in metadata.items()}
+        metadata = {str(key): value for key, value in metadata.items()}
     else:
-        metadata_dict = dict(metadata or {})
-    metadata_dict.pop("energy", None)
-    clone = ConFrame(
-        frame.cell,
-        frame.angles,
-        frame.atoms,
+        metadata = dict(metadata or {})
+    return readcon.ConFrame(
+        [float(value) for value in atoms.cell.lengths()],
+        [float(value) for value in atoms.cell.angles()],
+        list(frame.atoms),
         frame.prebox_header,
         frame.postbox_header,
-        metadata_dict,
-    )
-    clone_setter = getattr(clone, "set_energy", None)
-    if callable(clone_setter):
-        clone_setter(value)
-        return clone
-    metadata_dict["energy"] = str(value)
-    return ConFrame(
-        frame.cell,
-        frame.angles,
-        frame.atoms,
-        frame.prebox_header,
-        frame.postbox_header,
-        metadata_dict,
+        metadata,
     )
 
 
-def _write_con_atoms(dest: Path, atoms, energy: float | None = None) -> None:
-    """Write one ASE structure as a CON file via readcon."""
-    from readcon import ConFrame, write_con
+def _write_fresh_geometry(dest: Path, atoms, energy: float | None) -> None:
+    """Write a new geometry. Old forces, displacements, and spreads stay unset."""
+    from chemparseplot.parse.eon.con_io import write_atoms_as_con
 
-    if energy is None:
-        energy = _energy_from_atoms(atoms)
-    frame = _apply_frame_energy(ConFrame.from_ase(atoms), energy)
-    write_con(str(dest), [frame])
+    clone = atoms.copy()
+    clone.calc = None
+    energies = [energy] if energy is not None else None
+    write_atoms_as_con(dest, [clone], energies=energies)
 
 
-def _write_con_frame(dest: Path, frame, atoms=None, energy: float | None = None) -> None:
-    """Write a readcon ``ConFrame``, optionally replacing positions from *atoms*."""
-    from readcon import ConFrame, write_con
+def _write_output_frame(
+    dest: Path,
+    atoms,
+    frame,
+    energy: float | None,
+    *,
+    preserve_source: bool,
+) -> None:
+    """Write one image with precision omitted and canonical left off.
 
-    if atoms is not None:
+    An unmoved CON frame is the original object, so a RoundTrip rewrite can
+    match the input bytes. A translation uses ``frame_with_positions``. A
+    rotation or a reorder goes through ``from_ase`` with the calculator cleared.
+    """
+    from chemparseplot.parse.eon.con_io import frame_with_positions, write_con_frames
+
+    if frame is not None and energy is None and frame.energy is not None:
+        energy = float(frame.energy)
+    if frame is None:
         if energy is None:
-            energy = (
-                frame.energy if frame.energy is not None else _energy_from_atoms(atoms)
-            )
-        updated = _apply_frame_energy(ConFrame.from_ase(atoms), energy)
-        write_con(str(dest), [updated])
+            energy = _energy_from_atoms(atoms)
+        _write_fresh_geometry(dest, atoms, energy)
         return
-    if energy is not None:
-        frame = _apply_frame_energy(frame, energy)
-    write_con(str(dest), [frame])
+    unchanged = (
+        _sections_still_true(frame, atoms)
+        and _positions_unmoved(frame, atoms)
+        and not _cell_changed(frame, atoms)
+    )
+    if preserve_source or unchanged:
+        write_con_frames(dest, [_with_energy(frame, energy)])
+        return
+    if _sections_still_true(frame, atoms):
+        moved = frame_with_positions(frame, atoms.get_positions())
+        moved = _with_cell(moved, atoms)
+        write_con_frames(dest, [_with_energy(moved, energy)])
+        return
+    _write_fresh_geometry(dest, atoms, energy)
 
 
 # Optional IRA import logic
@@ -359,13 +440,11 @@ def con_splitter(
     con_frames = all_con_frames[start:end] if all_con_frames is not None else None
     logging.info(f"Extracted [cyan]Path {target_idx}[/cyan] with {len(frames)} images.")
 
-    geometry_mutated = False
     if center:
         logging.info("Centering structures...")
     if box_diagonal:
         logging.info("Overriding box...")
     if center and len(frames) > 0:
-        geometry_mutated = True
         ref_atoms = frames[0].copy()
         ref_center = ref_atoms.get_center_of_mass()
         box_center = [d / 2.0 for d in box_diagonal]
@@ -376,24 +455,23 @@ def con_splitter(
 
     align_strategy = AlignMode(align_type)
     if align_strategy != AlignMode.NONE:
-        geometry_mutated = True
         frames = align_path(
             frames, align_strategy, IRAConfig(enabled=use_ira, kmax=ira_kmax)
         )
+    preserve_source = (not center) and align_strategy == AlignMode.NONE
 
     created_paths = []
     for i, atoms in enumerate(frames):
         name = f"ipath_{i:03d}.con"
         dest = output_dir / name
-        energy = _energy_from_atoms(atoms)
-        if con_frames is not None and not geometry_mutated:
-            _write_con_frame(dest, con_frames[i], energy=energy)
-        elif con_frames is not None:
-            if energy is None and con_frames[i].energy is not None:
-                energy = float(con_frames[i].energy)
-            _write_con_frame(dest, con_frames[i], atoms=atoms, energy=energy)
-        else:
-            _write_con_atoms(dest, atoms, energy=energy)
+        source = con_frames[i] if con_frames is not None else None
+        _write_output_frame(
+            dest,
+            atoms,
+            source,
+            _energy_from_atoms(atoms),
+            preserve_source=preserve_source,
+        )
         created_paths.append(str(dest.resolve()))
         logging.info(f"  - Saved [green]{name}[/green]")
 

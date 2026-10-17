@@ -27,9 +27,15 @@ using the generalized (s, d) reaction valley projection. Supports:
 #   "polars",
 #   "chemparseplot[neb,plot]>=1.9.17,<2",
 #   "xyzrender>=0.1.3",
-#   "readcon>=0.14.5",
+#   "readcon>=0.17.1",
 #   "rgpycrumbs>=1.10.4",
 # ]
+#
+# [tool.uv.sources]
+# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
+# # chemparseplot release ships frame_with_positions.
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 # Optional deps (jax for landscapes) via uv PEP 723 or RGPYCRUMBS_AUTO_DEPS=1.
 
@@ -316,8 +322,6 @@ def _plot_landscape(
     perspective_tilt=0.0,
     theme=None,
 ):
-    import readcon
-
     try:
         from rgpycrumbs._aux import _import_from_parent_env
 
@@ -329,7 +333,9 @@ def _plot_landscape(
     traj = trajs[0]
 
     if ref_product is not None:
-        ref_b = readcon.read_con_as_ase(str(ref_product))[0]
+        from chemparseplot.parse.eon.con_io import read_first_atoms
+
+        ref_b = read_first_atoms(ref_product)
     elif traj.saddle_atoms is not None:
         ref_b = traj.saddle_atoms
     else:

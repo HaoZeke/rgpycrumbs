@@ -96,8 +96,10 @@ pyvista        = ">=0.46.4,<0.47"
 tblite-python  = ">=0.5.0,<0.6"
 
 [feature.test.pypi-dependencies]
-adjusttext    = ">=1.3"
-chemparseplot = ">=1.11.0"
+adjusttext = ">=1.3"
+# TODO: drop this git source once a chemparseplot release ships
+# frame_with_positions, read_first_frame, and the con overview plotters.
+chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot.git", branch = "main" }
 click         = ">=8.3.1, <9"
 eon-schema    = ">=0.2"
 cmcrameri     = ">=1.7"
@@ -118,7 +120,7 @@ xyzrender     = ">=0.1.3"
 rgpycrumbs    = { path = ".", editable = true }
 rich          = ">=13.0"
 scipy         = ">=1.11"
-readcon       = ">=0.14.5"
+readcon       = ">=0.17.1"
 
 [feature.test.dependencies]
 ase  = ">=3.23,<4"
