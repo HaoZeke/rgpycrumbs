@@ -187,12 +187,15 @@ def _resolve_pip_spec(module_name: str) -> str:
     return apply_pin_to_spec(spec, pins_from_env())
 
 
-# TODO: drop once readcon 0.17.1 is on PyPI and a chemparseplot release ships
+# TODO: drop once readcon-ops is on PyPI and a chemparseplot release ships
 # frame_with_positions, read_first_frame, and the con overview plotters.
 # The map keeps the version floor. The installer follows git so auto-deps does
-# not resolve the older PyPI wheels.
+# not resolve the older PyPI wheels, or fail on a name PyPI does not carry.
 _UNPUBLISHED_GIT = {
-    "readcon": "readcon @ git+https://github.com/lode-org/readcon-core.git@main",
+    "readcon-ops": (
+        "readcon-ops @ git+https://github.com/lode-org/readcon-ops.git"
+        "@760ecf5b36e3f8e949c42c9eff40cc74b3b20825"
+    ),
     "chemparseplot": (
         "chemparseplot[neb,plot] @ git+https://github.com/HaoZeke/chemparseplot.git@main"
     ),
@@ -209,7 +212,15 @@ def _install_spec(package_spec: str) -> str:
 def _uv_install(package_spec: str, target: Path) -> None:
     """Install *package_spec* into *target* using uv (falling back to pip).
 
-    Raises ``RuntimeError`` if both installers fail.
+    pip runs only when uv is not on PATH or cannot be started. A uv
+    resolution that fails, such as a ``requires-python`` the interpreter
+    does not meet, is final: pip would reach the same answer, and its
+    backtracking on that answer can run for hours.
+
+    Raises ``RuntimeError`` if no installer succeeds.
+
+    .. versionchanged:: 1.11.1
+       A failed uv install no longer falls back to pip.
     """
     package_spec = _install_spec(package_spec)
     target.mkdir(parents=True, exist_ok=True)
@@ -228,8 +239,11 @@ def _uv_install(package_spec: str, target: Path) -> None:
                 capture_output=True,
             )
             return
-        except (subprocess.CalledProcessError, OSError) as exc:
+        except subprocess.CalledProcessError as exc:
             logger.debug("%s install failed: %s", installer, exc)
+            break
+        except OSError as exc:
+            logger.debug("%s could not start: %s", installer, exc)
             continue
     msg = f"Failed to install {package_spec}. Ensure uv or pip is available on PATH."
     raise RuntimeError(msg)
