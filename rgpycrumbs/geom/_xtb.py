@@ -14,7 +14,16 @@ def sha256(path):
 
 
 def single_point(
-    atoms, directory, *, charge, multiplicity, executable="xtb", timeout=180, density=True, max_scc_iterations=2000, broydamp=0.2
+    atoms,
+    directory,
+    *,
+    charge,
+    multiplicity,
+    executable="xtb",
+    timeout=180,
+    density=True,
+    max_scc_iterations=2000,
+    broydamp=0.2,
 ):
     """Evaluate the supplied geometry without optimizing or changing its spin."""
     import io  # noqa: PLC0415
