@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["click==8.5.0", "matplotlib==3.11.2", "numpy==2.5.4", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "0a56b026f826f32e1724a8c26d39ceba2b787d34" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "12d39cceb7d9689fa87593e7a6182839c1f03518" }
 # ///
 """Compare verified search exports through a reproducible TOML profile."""
 
@@ -29,6 +29,8 @@ def cli(config, output):
     import matplotlib.pyplot as plt  # noqa: PLC0415
     from chemparseplot.parse.benchmark import load_benchmark_exports  # noqa: PLC0415
     from chemparseplot.plot.benchmark import (  # noqa: PLC0415
+        plot_acceptance_curves,
+        plot_cost_frontiers,
         plot_cost_savings,
         plot_performance_profiles,
         plot_reaction_costs,
@@ -68,7 +70,10 @@ def cli(config, output):
     save(fig, "method_savings")
     profile_fig, profile_stats = plot_performance_profiles(rows, titles, methods)
     save(profile_fig, "performance_profiles")
+    frontier_fig, frontier_stats = plot_cost_frontiers(rows, titles, methods)
+    save(frontier_fig, "method_cost_frontiers")
     for panel, title in titles.items():
+        save(plot_acceptance_curves(rows, panel, title, methods), f"method_acceptance_{panel}")
         save(plot_reaction_costs(rows, panel, title, methods), f"reaction_costs_{panel}")
     manifest = {
         "inputs": [
@@ -92,6 +97,7 @@ def cli(config, output):
         "uncertainty": "One retained measurement per method and reaction; no timing error bars estimated.",
         "panels": stats,
         "performance_profiles": profile_stats,
+        "cost_frontiers": frontier_stats,
         "artifacts": artifacts,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

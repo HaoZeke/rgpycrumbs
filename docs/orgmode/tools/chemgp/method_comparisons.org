@@ -17,6 +17,10 @@ profile and pinned requirements in =analysis/figure-requirements.txt=.
 
 The output directory contains:
 
+- =method_cost_frontiers.pdf= and =.png=: Pareto means on identical shared
+  successes, with acceptance counts on the full panels.
+- =method_acceptance_baker.pdf= and =method_acceptance_birkholz.pdf=:
+  cumulative acceptance against absolute time and force-call budgets.
 - =method_savings.pdf= and =.png=: paired mean search calls and elapsed times.
 - =performance_profiles.pdf= and =.png=: the fraction of all reactions whose
   accepted cost is within a factor of the best accepted method for that reaction.
@@ -25,6 +29,11 @@ The output directory contains:
   one row per reaction, with crosses for outcomes that fail the common checks.
 - =manifest.json=: input and output hashes, resolved package sources, shared
   reaction labels, raw totals and ratios.
+
+The performance profiles follow Dolan and More (doi:10.1007/s101070100263).
+The cumulative curves provide the absolute-budget view used by cactus plots.
+Their denominators include every attempted reaction, including a reaction
+for which all methods fail.
 
 A ratio above one means the comparator uses more calls or time. Costs exclude
 independent validation and shared Birkholz band preparation. Counts include
