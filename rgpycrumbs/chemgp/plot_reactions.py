@@ -153,7 +153,13 @@ def cli(config, output, xtb):
                 "profile_sha256": sha256(config),
                 "calculations": records,
                 "packages": {
-                    n: importlib.metadata.version(n)
+                    n: {
+                        "version": importlib.metadata.version(n),
+                        "source": json.loads(
+                            importlib.metadata.distribution(n).read_text("direct_url.json")
+                            or "null"
+                        ),
+                    }
                     for n in (
                         "rgpycrumbs",
                         "chemparseplot",

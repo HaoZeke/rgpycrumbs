@@ -71,7 +71,13 @@ def cli(config, output):
         ],
         "profile_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
         "packages": {
-            name: importlib.metadata.version(name)
+            name: {
+                "version": importlib.metadata.version(name),
+                "source": json.loads(
+                    importlib.metadata.distribution(name).read_text("direct_url.json")
+                    or "null"
+                ),
+            }
             for name in ("rgpycrumbs", "chemparseplot", "matplotlib", "numpy")
         },
         "clock": "Search only; independent validation and shared band preparation excluded.",
