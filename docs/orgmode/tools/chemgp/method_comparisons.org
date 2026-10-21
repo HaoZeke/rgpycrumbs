@@ -1,0 +1,98 @@
+#+TITLE: Method costs and reaction chemistry
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Compare search methods
+
+The =plot-comparison= command reads the verified =cells.csv= exports from
+[[https://github.com/HaoZeke/gpridge_repro][gpridge_repro]]. It pairs each comparator with GPRidge on the same accepted
+reactions. The method labels retain acceptance counts for the full panels.
+
+#+begin_src bash
+rgpycrumbs chemgp plot-comparison --config analysis/method_comparisons/profile.toml
+#+end_src
+
+The profile names the exports, panel sizes and method labels. Relative paths
+are resolved from the profile directory. The reproducer supplies the full
+profile and pinned requirements in =analysis/figure-requirements.txt=.
+
+The output directory contains:
+
+- =method_savings.pdf= and =.png=: paired mean search calls and elapsed times.
+- =reaction_costs_baker.pdf= and =reaction_costs_birkholz.pdf=, with PNG copies:
+  one row per reaction, with crosses for outcomes that fail the common checks.
+- =manifest.json=: input and output hashes, resolved package sources, shared
+  reaction labels, raw totals and ratios.
+
+A ratio above one means the comparator uses more calls or time. Costs exclude
+independent validation and shared Birkholz band preparation. Counts include
+endpoint evaluations and ML-FSM string construction. Each retained case has
+one timing measurement, so the plot does not estimate timing error bars.
+
+* Render bonds from electronic structure
+
+The =plot-reactions= command reads CON structures through =readcon=, aligns
+atom identities by rigid rotations, and evaluates GFN2-xTB single points.
+It uses =xyzrender= to draw the measured Wiberg bond orders (WBOs) and electron
+density. The calculation does not optimize the coordinates.
+
+#+begin_src bash
+rgpycrumbs chemgp plot-reactions --config reactions.toml --xtb xtb
+#+end_src
+
+The =xtb= executable must be installed. Other command dependencies use the
+standard uv dispatcher. A profile row contains four states:
+
+#+begin_src toml
+[shared]
+dpi = 300
+
+[reactions]
+output = "reaction-figures"
+density = true
+iso = 0.02
+
+[[reactions.cases]]
+id = "hcn"
+title = "HCN isomerization"
+charge = 0
+multiplicity = 1
+bonds = [[1, 3], [2, 3]]
+
+[[reactions.cases.states]]
+title = "Reactant"
+path = "reactant.con"
+[[reactions.cases.states]]
+title = "GPRidge saddle"
+path = "saddle.con"
+[[reactions.cases.states]]
+title = "Product"
+path = "product.con"
+[[reactions.cases.states]]
+title = "Comparator endpoint"
+path = "comparator.con"
+#+end_src
+
+Atom indices in =bonds= are one-based and follow the CON file. Without that
+list, annotations select the largest endpoint distance changes among pairs
+within a covalent-radius cutoff at either endpoint. Rendered connectivity
+always comes from the computed WBOs. Atom order and elements must agree across
+all four states; the alignment neither permutes atoms nor reflects a structure.
+
+Colour and width encode WBO on the same scale from zero to three. Values below
+0.5 are dotted and those below 0.1 are omitted. These are drawing thresholds,
+not universal criteria for a chemical bond. A missing xTB table entry is
+reported as unprinted, never as a measured zero. Density surfaces use the
+profile's common isovalue in electrons per cubic Bohr.
+
+The output includes =reaction_geometries.pdf=, =reaction_density.pdf= and PNG
+copies, =bonds.csv= with distances and WBOs, and a manifest. Each numbered state
+directory retains the input XYZ, xTB control file, log, WBO table, cube and
+=properties.json= with executable and artifact hashes. The command reuses a
+calculation only when its settings and artifact hashes match. A failed xTB
+calculation stops figure generation and keeps its log.
+
+Optional =record= and =validation_key= fields in a state select its retained
+benchmark validation record. The panel then reports the maximum force, number
+of negative modes and unresolved modes. Those quantities use the benchmark
+potential. The xTB properties provide chemical interpretation and do not
+replace that potential or its saddle checks.

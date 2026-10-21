@@ -16,6 +16,7 @@
    batch_command
    batch_tutorial
    hdf5_schema
+   method_comparisons
 #+END_EXPORT
 
 ** API Reference

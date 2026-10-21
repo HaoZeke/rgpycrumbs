@@ -33,17 +33,13 @@ By default, xyzrender auto-orients each structure using PCA to find
 the best viewing angle. This is usually good for small molecules.
 Override with ~--rotation "45x,30y,0z"~ for manual control.
 
-** Transition State Bonds
+** Reaction bonds
 
-xyzrender can highlight forming/breaking bonds at transition states:
-
-#+begin_src shell
-# Auto-detect TS bonds (dashed lines for partially formed bonds)
-rgpycrumbs eon plt-neb ... --strip-renderer xyzrender
-#+end_src
-
-The ~--ts~ flag in xyzrender auto-detects bonds being formed or broken
-using graphRC analysis. This is built into the paton preset.
+A coordinate-only structure strip does not establish which bonds form or break.
+Use =rgpycrumbs chemgp plot-reactions= for bonds coloured by GFN2-xTB Wiberg
+bond orders at retained reaction geometries. Its profile fixes the molecular
+charge and multiplicity, and its output retains each electronic-structure
+calculation. See [[file:../tools/chemgp/method_comparisons.org][Method costs and reaction chemistry]].
 
 ** Bond Orders and NCI
 
