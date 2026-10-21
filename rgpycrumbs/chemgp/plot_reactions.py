@@ -67,6 +67,7 @@ def cli(config, output, xtb):
                 multiplicity=case["multiplicity"],
                 executable=xtb,
                 density=settings.get("density", True),
+                broydamp=spec.get("broydamp", 0.4),
             )
             record = {
                 **record,
