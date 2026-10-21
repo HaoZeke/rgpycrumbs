@@ -46,7 +46,9 @@ def single_point(
         "cube_density_matrix_threshold": 0.0,
     }
     if max_scc_iterations < 1 or not 0 < broydamp < 1:
-        raise ValueError("SCC iterations must be positive and damping must lie between zero and one")
+        raise ValueError(
+            "SCC iterations must be positive and damping must lie between zero and one"
+        )
     directory = Path(directory)
     record = directory / "properties.json"
     if record.exists():
