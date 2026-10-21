@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["click==8.5.0", "matplotlib==3.11.2", "numpy==2.5.4", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "96514a020a21d1c2e8cdbb2edf257aaec13c08db" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "0a56b026f826f32e1724a8c26d39ceba2b787d34" }
 # ///
 """Compare verified search exports through a reproducible TOML profile."""
 
@@ -28,7 +28,11 @@ def cli(config, output):
     mpl.use("Agg")
     import matplotlib.pyplot as plt  # noqa: PLC0415
     from chemparseplot.parse.benchmark import load_benchmark_exports  # noqa: PLC0415
-    from chemparseplot.plot.benchmark import plot_cost_savings, plot_reaction_costs  # noqa: PLC0415
+    from chemparseplot.plot.benchmark import (
+        plot_cost_savings,
+        plot_reaction_costs,
+        plot_performance_profiles,
+    )  # noqa: PLC0415
 
     profile = tomllib.loads(config.read_text())
     settings = profile["comparison"]
@@ -62,6 +66,8 @@ def cli(config, output):
         plt.close(fig)
 
     save(fig, "method_savings")
+    profile_fig, profile_stats = plot_performance_profiles(rows, titles, methods)
+    save(profile_fig, "performance_profiles")
     for panel, title in titles.items():
         save(plot_reaction_costs(rows, panel, title, methods), f"reaction_costs_{panel}")
     manifest = {
@@ -85,6 +91,7 @@ def cli(config, output):
         "ratio": "Comparator total / GPRidge total on exactly the same accepted reactions.",
         "uncertainty": "One retained measurement per method and reaction; no timing error bars estimated.",
         "panels": stats,
+        "performance_profiles": profile_stats,
         "artifacts": artifacts,
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

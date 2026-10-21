@@ -18,6 +18,9 @@ profile and pinned requirements in =analysis/figure-requirements.txt=.
 The output directory contains:
 
 - =method_savings.pdf= and =.png=: paired mean search calls and elapsed times.
+- =performance_profiles.pdf= and =.png=: the fraction of all reactions whose
+  accepted cost is within a factor of the best accepted method for that reaction.
+  Failed checks have infinite cost; every reaction remains in the denominator.
 - =reaction_costs_baker.pdf= and =reaction_costs_birkholz.pdf=, with PNG copies:
   one row per reaction, with crosses for outcomes that fail the common checks.
 - =manifest.json=: input and output hashes, resolved package sources, shared
@@ -83,6 +86,9 @@ Colour and width encode WBO on the same scale from zero to three. Values below
 not universal criteria for a chemical bond. A missing xTB table entry is
 reported as unprinted, never as a measured zero. Density surfaces use the
 profile's common isovalue in electrons per cubic Bohr.
+
+Atom annotations use the DejaVu Sans Mono font supplied with Matplotlib.
+Each structure also retains an SVG for vector reuse.
 
 The output includes =reaction_geometries.pdf=, =reaction_density.pdf= and PNG
 copies, =bonds.csv= with distances and WBOs, and a manifest. Each numbered state

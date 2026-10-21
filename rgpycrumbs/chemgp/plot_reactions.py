@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon>=0.17.1", "xyzrender==0.3.8", "chemparseplot", "rgpycrumbs"]
+# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon>=0.17.1", "xyzrender==0.3.8", "resvg-py==0.5.0", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "96514a020a21d1c2e8cdbb2edf257aaec13c08db" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "0a56b026f826f32e1724a8c26d39ceba2b787d34" }
 # readcon = { git = "https://github.com/lode-org/readcon-core", rev = "aa5a9a776f52f988ef6d5b048bf2da8b13ffac8d" }
 # ///
 """Render retained reaction geometries and single-point electronic diagnostics."""
