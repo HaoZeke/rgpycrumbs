@@ -40,9 +40,13 @@ def single_point(
         "multiplicity": multiplicity,
         "gfn": 2,
         "density": density,
+        "max_scc_iterations": max_scc_iterations,
+        "broydamp": broydamp,
         "cube_step_bohr": 0.3,
         "cube_density_matrix_threshold": 0.0,
     }
+    if max_scc_iterations < 1 or not 0 < broydamp < 1:
+        raise ValueError("SCC iterations must be positive and damping must lie between zero and one")
     directory = Path(directory)
     record = directory / "properties.json"
     if record.exists():
@@ -58,7 +62,7 @@ def single_point(
     if binary is None:
         raise FileNotFoundError(f"xTB executable not found: {executable}")
     (directory / "geometry.xyz").write_text(geometry)
-    control = "$write\n  wiberg=true\n"
+    control = f"$scc\n  iterations={max_scc_iterations}\n  broydamp={broydamp}\n$write\n  wiberg=true\n"
     if density:
         control += "  density=true\n$cube\n  step=0.3\n  pthr=0.0\n"
     (directory / "xtb.inp").write_text(control + "$end\n")
