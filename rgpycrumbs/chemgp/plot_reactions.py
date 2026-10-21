@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon>=0.17.1", "xyzrender==0.3.8", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "10ceb70da047d0d8c434a6ace06aa6ed8a044308" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "96514a020a21d1c2e8cdbb2edf257aaec13c08db" }
 # readcon = { git = "https://github.com/lode-org/readcon-core", rev = "aa5a9a776f52f988ef6d5b048bf2da8b13ffac8d" }
 # ///
 """Render retained reaction geometries and single-point electronic diagnostics."""
@@ -105,12 +105,17 @@ def cli(config, output, xtb):
                 }
                 bonds.append(bond)
                 state["bonds"].append(bond)
+            atom_labels = sorted({index for pair in pairs for index in pair})
+            labels = [
+                f"{index} {frame[index - 1].symbol}{index}" for index in atom_labels
+            ]
             render_reaction_state(
                 target / "geometry.xyz",
                 state["image"],
                 charge=case["charge"],
                 multiplicity=case["multiplicity"],
                 bond_orders=wbo,
+                labels=labels,
             )
             if settings.get("density", True):
                 state["density_image"] = str(target / "density.png")
@@ -122,6 +127,7 @@ def cli(config, output, xtb):
                     multiplicity=case["multiplicity"],
                     iso=settings.get("iso", 0.02),
                     bond_orders=wbo,
+                    labels=labels,
                 )
             row["states"].append(state)
         cases.append(row)
