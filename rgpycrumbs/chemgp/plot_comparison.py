@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click", "matplotlib>=3.8", "numpy", "chemparseplot"]
+# dependencies = ["click", "matplotlib>=3.8", "numpy", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
 # chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
