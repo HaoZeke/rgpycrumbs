@@ -6,6 +6,7 @@
 # chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 """Compare verified search exports through a reproducible TOML profile."""
+
 from __future__ import annotations
 
 import hashlib
@@ -23,6 +24,7 @@ import click
 def cli(config, output):
     """Render direct savings and per-reaction failure panels."""
     import matplotlib
+
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from chemparseplot.parse.benchmark import load_benchmark_exports
@@ -37,25 +39,47 @@ def cli(config, output):
     rows = load_benchmark_exports(inputs, {k: v["count"] for k, v in panels.items()})
     methods = settings["methods"]
     titles = {k: v["title"] for k, v in panels.items()}
-    plt.rcParams.update({"font.size": 9, "pdf.fonttype": 42, "savefig.dpi": profile.get("shared", {}).get("dpi", 250)})
+    plt.rcParams.update(
+        {
+            "font.size": 9,
+            "pdf.fonttype": 42,
+            "savefig.dpi": profile.get("shared", {}).get("dpi", 250),
+        }
+    )
     fig, stats = plot_cost_savings(rows, titles, methods)
     artifacts = []
+
     def save(fig, name):
         for suffix in ("pdf", "png"):
             path = output / f"{name}.{suffix}"
             fig.savefig(path, bbox_inches="tight")
-            artifacts.append({"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+            artifacts.append(
+                {
+                    "file": path.name,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
+            )
         plt.close(fig)
+
     save(fig, "method_savings")
     for panel, title in titles.items():
         save(plot_reaction_costs(rows, panel, title, methods), f"reaction_costs_{panel}")
-    manifest = {"inputs": [{"path": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in inputs],
+    manifest = {
+        "inputs": [
+            {"path": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
+            for p in inputs
+        ],
         "profile_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
-        "packages": {name: importlib.metadata.version(name) for name in ("rgpycrumbs", "chemparseplot", "matplotlib", "numpy")},
+        "packages": {
+            name: importlib.metadata.version(name)
+            for name in ("rgpycrumbs", "chemparseplot", "matplotlib", "numpy")
+        },
         "clock": "Search only; independent validation and shared band preparation excluded.",
         "ratio": "Comparator total / GPRidge total on exactly the same accepted reactions.",
         "uncertainty": "One retained measurement per method and reaction; no timing error bars estimated.",
-        "panels": stats, "artifacts": artifacts}
+        "panels": stats,
+        "artifacts": artifacts,
+    }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
