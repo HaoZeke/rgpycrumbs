@@ -68,7 +68,12 @@ def cli(config, output, xtb):
                 executable=xtb,
                 density=settings.get("density", True),
             )
-            record = {**record, "source": str(source), "source_sha256": sha256(source)}
+            record = {
+                **record,
+                "argv": [Path(record["argv"][0]).name, *record["argv"][1:]],
+                "source": spec["path"],
+                "source_sha256": sha256(source),
+            }
             records.append(record)
             state = {
                 "title": spec["title"],
@@ -80,7 +85,7 @@ def cli(config, output, xtb):
                 document = json.loads(validation_path.read_text())
                 validation = document[spec["validation_key"]]
                 state["validation"] = validation
-                record["validation_record"] = str(validation_path)
+                record["validation_record"] = spec["record"]
                 record["validation_record_sha256"] = sha256(validation_path)
                 state["subtitle"] = (
                     f"{validation['n_imaginary']} negative; {validation['n_unresolved_vibrational_modes']} unresolved\nFmax = {validation['max_force_eV_per_A']:.3f} eV/Å"

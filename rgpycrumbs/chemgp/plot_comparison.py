@@ -66,8 +66,8 @@ def cli(config, output):
         save(plot_reaction_costs(rows, panel, title, methods), f"reaction_costs_{panel}")
     manifest = {
         "inputs": [
-            {"path": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
-            for p in inputs
+            {"path": source, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
+            for source, p in zip(settings["exports"], inputs, strict=True)
         ],
         "profile_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
         "command_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
