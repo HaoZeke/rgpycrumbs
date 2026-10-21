@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["click==8.5.0", "matplotlib==3.11.2", "numpy==2.5.4", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "21773a2f78e5956fe5741b10590b7469aabc61e7" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "10ceb70da047d0d8c434a6ace06aa6ed8a044308" }
 # ///
 """Compare verified search exports through a reproducible TOML profile."""
 

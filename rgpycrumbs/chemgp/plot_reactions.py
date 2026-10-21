@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon>=0.17.1", "xyzrender==0.3.8", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "21773a2f78e5956fe5741b10590b7469aabc61e7" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "10ceb70da047d0d8c434a6ace06aa6ed8a044308" }
 # readcon = { git = "https://github.com/lode-org/readcon-core", rev = "aa5a9a776f52f988ef6d5b048bf2da8b13ffac8d" }
 # ///
 """Render retained reaction geometries and single-point electronic diagnostics."""
