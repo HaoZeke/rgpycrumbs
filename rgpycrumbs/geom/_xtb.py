@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import subprocess
+from pathlib import Path
 
 
 def sha256(path):
@@ -17,8 +17,9 @@ def single_point(
     atoms, directory, *, charge, multiplicity, executable="xtb", timeout=180, density=True
 ):
     """Evaluate the supplied geometry without optimizing or changing its spin."""
-    import io
-    from ase.io import write
+    import io  # noqa: PLC0415
+
+    from ase.io import write  # noqa: PLC0415
 
     if multiplicity < 1 or int(multiplicity) != multiplicity or int(charge) != charge:
         raise ValueError(
@@ -75,11 +76,11 @@ def single_point(
         "--input",
         "xtb.inp",
     ]
-    version = subprocess.run(
+    version = subprocess.run(  # noqa: S603
         [binary, "--version"], capture_output=True, text=True, check=True, timeout=20
     )
     with (directory / "xtb.log").open("w") as log:
-        process = subprocess.run(
+        process = subprocess.run(  # noqa: S603
             command,
             cwd=directory,
             stdout=log,

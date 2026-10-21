@@ -14,9 +14,9 @@ import csv
 import importlib.metadata
 import json
 from pathlib import Path
-import tomllib
 
 import click
+import tomllib
 
 
 @click.command()
@@ -25,19 +25,20 @@ import click
 @click.option("--xtb", default="xtb", show_default=True)
 def cli(config, output, xtb):
     """Read a reaction profile; retain calculations, plots and input hashes."""
-    import matplotlib
+    import matplotlib as mpl  # noqa: PLC0415
 
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from chemparseplot.parse.eon.con_io import read_first_atoms
-    from chemparseplot.plot.reaction import (
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt  # noqa: PLC0415
+    from chemparseplot.parse.eon.con_io import read_first_atoms  # noqa: PLC0415
+    from chemparseplot.plot.reaction import (  # noqa: PLC0415
         align_reaction,
         changed_bonds,
+        plot_reaction_atlas,
         read_wbo,
         render_reaction_state,
-        plot_reaction_atlas,
     )
-    from rgpycrumbs.geom._xtb import sha256, single_point
+
+    from rgpycrumbs.geom._xtb import sha256, single_point  # noqa: PLC0415
 
     profile = tomllib.loads(config.read_text())
     settings = profile["reactions"]
@@ -92,7 +93,7 @@ def cli(config, output, xtb):
                     "state": spec["title"],
                     "atom_i": a,
                     "atom_j": b,
-                    "label": f"{frame[a - 1].symbol}{a}–{frame[b - 1].symbol}{b}",
+                    "label": f"{frame[a - 1].symbol}{a}\u2013{frame[b - 1].symbol}{b}",
                     "distance_A": float(frame.get_distance(a - 1, b - 1)),
                     "wbo": wbo.get(key),
                 }

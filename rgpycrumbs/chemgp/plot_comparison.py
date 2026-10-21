@@ -13,9 +13,9 @@ import hashlib
 import importlib.metadata
 import json
 from pathlib import Path
-import tomllib
 
 import click
+import tomllib
 
 
 @click.command()
@@ -23,12 +23,12 @@ import click
 @click.option("--output", type=click.Path(path_type=Path), default=None)
 def cli(config, output):
     """Render direct savings and per-reaction failure panels."""
-    import matplotlib
+    import matplotlib as mpl  # noqa: PLC0415
 
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from chemparseplot.parse.benchmark import load_benchmark_exports
-    from chemparseplot.plot.benchmark import plot_cost_savings, plot_reaction_costs
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt  # noqa: PLC0415
+    from chemparseplot.parse.benchmark import load_benchmark_exports  # noqa: PLC0415
+    from chemparseplot.plot.benchmark import plot_cost_savings, plot_reaction_costs  # noqa: PLC0415
 
     profile = tomllib.loads(config.read_text())
     settings = profile["comparison"]
