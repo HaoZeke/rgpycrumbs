@@ -112,3 +112,13 @@ benchmark validation record. The panel then reports the maximum force, number
 of negative modes and unresolved modes. Those quantities use the benchmark
 potential. The xTB properties provide chemical interpretation and do not
 replace that potential or its saddle checks.
+
+* Unfinished ML-NEB searches
+
+An optional =[comparison.catlearn]= table names =history= and =summary=
+CSV inputs from =gpridge_repro/analysis/analyze_catlearn_failures.py=.
+The same command adds =catlearn_failures.pdf= and its PNG. Each reaction
+compares the measured force at the selected geometry with the energy
+uncertainty on its surrogate path, each divided by its own stopping
+threshold. The caption must keep these two quantities distinct.
+Input hashes are included in the comparison manifest.

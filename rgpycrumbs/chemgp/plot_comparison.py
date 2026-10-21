@@ -3,12 +3,13 @@
 # requires-python = ">=3.11"
 # dependencies = ["click==8.5.0", "matplotlib==3.11.2", "numpy==2.5.4", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "fe6d64f0e522a9395c1d2edc0019425e13733b07" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "2a62b9317f1186aa8e10586d0be785ee780740cb" }
 # ///
 """Compare verified search exports through a reproducible TOML profile."""
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import importlib.metadata
 import json
@@ -78,11 +79,31 @@ def cli(config, output):
             f"method_acceptance_{panel}",
         )
         save(plot_reaction_costs(rows, panel, title, methods), f"reaction_costs_{panel}")
+    diagnostic_inputs = []
+    diagnostics = settings.get("catlearn")
+    if diagnostics:
+        from chemparseplot.plot.mlneb import plot_mlneb_diagnostics  # noqa: PLC0415
+
+        records = {}
+        for key in ("history", "summary"):
+            source = diagnostics[key]
+            path = (config.parent / source).resolve()
+            with path.open() as stream:
+                records[key] = list(csv.DictReader(stream))
+            diagnostic_inputs.append(
+                {"path": source, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            )
+        save(
+            plot_mlneb_diagnostics(
+                records["history"], records["summary"], diagnostics.get("titles")
+            ),
+            "catlearn_failures",
+        )
     manifest = {
         "inputs": [
             {"path": source, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
             for source, p in zip(settings["exports"], inputs, strict=True)
-        ],
+        ] + diagnostic_inputs,
         "profile_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
         "command_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "packages": {
