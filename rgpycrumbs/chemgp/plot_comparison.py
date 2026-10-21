@@ -28,11 +28,11 @@ def cli(config, output):
     mpl.use("Agg")
     import matplotlib.pyplot as plt  # noqa: PLC0415
     from chemparseplot.parse.benchmark import load_benchmark_exports  # noqa: PLC0415
-    from chemparseplot.plot.benchmark import (
+    from chemparseplot.plot.benchmark import (  # noqa: PLC0415
         plot_cost_savings,
-        plot_reaction_costs,
         plot_performance_profiles,
-    )  # noqa: PLC0415
+        plot_reaction_costs,
+    )
 
     profile = tomllib.loads(config.read_text())
     settings = profile["comparison"]
