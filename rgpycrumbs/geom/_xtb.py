@@ -23,7 +23,7 @@ def single_point(
     timeout=180,
     density=True,
     max_scc_iterations=2000,
-    broydamp=0.2,
+    broydamp=0.4,
 ):
     """Evaluate the supplied geometry without optimizing or changing its spin."""
     import io  # noqa: PLC0415
