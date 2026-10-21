@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click", "matplotlib>=3.8", "numpy", "chemparseplot", "rgpycrumbs"]
+# dependencies = ["click==8.5.0", "matplotlib==3.11.2", "numpy==2.5.4", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "21773a2f78e5956fe5741b10590b7469aabc61e7" }
 # ///
 """Compare verified search exports through a reproducible TOML profile."""
 
@@ -70,6 +70,7 @@ def cli(config, output):
             for p in inputs
         ],
         "profile_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
+        "command_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "packages": {
             name: {
                 "version": importlib.metadata.version(name),

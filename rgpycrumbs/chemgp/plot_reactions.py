@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click", "numpy", "matplotlib>=3.8", "scipy", "ase", "polars", "h5py", "readcon>=0.17.1", "xyzrender>=0.3.8", "chemparseplot", "rgpycrumbs"]
+# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon>=0.17.1", "xyzrender==0.3.8", "chemparseplot", "rgpycrumbs"]
 # [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
-# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "21773a2f78e5956fe5741b10590b7469aabc61e7" }
+# readcon = { git = "https://github.com/lode-org/readcon-core", rev = "aa5a9a776f52f988ef6d5b048bf2da8b13ffac8d" }
 # ///
 """Render retained reaction geometries and single-point electronic diagnostics."""
 
@@ -151,6 +151,8 @@ def cli(config, output, xtb):
         json.dumps(
             {
                 "profile_sha256": sha256(config),
+                "command_source_sha256": sha256(__file__),
+                "property_source_sha256": sha256(single_point.__code__.co_filename),
                 "calculations": records,
                 "packages": {
                     n: {
