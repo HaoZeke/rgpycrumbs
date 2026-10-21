@@ -156,7 +156,9 @@ def cli(config, output, xtb):
                     n: {
                         "version": importlib.metadata.version(n),
                         "source": json.loads(
-                            importlib.metadata.distribution(n).read_text("direct_url.json")
+                            importlib.metadata.distribution(n).read_text(
+                                "direct_url.json"
+                            )
                             or "null"
                         ),
                     }
