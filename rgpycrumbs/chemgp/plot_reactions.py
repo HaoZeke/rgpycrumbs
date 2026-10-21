@@ -104,6 +104,7 @@ def cli(config, output, xtb):
                 state["image"],
                 charge=case["charge"],
                 multiplicity=case["multiplicity"],
+                bond_orders=wbo,
             )
             if settings.get("density", True):
                 state["density_image"] = str(target / "density.png")
@@ -114,6 +115,7 @@ def cli(config, output, xtb):
                     charge=case["charge"],
                     multiplicity=case["multiplicity"],
                     iso=settings.get("iso", 0.02),
+                    bond_orders=wbo,
                 )
             row["states"].append(state)
         cases.append(row)
