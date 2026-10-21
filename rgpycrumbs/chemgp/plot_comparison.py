@@ -73,7 +73,10 @@ def cli(config, output):
     frontier_fig, frontier_stats = plot_cost_frontiers(rows, titles, methods)
     save(frontier_fig, "method_cost_frontiers")
     for panel, title in titles.items():
-        save(plot_acceptance_curves(rows, panel, title, methods), f"method_acceptance_{panel}")
+        save(
+            plot_acceptance_curves(rows, panel, title, methods),
+            f"method_acceptance_{panel}",
+        )
         save(plot_reaction_costs(rows, panel, title, methods), f"reaction_costs_{panel}")
     manifest = {
         "inputs": [
