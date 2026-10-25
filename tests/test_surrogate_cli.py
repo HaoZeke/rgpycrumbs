@@ -309,6 +309,8 @@ def test_pop_draws_one_row_per_table_and_cell(tmp_path):
         "parallel_eff=parallel efficiency",
         "--metric",
         "load_balance",
+        "--label",
+        "11_grignard=Grignard",
         "--format",
         "svg",
     ]
@@ -320,7 +322,7 @@ def test_pop_draws_one_row_per_table_and_cell(tmp_path):
     for text in (
         "parallel efficiency",
         "16_oxirane, process wall",
-        "11_grignard, process wall",
+        "Grignard, process wall",
         "fitcell, fit",
     ):
         assert text in svg, text
@@ -329,6 +331,15 @@ def test_pop_draws_one_row_per_table_and_cell(tmp_path):
     bad = CliRunner().invoke(main, [*args, "--cell", "oxirane"])
     assert bad.exit_code != 0
     assert "['oxirane']" in bad.output and "'16_oxirane'" in bad.output
+    malformed_label = CliRunner().invoke(main, [*args, "--label", "missing-name"])
+    assert malformed_label.exit_code != 0
+    assert "expected CELL=NAME" in malformed_label.output
+    duplicate_label = CliRunner().invoke(
+        main,
+        [*args, "--label", "11_grignard=G", "--label", "11_grignard=Grignard"],
+    )
+    assert duplicate_label.exit_code != 0
+    assert "duplicate display label" in duplicate_label.output
     count = CliRunner().invoke(main, [*args, "--time", "x"])
     assert count.exit_code != 0 and "3 --time values for 2 tables" in count.output
     nocol = CliRunner().invoke(

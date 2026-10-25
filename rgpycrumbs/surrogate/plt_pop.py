@@ -10,7 +10,8 @@ as one line on a 0 to 1 axis, with the fixed-work efficiency (speedup per
 core ratio against the layout with the fewest cores) and the ``--guide``
 level. ``--time COLUMN[=QUANTITY]`` names the timed column of the TABLEs in
 order (one value serves every table); the quantity titles the row. Layouts
-sharing a core count are dodged; there is no ideal line. One figure,
+sharing a core count are dodged; there is no ideal line. ``--label CELL=NAME`` changes the displayed row label without
+changing the source key used to select rows. One figure,
 ``<prefix>-pop``, with one row per table and cell::
 
     rgpycrumbs surrogate plt-pop replay.csv fit.csv --time elapsed_s="process wall" --time fit_s=fit -o figs/pop --metric parallel_eff="parallel efficiency" --metric load_balance="load balance" --metric comm_eff="communication efficiency"
@@ -98,6 +99,13 @@ def _metric(spec: str) -> tuple[str, str]:
     help="Cell to draw (repeatable). Default: every cell of every TABLE.",
 )
 @click.option(
+    "--label",
+    "cell_labels",
+    multiple=True,
+    help=("Displayed cell name as CELL=NAME (repeatable); "
+          "source keys stay unchanged."),
+)
+@click.option(
     "--guide",
     type=float,
     default=0.8,
@@ -137,6 +145,7 @@ def main(
     metrics,
     times,
     cells,
+    cell_labels,
     guide,
     fmt,
     dpi,
@@ -148,6 +157,18 @@ def main(
     set_font(font, font_dirs)
     set_legend_fontsize(legend_fontsize)
     labels = dict(_metric(m) for m in metrics)
+    display_labels: dict[str, str] = {}
+    for spec in cell_labels:
+        cell, separator, display = spec.partition("=")
+        if not separator or not cell or not display:
+            raise click.BadParameter(
+                f"{spec!r}: expected CELL=NAME", param_hint="--label"
+            )
+        if cell in display_labels:
+            raise click.BadParameter(
+                f"duplicate display label for {cell!r}", param_hint="--label"
+            )
+        display_labels[cell] = display
     if len(times) == 1:
         times = times * len(tables)
     if len(times) != len(tables):
@@ -163,15 +184,16 @@ def main(
         seen.update(have or [])
         for cell in targets:
             try:
-                series.append(
-                    parse_pop_factors(
-                        table,
-                        labels,
-                        time=column,
-                        quantity=quantity or column,
-                        cell=cell,
-                    )
+                parsed = parse_pop_factors(
+                    table,
+                    labels,
+                    time=column,
+                    quantity=quantity or column,
+                    cell=cell,
                 )
+                if cell is not None:
+                    parsed.cell = display_labels.get(cell, cell)
+                series.append(parsed)
             except ValueError as exc:
                 raise click.ClickException(str(exc)) from exc
     absent = [c for c in cells if c not in seen]
