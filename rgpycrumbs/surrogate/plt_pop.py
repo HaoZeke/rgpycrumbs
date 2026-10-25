@@ -28,7 +28,7 @@ changing the source key used to select rows. One figure,
 #   "ase>=3.22",
 #   "pandas>=2.0",
 #   "cmcrameri>=1.7",
-#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@f68ad5012778d82d59d2b85be733a85eb273c647",
+#   "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@16b32663c39aa63b18e1461bb0a7b7c150826c1a",
 # ]
 # ///
 
