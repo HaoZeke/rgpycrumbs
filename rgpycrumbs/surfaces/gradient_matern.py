@@ -1,4 +1,3 @@
-import jax
 import jax.numpy as jnp
 import jax.scipy.optimize as jopt
 from jax import jit, vmap
@@ -9,8 +8,8 @@ from rgpycrumbs.surfaces._base import (
     generic_negative_mll,
 )
 from rgpycrumbs.surfaces._kernels import (
+    _matern_query_row,
     k_matrix_matern_grad_map,
-    matern_kernel_elem,
 )
 
 # ==============================================================================
@@ -38,8 +37,7 @@ def _grad_matern_solve(x, y_full, noise_scalar, length_scale):
 @jit
 def _grad_matern_predict(x_query, x_obs, alpha, length_scale):
     def get_query_row(xq, xo):
-        kee = matern_kernel_elem(xq, xo, length_scale)
-        ked = jax.grad(matern_kernel_elem, argnums=1)(xq, xo, length_scale)
+        kee, ked = _matern_query_row(xq, xo, length_scale)
         return jnp.concatenate([kee[None], ked])
 
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
@@ -50,8 +48,7 @@ def _grad_matern_predict(x_query, x_obs, alpha, length_scale):
 @jit
 def _grad_matern_var(x_query, x_obs, K_inv, length_scale):
     def get_query_row(xq, xo):
-        kee = matern_kernel_elem(xq, xo, length_scale)
-        ked = jax.grad(matern_kernel_elem, argnums=1)(xq, xo, length_scale)
+        kee, ked = _matern_query_row(xq, xo, length_scale)
         return jnp.concatenate([kee[None], ked])
 
     K_q = vmap(vmap(get_query_row, (None, 0)), (0, None))(x_query, x_obs)
