@@ -5,6 +5,7 @@ from tests.conftest import skip_if_not_env
 skip_if_not_env("surfaces")
 
 import jax.numpy as jnp
+import numpy as np
 
 from rgpycrumbs.surfaces import (
     FastIMQ,
@@ -231,6 +232,158 @@ def test_gradient_matern_fit_and_predict(gradient_2d_data, query_points):
     preds = model(query_points)
     assert preds.shape == (3,)
     assert jnp.all(jnp.isfinite(preds))
+
+
+def _pinned_bowl():
+    """A 30-point bowl with exact gradients, 25 queries, and their truth."""
+    rng = np.random.default_rng(7)
+    x = rng.uniform(-2.0, 2.0, (30, 2))
+    query = rng.uniform(-2.0, 2.0, (25, 2))
+    a, b = x[:, 0], x[:, 1]
+    y = np.sin(a) * np.cos(0.5 * b) + 0.1 * a**2
+    grads = np.stack(
+        [np.cos(a) * np.cos(0.5 * b) + 0.2 * a, -0.5 * np.sin(a) * np.sin(0.5 * b)],
+        axis=1,
+    )
+    qa, qb = query[:, 0], query[:, 1]
+    truth = np.sin(qa) * np.cos(0.5 * qb) + 0.1 * qa**2
+    return x, y, grads, query, truth
+
+
+def test_gradient_matern_predict_is_near_the_exact_answer():
+    """Held to the exact answer on the bowl at the default and length_scale 3.
+
+    The bound is 0.02.  The closed form measures 0.00729 at the default and
+    0.00374 at length_scale 3.  The autodiff covariance is 45.4 and 0.247.
+    """
+    x, y, grads, query, truth = _pinned_bowl()
+    cases = ((None, 0.02), (3.0, 0.02))
+    for length_scale, bound in cases:
+        kwargs = {"optimize": False}
+        if length_scale is not None:
+            kwargs["length_scale"] = length_scale
+        out = GradientMatern(x, y, gradients=grads, **kwargs)(query)
+        error = float(np.abs(np.asarray(out) - np.asarray(truth)).max())
+        assert error < bound, (length_scale, error, bound)
+
+
+def test_gradient_matern_query_gradient_matches_the_expected_result():
+    """The query-row gradients are correct at training and query points.
+
+    At a training point, the mean gradient should match the exact bowl
+    gradient.  The variance path uses ``maximum(var, 0)``, so a training
+    point can sit on the clipping kink; the variance gradient check is done
+    at an off-training query where the unclipped path is smooth.
+    """
+    import jax
+
+    from rgpycrumbs.surfaces.gradient_matern import (
+        _grad_matern_predict,
+        _grad_matern_var,
+    )
+
+    x, y, grads, _, _ = _pinned_bowl()
+
+    def central_grad(fn, xq, h=5e-2):
+        out = np.empty_like(np.asarray(xq))
+        xq_np = np.asarray(xq)
+        for i in range(xq_np.size):
+            step = np.zeros_like(xq_np)
+            step[i] = h
+            out[i] = (fn(xq_np + step) - fn(xq_np - step)) / (2.0 * h)
+        return out
+
+    for length_scale in (None, 3.0):
+        kwargs = {"optimize": False}
+        if length_scale is not None:
+            kwargs["length_scale"] = length_scale
+        model = GradientMatern(x, y, gradients=grads, **kwargs)
+
+        def mean(xq, model=model):
+            return _grad_matern_predict(xq[None], model.x, model.alpha, model.ls)[0]
+
+        x0 = model.x[0]
+        grad_mean = np.asarray(jax.grad(mean)(x0))
+        assert grad_mean.shape == (2,)
+        assert np.all(np.isfinite(grad_mean))
+        assert grad_mean == pytest.approx(np.asarray(grads[0]), abs=1e-3)
+
+    model = GradientMatern(x, y, gradients=grads, optimize=False)
+
+    def var(xq):
+        return _grad_matern_var(xq[None], model.x, model.K_inv, model.ls)[0]
+
+    x0 = model.x[0]
+    grad_var = np.asarray(jax.grad(var)(x0))
+    assert grad_var.shape == (2,)
+    assert np.all(np.isfinite(grad_var))
+
+    xq = np.array([2.0, 2.0], dtype=np.float64)
+    grad_var_query = np.asarray(jax.grad(var)(jnp.asarray(xq, dtype=jnp.float32)))
+    fd_var_query = central_grad(
+        lambda p: float(var(jnp.asarray(p, dtype=jnp.float32))), xq
+    )
+    assert float(var(jnp.asarray(xq, dtype=jnp.float32))) > 0.0
+    assert grad_var_query == pytest.approx(fd_var_query, abs=2e-2)
+
+
+def test_matern_gradient_covariance_is_exact_at_a_repeated_point():
+    """The closed form, not an autodiff cancellation, at x1 == x2."""
+    from rgpycrumbs.surfaces._kernels import full_covariance_matern
+
+    x = jnp.array([0.3, -0.4], dtype=jnp.float32)
+    block = np.asarray(full_covariance_matern(x, x, jnp.float32(3.0)))
+    exact = 5.0 / (3.0 * 9.0)
+    assert block[0, 0] == pytest.approx(1.0, abs=1e-6)
+    assert block[0, 1:] == pytest.approx(0.0, abs=1e-6)
+    assert block[1:, 0] == pytest.approx(0.0, abs=1e-6)
+    assert block[1:, 1:] == pytest.approx(exact * np.eye(2), abs=1e-5)
+
+
+def test_matern_gradient_covariance_matches_a_central_difference():
+    """Off a repeated point, the block matches a float64 difference of k."""
+    from rgpycrumbs.surfaces._kernels import full_covariance_matern
+
+    rng = np.random.default_rng(1)
+    x1 = rng.normal(size=2)
+    x2 = rng.normal(size=2)
+    ls = 1.7
+    h = 1e-5
+
+    def value(p, q):
+        r = np.linalg.norm(p - q)
+        u = np.sqrt(5.0) * r / ls
+        return (1.0 + u + u**2 / 3.0) * np.exp(-u)
+
+    def grad_x2(p, q):
+        out = np.empty(2)
+        for i in range(2):
+            step = np.zeros(2)
+            step[i] = h
+            out[i] = (value(p, q + step) - value(p, q - step)) / (2.0 * h)
+        return out
+
+    dk_dx2 = grad_x2(x1, x2)
+    dk_dx1 = grad_x2(x2, x1)
+    hess = np.empty((2, 2))
+    for j in range(2):
+        step = np.zeros(2)
+        step[j] = h
+        hess[j] = (grad_x2(x1 + step, x2) - grad_x2(x1 - step, x2)) / (2.0 * h)
+    # jacfwd(grad wrt x2) wrt x1 has shape (dx2, dx1); hess[j] is d/dx1_j.
+    hess = hess.T
+    block = np.asarray(
+        full_covariance_matern(
+            jnp.asarray(x1),
+            jnp.asarray(x2),
+            jnp.asarray(ls),
+        ),
+        dtype=np.float64,
+    )
+    assert block[0, 0] == pytest.approx(value(x1, x2), abs=1e-5)
+    assert block[0, 1:] == pytest.approx(dk_dx2, abs=1e-5)
+    assert block[1:, 0] == pytest.approx(dk_dx1, abs=1e-5)
+    assert block[1:, 1:] == pytest.approx(hess, abs=1e-4)
 
 
 def test_gradient_imq_fit_and_predict(gradient_2d_data, query_points):

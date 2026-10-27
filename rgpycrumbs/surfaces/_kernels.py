@@ -4,7 +4,9 @@ Provides element-wise and matrix kernel functions for Matern 5/2, inverse
 multiquadric (IMQ), squared exponential (SE), rational quadratic (RQ), and
 thin-plate spline (TPS) kernels.  Each kernel family includes a ``full_covariance_*``
 function that builds the gradient-enhanced covariance block
-``[[k, dk/dx2], [dk/dx1, d2k/dx1dx2]]`` via JAX automatic differentiation.
+``[[k, dk/dx2], [dk/dx1, d2k/dx1dx2]]``. Matern 5/2 uses a
+cancellation-free closed form. The other families use JAX automatic
+differentiation.
 
 .. versionadded:: 1.0.0
 """
@@ -90,12 +92,63 @@ def matern_kernel_elem(x1, x2, length_scale=1.0):
     return val
 
 
+def _matern_radial(x1, x2, length_scale):
+    """Cancellation-free Matern 5/2 value and ``dk/dx2``.
+
+    With ``diff = x1 - x2`` and ``u = sqrt(5) ||diff|| / l``,
+
+    ``k = (1 + u + u**2 / 3) exp(-u)`` and
+    ``dk/dx2 = (5 / (3 l**2)) exp(-u) (1 + u) diff``,
+
+    which is the identity ``-dk/dr / r = (5 / (3 l**2)) (1 + u) exp(-u)``.
+    At a repeated point this is ``(1, 0)`` with no ``0/0`` quotient.
+    Automatic differentiation of :func:`matern_kernel_elem` subtracts two
+    ``O(1/l)`` terms there and is wrong by several percent in float32.
+    """
+    diff = x1 - x2
+    ls = jnp.squeeze(length_scale)
+    r = jnp.sqrt(jnp.sum(diff * diff))
+    u = jnp.sqrt(5.0) * r / ls
+    exp_u = jnp.exp(-u)
+    k_ee = (1.0 + u + (u**2) / 3.0) * exp_u
+    c = (5.0 / (3.0 * ls**2)) * exp_u
+    k_ed = c * (1.0 + u) * diff
+    return k_ee, k_ed, c, u, diff, ls
+
+
+def _matern_query_row(x1, x2, length_scale):
+    """Value and ``dk/dx2`` for a query, finite under ``jax.grad`` at ``r = 0``.
+
+    The train-train block keeps :func:`_matern_radial`.  A bare ``sqrt`` of
+    the squared distance has an infinite derivative at a repeated point, so
+    differentiating a prediction or a variance with respect to the query is
+    NaN exactly at a training point.  The double ``where`` is the identity
+    for ``r > 0`` and returns ``0`` at ``r = 0``, so the forward values match
+    the closed form.
+    """
+    diff = x1 - x2
+    ls = jnp.squeeze(length_scale)
+    sq = jnp.sum(diff * diff)
+    r = jnp.where(sq > 0, jnp.sqrt(jnp.where(sq > 0, sq, 1.0)), 0.0)
+    u = jnp.sqrt(5.0) * r / ls
+    exp_u = jnp.exp(-u)
+    k_ee = (1.0 + u + (u**2) / 3.0) * exp_u
+    c = (5.0 / (3.0 * ls**2)) * exp_u
+    k_ed = c * (1.0 + u) * diff
+    return k_ee, k_ed
+
+
 def full_covariance_matern(x1, x2, length_scale):
     """Build the gradient-enhanced covariance block for the Matern 5/2 kernel.
 
     Constructs a ``(D+1, D+1)`` matrix containing the energy-energy,
     energy-gradient, gradient-energy, and gradient-gradient covariance entries
-    using JAX automatic differentiation.
+    from the closed form in :func:`_matern_radial`. The Hessian block is
+
+    ``d**2 k / (dx1 dx2) = c ((1 + u) I - (5 / l**2) outer(diff, diff))``
+
+    with ``c = (5 / (3 l**2)) exp(-u)``, so a repeated point has diagonal
+    ``5 / (3 l**2)`` and the matrix stays positive definite in float32.
 
     Args:
         x1: First point, shape ``(D,)``.
@@ -107,12 +160,10 @@ def full_covariance_matern(x1, x2, length_scale):
 
     .. versionadded:: 1.1.0
     """
-    k_ee = matern_kernel_elem(x1, x2, length_scale)
-    k_ed = jax.grad(matern_kernel_elem, argnums=1)(x1, x2, length_scale)
-    k_de = jax.grad(matern_kernel_elem, argnums=0)(x1, x2, length_scale)
-    k_dd = jax.jacfwd(jax.grad(matern_kernel_elem, argnums=1), argnums=0)(
-        x1, x2, length_scale
-    )
+    k_ee, k_ed, c, u, diff, ls = _matern_radial(x1, x2, length_scale)
+    k_de = -k_ed
+    eye = jnp.eye(diff.shape[0], dtype=diff.dtype)
+    k_dd = c * ((1.0 + u) * eye - (5.0 / ls**2) * jnp.outer(diff, diff))
     row1 = jnp.concatenate([k_ee[None], k_ed])
     row2 = jnp.concatenate([k_de[:, None], k_dd], axis=1)
     return jnp.concatenate([row1[None, :], row2], axis=0)
