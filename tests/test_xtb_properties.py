@@ -4,6 +4,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+
+pytest.importorskip("ase")
+
 from ase import Atoms
 
 from rgpycrumbs.geom._xtb import single_point
