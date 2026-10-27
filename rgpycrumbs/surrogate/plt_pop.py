@@ -102,8 +102,7 @@ def _metric(spec: str) -> tuple[str, str]:
     "--label",
     "cell_labels",
     multiple=True,
-    help=("Displayed cell name as CELL=NAME (repeatable); "
-          "source keys stay unchanged."),
+    help=("Displayed cell name as CELL=NAME (repeatable); source keys stay unchanged."),
 )
 @click.option(
     "--guide",
