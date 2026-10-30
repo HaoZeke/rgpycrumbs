@@ -1,1 +1,0 @@
-``.con`` and ``.convel`` reads and writes go through readcon 0.17.1 from PyPI. Periodic alignment uses readcon-ops, installed from its git source until it is on PyPI. Writers omit precision and leave canonical off. Plotting code does not open an LMDB corpus. Restart fixtures are compared as whole files.

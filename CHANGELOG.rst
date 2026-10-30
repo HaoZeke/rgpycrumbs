@@ -1,3 +1,41 @@
+rgpycrumbs 1.12.0 (2026-10-30)
+==============================
+
+Added
+-----
+
+- ``rgpycrumbs geom plt-rings-track MOLECULE QUERIES`` labels each centre by
+  the primitive ring or bridge it sits on. A block hop is a change of the
+  terminal ring's atoms. A frame on a bridge keeps that ring. One molecule
+  frame is reused for every query frame. An XYZ molecule needs ``--cutoff``. (plt-rings-track)
+- Added `rgpycrumbs surrogate` with `plt-band`, `plt-history`, `plt-dimer`, `plt-campaign` and `plt-scaling`. They draw surrogate-assisted saddle searches (Gaussian-process NEB, GP dimer, ASE ML-NEB) with `chemparseplot.plot.surrogate`, write deterministic PNG, PDF or SVG files, and record input hashes and tool versions in each. (surrogate-plots)
+- Added ``rgpycrumbs surrogate plt-pop`` (fixed-work speedup and the POP efficiency factors against cores, with the 0.8 guide) and ``plt-components`` (where the wall of one layout goes per cell, with the Amdahl bound per component). ``plt-scaling --pop`` and ``plt-cases --baseline`` refuse a cell or case the main table does not hold and name the values on both sides. (surrogate-pop-components)
+- ``rgpycrumbs uma prepare-aoti STRUCTURE`` prints the compiled UMA (Universal
+  Model for Atoms) package that rgpot's ``UmaPot`` loads for one system. It runs
+  rgpot's exporter on a cache miss and returns the cached package otherwise.
+  The key covers the exact composition, charge, spin, task, model and dtype. It
+  also covers the export options, the device and its instruction set or CUDA
+  capability, and the torch and fairchem versions. Spin defaults from the
+  electron parity, and a spin of the wrong parity is refused. Concurrent runs
+  for one key compile once. A package whose embedded metadata disagrees with its
+  key is refused. ``rgpycrumbs uma aoti-cache`` lists, inspects and clears the
+  cache. (uma-prepare-aoti)
+
+
+Changed
+-------
+
+- ``.con`` and ``.convel`` reads and writes go through readcon 0.17.1 from PyPI. Periodic alignment uses readcon-ops, installed from its git source until it is on PyPI. Writers omit precision and leave canonical off. Plotting code does not open an LMDB corpus. Restart fixtures are compared as whole files. (readcon-017)
+
+
+Fixed
+-----
+
+- Auto-deps stops at a failed uv install instead of retrying the same spec with pip. On Python 3.10 the pip fallback for chemparseplot, which needs 3.11, held the uv align job for close to four hours. (auto-deps-no-pip-retry)
+- The gradient-enhanced SE, Matern and RQ surfaces solve their covariance after scaling it to unit diagonal, with the 1e-6 jitter taken relative to each diagonal entry. Repeated NEB steps and a short fitted length scale no longer turn the float32 inverse into NaN. (gradient-surface-conditioning)
+- The gradient-enhanced Matern 5/2 covariance and its prediction and variance query rows use the cancellation-free derivative ``-dk/dr / r = (5 / (3 l^2)) (1 + u) exp(-u)`` instead of differentiating the kernel with JAX. At a repeated input the autodiff Hessian lost several percent in float32 and left the covariance indefinite, so ``GradientMatern`` predictions on a 30-point bowl were off by up to 45.4. (matern-cancellation-free)
+
+
 rgpycrumbs (unreleased)
 =======================
 

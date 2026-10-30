@@ -1,1 +1,0 @@
-The gradient-enhanced SE, Matern and RQ surfaces solve their covariance after scaling it to unit diagonal, with the 1e-6 jitter taken relative to each diagonal entry. Repeated NEB steps and a short fitted length scale no longer turn the float32 inverse into NaN.
