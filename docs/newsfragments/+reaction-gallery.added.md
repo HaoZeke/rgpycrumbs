@@ -1,1 +1,0 @@
-`rgpycrumbs chemgp plot-reactions` accepts `layout = "gallery"` (with `columns`): each case lists reactant, saddle and product, and only the saddle is computed and drawn, titled with the case's name and optional `subtitle`, with the bonds the endpoints change annotated. The script header pins released chemparseplot (>= 1.13.0) and readcon (0.17.2).
