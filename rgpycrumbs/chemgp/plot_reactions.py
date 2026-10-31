@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon>=0.17.1", "xyzrender==0.3.8", "resvg-py==0.5.0", "chemparseplot", "rgpycrumbs"]
-# [tool.uv.sources]
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", rev = "0a56b026f826f32e1724a8c26d39ceba2b787d34" }
-# readcon = { git = "https://github.com/lode-org/readcon-core", rev = "aa5a9a776f52f988ef6d5b048bf2da8b13ffac8d" }
+# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon==0.17.2", "xyzrender==0.3.8", "resvg-py==0.5.0", "chemparseplot>=1.13.0", "rgpycrumbs"]
 # ///
 """Render retained reaction geometries and single-point electronic diagnostics."""
 
@@ -34,6 +31,7 @@ def cli(config, output, xtb):
         align_reaction,
         changed_bonds,
         plot_reaction_atlas,
+        plot_reaction_gallery,
         read_wbo,
         render_reaction_state,
     )
@@ -44,21 +42,34 @@ def cli(config, output, xtb):
     settings = profile["reactions"]
     output = (output or config.parent / settings["output"]).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    # An atlas row renders reactant, saddle, product and comparator; a gallery
+    # tile renders the saddle alone and reads the endpoints only to choose the
+    # bonds the reaction changes.
+    layout = settings.get("layout", "atlas")
+    if layout not in ("atlas", "gallery"):
+        msg = f"Unknown reaction layout {layout!r}; use atlas or gallery"
+        raise ValueError(msg)
+    expected, rendered = (4, (0, 1, 2, 3)) if layout == "atlas" else (3, (1,))
     cases, records, bonds = [], [], []
     for case in settings["cases"]:
         states = case["states"]
-        if len(states) != 4:
-            raise ValueError(
+        if len(states) != expected:
+            msg = (
                 "A reaction row requires reactant, saddle, product and comparator"
+                if layout == "atlas"
+                else "A gallery tile requires reactant, saddle and product"
             )
+            raise ValueError(msg)
         sources = [(config.parent / s["path"]).resolve() for s in states]
         atoms = [read_first_atoms(p) for p in sources]
         pairs = case.get("bonds") or changed_bonds(atoms[0], atoms[2])
         aligned = align_reaction(atoms)
-        row = {"title": case["title"], "states": []}
+        row = {"title": case["title"], "subtitle": case.get("subtitle", ""), "states": []}
         for i, (spec, frame, source) in enumerate(
             zip(states, aligned, sources, strict=True)
         ):
+            if i not in rendered:
+                continue
             target = output / case["id"] / str(i)
             record = single_point(
                 frame,
@@ -154,8 +165,22 @@ def cli(config, output, xtb):
         }
     )
     for density in [False, True] if settings.get("density", True) else [False]:
-        fig = plot_reaction_atlas(cases, density=density)
-        name = "reaction_density" if density else "reaction_geometries"
+        if layout == "atlas":
+            fig = plot_reaction_atlas(cases, density=density)
+            name = "reaction_density" if density else "reaction_geometries"
+        else:
+            tiles = [
+                {
+                    **row["states"][0],
+                    "title": row["title"],
+                    "subtitle": row["subtitle"],
+                }
+                for row in cases
+            ]
+            fig = plot_reaction_gallery(
+                tiles, columns=settings.get("columns", 4), density=density
+            )
+            name = "reaction_gallery_density" if density else "reaction_gallery"
         for suffix in ("pdf", "png"):
             fig.savefig(output / f"{name}.{suffix}", bbox_inches="tight")
         plt.close(fig)
