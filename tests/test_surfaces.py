@@ -427,6 +427,64 @@ def test_matern_gradient_covariance_matches_a_central_difference():
     assert block[1:, 1:] == pytest.approx(hess, abs=1e-4)
 
 
+def test_rq_gradient_covariance_matches_a_central_difference():
+    """Row ``i``, column ``j`` of the mixed block is d2k / dx1_i dx2_j.
+
+    The mirrored RQ kernel has an asymmetric mixed block, so a transposed
+    block fails this check where the isotropic kernels would not.
+    """
+    from rgpycrumbs.surfaces._kernels import full_covariance_rq
+
+    length_scale, alpha = 0.9, 1.5
+    params = jnp.array([length_scale, alpha], dtype=jnp.float32)
+
+    def base(p, q):
+        d2 = np.sum((p - q) ** 2)
+        # rq_kernel_base adds the same 1e-6 to its denominator.
+        return (1.0 + d2 / (2.0 * alpha * length_scale**2 + 1e-6)) ** (-alpha)
+
+    def value(p, q):
+        return base(p, q) + base(p[::-1], q)
+
+    rng = np.random.default_rng(3)
+    x1 = rng.normal(size=2).astype(np.float32).astype(np.float64)
+    x2 = rng.normal(size=2).astype(np.float32).astype(np.float64)
+    h = 1e-4
+    steps = h * np.eye(2)
+    mixed = np.empty((2, 2))
+    for i in range(2):
+        for j in range(2):
+            mixed[i, j] = (
+                value(x1 + steps[i], x2 + steps[j])
+                - value(x1 + steps[i], x2 - steps[j])
+                - value(x1 - steps[i], x2 + steps[j])
+                + value(x1 - steps[i], x2 - steps[j])
+            ) / (4.0 * h * h)
+    block = np.asarray(
+        full_covariance_rq(jnp.asarray(x1), jnp.asarray(x2), params), dtype=np.float64
+    )
+
+    assert not np.allclose(mixed, mixed.T, atol=1e-3)
+    assert block[1:, 1:] == pytest.approx(mixed, abs=1e-4)
+
+
+def test_rq_gradient_covariance_is_positive_semidefinite():
+    """No eigenvalue falls below the roundoff bound on the entries."""
+    from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+    from rgpycrumbs.surfaces._kernels import k_matrix_rq_grad_map
+
+    rng = np.random.default_rng(4)
+    x = jnp.asarray(rng.uniform(-1.0, 1.0, (12, 2)), dtype=jnp.float32)
+    params = jnp.array([0.5, 1.0], dtype=jnp.float32)
+    K_blocks = k_matrix_rq_grad_map(x, x, params)
+    N, _, D_plus_1, _ = K_blocks.shape
+    K = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
+
+    eigenvalues = np.linalg.eigvalsh(np.asarray(K, dtype=np.float64))
+
+    assert eigenvalues.min() >= -float(covariance_roundoff_jitter(K))
+
+
 def test_gradient_imq_fit_and_predict(gradient_2d_data, query_points):
     """GradientIMQ should fit and produce finite predictions."""
     x, y, grads = gradient_2d_data

@@ -236,7 +236,7 @@ def full_covariance_imq(x1, x2, epsilon):
     k_ee = imq_kernel_elem(x1, x2, epsilon)
     k_ed = jax.grad(imq_kernel_elem, argnums=1)(x1, x2, epsilon)
     k_de = jax.grad(imq_kernel_elem, argnums=0)(x1, x2, epsilon)
-    k_dd = jax.jacfwd(jax.grad(imq_kernel_elem, argnums=1), argnums=0)(x1, x2, epsilon)
+    k_dd = jax.jacfwd(jax.grad(imq_kernel_elem, argnums=0), argnums=1)(x1, x2, epsilon)
     row1 = jnp.concatenate([k_ee[None], k_ed])
     row2 = jnp.concatenate([k_de[:, None], k_dd], axis=1)
     return jnp.concatenate([row1[None, :], row2], axis=0)
@@ -290,7 +290,7 @@ def full_covariance_se(x1, x2, length_scale):
     k_ee = se_kernel_elem(x1, x2, length_scale)
     k_ed = jax.grad(se_kernel_elem, argnums=1)(x1, x2, length_scale)
     k_de = jax.grad(se_kernel_elem, argnums=0)(x1, x2, length_scale)
-    k_dd = jax.jacfwd(jax.grad(se_kernel_elem, argnums=1), argnums=0)(
+    k_dd = jax.jacfwd(jax.grad(se_kernel_elem, argnums=0), argnums=1)(
         x1, x2, length_scale
     )
     row1 = jnp.concatenate([k_ee[None], k_ed])
@@ -356,6 +356,8 @@ def full_covariance_rq(x1, x2, params):
 
     Constructs a ``(D+1, D+1)`` matrix containing energy-energy,
     energy-gradient, gradient-energy, and gradient-gradient covariance entries.
+    Row ``1 + i`` and column ``1 + j`` hold the derivative in ``x1[i]`` and
+    ``x2[j]``.
 
     Args:
         x1: First point, shape ``(D,)``.
@@ -366,11 +368,14 @@ def full_covariance_rq(x1, x2, params):
         Covariance block, shape ``(D+1, D+1)``.
 
     .. versionadded:: 1.1.0
+
+    .. versionchanged:: 1.14.0
+       The gradient-gradient block is no longer transposed.
     """
     k_ee = rq_kernel_elem(x1, x2, params)
     k_ed = jax.grad(rq_kernel_elem, argnums=1)(x1, x2, params)
     k_de = jax.grad(rq_kernel_elem, argnums=0)(x1, x2, params)
-    k_dd = jax.jacfwd(jax.grad(rq_kernel_elem, argnums=1), argnums=0)(x1, x2, params)
+    k_dd = jax.jacfwd(jax.grad(rq_kernel_elem, argnums=0), argnums=1)(x1, x2, params)
     row1 = jnp.concatenate([k_ee[None], k_ed])
     row2 = jnp.concatenate([k_de[:, None], k_dd], axis=1)
     return jnp.concatenate([row1[None, :], row2], axis=0)
