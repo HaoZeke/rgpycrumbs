@@ -113,6 +113,10 @@ from chemparseplot.parse.eon.neb import (
 
 # --- Library Imports ---
 from chemparseplot.parse.file_ import find_file_paths
+from chemparseplot.parse.projection import (
+    compute_projection_basis,
+    project_to_sd,
+)
 from chemparseplot.parse.trajectory.hdf5 import (
     history_to_landscape_df as hdf5_history_to_landscape_df,
 )
@@ -128,20 +132,6 @@ from chemparseplot.parse.trajectory.neb import (
     trajectory_to_landscape_df,
     trajectory_to_profile_dat,
 )
-from matplotlib.gridspec import GridSpec
-from matplotlib.patches import ArrowStyle
-from rich.logging import RichHandler
-
-from rgpycrumbs.eon.helpers import load_profile_rows
-
-try:
-    from chemparseplot.parse.projection import (
-        compute_projection_basis,
-        project_to_sd,
-    )
-except ImportError:
-    compute_projection_basis = None
-    project_to_sd = None
 from chemparseplot.plot.neb import (
     convert_neb_values,
     default_neb_ylabel,
@@ -168,6 +158,11 @@ from chemparseplot.plot.theme import (
     get_theme,
     setup_global_theme,
 )
+from matplotlib.gridspec import GridSpec
+from matplotlib.patches import ArrowStyle
+from rich.logging import RichHandler
+
+from rgpycrumbs.eon.helpers import load_profile_rows
 
 # --- Logging Setup ---
 logging.basicConfig(

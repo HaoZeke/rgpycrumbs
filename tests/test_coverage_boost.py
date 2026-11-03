@@ -157,6 +157,13 @@ def _make_chemparseplot_mocks():
     ]:
         setattr(mods["chemparseplot.parse.trajectory.neb"], fn_name, MagicMock())
 
+    # chemparseplot.parse.projection
+    mods["chemparseplot.parse.projection"] = types.ModuleType(
+        "chemparseplot.parse.projection"
+    )
+    for fn_name in ["compute_projection_basis", "project_to_sd"]:
+        setattr(mods["chemparseplot.parse.projection"], fn_name, MagicMock())
+
     # chemparseplot.parse.neb_utils
     mods["chemparseplot.parse.neb_utils"] = types.ModuleType(
         "chemparseplot.parse.neb_utils"
