@@ -69,10 +69,10 @@ Named sets: ~minima~, ~saddles~, ~endpoints~, ~training~, ~train_N<n>~, ~selecte
 |---------------+-----------------------------------------------------------|
 | convergence | ~table~ (oracle_calls, force metric, method) and root ~conv_tol~ |
 | surface | ~grids/energy~, optionally ~paths/*~ and ~points/*~ |
-| quality | ~grids/true_energy~ and ~grids/gp_mean_N<n>~, optionally ~points/train_N<n>~ |
+| quality | ~grids/true_energy~ and one or more ~grids/gp_mean_N<n>~, optionally ~points/train_N<n>~ |
 | rff | ~table~ (d_rff, energy_mae, gradient_mae) and root ~gp_e_mae~, ~gp_g_mae~ |
-| nll | ~grids/nll~ and ~points/optimum~ (log_sigma2, log_theta), optionally ~grids/grad_norm~ |
-| sensitivity | ~slice~ (x), ~true_surface~ (E_true) and a three-by-three grid of ~gp_ls{j}_sv{i}~ panels with E_pred and E_std, blank where missing |
+| nll | ~grids/nll~, optionally ~points/optimum~ (log_sigma2, log_theta) and ~grids/grad_norm~ |
+| sensitivity | ~slice~ (x), ~true_surface~ (E_true) and one or more of the three-by-three ~gp_ls{j}_sv{i}~ panels with E_pred and E_std, blank where missing |
 | trust | ~slice~ (x, E_true, E_pred, E_std, in_trust) and ~points/training~, optionally root ~y_slice~ |
 | variance | ~grids/energy~, ~grids/variance~ and ~points/training~, optionally ~points/minima~ and ~points/saddles~ |
 | fps | ~points/selected~ (pc1, pc2), ~points/pruned~ (pc1, pc2) |

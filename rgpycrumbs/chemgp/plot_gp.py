@@ -237,6 +237,10 @@ def quality(
         if not n_points:
             grid_names = [k for k in f["grids"].keys() if k.startswith("gp_mean_N")]
             n_points = sorted(int(k.replace("gp_mean_N", "")) for k in grid_names)
+        if not n_points:
+            raise click.ClickException(
+                f"{input_path} has no grids/gp_mean_N<n> grid to plot"
+            )
 
         grids = {}
         for n in n_points:
@@ -315,7 +319,9 @@ def nll(
     """MAP-NLL landscape in hyperparameter space."""
     with h5py.File(input_path, "r") as f:
         nll_data, xc, yc = read_h5_grid(f, "nll")
-        opt = read_h5_points(f, "optimum")
+        opt = {}
+        if "points" in f and "optimum" in f["points"]:
+            opt = read_h5_points(f, "optimum")
 
         # Read gradient norm grid if available
         grad_norm = None
@@ -370,6 +376,8 @@ def sensitivity(
                         "E_pred": gp_df["E_pred"].to_numpy(),
                         "E_std": gp_df["E_std"].to_numpy(),
                     }
+    if not panels:
+        raise click.ClickException(f"{input_path} has no gp_ls<j>_sv<i> table to plot")
 
     fig = plot_hyperparameter_sensitivity(
         x_vals,

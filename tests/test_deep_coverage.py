@@ -531,6 +531,19 @@ class TestPlotGPDeep:
         )
         assert result.exit_code == 0, result.output
 
+    def test_nll_subcommand_without_optimum(self, tmp_path):
+        cli = _try_import_plot_gp()
+
+        h5 = tmp_path / "nll-no-optimum.h5"
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "nll")
+
+        result = CliRunner().invoke(
+            cli, ["nll", "-i", str(h5), "-o", str(tmp_path / "nll.pdf")]
+        )
+        assert result.exit_code == 0, result.output
+        assert (tmp_path / "nll.pdf").exists()
+
     def test_sensitivity_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
 
@@ -558,6 +571,37 @@ class TestPlotGPDeep:
             cli, ["sensitivity", "-i", str(h5), "-o", str(tmp_path / "sens.pdf")]
         )
         assert result.exit_code == 0, result.output
+
+    def test_sensitivity_draws_a_partial_panel_grid(self, tmp_path):
+        cli = _try_import_plot_gp()
+
+        h5 = tmp_path / "sens-partial.h5"
+        x = np.linspace(-1, 1, 10)
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "slice", {"x": x})
+            _make_table(f, "true_surface", {"E_true": x**2})
+            _make_table(f, "gp_ls1_sv1", {"E_pred": x**2, "E_std": np.full_like(x, 0.1)})
+
+        result = CliRunner().invoke(
+            cli, ["sensitivity", "-i", str(h5), "-o", str(tmp_path / "sens.pdf")]
+        )
+        assert result.exit_code == 0, result.output
+
+    def test_sensitivity_requires_a_panel(self, tmp_path):
+        cli = _try_import_plot_gp()
+
+        h5 = tmp_path / "sens-empty.h5"
+        x = np.linspace(-1, 1, 10)
+        with h5py.File(h5, "w") as f:
+            _make_table(f, "slice", {"x": x})
+            _make_table(f, "true_surface", {"E_true": x**2})
+
+        result = CliRunner().invoke(
+            cli, ["sensitivity", "-i", str(h5), "-o", str(tmp_path / "sens.pdf")]
+        )
+        assert result.exit_code != 0
+        assert "no gp_ls<j>_sv<i> table" in result.output
+        assert not (tmp_path / "sens.pdf").exists()
 
     def test_trust_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
@@ -657,6 +701,19 @@ class TestPlotGPDeep:
             cli, ["quality", "-i", str(h5), "-o", str(tmp_path / "q.pdf")]
         )
         assert result.exit_code == 0, result.output
+
+    def test_quality_requires_a_gp_mean_grid(self, tmp_path):
+        cli = _try_import_plot_gp()
+
+        h5 = tmp_path / "quality-empty.h5"
+        with h5py.File(h5, "w") as f:
+            _make_grid(f, "true_energy")
+
+        result = CliRunner().invoke(
+            cli, ["quality", "-i", str(h5), "-o", str(tmp_path / "q.pdf")]
+        )
+        assert result.exit_code != 0
+        assert "no grids/gp_mean_N<n> grid" in result.output
 
     def test_rff_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
