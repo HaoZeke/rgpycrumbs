@@ -12,7 +12,7 @@
 #   "pandas",
 #   "plotnine",
 #   "rich",
-#   "chemparseplot",
+#   "chemparseplot>=1.13.0,<2",
 #   "rgpycrumbs>=1.10.2",
 # ]
 # ///

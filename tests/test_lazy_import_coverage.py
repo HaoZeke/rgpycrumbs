@@ -92,10 +92,10 @@ class TestDependencyMapCoverage:
     def test_optional_peers_pinned_for_uv_and_readcon(self) -> None:
         """Plot/CON peers resolve via ensure_import with chemparseplot / readcon floors."""
         cpp_spec = _DEPENDENCY_MAP["chemparseplot"]
-        # plt_min and plt_saddle import render_single_ended_landscape, which
-        # chemparseplot first ships in 1.11.0.
+        # 1.13.0 is the oldest release with every chemparseplot name
+        # rgpycrumbs imports; plot_reaction_gallery arrived last.
         floor = cpp_spec.split(">=")[1].split(",")[0]
-        assert tuple(int(x) for x in floor.split(".")) >= (1, 11, 0), cpp_spec
+        assert tuple(int(x) for x in floor.split(".")) >= (1, 13, 0), cpp_spec
         assert "neb" in cpp_spec or "chemparseplot" in cpp_spec
         read_spec = _DEPENDENCY_MAP["readcon"]
         assert read_spec.startswith("readcon>="), read_spec

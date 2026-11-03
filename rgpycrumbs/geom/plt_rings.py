@@ -28,7 +28,7 @@ angstrom is the ice neighbour list and is the wrong graph for a thiophene.
 #   "matplotlib>=3.8.2",
 #   "pydseamslib>=2.11.0",
 #   "xyzrender>=0.3.8",
-#   "chemparseplot>=1.11",
+#   "chemparseplot>=1.13.0,<2",
 # ]
 # ///
 

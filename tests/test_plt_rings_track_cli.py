@@ -15,7 +15,7 @@ def test_plt_rings_track_declares_the_wheel():
     text = script.read_text()
     assert '# requires-python = ">=3.12"' in text
     assert "pydseamslib>=2.11.0" in text
-    assert "chemparseplot>=1.11" in text
+    assert "chemparseplot>=1.13.0,<2" in text
 
 
 @patch("rgpycrumbs.cli.subprocess.run")

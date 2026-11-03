@@ -27,12 +27,12 @@ _DEPENDENCY_MAP: dict[str, str] = {
     "ase.data": "ase>=3.22",
     "ase.neighborlist": "ase>=3.22",
     "adjustText": "adjustText>=1.0",
-    "chemparseplot": "chemparseplot[neb,plot]>=1.11.0,<2",
-    "chemparseplot.plot": "chemparseplot[neb,plot]>=1.11.0,<2",
-    "chemparseplot.plot.chemgp": "chemparseplot[neb,plot]>=1.11.0,<2",
-    "chemparseplot.plot.neb": "chemparseplot[neb,plot]>=1.11.0,<2",
-    "chemparseplot.plot.optimization": "chemparseplot[neb,plot]>=1.11.0,<2",
-    "chemparseplot.parse": "chemparseplot[neb,plot]>=1.11.0,<2",
+    "chemparseplot": "chemparseplot[neb,plot]>=1.13.0,<2",
+    "chemparseplot.plot": "chemparseplot[neb,plot]>=1.13.0,<2",
+    "chemparseplot.plot.chemgp": "chemparseplot[neb,plot]>=1.13.0,<2",
+    "chemparseplot.plot.neb": "chemparseplot[neb,plot]>=1.13.0,<2",
+    "chemparseplot.plot.optimization": "chemparseplot[neb,plot]>=1.13.0,<2",
+    "chemparseplot.parse": "chemparseplot[neb,plot]>=1.13.0,<2",
     "readcon": "readcon>=0.17.1",
     "readcon_ops": "readcon-ops>=0.1.1",
     "h5py": "h5py",
@@ -197,17 +197,13 @@ def _resolve_pip_spec(module_name: str) -> str:
     return apply_pin_to_spec(spec, pins_from_env())
 
 
-# TODO: drop once readcon-ops is on PyPI and a chemparseplot release ships
-# frame_with_positions, read_first_frame, and the con overview plotters.
+# TODO: drop once readcon-ops is on PyPI.
 # The map keeps the version floor. The installer follows git so auto-deps does
-# not resolve the older PyPI wheels, or fail on a name PyPI does not carry.
+# not fail on a name PyPI does not carry.
 _UNPUBLISHED_GIT = {
     "readcon-ops": (
         "readcon-ops @ git+https://github.com/lode-org/readcon-ops.git"
         "@760ecf5b36e3f8e949c42c9eff40cc74b3b20825"
-    ),
-    "chemparseplot": (
-        "chemparseplot[neb,plot] @ git+https://github.com/HaoZeke/chemparseplot.git@main"
     ),
 }
 

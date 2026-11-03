@@ -586,7 +586,7 @@ class TestPltNebPlotting:
 
 @pytest.mark.skipif(
     not _HAS_DIMER_TRAJ,
-    reason="chemparseplot dev branch not installed",
+    reason="chemparseplot, polars or ase not available",
 )
 class TestPltSaddlePlotting:
     """Test actual plotting paths of plt_saddle.py."""
@@ -793,7 +793,7 @@ class TestPltSaddlePlotting:
 
 @pytest.mark.skipif(
     not _HAS_DIMER_TRAJ,
-    reason="chemparseplot dev branch not installed",
+    reason="chemparseplot, polars or ase not available",
 )
 class TestPltMinPlotting:
     """Test actual plotting paths of plt_min.py."""

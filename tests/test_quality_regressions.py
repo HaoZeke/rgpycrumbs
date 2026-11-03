@@ -157,3 +157,33 @@ def test_org_cog_output_matches_the_pixi_files() -> None:
             assert block["output"] == "".join(f"{line}\n" for line in emitted), path
             blocks += 1
     assert blocks
+
+
+def test_chemparseplot_requirements_share_one_released_floor() -> None:
+    """Installs, pixi, docs and script headers take one floor or a commit."""
+    tomllib = pytest.importorskip("tomllib")
+    from rgpycrumbs._aux import _DEPENDENCY_MAP, _install_spec
+
+    spec = _DEPENDENCY_MAP["chemparseplot"]
+    floor = re.fullmatch(r"chemparseplot\[neb,plot\]>=([\d.]+),<2", spec)[1]
+    pixi = tomllib.loads((PROJECT_ROOT / "pixi.toml").read_text())
+
+    assert _install_spec(spec) == spec
+    for feature in ("docs", "test"):
+        requirement = pixi["feature"][feature]["pypi-dependencies"]["chemparseplot"]
+        assert requirement == f">={floor}, <2", feature
+    for path in sorted((PROJECT_ROOT / "rgpycrumbs").rglob("*.py")):
+        text = path.read_text()
+        pinned = re.search(r"^# chemparseplot = \{ git = ", text, re.M)
+        for version in re.findall(
+            r'^#.*"chemparseplot(?:\[[\w,]+\])?([^"@]*)"', text, re.M
+        ):
+            assert version == f">={floor},<2" or (not version and pinned), path
+        assert 'branch = "main"' not in text, path
+        floors = set(re.findall(r'"chemparseplot(?:\[[\w,]+\])?>=([\d.]+)', text))
+        assert floors <= {floor}, path
+    for path in sorted((PROJECT_ROOT / "docs" / "orgmode").rglob("*.org")):
+        documented = re.findall(
+            r"chemparseplot ?(?:≥|>=) ?(\d+(?:\.\d+)+)", path.read_text()
+        )
+        assert set(documented) <= {floor}, path

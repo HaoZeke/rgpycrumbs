@@ -5,16 +5,10 @@
 #   "click",
 #   "ase>=3.22",
 #   "numpy",
-#   "chemparseplot>=1.11.0,<2",
+#   "chemparseplot>=1.13.0,<2",
 #   "readcon>=0.17.1",
 #   "rgpycrumbs",
 # ]
-#
-# [tool.uv.sources]
-# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
-# # chemparseplot release ships frame_with_positions.
-# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 """Match atoms in structure file to target coordinates.
 

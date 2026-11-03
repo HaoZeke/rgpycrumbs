@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon==0.17.2", "xyzrender==0.3.8", "resvg-py==0.5.0", "chemparseplot>=1.13.0", "rgpycrumbs"]
+# dependencies = ["click==8.5.0", "numpy==2.5.4", "matplotlib==3.11.2", "scipy==1.18.1", "ase==3.29.0", "polars==2.0.0", "h5py==3.16.0", "readcon==0.17.2", "xyzrender==0.3.8", "resvg-py==0.5.0", "chemparseplot>=1.13.0,<2", "rgpycrumbs"]
 # ///
 """Render retained reaction geometries and single-point electronic diagnostics."""
 

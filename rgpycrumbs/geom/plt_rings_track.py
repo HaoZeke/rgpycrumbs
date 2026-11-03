@@ -27,7 +27,7 @@ angstrom is the ice neighbour list.
 #   "numpy>=1.26",
 #   "matplotlib>=3.8.2",
 #   "pydseamslib>=2.11.0",
-#   "chemparseplot>=1.11",
+#   "chemparseplot>=1.13.0,<2",
 # ]
 # ///
 

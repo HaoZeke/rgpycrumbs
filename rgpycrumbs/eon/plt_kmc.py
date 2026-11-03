@@ -25,15 +25,9 @@ robust to partial aKMC directories (missing states are skipped).
 #   "rich",
 #   "ase",
 #   "readcon>=0.17.1",
-#   "chemparseplot[neb,plot]>=1.9.17,<2",
+#   "chemparseplot[neb,plot]>=1.13.0,<2",
 #   "rgpycrumbs>=1.10.4",
 # ]
-#
-# [tool.uv.sources]
-# # TODO: drop these git sources once readcon 0.17.1 is on PyPI and a
-# # chemparseplot release ships frame_with_positions.
-# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
-# chemparseplot = { git = "https://github.com/HaoZeke/chemparseplot", branch = "main" }
 # ///
 
 from __future__ import annotations
