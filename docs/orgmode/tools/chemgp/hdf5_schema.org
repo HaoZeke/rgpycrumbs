@@ -3,15 +3,16 @@
 
 * HDF5 Layout
 
-ChemGP Rust examples write HDF5 files with a fixed layout. The ~plt-gp~
-subcommands each read specific groups and attributes from this schema.
+The ChemGP Rust examples write line-delimited records.
+ChemGP's =scripts/jsonl_to_h5.py= turns them into HDF5 files with a fixed layout.
+The ~plt-gp~ subcommands each read specific groups and attributes from this layout.
 
 ** Top-Level Groups
 
 | Group | Contents |
 |-------------------+--------------------------------------------------------------|
 | ~grids/<name>~ | 2D arrays with attrs ~x_range~, ~y_range~, ~x_length~, ~y_length~ |
-| ~table/<name>~ | Group of same-length 1D arrays (DataFrame columns) |
+| ~<name>~ | Table: a root-level group of same-length 1D arrays (DataFrame columns) |
 | ~paths/<name>~ | Ordered point sequences (~x~, ~y~ or ~rAB~, ~rBC~) |
 | ~points/<name>~ | Point sets (~x~, ~y~ or ~pc1~, ~pc2~) |
 | Root attrs | Metadata scalars (~conv_tol~, ~gp_e_mae~, etc.) |
@@ -27,13 +28,20 @@ Each grid is a 2D ~float64~ dataset. Attributes store axis info:
 - ~x_length~ :: Number of x grid points (int)
 - ~y_length~ :: Number of y grid points (int)
 
-Named grids: ~energy~ (true PES), ~gp_mean_N~ (GP at N training points),
-~variance~, ~nll~, ~gradient_norm~.
+Named grids:
 
-*** ~table~
+- ~energy~ :: True potential energy surface
+- ~true_energy~ :: True surface, as the ~quality~ subcommand reads it
+- ~gp_mean_N<n>~ :: GP mean from /n/ training points
+- ~variance~ :: GP variance
+- ~nll~, ~grad_norm~ :: Negative log-likelihood and the norm of its gradient
 
-A group whose children are same-length 1D arrays, analogous to DataFrame
-columns. Common columns:
+*** Tables
+
+Each table is a group at the root of the file.
+Its children are same-length 1D arrays, like DataFrame columns.
+Three subcommands read the table named ~table~: ~convergence~, ~rff~ and ~profile~.
+Tables often have these columns:
 
 - ~oracle_calls~ :: Cumulative oracle evaluations
 - ~max_fatom~, ~max_force~, ~force_norm~, ~ci_force~ :: Force convergence metrics
@@ -53,22 +61,22 @@ Each point set is a group with coordinate arrays:
 - ~x~, ~y~ :: Cartesian coordinates
 - ~pc1~, ~pc2~ :: PCA projections (for FPS scatter)
 
-Named sets: ~minima~, ~saddles~, ~endpoints~, ~training~, ~selected~, ~pruned~.
+Named sets: ~minima~, ~saddles~, ~endpoints~, ~training~, ~train_N<n>~, ~selected~, ~pruned~, ~optimum~.
 
 * Schema per Plot Type
 
 | Subcommand | Required groups/attrs |
 |---------------+-----------------------------------------------------------|
-| convergence | ~table/convergence~ (oracle_calls, force metric, method); root ~conv_tol~ |
-| surface | ~grids/energy~; optional ~paths/*~, ~points/*~ |
-| quality | ~grids/gp_mean_N*~ + ~points/training_N*~; ~grids/energy~ |
-| rff | ~table/rff~ (d_rff, energy_mae, gradient_mae); root ~gp_e_mae~, ~gp_g_mae~ |
-| nll | ~grids/nll~; optional ~grids/gradient_norm~; root ~log_sigma2~, ~log_theta~ |
-| sensitivity | ~table/slice~ (x), ~table/true_surface~ (E); 9x ~table/gp_ls{j}_sv{i}~ (E_pred, E_std) |
-| trust | ~table/slice~ (x, E_true, E_pred, E_std, in_trust); optional ~points/training~ |
-| variance | ~grids/energy~, ~grids/variance~; optional ~points/training~, stationary root attrs |
+| convergence | ~table~ (oracle_calls, force metric, method) and root ~conv_tol~ |
+| surface | ~grids/energy~, optionally ~paths/*~ and ~points/*~ |
+| quality | ~grids/true_energy~ and ~grids/gp_mean_N<n>~, optionally ~points/train_N<n>~ |
+| rff | ~table~ (d_rff, energy_mae, gradient_mae) and root ~gp_e_mae~, ~gp_g_mae~ |
+| nll | ~grids/nll~ and ~points/optimum~ (log_sigma2, log_theta), optionally ~grids/grad_norm~ |
+| sensitivity | ~slice~ (x), ~true_surface~ (E_true) and a three-by-three grid of ~gp_ls{j}_sv{i}~ panels with E_pred and E_std, blank where missing |
+| trust | ~slice~ (x, E_true, E_pred, E_std, in_trust) and ~points/training~, optionally root ~y_slice~ |
+| variance | ~grids/energy~, ~grids/variance~ and ~points/training~, optionally ~points/minima~ and ~points/saddles~ |
 | fps | ~points/selected~ (pc1, pc2), ~points/pruned~ (pc1, pc2) |
-| profile | ~table/profile~ (image, energy, method) |
+| profile | ~table~ (image, energy, method) |
 | landscape | .con files in ~source_dir~ (not HDF5; delegates to plt-neb) |
 
 * Filename Conventions
