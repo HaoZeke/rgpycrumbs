@@ -239,3 +239,15 @@ def test_head_search_returns_false_at_early_eof(tmp_path: Path, content: str) ->
     path.write_text(content, encoding="utf-8")
 
     assert head_search(path, "absent") is False
+
+
+def test_head_search_reads_to_the_end_without_a_line_budget(tmp_path: Path) -> None:
+    """Only an explicit ``n`` bounds the search."""
+    from rgpycrumbs.search.helpers import head_search
+
+    lines = [f"line {index}" for index in range(1000)] + ["needle"]
+    path = tmp_path / "late.txt"
+    path.write_text("".join(f"{line}\n" for line in lines), encoding="utf-8")
+
+    assert head_search(path, "needle") is True
+    assert head_search(path, "needle", n=len(lines) - 1) is False

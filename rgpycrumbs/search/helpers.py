@@ -31,7 +31,7 @@ def tail(filename: str | Path, n: int) -> list[str]:
         return [line.rstrip("\r\n") for line in deque(stream, maxlen=n)]
 
 
-def head_search(filename: Path, sstr: str, n=60):
+def head_search(filename: Path, sstr: str, n: int | None = None) -> bool:
     """
     Checks if the search string is found in the first n lines of a file.
 
@@ -39,12 +39,14 @@ def head_search(filename: Path, sstr: str, n=60):
 
     .. versionchanged:: 1.14.0
        A file shorter than *n* lines returns ``False`` instead of raising
-       ``StopIteration``.
+       ``StopIteration``. *n* defaults to ``None``, which reads until a match
+       or the end of the file; pass ``n=60`` for the previous default.
 
     Args:
         filename (Path): Path to the file.
         sstr (str): The search string.
-        n (int, optional): Number of lines to read. Defaults to 60.
+        n (int, optional): Number of lines to read. ``None`` reads until a
+            match or the end of the file. Defaults to ``None``.
 
     Returns:
         bool: True if the search string is found, False otherwise.
