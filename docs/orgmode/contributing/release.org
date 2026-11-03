@@ -20,17 +20,23 @@ tag, but the actual build and PyPI publish are CI-driven.
 
 ** Building the Changelog
 The final build aggregates all fragments into ~CHANGELOG.rst~. First preview the
-next version, then render the changelog for that exact tag.
+next version, then render the changelog for that exact tag. ~cog~ is not on
+PyPI, so ~cargo~ builds it from the ~cocogitto~ crate, which needs a Rust
+toolchain with edition 2024 support. Both source blocks share the ~release~
+shell session, so ~V~ from the first block reaches the release commit.
 
-#+BEGIN_SRC shell
+#+BEGIN_SRC shell :session release
 uv sync --extra test --extra release
 uv run --extra test pytest -m pure
 uv run --extra test pytest --pep723-check -m pep723 --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
 uvx prek run -a -vvv
 pixi run -e docs docbld
 
-uvx cocogitto cog bump --dry-run --auto
-uvx towncrier build --version "1.7.1"
+cargo install --locked cocogitto@7.0.0
+V=$(cog bump --dry-run --auto)
+V=${V#v}
+: "${V:?cog bump --dry-run --auto printed no version}"
+uvx towncrier build --version "${V:?}"
 #+END_SRC
 
 *** Checklist
@@ -45,10 +51,11 @@ The release notes remain an explicit commit. After that, ~cog~ applies the next
 tag directly to the current commit. This works well with ~hatch-vcs~, which
 derives the package version from the tag itself.
 
-#+BEGIN_SRC shell
+#+BEGIN_SRC shell :session release
 git add CHANGELOG.rst docs/newsfragments
-git commit -m "release: v1.7.1"
-uvx cocogitto cog bump --auto
+git commit -m "release: v${V:?}"
+python3 scripts/check_version.py
+cog bump --auto
 git push origin main --tags
 #+END_SRC
 
