@@ -56,6 +56,25 @@ cited estimator:
   optimizer with a condition number of at most ``n + 1``.
 * ``NYSTROM_RANDOM_SEED`` only makes the random inducing subset reproducible.
   No fit is tuned to its value, and callers can pass their own ``seed``.
+* ``LENGTH_SCALE_FLOOR``, ``SQUARED_DISTANCE_GUARD`` and
+  ``RQ_DENOMINATOR_GUARD`` come from the float32 machine epsilon
+  ``eps = 2**-23``, the spacing of float32 numbers at one.
+  Inputs of order one resolve no length shorter than ``eps``, so the
+  squared-exponential kernel clamps its length scale there.
+  Its gradient-block likelihood and gradient stay finite below that.
+  The thin-plate and Matern kernels take ``r = sqrt(d2 + eps**2)``, which is
+  ``eps`` at coincident points.
+  Without the guard the square root has no derivative there, and the
+  thin-plate ``r**2 log(r)`` is NaN.
+  In float32, ``d2 + eps**2 == d2`` for every ``d2 >= 2**-21``.
+  The ``1e-12`` used before is a no-op in float32 for every ``d2 >= 2**-15``.
+  The rational-quadratic kernel adds ``eps**2``, the squared length-scale
+  floor, to ``2 alpha l**2``.
+  The ratio then stays defined at coincident points when that product
+  underflows.
+  The ``1e-6`` used before changed that kernel by half a percent at
+  ``l = 0.01`` and by half at ``l = 1e-3``.
+  ``eps**2`` changes it there by less than ``1e-8``.
 """
 
 from typing import Final
@@ -69,6 +88,10 @@ from rgpycrumbs._aux import ensure_import
 IMQ_EPSILON_PRIOR_SHAPE: Final = 2.0
 RQ_INITIAL_ALPHA: Final = 1.0
 NYSTROM_RANDOM_SEED: Final = 42
+_FLOAT32_EPS: Final = float(jnp.finfo(jnp.float32).eps)
+LENGTH_SCALE_FLOOR: Final = _FLOAT32_EPS
+SQUARED_DISTANCE_GUARD: Final = _FLOAT32_EPS**2
+RQ_DENOMINATOR_GUARD: Final = _FLOAT32_EPS**2
 
 
 @jax.jit
@@ -146,8 +169,11 @@ def starting_noise(smoothing, matrix: jnp.ndarray) -> float:
 
 __all__ = [
     "IMQ_EPSILON_PRIOR_SHAPE",
+    "LENGTH_SCALE_FLOOR",
     "NYSTROM_RANDOM_SEED",
+    "RQ_DENOMINATOR_GUARD",
     "RQ_INITIAL_ALPHA",
+    "SQUARED_DISTANCE_GUARD",
     "covariance_roundoff_factor",
     "covariance_roundoff_jitter",
     "covariance_scale",

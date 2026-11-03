@@ -17,6 +17,12 @@ import jax
 import jax.numpy as jnp
 from jax import jit, vmap
 
+from rgpycrumbs.surfaces._hyperparameters import (
+    LENGTH_SCALE_FLOOR,
+    RQ_DENOMINATOR_GUARD,
+    SQUARED_DISTANCE_GUARD,
+)
+
 # ==============================================================================
 # TPS KERNELS
 # ==============================================================================
@@ -38,7 +44,7 @@ def _tps_kernel_matrix(x):
     .. versionadded:: 1.0.0
     """
     d2 = jnp.sum((x[:, None, :] - x[None, :, :]) ** 2, axis=-1)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
     K = r**2 * jnp.log(r)
     return K
 
@@ -64,7 +70,7 @@ def _matern_kernel_matrix(x, length_scale):
     .. versionadded:: 1.0.0
     """
     d2 = jnp.sum((x[:, None, :] - x[None, :, :]) ** 2, axis=-1)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
 
     # Matern 5/2 Kernel
     # k(r) = (1 + sqrt(5)r/l + 5r^2/3l^2) * exp(-sqrt(5)r/l)
@@ -87,7 +93,7 @@ def matern_kernel_elem(x1, x2, length_scale=1.0):
     .. versionadded:: 1.0.0
     """
     d2 = jnp.sum((x1 - x2) ** 2)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
     ls = jnp.squeeze(length_scale)
     sqrt5_r_l = jnp.sqrt(5.0) * r / ls
     val = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * ls**2)) * jnp.exp(-sqrt5_r_l)
@@ -268,7 +274,7 @@ def se_kernel_elem(x1, x2, length_scale=1.0):
     .. versionadded:: 1.0.0
     """
     d2 = jnp.sum((x1 - x2) ** 2)
-    ls = jnp.maximum(length_scale, 1e-5)
+    ls = jnp.maximum(length_scale, LENGTH_SCALE_FLOOR)
     val = jnp.exp(-d2 / (2.0 * ls**2))
     return val
 
@@ -325,7 +331,7 @@ def rq_kernel_base(x1, x2, length_scale, alpha):
     .. versionadded:: 1.1.0
     """
     d2 = jnp.sum((x1 - x2) ** 2)
-    base = 1.0 + d2 / (2.0 * alpha * (length_scale**2) + 1e-6)
+    base = 1.0 + d2 / (2.0 * alpha * (length_scale**2) + RQ_DENOMINATOR_GUARD)
     val = base ** (-alpha)
     return val
 

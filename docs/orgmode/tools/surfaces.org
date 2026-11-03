@@ -75,6 +75,16 @@
      Here $u$ is the unit roundoff of the working precision.
      The shift bounds the entrywise backward error of a Cholesky factorization.
      [[https://doi.org/10.1137/1.9780898718027][Higham]] states this bound as Theorem 10.3.
+   - *Kernel guards*: Three guards come from the float32 machine epsilon ~eps = 2**-23~.
+     That is the spacing of float32 numbers at one, so inputs of order one resolve no shorter length.
+     The squared-exponential kernel clamps its length scale at ~eps~.
+     The thin-plate and Matérn kernels use $r = \sqrt{d^2 + \mathrm{eps}^2}$.
+     So $r$ stays positive at coincident points.
+     In float32 that sum equals $d^2$ for every $d^2 \geq 2^{-21}$.
+     The ~1e-12~ used before was a no-op in float32 for every $d^2 \geq 2^{-15}$.
+     The rational-quadratic kernel adds ~eps**2~ to $2 \alpha l^2$.
+     It then stays defined at coincident points when that product underflows.
+     The ~1e-6~ used before changed that kernel by half a percent at $l = 0.01$ and by half at $l = 10^{-3}$.
    - *Gradient noise*: With ~noise_per_obs~, ~GradientIMQ~ spreads each energy noise over the gradients at that point.
      Each gradient component keeps the energy's ratio of noise to prior variance.
      Its noise then has the units of a gradient variance.

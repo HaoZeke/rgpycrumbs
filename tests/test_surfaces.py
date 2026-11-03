@@ -618,6 +618,7 @@ def test_rq_gradient_covariance_matches_a_central_difference():
     The mirrored RQ kernel has an asymmetric mixed block, so a transposed
     block fails this check where the isotropic kernels would not.
     """
+    from rgpycrumbs.surfaces._hyperparameters import RQ_DENOMINATOR_GUARD
     from rgpycrumbs.surfaces._kernels import full_covariance_rq
 
     length_scale, alpha = 0.9, 1.5
@@ -625,8 +626,9 @@ def test_rq_gradient_covariance_matches_a_central_difference():
 
     def base(p, q):
         d2 = np.sum((p - q) ** 2)
-        # rq_kernel_base adds the same 1e-6 to its denominator.
-        return (1.0 + d2 / (2.0 * alpha * length_scale**2 + 1e-6)) ** (-alpha)
+        # rq_kernel_base adds the same guard to its denominator.
+        denominator = 2.0 * alpha * length_scale**2 + RQ_DENOMINATOR_GUARD
+        return (1.0 + d2 / denominator) ** (-alpha)
 
     def value(p, q):
         return base(p, q) + base(p[::-1], q)
@@ -668,6 +670,26 @@ def test_rq_gradient_covariance_is_positive_semidefinite():
     eigenvalues = np.linalg.eigvalsh(np.asarray(K, dtype=np.float64))
 
     assert eigenvalues.min() >= -float(covariance_roundoff_jitter(K))
+
+
+def test_se_kernel_uses_a_length_scale_above_the_floor():
+    """A length scale of 1e-6 lies above the float32 floor and is used as given."""
+    from rgpycrumbs.surfaces._kernels import se_kernel_elem
+
+    x1 = jnp.array([0.0, 0.0], dtype=jnp.float32)
+    x2 = jnp.array([1e-6, 0.0], dtype=jnp.float32)
+    value = se_kernel_elem(x1, x2, jnp.float32(1e-6))
+    assert float(value) == pytest.approx(np.exp(-0.5), rel=1e-5)
+
+
+def test_rq_kernel_keeps_its_value_at_a_small_length_scale():
+    """At l = 1e-3 the guard leaves (1 + d2 / (2 alpha l**2))**-alpha unchanged."""
+    from rgpycrumbs.surfaces._kernels import rq_kernel_base
+
+    x1 = jnp.array([0.0, 0.0], dtype=jnp.float32)
+    x2 = jnp.array([1e-3, 0.0], dtype=jnp.float32)
+    value = rq_kernel_base(x1, x2, jnp.float32(1e-3), jnp.float32(1.0))
+    assert float(value) == pytest.approx(2.0 / 3.0, rel=1e-5)
 
 
 def test_gradient_imq_fit_and_predict(gradient_2d_data, query_points):

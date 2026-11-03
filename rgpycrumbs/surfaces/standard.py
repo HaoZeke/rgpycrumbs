@@ -3,6 +3,7 @@ from jax import jit
 
 from rgpycrumbs.surfaces._base import BaseSurface, generic_negative_mll
 from rgpycrumbs.surfaces._hyperparameters import (
+    SQUARED_DISTANCE_GUARD,
     covariance_roundoff_jitter,
     median_pairwise_distance,
     minimize_log_parameters,
@@ -53,7 +54,7 @@ def _tps_solve(x, y, sm):
 @jit
 def _tps_predict(x_query, x_obs, w, v):
     d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
     K_q = r**2 * jnp.log(r)
 
     P_q = jnp.concatenate(
@@ -65,7 +66,7 @@ def _tps_predict(x_query, x_obs, w, v):
 @jit
 def _tps_var(x_query, x_obs, lhs_inv):
     d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
     K_q = r**2 * jnp.log(r)
     P_q = jnp.concatenate(
         [jnp.ones((x_query.shape[0], 1), dtype=jnp.float32), x_query], axis=1
@@ -205,7 +206,7 @@ def _matern_solve(x, y, sm, length_scale):
 @jit
 def _matern_predict(x_query, x_obs, alpha, length_scale):
     d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
     sqrt5_r_l = jnp.sqrt(5.0) * r / length_scale
     K_q = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * length_scale**2)) * jnp.exp(-sqrt5_r_l)
     return K_q @ alpha
@@ -214,7 +215,7 @@ def _matern_predict(x_query, x_obs, alpha, length_scale):
 @jit
 def _matern_var(x_query, x_obs, K_inv, length_scale):
     d2 = jnp.sum((x_query[:, None, :] - x_obs[None, :, :]) ** 2, axis=-1)
-    r = jnp.sqrt(d2 + 1e-12)
+    r = jnp.sqrt(d2 + SQUARED_DISTANCE_GUARD)
     sqrt5_r_l = jnp.sqrt(5.0) * r / length_scale
     K_q = (1.0 + sqrt5_r_l + (5.0 * r**2) / (3.0 * length_scale**2)) * jnp.exp(-sqrt5_r_l)
     var = 1.0 - jnp.sum((K_q @ K_inv) * K_q, axis=1)
