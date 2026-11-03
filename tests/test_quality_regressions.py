@@ -100,3 +100,14 @@ def test_pixi_test_tasks_propagate_test_failures() -> None:
     }
     for command in test_commands.values():
         assert "; true" not in command
+
+
+def test_ptm_environment_takes_ovito_from_its_channel() -> None:
+    """conda-forge's ovito is the desktop application without a Python module."""
+    tomllib = pytest.importorskip("tomllib")
+    project = tomllib.loads((PROJECT_ROOT / "pixi.toml").read_text())
+    ptm = project["feature"]["ptm"]
+
+    assert ptm["channels"] == ["https://conda.ovito.org"]
+    assert ptm["dependencies"]["ovito"]["channel"] == "https://conda.ovito.org"
+    assert "ovito" not in project["feature"]["test"]["dependencies"]

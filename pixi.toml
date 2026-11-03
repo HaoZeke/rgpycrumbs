@@ -129,16 +129,22 @@ readcon-ops = { git = "https://github.com/lode-org/readcon-ops.git", rev = "760e
 python = ">=3.11,<3.14"
 ase    = ">=3.23,<4"
 h5py   = ">=3.0"
-# conda-forge's OVITO: the PyPI wheel inside a conda env loads Qt and
-# numpy against the wrong libraries and ovito.data comes up without
-# DataCollection.
-ovito = ">=3.14.1,<4"
 
 [feature.surfaces.pypi-dependencies]
 jax = ">=0.4"
 
+[feature.ptm]
+channels = [ "https://conda.ovito.org" ]
+
 [feature.ptm.dependencies]
-ovito = "*"
+# conda-forge's ovito is a retired OVITO Basic desktop build without the
+# Python module; OVITO's own channel carries the module:
+# https://docs.ovito.org/python/introduction/installation.html#using-conda
+# Without a display, the ptm tests pass with 3.16.0 and every later Python
+# 3.13 build there; earlier builds abort while rendering or fail to import
+# without libcudart.so.12. <4 stops at the next major release, and
+# pixi.lock pins the tested build.
+ovito = { version = ">=3.16.0, <4", channel = "https://conda.ovito.org" }
 
 [feature.ptm.pypi-dependencies]
 ase = ">=3.26.0, <4"
