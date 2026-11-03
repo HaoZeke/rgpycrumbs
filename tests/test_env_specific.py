@@ -461,8 +461,9 @@ class TestPtmdisp:
             remove_fcc_vacancy=True,
             view_selection=False,
         )
-        # Should return some indices (the interstitial/defect neighborhood)
+        # The filter drops every vacancy neighbor, and no other atom is a defect.
         assert isinstance(indices, np.ndarray)
+        assert indices.size == 0
 
     def test_cli_help(self):
         from rgpycrumbs.eon.ptmdisp import main

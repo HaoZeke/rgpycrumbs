@@ -35,6 +35,7 @@ warnings.filterwarnings(
 import logging
 import sys
 from pathlib import Path
+from typing import Final
 
 if sys.version_info >= (3, 11):
     from enum import StrEnum
@@ -53,8 +54,6 @@ from ovito.io.ase import ase_to_ovito
 from ovito.modifiers import (
     CentroSymmetryModifier,
     DeleteSelectedModifier,  # noqa: F401
-    ExpressionSelectionModifier,
-    InvertSelectionModifier,
     PolyhedralTemplateMatchingModifier,
     SelectTypeModifier,
 )
@@ -90,6 +89,32 @@ STRUCTURE_TYPE_MAP = {
     CrystalStructure.OTHER: PolyhedralTemplateMatchingModifier.Type.OTHER,
 }
 
+# Centrosymmetry window of the atoms the vacancy filter drops, in units of a**2
+# for the FCC lattice constant a. The parameter of Kelchner, Plimpton and
+# Hamilton, Phys. Rev. B 58, 11085 (1998), sums |R_i + R_(i+6)|**2 over the six
+# pairs of opposite nearest neighbors. It is 0 in the perfect lattice. Next to
+# a vacancy one atom of a pair is missing and the other sits at a/sqrt(2), so
+# the parameter is a**2/2. Neighbors of an unrelaxed octahedral interstitial
+# come out at a**2/4, so the window reaches a**2/8, half that gap, to either
+# side of a**2/2.
+CSP_VACANCY_MIN_A2: Final = 3 / 8
+CSP_VACANCY_MAX_A2: Final = 5 / 8
+
+
+def _vacancy_neighbors(
+    data, candidates: np.ndarray, csp_min_a2: float, csp_max_a2: float
+) -> np.ndarray:
+    """The *candidates* whose centrosymmetry, in units of a**2, is in the window."""
+    structure = np.asarray(data.particles["Structure Type"])
+    fcc = structure == PolyhedralTemplateMatchingModifier.Type.FCC
+    if not fcc.any():
+        return candidates[:0]
+    # PTM gives an FCC atom its nearest-neighbor distance, a/sqrt(2).
+    distance = np.asarray(data.particles["Interatomic Distance"])
+    a2 = 2 * np.median(distance[fcc]) ** 2
+    csp = np.asarray(data.particles["Centrosymmetry"])[candidates] / a2
+    return candidates[(csp >= csp_min_a2) & (csp <= csp_max_a2)]
+
 
 def find_mismatch_indices(
     filename: str,
@@ -97,6 +122,8 @@ def find_mismatch_indices(
     remove_fcc_vacancy: bool = False,
     view_selection: bool = True,
     selection_radius: float = 5,
+    csp_vacancy_min: float = CSP_VACANCY_MIN_A2,
+    csp_vacancy_max: float = CSP_VACANCY_MAX_A2,
 ) -> np.ndarray:
     """
     Analyzes a structure file with PTM, identifies the interstitial defect,
@@ -105,6 +132,11 @@ def find_mismatch_indices(
 
     With `remove_fcc_vacancy` set, atoms whose centrosymmetry marks them as
     vacancy neighbors are dropped from the defect atoms.
+    Those are the mismatched atoms whose centrosymmetry, divided by the
+    squared FCC lattice constant, lies from `csp_vacancy_min` to
+    `csp_vacancy_max`. A vacancy neighbor has 1/2. Atoms in a stacking fault
+    and around a relaxed octahedral interstitial sit near 1/2 too, so they are
+    dropped as well. Without FCC atoms nothing is dropped.
     Otherwise every atom that does not match `target_structure` is a defect atom.
     With no defect atom, the result is empty and no ``selection.png`` is drawn.
 
@@ -112,6 +144,12 @@ def find_mismatch_indices(
        Without `remove_fcc_vacancy`, the mismatched atoms are kept instead of
        all being dropped.
        With no defect atom, the empty result comes back before any averaging.
+       The vacancy window is in units of the squared lattice constant, set by
+       `csp_vacancy_min` and `csp_vacancy_max`, and the parameter is taken
+       over all atoms. It used to be 70 to 95 square angstroms of a parameter
+       taken over the mismatched atoms alone. The neighbors of a lone vacancy
+       have 11/2 there, so that window caught them only for lattice constants
+       from 3.57 to 4.16 angstroms.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -135,7 +173,7 @@ def find_mismatch_indices(
     # NOTE(rg): Can't call delete anywhere else because it'll lose the index information
     pipeline = Pipeline(source=StaticSource(data=ase_to_ovito(atoms)))
 
-    ptm = PolyhedralTemplateMatchingModifier()
+    ptm = PolyhedralTemplateMatchingModifier(output_interatomic_distance=True)
     pipeline.modifiers.append(ptm)
 
     # Select atoms that DO match the target structure
@@ -152,26 +190,12 @@ def find_mismatch_indices(
     mismatch_indices = np.where(non_fcc.particles.selection.array == 0)[0]
     log.info(f"Running PTM analysis to find non-{target_structure.value} atoms...")
     if remove_fcc_vacancy:
-        pipeline.modifiers.append(InvertSelectionModifier())
-        csym = CentroSymmetryModifier(
-            only_selected=True,
-        )  # Default is conventional with 12 for FCC
-        pipeline.modifiers.append(csym)
-        pipeline.modifiers.append(
-            ExpressionSelectionModifier(
-                operate_on="particles",
-                expression="Centrosymmetry < 70 || Centrosymmetry > 95",
-            )
-        )
+        # The default is the conventional parameter over 12 neighbors, as for FCC.
+        pipeline.modifiers.append(CentroSymmetryModifier())
         data = pipeline.compute()
-
-        # After applying the pipeline modifiers:
-        # 1. InvertSelectionModifier: Inverts the selection, so previously unselected atoms (e.g., FCC atoms) are now selected.
-        # 2. CentroSymmetryModifier: Computes the centrosymmetry parameter for the selected atoms, which helps identify atoms in distorted environments.
-        # 3. ExpressionSelectionModifier: Selects atoms based on the centrosymmetry parameter, using the condition "Centrosymmetry < 70 || Centrosymmetry > 95".
-        #    This step identifies atoms that are likely to be vacancies or interstitials.
-        # At this point, the 'selection' array represents vacancy atoms (selection == 0).
-        vacancy = np.where(data.particles.selection.array == 0)[0]
+        vacancy = _vacancy_neighbors(
+            data, mismatch_indices, csp_vacancy_min, csp_vacancy_max
+        )
         interstitial = np.setdiff1d(mismatch_indices, vacancy)
     else:
         data = non_fcc
@@ -233,17 +257,50 @@ def find_mismatch_indices(
     default=False,
     help="Disable FCC vacancy processing.",
 )
-def main(filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacancy: bool):
+@click.option(
+    "--csp-vacancy-min",
+    type=float,
+    default=CSP_VACANCY_MIN_A2,
+    show_default=True,
+    help="Lowest centrosymmetry of a vacancy neighbor, in units of a**2.",
+)
+@click.option(
+    "--csp-vacancy-max",
+    type=float,
+    default=CSP_VACANCY_MAX_A2,
+    show_default=True,
+    help="Highest centrosymmetry of a vacancy neighbor, in units of a**2.",
+)
+def main(
+    filename: str,
+    structure: CrystalStructure,
+    verbose: bool,
+    no_fcc_vacancy: bool,
+    csp_vacancy_min: float,
+    csp_vacancy_max: float,
+):
     """
     Analyzes FILENAME to find all atoms that are NOT the specified
     crystal structure type and prints their 0-based indices as a
     comma-separated list, suitable for use in other programs.
+
+    The vacancy filter drops atoms whose centrosymmetry, divided by the
+    squared FCC lattice constant a**2, lies from --csp-vacancy-min to
+    --csp-vacancy-max. A vacancy neighbor has 0.5.
     """
     if verbose:
         log.setLevel(logging.INFO)
+    if csp_vacancy_min > csp_vacancy_max:
+        raise click.BadParameter(
+            "must not exceed --csp-vacancy-max", param_hint="--csp-vacancy-min"
+        )
 
     indices = find_mismatch_indices(
-        filename, structure, remove_fcc_vacancy=not no_fcc_vacancy
+        filename,
+        structure,
+        remove_fcc_vacancy=not no_fcc_vacancy,
+        csp_vacancy_min=csp_vacancy_min,
+        csp_vacancy_max=csp_vacancy_max,
     )
 
     # Final, clean output is printed to stdout.

@@ -13,6 +13,25 @@ filtering or setting up atom lists for the displacements used for eOn calculatio
    :nested: full
 #+END_EXPORT
 
+** Vacancy filter
+Unless ~--no-fcc-vacancy~ is given, the command drops the neighbors of a vacancy from the defect atoms.
+The selection then centers on the interstitial.
+The filter uses the centrosymmetry parameter of Kelchner, Plimpton and Hamilton (Physical Review B 58, 11085, 1998).
+It sums ~|R_i + R_(i+6)|**2~ over the six pairs of opposite nearest neighbors, so it is 0 in the perfect lattice.
+Next to a vacancy one atom of a pair is missing.
+The other sits at ~a/sqrt(2)~ for the lattice constant ~a~, so a vacancy neighbor has ~a**2/2~.
+The command divides the parameter by ~a**2~.
+It takes ~a~ from the median nearest-neighbor distance of the face-centered cubic (FCC) atoms.
+It drops the mismatched atoms whose value lies from ~--csp-vacancy-min~ to ~--csp-vacancy-max~.
+The defaults, ~3/8~ and ~5/8~, reach ~a**2/8~ to either side of ~a**2/2~.
+That is half the gap to the ~a**2/4~ of the atoms next to an unrelaxed octahedral interstitial.
+Without FCC atoms the filter drops nothing.
+
+The atoms of a stacking fault also have ~a**2/2~, and so do the atoms around a relaxed octahedral interstitial.
+The filter drops them as well, so pass ~--no-fcc-vacancy~ for such structures.
+In copper relaxed with effective medium theory, the neighbors of a ~<100>~ dumbbell stay below ~0.35~.
+The two dumbbell atoms stay above ~1~.
+
 ** Usage
 # TODO(rg): Actually use real examples here instead
 #+BEGIN_EXPORT rst

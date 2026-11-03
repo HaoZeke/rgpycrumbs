@@ -65,6 +65,40 @@ def defect_fcc_cu_file(tmp_path):
 
 
 @pytest.fixture
+def frenkel_pair_cu_file(tmp_path):
+    """
+    Creates FCC Cu with a vacancy and a <100> dumbbell interstitial and returns
+    its path with the indices of the vacancy neighbors and of the dumbbell.
+    """
+    filepath = tmp_path / "frenkel_pair.xyz"
+    a = 3.6
+    atoms = bulk("Cu", "fcc", a=a, cubic=True) * (4, 4, 4)
+    positions = atoms.get_positions()
+    vacancy_index = int(np.argmin(np.linalg.norm(positions - [a, a, a], axis=1)))
+    host_index = int(np.argmin(np.linalg.norm(positions - [3 * a, 3 * a, 3 * a], axis=1)))
+
+    nl = NeighborList([1.3] * len(atoms), self_interaction=False, bothways=True)
+    nl.update(atoms)
+    neighbor_indices = set(nl.get_neighbors(vacancy_index)[0])
+
+    # The host atom and a copy of it straddle the lattice site along x.
+    site = positions[host_index].copy()
+    atoms += atoms[host_index : host_index + 1]
+    positions = atoms.get_positions()
+    positions[host_index] = site + [0.3 * a, 0, 0]
+    positions[-1] = site - [0.3 * a, 0, 0]
+    atoms.set_positions(positions)
+    dumbbell_indices = {host_index, len(atoms) - 1}
+    del atoms[vacancy_index]
+    write(filepath, atoms)
+
+    def shift(indices):
+        return {i if i < vacancy_index else i - 1 for i in indices}
+
+    return filepath, shift(neighbor_indices), shift(dumbbell_indices)
+
+
+@pytest.fixture
 def perfect_bcc_fe_file(tmp_path):
     """Creates a perfect bulk BCC Fe crystal file and returns its path."""
     filepath = tmp_path / "perfect_bcc.xyz"
@@ -120,6 +154,46 @@ def test_find_indices_without_vacancy_filter_keeps_the_neighbors(defect_fcc_cu_f
     assert expected_defect_indices <= set(indices.tolist())
 
 
+@pytest.mark.parametrize(
+    ("element", "lattice_constant"),
+    [("Ni", 3.52), ("Cu", 3.6), ("Au", 4.08), ("Pb", 4.95)],
+)
+def test_vacancy_filter_drops_every_vacancy_neighbor(tmp_path, element, lattice_constant):
+    """The window scales with a**2, so a lone vacancy leaves no defect atom."""
+    filepath = tmp_path / "vacancy.xyz"
+    atoms = bulk(element, "fcc", a=lattice_constant, cubic=True) * (3, 3, 3)
+    del atoms[40]
+    write(filepath, atoms)
+    indices = find_mismatch_indices(
+        filepath, CrystalStructure.FCC, remove_fcc_vacancy=True, view_selection=False
+    )
+    assert indices.size == 0
+
+
+def test_vacancy_filter_keeps_the_interstitial_of_a_frenkel_pair(frenkel_pair_cu_file):
+    """Only the vacancy side of a Frenkel pair is dropped."""
+    filepath, vacancy_neighbors, dumbbell = frenkel_pair_cu_file
+    indices = find_mismatch_indices(
+        filepath, CrystalStructure.FCC, remove_fcc_vacancy=True, view_selection=False
+    )
+    assert dumbbell <= set(indices.tolist())
+    assert not vacancy_neighbors & set(indices.tolist())
+
+
+def test_vacancy_window_bounds_the_dropped_atoms(defect_fcc_cu_file):
+    """A window that leaves out 1/2 keeps the vacancy neighbors."""
+    filepath, expected_defect_indices = defect_fcc_cu_file
+    indices = find_mismatch_indices(
+        filepath,
+        CrystalStructure.FCC,
+        remove_fcc_vacancy=True,
+        view_selection=False,
+        csp_vacancy_min=0.6,
+        csp_vacancy_max=0.7,
+    )
+    assert expected_defect_indices <= set(indices.tolist())
+
+
 def test_find_indices_on_perfect_bcc(perfect_bcc_fe_file):
     """
     On a perfect bulk BCC crystal, searching for non-BCC atoms should return an empty list.
@@ -158,7 +232,7 @@ def test_cli_no_fcc_vacancy_turns_the_vacancy_filter_off(
     """The command runs the vacancy filter unless --no-fcc-vacancy is given."""
     filter_settings = []
 
-    def record(filename, structure, remove_fcc_vacancy=False):
+    def record(filename, structure, remove_fcc_vacancy=False, **kwargs):
         filter_settings.append(remove_fcc_vacancy)
         return np.array([], dtype=int)
 
@@ -168,3 +242,29 @@ def test_cli_no_fcc_vacancy_turns_the_vacancy_filter_off(
         result = runner.invoke(main, [*options, str(perfect_fcc_cu_file)])
         assert result.exit_code == 0, result.output
     assert filter_settings == [True, False]
+
+
+def test_cli_passes_the_vacancy_window(perfect_fcc_cu_file, monkeypatch):
+    """--csp-vacancy-min and --csp-vacancy-max reach the vacancy filter."""
+    from rgpycrumbs.eon.ptmdisp import CSP_VACANCY_MAX_A2, CSP_VACANCY_MIN_A2
+
+    windows = []
+
+    def record(filename, structure, **kwargs):
+        windows.append((kwargs["csp_vacancy_min"], kwargs["csp_vacancy_max"]))
+        return np.array([], dtype=int)
+
+    monkeypatch.setattr("rgpycrumbs.eon.ptmdisp.find_mismatch_indices", record)
+    runner = CliRunner()
+    for options in ([], ["--csp-vacancy-min", "0.4", "--csp-vacancy-max", "0.6"]):
+        result = runner.invoke(main, [*options, str(perfect_fcc_cu_file)])
+        assert result.exit_code == 0, result.output
+    assert windows == [(CSP_VACANCY_MIN_A2, CSP_VACANCY_MAX_A2), (0.4, 0.6)]
+
+
+def test_cli_refuses_a_window_whose_minimum_exceeds_its_maximum(perfect_fcc_cu_file):
+    """An empty window is a usage error."""
+    options = ["--csp-vacancy-min", "0.7", "--csp-vacancy-max", "0.6"]
+    result = CliRunner().invoke(main, [*options, str(perfect_fcc_cu_file)])
+    assert result.exit_code == 2
+    assert "must not exceed --csp-vacancy-max" in result.output

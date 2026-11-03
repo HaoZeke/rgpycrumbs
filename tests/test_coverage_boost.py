@@ -1319,8 +1319,6 @@ class TestPtmdisp:
         for mod_name in [
             "CentroSymmetryModifier",
             "DeleteSelectedModifier",
-            "ExpressionSelectionModifier",
-            "InvertSelectionModifier",
             "PolyhedralTemplateMatchingModifier",
             "SelectTypeModifier",
         ]:
