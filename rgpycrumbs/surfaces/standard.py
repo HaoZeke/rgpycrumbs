@@ -1,9 +1,11 @@
 import jax.numpy as jnp
-import jax.scipy.optimize as jopt
 from jax import jit
 
 from rgpycrumbs.surfaces._base import BaseSurface, generic_negative_mll
-from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+from rgpycrumbs.surfaces._hyperparameters import (
+    covariance_roundoff_jitter,
+    minimize_log_parameters,
+)
 from rgpycrumbs.surfaces._kernels import (
     _imq_kernel_matrix,
     _matern_kernel_matrix,
@@ -104,9 +106,9 @@ class FastTPS:
             def loss_fn(log_p):
                 return negative_mll_tps(log_p, self.x_obs, y_centered)
 
-            results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
+            log_params = minimize_log_parameters(loss_fn, x0)
 
-            self.sm = float(jnp.exp(results.x[0]))
+            self.sm = float(jnp.exp(log_params[0]))
             if jnp.isnan(self.sm):
                 self.sm = init_sm
         else:
@@ -233,9 +235,9 @@ class FastMatern(BaseSurface):
             def loss_fn(log_p):
                 return negative_mll_matern_std(log_p, self.x_obs, self.y_centered)
 
-            results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
-            self.ls = float(jnp.exp(results.x[0]))
-            self.noise = float(jnp.exp(results.x[1]))
+            log_params = minimize_log_parameters(loss_fn, x0)
+            self.ls = float(jnp.exp(log_params[0]))
+            self.noise = float(jnp.exp(log_params[1]))
 
             if jnp.isnan(self.ls) or jnp.isnan(self.noise):
                 self.ls, self.noise = init_ls, init_noise
@@ -314,9 +316,9 @@ class FastIMQ(BaseSurface):
             def loss_fn(log_p):
                 return negative_mll_imq_std(log_p, self.x_obs, self.y_centered)
 
-            results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
-            self.epsilon = float(jnp.exp(results.x[0]))
-            self.noise = float(jnp.exp(results.x[1]))
+            log_params = minimize_log_parameters(loss_fn, x0)
+            self.epsilon = float(jnp.exp(log_params[0]))
+            self.noise = float(jnp.exp(log_params[1]))
             if jnp.isnan(self.epsilon) or jnp.isnan(self.noise):
                 self.epsilon, self.noise = init_eps, init_noise
         else:

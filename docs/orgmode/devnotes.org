@@ -133,6 +133,7 @@ modules for computational tasks. These are used by downstream packages like
 - ~rgpycrumbs.surfaces~ :: JAX-based surface fitting with kernel methods (TPS,
   RBF, Matern 5/2, SE, IMQ). Includes gradient-enhanced variants. Optional
   dependency: ~jax~.
+  Fits with ~optimize=True~, the default, also need ~scipy~.
 - ~rgpycrumbs.geom.analysis~ :: Structure analysis using ASE: distance matrices,
   bond matrices, and fragment detection via depth-first search on neighbor
   lists. Optional dependencies: ~ase~, ~scipy~.
@@ -212,8 +213,7 @@ Follow the ASV class convention. Key JAX considerations:
   completion of JAX async dispatch.
 - Warm up JIT-compiled code paths in ~setup()~ with a throwaway call, then set
   ~warmup_time = 0~ so ASV does not double-count compilation.
-- Use ~optimize=False~ for surface-fitting benchmarks to measure kernel math
-  rather than BFGS optimizer convergence variance.
+- Use ~optimize=False~ for surface-fitting benchmarks, so they time the kernel math and not the optimizer.
 
 * Performance Improvements [2026-03-13]
 

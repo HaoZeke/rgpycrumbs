@@ -4,6 +4,7 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("surfaces")
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -95,6 +96,65 @@ def test_roundoff_jitter_is_highams_cholesky_bound():
     K = 4.0 * jnp.eye(order, dtype=jnp.float32)
 
     assert covariance_roundoff_jitter(K) == pytest.approx(4.0 * gamma, rel=1e-6)
+
+
+def test_log_parameter_fit_converges_on_a_smooth_objective():
+    """The optimizer reaches the minimum of a plain quadratic."""
+    from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
+
+    result = minimize_log_parameters(lambda p: jnp.sum((p - 2.0) ** 2), jnp.zeros(2))
+
+    assert np.asarray(result) == pytest.approx([2.0, 2.0], abs=1e-4)
+
+
+def test_log_parameter_fit_keeps_the_last_accepted_point():
+    """A trial step into a region with no finite objective is not the answer."""
+    from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
+
+    def loss(p):
+        return jnp.where(p[0] < 1.0, (p[0] - 2.0) ** 2, jnp.nan)
+
+    start = jnp.zeros(1)
+    value = float(loss(minimize_log_parameters(loss, start)))
+
+    assert np.isfinite(value)
+    assert value <= float(loss(start))
+
+
+def test_gradient_se_fit_beats_a_grid_search_on_muller_brown():
+    """The fitted likelihood is at least as good as the best grid point.
+
+    The data are 40 random Muller-Brown points in hundreds of energy units.
+    The fit starts at the median input distance and unit noise, the prior
+    variance of the squared-exponential kernel.  The 41 by 41 grid spans
+    length scales from ``e**-3`` to ``e`` times that start and noise from
+    float32 epsilon to one.
+    """
+    from rgpycrumbs.func.muller_brown import muller_brown, muller_brown_gradient
+    from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
+    from rgpycrumbs.surfaces.gradient_se import negative_mll_se_grad
+
+    rng = np.random.default_rng(0)
+    x = np.column_stack([rng.uniform(-1.5, 1.0, 40), rng.uniform(-0.2, 1.8, 40)])
+    energy = muller_brown(x.T) / 100
+    grads = np.asarray(muller_brown_gradient(x.T)).T / 100
+    data = GradientSE(x, energy, gradients=grads, length_scale=1.0, optimize=False)
+
+    def loss(p):
+        return negative_mll_se_grad(p, data.x, data.y_flat, data.D_plus_1)
+
+    distances = np.linalg.norm(x[:, None] - x[None], axis=-1)[np.triu_indices(40, 1)]
+    log_start = np.log(np.median(distances))
+    fitted = float(loss(minimize_log_parameters(loss, jnp.array([log_start, 0.0]))))
+
+    log_ls, log_noise = jnp.meshgrid(
+        log_start + jnp.linspace(-3.0, 1.0, 41),
+        jnp.linspace(jnp.log(jnp.finfo(jnp.float32).eps), 0.0, 41),
+    )
+    grid = jnp.stack([log_ls.ravel(), log_noise.ravel()], axis=1)
+    best_on_grid = float(jnp.nanmin(jax.jit(jax.vmap(loss))(grid)))
+
+    assert fitted <= best_on_grid
 
 
 # ---------------------------------------------------------------------------

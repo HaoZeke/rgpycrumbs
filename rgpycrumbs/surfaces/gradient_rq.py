@@ -1,6 +1,5 @@
 import jax
 import jax.numpy as jnp
-import jax.scipy.optimize as jopt
 from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import (
@@ -8,6 +7,7 @@ from rgpycrumbs.surfaces._base import (
     equilibrated_inverse_solve,
     generic_negative_mll,
 )
+from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
 from rgpycrumbs.surfaces._kernels import (
     k_matrix_rq_grad_map,
     rq_kernel_elem,
@@ -97,10 +97,10 @@ class GradientRQ(BaseGradientSurface):
             def loss_fn(log_p):
                 return negative_mll_rq_map(log_p, self.x, self.y_flat, self.D_plus_1)
 
-            results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
-            self.ls = float(jnp.exp(results.x[0]))
-            self.alpha_param = float(jnp.exp(results.x[1]))
-            self.noise = float(jnp.exp(results.x[2]))
+            log_params = minimize_log_parameters(loss_fn, x0)
+            self.ls = float(jnp.exp(log_params[0]))
+            self.alpha_param = float(jnp.exp(log_params[1]))
+            self.noise = float(jnp.exp(log_params[2]))
 
             if jnp.isnan(self.ls) or jnp.isnan(self.noise):
                 self.ls, self.alpha_param, self.noise = init_ls, init_alpha, init_noise

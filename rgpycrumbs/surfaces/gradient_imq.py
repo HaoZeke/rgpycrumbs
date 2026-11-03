@@ -1,10 +1,12 @@
 import jax
 import jax.numpy as jnp
-import jax.scipy.optimize as jopt
 from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import BaseGradientSurface, generic_negative_mll
-from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+from rgpycrumbs.surfaces._hyperparameters import (
+    covariance_roundoff_jitter,
+    minimize_log_parameters,
+)
 from rgpycrumbs.surfaces._kernels import (
     imq_kernel_elem,
     k_matrix_imq_grad_map,
@@ -123,9 +125,9 @@ class GradientIMQ(BaseGradientSurface):
                     log_p, init_eps, self.x, self.y_flat, self.D_plus_1
                 )
 
-            results = jopt.minimize(loss_fn, x0, method="BFGS", tol=1e-3)
-            self.epsilon = float(jnp.exp(results.x[0]))
-            self.noise = float(jnp.exp(results.x[1]))
+            log_params = minimize_log_parameters(loss_fn, x0)
+            self.epsilon = float(jnp.exp(log_params[0]))
+            self.noise = float(jnp.exp(log_params[1]))
             # Cap noise at smoothing input -- the MLL tends to overestimate
             # noise for gradient-enhanced IMQ, destroying basin accuracy.
             self.noise = min(self.noise, max(smoothing, 1e-2))

@@ -131,7 +131,8 @@ ase    = ">=3.23,<4"
 h5py   = ">=3.0"
 
 [feature.surfaces.pypi-dependencies]
-jax = ">=0.4"
+jax   = ">=0.4"
+scipy = ">=1.11"
 
 [feature.ptm]
 channels = [ "https://conda.ovito.org" ]

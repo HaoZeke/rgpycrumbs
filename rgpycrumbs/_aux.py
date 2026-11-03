@@ -21,6 +21,7 @@ _DEPENDENCY_MAP: dict[str, str] = {
     "jaxlib": "jax>=0.4",
     "scipy": "scipy>=1.11",
     "scipy.interpolate": "scipy>=1.11",
+    "scipy.optimize": "scipy>=1.11",
     "scipy.spatial": "scipy>=1.11",
     "scipy.spatial.distance": "scipy>=1.11",
     "ase": "ase>=3.22",

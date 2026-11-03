@@ -100,11 +100,11 @@ python -c "import rgpycrumbs; print(rgpycrumbs.__version__)"
 For Gaussian Process surface fitting and landscape visualization:
 
 #+begin_src bash
-# JAX for surface fitting
-pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
+# JAX for surface fitting, SciPy for its hyperparameter fits
+pip install jax scipy  # or: export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or with uv
-uv pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
+uv pip install jax scipy  # or: export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or enable auto-install (installs on first use)
 export RGPYCRUMBS_AUTO_DEPS=1
@@ -181,7 +181,7 @@ When =RGPYCRUMBS_AUTO_DEPS=1= is set:
 | Module | Install spec | Auto-Installed | Use Case |
 |--------+--------------+----------------+----------|
 | jax | ~jax>=0.4~ | ✓ | GP surface fitting, landscape plots |
-| scipy | ~scipy>=1.11~ | ✓ | Spline interpolation |
+| scipy | ~scipy>=1.11~ | ✓ | Spline interpolation, surface hyperparameter fits |
 | ase | ~ase>=3.22~ | ✓ | Structure analysis, root-mean-square deviation |
 
 ** Cache Location
