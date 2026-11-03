@@ -8,8 +8,7 @@ def spline_interp(x, y, num=100, knots=3):
     a uniformly spaced grid.
 
     Args:
-        x: Independent variable values (1D array, must be monotonically
-            increasing).
+        x: Independent variable values (1D array-like, strictly increasing).
         y: Dependent variable values (same length as *x*).
         num: Number of evaluation points on the output grid.
         knots: Degree of the spline (passed as ``k`` to
@@ -20,9 +19,32 @@ def spline_interp(x, y, num=100, knots=3):
         *num* spanning ``[x.min(), x.max()]`` and *y_fine* is the spline
         evaluated on that grid.
 
+    Raises:
+        ValueError: If *x* and *y* are not one-dimensional and of equal
+            length, if *x* is not strictly increasing, if there are no more
+            samples than *knots*, or if *num* is below one.
+
     .. versionadded:: 1.0.0
+    .. versionchanged:: 1.14.0
+       Inputs are validated before SciPy sees them, and lists are accepted.
+       A repeated *x* used to return all-NaN values.
     """
     from rgpycrumbs._aux import ensure_import
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.ndim != 1 or y.ndim != 1:
+        raise ValueError("x and y must be one-dimensional")
+    if x.size != y.size:
+        raise ValueError(f"x and y differ in length: {x.size} != {y.size}")
+    if x.size <= knots:
+        raise ValueError(
+            f"a degree {knots} spline needs more than {knots} samples, got {x.size}"
+        )
+    if np.any(np.diff(x) <= 0):
+        raise ValueError("x must be strictly increasing")
+    if num < 1:
+        raise ValueError(f"num must be at least 1, got {num}")
 
     scipy_interp = ensure_import("scipy.interpolate")
     spl = scipy_interp.splrep(x, y, k=knots)

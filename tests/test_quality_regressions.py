@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 pytestmark = pytest.mark.pure
@@ -372,3 +373,36 @@ def test_one_day_tdelta_runs_without_the_python_311_utc_alias(
     monkeypatch.setattr(helpers, "datetime", python310_datetime)
 
     assert helpers.one_day_tdelta("00:00:01", "23:59:59") == datetime.timedelta(seconds=2)
+
+
+@pytest.mark.parametrize(
+    ("x", "y", "options", "message"),
+    [
+        ([0.0, 2.0, 1.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0, 4.0], {}, "strictly increasing"),
+        ([0.0, 1.0, 1.0, 2.0, 3.0], [0.0, 1.0, 2.0, 3.0, 4.0], {}, "strictly increasing"),
+        ([0.0, 1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0], {}, "differ in length"),
+        ([[0.0, 1.0], [2.0, 3.0]], [[0.0, 1.0], [2.0, 3.0]], {}, "one-dimensional"),
+        ([0.0, 1.0, 2.0], [0.0, 1.0, 2.0], {"knots": 3}, "needs more than 3 samples"),
+        ([0.0, 1.0, 2.0, 3.0, 4.0], [0.0, 1.0, 2.0, 3.0, 4.0], {"num": 0}, "at least 1"),
+    ],
+    ids=["unordered", "repeated", "length", "two-dimensional", "too-few", "empty-grid"],
+)
+def test_spline_interp_rejects_inputs_it_cannot_fit(x, y, options, message) -> None:
+    """Inputs that SciPy rejects or turns into NaN raise ValueError up front."""
+    from rgpycrumbs.interpolation import spline_interp
+
+    with pytest.raises(ValueError, match=message):
+        spline_interp(np.asarray(x), np.asarray(y), **options)
+
+
+def test_spline_interp_accepts_lists() -> None:
+    """Lists give the same grid and values as arrays."""
+    pytest.importorskip("scipy")
+    from rgpycrumbs.interpolation import spline_interp
+
+    x = [0.0, 1.0, 2.0, 3.0, 4.0]
+    y = [0.0, 1.0, 4.0, 9.0, 16.0]
+
+    np.testing.assert_array_equal(
+        spline_interp(x, y, num=9), spline_interp(np.asarray(x), np.asarray(y), num=9)
+    )
