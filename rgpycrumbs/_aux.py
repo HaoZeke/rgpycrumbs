@@ -94,9 +94,12 @@ def warn_on_direct_script_import(
     )
 
 
-# Keep in sync with rgpycrumbs.config.AUTO_DEPS_ENVS (avoid importing config
-# from _aux: ensure_import is used during early bootstrap / circular paths).
+# Keep in sync with rgpycrumbs.config.AUTO_DEPS_ENVS and the spellings in
+# rgpycrumbs.config._env_flag_any (avoid importing config from _aux:
+# ensure_import is used during early bootstrap / circular paths).
 _AUTO_DEPS_ENVS = ("RGPKGS_AUTO_DEPS", "RGPYCRUMBS_AUTO_DEPS")
+_TRUE_ENV_VALUES = frozenset({"1", "on", "true", "yes"})
+_FALSE_ENV_VALUES = frozenset({"0", "false", "no", "off"})
 
 
 def _auto_deps_enabled() -> bool:
@@ -107,9 +110,16 @@ def _auto_deps_enabled() -> bool:
     materializes the resolved default into the process env before scripts run.
 
     Does **not** change the PEP 723 + uv isolation design for CLIs, and does
-    not enable auto-install unless an env flag is explicitly ``1``.
+    not enable auto-install unless an env flag is ``1``, ``true``, ``yes`` or
+    ``on`` (any case). The first variable set to a recognized value wins.
     """
-    return any(os.environ.get(name, "").strip() == "1" for name in _AUTO_DEPS_ENVS)
+    for name in _AUTO_DEPS_ENVS:
+        raw = os.environ.get(name, "").strip().lower()
+        if raw in _TRUE_ENV_VALUES:
+            return True
+        if raw in _FALSE_ENV_VALUES:
+            return False
+    return False
 
 
 def enable_library_auto_deps() -> None:

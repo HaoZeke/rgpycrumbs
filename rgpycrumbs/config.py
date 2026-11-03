@@ -371,11 +371,20 @@ def resolve_auto_deps_default(
     config: RgpycrumbsConfig | None = None,
     cwd: Path | None = None,
 ) -> str:
-    """Return ``'1'`` or ``'0'`` for default AUTO_DEPS when env unset."""
-    for name in AUTO_DEPS_ENVS:
-        env = os.environ.get(name, "").strip()
-        if env != "":
-            return env
+    """Return ``'1'`` or ``'0'`` for default AUTO_DEPS.
+
+    A set AUTO_DEPS variable is read with the boolean spellings of
+    ``_env_flag_any`` and normalized, so the dispatcher hands scripts the
+    ``1`` or ``0`` that ``rgpycrumbs._aux._auto_deps_enabled`` reads.
+
+    .. versionchanged:: 1.14.0
+       ``true``/``yes``/``on`` and ``false``/``no``/``off`` are normalized
+       instead of passed through verbatim. Any other value counts as unset,
+       as it does for the other boolean variables.
+    """
+    env_flag = _env_flag_any(*AUTO_DEPS_ENVS)
+    if env_flag is not None:
+        return "1" if env_flag else "0"
     cfg = config if config is not None else load_config(cwd=cwd)
     if cfg.auto_deps is False:
         return "0"

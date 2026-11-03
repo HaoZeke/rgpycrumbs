@@ -204,6 +204,10 @@ export RGPYCRUMBS_AUTO_DEPS=0
 unset RGPYCRUMBS_AUTO_DEPS
 #+end_src
 
+=RGPKGS_AUTO_DEPS= and =RGPYCRUMBS_AUTO_DEPS= take =1=, =true=, =yes= or =on= to enable.
+They take =0=, =false=, =no= or =off= to disable.
+Letter case does not matter, and any other value counts as unset.
+
 ** Troubleshooting
 
 *** "Failed to install" Error
