@@ -41,10 +41,11 @@ NYSTROM_N_INDUCING_DEFAULT = 300
 
 
 def nystrom_paths_needed(n_inducing, images_per_step):
-    """Number of optimization steps the Nystrom approximation actually samples.
+    """Number of complete input paths to retain before Nystrom sampling.
 
-    Mirrors the structured sampling in :class:`NystromGradientIMQ._fit`:
-    ``paths_to_sample = max(1, n_inducing // nimags)``, plus one buffer step.
+    The fitting model samples up to ``n_inducing // images_per_step`` complete
+    paths. Callers retain the ceiling plus one buffer path so thinning never
+    leaves fewer complete recent paths than the model can consume.
     """
     return max(1, -(-n_inducing // images_per_step)) + 1  # ceil div + buffer
 
