@@ -70,6 +70,9 @@ def parse_target_coords(text_block: str) -> np.ndarray:
     -------
     np.ndarray
         Array of shape (n, 3) with target coordinates
+
+    .. versionchanged:: 1.14.0
+       Text without a valid line gives shape ``(0, 3)`` instead of ``(0,)``.
     """
     coords = []
     lines = text_block.strip().split("\n")
@@ -90,7 +93,7 @@ def parse_target_coords(text_block: str) -> np.ndarray:
                 i + 1,
                 line.strip(),
             )
-    return np.array(coords)
+    return np.asarray(coords, dtype=float).reshape(-1, _EXPECTED_COORD_COLS)
 
 
 def match_atoms(

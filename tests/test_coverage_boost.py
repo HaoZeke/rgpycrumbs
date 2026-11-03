@@ -1069,8 +1069,8 @@ class TestMatchAtoms:
     def test_parse_target_coords_empty(self):
         from rgpycrumbs.chemgp.match_atoms import parse_target_coords
 
-        coords = parse_target_coords("")
-        assert coords.shape == (0,)
+        assert parse_target_coords("").shape == (0, 3)
+        assert parse_target_coords("bad line\n4.0 5.0\n").shape == (0, 3)
 
     def test_parse_target_coords_bad_lines(self):
         from rgpycrumbs.chemgp.match_atoms import parse_target_coords
