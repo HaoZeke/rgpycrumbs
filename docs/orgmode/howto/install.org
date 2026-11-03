@@ -178,11 +178,11 @@ When =RGPYCRUMBS_AUTO_DEPS=1= is set:
 
 ** Supported Optional Dependencies
 
-| Module | Extra | Auto-Installed | Use Case |
-|--------+-------+----------------+----------|
-| jax | surfaces | ✓ | GP surface fitting, landscape plots |
-| scipy | interpolation | ✓ | Spline interpolation |
-| ase | analysis | ✓ | Structure analysis, RMSD |
+| Module | Install spec | Auto-Installed | Use Case |
+|--------+--------------+----------------+----------|
+| jax | ~jax>=0.4~ | ✓ | GP surface fitting, landscape plots |
+| scipy | ~scipy>=1.11~ | ✓ | Spline interpolation |
+| ase | ~ase>=3.22~ | ✓ | Structure analysis, root-mean-square deviation |
 
 ** Cache Location
 

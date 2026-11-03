@@ -105,9 +105,8 @@ The ~pure~ marker is reserved for tests that depend only on core packages
 ~pure~ since they mock all optional dependencies. Never place tests that import
 dispatcher scripts under the ~pure~ marker.
 
-Note that ~[all]~ is a best-effort convenience extra covering pip-installable
-optional dependencies only. Pixi-only packages (~tblite~, ~ira_mod~) and
-heavier tools such as ~ovito~ still need explicit environment setup.
+There is no ~[all]~ extra, and ~ensure_import~ only installs the pip specs in its dependency map.
+Pixi-only packages (~tblite~, ~ira_mod~) and heavier tools such as ~ovito~ need explicit environment setup.
 
 ** Available Markers & Environments
 The following markers and their corresponding ~pixi~ environments are available:
