@@ -51,7 +51,7 @@ if warn_on_direct_script_import is not None:
 try:
     from ._render_cli import add_config_option, add_render_options
     from ._single_ended_cli import default_output_path, load_trajectories, overlay_labels
-    from .plot_config import library_plot, run_from_click
+    from .plot_config import library_plot, run_from_click, surface_fit_config
 except ImportError:  # pragma: no cover - direct script execution
     from rgpycrumbs.eon._render_cli import add_config_option, add_render_options
     from rgpycrumbs.eon._single_ended_cli import (
@@ -59,7 +59,11 @@ except ImportError:  # pragma: no cover - direct script execution
         load_trajectories,
         overlay_labels,
     )
-    from rgpycrumbs.eon.plot_config import library_plot, run_from_click
+    from rgpycrumbs.eon.plot_config import (
+        library_plot,
+        run_from_click,
+        surface_fit_config,
+    )
 # Lazy plot stack: AUTO_DEPS + ensure_import (same as jax / adjustText)
 try:
     from rgpycrumbs._aux import enable_library_auto_deps
@@ -173,6 +177,7 @@ def plot_saddle_from_settings(settings: dict[str, Any]) -> Path | None:
             rotation=rotation,
             perspective_tilt=perspective_tilt,
             theme=active_theme,
+            surface_fit=surface_fit_config(settings),
         )
     elif plot_type == "convergence":
         _plot_convergence(trajs, labels, output, dpi)
@@ -315,6 +320,7 @@ def _plot_landscape(
     rotation="auto",
     perspective_tilt=0.0,
     theme=None,
+    surface_fit=None,
 ):
     try:
         from rgpycrumbs._aux import _import_from_parent_env
@@ -373,6 +379,7 @@ def _plot_landscape(
         strip_dividers=strip_dividers,
         rotation=rotation,
         perspective_tilt=perspective_tilt,
+        surface_fit=surface_fit,
     )
 
 

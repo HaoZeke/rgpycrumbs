@@ -487,3 +487,59 @@ def test_plt_gp_docs_name_only_real_subcommands() -> None:
 
     assert listed == set(cli.commands)
     assert entry_types <= set(cli.commands) - {"batch"}
+
+
+def _saddle_landscape_keywords(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, jobs: list[str], config: str
+) -> dict:
+    """Run plot_saddle on stand-in job directories and return the renderer keywords."""
+    pytest.importorskip("chemparseplot")
+    import matplotlib
+    import polars as pl
+
+    from rgpycrumbs.eon import plt_saddle
+
+    def load(path: Path) -> SimpleNamespace:
+        return SimpleNamespace(
+            atoms_list=[f"{path.name} initial", f"{path.name} saddle"],
+            dat_df=pl.DataFrame({"delta_e": [0.0, 1.0]}),
+            initial_atoms=f"{path.name} initial",
+            saddle_atoms=f"{path.name} saddle",
+        )
+
+    rendered: dict = {}
+    monkeypatch.setenv("RGPYCRUMBS_AUTO_DEPS", "0")
+    monkeypatch.setattr(plt_saddle, "load_dimer_trajectory", load)
+    monkeypatch.setattr(
+        plt_saddle,
+        "render_single_ended_landscape",
+        lambda **kwargs: rendered.update(kwargs),
+    )
+    config_path = tmp_path / "plot.toml"
+    config_path.write_text(config, encoding="utf-8")
+    with matplotlib.rc_context():
+        plt_saddle.plot_saddle(
+            config=config_path,
+            job_dir=[tmp_path / job for job in jobs],
+            plot_type="landscape",
+            output=tmp_path / "landscape.pdf",
+        )
+    return rendered
+
+
+def test_saddle_landscape_forwards_the_surface_fit_settings(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """auto_thin and max_surface_points from the TOML config reach the renderer."""
+    from rgpycrumbs.eon.plot_config import SHARED_DEFAULTS
+
+    max_points = SHARED_DEFAULTS["max_surface_points"] + 1
+    rendered = _saddle_landscape_keywords(
+        monkeypatch,
+        tmp_path,
+        ["dimer"],
+        f"[saddle]\nauto_thin = true\nmax_surface_points = {max_points}\n",
+    )
+
+    assert rendered["surface_fit"].auto_thin is True
+    assert rendered["surface_fit"].max_surface_points == max_points
