@@ -102,6 +102,14 @@ def find_mismatch_indices(
     Analyzes a structure file with PTM, identifies the interstitial defect,
     and returns the indices of the interstitial atoms plus all atoms
     within a sphere of radius `selection_radius`.
+
+    With `remove_fcc_vacancy` set, atoms whose centrosymmetry marks them as
+    vacancy neighbors are dropped from the defect atoms.
+    Otherwise every atom that does not match `target_structure` is a defect atom.
+
+    .. versionchanged:: 1.14.0
+       Without `remove_fcc_vacancy`, the mismatched atoms are kept instead of
+       all being dropped.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -153,16 +161,19 @@ def find_mismatch_indices(
                 expression="Centrosymmetry < 70 || Centrosymmetry > 95",
             )
         )
-    data = pipeline.compute()
+        data = pipeline.compute()
 
-    # After applying the pipeline modifiers:
-    # 1. InvertSelectionModifier: Inverts the selection, so previously unselected atoms (e.g., FCC atoms) are now selected.
-    # 2. CentroSymmetryModifier: Computes the centrosymmetry parameter for the selected atoms, which helps identify atoms in distorted environments.
-    # 3. ExpressionSelectionModifier: Selects atoms based on the centrosymmetry parameter, using the condition "Centrosymmetry < 70 || Centrosymmetry > 95".
-    #    This step identifies atoms that are likely to be vacancies or interstitials.
-    # At this point, the 'selection' array represents vacancy atoms (selection == 0).
-    vacancy = np.where(data.particles.selection.array == 0)[0]
-    interstitial = np.setdiff1d(mismatch_indices, vacancy)
+        # After applying the pipeline modifiers:
+        # 1. InvertSelectionModifier: Inverts the selection, so previously unselected atoms (e.g., FCC atoms) are now selected.
+        # 2. CentroSymmetryModifier: Computes the centrosymmetry parameter for the selected atoms, which helps identify atoms in distorted environments.
+        # 3. ExpressionSelectionModifier: Selects atoms based on the centrosymmetry parameter, using the condition "Centrosymmetry < 70 || Centrosymmetry > 95".
+        #    This step identifies atoms that are likely to be vacancies or interstitials.
+        # At this point, the 'selection' array represents vacancy atoms (selection == 0).
+        vacancy = np.where(data.particles.selection.array == 0)[0]
+        interstitial = np.setdiff1d(mismatch_indices, vacancy)
+    else:
+        data = non_fcc
+        interstitial = mismatch_indices
     positions = data.particles.positions
     center_interstitial = np.mean(positions[interstitial], axis=0)
     selection_radius_sq = selection_radius**2

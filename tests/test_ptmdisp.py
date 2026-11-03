@@ -94,6 +94,15 @@ def test_find_indices_on_fcc_with_defect(defect_fcc_cu_file):
     assert isinstance(indices, np.ndarray)
 
 
+def test_find_indices_without_vacancy_filter_keeps_the_neighbors(defect_fcc_cu_file):
+    """Without the vacancy filter, every neighbor of the vacancy is a defect atom."""
+    filepath, expected_defect_indices = defect_fcc_cu_file
+    indices = find_mismatch_indices(
+        filepath, CrystalStructure.FCC, remove_fcc_vacancy=False, view_selection=False
+    )
+    assert expected_defect_indices <= set(indices.tolist())
+
+
 def test_find_indices_on_perfect_bcc(perfect_bcc_fe_file):
     """
     On a perfect bulk BCC crystal, searching for non-BCC atoms should return an empty list.
