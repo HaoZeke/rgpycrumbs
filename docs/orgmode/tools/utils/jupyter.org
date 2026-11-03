@@ -26,6 +26,12 @@
    run_command_or_exit(["eonclient"], timeout=300)
    #+END_SRC
 
+   The ~timeout~ is in seconds and covers the whole command, including the processes it starts.
+   At the deadline the helper kills them all and exits with status 124.
+   The default, ~timeout=None~, sets no deadline.
+   On POSIX the command runs in its own session.
+   Ctrl-C in a terminal then reaches only the helper, which kills the command.
+
 ** Configuration Generation
    Instead of writing ~config.ini~ files using fragile f-strings, use
    ~write_eon_config~ to generate them from Python dictionaries.

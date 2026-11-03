@@ -5,8 +5,11 @@ from __future__ import annotations
 import gzip
 import importlib
 import importlib.metadata
+import os
 import re
+import subprocess
 import sys
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -251,3 +254,55 @@ def test_head_search_reads_to_the_end_without_a_line_budget(tmp_path: Path) -> N
 
     assert head_search(path, "needle") is True
     assert head_search(path, "needle", n=len(lines) - 1) is False
+
+
+# The child sleeps for ten deadlines, so it is still running when the deadline
+# passes even if this thread loses the CPU for most of that time.
+LIVE_TIMEOUT_SECONDS = 0.5
+SILENT_CHILD_SECONDS = 10 * LIVE_TIMEOUT_SECONDS
+
+
+def test_live_command_timeout_stops_a_running_child() -> None:
+    """The deadline stops a child that is still running, even a silent one."""
+    from rgpycrumbs.run.jupyter import _run_command_live
+
+    with pytest.raises(subprocess.TimeoutExpired):
+        _run_command_live(
+            [sys.executable, "-c", f"import time; time.sleep({SILENT_CHILD_SECONDS})"],
+            timeout=LIVE_TIMEOUT_SECONDS,
+        )
+
+
+@pytest.mark.skipif(os.name != "posix", reason="needs POSIX sessions")
+@pytest.mark.parametrize(
+    "script",
+    ["{sleep} & {sleep}", "{sleep} &"],
+    ids=["shell-still-running", "shell-exited"],
+)
+def test_live_command_timeout_kills_what_a_shell_command_starts(script: str) -> None:
+    """A background child that keeps the output open ends at the deadline too."""
+    from rgpycrumbs.run.jupyter import _run_command_live
+
+    sleep = f"sleep {SILENT_CHILD_SECONDS:g}"
+    start = time.monotonic()
+    with pytest.raises(subprocess.TimeoutExpired):
+        _run_command_live(script.format(sleep=sleep), timeout=LIVE_TIMEOUT_SECONDS)
+    assert time.monotonic() - start < SILENT_CHILD_SECONDS
+
+
+def test_run_command_or_exit_sets_no_deadline_by_default(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Without a timeout argument the command runs as long as it needs."""
+    from rgpycrumbs.run import jupyter
+
+    seen = {}
+
+    def run_live(cmd, *, check, capture, timeout):
+        seen["timeout"] = timeout
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr(jupyter, "_run_command_live", run_live)
+    jupyter.run_command_or_exit(["true"])
+
+    assert seen == {"timeout": None}
