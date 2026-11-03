@@ -353,8 +353,9 @@ def _plot_landscape(
         energies_eV=traj.dat_df["delta_e"].to_numpy(),
         ref_a=traj.initial_atoms,
         ref_b=ref_b,
-        overlay_atom_lists=[t.atoms_list for t in trajs],
-        overlay_labels=labels,
+        # The renderer draws the primary path itself and labels every overlay start.
+        overlay_atom_lists=[t.atoms_list for t in trajs] if len(trajs) > 1 else None,
+        overlay_labels=labels if len(trajs) > 1 else None,
         ira_instance=ira_instance,
         ira_kmax=ira_kmax,
         project_path=project_path,

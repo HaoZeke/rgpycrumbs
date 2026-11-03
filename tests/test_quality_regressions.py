@@ -543,3 +543,19 @@ def test_saddle_landscape_forwards_the_surface_fit_settings(
 
     assert rendered["surface_fit"].auto_thin is True
     assert rendered["surface_fit"].max_surface_points == max_points
+
+
+def test_saddle_landscape_overlays_a_trajectory_only_beside_others(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A lone trajectory is the primary path, so it is not overlaid on itself."""
+    lone = _saddle_landscape_keywords(monkeypatch, tmp_path, ["dimer"], "")
+    pair = _saddle_landscape_keywords(monkeypatch, tmp_path, ["fire", "lbfgs"], "")
+
+    assert lone["overlay_atom_lists"] is None
+    assert lone["overlay_labels"] is None
+    assert pair["overlay_atom_lists"] == [
+        ["fire initial", "fire saddle"],
+        ["lbfgs initial", "lbfgs saddle"],
+    ]
+    assert pair["overlay_labels"] == ["fire", "lbfgs"]
