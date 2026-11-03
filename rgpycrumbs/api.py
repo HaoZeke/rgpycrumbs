@@ -68,12 +68,18 @@ def suite_pins() -> dict[str, str]:
     Single implementation for the suite. Consumers (chemparseplot, wailord)
     should re-export or call this rather than reimplementing the merge.
 
-    Soft-fails to env-only pins if config load errors (never raises for missing
-    config files). Does not install packages and does not require uv.
+    Environment pins override config pins for the same package, as the runtime
+    precedence in :mod:`rgpycrumbs.config` states. Soft-fails to env-only pins
+    if config load errors (never raises for missing config files). Does not
+    install packages and does not require uv.
+
+    .. versionchanged:: 1.14.0
+       Environment pins win over config pins. Config pins used to win.
     """
-    pins = dict(pins_from_env())
+    pins: dict[str, str] = {}
     try:
-        pins.update(load_config().merged_package_pins_normalized())
+        pins = load_config().merged_package_pins_normalized()
     except Exception as exc:
         logging.getLogger(__name__).debug("suite_pins: config load skipped: %s", exc)
+    pins.update(pins_from_env())
     return pins

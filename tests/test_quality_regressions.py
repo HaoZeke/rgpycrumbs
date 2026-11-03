@@ -321,3 +321,21 @@ def test_cli_discovery_requires_pep_723_script_metadata(
     monkeypatch.setattr(cli, "PACKAGE_ROOT", tmp_path)
 
     assert cli._get_scripts_in_folder("tools") == ["command"]
+
+
+def test_suite_pins_let_environment_pins_override_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Environment pins rank above config pins, as rgpycrumbs.config documents."""
+    from rgpycrumbs.api import suite_pins
+
+    (tmp_path / "rgpkgs.toml").write_text(
+        '[pins.packages]\nnumpy = "1.26.4"\nscipy = "1.11.4"\n', encoding="utf-8"
+    )
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
+    for name in ("RGPKGS_CONFIG", "RGPYCRUMBS_CONFIG"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("RGPKGS_LOCK_PINS", '{"numpy": "2.0.0"}')
+    monkeypatch.chdir(tmp_path)
+
+    assert suite_pins() == {"numpy": "2.0.0", "scipy": "1.11.4"}

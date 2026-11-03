@@ -25,7 +25,7 @@ from rgpycrumbs.api import (
 | ~apply_pin_to_spec~ | Apply pin map to a pip requirement string |
 | ~pins_from_env~ | Read ~RGPKGS_LOCK_PINS~ (set by CLI dispatch) |
 | ~ensure_import~ | On-demand optional import (+ AUTO_DEPS) |
-| ~suite_pins~ | Env ∪ config pin merge for consumers |
+| ~suite_pins~ | Config pins merged with env pins, env winning, for consumers |
 | ~resolve_lock_path_layered~ | CLI > env > config lock path |
 | ~user_config_path~ | Path to global TOML |
 
