@@ -50,6 +50,40 @@ pixi run -e eonmlflow test-eonmlflow # eon + mlflow
 pixi run -e ptm test-ptm            # ovito structure analysis
 #+END_SRC
 
+#+begin_comment
+[[[cog
+import re
+import tomllib
+from pathlib import Path
+
+root = next(p for p in Path(cog.inFile).resolve().parents if (p / "pixi.toml").is_file())
+pixi = tomllib.loads((root / "pixi.toml").read_text())
+spec = pixi["feature"]["ptm"]["dependencies"]["ovito"]
+build = re.search(
+    r"conda\.ovito\.org/linux-64/ovito-([\d.]+)-py(\d)(\d+)", (root / "pixi.lock").read_text()
+)
+version, major, minor = build.groups()
+cog.outl("#+end_comment")
+cog.outl(
+    "The ~ptm~ environment installs the Python module of the Open Visualization Tool (OVITO)"
+    f" from ~{spec['channel']}~."
+)
+cog.outl(
+    f"The version constraint in ~pixi.toml~ is ~{spec['version']}~,"
+    f" and ~pixi.lock~ pins {version} for Python {major}.{minor}."
+)
+cog.outl("#+begin_comment")
+]]]
+#+end_comment
+The ~ptm~ environment installs the Python module of the Open Visualization Tool (OVITO) from ~https://conda.ovito.org~.
+The version constraint in ~pixi.toml~ is ~>=3.16.0, <4~, and ~pixi.lock~ pins 3.17.2 for Python 3.13.
+#+begin_comment
+[[[end]]]
+#+end_comment
+The comment above ~ovito~ in ~pixi.toml~ gives the basis for that constraint.
+The ~ovito~ package on conda-forge is a retired OVITO Basic desktop build without the Python module.
+With that package, every ~ptm~ test skips.
+
 * How It Works
 
 #+BEGIN_SRC dot :file coverage_flow.png

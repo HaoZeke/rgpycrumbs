@@ -17,7 +17,7 @@ unique features. Each backend has different strengths.
 | xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | ~ensure_import~ / AUTO_DEPS (or ~pip install xyzrender~) |
 | ASE | Space-filling | Fast | Built-in, no extra deps | Built-in |
 | solvis | Ball-and-stick | Medium | Transparent bg, PyVista 3D | ~pip install solvis-tools~ |
-| ovito | Configurable | Slow | Full MD viz, modifiers | conda-forge / separate heavy install |
+| ovito | Configurable | Slow | Full MD viz, modifiers | ~ovito~ from ~https://conda.ovito.org~ |
 
 * xyzrender
 
@@ -113,6 +113,17 @@ blend seamlessly into plots without white rectangles.
 
 The [[https://www.ovito.org/python/][OVITO Python]] backend provides off-screen rendering with
 orthographic projection.
+
+The Python module of the Open Visualization Tool (OVITO) comes from OVITO's own conda channel.
+The [[https://docs.ovito.org/python/introduction/installation.html#using-conda][installation guide]] gives this command:
+
+#+begin_src shell
+conda install --strict-channel-priority -c https://conda.ovito.org -c conda-forge ovito
+#+end_src
+
+The ~ovito~ package on conda-forge is a retired OVITO Basic desktop build without the Python module.
+Since 3.17.2, the desktop application is the separate ~ovito-pro~ package, which pulls in ~ovito~.
+In a checkout of rgpycrumbs, ~pixi install -e ptm~ sets up an environment with the module.
 
 ** When to Use ovito
 

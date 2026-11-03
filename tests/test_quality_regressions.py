@@ -4,14 +4,20 @@ from __future__ import annotations
 
 import importlib
 import importlib.metadata
+import re
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 pytestmark = pytest.mark.pure
 
 PROJECT_ROOT = Path(__file__).parents[1]
+COG_BLOCK = re.compile(
+    r"^\[\[\[cog\n(?P<code>.*?)^\]\]\]\n(?P<output>.*?)^\[\[\[end\]\]\]$",
+    re.MULTILINE | re.DOTALL,
+)
 
 
 @pytest.mark.parametrize(
@@ -122,3 +128,17 @@ def test_docs_export_regenerates_cog_blocks_first() -> None:
 
     assert "cogapp" in docs["pypi-dependencies"]
     assert command.index("cog -r") < command.index("emacs --batch")
+
+
+def test_org_cog_output_matches_the_pixi_files() -> None:
+    """Committed cog output in the org sources is what the blocks generate now."""
+    pytest.importorskip("tomllib")
+    blocks = 0
+    for path in sorted((PROJECT_ROOT / "docs" / "orgmode").rglob("*.org")):
+        for block in COG_BLOCK.finditer(path.read_text()):
+            emitted: list[str] = []
+            cog = SimpleNamespace(inFile=str(path), outl=emitted.append)
+            exec(block["code"], {"cog": cog})  # noqa: S102
+            assert block["output"] == "".join(f"{line}\n" for line in emitted), path
+            blocks += 1
+    assert blocks
