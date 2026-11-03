@@ -39,6 +39,31 @@ _HAS_DEV_CHEMGP = has_module_spec("chemparseplot") and _has("chemparseplot.plot.
 pytestmark = pytest.mark.pure
 
 
+@pytest.fixture(autouse=True)
+def _unbind_dropped_submodules():
+    """Unbind the ``rgpycrumbs`` submodules a test dropped from ``sys.modules``.
+
+    The fixtures below import scripts against fake dependencies and then
+    delete them from ``sys.modules``.  ``from rgpycrumbs.eon import plt_saddle``
+    reads the package attribute first, so later test files would otherwise
+    get the copy built against the fakes.
+    """
+    yield
+    for name, package in list(sys.modules.items()):
+        if name.partition(".")[0] != "rgpycrumbs":
+            continue
+        if not isinstance(package, types.ModuleType):
+            continue
+        for attr, value in list(vars(package).items()):
+            child = f"{name}.{attr}"
+            if (
+                isinstance(value, types.ModuleType)
+                and value.__name__ == child
+                and sys.modules.get(child) is not value
+            ):
+                delattr(package, attr)
+
+
 def _assert_dispatches(argv, expected_script, monkeypatch):
     from rgpycrumbs.cli import main
 
