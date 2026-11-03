@@ -3,7 +3,7 @@ build-backend = "hatchling.build"
 requires      = [ "hatch-vcs", "hatchling" ]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "_version.py"
+version-file = "rgpycrumbs/_version.py"
 
 [tool.hatch.build]
 include = [ "rgpycrumbs/**/*.py", "rgpycrumbs/*.py" ]
@@ -241,9 +241,13 @@ ban-relative-imports = "all"
 ]
 
 [tool.coverage.run]
-branch      = true
-omit        = [ "_version.py", "rgpycrumbs/xts/*", "rgpycrumbs/eon/ptmdisp.py" ]
-parallel    = false
+branch = true
+omit = [
+  "rgpycrumbs/_version.py",
+  "rgpycrumbs/xts/*",
+  "rgpycrumbs/eon/ptmdisp.py",
+]
+parallel = false
 source_pkgs = [ "rgpycrumbs" ]
 
 [tool.coverage.paths]
