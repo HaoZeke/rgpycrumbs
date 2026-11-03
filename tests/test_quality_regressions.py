@@ -354,3 +354,21 @@ def test_bond_order_fragments_report_a_missing_tblite(
         fragments.find_fragments_bond_order(
             hydrogen, threshold=0.5, charge=0, multiplicity=1
         )
+
+
+def test_one_day_tdelta_runs_without_the_python_311_utc_alias(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The helper works with the datetime module of Python 3.10, which lacks UTC."""
+    import datetime
+
+    from rgpycrumbs.time import helpers
+
+    python310_datetime = SimpleNamespace(
+        datetime=datetime.datetime,
+        timedelta=datetime.timedelta,
+        timezone=datetime.timezone,
+    )
+    monkeypatch.setattr(helpers, "datetime", python310_datetime)
+
+    assert helpers.one_day_tdelta("00:00:01", "23:59:59") == datetime.timedelta(seconds=2)
