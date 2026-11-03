@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import importlib
 import importlib.metadata
 import re
@@ -204,3 +205,37 @@ def test_cyclonedx_purls_decode_every_percent_escape(purl: str, pins: dict) -> N
     document = {"components": [{"purl": purl, "type": "library"}]}
 
     assert pypi_pins_from_cyclonedx(document) == pins
+
+
+@pytest.mark.parametrize(
+    ("name", "lines"),
+    [
+        ("values.txt", ["alpha", "beta", "gamma"]),
+        ("values.txt.gz", ["alpha", "beta", "gamma"]),
+        ("wide.txt.gz", [f"{'x' * 3000} {index}" for index in range(10)]),
+    ],
+)
+def test_tail_returns_the_last_lines(tmp_path: Path, name: str, lines: list[str]) -> None:
+    """Plain and gzip files give the last lines, however long the lines are."""
+    from rgpycrumbs.search.helpers import tail
+
+    path = tmp_path / name
+    text = "".join(f"{line}\n" for line in lines)
+    if path.suffix == ".gz":
+        with gzip.open(path, "wt", encoding="utf-8") as stream:
+            stream.write(text)
+    else:
+        path.write_text(text, encoding="utf-8")
+
+    assert tail(path, 4) == lines[-4:]
+
+
+@pytest.mark.parametrize("content", ["", "one line\n"])
+def test_head_search_returns_false_at_early_eof(tmp_path: Path, content: str) -> None:
+    """A file shorter than the line budget is a plain miss."""
+    from rgpycrumbs.search.helpers import head_search
+
+    path = tmp_path / "short.txt"
+    path.write_text(content, encoding="utf-8")
+
+    assert head_search(path, "absent") is False

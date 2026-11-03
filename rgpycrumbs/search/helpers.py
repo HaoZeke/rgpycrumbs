@@ -1,39 +1,45 @@
 import gzip
-import os
+from collections import deque
+from itertools import islice
 from pathlib import Path
 
 
-# Kanged from here and there
-# e.g. https://stackoverflow.com/a/76733254/1895378
-# XXX: Not good at all, doesn't even handle exponential search
-def tail(filename, n):
+def _open_text(file_path: Path):
+    opener = gzip.open if file_path.suffix == ".gz" else open
+    return opener(file_path, "rt", encoding="utf-8")
+
+
+def tail(filename: str | Path, n: int) -> list[str]:
     """Return the last *n* lines of a file (supports gzip).
 
+    Line endings are stripped, and a file shorter than *n* lines is returned
+    whole.
+
     .. versionadded:: 0.0.2
+
+    .. versionchanged:: 1.14.0
+       Plain files no longer raise ``io.UnsupportedOperation``, and both kinds
+       return lines without line endings. Gzip files return all *n* lines even
+       when those lines average more than 1024 bytes.
     """
-    file_path = Path(filename)
-
-    if file_path.suffix == ".gz":
-        with gzip.open(file_path, "rb") as f:
-            try:
-                f.seek(-n * 1024, os.SEEK_END)
-                lines = f.readlines()[-n:]
-                return [line.decode("utf-8").rstrip("\n") for line in lines]
-            except EOFError:
-                return ""
-    else:
-        with open(file_path) as f:
-            f.seek(-n * 1024, os.SEEK_END)
-            lines = f.readlines()[-n:]
-            return lines
+    if n < 0:
+        msg = "n must be non-negative"
+        raise ValueError(msg)
+    if n == 0:
+        return []
+    with _open_text(Path(filename)) as stream:
+        return [line.rstrip("\r\n") for line in deque(stream, maxlen=n)]
 
 
-# XXX: Another hack
 def head_search(filename: Path, sstr: str, n=60):
     """
     Checks if the search string is found in the first n lines of a file.
 
     .. versionadded:: 0.0.2
+
+    .. versionchanged:: 1.14.0
+       A file shorter than *n* lines returns ``False`` instead of raising
+       ``StopIteration``.
 
     Args:
         filename (Path): Path to the file.
@@ -45,14 +51,8 @@ def head_search(filename: Path, sstr: str, n=60):
     """
 
     try:
-        with (
-            gzip.open(filename, "rt") if filename.suffix == ".gz" else open(filename)
-        ) as f:
-            for _ in range(n):
-                line = next(f).strip()
-                if sstr in line:
-                    return True
-            return False
+        with _open_text(Path(filename)) as stream:
+            return any(sstr in line.strip() for line in islice(stream, n))
     except (OSError, EOFError) as e:
         print(f"Error reading file: {e}")
         return False
