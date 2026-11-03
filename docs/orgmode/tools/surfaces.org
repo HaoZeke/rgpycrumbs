@@ -78,6 +78,8 @@
    - *Gradient noise*: With ~noise_per_obs~, ~GradientIMQ~ spreads each energy noise over the gradients at that point.
      Each gradient component keeps the energy's ratio of noise to prior variance.
      Its noise then has the units of a gradient variance.
+   - *Nystrom fits*: With ~optimize=True~, ~NystromGradientIMQ~ fits $\epsilon$ and the noise on its inducing points.
+     The fit uses the ~GradientIMQ~ prior and noise cap.
 
 * Troubleshooting
 

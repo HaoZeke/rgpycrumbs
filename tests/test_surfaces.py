@@ -725,6 +725,47 @@ def test_nystrom_gradient_imq_fit_and_predict(gradient_2d_data, query_points):
     assert jnp.all(jnp.isfinite(preds))
 
 
+def test_nystrom_gradient_imq_optimizes_hyperparameters(gradient_2d_data, monkeypatch):
+    """The public optimize flag must not be silently ignored."""
+    from rgpycrumbs.surfaces import gradient_nystrom
+
+    calls = []
+
+    def fake_minimize(loss_fn, x0):
+        calls.append((loss_fn, x0))
+        return jnp.log(jnp.array([2.0, 1e-3]))
+
+    monkeypatch.setattr(gradient_nystrom, "minimize_log_parameters", fake_minimize)
+    x, y, grads = gradient_2d_data
+    model = NystromGradientIMQ(
+        x,
+        y,
+        gradients=grads,
+        n_inducing=10,
+        smoothing=0.2,
+        optimize=True,
+        length_scale=1.0,
+    )
+
+    assert calls
+    assert model.epsilon == pytest.approx(2.0)
+    assert model.noise == pytest.approx(1e-3)
+
+
+def test_nystrom_fit_matches_gradient_imq_when_every_point_is_inducing(
+    gradient_2d_data,
+):
+    """With every point inducing, both models fit the same objective."""
+    x, y, grads = gradient_2d_data
+    kwargs = {"gradients": grads, "smoothing": 1e-3, "optimize": True}
+
+    full = GradientIMQ(x, y, **kwargs)
+    nystrom = NystromGradientIMQ(x, y, n_inducing=10, **kwargs)
+
+    assert nystrom.epsilon == pytest.approx(full.epsilon, rel=1e-5)
+    assert nystrom.noise == pytest.approx(full.noise, rel=1e-5)
+
+
 def test_nystrom_gradient_imq_path_sampling(gradient_2d_data):
     """Test the path-based sampling logic in NystromGradientIMQ."""
     x, y, grads = gradient_2d_data

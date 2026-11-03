@@ -8,13 +8,16 @@ from rgpycrumbs.surfaces._base import BaseGradientSurface
 from rgpycrumbs.surfaces._hyperparameters import (
     covariance_roundoff_jitter,
     median_pairwise_distance,
+    minimize_log_parameters,
     observation_noise,
+    starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
     gradient_covariance,
     imq_kernel_elem,
     k_matrix_imq_grad_map,
 )
+from rgpycrumbs.surfaces.gradient_imq import negative_mll_imq_map
 
 # ==============================================================================
 # NYSTROM GRADIENT-ENHANCED IMQ HELPERS
@@ -84,6 +87,9 @@ class NystromGradientIMQ(BaseGradientSurface):
     .. versionchanged:: 1.14.0
        The default ``epsilon`` is the median distance between inducing points.
        The default ``smoothing`` is None, which treats the data as exact.
+       ``optimize=True`` fits ``epsilon`` and the noise on the inducing
+       subset, as ``GradientIMQ`` does on all points, instead of being
+       ignored.
     """
 
     def __init__(
@@ -107,15 +113,17 @@ class NystromGradientIMQ(BaseGradientSurface):
             gradients: Training gradients.
             n_inducing: Number of inducing points to sample.
             nimags: Path-based image count for structured sampling.
-            smoothing: Noise variance. None or zero means exact data.
+            smoothing: Noise variance of fixed fits, and the start and cap
+                of optimized ones. None or zero means exact data.
             length_scale: Initial epsilon for IMQ.
-            optimize: Optimization toggle.
+            optimize: Whether to fit ``epsilon`` and the noise on the
+                inducing subset.
         """
         self.n_inducing = n_inducing
         self.nimags = nimags
         super().__init__(x, y, gradients, smoothing, length_scale, optimize, **kwargs)
 
-    def _fit(self, smoothing, length_scale, _optimize):
+    def _fit(self, smoothing, length_scale, optimize):
         N_total = self.x.shape[0]
         if N_total <= self.n_inducing:
             self.x_inducing = self.x
@@ -143,14 +151,37 @@ class NystromGradientIMQ(BaseGradientSurface):
                 idx = rng.choice(N_total, min(self.n_inducing, N_total), replace=False)
                 self.x_inducing = self.x[idx]
                 self.y_full_inducing = self.y_full[idx]
+
         if length_scale is None:
-            self.epsilon = median_pairwise_distance(self.x_inducing)
+            init_epsilon = median_pairwise_distance(self.x_inducing)
         else:
-            self.epsilon = length_scale
+            init_epsilon = length_scale
         K_mm = gradient_covariance(
-            k_matrix_imq_grad_map(self.x_inducing, self.x_inducing, self.epsilon)
+            k_matrix_imq_grad_map(self.x_inducing, self.x_inducing, init_epsilon)
         )
-        self.noise = observation_noise(smoothing, K_mm)
+        init_noise = observation_noise(smoothing, K_mm)
+
+        if optimize:
+            start_noise = starting_noise(smoothing, K_mm)
+            x0 = jnp.array([jnp.log(init_epsilon), jnp.log(start_noise)])
+
+            def loss_fn(log_p):
+                return negative_mll_imq_map(
+                    log_p,
+                    init_epsilon,
+                    self.x_inducing,
+                    self.y_full_inducing.flatten(),
+                    self.D_plus_1,
+                )
+
+            log_params = minimize_log_parameters(loss_fn, x0)
+            self.epsilon = float(jnp.exp(log_params[0]))
+            # Same cap as GradientIMQ, applied on the inducing subset.
+            self.noise = min(float(jnp.exp(log_params[1])), init_noise)
+            if jnp.isnan(self.epsilon) or jnp.isnan(self.noise):
+                self.epsilon, self.noise = init_epsilon, init_noise
+        else:
+            self.epsilon, self.noise = init_epsilon, init_noise
 
     def _solve(self):
         self.alpha_m, self.W = _stable_nystrom_grad_imq_solve(
