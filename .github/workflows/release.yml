@@ -9,6 +9,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - run: python3 scripts/check_version.py "${GITHUB_REF_NAME}"
       - uses: astral-sh/setup-uv@v6
       - run: uv build
       - uses: actions/upload-artifact@v4
