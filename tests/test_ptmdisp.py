@@ -150,3 +150,21 @@ def test_cli_structure_type_option(perfect_bcc_fe_file):
     result = runner.invoke(main, ["--structure-type", "BCC", str(perfect_bcc_fe_file)])
 
     assert result.exit_code == 0
+
+
+def test_cli_no_fcc_vacancy_turns_the_vacancy_filter_off(
+    perfect_fcc_cu_file, monkeypatch
+):
+    """The command runs the vacancy filter unless --no-fcc-vacancy is given."""
+    filter_settings = []
+
+    def record(filename, structure, remove_fcc_vacancy=False):
+        filter_settings.append(remove_fcc_vacancy)
+        return np.array([], dtype=int)
+
+    monkeypatch.setattr("rgpycrumbs.eon.ptmdisp.find_mismatch_indices", record)
+    runner = CliRunner()
+    for options in ([], ["--no-fcc-vacancy"]):
+        result = runner.invoke(main, [*options, str(perfect_fcc_cu_file)])
+        assert result.exit_code == 0, result.output
+    assert filter_settings == [True, False]

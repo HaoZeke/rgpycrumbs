@@ -229,6 +229,7 @@ def find_mismatch_indices(
 @click.option(
     "--no-fcc-vacancy",
     "no_fcc_vacancy",
+    is_flag=True,
     default=False,
     help="Disable FCC vacancy processing.",
 )
@@ -241,7 +242,9 @@ def main(filename: str, structure: CrystalStructure, verbose: bool, no_fcc_vacan
     if verbose:
         log.setLevel(logging.INFO)
 
-    indices = find_mismatch_indices(filename, structure, no_fcc_vacancy)
+    indices = find_mismatch_indices(
+        filename, structure, remove_fcc_vacancy=not no_fcc_vacancy
+    )
 
     # Final, clean output is printed to stdout.
     # All logs, errors, and status messages go to stderr.
