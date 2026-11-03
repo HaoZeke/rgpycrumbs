@@ -11,15 +11,19 @@ to these scripts at runtime, avoiding a monolithic CLI with heavy imports.
 
 * Dispatcher Pattern
 
-The main =rgpycrumbs= command discovers scripts under =rgpycrumbs/*/cli_*.py=
-and maps subcommand names to script paths. When invoked, it calls =uv run= on
+The main =rgpycrumbs= command maps each subpackage to a command group and each script in it to a command.
+When invoked, it calls =uv run= on
 the target script, letting uv resolve the per-script dependencies declared in
 the PEP 723 header.
+
+A public module is a script only when it carries the inline =script= metadata block of Python Enhancement Proposal (PEP) 723.
+Modules without that block stay library code, and so do modules whose names start with =_=.
+The command name is the module name with =-= for =_=, minus any =cli_= prefix.
 
 #+begin_src python
 # Simplified dispatcher logic (see rgpycrumbs/cli.py)
 def dispatch(cmd: str, args: list[str]):
-    script = SCRIPT_MAP[cmd]  # e.g. rgpycrumbs/neb/cli_plt_neb.py
+    script = SCRIPT_MAP[cmd]  # e.g. rgpycrumbs/eon/plt_neb.py
     subprocess.run(["uv", "run", "--script", str(script), *args])
 #+end_src
 
@@ -27,8 +31,8 @@ def dispatch(cmd: str, args: list[str]):
 
 - Each script declares only its own dependencies (click, matplotlib, etc.)
 - No global import of JAX/scipy/ASE at startup
-- Scripts are runnable standalone: =uv run rgpycrumbs/neb/cli_plt_neb.py --help=
-- New commands added by dropping a =cli_*.py= file in the right subpackage
+- Scripts are runnable standalone: =uv run rgpycrumbs/eon/plt_neb.py --help=
+- A module with a PEP 723 =script= block in a subpackage is a new command
 
 * Related
 

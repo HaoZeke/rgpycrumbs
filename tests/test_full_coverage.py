@@ -750,12 +750,13 @@ class TestCLIEdgeCases:
         # Create a fake folder with scripts and library modules
         folder = tmp_path / "test_group"
         folder.mkdir()
-        (folder / "real_script.py").touch()
+        script_block = "# /// script\n# dependencies = []\n# ///\n"
+        (folder / "real_script.py").write_text(script_block)
         (folder / "helpers.py").touch()  # should be excluded
         (folder / "utils.py").touch()  # should be excluded
-        (folder / "_private.py").touch()  # should be excluded
+        (folder / "_private.py").write_text(script_block)  # should be excluded
         (folder / "__init__.py").touch()  # should be excluded
-        (folder / "cli_something.py").touch()  # should strip cli_ prefix
+        (folder / "cli_something.py").write_text(script_block)  # strips cli_
 
         monkeypatch.setattr("rgpycrumbs.cli.PACKAGE_ROOT", tmp_path)
         result = _get_scripts_in_folder("test_group")

@@ -306,3 +306,18 @@ def test_run_command_or_exit_sets_no_deadline_by_default(
     jupyter.run_command_or_exit(["true"])
 
     assert seen == {"timeout": None}
+
+
+def test_cli_discovery_requires_pep_723_script_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only files with a PEP 723 script block become dispatcher commands."""
+    from rgpycrumbs import cli
+
+    group = tmp_path / "tools"
+    group.mkdir()
+    (group / "library.py").write_text('"""Run it with a # /// script header."""\n')
+    (group / "command.py").write_text("# /// script\n# dependencies = []\n# ///\n")
+    monkeypatch.setattr(cli, "PACKAGE_ROOT", tmp_path)
+
+    assert cli._get_scripts_in_folder("tools") == ["command"]

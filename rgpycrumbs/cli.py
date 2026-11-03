@@ -2,6 +2,7 @@ import contextlib
 import importlib.util
 import logging
 import os
+import re
 import shutil
 import site
 import subprocess
@@ -15,6 +16,11 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # The directory where cli.py is located
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+
+# The PEP 723 reference expression, so discovery agrees with what uv reads.
+_PEP_723_BLOCK = re.compile(
+    r"(?m)^# /// (?P<type>[a-zA-Z0-9-]+)$\s(?P<content>(^#(| .*)$\s)+)^# ///$"
+)
 
 # Modules that signal a usable in-env eOn/plot stack (readcon-native CON I/O).
 _IN_ENV_STACK_MODULES = ("readcon", "matplotlib", "polars", "ase", "chemparseplot")
@@ -160,27 +166,35 @@ def _uv_editable_sources() -> list[Path]:
     return sources
 
 
+def _declares_script_metadata(path: Path) -> bool:
+    """Return whether *path* carries a PEP 723 ``script`` metadata block."""
+    try:
+        source = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    return any(block["type"] == "script" for block in _PEP_723_BLOCK.finditer(source))
+
+
 def _get_scripts_in_folder(folder_name: str) -> list[str]:
     """Returns a sorted list of CLI script names (without extension) in a folder.
 
-    Excludes library modules (hdf5_io, plotting) and internal files (__init__, _*).
-    Includes actual CLI entry point scripts.
+    A public Python file is a command only when it declares a PEP 723
+    ``script`` metadata block. Library modules and internal files (``_*``)
+    are never registered. A ``cli_`` prefix is dropped from the command name.
+
+    .. versionchanged:: 1.14.0
+       Commands need a PEP 723 script block. Library modules without one
+       used to be registered as commands that did nothing.
     """
     folder_path = PACKAGE_ROOT / folder_name
     if not folder_path.is_dir():
         return []
 
-    # Library modules to exclude
-    library_modules = {"hdf5_io", "plotting", "utils", "helpers", "seed_dimers"}
-
     scripts = []
     for f in folder_path.glob("*.py"):
-        if f.name.startswith("_"):
+        if f.name.startswith("_") or not _declares_script_metadata(f):
             continue
         stem = f.stem
-        # Skip library modules and __init__
-        if stem in library_modules or stem == "__init__":
-            continue
         # Strip 'cli_' prefix if present for cleaner command names
         if stem.startswith("cli_"):
             stem = stem[4:]
