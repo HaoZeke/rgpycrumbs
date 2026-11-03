@@ -92,7 +92,7 @@ def test_basetypes_reexport():
     assert SaddleMeasure().success is False
 
 
-def test_basetypes_fallback(monkeypatch):
+def test_basetypes_import_without_chemparseplot(monkeypatch):
     sys.modules.pop("rgpycrumbs.basetypes", None)
 
     import builtins

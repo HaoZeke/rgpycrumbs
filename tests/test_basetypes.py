@@ -1,3 +1,7 @@
+import subprocess
+import sys
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -82,3 +86,17 @@ def test_saddle_measure_custom():
     assert s.success is True
     assert s.saddle_energy == -0.5
     assert s.barrier == 0.3
+
+
+def test_importing_the_records_leaves_chemparseplot_unloaded():
+    """The records are defined here, so importing them loads no chemparseplot."""
+    pytest.importorskip("chemparseplot")
+    code = "import sys, rgpycrumbs.basetypes; print('chemparseplot' in sys.modules)"
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        check=True,
+        cwd=Path(__file__).parents[1],
+    )
+    assert result.stdout.strip() == "False"
