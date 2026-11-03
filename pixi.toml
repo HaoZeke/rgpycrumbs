@@ -50,6 +50,7 @@ sphinx-favicon = ">=1.0.1,<2"
 [feature.docs.pypi-dependencies]
 autodoc-pydantic            = ">=2.2.0, <3"
 chemparseplot               = ">=1.11.0, <2"
+cogapp                      = ">=3.6.0, <4"
 pychum                      = ">=0.1.0, <0.2"
 rgpycrumbs                  = { path = ".", editable = true }
 shibuya                     = ">=2025.12.13, <2026"
@@ -187,6 +188,7 @@ depends-on = [ { task = "mkrst", environment = "docs" } ]
 
 [feature.docs.tasks.mkrst]
 cmd = """
+grep -rlxF --include='*.org' '[[[cog' orgmode | cog -r @/dev/stdin && \
 pandoc ../CODE_OF_CONDUCT.md -o ../CODE_OF_CONDUCT.rst && \
 emacs --batch --load export.el
 """

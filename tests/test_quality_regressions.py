@@ -111,3 +111,14 @@ def test_ptm_environment_takes_ovito_from_its_channel() -> None:
     assert ptm["channels"] == ["https://conda.ovito.org"]
     assert ptm["dependencies"]["ovito"]["channel"] == "https://conda.ovito.org"
     assert "ovito" not in project["feature"]["test"]["dependencies"]
+
+
+def test_docs_export_regenerates_cog_blocks_first() -> None:
+    """Org sources with cog blocks are regenerated before the Emacs export."""
+    tomllib = pytest.importorskip("tomllib")
+    project = tomllib.loads((PROJECT_ROOT / "pixi.toml").read_text())
+    docs = project["feature"]["docs"]
+    command = docs["tasks"]["mkrst"]["cmd"]
+
+    assert "cogapp" in docs["pypi-dependencies"]
+    assert command.index("cog -r") < command.index("emacs --batch")

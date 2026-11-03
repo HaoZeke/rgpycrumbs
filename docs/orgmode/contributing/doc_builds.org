@@ -30,6 +30,9 @@ authoring rules:
   intersphinx links (e.g., pointing to the eOn schema).
 - Source Code Links :: Link to the internal API reference using
   ~@@rst::mod:`rgpycrumbs.path.to.module`@@~.
+- Generated Text :: ~mkrst~ first runs ~cog -r~ on every org file with a cog block.
+  A block starts on a line of just ~[[[cog~ and computes its text from ~pixi.toml~ or ~pixi.lock~.
+  Commit the regenerated file with the change that moves those values.
 
 * Content Structure Template for Tools
 Every new tool documentation should follow this approximate structure:
