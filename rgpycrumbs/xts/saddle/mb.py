@@ -9,6 +9,8 @@ import numpy as np
 
 from rgpycrumbs.func.muller_brown import muller_brown
 
+ITERATION_LINE = re.compile(r"Iteration\s(?P<iter>\d*): (?P<coords>\[\d?.*\])")
+
 
 def _surface_grid():
     x = np.linspace(-1.5, 1.2, 400)
@@ -16,6 +18,26 @@ def _surface_grid():
     X, Y = np.meshgrid(x, y)
     Z = muller_brown([X, Y])
     return X, Y, Z
+
+
+def parse_iteration_paths(lines):
+    """Stack the coordinates of the ``Iteration`` lines of an optimizer log.
+
+    Lines whose coordinates contain ``nan`` are skipped.
+
+    Raises:
+        ValueError: If no ``Iteration`` line is left to stack.
+
+    .. versionadded:: 1.14.0
+    """
+    coords = []
+    for line in lines:
+        match = ITERATION_LINE.match(line)
+        if match and "nan" not in match["coords"]:
+            coords.append(np.array(ast.literal_eval(match["coords"])))
+    if not coords:
+        raise ValueError("the log has no Iteration line without nan coordinates")
+    return np.vstack(coords)
 
 
 if __name__ == "__main__":
@@ -38,16 +60,7 @@ if __name__ == "__main__":
     nimgs = int(args.nimgs)
     X, Y, Z = _surface_grid()
 
-    otext = Path(args.ifile).open().readlines()
-    ilines = [x for x in otext if "Iteration" in x]
-    iparser = re.compile(r"Iteration\s(?P<iter>\d*): (?P<coords>\[\d?.*\])")
-    path_arr = np.vstack(
-        [
-            np.array(ast.literal_eval(iparser.match(x).group("coords")))
-            for x in ilines
-            if iparser.match(x) and "nan" not in iparser.match(x).group("coords")
-        ]
-    )
+    path_arr = parse_iteration_paths(Path(args.ifile).read_text().splitlines())
     plt.figure(figsize=(12, 9))
     plt.contourf(X, Y, Z, 50, cmap=cmc.batlow, alpha=0.6)
     plt.colorbar()

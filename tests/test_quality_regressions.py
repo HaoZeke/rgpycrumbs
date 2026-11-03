@@ -425,3 +425,45 @@ def test_spline_interp_default_grid_passes_through_every_sample(degree: int) -> 
 
     np.testing.assert_allclose(x_fine[::degree], x)
     np.testing.assert_allclose(y_fine[::degree], y)
+
+
+def test_muller_brown_parser_skips_iterations_with_nan() -> None:
+    """Iteration lines with nan coordinates are dropped and the rest stacked."""
+    pytest.importorskip("cmcrameri")
+    from rgpycrumbs.xts.saddle.mb import parse_iteration_paths
+
+    lines = [
+        "log header",
+        "Iteration 0: [0.5, 0.1]",
+        "Iteration 1: [nan, nan]",
+        "Iteration 2: [0.4, 0.2]",
+    ]
+
+    np.testing.assert_array_equal(parse_iteration_paths(lines), [[0.5, 0.1], [0.4, 0.2]])
+
+
+def test_muller_brown_script_reports_a_log_without_iterations(tmp_path: Path) -> None:
+    """The plot script names the missing Iteration lines instead of failing in NumPy."""
+    pytest.importorskip("cmcrameri")
+    log = tmp_path / "output.txt"
+    log.write_text("log header\nIteration 1: [nan, nan]\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "rgpycrumbs.xts.saddle.mb",
+            "--nimgs",
+            "1",
+            "--ifile",
+            str(log),
+        ],
+        cwd=PROJECT_ROOT,
+        env={**os.environ, "MPLBACKEND": "Agg"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "no Iteration line without nan coordinates" in result.stderr
