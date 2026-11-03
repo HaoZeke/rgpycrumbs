@@ -727,6 +727,53 @@ def test_gradient_rq_with_optimization(gradient_2d_data, query_points):
     assert model.noise > 0
 
 
+def test_gradient_rq_fits_the_marginal_likelihood(gradient_2d_data):
+    """No penalty pulls the RQ parameters toward fixed values."""
+    from rgpycrumbs.surfaces._kernels import k_matrix_rq_grad_map
+    from rgpycrumbs.surfaces.gradient_rq import negative_mll_rq_grad
+
+    x, y, grads = gradient_2d_data
+    data = GradientRQ(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    length_scale, alpha, noise = 0.7, 2.0, 1e-2
+    K_blocks = k_matrix_rq_grad_map(data.x, data.x, jnp.array([length_scale, alpha]))
+    N, _, D_plus_1, _ = K_blocks.shape
+    K = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
+    log_params = jnp.log(jnp.array([length_scale, alpha, noise]))
+
+    objective = negative_mll_rq_grad(log_params, data.x, data.y_flat, data.D_plus_1)
+
+    assert float(objective) == pytest.approx(
+        float(generic_negative_mll(K, data.y_flat, noise)), rel=1e-5
+    )
+
+
+def test_gradient_rq_fit_minimizes_the_marginal_likelihood(gradient_2d_data):
+    """An optimized fit ends where a direct fit of the likelihood ends."""
+    from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
+    from rgpycrumbs.surfaces._kernels import k_matrix_rq_grad_map
+
+    x, y, grads = gradient_2d_data
+    model = GradientRQ(
+        x, y, gradients=grads, length_scale=1.5, smoothing=1e-2, optimize=True
+    )
+
+    def loss(log_params):
+        length_scale = jnp.exp(log_params[0])
+        alpha = jnp.exp(log_params[1])
+        noise = jnp.exp(log_params[2])
+        params = jnp.array([length_scale, alpha])
+        K_blocks = k_matrix_rq_grad_map(model.x, model.x, params)
+        N, _, D_plus_1, _ = K_blocks.shape
+        K = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
+        return generic_negative_mll(K, model.y_flat, noise)
+
+    start = jnp.log(jnp.array([1.5, 1.0, 1e-2]))
+    expected = np.exp(np.asarray(minimize_log_parameters(loss, start)))
+
+    fitted = np.array([model.ls, model.alpha_param, model.noise])
+    assert fitted == pytest.approx(expected, rel=1e-6)
+
+
 # ---------------------------------------------------------------------------
 # Prediction at origin sanity check
 # ---------------------------------------------------------------------------

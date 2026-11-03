@@ -53,6 +53,10 @@
    The surface fits take these defaults from ~rgpycrumbs.surfaces._hyperparameters~.
    - *Optimizer*: Fits with ~optimize=True~ run SciPy's ~L-BFGS-B~ on the log-parameters.
      It keeps the last point that its line search accepted.
+   - *Rational quadratic*: ~GradientRQ~ fits maximize the marginal likelihood with no penalty terms.
+     They start the shape $\alpha$ at 1.
+     The kernel is a gamma mixture of squared-exponential kernels.
+     Shape 1 makes that gamma distribution exponential.
    - *Roundoff jitter*: The diagonal shift is $\gamma_{n+1} = (n+1)u/(1-(n+1)u)$ times the largest covariance entry.
      Here $u$ is the unit roundoff of the working precision.
      The shift bounds the entrywise backward error of a Cholesky factorization.

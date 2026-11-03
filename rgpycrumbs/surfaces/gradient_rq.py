@@ -7,7 +7,10 @@ from rgpycrumbs.surfaces._base import (
     equilibrated_inverse_solve,
     generic_negative_mll,
 )
-from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
+from rgpycrumbs.surfaces._hyperparameters import (
+    RQ_INITIAL_ALPHA,
+    minimize_log_parameters,
+)
 from rgpycrumbs.surfaces._kernels import (
     k_matrix_rq_grad_map,
     rq_kernel_elem,
@@ -18,27 +21,16 @@ from rgpycrumbs.surfaces._kernels import (
 # ==============================================================================
 
 
-def negative_mll_rq_map(log_params, x, y_flat, D_plus_1):
-    log_ls = log_params[0]
-    log_alpha = log_params[1]
-    log_noise = log_params[2]
-    length_scale = jnp.exp(log_ls)
-    alpha = jnp.exp(log_alpha)
-    noise_scalar = jnp.exp(log_noise)
+def negative_mll_rq_grad(log_params, x, y_flat, D_plus_1):
+    length_scale = jnp.exp(log_params[0])
+    alpha = jnp.exp(log_params[1])
+    noise_scalar = jnp.exp(log_params[2])
 
     params = jnp.array([length_scale, alpha])
     K_blocks = k_matrix_rq_grad_map(x, x, params)
     N = x.shape[0]
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
-    mll_cost = generic_negative_mll(K_full, y_flat, noise_scalar)
-
-    ls_target = jnp.log(1.5)
-    ls_penalty = (log_ls - ls_target) ** 2 / 0.05
-    noise_target = jnp.log(1e-2)
-    noise_penalty = (log_noise - noise_target) ** 2 / 1.0
-    alpha_target = jnp.log(0.8)
-    alpha_penalty = (log_alpha - alpha_target) ** 2 / 0.5
-    return mll_cost + ls_penalty + noise_penalty + alpha_penalty
+    return generic_negative_mll(K_full, y_flat, noise_scalar)
 
 
 @jit
@@ -84,18 +76,21 @@ class GradientRQ(BaseGradientSurface):
     """Symmetric Gradient-enhanced Rational Quadratic (RQ) surface implementation.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       Optimized fits maximize the marginal likelihood without penalties.
     """
 
     def _fit(self, _smoothing, length_scale, optimize):
         init_ls = length_scale if length_scale is not None else 1.5
-        init_alpha = 1.0
+        init_alpha = RQ_INITIAL_ALPHA
         init_noise = 1e-2
 
         if optimize:
             x0 = jnp.array([jnp.log(init_ls), jnp.log(init_alpha), jnp.log(init_noise)])
 
             def loss_fn(log_p):
-                return negative_mll_rq_map(log_p, self.x, self.y_flat, self.D_plus_1)
+                return negative_mll_rq_grad(log_p, self.x, self.y_flat, self.D_plus_1)
 
             log_params = minimize_log_parameters(loss_fn, x0)
             self.ls = float(jnp.exp(log_params[0]))

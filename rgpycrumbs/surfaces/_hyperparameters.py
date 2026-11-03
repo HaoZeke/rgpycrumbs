@@ -3,6 +3,12 @@
 Each value below is derived from the data, the floating-point format, or a
 cited estimator:
 
+* ``RQ_INITIAL_ALPHA`` starts the rational-quadratic mixture at shape 1.
+  The RQ kernel is a gamma scale mixture of squared-exponential kernels over
+  inverse squared length scales (Rasmussen and Williams, eq. 4.20).
+  Shape 1 makes that mixture exponential, the maximum-entropy distribution on
+  the positive reals for a fixed mean (Cover and Thomas, chapter 12,
+  https://doi.org/10.1002/047174882X).
 * ``minimize_log_parameters`` runs SciPy's L-BFGS-B with its documented
   default tolerances and returns the last iterate its line search accepted.
   The BFGS loop in JAX 0.9.2 moves to the trial point even when the line
@@ -23,11 +29,15 @@ cited estimator:
   chapters 3 and 10, https://doi.org/10.1137/1.9780898718027.
 """
 
+from typing import Final
+
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 from rgpycrumbs._aux import ensure_import
+
+RQ_INITIAL_ALPHA: Final = 1.0
 
 
 def minimize_log_parameters(loss_fn, x0) -> jnp.ndarray:
@@ -65,6 +75,7 @@ def covariance_roundoff_jitter(matrix: jnp.ndarray) -> jnp.ndarray:
 
 
 __all__ = [
+    "RQ_INITIAL_ALPHA",
     "covariance_roundoff_factor",
     "covariance_roundoff_jitter",
     "covariance_scale",
