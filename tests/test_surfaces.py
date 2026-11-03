@@ -86,6 +86,29 @@ def test_get_surface_model_default():
 # ---------------------------------------------------------------------------
 
 
+def test_median_pairwise_distance_skips_repeated_points():
+    """Zero distances between repeated inputs do not drag the start down."""
+    from rgpycrumbs.surfaces._hyperparameters import median_pairwise_distance
+
+    points = jnp.array([[0.0, 0.0], [0.0, 0.0], [3.0, 0.0], [0.0, 4.0]])
+
+    # The distinct distances are 3, 3, 4, 4 and 5.
+    assert median_pairwise_distance(points) == pytest.approx(4.0)
+
+
+@pytest.mark.parametrize(
+    "points",
+    [jnp.zeros((1, 2)), jnp.zeros((3, 2))],
+    ids=["one-point", "repeated-point"],
+)
+def test_median_pairwise_distance_needs_two_distinct_points(points):
+    """No length scale can be read from fewer than two distinct inputs."""
+    from rgpycrumbs.surfaces._hyperparameters import median_pairwise_distance
+
+    with pytest.raises(ValueError, match="length-scale initialization"):
+        median_pairwise_distance(points)
+
+
 def test_roundoff_jitter_is_highams_cholesky_bound():
     """The diagonal shift is gamma_(n+1) times the largest covariance entry."""
     from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
@@ -354,8 +377,10 @@ def _pinned_bowl():
 def test_gradient_matern_predict_is_near_the_exact_answer():
     """Held to the exact answer on the bowl at the default and length_scale 3.
 
-    The bound is 0.02.  The closed form measures 0.00729 at the default and
-    0.00373 at length_scale 3.  The autodiff covariance is 45.4 and 0.247.
+    The bound is 0.02.  The closed form measures 0.00592 at the median start
+    and 0.00373 at length_scale 3.  At the v1.13.0 start, half the mean span,
+    it measured 0.00729, and the autodiff covariance it replaced measured
+    45.4 and 0.247.
     """
     x, y, grads, query, truth = _pinned_bowl()
     cases = ((None, 0.02), (3.0, 0.02))
@@ -725,6 +750,40 @@ def test_gradient_rq_with_optimization(gradient_2d_data, query_points):
     assert model.ls > 0
     assert model.alpha_param > 0
     assert model.noise > 0
+
+
+@pytest.mark.parametrize(
+    ("model_class", "attribute"),
+    [(FastMatern, "ls"), (FastIMQ, "epsilon")],
+)
+def test_dense_models_start_at_the_median_distance(
+    simple_2d_data, model_class, attribute
+):
+    """The five-point bowl has a median input distance of exactly 2."""
+    x, y = simple_2d_data
+    model = model_class(x, y, optimize=False)
+
+    assert getattr(model, attribute) == pytest.approx(2.0)
+
+
+@pytest.mark.parametrize(
+    ("model_class", "attribute"),
+    [
+        (GradientMatern, "ls"),
+        (GradientSE, "ls"),
+        (GradientRQ, "ls"),
+        (GradientIMQ, "epsilon"),
+        (NystromGradientIMQ, "epsilon"),
+    ],
+)
+def test_gradient_models_start_at_the_median_distance(
+    gradient_2d_data, model_class, attribute
+):
+    """The five-point bowl has a median input distance of exactly 2."""
+    x, y, grads = gradient_2d_data
+    model = model_class(x, y, gradients=grads, optimize=False)
+
+    assert getattr(model, attribute) == pytest.approx(2.0)
 
 
 def test_gradient_rq_fits_the_marginal_likelihood(gradient_2d_data):

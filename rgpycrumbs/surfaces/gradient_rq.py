@@ -9,6 +9,7 @@ from rgpycrumbs.surfaces._base import (
 )
 from rgpycrumbs.surfaces._hyperparameters import (
     RQ_INITIAL_ALPHA,
+    median_pairwise_distance,
     minimize_log_parameters,
 )
 from rgpycrumbs.surfaces._kernels import (
@@ -79,10 +80,14 @@ class GradientRQ(BaseGradientSurface):
 
     .. versionchanged:: 1.14.0
        Optimized fits maximize the marginal likelihood without penalties.
+       The default length scale starts at the median distance between inputs.
     """
 
     def _fit(self, _smoothing, length_scale, optimize):
-        init_ls = length_scale if length_scale is not None else 1.5
+        if length_scale is None:
+            init_ls = median_pairwise_distance(self.x)
+        else:
+            init_ls = length_scale
         init_alpha = RQ_INITIAL_ALPHA
         init_noise = 1e-2
 

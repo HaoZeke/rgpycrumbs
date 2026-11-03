@@ -6,6 +6,7 @@ from rgpycrumbs.surfaces._base import BaseGradientSurface, generic_negative_mll
 from rgpycrumbs.surfaces._hyperparameters import (
     IMQ_EPSILON_PRIOR_SHAPE,
     covariance_roundoff_jitter,
+    median_pairwise_distance,
     minimize_log_parameters,
 )
 from rgpycrumbs.surfaces._kernels import (
@@ -109,12 +110,12 @@ class GradientIMQ(BaseGradientSurface):
 
     .. versionchanged:: 1.14.0
        Optimized fits no longer pull the noise toward ``1e-2``.
+       The default ``epsilon`` starts at the median distance between inputs.
     """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
-            span = jnp.max(self.x, axis=0) - jnp.min(self.x, axis=0)
-            init_eps = jnp.mean(span) * 0.8
+            init_eps = median_pairwise_distance(self.x)
         else:
             init_eps = length_scale
         init_noise = max(smoothing, 1e-4)

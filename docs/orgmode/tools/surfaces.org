@@ -53,6 +53,9 @@
 
 ** Fit Defaults
    The surface fits take these defaults from ~rgpycrumbs.surfaces._hyperparameters~.
+   - *Length scales*: Fits start the length scale at the median distance between distinct inputs.
+     The inverse multiquadric models start $\epsilon$ the same way.
+     [[https://doi.org/10.48550/arXiv.1707.07269][Garreau, Jitkrittum and Kanagawa]] analyse this median heuristic.
    - *Optimizer*: Fits with ~optimize=True~ run SciPy's ~L-BFGS-B~ on the log-parameters.
      It keeps the last point that its line search accepted.
    - *Priors*: Fits maximize the marginal likelihood.

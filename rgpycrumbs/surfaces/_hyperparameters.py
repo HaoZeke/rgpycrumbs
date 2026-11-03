@@ -3,6 +3,16 @@
 Each value below is derived from the data, the floating-point format, or a
 cited estimator:
 
+* Length scales start at the median Euclidean distance between distinct
+  inputs.
+  Garreau, Jitkrittum and Kanagawa analyse this median heuristic, and note
+  that some authors use the median distance itself rather than that
+  distance over ``sqrt(2)``, https://doi.org/10.48550/arXiv.1707.07269.
+  Repeated inputs are left out, so they do not pull the start toward zero.
+  The IMQ kernel ``1 / sqrt(r**2 + epsilon**2)`` depends on ``r`` only through
+  ``r / epsilon`` up to its amplitude, so ``epsilon`` takes the same start.
+  Riabiz et al. set the IMQ length scale to the median distance in the same
+  way, https://doi.org/10.1111/rssb.12503.
 * ``IMQ_EPSILON_PRIOR_SHAPE`` is the shape of the gamma prior on the IMQ
   ``epsilon``.
   Chung et al. propose shape 2 for a standard deviation because the density
@@ -48,6 +58,21 @@ IMQ_EPSILON_PRIOR_SHAPE: Final = 2.0
 RQ_INITIAL_ALPHA: Final = 1.0
 
 
+def median_pairwise_distance(x: jnp.ndarray) -> jnp.ndarray:
+    """Return the median Euclidean distance between distinct input points."""
+    if x.ndim != 2 or x.shape[0] < 2:
+        msg = "length-scale initialization requires at least two input points"
+        raise ValueError(msg)
+
+    rows, columns = jnp.triu_indices(x.shape[0], k=1)
+    distances = jnp.sqrt(jnp.sum((x[rows] - x[columns]) ** 2, axis=-1))
+    distinct = distances[distances > 0]
+    if distinct.size == 0:
+        msg = "length-scale initialization requires two distinct input points"
+        raise ValueError(msg)
+    return jnp.median(distinct)
+
+
 def minimize_log_parameters(loss_fn, x0) -> jnp.ndarray:
     """Minimize a float32 JAX objective of log-parameters with L-BFGS-B."""
     scipy_optimize = ensure_import("scipy.optimize")
@@ -88,5 +113,6 @@ __all__ = [
     "covariance_roundoff_factor",
     "covariance_roundoff_jitter",
     "covariance_scale",
+    "median_pairwise_distance",
     "minimize_log_parameters",
 ]

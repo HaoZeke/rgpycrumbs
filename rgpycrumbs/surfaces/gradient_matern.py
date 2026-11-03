@@ -6,7 +6,10 @@ from rgpycrumbs.surfaces._base import (
     equilibrated_inverse_solve,
     generic_negative_mll,
 )
-from rgpycrumbs.surfaces._hyperparameters import minimize_log_parameters
+from rgpycrumbs.surfaces._hyperparameters import (
+    median_pairwise_distance,
+    minimize_log_parameters,
+)
 from rgpycrumbs.surfaces._kernels import (
     _matern_query_row,
     k_matrix_matern_grad_map,
@@ -62,12 +65,14 @@ class GradientMatern(BaseGradientSurface):
     """Gradient-enhanced Matern 5/2 surface implementation.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       The default length scale starts at the median distance between inputs.
     """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
-            span = jnp.max(self.x, axis=0) - jnp.min(self.x, axis=0)
-            init_ls = jnp.mean(span) * 0.5
+            init_ls = median_pairwise_distance(self.x)
         else:
             init_ls = length_scale
         init_noise = max(smoothing, 1e-4)

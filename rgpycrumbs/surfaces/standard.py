@@ -4,6 +4,7 @@ from jax import jit
 from rgpycrumbs.surfaces._base import BaseSurface, generic_negative_mll
 from rgpycrumbs.surfaces._hyperparameters import (
     covariance_roundoff_jitter,
+    median_pairwise_distance,
     minimize_log_parameters,
 )
 from rgpycrumbs.surfaces._kernels import (
@@ -218,12 +219,14 @@ class FastMatern(BaseSurface):
     """Matérn 5/2 surface implementation.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       The default length scale starts at the median distance between inputs.
     """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
-            span = jnp.max(self.x_obs, axis=0) - jnp.min(self.x_obs, axis=0)
-            init_ls = jnp.mean(span) * 0.2
+            init_ls = median_pairwise_distance(self.x_obs)
         else:
             init_ls = length_scale
 
@@ -300,12 +303,14 @@ class FastIMQ(BaseSurface):
     """Inverse Multi-Quadratic (IMQ) surface implementation.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       The default ``epsilon`` starts at the median distance between inputs.
     """
 
     def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
-            span = jnp.max(self.x_obs, axis=0) - jnp.min(self.x_obs, axis=0)
-            init_eps = jnp.mean(span) * 0.8
+            init_eps = median_pairwise_distance(self.x_obs)
         else:
             init_eps = length_scale
         init_noise = max(smoothing, 1e-4)

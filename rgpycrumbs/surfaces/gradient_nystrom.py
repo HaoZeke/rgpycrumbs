@@ -5,7 +5,10 @@ import numpy as np
 from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import BaseGradientSurface
-from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+from rgpycrumbs.surfaces._hyperparameters import (
+    covariance_roundoff_jitter,
+    median_pairwise_distance,
+)
 from rgpycrumbs.surfaces._kernels import (
     imq_kernel_elem,
     k_matrix_imq_grad_map,
@@ -75,6 +78,9 @@ class NystromGradientIMQ(BaseGradientSurface):
     """Memory-efficient Nystrom-approximated gradient-enhanced IMQ surface.
 
     .. versionadded:: 1.1.0
+
+    .. versionchanged:: 1.14.0
+       The default ``epsilon`` is the median distance between inducing points.
     """
 
     def __init__(
@@ -134,7 +140,10 @@ class NystromGradientIMQ(BaseGradientSurface):
                 idx = rng.choice(N_total, min(self.n_inducing, N_total), replace=False)
                 self.x_inducing = self.x[idx]
                 self.y_full_inducing = self.y_full[idx]
-        self.epsilon = length_scale if length_scale is not None else 0.5
+        if length_scale is None:
+            self.epsilon = median_pairwise_distance(self.x_inducing)
+        else:
+            self.epsilon = length_scale
         self.noise = smoothing
 
     def _solve(self):
