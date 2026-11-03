@@ -467,3 +467,23 @@ def test_muller_brown_script_reports_a_log_without_iterations(tmp_path: Path) ->
 
     assert result.returncode != 0
     assert "no Iteration line without nan coordinates" in result.stderr
+
+
+def test_plt_gp_docs_name_only_real_subcommands() -> None:
+    """The plt-gp page and the batch tutorial name only subcommands that exist."""
+    pytest.importorskip("h5py")
+    pytest.importorskip("chemparseplot")
+    from rgpycrumbs.chemgp.plot_gp import cli
+
+    docs = PROJECT_ROOT / "docs" / "orgmode" / "tools" / "chemgp"
+    overview = (docs / "plt_gp.org").read_text(encoding="utf-8").split("* Overview")[1]
+    listed = {
+        row.split("|")[1].strip()
+        for row in overview.split("\n* ")[0].splitlines()
+        if row.startswith("| ") and not row.startswith("| Subcommand")
+    }
+    tutorial = (docs / "batch_tutorial.org").read_text(encoding="utf-8")
+    entry_types = set(re.findall(r'^type = "([^"]+)"$', tutorial, re.MULTILINE))
+
+    assert listed == set(cli.commands)
+    assert entry_types <= set(cli.commands) - {"batch"}

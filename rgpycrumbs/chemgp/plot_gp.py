@@ -622,40 +622,24 @@ def batch(
         h = entry.get("height", 5.0)
         d = entry.get("dpi", dpi)
 
-        # Build arguments based on plot type
-        if plot_type == "landscape":
-            src_dir = base_dir / entry.get("source_dir", ".")
-            args = [
-                "--source-dir",
-                str(src_dir),
-                "--output",
-                str(out),
-                "--width",
-                str(w),
-                "--height",
-                str(h),
-                "--dpi",
-                str(d),
-            ]
-        else:
-            inp = input_dir / entry["input"]
-            if not inp.exists():
-                return entry["output"], False, f"Input not found: {inp}"
-            args = [
-                "--input",
-                str(inp),
-                "--output",
-                str(out),
-                "--width",
-                str(w),
-                "--height",
-                str(h),
-                "--dpi",
-                str(d),
-            ]
+        inp = input_dir / entry["input"]
+        if not inp.exists():
+            return entry["output"], False, f"Input not found: {inp}"
+        args = [
+            "--input",
+            str(inp),
+            "--output",
+            str(out),
+            "--width",
+            str(w),
+            "--height",
+            str(h),
+            "--dpi",
+            str(d),
+        ]
 
         # Forward extra keys as CLI options
-        skip = {"type", "input", "output", "width", "height", "dpi", "source_dir"}
+        skip = {"type", "input", "output", "width", "height", "dpi"}
         for k, v in entry.items():
             if k in skip:
                 continue

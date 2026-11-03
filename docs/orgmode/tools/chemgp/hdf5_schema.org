@@ -77,7 +77,6 @@ Named sets: ~minima~, ~saddles~, ~endpoints~, ~training~, ~train_N<n>~, ~selecte
 | variance | ~grids/energy~, ~grids/variance~ and ~points/training~, optionally ~points/minima~ and ~points/saddles~ |
 | fps | ~points/selected~ (pc1, pc2), ~points/pruned~ (pc1, pc2) |
 | profile | ~table~ (image, energy, method) |
-| landscape | .con files in ~source_dir~ (not HDF5; delegates to plt-neb) |
 
 * Filename Conventions
 

@@ -85,20 +85,6 @@ clamp_hi = 50
 Any key that matches a CLI option on the corresponding subcommand (with
 underscores replacing hyphens) works here.
 
-* Landscape Entries
-
-The ~landscape~ type uses ~source_dir~ instead of ~input~, because it reads .con
-and .dat files rather than HDF5:
-
-#+begin_src toml
-[[plots]]
-source_dir = "output"
-output = "leps_landscape.pdf"
-type = "landscape"
-#+end_src
-
-This delegates to ~rgpycrumbs chemgp plt-neb~ under the hood.
-
 * Next Steps
 
 - @@rst::doc:`plt_gp`@@ -- full CLI reference for all 11 subcommands
