@@ -58,7 +58,7 @@ comment with a link to a *live preview*.
 ** Local Build
 If you need to verify changes locally before pushing:
 #+BEGIN_SRC shell
-pixi run r docbld
+pixi run docbld
 #+END_SRC
 The build fails on any Sphinx warning.
 ~sphinxbld~ runs ~sphinx-build -W --keep-going~, which lists every warning before it fails.
@@ -69,7 +69,7 @@ python -m http.server -d docs/build
 #+end_src
 For a clean rebuild:
 #+begin_src bash
-pixi run r docdel
+pixi run docdel
 #+end_src
 
 * README and Branch Structure
