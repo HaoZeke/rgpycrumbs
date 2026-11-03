@@ -12,7 +12,7 @@ from rgpycrumbs.surfaces._hyperparameters import (
     starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
-    gradient_covariance,
+    gradient_kernel_matrix,
     imq_kernel_elem,
     k_matrix_imq_grad_map,
 )
@@ -130,7 +130,7 @@ class GradientIMQ(BaseGradientSurface):
             init_eps = median_pairwise_distance(self.x)
         else:
             init_eps = length_scale
-        K_init = gradient_covariance(k_matrix_imq_grad_map(self.x, self.x, init_eps))
+        K_init = gradient_kernel_matrix(k_matrix_imq_grad_map, self.x, init_eps)
         init_noise = observation_noise(smoothing, K_init)
 
         if optimize:

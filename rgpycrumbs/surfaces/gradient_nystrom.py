@@ -14,7 +14,7 @@ from rgpycrumbs.surfaces._hyperparameters import (
     starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
-    gradient_covariance,
+    gradient_kernel_matrix,
     imq_kernel_elem,
     k_matrix_imq_grad_map,
 )
@@ -161,8 +161,8 @@ class NystromGradientIMQ(BaseGradientSurface):
             init_epsilon = median_pairwise_distance(self.x_inducing)
         else:
             init_epsilon = length_scale
-        K_mm = gradient_covariance(
-            k_matrix_imq_grad_map(self.x_inducing, self.x_inducing, init_epsilon)
+        K_mm = gradient_kernel_matrix(
+            k_matrix_imq_grad_map, self.x_inducing, init_epsilon
         )
         init_noise = observation_noise(smoothing, K_mm)
 

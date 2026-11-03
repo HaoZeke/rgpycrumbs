@@ -138,6 +138,7 @@
 1. This is expected - gradient models have $(D+1)N \times (D+1)N$ covariance
 2. Use Nystrom approximation for large datasets
 3. Consider using standard (non-gradient) models if gradients are noisy
+4. The first fit at each number of points compiles its ~jax.jit~ functions, and later fits of that size reuse them
 
 ** API Reference
    For detailed method signatures, see the @@rst::doc:`Surfaces API Reference <../../autoapi/rgpycrumbs/surfaces/index>`@@.

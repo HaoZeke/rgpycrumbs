@@ -179,6 +179,25 @@ def test_gradient_covariance_orders_by_point_then_component():
             assert K[rows, columns] == pytest.approx(np.asarray(K_blocks[i, j]))
 
 
+@pytest.mark.parametrize(
+    ("kernel", "params"),
+    [("matern", 0.7), ("se", 0.7), ("imq", 0.7), ("rq", jnp.array([0.7, 1.0]))],
+)
+def test_gradient_kernel_matrix_compiles_the_pair_block_layout(kernel, params):
+    """The compiled helper returns ``gradient_covariance`` of the pair blocks."""
+    from rgpycrumbs.surfaces import _kernels
+
+    k_matrix_grad_map = getattr(_kernels, f"k_matrix_{kernel}_grad_map")
+    x = jax.random.normal(jax.random.PRNGKey(0), (5, 2))
+
+    compiled = np.asarray(_kernels.gradient_kernel_matrix(k_matrix_grad_map, x, params))
+    eager = np.asarray(_kernels.gradient_covariance(k_matrix_grad_map(x, x, params)))
+
+    assert compiled.shape == (15, 15)
+    # Compiled and eager float32 arithmetic may round the same entry differently.
+    np.testing.assert_allclose(compiled, eager, rtol=0, atol=1e-6 * np.abs(eager).max())
+
+
 def test_roundoff_jitter_is_highams_cholesky_bound():
     """The diagonal shift is gamma_(n+1) times the largest covariance entry."""
     from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter

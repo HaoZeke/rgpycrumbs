@@ -14,7 +14,7 @@ from rgpycrumbs.surfaces._hyperparameters import (
 )
 from rgpycrumbs.surfaces._kernels import (
     _matern_query_row,
-    gradient_covariance,
+    gradient_kernel_matrix,
     k_matrix_matern_grad_map,
 )
 
@@ -78,7 +78,7 @@ class GradientMatern(BaseGradientSurface):
             init_ls = median_pairwise_distance(self.x)
         else:
             init_ls = length_scale
-        K_init = gradient_covariance(k_matrix_matern_grad_map(self.x, self.x, init_ls))
+        K_init = gradient_kernel_matrix(k_matrix_matern_grad_map, self.x, init_ls)
         init_noise = observation_noise(smoothing, K_init)
 
         if optimize:

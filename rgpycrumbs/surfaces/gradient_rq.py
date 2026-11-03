@@ -15,7 +15,7 @@ from rgpycrumbs.surfaces._hyperparameters import (
     starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
-    gradient_covariance,
+    gradient_kernel_matrix,
     k_matrix_rq_grad_map,
     rq_kernel_elem,
 )
@@ -94,7 +94,7 @@ class GradientRQ(BaseGradientSurface):
             init_ls = length_scale
         init_alpha = RQ_INITIAL_ALPHA
         init_params = jnp.array([init_ls, init_alpha])
-        K_init = gradient_covariance(k_matrix_rq_grad_map(self.x, self.x, init_params))
+        K_init = gradient_kernel_matrix(k_matrix_rq_grad_map, self.x, init_params)
         init_noise = observation_noise(smoothing, K_init)
 
         if optimize:

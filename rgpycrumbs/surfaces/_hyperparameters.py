@@ -71,19 +71,26 @@ RQ_INITIAL_ALPHA: Final = 1.0
 NYSTROM_RANDOM_SEED: Final = 42
 
 
+@jax.jit
+def _distinct_distance_median(x: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Return the median distance between distinct points and their pair count."""
+    rows, columns = jnp.triu_indices(x.shape[0], k=1)
+    distances = jnp.sqrt(jnp.sum((x[rows] - x[columns]) ** 2, axis=-1))
+    distinct = distances > 0
+    return jnp.nanmedian(jnp.where(distinct, distances, jnp.nan)), jnp.sum(distinct)
+
+
 def median_pairwise_distance(x: jnp.ndarray) -> jnp.ndarray:
     """Return the median Euclidean distance between distinct input points."""
     if x.ndim != 2 or x.shape[0] < 2:
         msg = "length-scale initialization requires at least two input points"
         raise ValueError(msg)
 
-    rows, columns = jnp.triu_indices(x.shape[0], k=1)
-    distances = jnp.sqrt(jnp.sum((x[rows] - x[columns]) ** 2, axis=-1))
-    distinct = distances[distances > 0]
-    if distinct.size == 0:
+    median, distinct_pairs = _distinct_distance_median(x)
+    if distinct_pairs == 0:
         msg = "length-scale initialization requires two distinct input points"
         raise ValueError(msg)
-    return jnp.median(distinct)
+    return median
 
 
 def minimize_log_parameters(loss_fn, x0) -> jnp.ndarray:

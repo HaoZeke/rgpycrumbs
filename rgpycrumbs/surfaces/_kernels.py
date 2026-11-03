@@ -11,6 +11,8 @@ differentiation.
 .. versionadded:: 1.0.0
 """
 
+from functools import partial
+
 import jax
 import jax.numpy as jnp
 from jax import jit, vmap
@@ -402,3 +404,22 @@ def gradient_covariance(K_blocks):
     """
     N, M, D_plus_1, _ = K_blocks.shape
     return K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, M * D_plus_1)
+
+
+@partial(jit, static_argnums=0)
+def gradient_kernel_matrix(k_matrix_grad_map, x, params):
+    """Return the gradient-enhanced covariance of ``x`` with itself.
+
+    Compiles once per kernel map and input shape, as the model solves do.
+
+    Args:
+        k_matrix_grad_map: A ``k_matrix_*_grad_map`` function.
+        x: Inputs (N, D).
+        params: Kernel parameters of that map.
+
+    Returns:
+        The ``(N(D+1), N(D+1))`` matrix from ``gradient_covariance``.
+
+    .. versionadded:: 1.14.0
+    """
+    return gradient_covariance(k_matrix_grad_map(x, x, params))
