@@ -339,3 +339,18 @@ def test_suite_pins_let_environment_pins_override_config(
     monkeypatch.chdir(tmp_path)
 
     assert suite_pins() == {"numpy": "2.0.0", "scipy": "1.11.4"}
+
+
+def test_bond_order_fragments_report_a_missing_tblite(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Without tblite the bond-order method raises ImportError with install routes."""
+    ase = pytest.importorskip("ase")
+    from rgpycrumbs.geom import fragments
+
+    monkeypatch.setattr(fragments, "tbliteinterface", None)
+    hydrogen = ase.Atoms("H2", positions=[[0.0, 0.0, 0.0], [0.0, 0.0, 0.74]])
+    with pytest.raises(ImportError, match=r"needs tblite(?s:.)*pip install tblite"):
+        fragments.find_fragments_bond_order(
+            hydrogen, threshold=0.5, charge=0, multiplicity=1
+        )

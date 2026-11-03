@@ -92,10 +92,20 @@ def find_fragments_bond_order(
     Calculate electronic structure using the specified xTB level.
 
     .. versionadded:: 0.0.6
+    .. versionchanged:: 1.14.0
+       Raises :class:`ImportError` naming the install routes when tblite is
+       missing, instead of failing on a ``None`` attribute.
     """
     num_atoms = len(atoms)
     if num_atoms == 0:
         return 0, np.array([]), np.array([]), np.array([])
+    if tbliteinterface is None:
+        msg = (
+            "Bond-order fragment detection needs tblite.\n"
+            "  pip install tblite\n"
+            "  # or run inside the pixi environment: pixi shell -e fragments"
+        )
+        raise ImportError(msg)
 
     logging.info(f"Running {method} for {atoms.get_chemical_formula(mode='hill')}...")
 
