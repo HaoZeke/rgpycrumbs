@@ -54,6 +54,8 @@ cited estimator:
   The largest eigenvalue of a positive semidefinite ``K`` is at most ``n``
   times its largest entry, so ``K + covariance_scale(K) I`` starts the
   optimizer with a condition number of at most ``n + 1``.
+* ``NYSTROM_RANDOM_SEED`` only makes the random inducing subset reproducible.
+  No fit is tuned to its value, and callers can pass their own ``seed``.
 """
 
 from typing import Final
@@ -66,6 +68,7 @@ from rgpycrumbs._aux import ensure_import
 
 IMQ_EPSILON_PRIOR_SHAPE: Final = 2.0
 RQ_INITIAL_ALPHA: Final = 1.0
+NYSTROM_RANDOM_SEED: Final = 42
 
 
 def median_pairwise_distance(x: jnp.ndarray) -> jnp.ndarray:
@@ -136,6 +139,7 @@ def starting_noise(smoothing, matrix: jnp.ndarray) -> float:
 
 __all__ = [
     "IMQ_EPSILON_PRIOR_SHAPE",
+    "NYSTROM_RANDOM_SEED",
     "RQ_INITIAL_ALPHA",
     "covariance_roundoff_factor",
     "covariance_roundoff_jitter",

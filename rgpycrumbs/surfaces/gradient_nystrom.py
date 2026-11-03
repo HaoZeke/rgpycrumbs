@@ -6,6 +6,7 @@ from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import BaseGradientSurface
 from rgpycrumbs.surfaces._hyperparameters import (
+    NYSTROM_RANDOM_SEED,
     covariance_roundoff_jitter,
     median_pairwise_distance,
     minimize_log_parameters,
@@ -90,6 +91,7 @@ class NystromGradientIMQ(BaseGradientSurface):
        ``optimize=True`` fits ``epsilon`` and the noise on the inducing
        subset, as ``GradientIMQ`` does on all points, instead of being
        ignored.
+       The ``seed`` argument picks the random inducing subset.
     """
 
     def __init__(
@@ -102,6 +104,7 @@ class NystromGradientIMQ(BaseGradientSurface):
         smoothing=None,
         length_scale=None,
         optimize=True,
+        seed=NYSTROM_RANDOM_SEED,
         **kwargs,
     ):
         """
@@ -118,9 +121,11 @@ class NystromGradientIMQ(BaseGradientSurface):
             length_scale: Initial epsilon for IMQ.
             optimize: Whether to fit ``epsilon`` and the noise on the
                 inducing subset.
+            seed: Seed for the random inducing subset when ``nimags`` is unset.
         """
         self.n_inducing = n_inducing
         self.nimags = nimags
+        self.seed = seed
         super().__init__(x, y, gradients, smoothing, length_scale, optimize, **kwargs)
 
     def _fit(self, smoothing, length_scale, optimize):
@@ -129,7 +134,7 @@ class NystromGradientIMQ(BaseGradientSurface):
             self.x_inducing = self.x
             self.y_full_inducing = self.y_full
         else:
-            rng = np.random.RandomState(42)
+            rng = np.random.RandomState(self.seed)
             if self.nimags is not None and self.nimags > 0:
                 n_paths = N_total // self.nimags
                 paths_to_sample = max(1, self.n_inducing // self.nimags)

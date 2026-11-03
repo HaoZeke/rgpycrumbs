@@ -766,6 +766,32 @@ def test_nystrom_fit_matches_gradient_imq_when_every_point_is_inducing(
     assert nystrom.noise == pytest.approx(full.noise, rel=1e-5)
 
 
+def test_nystrom_seed_selects_the_random_inducing_subset():
+    """Equal seeds give equal subsets, and the default seed is the policy one."""
+    from rgpycrumbs.surfaces._hyperparameters import NYSTROM_RANDOM_SEED
+
+    rng = np.random.default_rng(5)
+    x = rng.uniform(-1.0, 1.0, (40, 2))
+    y = np.sum(x**2, axis=1)
+    grads = 2.0 * x
+
+    def inducing(**kwargs):
+        model = NystromGradientIMQ(
+            x,
+            y,
+            gradients=grads,
+            n_inducing=10,
+            optimize=False,
+            length_scale=1.0,
+            **kwargs,
+        )
+        return np.asarray(model.x_inducing)
+
+    assert np.array_equal(inducing(seed=1), inducing(seed=1))
+    assert not np.array_equal(inducing(seed=1), inducing(seed=2))
+    assert np.array_equal(inducing(), inducing(seed=NYSTROM_RANDOM_SEED))
+
+
 def test_nystrom_gradient_imq_path_sampling(gradient_2d_data):
     """Test the path-based sampling logic in NystromGradientIMQ."""
     x, y, grads = gradient_2d_data

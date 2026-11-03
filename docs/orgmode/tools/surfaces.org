@@ -80,6 +80,7 @@
      Its noise then has the units of a gradient variance.
    - *Nystrom fits*: With ~optimize=True~, ~NystromGradientIMQ~ fits $\epsilon$ and the noise on its inducing points.
      The fit uses the ~GradientIMQ~ prior and noise cap.
+     A ~seed~ argument picks the random inducing subset, and its default of 42 only makes that subset reproducible.
 
 * Troubleshooting
 
