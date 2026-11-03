@@ -34,6 +34,8 @@ This runs:
 | test | numpy, scipy, ase, click | pure, eon | CLI, parsers, basetypes, interpolation |
 | surfaces | + jax | surfaces | Surface models, kernels, gradient-enhanced GP |
 | fragments | + IRA, tblite, pyvista | fragments, ira, align | Geometry analysis, IRA alignment, fragments |
+| eonmlflow | + eon, mlflow | eon | MLflow logging of eOn runs and configs |
+| ptm | + ovito | ptm | Polyhedral template matching, ~ovito~ rendering |
 
 Each env writes ~COVERAGE_FILE=.coverage.<env>~, then ~cov~ combines them all.
 A failing test in any environment stops ~cov~ with the pytest exit status.
@@ -44,6 +46,8 @@ A failing test in any environment stops ~cov~ with the pytest exit status.
 pixi run -e test test-base          # base tests
 pixi run -e surfaces test-surfaces  # jax surface models
 pixi run -e fragments test-fragments # IRA + geometry
+pixi run -e eonmlflow test-eonmlflow # eon + mlflow
+pixi run -e ptm test-ptm            # ovito structure analysis
 #+END_SRC
 
 * How It Works
@@ -58,12 +62,16 @@ digraph coverage_flow {
     test [label="test-base\n(numpy, scipy, ase)"];
     surfaces [label="test-surfaces\n(+ jax)"];
     fragments [label="test-fragments\n(+ IRA, tblite)"];
-    combine [label="coverage combine\n.coverage.test + .coverage.surfaces + .coverage.fragments", fillcolor="#FF655D", fontcolor=white];
+    eonmlflow [label="test-eonmlflow\n(+ eon, mlflow)"];
+    ptm [label="test-ptm\n(+ ovito)"];
+    combine [label="coverage combine\none .coverage.<env> per env", fillcolor="#FF655D", fontcolor=white];
     report [label="coverage report", fillcolor="#004D40", fontcolor=white];
 
     clean -> test -> combine;
     clean -> surfaces -> combine;
     clean -> fragments -> combine;
+    clean -> eonmlflow -> combine;
+    clean -> ptm -> combine;
     combine -> report;
 }
 #+END_SRC
