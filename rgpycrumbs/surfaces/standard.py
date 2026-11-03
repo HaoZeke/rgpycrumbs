@@ -3,6 +3,7 @@ import jax.scipy.optimize as jopt
 from jax import jit
 
 from rgpycrumbs.surfaces._base import BaseSurface, generic_negative_mll
+from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
 from rgpycrumbs.surfaces._kernels import (
     _imq_kernel_matrix,
     _matern_kernel_matrix,
@@ -25,7 +26,7 @@ def negative_mll_tps(log_params, x, y):
 @jit
 def _tps_solve(x, y, sm):
     K = _tps_kernel_matrix(x)
-    K = K + jnp.eye(x.shape[0]) * sm
+    K = K + jnp.eye(x.shape[0]) * (sm + covariance_roundoff_jitter(K))
 
     # Polynomial Matrix
     N = x.shape[0]
@@ -182,7 +183,7 @@ def negative_mll_matern_std(log_params, x, y):
 @jit
 def _matern_solve(x, y, sm, length_scale):
     K = _matern_kernel_matrix(x, length_scale)
-    K = K + jnp.eye(x.shape[0]) * sm
+    K = K + jnp.eye(x.shape[0]) * (sm + covariance_roundoff_jitter(K))
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
 
@@ -268,7 +269,7 @@ def negative_mll_imq_std(log_params, x, y):
 @jit
 def _imq_solve(x, y, sm, epsilon):
     K = _imq_kernel_matrix(x, epsilon)
-    K = K + jnp.eye(x.shape[0]) * sm
+    K = K + jnp.eye(x.shape[0]) * (sm + covariance_roundoff_jitter(K))
     L = jnp.linalg.cholesky(K)
     alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
 

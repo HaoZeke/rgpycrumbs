@@ -45,8 +45,16 @@
 
 * Numerical Stability
    Gradient-enhanced models use auto-differentiation (via ~jax.grad~ and ~jax.jacfwd~) to construct the full $(D+1)N \times (D+1)N$ covariance matrix.
-   - *Cholesky Fallback*: The ~safe_cholesky_solve~ utility attempts Cholesky decomposition with increasing jitter to handle near-singular matrices.
+   - *Cholesky Fallback*: The ~safe_cholesky_solve~ utility adds roundoff jitter scaled to the covariance.
+     It checks the factor for non-finite values, since ~jax.numpy.linalg.cholesky~ returns NaNs instead of raising.
    - *Float Precision*: By default, models use ~float32~ for performance and compatibility with visualization backends, but ~jax_enable_x64~ can be toggled if higher precision is required.
+
+** Fit Defaults
+   The surface fits take these defaults from ~rgpycrumbs.surfaces._hyperparameters~.
+   - *Roundoff jitter*: The diagonal shift is $\gamma_{n+1} = (n+1)u/(1-(n+1)u)$ times the largest covariance entry.
+     Here $u$ is the unit roundoff of the working precision.
+     The shift bounds the entrywise backward error of a Cholesky factorization.
+     [[https://doi.org/10.1137/1.9780898718027][Higham]] states this bound as Theorem 10.3.
 
 * Troubleshooting
 

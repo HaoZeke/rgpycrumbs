@@ -5,6 +5,7 @@ import numpy as np
 from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import BaseGradientSurface
+from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
 from rgpycrumbs.surfaces._kernels import (
     imq_kernel_elem,
     k_matrix_imq_grad_map,
@@ -22,15 +23,16 @@ def _stable_nystrom_grad_imq_solve(x, y_full, x_inducing, noise_scalar, epsilon)
     D_plus_1 = x.shape[1] + 1
     K_mm_blocks = k_matrix_imq_grad_map(x_inducing, x_inducing, epsilon)
     K_mm = K_mm_blocks.transpose(0, 2, 1, 3).reshape(M * D_plus_1, M * D_plus_1)
-    jitter = (noise_scalar + 1e-4) * jnp.eye(M * D_plus_1)
+    jitter = (noise_scalar + covariance_roundoff_jitter(K_mm)) * jnp.eye(M * D_plus_1)
     K_mm = K_mm + jitter
     L = jnp.linalg.cholesky(K_mm)
     K_nm_blocks = k_matrix_imq_grad_map(x, x_inducing, epsilon)
     K_nm = K_nm_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, M * D_plus_1)
     K_mn = K_nm.T
     V = jlinalg.solve_triangular(L, K_mn, lower=True)
-    sigma2 = noise_scalar + 1e-6
-    S = V @ V.T + sigma2 * jnp.eye(M * D_plus_1)
+    S_base = V @ V.T
+    sigma2 = noise_scalar + covariance_roundoff_jitter(S_base)
+    S = S_base + sigma2 * jnp.eye(M * D_plus_1)
     L_S = jnp.linalg.cholesky(S)
     Vy = V @ y_full.flatten()
     beta = jlinalg.cho_solve((L_S, True), Vy)

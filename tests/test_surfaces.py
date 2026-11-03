@@ -81,6 +81,23 @@ def test_get_surface_model_default():
 
 
 # ---------------------------------------------------------------------------
+# Fit policy tests
+# ---------------------------------------------------------------------------
+
+
+def test_roundoff_jitter_is_highams_cholesky_bound():
+    """The diagonal shift is gamma_(n+1) times the largest covariance entry."""
+    from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+
+    order = 900
+    unit_roundoff = 2.0**-24
+    gamma = (order + 1) * unit_roundoff / (1 - (order + 1) * unit_roundoff)
+    K = 4.0 * jnp.eye(order, dtype=jnp.float32)
+
+    assert covariance_roundoff_jitter(K) == pytest.approx(4.0 * gamma, rel=1e-6)
+
+
+# ---------------------------------------------------------------------------
 # Kernel matrix tests
 # ---------------------------------------------------------------------------
 
@@ -162,6 +179,30 @@ def test_safe_cholesky_solve_identity():
     alpha, log_det = safe_cholesky_solve(K, y, 1e-6)
     assert jnp.allclose(alpha, y, atol=1e-3)
     assert jnp.isfinite(log_det)
+
+
+def test_safe_cholesky_solve_detects_non_positive_definite_input():
+    """JAX reports a failed Cholesky with NaNs rather than an exception."""
+    K = jnp.array([[1.0, 2.0], [2.0, 1.0]], dtype=jnp.float32)
+    y = jnp.ones(2, dtype=jnp.float32)
+
+    alpha, log_det = safe_cholesky_solve(K, y, 0.0)
+
+    assert jnp.all(alpha == 0)
+    assert jnp.isnan(log_det)
+
+
+def test_dense_solve_factors_repeated_inputs_without_smoothing():
+    """Two identical rows make ``K`` singular, which the jitter covers."""
+    from rgpycrumbs.surfaces.standard import _imq_solve
+
+    x = jnp.array([[0.0, 0.0], [0.0, 0.0], [1.0, 0.0]], dtype=jnp.float32)
+    y = jnp.array([1.0, 1.0, 0.0], dtype=jnp.float32)
+
+    alpha, K_inv = _imq_solve(x, y, 0.0, 1.0)
+
+    assert jnp.all(jnp.isfinite(alpha))
+    assert jnp.all(jnp.isfinite(K_inv))
 
 
 # ---------------------------------------------------------------------------
@@ -254,7 +295,7 @@ def test_gradient_matern_predict_is_near_the_exact_answer():
     """Held to the exact answer on the bowl at the default and length_scale 3.
 
     The bound is 0.02.  The closed form measures 0.00729 at the default and
-    0.00374 at length_scale 3.  The autodiff covariance is 45.4 and 0.247.
+    0.00373 at length_scale 3.  The autodiff covariance is 45.4 and 0.247.
     """
     x, y, grads, query, truth = _pinned_bowl()
     cases = ((None, 0.02), (3.0, 0.02))

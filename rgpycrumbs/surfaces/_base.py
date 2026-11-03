@@ -1,43 +1,46 @@
-import logging
-
 import jax.numpy as jnp
 
+from rgpycrumbs.surfaces._hyperparameters import (
+    covariance_roundoff_factor,
+    covariance_roundoff_jitter,
+)
 
-def safe_cholesky_solve(K, y, noise_scalar, jitter_steps=3):
+
+def safe_cholesky_solve(K, y, noise_scalar):
     """
-    Retries Cholesky decomposition with increasing jitter if it fails.
+    Solve with covariance-scaled roundoff jitter.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       The jitter is the Cholesky roundoff bound of ``K``, and the
+       ``jitter_steps`` retries are gone.
+       A factorization with non-finite entries returns zeros and a NaN
+       log-determinant.
 
     Args:
         K: Covariance matrix.
         y: Observation vector.
         noise_scalar: Initial noise level.
-        jitter_steps: Number of retry attempts with increasing jitter.
 
     Returns:
         tuple: (alpha, log_det) where alpha is the solution vector and
                log_det is the log determinant of the jittered matrix.
     """
     N = K.shape[0]
-
-    # Try successively larger jitters: 1e-6, 1e-5, 1e-4
-    for i in range(jitter_steps):
-        jitter = (noise_scalar + 10 ** (-6 + i)) * jnp.eye(N)
-        try:
-            L = jnp.linalg.cholesky(K + jitter)
-            alpha = jnp.linalg.solve(L.T, jnp.linalg.solve(L, y))
-            log_det = 2.0 * jnp.sum(jnp.log(jnp.diag(L)))
-            return alpha, log_det
-        except Exception as e:
-            logging.debug(f"Cholesky failed: {e}")
-            continue
-
-    # Fallback for compilation safety (NaN propagation)
-    return jnp.zeros_like(y), jnp.nan
+    jitter = noise_scalar + covariance_roundoff_jitter(K)
+    L = jnp.linalg.cholesky(K + jitter * jnp.eye(N, dtype=K.dtype))
+    valid = jnp.all(jnp.isfinite(L))
+    safe_L = jnp.where(valid, L, jnp.eye(N, dtype=K.dtype))
+    alpha = jnp.linalg.solve(safe_L.T, jnp.linalg.solve(safe_L, y))
+    log_det = 2.0 * jnp.sum(jnp.log(jnp.diag(safe_L)))
+    return (
+        jnp.where(valid, alpha, jnp.zeros_like(y)),
+        jnp.where(valid, log_det, jnp.asarray(jnp.nan, dtype=K.dtype)),
+    )
 
 
-def equilibrated_inverse_solve(K, y, noise_scalar, jitter=1e-6):
+def equilibrated_inverse_solve(K, y, noise_scalar):
     """
     Inverse and weights of a gradient-enhanced covariance matrix.
 
@@ -47,17 +50,22 @@ def equilibrated_inverse_solve(K, y, noise_scalar, jitter=1e-6):
     short length scale and repeated inputs leave ``K`` too ill-conditioned for a
     float32 inverse. The matrix is solved as ``K + noise * I + jitter * diag(K)``
     after a symmetric diagonal scaling to unit diagonal, which keeps the jitter
-    relative to each row.
+    relative to each row. ``jitter`` is ``covariance_roundoff_factor`` for the
+    order of ``K``.
+
+    .. versionchanged:: 1.14.0
+       The relative jitter is the Cholesky roundoff factor for the order of
+       ``K``, and the ``jitter`` argument is gone.
 
     Args:
         K: Covariance matrix without noise.
         y: Observation vector.
         noise_scalar: Noise level added to the diagonal.
-        jitter: Relative jitter applied to each diagonal entry.
 
     Returns:
         tuple: (alpha, K_inv) for the regularized matrix.
     """
+    jitter = covariance_roundoff_factor(K.shape[0], K.dtype)
     K_reg = K + jnp.diag(noise_scalar + jitter * jnp.diag(K))
     scale = 1.0 / jnp.sqrt(jnp.diag(K_reg))
     K_unit = scale[:, None] * K_reg * scale[None, :]

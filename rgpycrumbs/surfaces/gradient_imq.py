@@ -4,6 +4,7 @@ import jax.scipy.optimize as jopt
 from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import BaseGradientSurface, generic_negative_mll
+from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
 from rgpycrumbs.surfaces._kernels import (
     imq_kernel_elem,
     k_matrix_imq_grad_map,
@@ -64,10 +65,11 @@ def _grad_imq_solve(x, y_full, noise_scalar, epsilon, noise_per_obs=None):
                 ]
             )
             noise_blocks.append(block)
-        noise_diag = jnp.concatenate(noise_blocks) + 1e-6
-        K_full = K_full + jnp.diag(noise_diag)
+        noise_diag = jnp.concatenate(noise_blocks)
     else:
-        K_full = K_full + (noise_scalar + 1e-6) * jnp.eye(N * D_plus_1)
+        noise_diag = jnp.full(N * D_plus_1, noise_scalar)
+    jitter = covariance_roundoff_jitter(K_full)
+    K_full = K_full + jnp.diag(noise_diag + jitter)
     K_inv = jnp.linalg.inv(K_full)
     alpha = jnp.linalg.solve(K_full, y_full.flatten())
     return alpha, K_inv
