@@ -182,7 +182,8 @@ depends-on = [
 
 [feature.docs.tasks.sphinxbld]
 cmd = """
-sphinx-build docs/source/ docs/build
+RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING=1 \
+  sphinx-build -W --keep-going docs/source/ docs/build
 """
 depends-on = [ { task = "mkrst", environment = "docs" } ]
 

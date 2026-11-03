@@ -60,6 +60,8 @@ If you need to verify changes locally before pushing:
 #+BEGIN_SRC shell
 pixi run r docbld
 #+END_SRC
+The build fails on any Sphinx warning.
+~sphinxbld~ runs ~sphinx-build -W --keep-going~, which lists every warning before it fails.
 Outputs to ~docs/build/~, served with:
 #+begin_src bash
 python -m http.server -d docs/build
