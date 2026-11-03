@@ -1,7 +1,12 @@
 try:
     from rgpycrumbs._version import __version__
 except ImportError:
-    __version__ = "unknown"
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        __version__ = version("rgpycrumbs")
+    except PackageNotFoundError:
+        __version__ = "unknown"
 
 
 def __getattr__(name):

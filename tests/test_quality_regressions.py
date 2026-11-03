@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import importlib
+import importlib.metadata
+import sys
+
 import pytest
 
 pytestmark = pytest.mark.pure
@@ -55,3 +59,18 @@ def test_unrecognized_auto_deps_flag_counts_as_unset(
 
     assert resolve_auto_deps_default(config=RgpycrumbsConfig(auto_deps=False)) == "1"
     assert _auto_deps_enabled() is True
+
+
+def test_version_falls_back_to_distribution_metadata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Without the generated module, the installed metadata names the version."""
+    import rgpycrumbs
+
+    monkeypatch.setitem(sys.modules, "rgpycrumbs._version", None)
+    try:
+        reloaded = importlib.reload(rgpycrumbs)
+        assert reloaded.__version__ == importlib.metadata.version("rgpycrumbs")
+    finally:
+        monkeypatch.undo()
+        importlib.reload(rgpycrumbs)
