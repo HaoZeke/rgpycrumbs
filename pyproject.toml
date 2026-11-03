@@ -3,7 +3,7 @@ build-backend = "hatchling.build"
 requires      = [ "hatch-vcs", "hatchling" ]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "_version.py"
+version-file = "rgpycrumbs/_version.py"
 
 [tool.hatch.build]
 include = [ "rgpycrumbs/**/*.py", "rgpycrumbs/*.py" ]
@@ -39,7 +39,13 @@ requires-python = ">=3.10"
 eon     = [ "eon-schema>=0.2.0; python_version >= '3.11'" ]
 lint    = [ "ruff>=0.1.6" ]
 release = [ "build>=0.10", "towncrier>=24.8.0", "twine>=4.0", "wheel>=0.40" ]
-test    = [ "pytest>=9.0", "pytest-cov>=4.1.0", "pytest-pep723>=0.1.0" ]
+
+test = [
+  "pytest>=9.0",
+  "pytest-cov>=4.1.0",
+  "pytest-pep723>=0.1.0",
+  "tomli; python_version < '3.11'",
+]
 # eon-schema needs Python>=3.11; install separately for eOn config tests:
 #   uv pip install "eon-schema>=0.2"  or  uv sync --extra test --extra eon
 # Plot stack (chemparseplot, jax, …): PEP 723 on CLI scripts or
@@ -241,9 +247,13 @@ ban-relative-imports = "all"
 ]
 
 [tool.coverage.run]
-branch      = true
-omit        = [ "_version.py", "rgpycrumbs/xts/*", "rgpycrumbs/eon/ptmdisp.py" ]
-parallel    = false
+branch = true
+omit = [
+  "rgpycrumbs/_version.py",
+  "rgpycrumbs/xts/*",
+  "rgpycrumbs/eon/ptmdisp.py",
+]
+parallel = false
 source_pkgs = [ "rgpycrumbs" ]
 
 [tool.coverage.paths]

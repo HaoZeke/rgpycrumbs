@@ -414,18 +414,24 @@ automatically (e.g. `1.0.1.dev3+gabcdef`).
     pixi run -e docs docbld
     
     # 2. Preview the next semantic version from Conventional Commits
-    uvx cocogitto cog bump --dry-run --auto
+    #    cog is not on PyPI; cargo builds it from the cocogitto crate,
+    #    which needs a Rust toolchain with edition 2024 support
+    cargo install --locked cocogitto@7.0.0
+    V=$(cog bump --dry-run --auto)
+    V=${V#v}
+    : "${V:?cog bump --dry-run --auto printed no version}"
     
     # 3. Build the release notes from towncrier fragments
     #    towncrier headings use X.Y.Z, while the git tag stays vX.Y.Z
-    uvx towncrier build --version "1.7.1"
+    uvx towncrier build --version "${V:?}"
     
     # 4. Commit the release notes (historically: release: vX.Y.Z)
     git add CHANGELOG.rst docs/newsfragments
-    git commit -m "release: v1.7.1"
+    git commit -m "release: v${V:?}"
+    python3 scripts/check_version.py
     
     # 5. Tag the release commit (hatch-vcs derives the package version from tags)
-    uvx cocogitto cog bump --auto
+    cog bump --auto
     
     # 6. Push main and tags; GitHub Actions handles build/publish/release
     git push origin main --tags
