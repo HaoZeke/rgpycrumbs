@@ -12,9 +12,11 @@ to these scripts at runtime, avoiding a monolithic CLI with heavy imports.
 * Dispatcher Pattern
 
 The main =rgpycrumbs= command maps each subpackage to a command group and each script in it to a command.
-When invoked, it calls =uv run= on
-the target script, letting uv resolve the per-script dependencies declared in
-the PEP 723 header.
+When invoked, it runs the script with =uv run=, so uv resolves the dependencies in its PEP 723 header.
+It uses the active interpreter instead under =--dev= or =RGPYCRUMBS_DEV=, or when =uv= is not on the path.
+It does the same when that interpreter already has readcon, matplotlib, polars, ASE and chemparseplot.
+=RGPKGS_FORCE_UV=, =RGPYCRUMBS_FORCE_UV= or =force_uv= in the suite configuration forces =uv run=.
+Only =--dev= and =RGPYCRUMBS_DEV= override that.
 
 A public module is a script only when it carries the inline =script= metadata block of Python Enhancement Proposal (PEP) 723.
 Modules without that block stay library code, and so do modules whose names start with =_=.
