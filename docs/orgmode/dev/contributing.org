@@ -36,6 +36,15 @@ uv run ruff format .
 uv run ruff check .
 #+end_src
 
+*** Type Checks
+
+#+begin_src bash
+uv run --extra lint pyright
+#+end_src
+
+The lint workflow runs the same command.
+Pyright reads its settings from ~[tool.pyright]~ in ~pyproject.toml~.
+
 *** Type Hints
 
 Target: 90%+ coverage.

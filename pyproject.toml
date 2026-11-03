@@ -38,7 +38,7 @@ requires-python = ">=3.10"
 # eOn job-config authorship (write_eon_config, seed_dimers, MLflow hydrate)
 # uses eon-schema — not eon-akmc. Plotting still chemparseplot.
 eon     = [ "eon-schema>=0.2.0; python_version >= '3.11'" ]
-lint    = [ "ruff>=0.1.6" ]
+lint    = [ "pyright>=1.1.414", "ruff>=0.15.2" ]
 release = [ "build>=0.10", "towncrier>=24.8.0", "twine>=4.0", "wheel>=0.40" ]
 
 test = [
@@ -291,3 +291,25 @@ pep723_ignore_imports = [
 pep723_paths = [ "rgpycrumbs" ]
 required_plugins = [ "pytest-pep723" ]
 testpaths = [ "tests" ]
+
+[tool.pyright]
+include          = [ "rgpycrumbs" ]
+pythonVersion    = "3.10"
+typeCheckingMode = "basic"
+
+# Basic mode reports each rule below on the current code, either with only the
+# core dependencies of the lint extra or with the pixi test environment. Most
+# reports come from optional imports Pyright cannot resolve, from h5py stubs,
+# or from names the lazy modules serve through __getattr__. The rest are loose
+# first-party annotations. Enable a rule here once its reports are fixed.
+reportArgumentType         = "none"
+reportAssignmentType       = "none"
+reportAttributeAccessIssue = "none"
+reportCallIssue            = "none"
+reportGeneralTypeIssues    = "none"
+reportInvalidTypeForm      = "none"
+reportMissingImports       = "none"
+reportMissingModuleSource  = "none"
+reportOperatorIssue        = "none"
+reportOptionalMemberAccess = "none"
+reportUnsupportedDunderAll = "none"

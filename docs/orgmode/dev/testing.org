@@ -47,7 +47,7 @@ RGPYCRUMBS_AUTO_DEPS=1 uv run scripts/test_all_features.py
 | ~ci_test.yml~ | ~pytest -m pure~ on py3.10-3.12 | push, PR |
 | ~ci_tutorials.yml~ | Module compile checks, CLI help | push, PR |
 | ~ci_doctest.yml~ | Extract and run Python blocks from org tutorials | push, PR |
-| ~ci_prek.yml~ | ruff, codespell, lychee link checker | push, PR |
+| ~ci_prek.yml~ | ruff, pyright, codespell, lychee link checker | push, PR |
 | ~ci_docs.yml~ | Sphinx doc build (org -> RST -> HTML) | push to main, PR |
 
 * Adding Tests

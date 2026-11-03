@@ -20,6 +20,9 @@ jobs:
     - name: Run precommit
       run: |
         uvx prek run -a -vvv
+    - name: Run static type checks
+      run: |
+        uv run --extra lint pyright
     - name: Link check (advisory)
       continue-on-error: true
       run: |
