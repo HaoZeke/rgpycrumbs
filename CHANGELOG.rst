@@ -822,14 +822,11 @@ Fixed
 - Rework documentation
 
 
-Changelog
-=========
-
 `v0.1.0 <https://github.com/HaoZeke/rgpycrumbs/tree/v0.1.0>`__ - 2026-01-28
----------------------------------------------------------------------------
+===========================================================================
 
 Added
-~~~~~
+-----
 
 -  feat(eon): add dictionary support
    (`#28ac681.eon <https://github.com/HaoZeke/rgpycrumbs/issues/28ac681.eon>`__)
@@ -847,18 +844,18 @@ Added
    global median RMSD step distance
 
 Developer
-~~~~~~~~~
+---------
 
 -  Refactored alignment internals into structured dataclasses for
    improved API clarity.
 
 `v0.0.6 <https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.6>`__ - 2025-12-23
----------------------------------------------------------------------------
+===========================================================================
 
 .. _added-1:
 
 Added
-~~~~~
+-----
 
 -  Added a new fragment detection tool () supporting both Geometric
    (covalent radii) and Bond Order (GFN2-xTB) methodologies.
@@ -866,23 +863,23 @@ Added
 -  feat(pltneb): Add ‘ira-kmax’ to tweak settings for IRA
 
 Fixed
-~~~~~
+-----
 
 -  Refactored internal import helper to use , fixing support for nested
    module imports (e.g., ).
 
 `v0.0.5 <https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.5>`__ - 2025-12-06
----------------------------------------------------------------------------
+===========================================================================
 
 .. _added-2:
 
 Added
-~~~~~
+-----
 
 -  feat(pltneb): Add ‘index’ rc-mode to plot against image number
 
 Changed
-~~~~~~~
+-------
 
 -  Use white as a default background for plots
 -  feat(cache1D): Add disk caching for 1D profiles with rmsd using
@@ -892,17 +889,17 @@ Changed
 .. _fixed-1:
 
 Fixed
-~~~~~
+-----
 
 -  fix(plt_neb): Use standard spline for RMSD profiles to fix artifacts
 
 `v0.0.4 <https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.4>`__ - 2025-12-01
----------------------------------------------------------------------------
+===========================================================================
 
 .. _added-3:
 
 Added
-~~~~~
+-----
 
 -  Added ``_import_from_parent_env`` helper to enable fallback imports
    from the parent python environment.
@@ -912,7 +909,7 @@ Added
 .. _changed-1:
 
 Changed
-~~~~~~~
+-------
 
 -  Migrated linting configuration to ``tool.ruff.lint`` and applied
    global formatting fixes.
@@ -924,7 +921,7 @@ Changed
 .. _fixed-2:
 
 Fixed
-~~~~~
+-----
 
 -  Added conditional skipping for ``ptmdisp`` tests when ``ase`` is not
    present in the environment.
@@ -932,12 +929,12 @@ Fixed
    overlay data.
 
 `v0.0.3 <https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.3>`__ - 2025-10-27
----------------------------------------------------------------------------
+===========================================================================
 
 .. _added-4:
 
 Added
-~~~~~
+-----
 
 -  Add a FES direct reconstruction helper
 -  Add a version picker for the prefix package deleter
@@ -949,17 +946,17 @@ Added
 .. _changed-2:
 
 Changed
-~~~~~~~
+-------
 
 -  Use hermite interpolation for NEB plots
 
 `v0.0.2 <https://github.com/HaoZeke/rgpycrumbs/tree/v0.0.2>`__ - 2025-09-06
----------------------------------------------------------------------------
+===========================================================================
 
 .. _added-5:
 
 Added
-~~~~~
+-----
 
 -  Helper to delete prefix packages
 -  Helper to generate initial paths for EON’s NEB

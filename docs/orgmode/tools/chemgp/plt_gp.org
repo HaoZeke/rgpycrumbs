@@ -3,7 +3,7 @@
 
 * CLI Reference
 #+BEGIN_EXPORT rst
-.. click:: rgpycrumbs.chemgp.plt_gp:cli
+.. click:: rgpycrumbs.chemgp.plot_gp:cli
    :prog: rgpycrumbs chemgp plt-gp
    :nested: full
 #+END_EXPORT
@@ -74,7 +74,7 @@ Override with ~--clamp-lo~ and ~--clamp-hi~ flags on the subcommand, or
 * API Reference
 
 For developer details and source code see
-@@rst::mod:`rgpycrumbs.chemgp.plt_gp`@@.
+@@rst::mod:`rgpycrumbs.chemgp.plot_gp`@@.
 
 The plotting functions themselves live in
 [[https://chemparseplot.rgoswami.me][chemparseplot]] at

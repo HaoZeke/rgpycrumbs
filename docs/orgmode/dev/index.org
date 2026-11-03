@@ -7,6 +7,20 @@
 
 This section contains technical documentation for developers working on rgpycrumbs.
 
+#+begin_export rst
+.. toctree::
+   :hidden:
+
+   best_practices
+   cli_architecture
+   contributing
+   lazy_imports
+   modular_design
+   pep723_scripts
+   testing
+   testing_pattern
+#+end_export
+
 ** Architecture
 
 | Document | Description |

@@ -18,6 +18,7 @@ extensions = [
     "sphinx.ext.autodoc",  # Needed for mocking machinery
     "sphinx.ext.viewcode",  # Adds '[source]' links
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",  # Google and NumPy docstring sections
     "autoapi.extension",
     "sphinxcontrib.autodoc_pydantic",
     "sphinx_sitemap",

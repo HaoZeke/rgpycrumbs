@@ -344,7 +344,7 @@ def run_plot(
     config: str | Path | None = None,
     **overrides: Any,
 ) -> Any:
-    """Merge settings for *command* then call *runner*(settings).
+    """Merge settings for *command* then call ``runner(settings)``.
 
     Shared by the library ``plot_*`` entry points. *runner* is typically
     ``plot_*_from_settings``.
@@ -368,7 +368,7 @@ def run_from_click(
     config: str | Path | None = None,
     **params: Any,
 ) -> Any:
-    """CLI path: ``resolve_from_click`` then *runner*(settings).
+    """CLI path: ``resolve_from_click`` then ``runner(settings)``.
 
     A missing input (``FileNotFoundError``) or a bad option combination
     (``ValueError``) from *runner* exits through Click with its message,

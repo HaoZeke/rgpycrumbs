@@ -87,6 +87,7 @@ digraph G {
      :caption: Tutorials
 
      quickstart
+     tutorials/first-project
      tutorials/neb-visualization
      tutorials/saddle-search-visualization
      tutorials/minimization-visualization
@@ -130,6 +131,9 @@ digraph G {
 
      autoapi/index
      reference/glossary
+     explanation/public_api
+     explanation/suite_architecture
+     devnotes
      changelog
      used_by
 #+END_EXPORT

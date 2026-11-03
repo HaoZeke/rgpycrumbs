@@ -2,9 +2,9 @@
 #+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
 
 #+begin_export rst
-=============================
+===============================
 NEB Reaction Path Visualization
-=============================
+===============================
 #+end_export
 
 In this tutorial you will produce publication-quality figures from a Diels-Alder

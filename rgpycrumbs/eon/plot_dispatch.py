@@ -92,9 +92,9 @@ def adapt_plot_source(
 
     Returns
     -------
-    command, payload
-        *command* is ``neb`` | ``min`` | ``saddle``. *payload* is merged into
-        settings (``frames``, ``trajectory``, …).
+    tuple[str, dict[str, Any]]
+        ``(command, payload)``. *command* is ``neb`` | ``min`` | ``saddle``.
+        *payload* is merged into settings (``frames``, ``trajectory``, …).
     """
     # Pre-built chemparseplot DTOs (duck by attributes)
     if (

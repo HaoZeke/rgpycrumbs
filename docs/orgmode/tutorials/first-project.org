@@ -2,9 +2,9 @@
 #+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
 
 #+begin_export rst
-============
+=============
 First Project
-============
+=============
 #+end_export
 
 This tutorial walks you through a complete workflow: from raw NEB calculation
@@ -197,9 +197,9 @@ Now that you have the basics, explore:
 3. **Batch Processing**: Process multiple NEB calculations automatically
 
 See also:
-- @@rst::doc:`tools/eon/plt_neb`@@ for NEB plotting options
-- @@rst::doc:`tools/surfaces`@@ for surface fitting details
-- @@rst::doc:`tools/eon/con_splitter`@@ for trajectory processing
+- @@rst::doc:`/tools/eon/plt_neb`@@ for nudged elastic band plotting options
+- Surface fitting details in @@rst::doc:`/tools/surfaces`@@
+- Trajectory processing with @@rst::doc:`/tools/eon/con_splitter`@@
 
 * Complete Script
 
