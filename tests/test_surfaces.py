@@ -109,6 +109,62 @@ def test_median_pairwise_distance_needs_two_distinct_points(points):
         median_pairwise_distance(points)
 
 
+def test_zero_smoothing_is_the_roundoff_jitter(simple_2d_data):
+    """Exact data get the Cholesky roundoff bound as their noise."""
+    from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+
+    x, y = simple_2d_data
+    model = FastMatern(x, y, smoothing=0.0, optimize=False, length_scale=1.0)
+    jitter = covariance_roundoff_jitter(_matern_kernel_matrix(x, 1.0))
+
+    assert model.noise == pytest.approx(float(jitter))
+
+
+def test_exact_data_fits_start_the_noise_at_the_prior_scale(simple_2d_data, monkeypatch):
+    """An optimized exact-data fit starts at a signal-to-noise ratio of one."""
+    from rgpycrumbs.surfaces import standard
+
+    starts = []
+
+    def record_start(_loss_fn, x0):
+        starts.append(np.asarray(x0))
+        return jnp.asarray(x0)
+
+    monkeypatch.setattr(standard, "minimize_log_parameters", record_start)
+    x, y = simple_2d_data
+    FastMatern(x, y, smoothing=0.0, optimize=True, length_scale=1.0)
+    scale = jnp.max(jnp.abs(_matern_kernel_matrix(x, 1.0)))
+
+    assert np.exp(starts[0][1]) == pytest.approx(float(scale))
+
+
+def test_negative_smoothing_is_rejected(simple_2d_data):
+    """A negative noise variance is an input error."""
+    x, y = simple_2d_data
+
+    with pytest.raises(ValueError, match="smoothing must be non-negative"):
+        FastMatern(x, y, smoothing=-1e-3, optimize=False, length_scale=1.0)
+
+
+def test_gradient_covariance_orders_by_point_then_component():
+    """Entry ``(i(D+1) + a, j(D+1) + b)`` is component pair ``(a, b)`` of ``(i, j)``."""
+    from rgpycrumbs.surfaces._kernels import gradient_covariance
+
+    N, M, D_plus_1 = 3, 2, 3
+    K_blocks = jnp.arange(N * M * D_plus_1**2, dtype=jnp.float32).reshape(
+        N, M, D_plus_1, D_plus_1
+    )
+
+    K = np.asarray(gradient_covariance(K_blocks))
+
+    assert K.shape == (N * D_plus_1, M * D_plus_1)
+    for i in range(N):
+        for j in range(M):
+            rows = slice(i * D_plus_1, (i + 1) * D_plus_1)
+            columns = slice(j * D_plus_1, (j + 1) * D_plus_1)
+            assert K[rows, columns] == pytest.approx(np.asarray(K_blocks[i, j]))
+
+
 def test_roundoff_jitter_is_highams_cholesky_bound():
     """The diagonal shift is gamma_(n+1) times the largest covariance entry."""
     from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
@@ -323,6 +379,7 @@ def test_fast_matern_interpolates_training_points(simple_2d_data):
     """FastMatern predictions at training points should be close to training values."""
     x, y = simple_2d_data
     model = FastMatern(x, y, smoothing=1e-6, length_scale=1.0, optimize=False)
+    assert model.noise == pytest.approx(1e-6)
     preds = model(x)
     assert jnp.allclose(preds, y, atol=0.5)
 
@@ -352,7 +409,15 @@ def test_fast_imq_interpolates_training_points(simple_2d_data):
 def test_gradient_matern_fit_and_predict(gradient_2d_data, query_points):
     """GradientMatern should fit and produce finite predictions."""
     x, y, grads = gradient_2d_data
-    model = GradientMatern(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    model = GradientMatern(
+        x,
+        y,
+        gradients=grads,
+        smoothing=1e-6,
+        optimize=False,
+        length_scale=1.0,
+    )
+    assert model.noise == pytest.approx(1e-6)
     preds = model(query_points)
     assert preds.shape == (3,)
     assert jnp.all(jnp.isfinite(preds))
@@ -595,6 +660,41 @@ def test_gradient_rq_fit_and_predict(gradient_2d_data, query_points):
     preds = model(query_points)
     assert preds.shape == (3,)
     assert jnp.all(jnp.isfinite(preds))
+
+
+def test_gradient_rq_respects_fixed_smoothing(gradient_2d_data):
+    """Disabling optimization keeps the caller's smoothing parameter."""
+    x, y, grads = gradient_2d_data
+    smoothing = 0.25
+    model = GradientRQ(
+        x,
+        y,
+        gradients=grads,
+        optimize=False,
+        length_scale=1.0,
+        smoothing=smoothing,
+    )
+
+    assert model.noise == pytest.approx(smoothing)
+
+
+def test_gradient_imq_caps_the_fitted_noise_at_the_callers_smoothing(
+    gradient_2d_data, monkeypatch
+):
+    """A likelihood that prefers more noise cannot exceed the caller's value."""
+    from rgpycrumbs.surfaces import gradient_imq
+
+    monkeypatch.setattr(
+        gradient_imq,
+        "minimize_log_parameters",
+        lambda _loss_fn, _x0: jnp.log(jnp.array([1.0, 0.5])),
+    )
+    x, y, grads = gradient_2d_data
+    model = GradientIMQ(
+        x, y, gradients=grads, smoothing=1e-3, optimize=True, length_scale=1.0
+    )
+
+    assert model.noise == pytest.approx(1e-3)
 
 
 def test_nystrom_gradient_imq_fit_and_predict(gradient_2d_data, query_points):

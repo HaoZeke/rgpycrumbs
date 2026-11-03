@@ -382,3 +382,23 @@ def full_covariance_rq(x1, x2, params):
 
 
 k_matrix_rq_grad_map = vmap(vmap(full_covariance_rq, (None, 0, None)), (0, None, None))
+
+
+# ==============================================================================
+# GRADIENT COVARIANCE LAYOUT
+# ==============================================================================
+
+
+def gradient_covariance(K_blocks):
+    """Arrange ``(N, M, D+1, D+1)`` pair blocks as one ``(N(D+1), M(D+1))`` matrix.
+
+    Args:
+        K_blocks: Pair blocks from a ``k_matrix_*_grad_map`` function.
+
+    Returns:
+        Covariance matrix ordered by point, then by value and gradient component.
+
+    .. versionadded:: 1.14.0
+    """
+    N, M, D_plus_1, _ = K_blocks.shape
+    return K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, M * D_plus_1)

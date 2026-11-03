@@ -44,6 +44,15 @@ cited estimator:
   log-determinant instead of a wrong finite value.
   See Higham, *Accuracy and Stability of Numerical Algorithms*, 2nd ed.,
   chapters 3 and 10, https://doi.org/10.1137/1.9780898718027.
+* ``observation_noise`` keeps the caller's ``smoothing`` as the noise
+  variance.
+  A ``smoothing`` of zero marks exact data.
+  Fixed fits and the IMQ noise caps then set the noise to the roundoff jitter.
+  ``starting_noise`` starts optimized exact-data fits at ``covariance_scale``,
+  a signal-to-noise ratio of one.
+  The largest eigenvalue of a positive semidefinite ``K`` is at most ``n``
+  times its largest entry, so ``K + covariance_scale(K) I`` starts the
+  optimizer with a condition number of at most ``n + 1``.
 """
 
 from typing import Final
@@ -107,6 +116,23 @@ def covariance_roundoff_jitter(matrix: jnp.ndarray) -> jnp.ndarray:
     return covariance_roundoff_factor(order, matrix.dtype) * covariance_scale(matrix)
 
 
+def observation_noise(smoothing, matrix: jnp.ndarray) -> float:
+    """Return the caller's smoothing, or the roundoff jitter for exact data."""
+    if smoothing < 0:
+        msg = "smoothing must be non-negative"
+        raise ValueError(msg)
+    if smoothing == 0:
+        return float(covariance_roundoff_jitter(matrix))
+    return float(smoothing)
+
+
+def starting_noise(smoothing, matrix: jnp.ndarray) -> float:
+    """Return the caller's smoothing, or the covariance scale as a noise start."""
+    if smoothing == 0:
+        return float(covariance_scale(matrix))
+    return observation_noise(smoothing, matrix)
+
+
 __all__ = [
     "IMQ_EPSILON_PRIOR_SHAPE",
     "RQ_INITIAL_ALPHA",
@@ -115,4 +141,6 @@ __all__ = [
     "covariance_scale",
     "median_pairwise_distance",
     "minimize_log_parameters",
+    "observation_noise",
+    "starting_noise",
 ]

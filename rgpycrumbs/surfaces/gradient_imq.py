@@ -8,8 +8,11 @@ from rgpycrumbs.surfaces._hyperparameters import (
     covariance_roundoff_jitter,
     median_pairwise_distance,
     minimize_log_parameters,
+    observation_noise,
+    starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
+    gradient_covariance,
     imq_kernel_elem,
     k_matrix_imq_grad_map,
 )
@@ -111,6 +114,7 @@ class GradientIMQ(BaseGradientSurface):
     .. versionchanged:: 1.14.0
        Optimized fits no longer pull the noise toward ``1e-2``.
        The default ``epsilon`` starts at the median distance between inputs.
+       Optimized fits cap the noise at the caller's ``smoothing``.
     """
 
     def _fit(self, smoothing, length_scale, optimize):
@@ -118,10 +122,12 @@ class GradientIMQ(BaseGradientSurface):
             init_eps = median_pairwise_distance(self.x)
         else:
             init_eps = length_scale
-        init_noise = max(smoothing, 1e-4)
+        K_init = gradient_covariance(k_matrix_imq_grad_map(self.x, self.x, init_eps))
+        init_noise = observation_noise(smoothing, K_init)
 
         if optimize:
-            x0 = jnp.array([jnp.log(init_eps), jnp.log(init_noise)])
+            start_noise = starting_noise(smoothing, K_init)
+            x0 = jnp.array([jnp.log(init_eps), jnp.log(start_noise)])
 
             def loss_fn(log_p):
                 return negative_mll_imq_map(
@@ -131,9 +137,10 @@ class GradientIMQ(BaseGradientSurface):
             log_params = minimize_log_parameters(loss_fn, x0)
             self.epsilon = float(jnp.exp(log_params[0]))
             self.noise = float(jnp.exp(log_params[1]))
-            # Cap noise at smoothing input -- the MLL tends to overestimate
-            # noise for gradient-enhanced IMQ, destroying basin accuracy.
-            self.noise = min(self.noise, max(smoothing, 1e-2))
+            # Cap noise at the caller's smoothing, or the roundoff floor for
+            # exact data -- the MLL tends to overestimate noise for
+            # gradient-enhanced IMQ, destroying basin accuracy.
+            self.noise = min(self.noise, init_noise)
             if jnp.isnan(self.epsilon) or jnp.isnan(self.noise):
                 self.epsilon, self.noise = init_eps, init_noise
         else:

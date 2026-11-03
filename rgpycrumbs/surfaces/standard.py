@@ -6,6 +6,8 @@ from rgpycrumbs.surfaces._hyperparameters import (
     covariance_roundoff_jitter,
     median_pairwise_distance,
     minimize_log_parameters,
+    observation_noise,
+    starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
     _imq_kernel_matrix,
@@ -88,7 +90,8 @@ class FastTPS:
         Args:
             x_obs: Training inputs (N, D).
             y_obs: Training observations (N,).
-            smoothing: Initial smoothing parameter.
+            smoothing: Smoothing variance of fixed fits and the start of
+                optimized ones. Zero means exact data.
             optimize: Whether to optimize the smoothing parameter.
         """
         self.x_obs = jnp.asarray(x_obs, dtype=jnp.float32)
@@ -98,7 +101,7 @@ class FastTPS:
         self.y_mean = jnp.mean(self.y_obs)
         y_centered = self.y_obs - self.y_mean
 
-        init_sm = max(smoothing, 1e-4)
+        init_sm = observation_noise(smoothing, _tps_kernel_matrix(self.x_obs))
 
         if optimize:
             # Optimize [log_smoothing]
@@ -230,10 +233,12 @@ class FastMatern(BaseSurface):
         else:
             init_ls = length_scale
 
-        init_noise = max(smoothing, 1e-4)
+        K_init = _matern_kernel_matrix(self.x_obs, init_ls)
+        init_noise = observation_noise(smoothing, K_init)
 
         if optimize:
-            x0 = jnp.array([jnp.log(init_ls), jnp.log(init_noise)])
+            start_noise = starting_noise(smoothing, K_init)
+            x0 = jnp.array([jnp.log(init_ls), jnp.log(start_noise)])
 
             def loss_fn(log_p):
                 return negative_mll_matern_std(log_p, self.x_obs, self.y_centered)
@@ -313,10 +318,12 @@ class FastIMQ(BaseSurface):
             init_eps = median_pairwise_distance(self.x_obs)
         else:
             init_eps = length_scale
-        init_noise = max(smoothing, 1e-4)
+        K_init = _imq_kernel_matrix(self.x_obs, init_eps)
+        init_noise = observation_noise(smoothing, K_init)
 
         if optimize:
-            x0 = jnp.array([jnp.log(init_eps), jnp.log(init_noise)])
+            start_noise = starting_noise(smoothing, K_init)
+            x0 = jnp.array([jnp.log(init_eps), jnp.log(start_noise)])
 
             def loss_fn(log_p):
                 return negative_mll_imq_std(log_p, self.x_obs, self.y_centered)

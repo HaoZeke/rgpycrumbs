@@ -11,8 +11,11 @@ from rgpycrumbs.surfaces._hyperparameters import (
     RQ_INITIAL_ALPHA,
     median_pairwise_distance,
     minimize_log_parameters,
+    observation_noise,
+    starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
+    gradient_covariance,
     k_matrix_rq_grad_map,
     rq_kernel_elem,
 )
@@ -81,18 +84,22 @@ class GradientRQ(BaseGradientSurface):
     .. versionchanged:: 1.14.0
        Optimized fits maximize the marginal likelihood without penalties.
        The default length scale starts at the median distance between inputs.
+       The caller's ``smoothing`` sets the noise, which was fixed at ``1e-2``.
     """
 
-    def _fit(self, _smoothing, length_scale, optimize):
+    def _fit(self, smoothing, length_scale, optimize):
         if length_scale is None:
             init_ls = median_pairwise_distance(self.x)
         else:
             init_ls = length_scale
         init_alpha = RQ_INITIAL_ALPHA
-        init_noise = 1e-2
+        init_params = jnp.array([init_ls, init_alpha])
+        K_init = gradient_covariance(k_matrix_rq_grad_map(self.x, self.x, init_params))
+        init_noise = observation_noise(smoothing, K_init)
 
         if optimize:
-            x0 = jnp.array([jnp.log(init_ls), jnp.log(init_alpha), jnp.log(init_noise)])
+            start_noise = starting_noise(smoothing, K_init)
+            x0 = jnp.log(jnp.array([init_ls, init_alpha, start_noise]))
 
             def loss_fn(log_p):
                 return negative_mll_rq_grad(log_p, self.x, self.y_flat, self.D_plus_1)

@@ -10,8 +10,11 @@ from rgpycrumbs.surfaces._base import (
 from rgpycrumbs.surfaces._hyperparameters import (
     median_pairwise_distance,
     minimize_log_parameters,
+    observation_noise,
+    starting_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
+    gradient_covariance,
     k_matrix_se_grad_map,
     se_kernel_elem,
 )
@@ -78,10 +81,12 @@ class GradientSE(BaseGradientSurface):
             init_ls = median_pairwise_distance(self.x)
         else:
             init_ls = length_scale
-        init_noise = max(smoothing, 1e-4)
+        K_init = gradient_covariance(k_matrix_se_grad_map(self.x, self.x, init_ls))
+        init_noise = observation_noise(smoothing, K_init)
 
         if optimize:
-            x0 = jnp.array([jnp.log(init_ls), jnp.log(init_noise)])
+            start_noise = starting_noise(smoothing, K_init)
+            x0 = jnp.array([jnp.log(init_ls), jnp.log(start_noise)])
 
             def loss_fn(log_p):
                 return negative_mll_se_grad(log_p, self.x, self.y_flat, self.D_plus_1)

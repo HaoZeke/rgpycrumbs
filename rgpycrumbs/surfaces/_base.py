@@ -116,7 +116,9 @@ class BaseSurface:
         Args:
             x_obs: Training inputs (N, D).
             y_obs: Training observations (N,).
-            smoothing: Initial noise/smoothing parameter.
+            smoothing: Noise variance of fixed fits and the start of optimized
+                ones. Zero means exact data, and optimized fits then start at
+                the largest prior variance.
             length_scale: Initial length scale parameter(s).
             optimize: Whether to optimize parameters via MLE.
             **kwargs: Additional model-specific parameters.
@@ -213,7 +215,9 @@ class BaseGradientSurface:
             x: Training inputs (N, D).
             y: Training values (N,).
             gradients: Training gradients (N, D).
-            smoothing: Initial noise/smoothing parameter.
+            smoothing: Noise variance of fixed fits and the start of optimized
+                ones. Zero means exact data, and optimized fits then start at
+                the largest prior variance.
             length_scale: Initial length scale parameter(s).
             optimize: Whether to optimize parameters.
             noise_per_obs: Per-observation noise array (N,) for heteroscedastic

@@ -8,8 +8,10 @@ from rgpycrumbs.surfaces._base import BaseGradientSurface
 from rgpycrumbs.surfaces._hyperparameters import (
     covariance_roundoff_jitter,
     median_pairwise_distance,
+    observation_noise,
 )
 from rgpycrumbs.surfaces._kernels import (
+    gradient_covariance,
     imq_kernel_elem,
     k_matrix_imq_grad_map,
 )
@@ -104,7 +106,7 @@ class NystromGradientIMQ(BaseGradientSurface):
             gradients: Training gradients.
             n_inducing: Number of inducing points to sample.
             nimags: Path-based image count for structured sampling.
-            smoothing: Noise level.
+            smoothing: Noise variance. Zero means exact data.
             length_scale: Initial epsilon for IMQ.
             optimize: Optimization toggle.
         """
@@ -144,7 +146,10 @@ class NystromGradientIMQ(BaseGradientSurface):
             self.epsilon = median_pairwise_distance(self.x_inducing)
         else:
             self.epsilon = length_scale
-        self.noise = smoothing
+        K_mm = gradient_covariance(
+            k_matrix_imq_grad_map(self.x_inducing, self.x_inducing, self.epsilon)
+        )
+        self.noise = observation_noise(smoothing, K_mm)
 
     def _solve(self):
         self.alpha_m, self.W = _stable_nystrom_grad_imq_solve(
