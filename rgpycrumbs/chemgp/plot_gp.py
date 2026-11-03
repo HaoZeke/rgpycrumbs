@@ -657,20 +657,15 @@ def batch(
             else:
                 args.extend([flag, str(v)])
 
+        # Not click.testing.CliRunner: it rebinds sys.stdout and sys.stderr for
+        # the whole process, which the --parallel worker threads share.
         try:
-            from click.testing import CliRunner
-
-            runner = CliRunner(mix_stderr=False)
-            result = runner.invoke(cmds[plot_type], args, catch_exceptions=True)
-            if result.exit_code == 0:
-                return entry["output"], True, None
-            else:
-                err = result.output or ""
-                if result.exception:
-                    err += f" ({result.exception})"
-                return entry["output"], False, err
+            cmds[plot_type].main(args, standalone_mode=False)
+        except click.ClickException as e:
+            return entry["output"], False, e.format_message()
         except Exception as e:
-            return entry["output"], False, str(e)
+            return entry["output"], False, f"{type(e).__name__}: {e}"
+        return entry["output"], True, None
 
     # Process plots
     n_ok = 0

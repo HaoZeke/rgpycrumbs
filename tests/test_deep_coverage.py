@@ -10,9 +10,12 @@ that need synthetic eOn data.
 import importlib
 import os
 import shutil
+import sys
 import textwrap
+import threading
 from pathlib import Path
 
+import click
 import pytest
 
 matplotlib = pytest.importorskip("matplotlib")
@@ -769,6 +772,40 @@ class TestPlotGPDeep:
             ],
         )
         assert result.exit_code == 0, result.output
+
+    def test_batch_writes_a_valid_entry(self, tmp_path):
+        cli = _try_import_plot_gp()
+
+        (tmp_path / "data").mkdir()
+        (tmp_path / "output").mkdir()
+        with h5py.File(tmp_path / "data" / "conv.h5", "w") as f:
+            _make_table(
+                f,
+                "table",
+                {
+                    "oracle_calls": np.arange(5, dtype=float),
+                    "max_force": np.linspace(1.0, 0.1, 5),
+                    "method": np.array([b"GP"] * 5),
+                },
+            )
+        cfg = tmp_path / "plots.toml"
+        cfg.write_text(
+            textwrap.dedent("""\
+            [defaults]
+            input_dir = "data"
+            output_dir = "output"
+
+            [[plots]]
+            type = "convergence"
+            input = "conv.h5"
+            output = "conv.pdf"
+        """)
+        )
+
+        result = CliRunner().invoke(cli, ["batch", "-c", str(cfg), "-b", str(tmp_path)])
+
+        assert result.exit_code == 0, result.output
+        assert (tmp_path / "output" / "conv.pdf").exists()
 
     def test_batch_subcommand(self, tmp_path):
         cli = _try_import_plot_gp()
@@ -1787,6 +1824,9 @@ class TestInitDeep:
             _ = rgpycrumbs.totally_nonexistent_xyz
 
 
+BATCH_OVERLAP_TIMEOUT_SECONDS = 30.0
+
+
 @pytest.mark.skipif(not _HAS_H5PY, reason="h5py required")
 class TestPlotGPBatchDeep:
     """Cover batch parallel and error handling paths."""
@@ -1840,6 +1880,49 @@ class TestPlotGPBatchDeep:
             ],
         )
         assert result.exit_code in (0, 1)
+
+    def test_batch_parallel_keeps_the_callers_stdout(self, tmp_path, monkeypatch):
+        plot_gp = _import_optional_module(
+            "rgpycrumbs.chemgp.plot_gp", "plot_gp not importable"
+        )
+        both_running = threading.Barrier(2, timeout=BATCH_OVERLAP_TIMEOUT_SECONDS)
+        seen = []
+
+        @click.command()
+        @click.option("--input", "input_path")
+        @click.option("--output", "output_path")
+        @click.option("--width")
+        @click.option("--height")
+        @click.option("--dpi")
+        def overlapping(input_path, output_path, width, height, dpi):
+            both_running.wait()
+            seen.append(sys.stdout)
+
+        monkeypatch.setattr(plot_gp, "convergence", overlapping)
+        monkeypatch.setattr(sys, "stdout", sys.stdout)
+        (tmp_path / "a.h5").touch()
+        (tmp_path / "b.h5").touch()
+        cfg = tmp_path / "plots.toml"
+        cfg.write_text(
+            textwrap.dedent("""\
+            [[plots]]
+            type = "convergence"
+            input = "a.h5"
+            output = "a.pdf"
+
+            [[plots]]
+            type = "convergence"
+            input = "b.h5"
+            output = "b.pdf"
+        """)
+        )
+        stdout = sys.stdout
+
+        plot_gp.cli.main(["batch", "-c", str(cfg), "-j", "2"], standalone_mode=False)
+
+        assert len(seen) == 2
+        assert all(stream is stdout for stream in seen)
+        assert sys.stdout is stdout
 
     def test_batch_unknown_type(self, tmp_path):
         cli = _try_import_plot_gp()

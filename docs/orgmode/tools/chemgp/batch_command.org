@@ -182,6 +182,7 @@ Batch complete: 2 ok, 1 failed
 #+end_src
 
 Exit code is 1 if any plots failed, 0 if all succeeded.
+A plot that fails inside its subcommand shows the error message of that subcommand after =[FAIL]=.
 
 * Performance Tips
 
@@ -201,6 +202,8 @@ Exit code is 1 if any plots failed, 0 if all succeeded.
 The batch command uses =concurrent.futures.ThreadPoolExecutor= for parallel
 processing. This pattern is adopted from the =nebmmf_repro= project's
 =scripts/parse_results.py= for consistent parallel file processing.
+Each worker calls the =main= of its plot subcommand in the same process.
+The workers share the console, so their log lines can interleave.
 
 Progress tracking uses =rich.progress= for user-friendly output during
 long-running batch operations.
