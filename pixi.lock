@@ -15299,6 +15299,7 @@ packages:
   - pytest-cov>=4.1.0 ; extra == 'test'
   - pytest-pep723>=0.1.0 ; extra == 'test'
   - pytest>=9.0 ; extra == 'test'
+  - tomli ; python_full_version < '3.11' and extra == 'test'
   requires_python: '>=3.10'
 - pypi: git+https://github.com/HaoZeke/chemparseplot.git?branch=main#4a917e866f13527e38bd5afb5aa987795eeb572c
   name: chemparseplot

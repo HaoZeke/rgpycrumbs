@@ -21,7 +21,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parent.parent
 HEADING = re.compile(r"^(?:rgpycrumbs )?(\d+\.\d+\.\d+) \(\d{4}-\d{2}-\d{2}\)$", re.M)
