@@ -3,6 +3,13 @@
 Each value below is derived from the data, the floating-point format, or a
 cited estimator:
 
+* ``IMQ_EPSILON_PRIOR_SHAPE`` is the shape of the gamma prior on the IMQ
+  ``epsilon``.
+  Chung et al. propose shape 2 for a standard deviation because the density
+  is zero at zero with a positive slope, so the estimate stays off zero.
+  The mode of that prior is ``1 / rate``, which they suggest setting to a
+  prior estimate, https://doi.org/10.1007/s11336-013-9328-2.
+  The rate here puts the mode at the starting ``epsilon``.
 * ``RQ_INITIAL_ALPHA`` starts the rational-quadratic mixture at shape 1.
   The RQ kernel is a gamma scale mixture of squared-exponential kernels over
   inverse squared length scales (Rasmussen and Williams, eq. 4.20).
@@ -37,6 +44,7 @@ import numpy as np
 
 from rgpycrumbs._aux import ensure_import
 
+IMQ_EPSILON_PRIOR_SHAPE: Final = 2.0
 RQ_INITIAL_ALPHA: Final = 1.0
 
 
@@ -75,6 +83,7 @@ def covariance_roundoff_jitter(matrix: jnp.ndarray) -> jnp.ndarray:
 
 
 __all__ = [
+    "IMQ_EPSILON_PRIOR_SHAPE",
     "RQ_INITIAL_ALPHA",
     "covariance_roundoff_factor",
     "covariance_roundoff_jitter",

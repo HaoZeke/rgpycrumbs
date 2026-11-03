@@ -4,6 +4,7 @@ from jax import jit, vmap
 
 from rgpycrumbs.surfaces._base import BaseGradientSurface, generic_negative_mll
 from rgpycrumbs.surfaces._hyperparameters import (
+    IMQ_EPSILON_PRIOR_SHAPE,
     covariance_roundoff_jitter,
     minimize_log_parameters,
 )
@@ -37,14 +38,12 @@ def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     mll_cost = generic_negative_mll(K_full, y_flat, noise_scalar)
 
-    alpha_g = 2.0
-    beta_g = 1.0 / (init_eps + 1e-6)
-    eps_penalty = -(alpha_g - 1.0) * log_eps + beta_g * epsilon
+    # Gamma(shape, rate) prior on epsilon with its mode (shape - 1) / rate at
+    # the starting value.
+    rate = (IMQ_EPSILON_PRIOR_SHAPE - 1.0) / init_eps
+    eps_penalty = -(IMQ_EPSILON_PRIOR_SHAPE - 1.0) * log_eps + rate * epsilon
 
-    noise_target = jnp.log(1e-2)
-    noise_penalty = (log_noise - noise_target) ** 2 / 0.5
-
-    return mll_cost + eps_penalty + noise_penalty
+    return mll_cost + eps_penalty
 
 
 @jit
@@ -107,6 +106,9 @@ class GradientIMQ(BaseGradientSurface):
     """Gradient-enhanced Inverse Multi-Quadratic (IMQ) surface implementation.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       Optimized fits no longer pull the noise toward ``1e-2``.
     """
 
     def _fit(self, smoothing, length_scale, optimize):

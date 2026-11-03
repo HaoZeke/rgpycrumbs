@@ -774,6 +774,48 @@ def test_gradient_rq_fit_minimizes_the_marginal_likelihood(gradient_2d_data):
     assert fitted == pytest.approx(expected, rel=1e-6)
 
 
+def _imq_prior(log_params, init_eps, data):
+    from rgpycrumbs.surfaces.gradient_imq import (
+        negative_mll_imq_grad,
+        negative_mll_imq_map,
+    )
+
+    args = (data.x, data.y_flat, data.D_plus_1)
+    return float(
+        negative_mll_imq_map(log_params, init_eps, *args)
+        - negative_mll_imq_grad(log_params, *args)
+    )
+
+
+def test_gradient_imq_prior_peaks_at_the_starting_epsilon(gradient_2d_data):
+    """The gamma prior adds the least penalty at the starting epsilon."""
+    x, y, grads = gradient_2d_data
+    data = GradientIMQ(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    init_eps = 1.3
+    log_eps = jnp.log(init_eps) + jnp.linspace(-0.5, 0.5, 101)
+    penalties = [
+        _imq_prior(jnp.array([value, jnp.log(1e-2)]), init_eps, data) for value in log_eps
+    ]
+
+    best = float(jnp.exp(log_eps[int(np.argmin(penalties))]))
+
+    assert best == pytest.approx(init_eps, rel=1e-2)
+
+
+def test_gradient_imq_prior_leaves_the_noise_to_the_likelihood(gradient_2d_data):
+    """Only epsilon carries a prior, so the noise level changes no penalty."""
+    x, y, grads = gradient_2d_data
+    data = GradientIMQ(x, y, gradients=grads, optimize=False, length_scale=1.0)
+    log_eps = jnp.log(1.3)
+
+    penalties = [
+        _imq_prior(jnp.array([log_eps, jnp.log(noise)]), 1.3, data)
+        for noise in (1e-4, 1e-2, 1.0)
+    ]
+
+    assert penalties == pytest.approx([penalties[0]] * 3, abs=1e-3)
+
+
 # ---------------------------------------------------------------------------
 # Prediction at origin sanity check
 # ---------------------------------------------------------------------------
