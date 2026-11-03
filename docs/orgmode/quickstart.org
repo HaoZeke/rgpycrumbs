@@ -154,6 +154,9 @@ energy = np.array([0.0, -0.3, -0.8, -1.0, -0.5, 0.2, 0.8, 0.5, -0.1, 0.0])
 rc_fine, energy_fine = spline_interp(rc, energy, num=200)
 #+end_src
 
+Leave out ~num~ to get a grid derived from the samples.
+For the default cubic spline it has ~3 * (len(rc) - 1) + 1~ points and passes through every sample of an evenly spaced ~rc~.
+
 * Data Types
 
 The ~basetypes~ module provides lightweight containers used across ~rgpycrumbs~

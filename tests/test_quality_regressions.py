@@ -406,3 +406,22 @@ def test_spline_interp_accepts_lists() -> None:
     np.testing.assert_array_equal(
         spline_interp(x, y, num=9), spline_interp(np.asarray(x), np.asarray(y), num=9)
     )
+
+
+# More samples than the 100 points the default grid used to have.
+SPLINE_SAMPLES = 200
+
+
+@pytest.mark.parametrize("degree", [1, 2, 3, 4, 5])
+def test_spline_interp_default_grid_passes_through_every_sample(degree: int) -> None:
+    """Without num, the grid of an evenly spaced input contains every sample."""
+    pytest.importorskip("scipy")
+    from rgpycrumbs.interpolation import spline_interp
+
+    x = np.linspace(1.0, 2.0, SPLINE_SAMPLES)
+    y = x**2
+
+    x_fine, y_fine = spline_interp(x, y, knots=degree)
+
+    np.testing.assert_allclose(x_fine[::degree], x)
+    np.testing.assert_allclose(y_fine[::degree], y)
