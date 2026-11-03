@@ -46,7 +46,8 @@ cited estimator:
   chapters 3 and 10, https://doi.org/10.1137/1.9780898718027.
 * ``observation_noise`` keeps the caller's ``smoothing`` as the noise
   variance.
-  A ``smoothing`` of zero marks exact data.
+  Fits without a caller ``smoothing``, or with zero, treat the observations
+  as exact.
   Fixed fits and the IMQ noise caps then set the noise to the roundoff jitter.
   ``starting_noise`` starts optimized exact-data fits at ``covariance_scale``,
   a signal-to-noise ratio of one.
@@ -118,17 +119,17 @@ def covariance_roundoff_jitter(matrix: jnp.ndarray) -> jnp.ndarray:
 
 def observation_noise(smoothing, matrix: jnp.ndarray) -> float:
     """Return the caller's smoothing, or the roundoff jitter for exact data."""
-    if smoothing < 0:
-        msg = "smoothing must be non-negative"
-        raise ValueError(msg)
-    if smoothing == 0:
+    if smoothing is None or smoothing == 0:
         return float(covariance_roundoff_jitter(matrix))
+    if smoothing < 0:
+        msg = "smoothing must be non-negative, or None for exact observations"
+        raise ValueError(msg)
     return float(smoothing)
 
 
 def starting_noise(smoothing, matrix: jnp.ndarray) -> float:
     """Return the caller's smoothing, or the covariance scale as a noise start."""
-    if smoothing == 0:
+    if smoothing is None or smoothing == 0:
         return float(covariance_scale(matrix))
     return observation_noise(smoothing, matrix)
 

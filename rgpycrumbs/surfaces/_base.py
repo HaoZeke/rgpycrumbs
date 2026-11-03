@@ -104,11 +104,14 @@ class BaseSurface:
 
     .. versionadded:: 1.0.0
 
+    .. versionchanged:: 1.14.0
+       The default ``smoothing`` is None, which treats the data as exact.
+
     Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
     """
 
     def __init__(
-        self, x_obs, y_obs, smoothing=1e-3, length_scale=None, optimize=True, **_kwargs
+        self, x_obs, y_obs, smoothing=None, length_scale=None, optimize=True, **_kwargs
     ):
         """
         Initializes and fits the surface model.
@@ -117,8 +120,8 @@ class BaseSurface:
             x_obs: Training inputs (N, D).
             y_obs: Training observations (N,).
             smoothing: Noise variance of fixed fits and the start of optimized
-                ones. Zero means exact data, and optimized fits then start at
-                the largest prior variance.
+                ones. None or zero means exact data, and optimized fits then
+                start at the largest prior variance.
             length_scale: Initial length scale parameter(s).
             optimize: Whether to optimize parameters via MLE.
             **kwargs: Additional model-specific parameters.
@@ -193,6 +196,9 @@ class BaseGradientSurface:
 
     .. versionadded:: 1.1.0
 
+    .. versionchanged:: 1.14.0
+       The default ``smoothing`` is None, which treats the data as exact.
+
     Derived classes must implement `_fit`, `_solve`, `_predict_chunk`, and `_var_chunk`.
     These models incorporate both values and their gradients into the fit.
     """
@@ -202,7 +208,7 @@ class BaseGradientSurface:
         x,
         y,
         gradients=None,
-        smoothing=1e-4,
+        smoothing=None,
         length_scale=None,
         optimize=True,
         noise_per_obs=None,
@@ -216,8 +222,8 @@ class BaseGradientSurface:
             y: Training values (N,).
             gradients: Training gradients (N, D).
             smoothing: Noise variance of fixed fits and the start of optimized
-                ones. Zero means exact data, and optimized fits then start at
-                the largest prior variance.
+                ones. None or zero means exact data, and optimized fits then
+                start at the largest prior variance.
             length_scale: Initial length scale parameter(s).
             optimize: Whether to optimize parameters.
             noise_per_obs: Per-observation noise array (N,) for heteroscedastic

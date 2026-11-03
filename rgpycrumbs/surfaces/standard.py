@@ -81,9 +81,12 @@ class FastTPS:
     Includes a polynomial mean function and supports smoothing optimization.
 
     .. versionadded:: 1.0.0
+
+    .. versionchanged:: 1.14.0
+       The default ``smoothing`` is None, which treats the data as exact.
     """
 
-    def __init__(self, x_obs, y_obs, smoothing=1e-3, optimize=True, **_kwargs):
+    def __init__(self, x_obs, y_obs, smoothing=None, optimize=True, **_kwargs):
         """
         Initializes the TPS model.
 
@@ -91,7 +94,7 @@ class FastTPS:
             x_obs: Training inputs (N, D).
             y_obs: Training observations (N,).
             smoothing: Smoothing variance of fixed fits and the start of
-                optimized ones. Zero means exact data.
+                optimized ones. None or zero means exact data.
             optimize: Whether to optimize the smoothing parameter.
         """
         self.x_obs = jnp.asarray(x_obs, dtype=jnp.float32)

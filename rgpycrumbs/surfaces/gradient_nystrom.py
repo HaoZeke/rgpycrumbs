@@ -83,6 +83,7 @@ class NystromGradientIMQ(BaseGradientSurface):
 
     .. versionchanged:: 1.14.0
        The default ``epsilon`` is the median distance between inducing points.
+       The default ``smoothing`` is None, which treats the data as exact.
     """
 
     def __init__(
@@ -92,7 +93,7 @@ class NystromGradientIMQ(BaseGradientSurface):
         gradients=None,
         n_inducing=300,
         nimags=None,
-        smoothing=1e-3,
+        smoothing=None,
         length_scale=None,
         optimize=True,
         **kwargs,
@@ -106,7 +107,7 @@ class NystromGradientIMQ(BaseGradientSurface):
             gradients: Training gradients.
             n_inducing: Number of inducing points to sample.
             nimags: Path-based image count for structured sampling.
-            smoothing: Noise variance. Zero means exact data.
+            smoothing: Noise variance. None or zero means exact data.
             length_scale: Initial epsilon for IMQ.
             optimize: Optimization toggle.
         """

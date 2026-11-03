@@ -67,7 +67,7 @@
      Shape 1 makes that gamma distribution exponential.
    - *Smoothing*: A caller's ~smoothing~ is the noise variance of fixed fits and the start of optimized ones.
      The ~GradientIMQ~ fit caps its fitted noise at that value.
-     A ~smoothing~ of zero marks exact data.
+     Without a ~smoothing~, or with zero, the fits treat the data as exact.
      Fixed fits then use the roundoff jitter as the noise.
      Optimized fits start the noise at the largest prior variance.
      The first covariance matrix then has a condition number of at most $n + 1$.

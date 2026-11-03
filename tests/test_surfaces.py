@@ -120,7 +120,21 @@ def test_zero_smoothing_is_the_roundoff_jitter(simple_2d_data):
     assert model.noise == pytest.approx(float(jitter))
 
 
-def test_exact_data_fits_start_the_noise_at_the_prior_scale(simple_2d_data, monkeypatch):
+def test_default_smoothing_treats_observations_as_exact(simple_2d_data):
+    """Without a caller's smoothing, the noise is the roundoff jitter."""
+    from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+
+    x, y = simple_2d_data
+    model = FastMatern(x, y, optimize=False, length_scale=1.0)
+    jitter = covariance_roundoff_jitter(_matern_kernel_matrix(x, 1.0))
+
+    assert model.noise == pytest.approx(float(jitter))
+
+
+@pytest.mark.parametrize("smoothing", [None, 0.0])
+def test_exact_data_fits_start_the_noise_at_the_prior_scale(
+    simple_2d_data, monkeypatch, smoothing
+):
     """An optimized exact-data fit starts at a signal-to-noise ratio of one."""
     from rgpycrumbs.surfaces import standard
 
@@ -132,7 +146,7 @@ def test_exact_data_fits_start_the_noise_at_the_prior_scale(simple_2d_data, monk
 
     monkeypatch.setattr(standard, "minimize_log_parameters", record_start)
     x, y = simple_2d_data
-    FastMatern(x, y, smoothing=0.0, optimize=True, length_scale=1.0)
+    FastMatern(x, y, smoothing=smoothing, optimize=True, length_scale=1.0)
     scale = jnp.max(jnp.abs(_matern_kernel_matrix(x, 1.0)))
 
     assert np.exp(starts[0][1]) == pytest.approx(float(scale))
@@ -442,10 +456,11 @@ def _pinned_bowl():
 def test_gradient_matern_predict_is_near_the_exact_answer():
     """Held to the exact answer on the bowl at the default and length_scale 3.
 
-    The bound is 0.02.  The closed form measures 0.00592 at the median start
-    and 0.00373 at length_scale 3.  At the v1.13.0 start, half the mean span,
-    it measured 0.00729, and the autodiff covariance it replaced measured
-    45.4 and 0.247.
+    The bound is 0.02.  With exact data the closed form measures 0.00593 at
+    the median start and 0.00389 at length_scale 3, against 0.00592 and
+    0.00373 with noise 1e-4.  At the v1.13.0 start, half the mean span, it
+    measured 0.00729, and the autodiff covariance it replaced measured 45.4
+    and 0.247.
     """
     x, y, grads, query, truth = _pinned_bowl()
     cases = ((None, 0.02), (3.0, 0.02))
@@ -464,7 +479,9 @@ def test_gradient_matern_query_gradient_matches_the_expected_result():
     At a training point, the mean gradient should match the exact bowl
     gradient.  The variance path uses ``maximum(var, 0)``, so a training
     point can sit on the clipping kink; the variance gradient check is done
-    at an off-training query where the unclipped path is smooth.
+    at an off-training query where the unclipped path is smooth.  With exact
+    data the float32 variance is a small difference of large terms, so the
+    central difference evaluates the same fitted model in float64.
     """
     import jax
 
@@ -511,9 +528,8 @@ def test_gradient_matern_query_gradient_matches_the_expected_result():
 
     xq = np.array([2.0, 2.0], dtype=np.float64)
     grad_var_query = np.asarray(jax.grad(var)(jnp.asarray(xq, dtype=jnp.float32)))
-    fd_var_query = central_grad(
-        lambda p: float(var(jnp.asarray(p, dtype=jnp.float32))), xq
-    )
+    with jax.enable_x64(True):
+        fd_var_query = central_grad(lambda p: float(var(jnp.asarray(p))), xq)
     assert float(var(jnp.asarray(xq, dtype=jnp.float32))) > 0.0
     assert grad_var_query == pytest.approx(fd_var_query, abs=2e-2)
 
