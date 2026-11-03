@@ -106,10 +106,12 @@ def find_mismatch_indices(
     With `remove_fcc_vacancy` set, atoms whose centrosymmetry marks them as
     vacancy neighbors are dropped from the defect atoms.
     Otherwise every atom that does not match `target_structure` is a defect atom.
+    With no defect atom, the result is empty and no ``selection.png`` is drawn.
 
     .. versionchanged:: 1.14.0
        Without `remove_fcc_vacancy`, the mismatched atoms are kept instead of
        all being dropped.
+       With no defect atom, the empty result comes back before any averaging.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -174,6 +176,11 @@ def find_mismatch_indices(
     else:
         data = non_fcc
         interstitial = mismatch_indices
+    log.info(
+        f"Found {len(mismatch_indices)} non-{target_structure.value}, returning {len(interstitial)} frenkel pair atoms."
+    )
+    if interstitial.size == 0:
+        return interstitial
     positions = data.particles.positions
     center_interstitial = np.mean(positions[interstitial], axis=0)
     selection_radius_sq = selection_radius**2
@@ -182,9 +189,6 @@ def find_mismatch_indices(
     sphere_indices = np.where(dist_sq_from_center < selection_radius_sq)[0]
     final_active_indices = np.unique(np.hstack([sphere_indices, interstitial]))
 
-    log.info(
-        f"Found {len(mismatch_indices)} non-{target_structure.value}, returning {len(interstitial)} frenkel pair atoms."
-    )
     if view_selection:
         # Just to see what's being selected..
         pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[sphere_indices])))

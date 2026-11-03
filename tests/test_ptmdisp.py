@@ -3,6 +3,8 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("ptm")
 
+import warnings
+
 import numpy as np
 import pytest
 from ase.build import bulk
@@ -81,6 +83,21 @@ def test_find_indices_on_perfect_fcc(perfect_fcc_cu_file):
     """
     indices = find_mismatch_indices(perfect_fcc_cu_file, CrystalStructure.FCC)
     assert len(indices) == 0, "Should find no defects in a perfect bulk crystal"
+
+
+@pytest.mark.parametrize("remove_fcc_vacancy", [False, True])
+def test_find_indices_without_defect_atoms_returns_quietly(
+    perfect_fcc_cu_file, remove_fcc_vacancy, tmp_path, monkeypatch
+):
+    """With no defect atom, nothing is averaged and no selection image is drawn."""
+    monkeypatch.chdir(tmp_path)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        indices = find_mismatch_indices(
+            perfect_fcc_cu_file, CrystalStructure.FCC, remove_fcc_vacancy
+        )
+    assert indices.size == 0
+    assert not (tmp_path / "selection.png").exists()
 
 
 def test_find_indices_on_fcc_with_defect(defect_fcc_cu_file):
