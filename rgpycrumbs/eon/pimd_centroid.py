@@ -92,7 +92,7 @@ def read_xyz(path: Path) -> tuple[np.ndarray, list[str]]:
             raise ValueError(msg)
         frames.append(np.array([[float(v) for v in r[1:4]] for r in rows]))
         i += 2 + n
-    if not frames:
+    if symbols is None:
         msg = f"{path} holds no frames"
         raise ValueError(msg)
     if len({f.shape for f in frames}) != 1:

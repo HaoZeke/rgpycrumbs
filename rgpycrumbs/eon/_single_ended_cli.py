@@ -30,7 +30,7 @@ def load_trajectories(
     job_dirs: Iterable[Path],
     loader: Callable[[Path], T],
     *,
-    log_info: Callable[[str, object, object], None],
+    log_info: Callable[[str, object, object, object], None],
     noun: str,
     detail: Callable[[T], str],
 ) -> list[T]:

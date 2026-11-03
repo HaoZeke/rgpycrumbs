@@ -114,6 +114,13 @@ def test_xyz_single_file_splits_species_too(tmp_path):
     np.testing.assert_allclose(got, beads, atol=1e-8)
 
 
+def test_xyz_without_frames_is_refused(tmp_path):
+    path = tmp_path / "blank.xyz"
+    path.write_text("\n\n")
+    with pytest.raises(ValueError, match="holds no frames"):
+        mod.read_xyz(path)
+
+
 def test_every_keeps_each_kth_frame_with_original_index():
     beads, centres = _ring(4, n_frames=7)
     pos, spread, md = mod.collapse(beads, every=3)
