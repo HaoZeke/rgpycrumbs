@@ -18,18 +18,15 @@ file:../../branding/logo/pycrumbs_logo.webp
 
 * Overview
 
-~rgpycrumbs~ is a computational library and CLI toolkit for chemical
-physics. It provides surface fitting (JAX kernels), structure analysis
-(IRA matching, fragment detection), and a dispatcher-based CLI for NEB
-visualization, saddle search analysis, and simulation setup.
+~rgpycrumbs~ is a library and command-line toolkit for chemical physics.
+It fits surfaces to energy landscapes with ~jax~, compares structures through Iterative Rotations and Assignments (IRA), and detects the fragments of a structure.
+Its commands plot nudged elastic band (NEB) paths, saddle searches and minimizations, and set up simulations.
 
-Sister libraries: [[https://chemparseplot.rgoswami.me][chemparseplot]]
-(parsers and plots) and [[https://pychum.rgoswami.me][pychum]] (input
-generation). The header *Ecosystem* menu on every page jumps between
-the three Shibuya sites.
+~rgpycrumbs~ has two sister libraries for the other ends of a simulation.
+[[https://pychum.rgoswami.me][pychum]] writes the input files, and [[https://chemparseplot.rgoswami.me][chemparseplot]] parses structures and energies from the output and draws the plots.
+The *Ecosystem* menu in the header of every page links the three sites.
 
-Start with the [[file:quickstart.org][quickstart]] or the
-[[file:tutorials/neb-visualization.org][NEB visualization tutorial]].
+Start with the [[file:quickstart.org][quickstart]] or the [[file:tutorials/neb-visualization.org][NEB visualization tutorial]].
 
 # Ecosystem diagram (generated during doc build)
 #+begin_src dot :file ecosystem.svg :exports results
@@ -67,18 +64,17 @@ digraph G {
 }
 #+end_src
 
-* Key Features
+* Features
 
-- *NEB Visualization* :: 1D energy profiles, 2D reaction valley landscapes
-  with GP surface fitting, four rendering backends (xyzrender, ASE, solvis,
-  ovito), OCI-NEB refinement-sample overlays, and band evolution ([[file:tutorials/neb-visualization.org][tutorial]])
-- *Single-Ended Methods* :: Dimer/saddle search and minimization trajectory
-  visualization with the same 2D projection framework
-- *Surface Fitting* :: JAX-based gradient-enhanced kernels (Matern, IMQ, RBF)
-  for energy landscape interpolation
-- *Structure Analysis* :: IRA matching, fragment detection, distance matrices
-- *Simulation Setup* :: eOn, ORCA, and NWChem input generation
-- *CLI Dispatcher* :: [[https://peps.python.org/pep-0723/][PEP 723]] script metadata with ~uv~ auto-resolution
+- *Nudged elastic band plots* :: Energy profiles along the band, and maps of the reaction valley in two coordinates under a surface fit to the band ([[file:tutorials/neb-visualization.org][tutorial]]).
+- *Structure strips* :: Four renderers draw the structures at the critical points: ~xyzrender~, ~ase~, ~solvis~ and ~ovito~.
+- *Overlays* :: The frames of a minimum-mode following refinement, and the earlier snapshots of the band.
+- *Single-ended methods* :: The same maps for saddle searches with the dimer method and for minimizations.
+- *Surface fitting* :: Gaussian process fits in ~jax~ to energies and gradients, with Matérn, inverse multiquadric (IMQ), rational quadratic and squared exponential kernels, and fits to energies alone with a thin-plate spline or the Matérn and IMQ kernels.
+- *Structure analysis* :: Matching and alignment of structures by IRA, fragment detection from covalent radii or GFN2-xTB bond orders, and distance matrices.
+- *Simulation setup* :: ~eon generate-nwchem-input~ and ~orca generate-orca-input~ write input files for those two programs, and ~eon gen-dimer~ seeds eOn saddle searches from the peaks of a band.
+- *Command dispatcher* :: The dispatcher turns the scripts of the package into commands, and a script with a [[https://peps.python.org/pep-0723/][Python Enhancement Proposal (PEP) 723]] header lists its dependencies there.
+- *Dependency resolution* :: If the active Python has the eOn plotting libraries, the dispatcher runs the command there, and otherwise through ~uv run --script~, which installs the dependencies from the header.
 
 * Tutorials
 #+BEGIN_EXPORT rst
@@ -87,22 +83,16 @@ digraph G {
      :caption: Tutorials
 
      quickstart
-     tutorials/neb-visualization
-     tutorials/saddle-search-visualization
-     tutorials/minimization-visualization
-     tutorials/rendering-backends
+     tutorials/index
 #+END_EXPORT
 
-* How-to Guides
+* How-to guides
 #+BEGIN_EXPORT rst
   .. toctree::
      :maxdepth: 1
-     :caption: How-to Guides
+     :caption: How-to guides
 
-     howto/install
-     howto/faq
-     howto/troubleshooting
-     howto/dev_testing
+     howto/index
 #+END_EXPORT
 
 * Tools
@@ -111,15 +101,7 @@ digraph G {
      :maxdepth: 2
      :caption: Tools
 
-     tools/eon/index
-     tools/chemgp/index
-     tools/orca/index
-     tools/geom/index
-     tools/uma/index
-     tools/surrogate/index
-     tools/surfaces
-     tools/utils/index
-     tools/prefix/index
+     tools/index
 #+END_EXPORT
 
 * Reference
@@ -128,10 +110,7 @@ digraph G {
      :maxdepth: 2
      :caption: Reference
 
-     autoapi/index
-     reference/glossary
-     changelog
-     used_by
+     reference/index
 #+END_EXPORT
 
 * Contributing
@@ -143,4 +122,7 @@ digraph G {
      contributing/index
      dev/index
      explanation/citation
+     explanation/public_api
+     explanation/suite_architecture
+     devnotes
 #+end_export

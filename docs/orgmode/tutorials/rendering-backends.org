@@ -1,154 +1,104 @@
-#+TITLE: Rendering Backends Guide
+#+TITLE: Rendering backends
 #+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
 
 #+begin_export rst
-=========================
-Rendering Backends Guide
-=========================
+==================
+Rendering backends
+==================
 #+end_export
 
-This guide covers the four structure rendering backends and their
-unique features. Each backend has different strengths.
+~plt-neb~, ~plt-min~ and ~plt-saddle~ draw strips of structures under their plots, and =--strip-renderer= picks one of four backends for those structures.
+This page describes the backends and the strip options that the three commands share.
+The facts on this page come from ~xyzrender~ 0.2.3, ASE 3.28, ~solvis-tools~ 0.1.5 and ~ovito~ 3.17.2.
 
-* Quick Comparison
+* Comparison
 
-| Backend | Style | Speed | Features | Install |
-|---------+-------+-------+----------+---------|
-| xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | ~ensure_import~ / AUTO_DEPS (or ~pip install xyzrender~) |
-| ASE | Space-filling | Fast | Built-in, no extra deps | Built-in |
-| solvis | Ball-and-stick | Medium | Transparent bg, PyVista 3D | ~pip install solvis-tools~ |
-| ovito | Configurable | Slow | Full MD viz, modifiers | conda-forge / separate heavy install |
+| Backend | Structures | Needs |
+|---------+------------+-------|
+| =xyzrender=, the default | Ball-and-stick, turned by principal component analysis (PCA) | The ~xyzrender~ Python package |
+| =ase= | Spheres without bonds | Nothing beyond the plot commands |
+| =solvis= | Ball-and-stick through PyVista | ~solvis-tools~ and the Xvfb display server |
+| =ovito= | Spheres without bonds, inside the simulation cell | The ~ovito~ Python module and a Vulkan driver |
 
 * xyzrender
 
-The default backend. Structure strips call the [[https://github.com/aligfellow/xyzrender][xyzrender]]
-**Python API** (~xyzrender.render~) with the ~paton~ preset. The package is
-staged via ~ensure_import("xyzrender")~ when ~RGPYCRUMBS_AUTO_DEPS=1~ (library
-plot entry points enable that by default). You do *not* need a ~xyzrender~
-binary on ~PATH~ for ~rgpycrumbs eon plt-*~ / ~plot_neb~.
+The strips call ~xyzrender.render~, the Python function of [[https://github.com/aligfellow/xyzrender][xyzrender]], with hydrogens shown and a transparent background.
+They do not need the =xyzrender= command on =PATH=.
+If the package is missing and =RGPYCRUMBS_AUTO_DEPS= is on, ~ensure_import~ installs it into the uv cache, and the library plot functions turn that variable on by default.
 
-** Auto-orientation
+With the default =--rotation auto=, xyzrender turns each structure by PCA, so that the structure spreads most across the image and least along the line of sight.
+Any other value, such as =--rotation "0x,90y,0z"=, turns that off and rotates the atoms by the given angles about x, y and z, in that order.
 
-By default, xyzrender auto-orients each structure using PCA to find
-the best viewing angle. This is usually good for small molecules.
-Override with ~--rotation "45x,30y,0z"~ for manual control.
+=--xyzrender-config= picks the preset, =paton= by default.
+In ~xyzrender~ 0.2.3, the presets differ from =default= as follows.
 
-** Reaction bonds
+| Preset | Look |
+|--------+------|
+| =default= | Shaded atoms with outlines, depth fog and bond orders |
+| =paton= | Thinner atom outlines, lighter fog and no bond orders |
+| =flat= | No shading |
+| =bubble= | Large atoms and no bonds |
+| =tube= | Thick bonds colored by element, without atoms |
+| =wire= | As =tube=, with thin bonds |
+| =skeletal= | Skeletal formula |
 
-A coordinate-only structure strip does not establish which bonds form or break.
-Use =rgpycrumbs chemgp plot-reactions= for bonds coloured by GFN2-xTB Wiberg
-bond orders at retained reaction geometries. Its profile fixes the molecular
-charge and multiplicity, and its output retains each electronic-structure
-calculation. See [[file:../tools/chemgp/method_comparisons.org][Method costs and reaction chemistry]].
+Bond orders, non-covalent interactions (NCI) and van der Waals spheres belong to the =xyzrender= command, not to the strips.
+To draw them for one structure, give the command an =.xyz= file, as in these two examples.
 
-** Bond Orders and NCI
-
-xyzrender supports bond order display and non-covalent interaction
-detection:
-
-#+begin_src shell
-# Advanced one-off renders: optional CLI (same package as the Python API)
-xyzrender structure.xyz -o output.png --config paton --hy --bo --nci
+#+begin_src bash
+xyzrender sp.xyz -o nci.png --config paton --hy --bo --nci
+xyzrender sp.xyz -o vdw.png --vdw
 #+end_src
 
-For strips inside ~plt-neb~ / ~plot_neb~, only ~--strip-renderer~ /
-~--xyzrender-config~ (or TOML) matter; deps resolve lazily.
+** Bonds that change
 
-** VdW Spheres
-
-Show van der Waals radii as translucent spheres:
-
-#+begin_src shell
-xyzrender structure.xyz -o output.png --vdw --vdw-opacity 0.3
-#+end_src
-
-** Presets
-
-| Preset | Description |
-|--------+-------------|
-| ~default~ | Standard CPK radii |
-| ~paton~ | Publication-style, smaller atoms (used by rgpycrumbs) |
-| ~flat~ | Flat 2D style |
-| ~bubble~ | Large translucent spheres |
+The positions in a strip do not show which bonds form or break.
+~rgpycrumbs chemgp plot-reactions~ computes GFN2-xTB single points at the stored geometries, with the charge and multiplicity from its profile file, and draws the Wiberg bond orders with xyzrender.
+Its output keeps each of these calculations.
+[[file:../tools/chemgp/method_comparisons.org][Method costs and reaction chemistry]] describes the command.
 
 * ASE
 
-The ASE backend uses ~ase.io.write(format="png")~ for space-filling
-sphere rendering. No bonds are drawn.
-
-** When to Use ASE
-
-- No extra dependencies needed
-- Good for periodic systems where bonds are ambiguous
-- Fast rendering for large systems
-
-** Limitations
-
-- No bond rendering
-- No auto-orientation (uses ~--rotation~ directly)
-- All atoms same style (no ball-and-stick option)
+The =ase= backend writes each structure to an image with ~ase.io.write~, as spheres without bonds and without the cell.
+The plot commands already need ASE, so this backend needs nothing more.
+ASE does not turn the structures by itself: =--rotation auto= gives the side view =0x,90y,0z=, and any other value passes to ASE as it is.
 
 * solvis
 
-The [[https://github.com/amritagos/solvis][solvis]] backend uses PyVista for 3D rendering with transparent
-backgrounds.
-
-** Ball-and-Stick with Bonds
-
-solvis renders atoms as spheres and bonds as cylinders. Bonds are
-detected using ASE's neighbor list with natural cutoffs.
-
-** Transparent Background
-
-solvis renders with RGBA transparent backgrounds, so structures
-blend seamlessly into plots without white rectangles.
-
-** When to Use solvis
-
-- When you need transparent backgrounds for overlaying on colored plots
-- When you want 3D depth effects (shadows, lighting)
-- For PyVista-based workflows
+The =solvis= backend draws atoms as spheres and bonds as cylinders with [[https://github.com/amritagos/solvis][solvis]], which renders through PyVista.
+It draws a bond between two atoms closer than 1.1 times the sum of their covalent radii, and colors the atoms with the Jmol colors of ASE.
+The background is transparent.
+PyVista renders off-screen through Xvfb, so the Xvfb server must be installed.
+=--rotation= works as for ASE.
 
 * ovito
 
-The [[https://www.ovito.org/python/][OVITO Python]] backend provides off-screen rendering with
-orthographic projection.
+The =ovito= backend renders each structure with the Open Visualization Tool (OVITO) Python module, in an orthographic view on a white background.
+It draws the atoms as spheres without bonds, together with the simulation cell, and zooms to fit the cell.
+In the Diels-Alder files, the cell is a box of 25 Å, and the molecule spans at most 22% of the height and 15% of the width of each panel.
+=--rotation= works as for ASE.
 
-** When to Use ovito
+The conda-forge ~ovito~ package in the pixi environments of this repository has no Python module, so the backend stops there with =ovito not installed=.
+In a plain virtual environment, ~pip install ovito~ installs ~ovito~ 3.17.2 with PySide6 and shiboken6, which take 505 MB together.
+That version renders through Vulkan.
+The strip renders with the Mesa Vulkan driver, and stops with =Could not initialize the Vulkan graphics backend= when no driver loads.
 
-- For crystalline systems where OVITO modifiers are useful
-- When you need OVITO's bond computation
-- For consistency with OVITO Desktop visualizations
+* Strip options
 
-** Limitations
+~plt-neb~, ~plt-min~ and ~plt-saddle~ take these options from one shared definition.
 
-- Large dependency (~2-3 GB)
-- No auto-orientation (uses pre-rotation like ASE/solvis)
-- Requires OpenGL (headless via osmesa)
+| Option | Default | Effect |
+|--------+---------+--------|
+| =--strip-renderer= | =xyzrender= | Backend for the structures |
+| =--xyzrender-config= | =paton= | xyzrender preset |
+| =--rotation= | =auto= | =auto=, or angles such as =0x,90y,0z= for every backend |
+| =--perspective-tilt= | =0.0= | Tilt in degrees about a fixed line in the x-y plane, before rendering, so that hidden atoms come into view |
+| =--strip-spacing= | =1.5= | Horizontal spacing between the structure images |
+| =--strip-dividers= | off | Vertical lines between the images |
 
-* Unified Controls
+* See also
 
-All backends share these controls:
-
-| Flag | Effect |
-|------+--------|
-| ~--rotation "auto"~ | xyzrender auto-orients; others use side view |
-| ~--rotation "Xx,Yy,Zz"~ | Manual rotation for all backends |
-| ~--perspective-tilt N~ | Rodrigues off-axis tilt (degrees) |
-| ~--strip-spacing N~ | Horizontal gap between images |
-| ~--strip-dividers~ | Vertical separator lines |
-| ~--xyzrender-config NAME~ | xyzrender preset when that backend is active |
-
-All three eOn plotting CLIs (=plt-neb=, =plt-min=, and =plt-saddle=) now use
-the same renderer-option bundle, so these controls behave consistently across
-NEB, minimization, and saddle-search figure generation.
-
-* See Also
-
-- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
-- [[file:neb-visualization.org][NEB Visualization Tutorial]]
-- [[file:../tools/eon/plt_neb.org][plt-neb CLI Reference]]
-- [[https://github.com/aligfellow/xyzrender][xyzrender]] -- ball-and-stick molecular renderer
-- [[https://wiki.fysik.dtu.dk/ase/][ASE]] -- Atomic Simulation Environment
-- [[https://github.com/amritagos/solvis][solvis]] -- PyVista molecular visualization
-- [[https://www.ovito.org/python/][OVITO Python]] -- scientific visualization and analysis
+- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation", /MethodsX/ (2026), [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]], for the root mean square deviation (RMSD) maps that these strips sit under
+- [[file:neb-visualization.org][Nudged elastic band visualization]]
+- [[file:../tools/eon/plt_neb.org][plt-neb command reference]]
+- [[https://github.com/aligfellow/xyzrender][xyzrender]], [[https://wiki.fysik.dtu.dk/ase/][ASE]], [[https://github.com/amritagos/solvis][solvis]] and [[https://www.ovito.org/python/][OVITO Python]]

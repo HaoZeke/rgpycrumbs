@@ -1,82 +1,79 @@
-#+TITLE: ~plt-gp~
+#+TITLE: ~plot-gp~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
-* CLI Reference
+* Command reference
 #+BEGIN_EXPORT rst
-.. click:: rgpycrumbs.chemgp.plt_gp:cli
-   :prog: rgpycrumbs chemgp plt-gp
+.. click:: rgpycrumbs.chemgp.plot_gp:cli
+   :prog: rgpycrumbs chemgp plot-gp
    :nested: full
 #+END_EXPORT
 
 * Overview
 
-~plt-gp~ reads HDF5 files produced by ChemGP (the Rust crate ~chemgp-core~) and
-generates publication-quality PDF figures via ~chemparseplot~.
+~rgpycrumbs chemgp plot-gp~ draws figures from ChemGP output in HDF5 files, through ~chemparseplot~.
+ChemGP is the Rust crate ~chemgp-core~, and its examples write these files.
+Each subcommand draws one kind of figure:
 
-| Subcommand | Plot type | Backend |
-|---------------+-----------------------------------------+------------|
-| convergence | Oracle calls vs force/energy | plotnine |
-| surface | 2D PES contour + NEB path overlay | matplotlib |
-| quality | GP surrogate progression (multi-panel) | matplotlib |
-| rff | RFF vs exact GP error (two-panel) | plotnine |
-| nll | MAP-NLL landscape in hyperparameter space | matplotlib |
-| sensitivity | 3x3 hyperparameter sensitivity grid | matplotlib |
-| trust | Trust region illustration (1D slice) | matplotlib |
-| variance | GP variance hatching on PES | matplotlib |
-| fps | FPS subset PCA scatter | plotnine |
-| profile | NEB energy profile across images | plotnine |
-| landscape | 2D NEB landscape (delegates to plt-neb) | matplotlib |
-| batch | TOML-driven batch figure generation | (all) |
+| Subcommand | Figure |
+|------------+--------|
+| =convergence= | Force or energy against oracle calls, on a log scale |
+| =surface= | Filled contours of a two-dimensional potential energy surface, with optional paths and points |
+| =quality= | Panels of the Gaussian process mean at growing training sizes |
+| =rff= | Energy and gradient errors of random Fourier features against their dimension |
+| =nll= | Contours of the negative log-likelihood over two log hyperparameters |
+| =sensitivity= | Grid of one-dimensional Gaussian process slices with confidence bands |
+| =trust= | Trust region on a one-dimensional slice |
+| =variance= | Potential energy surface with its high-variance regions hatched |
+| =fps= | Principal component scatter of the points that farthest point sampling keeps |
+| =profile= | Nudged elastic band energy profile against image index |
+| =batch= | Every figure of one plot list |
 
-* Common Options
+* Common options
 
-All single-plot subcommands accept:
+Every subcommand except =batch= takes:
 
-- ~--input~ / ~-i~ :: Path to the HDF5 file (required)
-- ~--output~ / ~-o~ :: Output PDF/PNG path (required)
-- ~--width~ :: Figure width in inches (default varies by type)
-- ~--height~ :: Figure height in inches (default varies by type)
-- ~--dpi~ :: Resolution (default 300)
+- =--input= / =-i= :: the HDF5 file, required
+- =--output= / =-o= :: the output file, required
+- =--width= / =-W= and =--height= / =-H= :: figure size in inches, 7.0 by 5.0 by default
+- =--dpi= :: resolution in dots per inch, 300 by default
 
-* Single-Plot Usage
-
-#+begin_src bash
-# Convergence curve from a minimize run
-rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
-
-# 2D surface with NEB path overlay
-rgpycrumbs chemgp plt-gp surface -i output/leps_neb.h5 -o surface.pdf
-
-# NLL landscape
-rgpycrumbs chemgp plt-gp nll -i output/leps_nll.h5 -o nll.pdf
-#+end_src
-
-* Batch Mode
-
-Define a TOML config listing all plots, then generate them in one command:
+* Usage
 
 #+begin_src bash
-rgpycrumbs chemgp plt-gp batch --config figures.toml
+rgpycrumbs chemgp plot-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+rgpycrumbs chemgp plot-gp surface -i output/leps_neb.h5 -o surface.pdf
+rgpycrumbs chemgp plot-gp nll -i output/leps_nll.h5 -o nll.pdf
 #+end_src
 
-See the @@rst::doc:`batch tutorial <batch_tutorial>`@@ for a worked example with
-a full TOML config.
+* Batch mode
 
-* Energy Clamping
+=batch= reads a list of figures from a file in Tom's Obvious, Minimal Language (TOML), with one =[[plots]]= table for each figure:
 
-Surface and quality plots auto-detect clamping ranges from the filename:
+#+begin_src toml
+[[plots]]
+type = "convergence"
+input = "leps_minimize.h5"
+output = "convergence.pdf"
+#+end_src
 
-- Files containing ~mb~ use ~[-200, 50]~
-- Files containing ~leps~ use ~[-5, 5]~
+#+begin_src bash
+rgpycrumbs chemgp plot-gp batch --config figures.toml
+#+end_src
 
-Override with ~--clamp-lo~ and ~--clamp-hi~ flags on the subcommand, or
-~clamp_lo~ / ~clamp_hi~ keys in the TOML config.
+Each table names its subcommand in =type=.
+Its other keys pass on as options of that subcommand, so =clamp_lo = -5.0= turns into =--clamp-lo -5.0=.
+With click 8.3.1, the version in the pixi environments, every entry fails with =CliRunner.__init__() got an unexpected keyword argument 'mix_stderr'=, and the batch exits with status 1.
+Until that changes, run the subcommands one at a time.
+The @@rst::doc:`batch tutorial <batch_tutorial>`@@ works through a longer plot list.
 
-* API Reference
+* Energy clamping
 
-For developer details and source code see
-@@rst::mod:`rgpycrumbs.chemgp.plt_gp`@@.
+=surface=, =quality= and =variance= clip the energy range by the name of the input file.
+A name that contains =mb= gets the range from -200 to 50, and a name that contains =leps= gets -5 to 5.
+For other names, =quality= and =variance= fall back to -200 to 50, while =surface= leaves the range open.
+=surface= also takes =--clamp-lo= and =--clamp-hi=, and with either of them the file name no longer sets the range.
 
-The plotting functions themselves live in
-[[https://chemparseplot.rgoswami.me][chemparseplot]] at
-~chemparseplot.plot.chemgp~.
+* API reference
+
+The command lives in @@rst::mod:`rgpycrumbs.chemgp.plot_gp`@@.
+The plotting functions themselves live in ~chemparseplot.plot.chemgp~ of [[https://chemparseplot.rgoswami.me][chemparseplot]].

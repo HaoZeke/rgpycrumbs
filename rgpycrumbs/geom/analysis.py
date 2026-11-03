@@ -10,33 +10,39 @@ def analyze_structure(
     np.ndarray,
     list[tuple[float, str, str, float, float]],
 ]:
-    """
-    Analyzes an ASE Atoms object to calculate the distance matrix, bond matrix,
-    identify molecular fragments, and calculate inter-fragment distances.
+    """Find the distance matrix, bonds, fragments and inter-fragment distances.
 
     .. versionadded:: 1.0.0
 
-    Args:
-        atoms: The ASE Atoms object to analyze.
-        covalent_scale:  A scaling factor applied to the covalent radii to
-            determine the bonding threshold.  A bond is formed if the distance
-            between two atoms is less than or equal to the sum of their
-            covalent radii, multiplied by this factor.
+    Parameters
+    ----------
+    atoms
+        ASE Atoms object to analyze.
+    covalent_scale
+        Scaling factor applied to the covalent radii to determine bonding.
+        Two atoms bond when their distance is less than the sum of their
+        covalent radii times this factor.
 
-    Returns:
-        A tuple containing:
-        - distance_matrix: A NumPy array representing the pairwise distances
-          between all atoms in the system.
-        - bond_matrix: A NumPy array representing the adjacency matrix of the
-          molecular graph.  bond_matrix[i, j] = 1 if atoms i and j are
-          bonded, and 0 otherwise.
-        - fragments: A list of lists, where each inner list contains the indices
-          of the atoms belonging to a connected fragment.
-        - centroid_distances: A NumPy array of pairwise distances between the
-          centroids of each fragment.
-        - corrected_distances: A list of tuples, each containing:
-          (min_dist, symbol_i, symbol_j, covrad_sum, corrected_dist)
-          for each pair of fragments.
+    Returns
+    -------
+    tuple
+        ``(distance_matrix, bond_matrix, fragments, centroid_distances,``
+        ``corrected_distances)``, where:
+
+        - ``distance_matrix``: pairwise distances between all atoms, under
+          the minimum image convention.
+        - ``bond_matrix``: adjacency matrix of the molecular graph, with
+          ``bond_matrix[i, j] = 1`` if atoms ``i`` and ``j`` are bonded and
+          ``0`` otherwise.
+        - ``fragments``: one list of atom indices for each connected fragment.
+        - ``centroid_distances``: pairwise distances between the centroids of
+          the fragments.
+        - ``corrected_distances``: one tuple
+          ``(min_dist, symbol_i, symbol_j, covrad_sum, corrected_dist)`` for
+          each pair of fragments, where ``min_dist`` is the shortest distance
+          between their atoms, the symbols and ``covrad_sum`` belong to that
+          closest pair, and ``corrected_dist`` is
+          ``min_dist - covrad_sum * covalent_scale``.
     """
     from rgpycrumbs._aux import ensure_import
 

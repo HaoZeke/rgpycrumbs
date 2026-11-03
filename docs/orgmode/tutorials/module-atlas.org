@@ -1,0 +1,67 @@
+#+TITLE: Module atlas
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+#+begin_export rst
+============
+Module atlas
+============
+#+end_export
+
+This page maps the subpackages of ~rgpycrumbs~ and shows which of its modules a notebook can import.
+The package has two kinds of module.
+A script module starts with a [[https://peps.python.org/pep-0723/][Python Enhancement Proposal (PEP) 723]] header that lists its dependencies, and the dispatcher runs it as a command, such as ~rgpycrumbs eon plt-neb~.
+A library module has no such header, and other code imports it.
+
+* Subpackages
+
+- ~rgpycrumbs.cli~ :: Dispatcher behind the ~rgpycrumbs~ command.
+- ~rgpycrumbs.api~ :: Stable names for configuration, version pins and on-demand imports.
+- ~rgpycrumbs.eon~ :: Commands for eOn output, and the library calls ~plot~, ~plot_neb~, ~plot_saddle~ and ~plot_min~ that draw the same figures.
+- ~rgpycrumbs.geom~ :: Fragment detection, distance matrices, ring plots, and matching and alignment by Iterative Rotations and Assignments (IRA).
+- ~rgpycrumbs.surfaces~ :: Surface fits in ~jax~, which ~get_surface_model~ returns by name.
+- ~rgpycrumbs.chemgp~ :: Commands that plot ChemGP output, such as ~rgpycrumbs chemgp plot-gp~, and re-exports of the ~chemparseplot~ functions behind them.
+- ~rgpycrumbs.surrogate~ :: Figure commands for saddle searches with a surrogate model.
+
+The [[file:../reference/module_api_map.org][module index]] lists every public module, from the library modules to the commands, with a link to its page in the API reference.
+
+* Import library modules
+
+The five modules in this loop are library modules.
+The loop imports each one and prints the type of any error.
+
+#+begin_src python
+import importlib
+
+mods = [
+    "rgpycrumbs.api",
+    "rgpycrumbs.basetypes",
+    "rgpycrumbs.geom.analysis",
+    "rgpycrumbs.interpolation",
+    "rgpycrumbs.surfaces.gradient_matern",
+]
+for name in mods:
+    try:
+        importlib.import_module(name)
+        print("OK ", name)
+    except Exception as exc:
+        print("ERR", name, type(exc).__name__)
+#+end_src
+
+In the =fragments= and =test= environments of the pixi workspace, all five import:
+
+#+begin_example
+OK  rgpycrumbs.api
+OK  rgpycrumbs.basetypes
+OK  rgpycrumbs.geom.analysis
+OK  rgpycrumbs.interpolation
+OK  rgpycrumbs.surfaces.gradient_matern
+#+end_example
+
+A plain install of ~rgpycrumbs~ brings only ~click~, ~numpy~ and ~rich~, and there the last line reads:
+
+#+begin_example
+ERR rgpycrumbs.surfaces.gradient_matern ModuleNotFoundError
+#+end_example
+
+~rgpycrumbs.surfaces.gradient_matern~ imports ~jax~ as it loads, so it needs ~jax~ installed.
+~geom.analysis~ and ~interpolation~ ask for ~ase~ and ~scipy~ through ~ensure_import~ only when called, so they import without them.

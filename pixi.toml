@@ -165,18 +165,18 @@ npx html-minifier-terser \
 
 
 [feature.test.tasks.genfigs]
-cmd = "python docs/generate_tutorial_figs.py && python docs/generate_singleended_figs.py"
+cmd = "python docs/generate_tutorial_figs.py && python docs/generate_singleended_figs.py && python docs/generate_figure_gallery.py"
 
 [feature.docs.tasks.docbld]
 depends-on = [
-  { task = "genfigs", environment = "test" },
+  { task = "genfigs", environment = "fragments" },
   "mkrst",
   "sphinxbld",
 ]
 
 [feature.docs.tasks.sphinxbld]
 cmd = """
-sphinx-build docs/source/ docs/build
+sphinx-build -W --keep-going docs/source/ docs/build
 """
 depends-on = [ { task = "mkrst", environment = "docs" } ]
 

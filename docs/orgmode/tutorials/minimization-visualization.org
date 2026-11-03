@@ -1,208 +1,135 @@
-#+TITLE: Minimization Visualization
-#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+TITLE: Minimization visualization
+#+AUTHOR: Rohit Goswami
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
 
-#+begin_export rst
-==============================
-Minimization Visualization
-==============================
-#+end_export
+This tutorial plots one eOn minimization with ~rgpycrumbs eon plt-min~.
+The system is ethane, and the minimization relaxes a structure next to the eclipsed saddle point of the rotation about the C-C bond into the staggered minimum.
+Each figure comes from the command printed above it.
 
-This tutorial shows how to visualize energy minimization trajectories
-using ~plt-min~. You will produce energy profiles, 2D optimization
-landscapes, and convergence panels.
+The two-dimensional map in this tutorial follows R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation", /MethodsX/ (2026), [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]].
+Please cite that paper if you use these maps in published figures.
 
-#+begin_export rst
-.. admonition:: Reference
+* Data and environment
 
-   The 2D projection method used here is described in:
+The eOn output files for this tutorial are in =docs/orgmode/tutorials/data/ethane/minimization/=.
+The script =docs/generate_singleended_data.py= computes them with eOn 2.16 and its default conjugate gradient optimizer.
+The energies and forces come from the GFN2-xTB tight-binding method through the =ext_pot= interface of eOn.
+The start structure is the saddle point of the [[file:saddle-search-visualization.org][saddle search tutorial]], moved 0.2 Å along the dimer direction.
 
-   R. Goswami, "Two-dimensional RMSD projections for reaction path
-   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
-   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
-#+end_export
+| File | Content |
+|------+---------|
+| =pos.con= | Start structure |
+| =minimization.con= | One frame per iteration, from frame 0 at the start to frame 29 at the minimum |
+| =min.con= | Final structure |
+| =results.dat= | Summary of the run |
+| =config.ini= | eOn settings |
 
-* Prerequisites
+The header line of each frame in =minimization.con= records the energy, the step size and the convergence value of that iteration.
 
-~plt-min~ reads eOn minimization output: a movie file (multi-frame
-=.con=), optionally a =.dat= compatibility/export log, and optionally the
-final structure. Metadata-rich full CON frames are treated as the canonical
-source of per-iteration metrics.
+eOn 2.16 writes the frames to =minimization.con=.
+With the default =--prefix minimization=, ~plt-min~ reads the frames from that file, but it also takes the first frame as the final structure, because it looks for =<prefix>.con= before =min.con=.
+The commands below pass =--prefix minimization.con=, which names the same file, so the final structure comes from =min.con=.
+The =--label ethane= option sets the name in the landscape title.
+
+The landscape also needs the structure in each frame, which ~plt-min~ compares with the start and the final structure through Iterative Rotations and Assignments (IRA).
+IRA aligns two structures and matches their atoms.
+The repository's pixi =fragments= environment provides IRA, and the figures on this page come from that environment.
+Run the commands from the tutorial folder.
 
 #+begin_src bash
-pip install rgpycrumbs  # plot heavies via library AUTO_DEPS / ensure_import
+git clone https://github.com/HaoZeke/rgpycrumbs
+cd rgpycrumbs
+pixi shell -e fragments
+cd docs/orgmode/tutorials
 #+end_src
 
-The expected directory layout:
+Outside pixi, install IRA from conda-forge, where the package is named =ira=.
+Without IRA, ~plt-min~ still draws the profile and the convergence panels, but the landscape command stops with an error.
 
-#+begin_example
-min_job/
-  minimization   # multi-frame .con trajectory (movie file)
-  minimization.dat  # (optional fallback/export) TSV: iteration, step_size, convergence, energy
-  minimization.con  # (optional) explicit final structure
-  min.con        # (optional legacy fallback) final minimized structure
-#+end_example
+* Energy profile
 
-The file prefix defaults to =minimization= but can be changed with =--prefix=
-(e.g., =--prefix qm_min= for =qm_min=, =qm_min.dat=, =qm_min.con=). The
-sidecar =.dat= file remains useful for inspection and backwards
-compatibility, but the embedded CON metadata is the primary source. When an
-explicit final structure is present, =plt-min= prefers =<prefix>.con= and then
-falls back to legacy =min.con=.
-
-* Step 1: Energy Profile
-
-The profile plot shows total energy vs iteration. A successful
-minimization shows monotonically decreasing energy converging to a
-plateau.
-
-#+begin_src shell
-rgpycrumbs eon plt-min \
-  --job-dir min_job/ \
-  --plot-type profile \
-  -o min_profile.pdf
+#+begin_src bash
+rgpycrumbs eon plt-min --job-dir data/ethane/minimization --prefix minimization.con \
+  --label ethane --plot-type profile -o min_profile.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/min_profile.png
-   :width: 80%
-   :alt: Energy profile for minimization
+   :alt: The energy in eV against iteration. It falls at every iteration from minus 199.526 eV to minus 199.633 eV, with the steepest drop at iteration 7.
 #+end_export
 
-The exponential decay shape is typical for gradient descent
-minimization. The curve should flatten as forces approach zero.
+The plot shows the energy of each frame in eV.
+The energy falls at every iteration, by 0.107 eV in total, and about half of the drop comes at iterations 6 and 7.
+Iteration 6 takes the largest step that eOn allows, 0.2 Å, and turns the torsion from 19.6 to 39.3 degrees.
+That step strains the C-H bonds, which spread from 1.085-1.087 Å to 1.073-1.119 Å, and iteration 7 brings them back to 1.082-1.091 Å.
+The run ends in the staggered minimum, with a torsion of 60.0 degrees and an energy within 0.00001 eV of the reactant energy in the saddle search.
 
-* Step 2: 2D Optimization Landscape
+* Landscape
 
-The landscape projects the trajectory into /(s, d)/ coordinates:
-
-- /s/ (progress): RMSD distance from initial to final structure
-- /d/ (deviation): lateral displacement from the direct path
-
-#+begin_src shell
-rgpycrumbs eon plt-min \
-  --job-dir min_job/ \
-  --plot-type landscape \
-  --surface-type grad_matern \
-  --project-path \
-  -o min_landscape.pdf
+#+begin_src bash
+rgpycrumbs eon plt-min --job-dir data/ethane/minimization --prefix minimization.con \
+  --label ethane --plot-type landscape --surface-type grad_matern --project-path \
+  --plot-structures endpoints -o min_landscape.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/min_landscape.png
-   :width: 80%
-   :alt: 2D optimization landscape for minimization
+   :alt: The minimization path on progress and deviation coordinates, from the initial structure at the left to the minimized one at the right, over a background that falls in energy from left to right, with ball-and-stick structures of both below.
 #+end_export
 
-For a well-behaved minimization, the trajectory should follow the
-energy valley from the initial displaced geometry toward the minimum.
-Large lateral deviations indicate the optimizer is exploring
-off-pathway configurations.
+The landscape places each frame by its root mean square deviation (RMSD) from the start and from the final structure.
+The =--project-path= flag turns these two distances into progress /s/ along the line from the start to the final structure and deviation /d/ from that line.
+The =--plot-structures endpoints= option draws the start and the final structure under the map.
 
-** Dense movies and TOML surface fit
+The path stays within 0.005 Å of /d/ = 0, so the minimization follows the straight line between its end points.
+The frames bunch up along /s/, with gaps at the large steps of iterations 3, 6 and 14.
 
-eOn ~write_movies~ can record every force evaluation, so LBFGS paths may
-exceed ~100 frames. GradientIMQ surfaces can then raise a non-finite
-contourf error. Prefer a plot TOML over more CLI flags:
+The background is a fitted surface, by default a Gaussian process (GP) with a gradient-enhanced Matérn kernel.
+The GP takes the energy of each frame, and a slope from the energy change between the neighbouring frames along the direction of the path in the map.
+Here the fit follows the fall in energy along /s/, but only roughly.
+It sits 0.056 eV below the energy of frame 6, the frame after the largest step.
+Its colors also span the range of the fitted surface, 0.008 to 0.095 eV, and not the range of 0 to 0.107 eV on the colorbar.
+Read the energies from the colors of the path, which follow the colorbar.
 
-#+begin_src toml
-# plot.toml
-[shared]
-auto_thin = true
-max_surface_points = 64
+* Convergence panel
 
-[min]
-job_dir = ["min_job"]
-plot_type = "landscape"
-surface_type = "grad_imq"
-output = "min_landscape.pdf"
-#+end_src
-
-#+begin_src shell
-rgpycrumbs eon plt-min --config plot.toml
-#+end_src
-
-~auto_thin~ defaults to *false* (opt-in). When enabled, chemparseplot
-subsamples the GP fit set only; the path scatter still shows the full
-trajectory. See [[file:../tools/eon/plot_config.org][eOn plot TOML config]].
-
-* Step 3: Convergence Panel
-
-The convergence panel monitors the force norm and step size to diagnose
-optimization quality.
-
-#+begin_src shell
-rgpycrumbs eon plt-min \
-  --job-dir min_job/ \
-  --plot-type convergence \
-  -o min_convergence.pdf
+#+begin_src bash
+rgpycrumbs eon plt-min --job-dir data/ethane/minimization --prefix minimization.con \
+  --label ethane --plot-type convergence -o min_convergence.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/min_convergence.png
-   :width: 80%
-   :alt: Convergence panel for minimization
+   :alt: Two panels against iteration. The force norm on a log scale jumps to 1.8 at iteration 6 and falls to 0.004 at iteration 29, and the step size peaks at 0.2 at iteration 6.
 #+end_export
 
-Both curves should decrease monotonically. Oscillations in the force
-norm suggest the step size is too large or the optimizer is struggling
-with the PES topology.
+The left panel shows the norm of the force, which eOn compares with its =converged_force= threshold of 0.01 eV/Å.
+The right panel shows the step size.
+The force norm jumps to 1.80 eV/Å after the 0.2 Å step of iteration 6, and it drops below the threshold only at iteration 29, at 0.0043 eV/Å.
 
-* Custom File Prefix
+* Dense trajectories
 
-eOn minimization jobs can use different prefixes depending on the job
-type. Use =--prefix= to match:
+The surface fit can also run on a subset of the frames of a long trajectory.
+The =auto_thin= and =max_surface_points= settings for this live only in a plot file in Tom's Obvious, Minimal Language (TOML), which =--config= reads.
+See [[file:../tools/eon/plot_config.org][eOn plot TOML config]] for these settings.
 
-#+begin_src shell
-# For jobs with qm_min, qm_min.dat, qm_min.con
-rgpycrumbs eon plt-min --job-dir job/ --prefix qm_min --plot-type profile
-#+end_src
+* Option summary
 
-* Step 4: Comparing Optimizers
+| Option | Effect |
+|--------+--------|
+| =--plot-type profile= | Energy against iteration |
+| =--plot-type landscape= | Path on the RMSD map over a fitted surface |
+| =--plot-type convergence= | Force norm and step size against iteration |
+| =--prefix= | Name of the frame file, which also sets the final structure file |
+| =--label= | Name in the landscape title, one per =--job-dir= |
+| =--surface-type= | Surface fit: =grad_matern= by default, or =grad_imq= or =rbf= |
+| =--no-project-path= | The two RMSD values instead of progress and deviation |
+| =--plot-structures endpoints= | Start and final structure under the landscape |
+| =--config= | Settings from a plot TOML file |
 
-Use =--job-dir= multiple times to overlay trajectories from different
-optimizers (FIRE, LBFGS, SD) on the same plot:
+* See also
 
-#+begin_src shell
-rgpycrumbs eon plt-min \
-  --job-dir fire_min/ --label FIRE \
-  --job-dir lbfgs_min/ --label LBFGS \
-  --job-dir sd_min/ --label SD \
-  --plot-type profile \
-  -o optimizer_comparison.pdf
-#+end_src
-
-Each trajectory is plotted with a different color and appears in the
-legend. This works for profile, landscape, and convergence plots. On
-the landscape, the GP surface is fitted from the primary (first)
-trajectory, and all paths are overlaid.
-
-#+begin_src shell
-# Convergence comparison
-rgpycrumbs eon plt-min \
-  --job-dir fire_min/ --label FIRE \
-  --job-dir lbfgs_min/ --label LBFGS \
-  --plot-type convergence \
-  -o convergence_comparison.pdf
-#+end_src
-
-* Summary
-
-| Feature | Flag / TOML | Notes |
-|---------+-------------+-------|
-| Energy profile | =--plot-type profile= | Energy vs iteration |
-| 2D landscape | =--plot-type landscape= | GP surface fit |
-| Convergence | =--plot-type convergence= | Force + step size |
-| Multi-trajectory | =--job-dir A --job-dir B= | Overlay with legend |
-| Structure strip | =--plot-structures endpoints= | Init and Min below |
-| Custom prefix | =--prefix qm_min= | For non-default file names |
-| Projection toggle | =--project-path / --no-project-path= | Default: on |
-| Dense-fit thin | TOML =auto_thin= | Default off; not a CLI flag |
-| Plot suite config | =--config plot.toml= | Preferred for many options |
-
-* See Also
-
-- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
-- [[file:neb-visualization.org][NEB Visualization Tutorial]]
-- [[file:saddle-search-visualization.org][Saddle Search Visualization Tutorial]]
-- [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]
+- [[file:neb-visualization.org][Nudged elastic band visualization]]
+- [[file:saddle-search-visualization.org][Saddle search visualization]]
+- [[file:../tools/eon/plt_min.org][plt-min command reference]]
 - [[file:../tools/eon/plot_config.org][eOn plot TOML config]]

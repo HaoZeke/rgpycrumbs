@@ -1,34 +1,32 @@
 #+TITLE: Contributing to ~rgpycrumbs~
+#+AUTHOR: Rohit Goswami
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 #+STARTUP: content
 
-We welcome all contributions and contributors to ~rgpycrumbs~. Whether you
-report bugs, improve documentation, or submit code, your help makes the tools
-better for everyone.
+We welcome all contributions and contributors to ~rgpycrumbs~.
+Whether you report bugs, improve documentation, or submit code, your help makes the tools better for everyone.
 
-* Communication and Conduct
-We value a respectful and inclusive community. All contributors must follow our
-[[https://rgpycrumbs.rgoswami.me/code_of_conduct.html][Code of Conduct]].
+* Communication and conduct
+We value a respectful and inclusive community.
+All contributors must follow our [[https://rgpycrumbs.rgoswami.me/code_of_conduct.html][Code of Conduct]].
 
-* Getting Started
-Please review the technical requirements before submitting a Pull Request:
+* Getting started
+Please review the technical requirements before you open a pull request.
 
 - Development Environment :: We use ~pixi~ for environment management.
-  Read the [[file:test_requirements.org][Testing & Environment Requirements]] to understand how to handle
-  conflicting dependencies, and how to use the ~--dev~ flag when working
-  with local, editable installs of dependent packages.
-- Code Style :: We follow a "Dispatcher" pattern detailed in the [[file:../devnotes.org][design and architecture notes]]. Keep core logic in
-  independent scripts using PEP 723 metadata as per these [[https://realpython.com/python-script-structure/][real python best practices]].
-- Documentation :: We author all documentation in ~orgmode~ converted to ~rst~,
-  with the workflow and standards in the [[file:doc_builds.org][Documentation Standards & Authoring]] section.
+                             The [[file:test_requirements.org][testing and environment requirements]] show how to handle conflicting dependencies, and how the ~--dev~ flag runs scripts against local, editable installs of dependent packages.
+- Code Style :: We follow the dispatcher pattern of the [[file:../devnotes.org][design and architecture notes]].
+                Keep core logic in independent scripts with Python Enhancement Proposal (PEP) 723 metadata, as this [[https://realpython.com/python-script-structure/][article on Python script structure]] describes.
+- Documentation :: We write all documentation in ~orgmode~ and convert it to ~rst~.
+                   The [[file:doc_builds.org][documentation standards]] page describes the workflow and the conventions.
 
-* Reporting Issues
-Use the [[https://github.com/HaoZeke/rgpycrumbs/issues][GitHub issue tracker]] to report bugs or suggest enhancements. Please
-provide a minimal reproducible example for all bug reports. User facing comments
-may be directed also to the [[https://matsci.org/c/eon/72][eOn materials science section]].
+* Reporting issues
+Use the [[https://github.com/HaoZeke/rgpycrumbs/issues][GitHub issue tracker]] to report bugs or suggest enhancements.
+Please provide a minimal reproducible example for all bug reports.
+User-facing comments can also go to the [[https://matsci.org/c/eon/72][eOn materials science section]].
 
 * Contributing
-  For details on the dispatcher architecture or internal API:
+The pages below cover the documentation build, the test environments, the code of conduct and the release process.
 
 #+begin_export rst
   .. toctree::

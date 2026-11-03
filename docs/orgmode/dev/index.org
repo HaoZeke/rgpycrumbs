@@ -1,18 +1,33 @@
-#+TITLE: Developer Documentation
+#+TITLE: Developer documentation
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+EMAIL: rgoswami@ieee.org
 #+OPTIONS: toc:t num:nil
 
-* Developer Documentation
+* Developer documentation
 
 This section contains technical documentation for developers working on rgpycrumbs.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+   :caption: Developer reference
+
+   best_practices
+   cli_architecture
+   contributing
+   lazy_imports
+   modular_design
+   pep723_scripts
+   testing
+   testing_pattern
+#+end_export
 
 ** Architecture
 
 | Document | Description |
 |----------+-------------|
 | [[file:lazy_imports.org][Lazy Import Pattern]] | How ensure_import() works for optional dependencies |
-| [[file:cli_architecture.org][CLI Architecture]] | Dispatcher pattern for PEP 723 scripts |
+| [[file:cli_architecture.org][CLI Architecture]] | Dispatcher pattern for Python Enhancement Proposal (PEP) 723 scripts |
 | [[file:modular_design.org][Modular Design]] | Separation of CLI, I/O, and plotting logic |
 
 ** Patterns
@@ -29,9 +44,9 @@ This section contains technical documentation for developers working on rgpycrum
 - [[file:../contributing/release.org][Release Process]]
 - [[file:../contributing/test_requirements.org][Test Requirements]]
 
-* Quick Start for Developers
+* Quick start for developers
 
-** Setup Development Environment**
+** Set up the development environment
 
 #+begin_src bash
 git clone https://github.com/HaoZeke/rgpycrumbs
@@ -39,7 +54,7 @@ cd rgpycrumbs
 uv sync --all-extras
 #+end_src
 
-** Run Tests**
+** Run tests
 
 #+begin_src bash
 uv run pytest -m pure  # Pure Python tests
@@ -47,12 +62,14 @@ uv run pytest -m interpolation  # Tests requiring scipy
 uv run pytest -m surfaces  # Tests requiring jax
 #+end_src
 
-** Add New CLI Command**
+** Add a new CLI command
 
-1. Create script in =rgpycrumbs/<module>/cli_<name>.py=
-2. Add PEP 723 header with dependencies
-3. Use click for CLI interface
-4. Delegate to plotting functions in =rgpycrumbs/<module>/plotting.py=
+- Put the script in a group folder, as =rgpycrumbs/<group>/<name>.py=.
+  The dispatcher turns it into =rgpycrumbs <group> <name>=, with =-= in place of =_= and without a leading =cli_=.
+- Add a PEP 723 header with its dependencies.
+- Use click for the interface.
+- Keep plotting code in a library module of the group.
+  The dispatcher skips =plotting.py=, =helpers.py=, =utils.py=, =hdf5_io.py=, =seed_dimers.py= and file names that start with =_=.
 
 See [[file:cli_architecture.org][CLI Architecture]] for details.
 

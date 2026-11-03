@@ -1,191 +1,136 @@
-#+TITLE: Saddle Search Visualization
-#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+TITLE: Saddle search visualization
+#+AUTHOR: Rohit Goswami
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
 
-#+begin_export rst
-=============================
-Saddle Search Visualization
-=============================
-#+end_export
+This tutorial plots one eOn saddle search with ~rgpycrumbs eon plt-saddle~.
+The system is ethane, and the search climbs from the staggered minimum to the eclipsed saddle point of the rotation about the C-C bond.
+Each figure comes from the command printed above it.
 
-This tutorial shows how to visualize dimer and saddle point search
-trajectories using ~plt-saddle~. You will produce energy/eigenvalue
-profiles, 2D optimization landscapes, convergence panels, and mode
-evolution plots.
+The two-dimensional map in this tutorial follows R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation", /MethodsX/ (2026), [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]].
+Please cite that paper if you use these maps in published figures.
 
-#+begin_export rst
-.. admonition:: Reference
+* Data and environment
 
-   The 2D projection method used here is described in:
+The eOn output files for this tutorial are in =docs/orgmode/tutorials/data/ethane/saddle_search/=.
+The script =docs/generate_singleended_data.py= computes them with eOn 2.16 and its default dimer settings.
+The energies and forces come from the GFN2-xTB tight-binding method through the =ext_pot= interface of eOn.
 
-   R. Goswami, "Two-dimensional RMSD projections for reaction path
-   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
-   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
-#+end_export
+| File | Content |
+|------+---------|
+| =pos.con= | Staggered minimum, the reactant |
+| =displacement.con= | Minimum moved 0.2 Å along the C-C torsion mode, where the search starts |
+| =direction.dat= | Starting direction of the dimer, the same torsion mode |
+| =climb.con= | One frame per iteration, from frame 0 at the start to frame 38 at the saddle point |
+| =saddle.con= | Saddle point |
+| =mode.dat= | Dimer direction at the saddle point |
+| =results.dat= | Summary of the run |
+| =config.ini= | eOn settings |
 
-* Prerequisites
+The header line of each frame in =climb.con= records the energy above the reactant, the lowest curvature, the step size and the convergence value of that iteration.
+~plt-saddle~ reads the plotted values from these lines.
 
-~plt-saddle~ reads eOn saddle search output: =climb= (movie file),
-optionally =climb.dat= (iteration log), =reactant.con=, =saddle.con=,
-and optionally =mode.dat=. Metadata-rich full CON frames are treated as the
-canonical source of per-iteration metrics.
+The landscape also needs the structure in each frame, which ~plt-saddle~ compares with the reactant and the saddle point through Iterative Rotations and Assignments (IRA).
+IRA aligns two structures and matches their atoms.
+The repository's pixi =fragments= environment provides IRA, and the figures on this page come from that environment.
+Run the commands from the tutorial folder.
 
 #+begin_src bash
-pip install rgpycrumbs  # plot heavies via library AUTO_DEPS / ensure_import
+git clone https://github.com/HaoZeke/rgpycrumbs
+cd rgpycrumbs
+pixi shell -e fragments
+cd docs/orgmode/tutorials
 #+end_src
 
-The expected directory layout:
+Outside pixi, install IRA from conda-forge, where the package is named =ira=.
+Without IRA, ~plt-saddle~ still draws the profile and the convergence panels, but the landscape command stops with an error.
 
-#+begin_example
-saddle_job/
-  climb          # multi-frame .con trajectory
-  climb.dat      # (optional fallback/export) TSV: iteration, step_size, convergence, delta_e, eigenvalue
-  reactant.con   # initial minimum
-  saddle.con     # converged saddle point
-  mode.dat       # (optional) final dimer eigenvector (Nx3)
-#+end_example
+* Energy and curvature profile
 
-* Step 1: Energy and Eigenvalue Profile
-
-The profile plot shows energy and lowest eigenvalue vs iteration.
-A successful dimer search shows energy rising while the eigenvalue
-becomes increasingly negative (negative curvature along the dimer axis).
-
-#+begin_src shell
-rgpycrumbs eon plt-saddle \
-  --job-dir saddle_job/ \
-  --plot-type profile \
-  -o saddle_profile.pdf
+#+begin_src bash
+rgpycrumbs eon plt-saddle --job-dir data/ethane/saddle_search --plot-type profile \
+  -o saddle_profile.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/saddle_profile.png
-   :width: 80%
-   :alt: Energy and eigenvalue profile for dimer search
+   :alt: Two panels against iteration. The energy rises to 1.3 eV at iteration 20 and settles near 0.11 eV, and the lowest curvature stays positive until iteration 27 and then turns negative.
 #+end_export
 
-The dual-axis plot shows energy (left, teal) and eigenvalue (right,
-coral). The eigenvalue crossing zero indicates transition from convex
-to concave curvature -- the dimer has found a saddle region.
+The left panel shows the energy above the reactant at each iteration.
+The right panel shows the lowest curvature that the dimer finds there, in eV/Å².
+This curvature is positive until iteration 27, which means that the energy curves upward in every direction, as it does near a minimum.
+In such a region the dimer method can only climb along its direction, and every step has the largest size that eOn allows, 0.2 Å.
 
-* Step 2: 2D Optimization Landscape
+The torsion closes from 50.8 to 5.6 degrees within the first five steps.
+After that the torsion stays within 20 degrees of the eclipsed form, but the bonds stretch.
+At iteration 20 the C-C bond is 1.623 Å long and the six C-H bonds are 1.194 Å long, against 1.521 Å and 1.088 Å in the minimum, and the energy reaches 1.306 eV.
+From iteration 27 the curvature is negative, the steps shrink below 0.03 Å, and the search converges on the eclipsed saddle point at iteration 38.
+The saddle point lies 0.112 eV above the minimum, and its curvature along the dimer direction is -0.310 eV/Å².
 
-The landscape projects the trajectory into /(s, d)/ coordinates using
-RMSD from the reactant and saddle (or an optional product reference):
+* Landscape
 
-- /s/ (progress): how far along the reactant-to-saddle axis
-- /d/ (deviation): lateral displacement from that axis
-
-#+begin_src shell
-rgpycrumbs eon plt-saddle \
-  --job-dir saddle_job/ \
-  --plot-type landscape \
-  --surface-type grad_matern \
-  --project-path \
-  -o saddle_landscape.pdf
+#+begin_src bash
+rgpycrumbs eon plt-saddle --job-dir data/ethane/saddle_search --plot-type landscape \
+  --surface-type grad_matern --project-path --plot-structures endpoints \
+  -o saddle_landscape.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/saddle_landscape.png
-   :width: 80%
-   :alt: 2D optimization landscape for dimer search
+   :alt: The search path on progress and deviation coordinates, from R at the left to SP at the right, over a speckled background, with ball-and-stick structures of the reactant and the saddle point below.
 #+end_export
 
-The colored path shows the dimer walking uphill from the reactant
-basin toward the saddle point. The GP surface contours reveal the
-energy landscape topology. Dashed lines show variance contours -- the
-surface prediction is reliable inside the inner contour.
+The landscape places each frame by its root mean square deviation (RMSD) from the reactant and from the saddle point.
+The =--project-path= flag turns these two distances into progress /s/ along the line from the first frame to the saddle point and deviation /d/ from that line.
+The =--plot-structures endpoints= option draws the reactant and the saddle point under the map.
 
-Use =--ref-product product.con= to define the projection basis as
-reactant-to-product instead of reactant-to-saddle.
+The first five steps stay within 0.013 Å of /d/ = 0 as the torsion closes.
+Frames 6 to 25 then wander near the saddle point, up to 0.095 Å off the line, and the last 13 frames differ from the saddle point by an RMSD of at most 0.020 Å.
+The map hides part of this wandering.
+Frames 7 and 17 lie 0.047 Å apart on it, yet frame 17 sits 0.835 eV higher, with C-H bonds of 1.175 Å against 1.104 Å in frame 7.
 
-* Step 3: Convergence Panel
+The background is a fitted surface, by default a Gaussian process (GP) with a gradient-enhanced Matérn kernel.
+The GP takes the energy of each frame, and a slope from the energy change between the neighbouring frames along the direction of the path in the map.
+For this search the fit fails.
+Its length scale is about 2000 Å, far beyond the 0.4 Å that the frames span.
+The fitted surface is flat at 0.319 eV, the mean energy of the frames.
+~plt-saddle~ then stretches the whole color scale over the 0.00004 eV by which this flat surface varies across the map.
+The speckle therefore carries no energy information.
+The dashed variance contours do not help either, because the variance that they trace changes by only 2% across the map.
+On this map, read the energies from the colors of the path, which follow the colorbar.
 
-The convergence panel shows force norm and step size vs iteration --
-useful for diagnosing convergence issues.
+* Convergence panel
 
-#+begin_src shell
-rgpycrumbs eon plt-saddle \
-  --job-dir saddle_job/ \
-  --plot-type convergence \
-  -o saddle_convergence.pdf
+#+begin_src bash
+rgpycrumbs eon plt-saddle --job-dir data/ethane/saddle_search --plot-type convergence \
+  -o saddle_convergence.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/saddle_convergence.png
-   :width: 80%
-   :alt: Convergence panel for dimer search
+   :alt: Two panels against iteration. The convergence value on a log scale rises to about 7 by iteration 20 and falls to 0.002 at iteration 38, and the step size stays at 0.2 until iteration 26 and then drops close to zero.
 #+end_export
 
-The upper panel shows the maximum force component (convergence
-criterion); the lower panel shows the step size. Both should decrease
-monotonically for a well-behaved search.
+The left panel shows the convergence value, which eOn compares with its =converged_force= threshold of 0.01 eV/Å.
+The right panel shows the step size.
+The convergence value peaks at 6.84 eV/Å at iteration 20 and drops below the threshold only at iteration 38, at 0.0021 eV/Å.
+The steps of 0.2 Å up to iteration 26 match the iterations with positive curvature in the profile.
 
-* Step 4: Mode Evolution
+* Option summary
 
-When =mode.dat= is present, the mode evolution plot shows how the
-dimer rotation axis aligns with the final converged mode over
-iterations. This requires per-iteration mode vectors, which future
-eOn versions will provide.
+| Option | Effect |
+|--------+--------|
+| =--plot-type profile= | Energy and lowest curvature against iteration |
+| =--plot-type landscape= | Path on the RMSD map over a fitted surface |
+| =--plot-type convergence= | Convergence value and step size against iteration |
+| =--surface-type= | Surface fit: =grad_matern= by default, or =grad_imq= or =rbf= |
+| =--ref-product= | Second reference structure in place of the saddle point |
+| =--no-project-path= | The two RMSD values instead of progress and deviation |
+| =--plot-structures endpoints= | Reactant and saddle point under the landscape |
+| =--job-dir= with =--label= | Another search on the same plots |
 
-#+begin_src shell
-rgpycrumbs eon plt-saddle \
-  --job-dir saddle_job/ \
-  --plot-type mode-evolution \
-  -o saddle_mode.pdf
-#+end_src
+* See also
 
-#+begin_export rst
-.. image:: /_static/tutorial/saddle_mode.png
-   :width: 80%
-   :alt: Mode evolution for dimer search
-#+end_export
-
-* Step 5: Comparing Optimizers
-
-Use =--job-dir= multiple times to overlay trajectories from different
-optimizers on the same plot. Each trajectory gets a distinct color and
-legend entry.
-
-#+begin_src shell
-rgpycrumbs eon plt-saddle \
-  --job-dir fire_job/ --label FIRE \
-  --job-dir lbfgs_job/ --label LBFGS \
-  --job-dir sd_job/ --label SD \
-  --plot-type profile \
-  -o optimizer_comparison.pdf
-#+end_src
-
-This works for all plot types -- profile, landscape, and convergence.
-On the landscape, the GP surface is fitted from the primary (first)
-trajectory, and all paths are overlaid with different colors. The
-convergence panel shows how quickly each optimizer reaches the force
-threshold.
-
-#+begin_src shell
-# Compare convergence of three optimizers
-rgpycrumbs eon plt-saddle \
-  --job-dir fire_job/ --label FIRE \
-  --job-dir lbfgs_job/ --label LBFGS \
-  --plot-type convergence \
-  -o convergence_comparison.pdf
-#+end_src
-
-* Summary
-
-| Feature | Flag | Notes |
-|---------+------+-------|
-| Energy + eigenvalue | =--plot-type profile= | Dual-axis |
-| 2D landscape | =--plot-type landscape= | GP surface fit |
-| Convergence | =--plot-type convergence= | Force + step size |
-| Mode evolution | =--plot-type mode-evolution= | Requires mode.dat |
-| Product reference | =--ref-product product.con= | Changes (s,d) basis |
-| Multi-trajectory | =--job-dir A --job-dir B= | Overlay with legend |
-| Structure strip | =--plot-structures endpoints= | R and SP below plot |
-| Projection toggle | =--project-path / --no-project-path= | Default: on |
-
-* See Also
-
-- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
-- [[file:neb-visualization.org][NEB Visualization Tutorial]]
-- [[file:minimization-visualization.org][Minimization Visualization Tutorial]]
-- [[file:../tools/eon/plt_saddle.org][plt-saddle CLI Reference]]
+- [[file:neb-visualization.org][Nudged elastic band visualization]]
+- [[file:minimization-visualization.org][Minimization visualization]]
+- [[file:../tools/eon/plt_saddle.org][plt-saddle command reference]]

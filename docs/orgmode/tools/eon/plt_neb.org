@@ -1,229 +1,130 @@
 #+TITLE: ~plt-neb~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
-* Visualizing NEB Paths and Landscapes
+* Nudged elastic band paths and landscapes
 
-This tool generates both 1D NEB profiles and 2D NEB landscapes from eOn calculations. It supports energy or curvature plots, structure strips, OCI/MMF refinement-sample overlays, and evolution overlays from saved optimization history.
+~plt-neb~ plots the output of a nudged elastic band (NEB) calculation from eOn.
+A profile plot draws the energy of the images along the path, one curve for each =neb_*.dat= file.
+A landscape plot places the images on a plane of structural distances from the reactant and the product, over a surface fitted to their energies.
+Either plot can carry a strip of rendered structures.
 
-* Method
+* Landscape coordinates
 
-The default ~grad_matern~ surface method uses gradient-enhanced interpolation on 2D RMSD projections.
-This approach is described in:
+Each image becomes a point at its root mean square deviation (RMSD) from the reactant and from the product.
+Iterative Rotations and Assignments (IRA) aligns each pair of structures and matches their atoms before the RMSD.
+By default, ~plt-neb~ rotates this plane into a progress coordinate /s/ from reactant to product and a distance /d/ from the line between them.
+The method follows R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation", /MethodsX/ (2026), [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]].
 
-- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation,"
-  _MethodsX_, p. 103851, Mar. 2026, doi: [[https://doi.org/10.1016/j.mex.2026.103851][10.1016/j.mex.2026.103851]].
-
-The method projects high-dimensional structures onto 2D RMSD coordinates (reactant distance ~r~ vs product distance ~p~),
-then fits a smooth surface using energy values and their gradients for enhanced accuracy.
+The surface behind the band comes from the images of every iteration.
+The default =--surface-type rbf= fits a thin-plate spline to their energies.
+The =grad_= types, such as =grad_matern= and =grad_imq=, fit a Gaussian process (GP) to the energies and to gradients made from the force along the band.
 
 * Usage
 
-To plot an energy profile:
+In a folder of eOn NEB output, with the =neb_*.dat= and =neb_path_*.con= files of each saved iteration:
 
-#+BEGIN_SRC shell
+#+begin_src bash
 rgpycrumbs eon plt-neb --plot-type profile -o neb_profile.pdf
-#+END_SRC
-
-To plot a 2D landscape:
-
-#+BEGIN_SRC shell
 rgpycrumbs eon plt-neb --plot-type landscape -o neb_landscape.pdf
-#+END_SRC
+#+end_src
 
-To show the plot interactively without saving:
-#+BEGIN_SRC shell
-python -m rgpycrumbs.cli eon plt-neb --plot-type profile
-#+END_SRC
+Without =-o=, ~plt-neb~ opens the plot in a window instead of saving it.
+=--input-dat-pattern= and =--input-path-pattern= take other file patterns.
+=--start= and =--end= pick a slice of the sorted =.dat= files for the profile, with =--end= excluded.
+If that slice is empty, or no file matches the pattern, the profile stops with =No profile data files found in the requested start:end range=.
 
-
-* Library API
+* Library interface
 
 #+begin_src python
-from rgpycrumbs.eon import plot_neb, plot
+from rgpycrumbs.eon import plot, plot_neb
 
-# Job files / patterns (same as CLI)
+# Job files, with the same settings as the command line
 plot_neb(
     plot_type="landscape",
     con_file="neb.con",
     surface_type="grad_imq",
     plot_structures="crit_points",
     output_file="neb_2d.pdf",
-    config="plot.toml",  # optional TOML
+    config="plot.toml",  # optional
 )
 
 # Live pyeonclient NEB after compute()
 plot(neb, plot_type="profile", output_file="1d.pdf")
 
-# Stamped ConFrame list (e.g. neb.path_frames())
+# ConFrame list from neb.path_frames()
 plot(frames, kind="neb", plot_type="profile", output_file="1d.pdf")
 #+end_src
 
-Library calls enable ~RGPYCRUMBS_AUTO_DEPS~ automatically so ~jax~ (for
-~grad_imq~ surfaces) and ~xyzrender~ (structure strips) resolve through
-~ensure_import~ without declaring them in the host environment.
+The library calls turn on =RGPYCRUMBS_AUTO_DEPS= as the dispatcher does, unless it or =RGPKGS_AUTO_DEPS= is already set, or the rgpycrumbs configuration turns it off.
+With it on, ~ensure_import~ installs a missing =jax= for the gradient surfaces, or a missing =xyzrender= for structure strips, into the uv cache.
 
-* Prefer TOML for suite options
+* Plot files
 
-Use ~--config plot.toml~ for shared style, strip rendering, and surface-fit
-settings (~auto_thin~, ~max_surface_points~). Those surface-fit knobs are
-*TOML-only* (default ~auto_thin = false~). See [[file:plot_config.org][eOn plot TOML config]].
+=--config plot.toml= reads settings from a plot file in Tom's Obvious, Minimal Language (TOML).
+Its =[shared]= section applies to ~plt-neb~, ~plt-min~ and ~plt-saddle~, and its =[neb]= section to ~plt-neb~ alone.
+Two surface-fit keys exist only in this file: =auto_thin=, off by default, and =max_surface_points=.
+With =auto_thin = true=, the fit takes at most =max_surface_points= points: the first, the last, and others evenly spaced between them.
+The plot still draws every point.
+[[file:plot_config.org][eOn plot TOML config]] lists all the keys.
 
-#+BEGIN_SRC shell
-rgpycrumbs eon plt-neb --config plot.toml
-#+END_SRC
+* Key options
 
-* Key Options
+=rgpycrumbs eon plt-neb --help= lists every option with its default.
 
-| Option | Default | Description |
-|--------+---------+-------------|
-| ~--config~ | (none) | TOML plot config (~[shared]~ / ~[neb]~) |
-| ~--plot-type~ | ~profile~ | ~profile~, ~landscape~, or ~evolution~ |
-| ~--surface-type~ | ~grad_matern~ | Surface fitting method for landscapes |
-| ~--plot-mode~ | ~energy~ | Plot ~energy~ or ~curvature~ |
-| ~--energy-unit~ | ~eV~ | Presentation unit: ~eV~, ~kcal/mol~, ~kJ/mol~ |
-| ~--plot-structures~ | ~none~ | Structure strip: ~none~, ~all~, ~crit_points~ |
-| ~--strip-renderer~ | ~xyzrender~ | Renderer backend for structure strips |
-| ~--xyzrender-config~ | ~paton~ | xyzrender preset for strip rendering |
-| ~--rotation~ | ~auto~ | Shared viewing rotation control |
-| ~--perspective-tilt~ | 0.0 | Small off-axis tilt to reveal occluded atoms |
-| ~--ira-kmax~ | 1.8 | Factor on the IRA basis cutoff |
-| ~--mmf-peaks~ | Off | Overlay OCI-NEB/RONEB refinement samples |
-| ~--show-evolution~ | Off | Fade earlier optimization bands behind final path |
+| Option | Default | Effect |
+|--------+---------+--------|
+| =--plot-type= | =profile= | =profile= or =landscape= |
+| =--plot-mode= | =energy= | =energy= or =eigenvalue= |
+| =--surface-type= | =rbf= | Surface fit for the landscape |
+| =--project-path= / =--no-project-path= | on | Rotation into /s/ and /d/ |
+| =--rc-mode= | =path= | Reaction coordinate of the profile: =path=, =rmsd=, =index= or =mw= |
+| =--spline-method= | =hermite= | Profile curve: =hermite=, =spline= or =none= |
+| =--energy-unit= | =eV= | =eV=, =kcal/mol= or =kJ/mol= |
+| =--plot-structures= | =none= | Strip: =none=, =all= or =crit_points= |
+| =--strip-renderer= | =xyzrender= | =xyzrender=, =ase=, =solvis= or =ovito= |
+| =--rotation= | =auto= | Viewing rotation of the strip |
+| =--perspective-tilt= | =0.0= | Off-axis tilt of the strip, in degrees |
+| =--ira-kmax= | =1.8= | Factor on the IRA basis cutoff |
+| =--mmf-peaks= / =--no-mmf-peaks= | on with a =climb= movie | Refinement frames on the landscape |
+| =--show-evolution= | off | Earlier bands on the landscape |
 
-Dense-fit keys (~auto_thin~, ~max_surface_points~) are *not* CLI flags; set them
-in the TOML file only.
+* Climbing-image refinement and band evolution
 
-* Troubleshooting
+The =--mmf-peaks= flag overlays the frames of a minimum-mode following (MMF) refinement on a landscape plot.
+It reads the =climb= or =climb.con= movie that eOn writes into the folder named by =--peak-dir=, which defaults to the current folder.
+Without either flag, the overlay turns on whenever that folder contains such a movie, and =--no-mmf-peaks= turns it off.
 
-** "No .dat files found" error
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks --peak-dir climb_run/ -o neb_mmf.pdf
+#+end_src
 
-*Problem:* The script reports no input files matching the pattern.
+=--show-evolution= draws the bands of the earlier iterations, from their =neb_path_*.con= files, behind the final band of a landscape plot.
 
-*Solution:*
-1. Verify the input pattern matches your files:
-   #+BEGIN_SRC shell
-   ls neb_*.dat
-   #+END_SRC
-2. Use the ~--input-dat-pattern~ flag to specify a custom pattern:
-   #+BEGIN_SRC shell
-   python -m rgpycrumbs.cli eon plt-neb --input-dat-pattern "path/to/neb_*.dat"
-   #+END_SRC
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --show-evolution -o neb_evolution.pdf
+#+end_src
 
-** "Index out of range" error
+* Structure strips
 
-*Problem:* The ~--start~ or ~--end~ indices are outside the available data range.
+=--plot-structures crit_points= renders the reactant, the saddle point and the product in a strip under the plot, and =all= renders every image.
+Both read the structures from =--con-file=.
 
-*Solution:*
-1. Check available iterations:
-   #+BEGIN_SRC shell
-   ls -1 neb_*.dat | wc -l
-   #+END_SRC
-2. Adjust indices to be within range (0 to N-1 where N is the number of files)
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type profile --plot-structures crit_points --con-file neb.con \
+  --energy-unit kJ/mol -o neb_profile_strip.pdf
+#+end_src
 
-** Plot appears empty
+=--strip-renderer= picks the renderer, and [[file:../../tutorials/rendering-backends.org][the rendering backends tutorial]] compares the four.
+=--rotation auto=, the default, lets =xyzrender= orient each structure.
+A rotation in the style of ASE, such as =--rotation "0x,90y,0z"=, fixes one view for every renderer.
+=--perspective-tilt= tilts the view by a small angle, in degrees, so that atoms hidden behind others come into sight.
 
-*Problem:* The plot window opens but shows no data.
+* See also
 
-*Solution:*
-1. Verify the .dat files contain valid energy data (column 2)
-2. Check that the energy values are not all identical
-3. Try with a smaller range first: ~--start 0 --end 5~
+- [[file:../../tutorials/neb-visualization.org][Nudged elastic band visualization]], a worked example on eOn output
+- [[file:plt_saddle.org][Plotting saddle search trajectories]]
+- [[file:plt_min.org][Plotting minimization trajectories]]
 
-** Force-corrected interpolation fails
+** API reference
 
-*Problem:* Hermite spline interpolation produces warnings or errors.
-
-*Solution:*
-1. Ensure you have at least 3 data points
-2. Check that force data (column 4 in .dat) is present
-3. The script falls back to raw lines if spline fails - this is expected behavior
-
-** "Surface prediction produced no finite values for contourf"
-
-*Problem:* Gradient surface fit (often ~grad_imq~) returns a non-finite grid on a
-dense observation cloud (many NEB or min force evaluations).
-
-*Solution:* In plot TOML set ~auto_thin = true~ (and optionally
-~max_surface_points = 64~) under ~[shared]~ or ~[neb]~, then re-run with
-~--config~. Default remains off so behaviour is opt-in. See
-[[file:plot_config.org][eOn plot TOML config]].
-
-* OCI-NEB/RONEB Options
-
-** MMF Peak Overlay
-
-When eOn produces ~peak{NN}_pos.con~ files (from OCI-NEB mode-following), overlay them on the landscape:
-
-#+BEGIN_SRC shell
-rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks
-#+END_SRC
-
-Peaks are auto-detected in the current directory. Use ~--peak-dir~ to specify an explicit path:
-
-#+BEGIN_SRC shell
-rgpycrumbs eon plt-neb --plot-type landscape --mmf-peaks --peak-dir path/to/peaks/
-#+END_SRC
-
-If the same directory also contains a metadata-rich ~climb~ / ~climb.con~
-movie from the MMF refinement, the sampled dimer phase is overlaid too, with
-distinct inner markers on top of the shared dark point cloud.
-
-** Band Evolution
-
-Show how the NEB band evolves across optimization iterations (requires ~write_movies=true~ data):
-
-#+BEGIN_SRC shell
-rgpycrumbs eon plt-neb --plot-type landscape --show-evolution
-#+END_SRC
-
-Older bands appear with lower opacity; the final band is most visible.
-
-* Structure Rendering
-
-** Rendering Backends
-
-Four backends available via ~--strip-renderer~:
-
-| Backend | Install | Style |
-|---------+---------+-------|
-| ~xyzrender~ (default) | ~pip install xyzrender~ | Ball-and-stick, paton preset |
-| ~ase~ | Built-in | Space-filling spheres |
-| ~solvis~ | ~pip install solvis-tools~ | PyVista ball-and-stick, transparent bg |
-| ~ovito~ | ~pip install ovito~ | OVITO off-screen |
-
-** Viewing Angle
-
-~--rotation auto~ (default) lets xyzrender auto-orient each structure. Use an
-ASE-style string such as ~--rotation "0x,90y,0z"~ to force the same manual
-orientation across all backends.
-
-** Perspective Tilt
-
-~--perspective-tilt 8~ applies a small Rodrigues off-axis rotation (8 degrees)
-to reveal atoms hidden by orthographic projection overlap. Useful for ring
-structures where H atoms hide behind carbons.
-
-** Profile Structure Strips
-
-Profile plots also support structure strips. With =--plot-structures crit_points=
-the reactant, saddle, and product images are rendered below the profile instead
-of being inset on top of the curve:
-
-#+BEGIN_SRC shell
-rgpycrumbs eon plt-neb \
-  --plot-type profile \
-  --plot-structures crit_points \
-  --strip-renderer xyzrender \
-  --energy-unit kJ/mol \
-  -o neb_profile_strip.pdf
-#+END_SRC
-
-* See Also
-
-- [[file:plt_saddle.org][Plotting saddle search trajectories]] for dimer/single-ended visualization
-- [[file:plt_min.org][Plotting minimization trajectories]] for minimization visualization
-
-** API Reference
-
-For developer details and source code see
-@@rst::mod:`rgpycrumbs.eon.plt_neb`@@.
+The module reference is @@rst::mod:`rgpycrumbs.eon.plt_neb`@@.

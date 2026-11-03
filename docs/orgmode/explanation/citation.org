@@ -1,29 +1,27 @@
-#+TITLE: How to Cite rgpycrumbs
+#+TITLE: How to cite rgpycrumbs
 #+AUTHOR: [[https://rgoswami.me][Rohit Goswami]]
 #+EMAIL: rgoswami@ieee.org
 #+OPTIONS: toc:nil num:nil
 #+BIBLIOGRAPHY: ~/Documents/zotLib.bib
 
-* How to Cite rgpycrumbs
+* How to cite rgpycrumbs
 
 If you use rgpycrumbs in your research, please cite the relevant papers based on functionality used.
 
-** Software Citation
+** Software citation
 
 cite:[goswami2024rgpycrumbs]
 
-** Visualization Methods
+** Visualization
 
 When using 2D reaction valley projection (landscape visualization, =grad_imq=, =grad_matern=, Nystrom approximation):
 
 cite:[goswami2026valley]
 
-The method maps NEB trajectories onto a two-dimensional projection defined by
-permutation-corrected RMSD from reactant and product configurations, with a
-rotated coordinate frame decomposing into reaction progress (=s=) and orthogonal
-deviation (=d=).
+The method maps nudged elastic band (NEB) trajectories onto two coordinates: the permutation-corrected root mean square deviation (RMSD) from the reactant and from the product.
+A rotated frame turns those into the reaction progress (=s=) and the orthogonal deviation (=d=).
 
-** NEB Methods
+** Nudged elastic band
 
 When using NEB orchestration or enhanced CI-NEB:
 
@@ -31,22 +29,22 @@ cite:[goswami2026neb]
 
 Enhanced Climbing Image NEB method with Hessian eigenmode alignment.
 
-** Gaussian Process Methods
+** Gaussian processes
 
 When using surface fitting, GP models, or saddle search acceleration:
 
 cite:[goswami2025gpr goswami2025pruning]
 
-- GPR-accelerated saddle point searches (JCTC 2025)
+- GPR-accelerated saddle point searches (Journal of Chemical Theory and Computation, 2025)
 - Adaptive pruning for robustness (ChemPhysChem 2025)
 
-** Statistical Analysis
+** Statistical analysis
 
 When using Bayesian hierarchical models for performance analysis:
 
 cite:[goswami2025bayesian]
 
-** Combined Citation
+** Combined citation
 
 cite:[goswami2024rgpycrumbs goswami2026valley goswami2026neb goswami2025gpr goswami2025pruning goswami2025bayesian]
 
@@ -59,14 +57,14 @@ NEB calculations used enhanced CI-NEB [cite:@goswami2026neb]. Gaussian process
 acceleration followed [cite:@goswami2025gpr @goswami2025pruning].
 #+end_src
 
-** Related Software
+** Related software
 
 *** metatensor/metatomic
 
 cite:[bigiMetatensorMetatomicFoundational2026]
 
-** See Also
+** See also
 
 - [[file:../reference/index.org][Reference]]
 - [[file:../tutorials/index.org][Tutorials]]
-- [[file:dev/lazy_imports.org][Lazy Import Pattern]]
+- [[file:../dev/lazy_imports.org][Lazy Import Pattern]]

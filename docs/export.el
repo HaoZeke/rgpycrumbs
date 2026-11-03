@@ -18,6 +18,16 @@
     (memq (org-element-type node)
           (if (listp types) types (list types)))))
 
+;; ox-rst exports [[file:page.org][text]] as a hyperlink to page.rst, which
+;; the HTML build never writes.  A :doc: role links the built page, and
+;; sphinx-build -W fails when the target page does not exist.
+(defun rgpycrumbs-org-link-as-doc (link backend _info)
+  (if (org-export-derived-backend-p backend 'rst)
+      (replace-regexp-in-string
+       "\\``\\([^`<]+\\) <\\([^:<>`]+\\)\\.rst>`_"
+       ":doc:`\\1 <\\2>`" link t)
+    link))
+(add-to-list 'org-export-filter-link-functions #'rgpycrumbs-org-link-as-doc)
 (setq org-export-with-section-numbers nil)
 (setq org-export-with-toc nil)
 (setq org-export-with-author nil)

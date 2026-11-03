@@ -1,0 +1,21 @@
+#+TITLE: How-to guides
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+#+begin_export rst
+=============
+How-to guides
+=============
+#+end_export
+
+Two of the guides below show how to install the package and how to run its tests.
+The other two answer common questions and help when something fails.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   install
+   faq
+   troubleshooting
+   dev_testing
+#+end_export

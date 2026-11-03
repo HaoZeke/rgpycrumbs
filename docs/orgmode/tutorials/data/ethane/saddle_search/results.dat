@@ -1,0 +1,14 @@
+0 termination_reason
+Success termination_reason_text
+saddle_search job_type
+0 random_seed
+EXT_POT potential_type
+157 total_force_calls
+156 force_calls_saddle
+38 iterations
+-199.520385 potential_energy_saddle
+-0.310382 final_eigenvalue
+-199.632814 potential_energy_reactant
+time_seconds 11.8157
+user_time 0.477515
+system_time 0.337069

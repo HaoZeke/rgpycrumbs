@@ -1,0 +1,65 @@
+#+TITLE: Command atlas
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+#+begin_export rst
+=============
+Command atlas
+=============
+#+end_export
+
+The dispatcher turns the modules of each subpackage into commands of the form =rgpycrumbs GROUP COMMAND=.
+The group is the name of the subpackage, and the command is the name of the module with each =_= turned into =-=, so =rgpycrumbs/eon/plt_neb.py= becomes =rgpycrumbs eon plt-neb=.
+The dispatcher leaves out modules whose names start with =_=, and the library modules =hdf5_io=, =plotting=, =utils=, =helpers= and =seed_dimers=.
+
+* Check a command
+
+The dispatcher passes =--help= on to the module.
+A command script answers with its options.
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --help
+#+end_src
+
+The sections below give the result of that check for each of the 51 commands, run with ~rgpycrumbs~ 1.13.0 in the =fragments= environment of the pixi workspace.
+
+* Command scripts
+
+A command script carries a [[https://peps.python.org/pep-0723/][Python Enhancement Proposal (PEP) 723]] header with its dependencies.
+32 of the 35 scripts print their options.
+
+| Group       | Commands                                                                                                                                                                 |
+|-------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| =chemgp=    | =match-atoms=, =plot-comparison=, =plot-gp=, =plot-reactions=                                                                                                            |
+| =eon=       | =con-splitter=, =gen-dimer=, =generate-nwchem-input=, =modes-tensormap=, =pimd-centroid=, =plt-con=, =plt-kmc=, =plt-min=, =plt-neb=, =plt-neb-stitch=, =plt-saddle=, =tls-pairs= |
+| =geom=      | =detect-fragments=, =plt-rings=, =plt-rings-track=                                                                                                                       |
+| =orca=      | =generate-orca-input=                                                                                                                                                    |
+| =prefix=    | =delete-packages=                                                                                                                                                        |
+| =surrogate= | =plt-band=, =plt-breakdown=, =plt-campaign=, =plt-cases=, =plt-components=, =plt-dimer=, =plt-history=, =plt-pop=, =plt-scaling=                                         |
+| =uma=       | =aoti-cache=, =prepare-aoti=                                                                                                                                             |
+
+The other three scripts need more than the =fragments= environment gives them:
+
+- =eon to-mlflow= imports ~mlflow~, and works in the =eonmlflow= environment.
+- =eon ptmdisp= imports the Python module of ~ovito~, which the conda-forge package in the =ptm= environment lacks, and prints its options with the PyPI wheel of ~ovito~ 3.17.2.
+- =plumed direct-reconstruction= takes no options.
+  It reads a file named =HILLS= from the working directory, and without one it stops with an error.
+
+* Library modules
+
+The other 16 modules have no header, and the dispatcher lists them as commands too.
+Each of these commands runs its module, which only defines functions, so it exits without any output:
+
+| Group      | Modules                                                                                        |
+|------------+------------------------------------------------------------------------------------------------|
+| =eon=      | =plot_config=, =plot_dispatch=                                                                 |
+| =func=     | =muller_brown=                                                                                 |
+| =geom=     | =analysis=, =fragment_visualization=, =fragments=, =ira=                                       |
+| =parsers=  | =bless=, =common=                                                                              |
+| =run=      | =jupyter=                                                                                      |
+| =surfaces= | =gradient_imq=, =gradient_matern=, =gradient_nystrom=, =gradient_rq=, =gradient_se=, =standard= |
+
+Python code imports these modules instead, as the [[file:module-atlas.org][module atlas]] shows.
+
+* Next steps
+
+The [[file:neb-visualization.org][nudged elastic band tutorial]] runs =plt-neb= on the eOn output in =docs/orgmode/tutorials/data/=, and the [[file:../tools/index.org][tools]] pages document each command.

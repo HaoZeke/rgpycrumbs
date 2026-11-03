@@ -197,6 +197,7 @@ tramp
 
 # elpa packages
 /elpa/
+docs/.emacs.d/
 
 # reftex files
 *.rel

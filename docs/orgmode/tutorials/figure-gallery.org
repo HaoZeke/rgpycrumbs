@@ -1,0 +1,73 @@
+#+TITLE: Figure gallery
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+#+begin_export rst
+==============
+Figure gallery
+==============
+#+end_export
+
+These three figures show options of =rgpycrumbs eon plt-neb= that the [[file:neb-visualization.org][nudged elastic band tutorial]] leaves out.
+They draw the same Diels-Alder band, from the eOn output in =docs/orgmode/tutorials/data/diels_alder/=, and the commands run from =docs/orgmode/tutorials/=.
+=docs/generate_figure_gallery.py= runs the same commands to make the images on this page.
+
+* Energies in kJ/mol
+
+=--energy-unit kJ/mol= gives the energies in kJ/mol, and =--xyzrender-config tube= draws the structures with the =tube= preset of ~xyzrender~, as bonds without atoms.
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type profile --energy-unit kJ/mol \
+  --plot-structures crit_points --xyzrender-config tube \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o profile_kj_tube.png
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/gallery/profile_kj_tube.png
+   :alt: Energy profiles of four snapshots of the band in kJ/mol, with tube drawings of the reactant, the saddle point and the product below.
+#+end_export
+
+The barrier of the final band reads 76 kJ/mol, which is the 0.788 eV of the tutorial.
+
+* Structures under the path map
+
+With =--plot-structures crit_points=, the path map gets the same strip as the profile: the reactant, the saddle point and the product, drawn with the default preset of ~xyzrender~.
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode path --project-path \
+  --plot-structures crit_points \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o landscape_path_strip.png
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/gallery/landscape_path_strip.png
+   :alt: The final band on the progress and deviation axes, colored by energy, with ball-and-stick drawings of the reactant, the saddle point and the product below.
+#+end_export
+
+* Inverse multiquadric surface
+
+=--surface-type grad_imq= fits a Gaussian process (GP) with a gradient-enhanced inverse multiquadric (IMQ) kernel, where the tutorial fits one with a Matérn kernel.
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode surface \
+  --surface-type grad_imq --project-path \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o surface_grad_imq.png
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/gallery/surface_grad_imq.png
+   :alt: A fitted energy surface on the progress and deviation axes, with dashed variance contours and the final band on top.
+#+end_export
+
+The IMQ surface spans -2.16 eV to 0.19 eV over the map.
+It reaches down to the product valley, but its highest point lies 0.60 eV below the saddle point, at 0.79 eV.
+As in the tutorial, the surface colors span the range of the surface.
+The colorbar covers the energies of the band, from -1.95 eV to 0.79 eV.

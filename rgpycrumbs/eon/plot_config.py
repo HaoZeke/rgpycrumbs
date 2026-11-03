@@ -11,8 +11,7 @@ Merge order (later wins for explicit CLI overrides only)::
     shared defaults < command defaults < [shared] + [command] from file
     < Click parameters whose source is not DEFAULT
 
-```{versionadded} 1.8.2
-```
+.. versionadded:: 1.8.2
 """
 
 from __future__ import annotations
@@ -344,9 +343,9 @@ def run_plot(
     config: str | Path | None = None,
     **overrides: Any,
 ) -> Any:
-    """Merge settings for *command* then call *runner*(settings).
+    """Merge settings for ``command`` then call ``runner(settings)``.
 
-    Shared by the library ``plot_*`` entry points. *runner* is typically
+    Shared by the library ``plot_*`` entry points. ``runner`` is typically
     ``plot_*_from_settings``.
     """
     from rgpycrumbs._aux import enable_library_auto_deps
@@ -368,10 +367,10 @@ def run_from_click(
     config: str | Path | None = None,
     **params: Any,
 ) -> Any:
-    """CLI path: ``resolve_from_click`` then *runner*(settings).
+    """CLI path: ``resolve_from_click`` then ``runner(settings)``.
 
     A missing input (``FileNotFoundError``) or a bad option combination
-    (``ValueError``) from *runner* exits through Click with its message,
+    (``ValueError``) from ``runner`` exits through Click with its message,
     not a traceback. The library entry keeps the plain exceptions.
     """
     import click

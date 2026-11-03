@@ -1,0 +1,9 @@
+0 termination_reason
+GOOD termination_reason_text
+minimization job_type
+EXT_POT potential_type
+59 total_force_calls
+-199.633 potential_energy
+time_seconds 4.42334
+user_time 0.330447
+system_time 0.102805

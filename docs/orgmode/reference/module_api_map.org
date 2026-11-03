@@ -1,0 +1,102 @@
+#+TITLE: Module API map
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+#+begin_export rst
+==============
+Module API map
+==============
+#+end_export
+
+This table links each public module of ~rgpycrumbs~ to its page in the API reference, which AutoAPI builds from the docstrings.
+Modules whose names start with =_= are internal, and the table leaves them out.
+The [[file:../tutorials/module-atlas.org][module atlas]] describes the subpackages and shows which modules a notebook can import.
+
+~rgpycrumbs.search~, ~rgpycrumbs.time~ and ~rgpycrumbs.orca~ have no =__init__.py=, so AutoAPI files their modules under bare names.
+The page for ~rgpycrumbs.search.helpers~ is =helpers=, and ~rgpycrumbs.time.helpers~ has no page, because its name collides with that one.
+
+#+begin_export rst
+.. csv-table::
+   :header: "Module", "AutoAPI page"
+
+   "rgpycrumbs", ":doc:`../autoapi/rgpycrumbs/index`"
+   "rgpycrumbs.api", ":doc:`../autoapi/rgpycrumbs/api/index`"
+   "rgpycrumbs.basetypes", ":doc:`../autoapi/rgpycrumbs/basetypes/index`"
+   "rgpycrumbs.chemgp", ":doc:`../autoapi/rgpycrumbs/chemgp/index`"
+   "rgpycrumbs.chemgp.match_atoms", ":doc:`../autoapi/rgpycrumbs/chemgp/match_atoms/index`"
+   "rgpycrumbs.chemgp.plot_comparison", ":doc:`../autoapi/rgpycrumbs/chemgp/plot_comparison/index`"
+   "rgpycrumbs.chemgp.plot_gp", ":doc:`../autoapi/rgpycrumbs/chemgp/plot_gp/index`"
+   "rgpycrumbs.chemgp.plot_reactions", ":doc:`../autoapi/rgpycrumbs/chemgp/plot_reactions/index`"
+   "rgpycrumbs.cli", ":doc:`../autoapi/rgpycrumbs/cli/index`"
+   "rgpycrumbs.config", ":doc:`../autoapi/rgpycrumbs/config/index`"
+   "rgpycrumbs.eon", ":doc:`../autoapi/rgpycrumbs/eon/index`"
+   "rgpycrumbs.eon.con_splitter", ":doc:`../autoapi/rgpycrumbs/eon/con_splitter/index`"
+   "rgpycrumbs.eon.gen_dimer", ":doc:`../autoapi/rgpycrumbs/eon/gen_dimer/index`"
+   "rgpycrumbs.eon.generate_nwchem_input", ":doc:`../autoapi/rgpycrumbs/eon/generate_nwchem_input/index`"
+   "rgpycrumbs.eon.helpers", ":doc:`../autoapi/rgpycrumbs/eon/helpers/index`"
+   "rgpycrumbs.eon.modes_tensormap", ":doc:`../autoapi/rgpycrumbs/eon/modes_tensormap/index`"
+   "rgpycrumbs.eon.pimd_centroid", ":doc:`../autoapi/rgpycrumbs/eon/pimd_centroid/index`"
+   "rgpycrumbs.eon.plot_config", ":doc:`../autoapi/rgpycrumbs/eon/plot_config/index`"
+   "rgpycrumbs.eon.plot_dispatch", ":doc:`../autoapi/rgpycrumbs/eon/plot_dispatch/index`"
+   "rgpycrumbs.eon.plt_con", ":doc:`../autoapi/rgpycrumbs/eon/plt_con/index`"
+   "rgpycrumbs.eon.plt_kmc", ":doc:`../autoapi/rgpycrumbs/eon/plt_kmc/index`"
+   "rgpycrumbs.eon.plt_min", ":doc:`../autoapi/rgpycrumbs/eon/plt_min/index`"
+   "rgpycrumbs.eon.plt_neb", ":doc:`../autoapi/rgpycrumbs/eon/plt_neb/index`"
+   "rgpycrumbs.eon.plt_neb_stitch", ":doc:`../autoapi/rgpycrumbs/eon/plt_neb_stitch/index`"
+   "rgpycrumbs.eon.plt_saddle", ":doc:`../autoapi/rgpycrumbs/eon/plt_saddle/index`"
+   "rgpycrumbs.eon.ptmdisp", ":doc:`../autoapi/rgpycrumbs/eon/ptmdisp/index`"
+   "rgpycrumbs.eon.seed_dimers", ":doc:`../autoapi/rgpycrumbs/eon/seed_dimers/index`"
+   "rgpycrumbs.eon.tls_pairs", ":doc:`../autoapi/rgpycrumbs/eon/tls_pairs/index`"
+   "rgpycrumbs.eon.to_mlflow", ":doc:`../autoapi/rgpycrumbs/eon/to_mlflow/index`"
+   "rgpycrumbs.func", ":doc:`../autoapi/rgpycrumbs/func/index`"
+   "rgpycrumbs.func.muller_brown", ":doc:`../autoapi/rgpycrumbs/func/muller_brown/index`"
+   "rgpycrumbs.geom", ":doc:`../autoapi/rgpycrumbs/geom/index`"
+   "rgpycrumbs.geom.analysis", ":doc:`../autoapi/rgpycrumbs/geom/analysis/index`"
+   "rgpycrumbs.geom.api", ":doc:`../autoapi/rgpycrumbs/geom/api/index`"
+   "rgpycrumbs.geom.api.alignment", ":doc:`../autoapi/rgpycrumbs/geom/api/alignment/index`"
+   "rgpycrumbs.geom.detect_fragments", ":doc:`../autoapi/rgpycrumbs/geom/detect_fragments/index`"
+   "rgpycrumbs.geom.fragment_visualization", ":doc:`../autoapi/rgpycrumbs/geom/fragment_visualization/index`"
+   "rgpycrumbs.geom.fragments", ":doc:`../autoapi/rgpycrumbs/geom/fragments/index`"
+   "rgpycrumbs.geom.ira", ":doc:`../autoapi/rgpycrumbs/geom/ira/index`"
+   "rgpycrumbs.geom.plt_rings", ":doc:`../autoapi/rgpycrumbs/geom/plt_rings/index`"
+   "rgpycrumbs.geom.plt_rings_track", ":doc:`../autoapi/rgpycrumbs/geom/plt_rings_track/index`"
+   "rgpycrumbs.interpolation", ":doc:`../autoapi/rgpycrumbs/interpolation/index`"
+   "rgpycrumbs.locks", ":doc:`../autoapi/rgpycrumbs/locks/index`"
+   "rgpycrumbs.orca.generate_orca_input", ":doc:`../autoapi/generate_orca_input/index`"
+   "rgpycrumbs.parsers", ":doc:`../autoapi/rgpycrumbs/parsers/index`"
+   "rgpycrumbs.parsers.bless", ":doc:`../autoapi/rgpycrumbs/parsers/bless/index`"
+   "rgpycrumbs.parsers.common", ":doc:`../autoapi/rgpycrumbs/parsers/common/index`"
+   "rgpycrumbs.plumed", ":doc:`../autoapi/rgpycrumbs/plumed/index`"
+   "rgpycrumbs.plumed.direct_reconstruction", ":doc:`../autoapi/rgpycrumbs/plumed/direct_reconstruction/index`"
+   "rgpycrumbs.prefix", ":doc:`../autoapi/rgpycrumbs/prefix/index`"
+   "rgpycrumbs.prefix.delete_packages", ":doc:`../autoapi/rgpycrumbs/prefix/delete_packages/index`"
+   "rgpycrumbs.run", ":doc:`../autoapi/rgpycrumbs/run/index`"
+   "rgpycrumbs.run.jupyter", ":doc:`../autoapi/rgpycrumbs/run/jupyter/index`"
+   "rgpycrumbs.sbom", ":doc:`../autoapi/rgpycrumbs/sbom/index`"
+   "rgpycrumbs.search.helpers", ":doc:`../autoapi/helpers/index`"
+   "rgpycrumbs.surfaces", ":doc:`../autoapi/rgpycrumbs/surfaces/index`"
+   "rgpycrumbs.surfaces.gradient_imq", ":doc:`../autoapi/rgpycrumbs/surfaces/gradient_imq/index`"
+   "rgpycrumbs.surfaces.gradient_matern", ":doc:`../autoapi/rgpycrumbs/surfaces/gradient_matern/index`"
+   "rgpycrumbs.surfaces.gradient_nystrom", ":doc:`../autoapi/rgpycrumbs/surfaces/gradient_nystrom/index`"
+   "rgpycrumbs.surfaces.gradient_rq", ":doc:`../autoapi/rgpycrumbs/surfaces/gradient_rq/index`"
+   "rgpycrumbs.surfaces.gradient_se", ":doc:`../autoapi/rgpycrumbs/surfaces/gradient_se/index`"
+   "rgpycrumbs.surfaces.standard", ":doc:`../autoapi/rgpycrumbs/surfaces/standard/index`"
+   "rgpycrumbs.surrogate", ":doc:`../autoapi/rgpycrumbs/surrogate/index`"
+   "rgpycrumbs.surrogate.plt_band", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_band/index`"
+   "rgpycrumbs.surrogate.plt_breakdown", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_breakdown/index`"
+   "rgpycrumbs.surrogate.plt_campaign", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_campaign/index`"
+   "rgpycrumbs.surrogate.plt_cases", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_cases/index`"
+   "rgpycrumbs.surrogate.plt_components", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_components/index`"
+   "rgpycrumbs.surrogate.plt_dimer", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_dimer/index`"
+   "rgpycrumbs.surrogate.plt_history", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_history/index`"
+   "rgpycrumbs.surrogate.plt_pop", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_pop/index`"
+   "rgpycrumbs.surrogate.plt_scaling", ":doc:`../autoapi/rgpycrumbs/surrogate/plt_scaling/index`"
+   "rgpycrumbs.uma", ":doc:`../autoapi/rgpycrumbs/uma/index`"
+   "rgpycrumbs.uma.aoti_cache", ":doc:`../autoapi/rgpycrumbs/uma/aoti_cache/index`"
+   "rgpycrumbs.uma.prepare_aoti", ":doc:`../autoapi/rgpycrumbs/uma/prepare_aoti/index`"
+   "rgpycrumbs.xts", ":doc:`../autoapi/rgpycrumbs/xts/index`"
+   "rgpycrumbs.xts.cuh2", ":doc:`../autoapi/rgpycrumbs/xts/cuh2/index`"
+   "rgpycrumbs.xts.cuh2.datgen", ":doc:`../autoapi/rgpycrumbs/xts/cuh2/datgen/index`"
+   "rgpycrumbs.xts.saddle", ":doc:`../autoapi/rgpycrumbs/xts/saddle/index`"
+   "rgpycrumbs.xts.saddle.cuh2", ":doc:`../autoapi/rgpycrumbs/xts/saddle/cuh2/index`"
+   "rgpycrumbs.xts.saddle.mb", ":doc:`../autoapi/rgpycrumbs/xts/saddle/mb/index`"
+#+end_export

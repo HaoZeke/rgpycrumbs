@@ -1,23 +1,26 @@
-#+TITLE: Testing & Environment Requirements
+#+TITLE: Testing and environment requirements
+#+AUTHOR: Rohit Goswami
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 #+STARTUP: content
 
-* Development Environment
-This project manages conflicting binary dependencies through isolated ~pixi~
-environments. We avoid a monolithic environment to prevent version resolution
-failures and import-time crashes.
+* Development environment
+This project manages conflicting binary dependencies through isolated ~pixi~ environments.
+We avoid a monolithic environment to prevent version resolution failures and import-time crashes.
 
-** Initial Setup
+** Initial setup
 #+BEGIN_SRC shell
 pixi install
 #+END_SRC
 
-* Local Development & Editable Installs
-By default, the ~rgpycrumbs~ dispatcher runs scripts using ~uv run~. This enforces strict environment isolation by resolving and fetching a script's PEP 723 inline dependencies on the fly.
+* Local development and editable installs
+The ~rgpycrumbs~ dispatcher uses ~uv run~ for a script, unless ~uv~ is missing or the active environment already has the plotting stack (~readcon~, ~matplotlib~, ~polars~, ~ase~ and ~chemparseplot~).
+Under ~uv run~, each script gets an environment that ~uv~ resolves from the Python Enhancement Proposal (PEP) 723 header of the script.
 
-While excellent for reproducibility, this behavior bypasses your local Python environment. If you are actively developing a dependent package (e.g., you installed it locally via ~pip install -e .~ or ~pixi add --editable~), ~uv run~ will ignore your local edits and fetch the published version instead.
+That isolation keeps runs reproducible, but it also bypasses your local Python environment.
+The dispatcher passes an editable checkout of ~chemparseplot~ on to ~uv run~, and no other.
+If you develop another dependent package (e.g., you installed it via ~pip install -e .~ or ~pixi add --editable~), ~uv run~ ignores your local edits and resolves the requirement from the script header instead.
 
-To force ~rgpycrumbs~ to use your active environment and respect your editable installs, use the ~--dev~ flag:
+To force ~rgpycrumbs~ to use your active environment and respect your editable installs, use the ~--dev~ flag.
 
 #+BEGIN_SRC shell
 # Standard execution (Isolated: uv resolves dependencies from scratch)
@@ -27,14 +30,14 @@ rgpycrumbs mygroup myscript
 rgpycrumbs --dev mygroup myscript
 #+END_SRC
 
-** Workflow for Dependent Packages
+** Workflow for dependent packages
 1. Activate your desired ~pixi~ environment (e.g., ~pixi shell -e test~).
 2. Install your dependent package in editable mode if not already managed by pixi (e.g., ~pip install -e /path/to/local/dependency~).
 3. Run your script using the ~--dev~ flag to test your local package modifications: ~rgpycrumbs --dev <group> <script>~.
-** Debugging Execution with Verbose Mode
-Because the dispatcher dynamically resolves script paths and environment execution contexts (switching between ~uv run~ and ~sys.executable~), it can occasionally be helpful to inspect the underlying commands.
-
-Pass the ~--verbose~ (or ~-v~) flag to print the fully resolved path to the PEP 723 script and the exact command array being constructed before it is executed.
+** Debugging execution with verbose mode
+The dispatcher picks the script path and the interpreter at run time, switching between ~uv run~ and ~sys.executable~.
+To see what it picked, pass the ~--verbose~ (or ~-v~) flag.
+The dispatcher then prints the resolved path of the script, and the command that it runs.
 
 #+BEGIN_SRC shell
 # Check standard isolated execution
@@ -43,21 +46,19 @@ rgpycrumbs --verbose mygroup myscript
 # Check local development execution
 rgpycrumbs --dev -v mygroup myscript
 #+END_SRC
-* Testing Guidelines
+* Testing guidelines
 The test suite utilizes custom markers to scope tests to specific environments.
 This prevents ~ModuleNotFoundError~ during the ~pytest~ collection phase.
 
-** Adding New Tests
+** Adding new tests
 When creating a new test file, you must protect the collection phase:
 
-- Define requirements :: Add any required external modules to the
-  ~ENVIRONMENT_REQUIREMENTS~ dictionary in ~tests/conftest.py~.
-- Guard imports :: Call ~skip_if_not_env("marker_name")~ at the top of your test
-  file. This must occur before you import any package modules that depend on
-  external binaries.
+- Define requirements :: Add any required external modules to the ~ENVIRONMENT_REQUIREMENTS~ dictionary in ~tests/conftest.py~.
+- Guard imports :: Call ~skip_if_not_env("marker_name")~ at the top of your test file.
+                   This must occur before you import any package modules that depend on external binaries.
 - Mark your tests :: Assign the corresponding marker to the file or functions.
 
-** Example Test Structure
+** Example test structure
 #+BEGIN_SRC python
 import pytest
 from tests.conftest import skip_if_not_env
@@ -72,17 +73,12 @@ def test_feature_execution():
     assert core_feature() is True
 #+END_SRC
 
-** Dispatcher Scripts and Test Markers
-Scripts under ~rgpycrumbs/eon/~ (and similar groups) declare their own
-dependencies via PEP 723 inline metadata. These scripts import heavy packages
-(polars, chemparseplot, ase, etc.) at the top level, because ~uv run~ resolves
-those dependencies before execution.
+** Dispatcher scripts and test markers
+Scripts under ~rgpycrumbs/eon/~ (and similar groups) declare their own dependencies via PEP 723 inline metadata.
+These scripts import heavy packages (polars, chemparseplot, ase, etc.) at the top level, because ~uv run~ resolves those dependencies before execution.
 
-When writing tests that import these scripts directly (e.g., to test CLI
-~--help~ output), the test file *must* use the corresponding marker (e.g.,
-~eon~, not ~pure~) and the ~skip_if_not_env~ guard. Otherwise the top-level
-imports will fail during collection in environments that lack the script's
-dependencies.
+When writing tests that import these scripts directly (e.g., to test CLI ~--help~ output), the test file *must* use the corresponding marker (e.g., ~eon~, not ~pure~) and the ~skip_if_not_env~ guard.
+Otherwise the top-level imports will fail during collection in environments that lack the script's dependencies.
 
 #+BEGIN_SRC python
 import pytest
@@ -100,31 +96,29 @@ def test_plt_neb_help(runner):
     assert result.exit_code == 0
 #+END_SRC
 
-The ~pure~ marker is reserved for tests that depend only on core packages
-(numpy, click). The ~ensure_import~ and ~lazy_import~ tests also run under
-~pure~ since they mock all optional dependencies. Never place tests that import
-dispatcher scripts under the ~pure~ marker.
+The ~pure~ marker is reserved for tests that depend only on core packages (~click~, ~numpy~ and ~rich~).
+The ~ensure_import~ and ~lazy_import~ tests also run under ~pure~ since they mock all optional dependencies.
+Never place tests that import dispatcher scripts under the ~pure~ marker.
 
-Note that ~[all]~ is a best-effort convenience extra covering pip-installable
-optional dependencies only. Pixi-only packages (~tblite~, ~ira_mod~) and
-heavier tools such as ~ovito~ still need explicit environment setup.
+~rgpycrumbs~ has no feature extras.
+Pixi-only packages (~tblite~, ~ira_mod~) and heavier tools such as ~ovito~ still need explicit environment setup.
 
-** Available Markers & Environments
-The following markers and their corresponding ~pixi~ environments are available:
+** Available markers and environments
+The following markers and their corresponding ~pixi~ environments are available.
 
 | Marker | Environment | Dependencies | What it tests |
 |------------+-------------+--------------------+---------------------------------------|
 | ~pure~ | ~test~ | ~numpy~ | Core utilities, basetypes, ensure_import |
 | ~align~ | ~test~ | ~ase~, ~numpy~ | Structure analysis, alignment |
+| ~interpolation~ | ~test~ | ~numpy~, ~scipy~ | Spline interpolation |
 | ~fragments~ | ~fragments~ | ~ase~, ~tblite~ | Fragment detection with tight-binding |
 | ~surfaces~ | ~surfaces~ | ~jax~ | Surface fitting kernels and models |
 | ~ptm~ | ~ptm~ | ~ase~, ~ovito~ | Polyhedral template matching |
-| ~eon~ | ~eonmlflow~ | ~ase~, ~eon~, ~polars~, ~chemparseplot~ | eOn integration, NEB CLI |
-| ~ira~ | (requires ~ira_mod~) | ~ira_mod~ | IRA matching and RMSD comparison |
+| ~eon~ | ~eonmlflow~ | ~ase~, ~eon~, ~polars~, ~chemparseplot~ | eOn integration, nudged elastic band command |
+| ~ira~ | ~fragments~ | ~ira_mod~ | Iterative rotations and assignments matching, deviation after alignment |
 
-** Running Tests
-Execute tests within the specific environment that provides the necessary
-dependencies:
+** Running tests
+Execute tests within the specific environment that provides the necessary dependencies.
 
 #+BEGIN_SRC shell
 # Run tests for a specific suite

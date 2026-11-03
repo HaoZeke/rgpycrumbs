@@ -1,307 +1,258 @@
-#+TITLE: NEB Reaction Path Visualization
-#+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil
+#+TITLE: NEB reaction path visualization
+#+AUTHOR: Rohit Goswami
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
 
-#+begin_export rst
-=============================
-NEB Reaction Path Visualization
-=============================
-#+end_export
+This tutorial plots one nudged elastic band (NEB) calculation with ~rgpycrumbs eon plt-neb~.
+The reaction is a Diels-Alder cycloaddition, in which 1,3-butadiene and ethylene form cyclohexene.
+Each figure comes from the command printed above it.
 
-In this tutorial you will produce publication-quality figures from a Diels-Alder
-NEB calculation: a 1D energy profile, a 2D reaction valley landscape with GP
-surface [fn:: defaults to the gradient-enhanced Inverse Multiquadric], structure
-galleries with four rendering backends, OCI-NEB refinement-sample overlays, and band
-evolution plots.
+The two-dimensional maps in this tutorial follow R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation", /MethodsX/ (2026), [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]].
+Please cite that paper if you use these maps in published figures.
 
-#+begin_export rst
-.. admonition:: Reference
+* Data and environment
 
-   The 2D RMSD projection method used here is described in:
+The eOn output files for this tutorial are in =docs/orgmode/tutorials/data/diels_alder/=.
+The system is C6H10 with 16 atoms, and each band has 22 images.
+eOn computed the band with its metatomic potential interface.
 
-   R. Goswami, "Two-dimensional RMSD projections for reaction path
-   visualization and validation," *MethodsX*, p. 103851, Mar. 2026,
-   `doi:10.1016/j.mex.2026.103851 <https://doi.org/10.1016/j.mex.2026.103851>`_.
+| File | Content |
+|------+---------|
+| =neb_000.dat=, =neb_005.dat=, =neb_010.dat=, =neb_014.dat= | Four snapshots of the band during the optimization, with =neb_014.dat= as the last |
+| =neb_path_000.con= to =neb_path_014.con= | Structures for the same four snapshots |
+| =neb.con= | Structures of the final band |
+| =sp.con= | Saddle point structure |
 
-   If you use these visualizations in your work, please cite the paper.
-#+end_export
+Each =.dat= file lists the image index, the path length, the energy relative to image 0 and the force along the path.
+The =.con= files store the atom positions of the same images.
 
-#+begin_export rst
-.. image:: /_static/tutorial/surface_gallery.png
-   :width: 100%
-   :alt: Final result: 2D GP surface using the gradient-enhanced Inverse Multiquadric kernel with xyzrender structure strip
-#+end_export
-
-* Prerequisites
+The maps compare the structures of the images through Iterative Rotations and Assignments (IRA), which aligns two structures and matches their atoms.
+The repository's pixi =fragments= environment provides IRA, and the figures on this page come from that environment.
+Run the commands from the tutorial folder.
 
 #+begin_src bash
-pip install rgpycrumbs
-# Library/CLI plot paths enable AUTO_DEPS by default (jax, chemparseplot,
-# xyzrender, adjustText via ensure_import + uv on PATH).
-# Optional explicit backends only if you need them:
-#   pip install solvis-tools    # strip_renderer=solvis
-#   # ovito: conda-forge / separate heavy install
+git clone https://github.com/HaoZeke/rgpycrumbs
+cd rgpycrumbs
+pixi shell -e fragments
+cd docs/orgmode/tutorials
 #+end_src
 
-The tutorial data ships with the rgpycrumbs source tree at
-=docs/orgmode/tutorials/data/diels_alder/=. It contains output from an
-OCI-NEB calculation of the Diels-Alder [4+2] cycloaddition of
-1,3-butadiene and ethylene (C6H10, 16 atoms, 22 images).
+Outside pixi, install IRA from conda-forge, where the package is named =ira=.
+Without IRA, the maps can differ from the ones shown here, because ~plt-neb~ then aligns structures in the atom order of the files.
 
-* Step 1: Energy Profile
+* Energy profile
 
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type profile \
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type profile \
   --input-dat-pattern "data/diels_alder/neb_*.dat" \
   --input-path-pattern "data/diels_alder/neb_path_*.con" \
-  --con-file data/diels_alder/neb.con \
-  --sp-file data/diels_alder/sp.con \
-  -o profile.pdf
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o profile.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/profile.png
-   :width: 80%
-   :alt: Energy profile with Hermite spline interpolation
+   :alt: Energy against path length for four snapshots of the band. The black final band peaks near 0.8 eV at the saddle point star and ends near minus 1.9 eV.
 #+end_export
 
-Multiple NEB optimization steps are overlaid with Hermite spline
-interpolation. The final converged barrier is ~0.8 eV.
+Each curve shows one snapshot of the band, and the black curve shows the final band.
+The default =--spline-method hermite= joins the images with cubic Hermite splines, which take the slope at each image from the force along the path.
+In the final band, image 14 sits 0.788 eV above image 0, and the product lies 1.948 eV below image 0.
+The star marks the saddle point from =sp.con=.
 
-* Step 2: 2D Reaction Valley Landscape
+* Reaction valley maps
 
-** Path overlay (no surface fit)
+** Distances from the reactant and the product
 
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape \
-  --landscape-mode path \
-  --no-project-path \
-  --con-file data/diels_alder/neb.con \
-  --sp-file data/diels_alder/sp.con \
-  -o landscape_raw.pdf
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode path --no-project-path \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o landscape_raw.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/landscape_raw.png
-   :width: 80%
-   :alt: Raw RMSD landscape
+   :alt: The final band drawn on axes of root mean square deviation from the reactant and from the product, colored by energy, over a shaded background.
 #+end_export
 
-Shows the NEB path on raw RMSD(R,P) axes, colored by energy.
+Each image becomes a point at its root mean square deviation (RMSD) from the reactant and from the product.
+The shaded background interpolates the energies of the images in all four snapshots, so it covers only the region that the bands visited.
 
-** Projected (s, d) coordinates
+Images 2 and 3 sit further from the product than image 1 does.
+For these two images, IRA matches the atoms to the product in a different order from the one in the files.
+That order gives RMSD values of 1.232 Å and 1.142 Å, against 0.928 Å and 0.881 Å in file order.
 
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape \
-  --landscape-mode path \
-  --project-path \
-  --con-file data/diels_alder/neb.con \
-  --sp-file data/diels_alder/sp.con \
-  -o landscape_projected.pdf
+** Progress and deviation coordinates
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode path --project-path \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o landscape_projected.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/landscape_projected.png
-   :width: 80%
-   :alt: Projected (s,d) reaction valley
+   :alt: The same band after rotation into reaction progress s along the horizontal axis and orthogonal deviation d along the vertical axis.
 #+end_export
 
-The =--project-path= flag rotates into reaction progress (s) and
-orthogonal deviation (d). A path with d near 0 indicates a
-concerted mechanism.
+The =--project-path= flag rotates the RMSD plane.
+The horizontal coordinate /s/ then measures progress along the line from the reactant to the product, and the vertical coordinate /d/ is the distance from that line.
+A band that stays near /d/ = 0 follows the direct line between the end points.
 
-** GP surface fit
+** Fitted surface
 
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape \
-  --landscape-mode surface \
-  --surface-type grad_matern \
-  --project-path \
-  --con-file data/diels_alder/neb.con \
-  --sp-file data/diels_alder/sp.con \
-  -o landscape_surface.pdf
-#+end_src
-
-#+begin_export rst
-.. |surface_proj| image:: /_static/tutorial/surface_projected.png
-   :width: 49%
-
-.. |surface_raw| image:: /_static/tutorial/surface_raw.png
-   :width: 49%
-
-|surface_proj| |surface_raw|
-#+end_export
-
-Left: projected (s,d). Right: raw RMSD(R,P). Gradient-enhanced Matern
-kernel GP surface with variance contours (dashed lines). Requires jax.
-
-* Step 3: Structure Galleries
-
-** Rendering backends
-
-Four backends are available via =--strip-renderer=. Each wraps an
-external visualization library:
-
-- [[https://github.com/aligfellow/xyzrender][xyzrender]] (default) -- ball-and-stick with the =paton= preset, auto-orientation via PCA
-- [[https://wiki.fysik.dtu.dk/ase/][ASE]] -- space-filling spheres, built-in (no extra deps)
-- [[https://github.com/amritagos/solvis][solvis]] -- PyVista ball-and-stick with transparent RGBA backgrounds
-- [[https://www.ovito.org/python/][OVITO Python]] -- off-screen rendering with orthographic projection
-
-See the [[file:rendering-backends.org][Rendering Backends Guide]] for detailed feature comparison.
-
-#+begin_src shell
-# xyzrender (default): ball-and-stick with paton preset
-rgpycrumbs eon plt-neb \
-  --plot-type landscape --landscape-mode path --no-project-path \
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode surface \
+  --surface-type grad_matern --project-path \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
   --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
-  --plot-structures crit_points \
-  --strip-renderer xyzrender \
-  --strip-spacing 2.0 --strip-dividers \
-  -o gallery_xyzrender.pdf
+  -o surface_projected.png
 #+end_src
 
 #+begin_export rst
-.. |gal_xyz| image:: /_static/tutorial/gallery_xyzrender.png
-   :width: 49%
-
-.. |gal_ase| image:: /_static/tutorial/gallery_ase.png
-   :width: 49%
-
-|gal_xyz| |gal_ase|
-
-*Left:* xyzrender (ball-and-stick). *Right:* ASE (space-filling).
+.. image:: /_static/tutorial/surface_projected.png
+   :alt: A fitted energy surface on the progress and deviation axes, with dashed variance contours and the final band on top.
 #+end_export
+
+The =--landscape-mode surface= option fits a surface to the images of all four snapshots and draws the final band on top.
+With =--surface-type grad_matern=, the surface is a Gaussian process (GP) with a gradient-enhanced Matérn kernel.
+The default =rbf= fits a thin-plate spline to the energies alone.
+The gradients come from the force along the path, projected onto the direction of the band in the map.
+Dashed contours mark levels of the GP variance.
+
+On this band the fit does not follow the energies.
+The fitted surface spans only -0.31 eV to 0.31 eV over the map, while the images of the final band run from -1.95 eV to 0.79 eV.
+The background therefore shows no barrier, only a slope from the reactant side down to the product side.
+Its colors also span the range of the fitted surface, and not the range on the colorbar, which belongs to the band.
+Read the energies from the colors of the band.
+
+* Structure strips
+
+The =--plot-structures crit_points= option draws three structures under the plot: the reactant, the highest image and the product, labeled R, SP and P.
+The =--strip-renderer= option picks the program that draws them.
+
+- =xyzrender= is the default.
+  It draws ball-and-stick models, and its default =--rotation auto= orients each molecule from a principal component analysis of its atom positions.
+- =ase= needs no extra package and draws each structure with space-filling spheres.
+- =solvis= renders ball-and-stick models through PyVista, which needs a display.
+- =ovito= uses the Open Visualization Tool (OVITO), a separate install.
+
+The other three renderers draw each molecule in the fixed side view =0x,90y,0z= unless =--rotation= names another one.
+The =--strip-dividers= flag draws dashed lines between the panels.
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type profile --plot-structures crit_points --strip-dividers \
+  --strip-renderer xyzrender \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o gallery_xyzrender.png
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/gallery_xyzrender.png
+   :alt: The energy profile with ball-and-stick structures of the reactant, the highest image and the product drawn by xyzrender below it.
+#+end_export
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type profile --plot-structures crit_points --strip-dividers \
+  --strip-renderer ase \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o gallery_ase.png
+#+end_src
+
+#+begin_export rst
+.. image:: /_static/tutorial/gallery_ase.png
+   :alt: The energy profile with space-filling structures of the reactant, the highest image and the product drawn by ASE in a fixed side view.
+#+end_export
+
+In this side view the two molecules approach each other almost along the line of sight, so the three ASE panels look alike.
+The structures still differ, because the two forming C-C bonds shrink from 3.93 Å and 3.45 Å in R to 2.63 Å and 2.03 Å in SP, and both reach 1.53 Å in P.
+
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type profile --plot-structures crit_points --strip-dividers \
+  --strip-renderer solvis \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o gallery_solvis.png
+#+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/gallery_solvis.png
-   :width: 60%
-   :alt: solvis rendering (PyVista, transparent background)
-
-solvis: PyVista ball-and-stick with transparent background.
+   :alt: The energy profile with ball-and-stick structures of the reactant, the highest image and the product drawn by solvis on a transparent background.
 #+end_export
 
-** Viewing angle
+The =--rotation= option takes an ASE rotation string such as ="45x,30y,0z"= for every renderer.
+The =--perspective-tilt= option can uncover atoms hidden behind others, because it turns each structure by the given number of degrees about a direction in the picture plane.
 
-The =--rotation= flag controls the viewing angle for all backends:
+* Band evolution
 
-#+begin_src shell
-rgpycrumbs eon plt-neb ... --rotation "45x,30y,0z"
-#+end_src
-
-** Perspective tilt
-
-When atoms overlap in orthographic projection, use =--perspective-tilt=
-to apply a small Rodrigues off-axis rotation that reveals hidden atoms:
-
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape --landscape-mode path --no-project-path \
-  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
-  --plot-structures crit_points \
-  --strip-dividers \
-  --perspective-tilt 8 \
-  -o gallery_tilted.pdf
-#+end_src
-
-#+begin_export rst
-.. |no_tilt| image:: /_static/tutorial/no_tilt.png
-   :width: 49%
-
-.. |tilt_8| image:: /_static/tutorial/tilt_8deg.png
-   :width: 49%
-
-|no_tilt| |tilt_8|
-
-*Left:* no tilt (H atoms hidden). *Right:* 8 degree tilt (H atoms revealed).
-#+end_export
-
-* Step 4: OCI-NEB Refinement Samples
-
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape --landscape-mode path --no-project-path \
-  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
-  --mmf-peaks --peak-dir data/diels_alder/ \
-  -o mmf_peaks.pdf
-#+end_src
-
-#+begin_export rst
-.. image:: /_static/tutorial/mmf_peaks.png
-   :width: 80%
-   :alt: OCI-NEB refinement samples
-#+end_export
-
-Small inner markers show the extra OCI/MMF refinement samples without
-adding another independent trajectory layer. The dark outer points still
-represent every sampled structure across the combined search.
-
-* Step 5: Band Evolution
-
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape --landscape-mode path --no-project-path \
-  --con-file data/diels_alder/neb.con \
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode path --no-project-path \
   --show-evolution \
-  -o evolution.pdf
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
+  -o evolution.png
 #+end_src
 
 #+begin_export rst
 .. image:: /_static/tutorial/evolution.png
-   :width: 80%
-   :alt: Band evolution
+   :alt: The RMSD map of the final band with the earlier snapshots drawn as faint lines behind it.
 #+end_export
 
-Older bands are drawn with lower opacity.
+The =--show-evolution= flag draws the earlier snapshots as faint lines behind the final band.
 
-* Step 6: Combined Figure
+* Surface with a structure strip
 
-The full figure with 2D GP surface, xyzrender structure strip, and
-OCI/MMF refinement samples:
-
-#+begin_export rst
-.. image:: /_static/tutorial/surface_mmf.png
-   :width: 100%
-   :alt: Combined: surface + OCI/MMF samples + xyzrender strip
-#+end_export
-
-#+begin_src shell
-rgpycrumbs eon plt-neb \
-  --plot-type landscape --landscape-mode surface \
+#+begin_src bash
+rgpycrumbs eon plt-neb --plot-type landscape --landscape-mode surface \
   --surface-type grad_matern --project-path \
+  --plot-structures crit_points --strip-renderer xyzrender --strip-dividers \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
   --con-file data/diels_alder/neb.con --sp-file data/diels_alder/sp.con \
-  --mmf-peaks --peak-dir data/diels_alder/ \
-  --plot-structures crit_points \
-  --strip-renderer xyzrender \
-  --strip-spacing 2.0 --strip-dividers \
-  -o combined.pdf
+  -o surface_gallery.png
 #+end_src
 
-* Summary
+#+begin_export rst
+.. image:: /_static/tutorial/surface_gallery.png
+   :alt: The fitted surface on the progress and deviation axes with xyzrender structures of the reactant, the saddle point and the product below the map.
+#+end_export
 
-| Feature            | Flag                                 | Notes                   |
-|--------------------+--------------------------------------+-------------------------|
-| Energy profile     | =--plot-type profile=                  | Hermite spline          |
-| Raw RMSD landscape | =--no-project-path=                    | RMSD(R) vs RMSD(P)      |
-| Reaction valley    | =--project-path=                       | (s, d) coordinates      |
-| GP surface         | =--landscape-mode surface=             | Needs jax               |
-| Structure strip    | =--plot-structures crit_points=        | R, SP, P                |
-| xyzrender          | =--strip-renderer xyzrender=           | Default, ball-and-stick |
-| ASE                | =--strip-renderer ase=                 | Space-filling           |
-| solvis             | =--strip-renderer solvis=              | PyVista, transparent bg |
-| ovito              | =--strip-renderer ovito=               | OVITO off-screen        |
-| Custom rotation    | =--rotation "45x,30y,0z"=              | All backends            |
-| Perspective tilt   | =--perspective-tilt 8=                 | Reveals hidden atoms    |
-| Spacing/dividers   | =--strip-spacing 2.0 --strip-dividers= |                         |
-| OCI/MMF samples    | =--mmf-peaks --peak-dir .=             | OCI-NEB                 |
-| Band evolution     | =--show-evolution=                     | Fading iterations       |
+This command joins the fitted surface and the xyzrender strip in one figure.
+The same fit sits behind this figure, so read the energies from the band here too.
 
-* See Also
+* Refinement overlay
 
-- R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," /MethodsX/, p. 103851, Mar. 2026, [[https://doi.org/10.1016/j.mex.2026.103851][doi:10.1016/j.mex.2026.103851]]
-- [[file:rendering-backends.org][Rendering Backends Guide]]
-- [[file:../tools/eon/plt_neb.org][plt-neb CLI Reference]]
-- [[file:../tools/eon/plt_saddle.org][plt-saddle CLI Reference]]
-- [[file:../tools/eon/plt_min.org][plt-min CLI Reference]]
+The =--mmf-peaks= flag overlays the frames of a minimum-mode following (MMF) refinement on a landscape plot.
+It reads the =climb= or =climb.con= movie that eOn writes into the folder named by =--peak-dir=, which defaults to the current folder.
+Without either flag, the overlay turns on whenever that folder contains such a movie, and =--no-mmf-peaks= turns it off.
+The Diels-Alder data has no climb movie, so this page shows no overlay.
+
+* Option summary
+
+| Option | Effect |
+|--------+--------|
+| =--plot-type profile= | Energy against path length |
+| =--plot-type landscape --landscape-mode path= | Bands on the RMSD map |
+| =--landscape-mode surface= | Fitted surface behind the final band |
+| =--project-path= | Progress and deviation coordinates |
+| =--plot-structures crit_points= | Strip with the reactant, the highest image and the product |
+| =--strip-renderer= | Program that draws the strip |
+| =--show-evolution= | Earlier snapshots as faint lines |
+| =--mmf-peaks= | Refinement frames from a climb movie |
+
+* See also
+
+- [[file:rendering-backends.org][Rendering backends guide]]
+- [[file:saddle-search-visualization.org][Saddle search visualization]]
+- [[file:minimization-visualization.org][Minimization visualization]]
+- [[file:../tools/eon/plt_neb.org][plt-neb command reference]]

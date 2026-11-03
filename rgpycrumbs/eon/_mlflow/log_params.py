@@ -26,11 +26,15 @@ def log_config_ini(
 ):
     """Log the hydrated eOn configuration to MLflow.
 
-    Args:
-        conf_ini: Path to the eOn ``config.ini`` file.
-        w_artifact: Whether to log the config file as an MLflow artifact.
-        track_overrides: Whether to separately log parameters that the user
-            explicitly set (values present in the INI, not only defaults).
+    Parameters
+    ----------
+    conf_ini
+        Path to the eOn ``config.ini`` file.
+    w_artifact
+        Whether to log the config file as an MLflow artifact.
+    track_overrides
+        Whether to separately log parameters that the user explicitly set
+        (values present in the INI, not only defaults).
 
     .. versionadded:: 1.1.0
     """

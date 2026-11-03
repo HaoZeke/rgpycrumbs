@@ -6,8 +6,7 @@
 Kind comes from the object type or an explicit ``kind=`` when only frames are
 passed. Never sniffs mixed job directories for ``neb.con`` vs ``min.con``.
 
-```{versionadded} 1.10.4
-```
+.. versionadded:: 1.10.4
 """
 
 from __future__ import annotations

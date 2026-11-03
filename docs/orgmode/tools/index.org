@@ -1,0 +1,26 @@
+#+TITLE: Tooling overview
+#+OPTIONS: toc:nil title:nil todo:nil num:nil author:nil
+
+#+begin_export rst
+=====
+Tools
+=====
+#+end_export
+
+These pages document the commands of ~rgpycrumbs~, grouped by domain.
+Most of them list the options of a command and show examples of its use.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 2
+
+   eon/index
+   chemgp/index
+   orca/index
+   geom/index
+   uma/index
+   surrogate/index
+   surfaces
+   utils/index
+   prefix/index
+#+end_export

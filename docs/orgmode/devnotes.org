@@ -1,176 +1,148 @@
-#+TITLE: ~rgpycrumbs~ Design & Architecture Notes
+#+TITLE: ~rgpycrumbs~ design and architecture notes
+#+AUTHOR: Rohit Goswami
 #+OPTIONS: toc:nil todo:nil num:nil author:t title:t
 #+STARTUP: overview
 
-* Documentation Pipeline
-  :PROPERTIES:
-  :ID:       docs-architecture
-  :END:
+* Documentation pipeline
+  :properties:
+  :id:       docs-architecture
+  :end:
 
-We craft documents in ~orgmode~, though downstream processing uses ~sphinx~.
-Partially because of this, since ~ox-rst~ needs ~emacs~, and because the
-documentation rarely needs to be built outside of the development workflow,
-instead of staying within the ~pyproject~ file as an optional dependency the
-documentation forms a new environment in the ~pixi.toml~ file.
+We write the documents in ~orgmode~, and ~sphinx~ builds the HTML from the exported ~rst~.
+The export needs ~emacs~ for ~ox-rst~, and the documentation rarely needs a build outside of the development workflow, so the documentation tools form their own environment in ~pixi.toml~ instead of an optional dependency in ~pyproject.toml~.
 * Dependency management
 - Library :: go in ~pyproject.toml~.
 - Doc/Dev :: go in ~pixi.toml~.
-- Script :: handled on-the-fly via the ~uv~ dispatching mechanism and [[https://peps.python.org/pep-0723/][PEP 723]] detailed in my [[https://realpython.com/python-script-structure/][RealPython best practices post]].
-* Core Architecture: The Dispatcher
-  :PROPERTIES:
-  :ID:       cli-dispatch
-  :END:
+- Script :: handled on the fly by the ~uv~ dispatch and the [[https://peps.python.org/pep-0723/][Python Enhancement Proposal (PEP) 723]] header, as my [[https://realpython.com/python-script-structure/][post on Python script structure]] describes.
+* Core architecture: the dispatcher
+  :properties:
+  :id:       cli-dispatch
+  :end:
 
-** The Problem
-Research pipelines require conflicting environments and a monolithic CLI
-(e.g., standard ~Typer~ app) fails because importing the top-level module
-crashes due to conflicting dependencies in sub-modules.
+** The problem
+Research pipelines require conflicting environments and a monolithic CLI (e.g., standard ~Typer~ app) fails because importing the top-level module crashes due to conflicting dependencies in sub-modules.
 
-** The Solution: Dynamic Subprocess Dispatch
-   Instead of directly importing modules, ~rgpycrumbs/cli.py~ controls execution flow:
-   - It scans directory structure at runtime.
-   - It invokes scripts via ~uv run~.
-   - This leads to complete isolation for each script.
+** The solution: dynamic subprocess dispatch
+Instead of directly importing modules, ~rgpycrumbs/cli.py~ controls execution flow.
+- It scans the directory structure at runtime.
+- It runs each script in a subprocess, through ~uv run~ or the active interpreter.
+- Each script imports its dependencies in its own process, so one script cannot break another.
 
-   #+BEGIN_SRC python
-   # Logic captured in rgpycrumbs/cli.py
-   subprocess.run(["uv", "run", script_path] + args)
-   #+END_SRC
+#+BEGIN_SRC python
+# Logic captured in rgpycrumbs/cli.py
+subprocess.run(["uv", "run", "--no-project", "--script", script_path, *args])
+#+END_SRC
 
 ** Philosophy
 
-The library is designed with the following principles in mind:
+The library is designed with the following principles in mind.
 
-- Dispatcher-Based Architecture :: The top-level ~rgpycrumbs.cli~ command acts as a
-  lightweight dispatcher. It does not contain the core logic of the tools
-  itself. Instead, it parses user commands to identify the target script and
-  then invokes it in an isolated subprocess using the ~uv~ runner. This provides
-  a unified command-line interface while keeping the tools decoupled.
+- Dispatcher-Based Architecture :: The top-level ~rgpycrumbs.cli~ command is a lightweight dispatcher.
+                                   It does not contain the core logic of the tools itself.
+                                   Instead, it parses user commands to identify the target script and then runs it in a subprocess.
+                                   The dispatcher gives one command-line interface, while the tools stay decoupled.
+- Isolated & Reproducible Execution :: Each script is a self-contained unit that declares its own dependencies via PEP 723 metadata.
+                                       Under ~uv run~, the ~uv~ runner uses this information to resolve and install the required packages into a cached environment on demand.
+                                       This design keeps runs reproducible, and keeps the dependencies of one tool apart from those of another.
+- Lightweight Core, On-Demand Dependencies :: The installable ~rgpycrumbs~ package has three core dependencies (~click~, ~numpy~ and ~rich~), and no feature extras.
+                                              Under ~uv run~, the dependencies of a command arrive only when the command runs.
+                                              Library modules call ~ensure_import~, which can install a missing dependency at first use when ~RGPKGS_AUTO_DEPS=1~ is set, with CUDA-aware resolution.
+                                              The base installation stays lightweight either way.
+- Modular & Extendable Tooling :: Each utility is an independent script.
+                                  This modularity simplifies development and testing, as changes to one tool cannot inadvertently affect another.
+                                  New tools can join the collection without changes to the core dispatcher logic, so the system is easy to extend.
 
-- Isolated & Reproducible Execution :: Each script is a self-contained unit that
-  declares its own dependencies via [[https://peps.python.org/pep-0723/][PEP 723]] metadata. The ~uv~ runner uses this
-  information to resolve and install the exact required packages into a
-  temporary, cached environment on-demand. This design guarantees
-  reproducibility and completely eliminates the risk of dependency conflicts
-  between different tools in the collection.
-
-- Lightweight Core, On-Demand Dependencies :: The installable ~rgpycrumbs~
-  package has minimal core dependencies (~click~, ~numpy~). Heavy scientific
-  there are no runtime feature extras. CLI tools fetch deps via PEP 723 + uv; library modules use ensure_import + AUTO_DEPS. Dependencies are fetched by
-  ~uv~ only when a script that needs them is executed. For library modules,
-  ~ensure_import~ resolves dependencies at first use when ~RGPYCRUMBS_AUTO_DEPS=1~
-  is set, with CUDA-aware resolution. The base installation stays lightweight
-  either way.
-
-- Modular & Extensible Tooling :: Each utility is an independent script. This
-  modularity simplifies development, testing, and maintenance, as changes to one
-  tool cannot inadvertently affect another. New tools can be added to the
-  collection without modifying the core dispatcher logic, making the system
-  easily extensible.
-
-* Dynamic Dependency Resolution
-  :PROPERTIES:
-  :ID:       dynamic-deps
-  :END:
+* Dynamic dependency resolution
+  :properties:
+  :id:       dynamic-deps
+  :end:
 
 The library extends the PEP 723 dispatcher philosophy to the import surface.
-CLI scripts resolve deps via ~uv run~; library modules resolve deps via
-~ensure_import~ at first use. Same principle (lightweight core, on-demand
-resolution), two execution modes.
+CLI scripts resolve deps via ~uv run~; library modules resolve deps via ~ensure_import~ at first use.
+Same principle (lightweight core, on-demand resolution), two execution modes.
 
-** Priority Chain
+** Priority chain
 
-Every call to ~ensure_import(module_name)~ walks a 5-step chain:
+Every call to ~ensure_import(module_name)~ walks a chain of five steps.
 
-1. *Current environment* -- ~importlib.import_module()~, zero overhead when installed.
-2. *Parent environment* -- ~RGPYCRUMBS_PARENT_SITE_PACKAGES~ path fallback.
-3. *uv cache* -- ~sys.path~ lookup in ~$XDG_CACHE_HOME/rgpycrumbs/deps/~.
-4. *uv install* -- ~uv pip install --target <cache_dir>~ then retry import.
-   Gated by ~RGPYCRUMBS_AUTO_DEPS=1~ (opt-in).
-5. *Fallback* -- ~ImportError~ with an actionable message suggesting the right
-   extra or pixi.
+1. *Current environment*: ~importlib.import_module()~, with no overhead when the module is installed.
+2. *Parent environment*: a fallback to the paths in ~RGPYCRUMBS_PARENT_SITE_PACKAGES~.
+3. *uv cache*: a ~sys.path~ lookup in ~$XDG_CACHE_HOME/rgpycrumbs/deps/~.
+4. *uv install*: ~uv pip install --target <cache_dir>~, then the import again.
+   This step needs ~RGPKGS_AUTO_DEPS=1~ (or the older ~RGPYCRUMBS_AUTO_DEPS=1~), and it skips modules that are not in ~_DEPENDENCY_MAP~.
+5. *Fallback*: an ~ImportError~ whose message gives the ~pip install~ line and the ~RGPKGS_AUTO_DEPS~ switch, or points to pixi for ~ira_mod~ and ~tblite~.
 
-** CUDA-aware Resolution
+** CUDA-aware resolution
 
-When auto-installing packages with GPU backends (currently jax), the resolver
-probes for ~nvidia-smi~ to detect whether CUDA is available. On CPU-only
-machines it substitutes CPU-only install specs (e.g. ~jax[cpu]>=0.4~) to avoid
-pulling hundreds of megabytes of unused CUDA libraries.
+The resolver checks whether CUDA is available by probing for ~nvidia-smi~, before it auto-installs a package with GPU backends such as ~jax~.
+On CPU-only machines it substitutes CPU-only install specs (e.g. ~jax[cpu]>=0.4~) to avoid pulling hundreds of megabytes of unused CUDA libraries.
 
-** Dependency Registry
+** Dependency registry
 
-~_DEPENDENCY_MAP~ in ~rgpycrumbs/_aux.py~ maps importable module names to their
-pip install spec (no feature extras):
+~_DEPENDENCY_MAP~ in ~rgpycrumbs/_aux.py~ maps importable module names to the pip install specs of their packages, with no feature extras.
+This excerpt shows a few of its entries.
 
 #+begin_src python
 _DEPENDENCY_MAP = {
     "jax":   "jax>=0.4",
     "scipy": "scipy>=1.11",
     "ase":   "ase>=3.22",
+    "chemparseplot": "chemparseplot[neb,plot]>=1.11.0,<2",
+    # ... submodules such as "scipy.spatial" map to the same specs
 }
 #+end_src
 
-Packages intentionally excluded from this map are NOT auto-installed by default.
-ira_mod and tblite fall through to step 5 with a pixi hint; heavy packages like ovito are left for explicit installation in the active environment.
+Step 4 installs only the packages in this map.
+The map leaves out ~ira_mod~ and ~tblite~, which fall through to step 5 with a pixi hint, and heavy packages like ~ovito~, which need an explicit install in the active environment.
 
-** Cache Location
+** Cache location
 
-~$XDG_CACHE_HOME/rgpycrumbs/deps/~ (default ~\~/.cache/rgpycrumbs/deps/~).
-uv installs with ~--target~ into this directory. It persists across sessions
-and can be cleared with ~rm -rf~.
+The cache directory is ~$XDG_CACHE_HOME/rgpycrumbs/deps/~ (default =~/.cache/rgpycrumbs/deps/=).
+~uv~ installs into this directory with ~--target~.
+It persists across sessions and can be cleared with ~rm -rf~.
 
-* Library Modules
-  :PROPERTIES:
-  :ID:       library-modules
-  :END:
+* Library modules
+  :properties:
+  :id:       library-modules
+  :end:
 
-In addition to the CLI dispatcher, ~rgpycrumbs~ provides importable library
-modules for computational tasks. These are used by downstream packages like
-~chemparseplot~ and can be used directly in notebooks or custom scripts.
+In addition to the CLI dispatcher, ~rgpycrumbs~ provides importable library modules for computational tasks.
+These are used by downstream packages like ~chemparseplot~ and can be used directly in notebooks or custom scripts.
 
-** Module Structure
+** Module structure
 
-- ~rgpycrumbs.surfaces~ :: JAX-based surface fitting with kernel methods (TPS,
-  RBF, Matern 5/2, SE, IMQ). Includes gradient-enhanced variants. Optional
-  dependency: ~jax~.
-- ~rgpycrumbs.geom.analysis~ :: Structure analysis using ASE: distance matrices,
-  bond matrices, and fragment detection via depth-first search on neighbor
-  lists. Optional dependencies: ~ase~, ~scipy~.
-- ~rgpycrumbs.geom.ira~ :: Iterative Rotations and Assignments (IRA) for
-  RMSD-based structure comparison. Optional dependency: ~ira_mod~.
+- ~rgpycrumbs.surfaces~ :: Surface fitting in ~jax~ with kernel methods: thin plate spline (TPS), Matern 5/2 and inverse multiquadric (IMQ) fits, and gradient-enhanced Matern, IMQ, squared exponential and rational quadratic fits.
+                           A Nystrom approximation of the gradient-enhanced IMQ fit handles large data sets.
+                           Optional dependency: ~jax~.
+- ~rgpycrumbs.geom.analysis~ :: Structure analysis using ASE: distance matrices, bond matrices, and fragment detection via depth-first search on neighbor lists.
+                                Optional dependencies: ~ase~, ~scipy~.
+- ~rgpycrumbs.geom.ira~ :: Iterative Rotations and Assignments (IRA) for structure comparison by root mean square deviation (RMSD).
+                           Optional dependency: ~ira_mod~.
 - ~rgpycrumbs.interpolation~ :: Spline interpolation utilities built on SciPy.
-  Optional dependency: ~scipy~.
-- ~rgpycrumbs.basetypes~ :: Shared data structures (namedtuples and dataclasses)
-  for NEB iterations, NEB paths, saddle search measurements, dimer
-  optimization, molecular geometries, and spin identification. No extra
-  dependencies.
+                                Optional dependency: ~scipy~.
+- ~rgpycrumbs.basetypes~ :: Typed records (dataclasses) for nudged elastic band (NEB) iterations and paths, saddle search measurements, dimer settings, molecular geometries and spin labels.
+                            It re-exports them from ~chemparseplot.basetypes~ when ~chemparseplot~ is installed, and otherwise defines local copies, which need only ~numpy~.
 
-** Lazy Loading
-The top-level ~rgpycrumbs/__init__.py~ uses ~__getattr__~ for lazy imports, so
-modules with heavy optional dependencies (like JAX) are only loaded when
-accessed. This keeps ~import rgpycrumbs~ fast regardless of which extras are
-installed.
+** Lazy loading
+The top-level ~rgpycrumbs/__init__.py~ uses ~__getattr__~ for lazy imports, so modules with heavy optional dependencies (like ~jax~) are only loaded when accessed.
+This keeps ~import rgpycrumbs~ fast regardless of which optional packages are installed.
 
 * Benchmarks
-  :PROPERTIES:
-  :ID:       benchmarks
-  :END:
+  :properties:
+  :id:       benchmarks
+  :end:
 
-Performance benchmarks use [[https://asv.readthedocs.io][ASV (Airspeed Velocity)]] with results posted on PRs
-via [[https://github.com/HaoZeke/asv-perch][asv-perch]]. The benchmark suite covers all three computational domains:
+Performance benchmarks use [[https://asv.readthedocs.io][Airspeed Velocity (ASV)]], and [[https://github.com/HaoZeke/asv-perch][asv-perch]] posts the timing results on pull requests.
+The benchmark suite has one file for each computational domain, from surfaces to geometry.
 
-- *Surfaces* (~benchmarks/bench_surfaces.py~) :: JAX kernel matrix construction,
-  ~GradientMatern~ fit/predict cycles, and prediction-only scaling. Uses manual
-  JIT warmup in ~setup()~ and ~block_until_ready()~ for accurate timing.
-- *Interpolation* (~benchmarks/bench_interpolation.py~) :: SciPy B-spline
-  interpolation via ~spline_interp~, parameterized by input size.
-- *Geometry* (~benchmarks/bench_geometry.py~) :: ASE ~analyze_structure~ on
-  water clusters, parameterized by molecule count.
+- *Surfaces* (~benchmarks/bench_surfaces.py~) :: Kernel matrix construction in ~jax~, ~GradientMatern~ fit/predict cycles, and prediction-only scaling.
+                                                 It warms up the just-in-time (JIT) compiled code in ~setup()~ and calls ~block_until_ready()~ for accurate timing.
+- *Interpolation* (~benchmarks/bench_interpolation.py~) :: SciPy B-spline interpolation via ~spline_interp~, parameterized by input size.
+- *Geometry* (~benchmarks/bench_geometry.py~) :: ASE ~analyze_structure~ on water clusters, parameterized by molecule count.
 
-** Running Locally
+** Running locally
 
-The ~bench~ pixi environment composes the ~surfaces~ and ~test~ features,
-providing JAX, SciPy, ASE, and ASV:
+The ~bench~ pixi environment has ~jax~, SciPy, ASE and ASV, since it adds the ~surfaces~ and ~test~ features to the ~bench~ feature.
 
 #+begin_src bash
 # Validate that all benchmarks parse correctly
@@ -187,35 +159,28 @@ pixi run -e bench asv run \
   --record-samples
 #+end_src
 
-The ~-E "existing:..."~ flag tells ASV to use the pixi-managed Python
-rather than building its own virtualenv. Results land in ~.asv/results/~
-(gitignored).
+The ~-E "existing:..."~ flag tells ASV to use the pixi-managed Python rather than building its own virtualenv.
+ASV writes the results to ~.asv/results/~, which git ignores.
 
-** CI Workflow
+** CI workflow
 
-Two workflows implement the [[https://asv-perch.rgoswami.me/explanation/fork_security.html][fork-safe split pattern]]:
+Two workflows implement the [[https://asv-perch.rgoswami.me/explanation/fork_security.html][fork-safe split pattern]].
 
-1. ~ci_benchmark.yml~ (=pull_request= trigger, read-only) :: Runs benchmarks
-   for the base and PR commits in a matrix. Stashes ~benchmarks/~,
-   ~asv.conf.json~, ~pixi.toml~, and ~pixi.lock~ before each ~git checkout~
-   so the PR's benchmark code and environment definition apply to both
-   commits. Uploads ~.asv/results/~ as artifacts.
-2. ~ci_bench_commenter.yml~ (=workflow_run= trigger, write access) :: Downloads
-   the combined artifact and calls ~HaoZeke/asv-perch@v1~ with
-   ~comparison-text-file~ mode to post a formatted table on the PR.
+1. ~ci_benchmark.yml~ (=pull_request= trigger, read-only) :: Runs benchmarks for the base and PR commits in a matrix.
+                                                             Stashes ~benchmarks/~, ~asv.conf.json~, ~pixi.toml~, and ~pixi.lock~ before each ~git checkout~ so the PR's benchmark code and environment definition apply to both commits.
+                                                             Uploads ~.asv/results/~ as artifacts.
+2. ~ci_bench_commenter.yml~ (=workflow_run= trigger, write access) :: Downloads the combined artifact and calls ~HaoZeke/asv-perch@v1~ with ~comparison-text-file~ mode to post a formatted table on the PR.
 
-** Writing New Benchmarks
+** Writing new benchmarks
 
-Follow the ASV class convention. Key JAX considerations:
+Follow the ASV class convention, and mind these points for ~jax~ code.
 
-- Always call ~block_until_ready()~ in the timing body to force synchronous
-  completion of JAX async dispatch.
-- Warm up JIT-compiled code paths in ~setup()~ with a throwaway call, then set
-  ~warmup_time = 0~ so ASV does not double-count compilation.
-- Use ~optimize=False~ for surface-fitting benchmarks to measure kernel math
-  rather than BFGS optimizer convergence variance.
+- Always call ~block_until_ready()~ in the timing body to force synchronous completion of the asynchronous dispatch in ~jax~.
+- Warm up the compiled code paths in ~setup()~ with a throwaway call.
+  Then set ~warmup_time = 0~, so that ASV does not count the compilation twice.
+- Use ~optimize=False~ for surface-fitting benchmarks to measure kernel math rather than the convergence variance of the Broyden-Fletcher-Goldfarb-Shanno (BFGS) optimizer.
 
-* Performance Improvements [2026-03-13]
+* Performance improvements [2026-03-13]
 
 ** Summary
 
@@ -226,17 +191,11 @@ Completed performance optimization campaign for chemgp module:
 3. Complete type hints (90%+ coverage)
 4. Error handling and HDF5 validation
 
-** Benchmarks
+The caching and error-handling helpers below have since moved to ~chemparseplot.plot.chemgp~, while the thread pool stays in ~rgpycrumbs/chemgp/plot_gp.py~.
 
-| Operation          | Before | After | Speedup |
-|--------------------+--------+-------+---------|
-| Batch (20 plots)   | 60s    | 15s   | 4x      |
-| Batch (50 plots)   | 150s   | 35s   | 4.3x    |
-| Repeated clamp detect | 10ms  | 8ms   | 1.25x   |
+** Implementation details
 
-** Implementation Details
-
-*** Parallel Processing
+*** Parallel processing
 
 Pattern adopted from =nebmmf_repro/scripts/parse_results.py=:
 
@@ -256,11 +215,11 @@ def detect_clamp(filename: str):
     ...
 #+end_src
 
-*** Type Hints
+*** Type hints
 
 Target: 90%+ coverage across chemgp modules.
 
-*** Error Handling
+*** Error handling
 
 #+begin_src python
 @safe_plot
@@ -269,13 +228,13 @@ def plot_surface(...):
     ...
 #+end_src
 
-** Files Changed
+** Files changed
 
 - chemgp/plot_gp.py (+172 lines)
 - chemgp/plotting.py (+65 lines)
 - chemgp/hdf5_io.py (+35 lines)
 
-** Towncrier Newsfragments
+** Towncrier newsfragments
 
 - docs/newsfragments/5019393.dev.rst
 - docs/newsfragments/type_hints.dev.rst
