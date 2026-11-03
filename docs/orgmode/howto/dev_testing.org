@@ -36,6 +36,7 @@ This runs:
 | fragments | + IRA, tblite, pyvista | fragments, ira, align | Geometry analysis, IRA alignment, fragments |
 
 Each env writes ~COVERAGE_FILE=.coverage.<env>~, then ~cov~ combines them all.
+A failing test in any environment stops ~cov~ with the pytest exit status.
 
 ** Individual Environments
 

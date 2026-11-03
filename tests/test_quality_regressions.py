@@ -5,10 +5,13 @@ from __future__ import annotations
 import importlib
 import importlib.metadata
 import sys
+from pathlib import Path
 
 import pytest
 
 pytestmark = pytest.mark.pure
+
+PROJECT_ROOT = Path(__file__).parents[1]
 
 
 @pytest.mark.parametrize(
@@ -74,3 +77,26 @@ def test_version_falls_back_to_distribution_metadata(
     finally:
         monkeypatch.undo()
         importlib.reload(rgpycrumbs)
+
+
+def test_pixi_test_tasks_propagate_test_failures() -> None:
+    """Coverage orchestration must not turn failed test runs into success."""
+    tomllib = pytest.importorskip("tomllib")
+    project = tomllib.loads((PROJECT_ROOT / "pixi.toml").read_text())
+
+    test_commands = {
+        name: task["cmd"]
+        for feature in project["feature"].values()
+        for name, task in feature.get("tasks", {}).items()
+        if name.startswith("test-")
+    }
+
+    assert set(test_commands) == {
+        "test-base",
+        "test-eonmlflow",
+        "test-fragments",
+        "test-ptm",
+        "test-surfaces",
+    }
+    for command in test_commands.values():
+        assert "; true" not in command
