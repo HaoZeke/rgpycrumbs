@@ -50,27 +50,33 @@ def negative_mll_imq_map(log_params, init_eps, x, y_flat, D_plus_1):
     return mll_cost + eps_penalty
 
 
+def _heteroscedastic_noise(noise_per_obs, prior_variance):
+    """Spread each energy noise over its point's gradient components.
+
+    Every component keeps the energy's ratio of noise to prior variance, so
+    the gradient noise carries the energy noise units divided by length
+    squared, as the gradients themselves do.
+
+    Args:
+        noise_per_obs: Energy noise variance per point, shape ``(N,)``.
+        prior_variance: Prior variances per point, shape ``(N, D+1)``, with
+            the energy first.
+
+    Returns:
+        Noise variances in the covariance order, shape ``(N(D+1),)``.
+    """
+    relative_noise = noise_per_obs / prior_variance[:, 0]
+    return (relative_noise[:, None] * prior_variance).flatten()
+
+
 @jit
 def _grad_imq_solve(x, y_full, noise_scalar, epsilon, noise_per_obs=None):
     K_blocks = k_matrix_imq_grad_map(x, x, epsilon)
     N, _, D_plus_1, _ = K_blocks.shape
     K_full = K_blocks.transpose(0, 2, 1, 3).reshape(N * D_plus_1, N * D_plus_1)
     if noise_per_obs is not None:
-        # Heteroscedastic: each observation has its own noise level,
-        # repeated for the value + D gradient components.
-        # Gradient components get 10x less noise than energy (trust gradients).
-        D = D_plus_1 - 1
-        noise_blocks = []
-        for i in range(N):
-            obs_noise = noise_per_obs[i]
-            block = jnp.concatenate(
-                [
-                    jnp.array([obs_noise]),  # energy noise
-                    jnp.full(D, obs_noise * 0.1),  # gradient noise (10x lower)
-                ]
-            )
-            noise_blocks.append(block)
-        noise_diag = jnp.concatenate(noise_blocks)
+        prior_variance = jnp.diag(K_full).reshape(N, D_plus_1)
+        noise_diag = _heteroscedastic_noise(noise_per_obs, prior_variance)
     else:
         noise_diag = jnp.full(N * D_plus_1, noise_scalar)
     jitter = covariance_roundoff_jitter(K_full)
@@ -115,6 +121,8 @@ class GradientIMQ(BaseGradientSurface):
        Optimized fits no longer pull the noise toward ``1e-2``.
        The default ``epsilon`` starts at the median distance between inputs.
        Optimized fits cap the noise at the caller's ``smoothing``.
+       With ``noise_per_obs``, each gradient component keeps the energy's
+       ratio of noise to prior variance instead of a tenth of its noise.
     """
 
     def _fit(self, smoothing, length_scale, optimize):

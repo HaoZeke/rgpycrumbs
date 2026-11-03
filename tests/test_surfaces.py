@@ -991,6 +991,54 @@ def test_gradient_imq_prior_leaves_the_noise_to_the_likelihood(gradient_2d_data)
     assert penalties == pytest.approx([penalties[0]] * 3, abs=1e-3)
 
 
+def test_heteroscedastic_gradient_noise_follows_the_input_units():
+    """Inputs scaled by ``s`` scale the gradient noise by ``1 / s**2``.
+
+    That is the energy noise ratio a gradient in energy per length needs.
+    """
+    from rgpycrumbs.surfaces._kernels import full_covariance_imq
+    from rgpycrumbs.surfaces.gradient_imq import _heteroscedastic_noise
+
+    point = jnp.array([0.3, -0.2], dtype=jnp.float32)
+    epsilon, scale = 0.7, 10.0
+    noise = jnp.array([0.05], dtype=jnp.float32)
+    ratios = []
+    for s in (1.0, scale):
+        block = full_covariance_imq(s * point, s * point, jnp.float32(s * epsilon))
+        spread = _heteroscedastic_noise(noise, jnp.diag(block)[None, :])
+        assert spread[0] == pytest.approx(0.05)
+        ratios.append(np.asarray(spread[1:] / spread[0]))
+
+    assert ratios[1] == pytest.approx(ratios[0] / scale**2, rel=1e-5)
+
+
+def test_gradient_imq_solve_spreads_the_energy_noise_by_prior_variance(
+    gradient_2d_data,
+):
+    """The IMQ prior variances are ``1 / epsilon`` and ``1 / epsilon**3``.
+
+    Each gradient component therefore gets the energy noise over
+    ``epsilon**2``.
+    """
+    from rgpycrumbs.surfaces._hyperparameters import covariance_roundoff_jitter
+    from rgpycrumbs.surfaces._kernels import gradient_covariance, k_matrix_imq_grad_map
+    from rgpycrumbs.surfaces.gradient_imq import _grad_imq_solve
+
+    x, y, grads = gradient_2d_data
+    epsilon = 0.7
+    noise = jnp.linspace(0.01, 0.05, x.shape[0], dtype=jnp.float32)
+    y_full = jnp.concatenate([y[:, None], grads], axis=1)
+    K = gradient_covariance(k_matrix_imq_grad_map(x, x, epsilon))
+    gradient_noise = noise / epsilon**2
+    expected_noise = jnp.stack([noise, gradient_noise, gradient_noise], axis=1)
+    K_noisy = K + jnp.diag(expected_noise.flatten() + covariance_roundoff_jitter(K))
+
+    alpha, _ = _grad_imq_solve(x, y_full, 0.0, epsilon, noise)
+
+    expected = np.linalg.solve(np.asarray(K_noisy, np.float64), np.ravel(y_full))
+    assert np.asarray(alpha) == pytest.approx(expected, rel=1e-3, abs=1e-4)
+
+
 # ---------------------------------------------------------------------------
 # Prediction at origin sanity check
 # ---------------------------------------------------------------------------
