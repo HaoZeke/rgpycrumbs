@@ -9,9 +9,8 @@
   .. versionadded:: 0.1.0
   #+END_EXPORT
 
-  The ~rgpycrumbs.run.jupyter~ module provides clean abstractions for subprocess
-  management and configuration generation, designed specifically for tutorial
-  notebooks (like those in the Atomistic Cookbook).
+  The ~rgpycrumbs.run.jupyter~ module runs subprocesses for tutorial notebooks, like those in the Atomistic Cookbook.
+  The ~rgpycrumbs.eon.helpers~ module writes eOn ~config.ini~ files.
 
 ** Subprocess Management
    The ~run_command_or_exit~ function streams ~stdout~ and ~stderr~ in real-time
@@ -37,7 +36,7 @@
    ~write_eon_config~ to generate them from Python dictionaries.
 
    #+BEGIN_SRC python
-   from rgpycrumbs.run.jupyter import write_eon_config
+   from rgpycrumbs.eon.helpers import write_eon_config
 
    settings = {
        "Main": {"job": "nudged_elastic_band"},
@@ -50,3 +49,4 @@
 
 ** API Reference
    For developer details see @@rst::mod:`rgpycrumbs.run.jupyter`@@.
+   ~write_eon_config~ is documented in @@rst::mod:`rgpycrumbs.eon.helpers`@@.
