@@ -119,6 +119,21 @@ def test_ptm_environment_takes_ovito_from_its_channel() -> None:
     assert "ovito" not in project["feature"]["test"]["dependencies"]
 
 
+def test_coverage_workflow_combines_every_cov_environment() -> None:
+    """CI runs and combines each per-environment file that ``pixi run cov`` does."""
+    tomllib = pytest.importorskip("tomllib")
+    project = tomllib.loads((PROJECT_ROOT / "pixi.toml").read_text())
+    cov = project["feature"]["test"]["tasks"]["cov"]["cmd"]
+    workflow = (PROJECT_ROOT / ".github" / "workflows" / "ci_coverage.yml").read_text()
+    combine = next(line for line in workflow.splitlines() if "coverage combine" in line)
+
+    environments = re.findall(r"\.coverage\.(\w+)", cov)
+    assert environments
+    for environment in environments:
+        assert f"--data-file=.coverage.{environment} " in workflow
+        assert f" .coverage.{environment}" in combine
+
+
 def test_docs_export_regenerates_cog_blocks_first() -> None:
     """Org sources with cog blocks are regenerated before the Emacs export."""
     tomllib = pytest.importorskip("tomllib")

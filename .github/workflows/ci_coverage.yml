@@ -34,8 +34,12 @@ jobs:
         shell: bash -el {0}
         run: |
           pixi r -e eonmlflow -- python -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q
+      - name: Run ptm env
+        shell: bash -el {0}
+        run: |
+          pixi r -e ptm -- python -m coverage run --data-file=.coverage.ptm --source=rgpycrumbs -m pytest tests/ -m ptm -q
       - name: Combine and report
         shell: bash -el {0}
         run: |
-          pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow
+          pixi r -e test -- python -m coverage combine .coverage.test .coverage.surfaces .coverage.fragments .coverage.eonmlflow .coverage.ptm
           pixi r -e test -- python -m coverage report --show-missing --precision=1 --fail-under=70
