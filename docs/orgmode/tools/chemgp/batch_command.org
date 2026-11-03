@@ -17,13 +17,13 @@ It supports parallel execution for improved performance when processing many fil
 
 #+begin_src bash
 # Sequential processing (default)
-rgpycrumbs chemgp batch --config plots.toml
+rgpycrumbs chemgp plot-gp batch --config plots.toml
 
 # Parallel processing with 4 workers
-rgpycrumbs chemgp batch --config plots.toml --parallel 4
+rgpycrumbs chemgp plot-gp batch --config plots.toml --parallel 4
 
 # Short form
-rgpycrumbs chemgp batch -c plots.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c plots.toml -j 4
 #+end_src
 
 * Configuration File Format
@@ -98,10 +98,10 @@ The =--parallel= (or =-j=) option enables concurrent plot generation:
 
 #+begin_src bash
 # Use 4 parallel workers
-rgpycrumbs chemgp batch -c plots.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c plots.toml -j 4
 
 # Use 8 workers for large batches
-rgpycrumbs chemgp batch -c plots.toml -j 8
+rgpycrumbs chemgp plot-gp batch -c plots.toml -j 8
 #+end_src
 
 ** Performance
@@ -123,7 +123,7 @@ Note: Speedup depends on I/O bandwidth and CPU cores available.
 Generate all plots from configuration:
 
 #+begin_src bash
-rgpycrumbs chemgp batch -c my_plots.toml
+rgpycrumbs chemgp plot-gp batch -c my_plots.toml
 #+end_src
 
 * Parallel Processing
@@ -131,7 +131,7 @@ rgpycrumbs chemgp batch -c my_plots.toml
 Process 20 plots with 4 workers:
 
 #+begin_src bash
-rgpycrumbs chemgp batch -c large_batch.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c large_batch.toml -j 4
 #+end_src
 
 * Custom Output Directory
@@ -148,7 +148,7 @@ output = "reaction1_surface.pdf"
 #+end_src
 
 #+begin_src bash
-rgpycrumbs chemgp batch -c config.toml
+rgpycrumbs chemgp plot-gp batch -c config.toml
 #+end_src
 
 * Type-Specific Options

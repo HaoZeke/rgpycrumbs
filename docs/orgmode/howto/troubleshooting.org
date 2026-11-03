@@ -71,7 +71,7 @@ export RGPYCRUMBS_AUTO_DEPS=1  # ase/scipy via ensure_import
 *Solution:*
 #+begin_src bash
 # Reduce number of workers
-rgpycrumbs chemgp batch -c config.toml -j 2
+rgpycrumbs chemgp plot-gp batch -c config.toml -j 2
 #+end_src
 
 * Performance

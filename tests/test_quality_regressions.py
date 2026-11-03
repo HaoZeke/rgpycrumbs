@@ -470,7 +470,7 @@ def test_muller_brown_script_reports_a_log_without_iterations(tmp_path: Path) ->
 
 
 def test_plt_gp_docs_name_only_real_subcommands() -> None:
-    """The plt-gp page and the batch tutorial name only subcommands that exist."""
+    """The plot-gp page and the batch tutorial name only subcommands that exist."""
     pytest.importorskip("h5py")
     pytest.importorskip("chemparseplot")
     from rgpycrumbs.chemgp.plot_gp import cli
@@ -484,9 +484,43 @@ def test_plt_gp_docs_name_only_real_subcommands() -> None:
     }
     tutorial = (docs / "batch_tutorial.org").read_text(encoding="utf-8")
     entry_types = set(re.findall(r'^type = "([^"]+)"$', tutorial, re.MULTILINE))
+    invoked = {
+        match.group(1)
+        for page in (PROJECT_ROOT / "docs" / "orgmode").rglob("*.org")
+        for match in re.finditer(
+            r"rgpycrumbs chemgp plot-gp ([a-z]+)", page.read_text(encoding="utf-8")
+        )
+    }
 
     assert listed == set(cli.commands)
     assert entry_types <= set(cli.commands) - {"batch"}
+    assert invoked
+    assert invoked <= set(cli.commands)
+
+
+def test_docs_name_registered_commands() -> None:
+    """Commands the org pages run through ``rgpycrumbs`` exist in the CLI."""
+    import click
+
+    from rgpycrumbs.cli import main
+
+    invoked = {
+        (match["group"], match["command"])
+        for page in (PROJECT_ROOT / "docs" / "orgmode").rglob("*.org")
+        for match in re.finditer(
+            r"rgpycrumbs (?P<group>[a-z]+) (?P<command>[a-z][a-z-]*[a-z])(?![a-z*-])",
+            page.read_text(encoding="utf-8"),
+        )
+        if isinstance(main.commands.get(match["group"]), click.Group)
+    }
+    unknown = {
+        f"{group} {command}"
+        for group, command in invoked
+        if command not in main.commands[group].commands
+    }
+
+    assert invoked
+    assert unknown == set()
 
 
 def _saddle_landscape_keywords(

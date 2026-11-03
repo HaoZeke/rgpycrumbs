@@ -204,10 +204,10 @@ rgpycrumbs eon plt-neb --start 280
 
 #+begin_src bash
 # Single convergence plot from an HDF5 file
-rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+rgpycrumbs chemgp plot-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
 
 # Batch generation from a TOML config
-rgpycrumbs chemgp plt-gp batch --config figures.toml
+rgpycrumbs chemgp plot-gp batch --config figures.toml
 #+end_src
 
 See @@rst::doc:`tools/chemgp/plt_gp`@@ for the full CLI reference and

@@ -1,16 +1,16 @@
-#+TITLE: ~plt-gp~
+#+TITLE: ~plot-gp~
 #+OPTIONS: toc:nil todo:nil num:nil author:nil
 
 * CLI Reference
 #+BEGIN_EXPORT rst
 .. click:: rgpycrumbs.chemgp.plot_gp:cli
-   :prog: rgpycrumbs chemgp plt-gp
+   :prog: rgpycrumbs chemgp plot-gp
    :nested: full
 #+END_EXPORT
 
 * Overview
 
-~plt-gp~ reads HDF5 files produced by ChemGP (the Rust crate ~chemgp-core~) and
+~plot-gp~ reads HDF5 files produced by ChemGP (the Rust crate ~chemgp-core~) and
 generates publication-quality PDF figures via ~chemparseplot~.
 
 | Subcommand | Plot type | Backend |
@@ -41,13 +41,13 @@ All single-plot subcommands accept:
 
 #+begin_src bash
 # Convergence curve from a minimize run
-rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+rgpycrumbs chemgp plot-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
 
 # 2D surface with NEB path overlay
-rgpycrumbs chemgp plt-gp surface -i output/leps_neb.h5 -o surface.pdf
+rgpycrumbs chemgp plot-gp surface -i output/leps_neb.h5 -o surface.pdf
 
 # NLL landscape
-rgpycrumbs chemgp plt-gp nll -i output/leps_nll.h5 -o nll.pdf
+rgpycrumbs chemgp plot-gp nll -i output/leps_nll.h5 -o nll.pdf
 #+end_src
 
 * Batch Mode
@@ -55,7 +55,7 @@ rgpycrumbs chemgp plt-gp nll -i output/leps_nll.h5 -o nll.pdf
 Define a TOML config listing all plots, then generate them in one command:
 
 #+begin_src bash
-rgpycrumbs chemgp plt-gp batch --config figures.toml
+rgpycrumbs chemgp plot-gp batch --config figures.toml
 #+end_src
 
 See the @@rst::doc:`batch tutorial <batch_tutorial>`@@ for a worked example with

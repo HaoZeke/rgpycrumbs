@@ -45,8 +45,8 @@ output = "leps_rff_quality.pdf"
 type = "rff"
 #+end_src
 
-Each ~[[plots]]~ entry maps one HDF5 input to one PDF output. The ~type~ field
-selects the plt-gp subcommand (convergence, surface, rff, etc.).
+Each ~[[plots]]~ entry maps one HDF5 input to one PDF output.
+The ~type~ field names the ~plot-gp~ subcommand, such as ~convergence~, ~surface~ or ~rff~.
 
 Paths in ~input~ and ~output~ resolve relative to ~input_dir~ and ~output_dir~
 respectively. Both default to the directory containing the TOML file.
@@ -54,7 +54,7 @@ respectively. Both default to the directory containing the TOML file.
 * Generate the Figures
 
 #+begin_src bash
-rgpycrumbs chemgp plt-gp batch --config my_figures.toml
+rgpycrumbs chemgp plot-gp batch --config my_figures.toml
 #+end_src
 
 Output:
@@ -87,6 +87,6 @@ underscores replacing hyphens) works here.
 
 * Next Steps
 
-- @@rst::doc:`plt_gp`@@ -- full CLI reference for all 11 subcommands
-- @@rst::doc:`hdf5_schema`@@ -- HDF5 layout that plt-gp expects
-- [[https://chemparseplot.rgoswami.me/tutorials/chemgp/index.html][chemparseplot ChemGP tutorials]] -- using the plotting functions directly from Python
+- @@rst::doc:`plt_gp`@@: the CLI reference for all 11 subcommands
+- @@rst::doc:`hdf5_schema`@@: the HDF5 layout that ~plot-gp~ expects
+- [[https://chemparseplot.rgoswami.me/tutorials/chemgp/index.html][chemparseplot ChemGP tutorials]]: plotting from Python

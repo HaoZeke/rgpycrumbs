@@ -25,7 +25,7 @@ export RGPYCRUMBS_AUTO_DEPS=1
 *** How do I use the batch command?
 
 #+begin_src bash
-rgpycrumbs chemgp batch -c config.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c config.toml -j 4
 #+end_src
 
 *** How do I match atoms to target coordinates?
@@ -57,7 +57,7 @@ RGPYCRUMBS_AUTO_DEPS=1 rgpycrumbs chemgp ...
 Use parallel processing:
 
 #+begin_src bash
-rgpycrumbs chemgp batch -c config.toml -j 8
+rgpycrumbs chemgp plot-gp batch -c config.toml -j 8
 #+end_src
 
 ** See Also

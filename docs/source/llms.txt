@@ -47,7 +47,7 @@ eOn configuration options are not listed here. The option schema is published wi
 - [plt-saddle](https://rgpycrumbs.rgoswami.me/tools/eon/plt_saddle): saddle-search figures
 - [ptmdisp](https://rgpycrumbs.rgoswami.me/tools/eon/ptmdisp): displacement plots
 - [ChemGP tools](https://rgpycrumbs.rgoswami.me/tools/chemgp/): figures from ChemGP HDF5
-- [plt-gp](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp): ChemGP figures
+- [plot-gp](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp): ChemGP figures
 - [batch](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_command): batch command
 - [Batch tutorial](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_tutorial): batch workflow
 - [HDF5 schema](https://rgpycrumbs.rgoswami.me/tools/chemgp/hdf5_schema): ChemGP HDF5 layout

@@ -5,7 +5,7 @@
 
 The ChemGP Rust examples write line-delimited records.
 ChemGP's =scripts/jsonl_to_h5.py= turns them into HDF5 files with a fixed layout.
-The ~plt-gp~ subcommands each read specific groups and attributes from this layout.
+The ~plot-gp~ subcommands each read specific groups and attributes from this layout.
 
 ** Top-Level Groups
 
