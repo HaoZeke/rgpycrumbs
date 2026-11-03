@@ -27,6 +27,7 @@ import sys
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -82,7 +83,13 @@ def _require_tomllib() -> Any:
 
 
 def _pin_from_purl(purl: str) -> tuple[str, str] | None:
-    """Parse ``pkg:pypi/name@version`` (optional qualifiers after ``?``)."""
+    """Parse ``pkg:pypi/name@version`` (optional qualifiers after ``?``).
+
+    Percent escapes in the name and the version are decoded in either case.
+
+    .. versionchanged:: 1.14.0
+       Versions are decoded too, so ``2.5.1%2Bcpu`` pins ``2.5.1+cpu``.
+    """
     if not purl.startswith("pkg:pypi/"):
         return None
     rest = purl[len("pkg:pypi/") :]
@@ -90,8 +97,8 @@ def _pin_from_purl(purl: str) -> tuple[str, str] | None:
     if "@" not in rest:
         return None
     name, version = rest.rsplit("@", maxsplit=1)
-    name = name.strip().replace("%2D", "-").replace("%5F", "_")
-    version = version.strip()
+    name = unquote(name.strip())
+    version = unquote(version.strip())
     if not name or not version:
         return None
     return name, version

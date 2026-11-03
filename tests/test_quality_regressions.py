@@ -187,3 +187,20 @@ def test_chemparseplot_requirements_share_one_released_floor() -> None:
             r"chemparseplot ?(?:≥|>=) ?(\d+(?:\.\d+)+)", path.read_text()
         )
         assert set(documented) <= {floor}, path
+
+
+@pytest.mark.parametrize(
+    ("purl", "pins"),
+    [
+        ("pkg:pypi/example%2dpackage@1.2.3", {"example-package": "1.2.3"}),
+        ("pkg:pypi/torch@2.5.1%2Bcpu", {"torch": "2.5.1+cpu"}),
+        ("pkg:pypi/typing%5fextensions@4.12.2", {"typing-extensions": "4.12.2"}),
+    ],
+)
+def test_cyclonedx_purls_decode_every_percent_escape(purl: str, pins: dict) -> None:
+    """Package URL escapes are case-insensitive and apply to versions too."""
+    from rgpycrumbs.locks import pypi_pins_from_cyclonedx
+
+    document = {"components": [{"purl": purl, "type": "library"}]}
+
+    assert pypi_pins_from_cyclonedx(document) == pins
