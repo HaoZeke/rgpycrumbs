@@ -6284,9 +6284,9 @@ The `.rst` files are generated and ignored by git, so edit the Org files.
 ### Pitfalls
 
 - The version comes from the git tag through hatch-vcs.
-  Nothing in the tree sets it, and the `version = "1.8.0"` in `pixi.toml` is unused and stale.
-  In a checkout of v1.13.0, `rgpycrumbs.__version__` is `unknown`, because hatch-vcs writes `_version.py` at the repository root.
-  `rgpycrumbs --version` and `importlib.metadata.version("rgpycrumbs")` give the real one.
+  Building or installing the package writes it to `rgpycrumbs/_version.py`, and `rgpycrumbs.__version__` reads that file.
+  A source tree that was never built or installed has no such file, so there `rgpycrumbs.__version__` is `unknown`.
+  Nothing in the tree sets the version, and `scripts/check_version.py` fails when `pixi.toml` sets one.
 - `rgpycrumbs GROUP TOOL --help` passes `--help` to the script, so uv installs the tool's whole dependency list first.
   The pages under <https://rgpycrumbs.rgoswami.me/tools/> list the options without installing anything.
 - Many tool headers take readcon and chemparseplot from git through `[tool.uv.sources]`.
