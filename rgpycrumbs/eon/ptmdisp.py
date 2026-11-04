@@ -120,10 +120,11 @@ def find_mismatch_indices(
     filename: str,
     target_structure: CrystalStructure,
     remove_fcc_vacancy: bool = False,
-    view_selection: bool = True,
+    view_selection: bool = False,
     selection_radius: float = 5,
     csp_vacancy_min: float = CSP_VACANCY_MIN_A2,
     csp_vacancy_max: float = CSP_VACANCY_MAX_A2,
+    selection_image: str | Path = "selection.png",
 ) -> np.ndarray:
     """
     Analyzes a structure file with PTM, identifies the interstitial defect,
@@ -138,7 +139,9 @@ def find_mismatch_indices(
     and around a relaxed octahedral interstitial sit near 1/2 too, so they are
     dropped as well. Without FCC atoms nothing is dropped.
     Otherwise every atom that does not match `target_structure` is a defect atom.
-    With no defect atom, the result is empty and no ``selection.png`` is drawn.
+    With `view_selection` set, the atoms of the sphere are rendered to the PNG
+    file `selection_image`.
+    With no defect atom, the result is empty and nothing is rendered.
 
     .. versionchanged:: 1.14.0
        Without `remove_fcc_vacancy`, the mismatched atoms are kept instead of
@@ -150,6 +153,9 @@ def find_mismatch_indices(
        taken over the mismatched atoms alone. The neighbors of a lone vacancy
        have 11/2 there, so that window caught them only for lattice constants
        from 3.57 to 4.16 angstroms.
+       `view_selection` defaults to False, and `selection_image` names the
+       file. By default, every call used to render ``selection.png`` in the
+       working directory.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -223,7 +229,7 @@ def find_mismatch_indices(
         vp.type = Viewport.Type.Ortho
         vp.zoom_all()
         vp.render_image(
-            size=(800, 600), filename="selection.png", background=(0, 0, 0), frame=0
+            size=(800, 600), filename=str(selection_image), background=(0, 0, 0), frame=0
         )
     return final_active_indices
 
@@ -271,6 +277,12 @@ def find_mismatch_indices(
     show_default=True,
     help="Highest centrosymmetry of a vacancy neighbor, in units of a**2.",
 )
+@click.option(
+    "--selection-image",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=None,
+    help="Render the atoms around the defect to this PNG file.",
+)
 def main(
     filename: str,
     structure: CrystalStructure,
@@ -278,6 +290,7 @@ def main(
     no_fcc_vacancy: bool,
     csp_vacancy_min: float,
     csp_vacancy_max: float,
+    selection_image: Path | None,
 ):
     """
     Analyzes FILENAME to find all atoms that are NOT the specified
@@ -299,8 +312,10 @@ def main(
         filename,
         structure,
         remove_fcc_vacancy=not no_fcc_vacancy,
+        view_selection=selection_image is not None,
         csp_vacancy_min=csp_vacancy_min,
         csp_vacancy_max=csp_vacancy_max,
+        selection_image=selection_image or "selection.png",
     )
 
     # Final, clean output is printed to stdout.

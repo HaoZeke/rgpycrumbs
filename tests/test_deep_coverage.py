@@ -2596,8 +2596,9 @@ class TestLogParamsDeep:
         cfg.write_text("[Main]\njob = minimization\n")
         import mlflow
 
-        with mlflow.start_run():
+        with mlflow.start_run() as run:
             log_config_ini(cfg)
+        assert run.info.artifact_uri.startswith(f"{tmp_path.as_uri()}/")
 
 
 class TestAuxDeep:

@@ -90,3 +90,22 @@ def skip_if_not_env(marker_name):
             f"Missing dependencies for '{marker_name}': {', '.join(missing)}",
             allow_module_level=True,
         )
+
+
+@pytest.fixture(autouse=True)
+def _mlflow_store_in_tmp_path(tmp_path, monkeypatch):
+    """Keep MLflow runs under ``tmp_path``.
+
+    Without a tracking URI, MLflow writes ``mlflow.db`` and ``mlruns/`` to the
+    working directory. A SQLite store in ``tmp_path`` would still put artifacts
+    under ``mlruns/`` in the working directory, so each test gets a file store,
+    which MLflow opens only with ``MLFLOW_ALLOW_FILE_STORE`` set. ``set_experiment``
+    keeps the active experiment in the process, and each test starts without
+    one, since its store starts empty.
+    """
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", (tmp_path / "mlruns").as_uri())
+    monkeypatch.setenv("MLFLOW_ALLOW_FILE_STORE", "true")
+    monkeypatch.delenv("MLFLOW_EXPERIMENT_ID", raising=False)
+    fluent = sys.modules.get("mlflow.tracking.fluent")
+    if fluent is not None:
+        monkeypatch.setattr(fluent, "_active_experiment_id", None)

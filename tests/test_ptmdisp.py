@@ -20,6 +20,9 @@ from rgpycrumbs.eon.ptmdisp import (
     main,
 )
 
+# The first eight bytes of every PNG file.
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
 
 @pytest.fixture
 def perfect_fcc_cu_file(tmp_path):
@@ -108,6 +111,12 @@ def perfect_bcc_fe_file(tmp_path):
     return filepath
 
 
+@pytest.fixture
+def selection_image(tmp_path):
+    """The file that a test renders the selected atoms to."""
+    return tmp_path / "selected-atoms.png"
+
+
 ### Unit Tests for the Core Logic ###
 
 
@@ -121,17 +130,21 @@ def test_find_indices_on_perfect_fcc(perfect_fcc_cu_file):
 
 @pytest.mark.parametrize("remove_fcc_vacancy", [False, True])
 def test_find_indices_without_defect_atoms_returns_quietly(
-    perfect_fcc_cu_file, remove_fcc_vacancy, tmp_path, monkeypatch
+    perfect_fcc_cu_file, remove_fcc_vacancy, selection_image, tmp_path, monkeypatch
 ):
     """With no defect atom, nothing is averaged and no selection image is drawn."""
     monkeypatch.chdir(tmp_path)
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         indices = find_mismatch_indices(
-            perfect_fcc_cu_file, CrystalStructure.FCC, remove_fcc_vacancy
+            perfect_fcc_cu_file,
+            CrystalStructure.FCC,
+            remove_fcc_vacancy,
+            view_selection=True,
+            selection_image=selection_image,
         )
     assert indices.size == 0
-    assert not (tmp_path / "selection.png").exists()
+    assert [path.name for path in tmp_path.iterdir()] == ["perfect_fcc.xyz"]
 
 
 def test_find_indices_on_fcc_with_defect(defect_fcc_cu_file):
@@ -143,6 +156,34 @@ def test_find_indices_on_fcc_with_defect(defect_fcc_cu_file):
     filepath, expected_defect_indices = defect_fcc_cu_file
     indices = find_mismatch_indices(filepath, CrystalStructure.FCC)
     assert isinstance(indices, np.ndarray)
+
+
+def test_find_indices_renders_nothing_by_default(
+    defect_fcc_cu_file, tmp_path, monkeypatch
+):
+    """Without view_selection, the defect atoms come back and no image is written."""
+    filepath, expected_defect_indices = defect_fcc_cu_file
+    monkeypatch.chdir(tmp_path)
+    indices = find_mismatch_indices(filepath, CrystalStructure.FCC)
+    assert expected_defect_indices <= set(indices.tolist())
+    assert [path.name for path in tmp_path.iterdir()] == ["defect_fcc.xyz"]
+
+
+def test_view_selection_renders_to_selection_image(
+    defect_fcc_cu_file, selection_image, tmp_path, monkeypatch
+):
+    """With view_selection, the selected atoms go to selection_image alone."""
+    filepath, _ = defect_fcc_cu_file
+    monkeypatch.chdir(tmp_path)
+    find_mismatch_indices(
+        filepath,
+        CrystalStructure.FCC,
+        view_selection=True,
+        selection_image=selection_image,
+    )
+    assert selection_image.read_bytes().startswith(PNG_SIGNATURE)
+    written = sorted(path.name for path in tmp_path.iterdir())
+    assert written == ["defect_fcc.xyz", selection_image.name]
 
 
 def test_find_indices_without_vacancy_filter_keeps_the_neighbors(defect_fcc_cu_file):
@@ -214,6 +255,29 @@ def test_cli_quiet_output_for_defect(defect_fcc_cu_file):
     result = runner.invoke(main, [str(filepath)])
 
     assert result.exit_code == 0, f"Script should exit successfully: {result.output}"
+
+
+def test_cli_renders_nothing_by_default(frenkel_pair_cu_file, tmp_path, monkeypatch):
+    """With the interstitial of a Frenkel pair to render, the command writes no image."""
+    filepath, _, _ = frenkel_pair_cu_file
+    monkeypatch.chdir(tmp_path)
+    result = CliRunner().invoke(main, [str(filepath)])
+    assert result.exit_code == 0, result.output
+    assert [path.name for path in tmp_path.iterdir()] == ["frenkel_pair.xyz"]
+
+
+def test_cli_selection_image_renders_the_selected_atoms(
+    frenkel_pair_cu_file, selection_image, tmp_path, monkeypatch
+):
+    """--selection-image renders the atoms around the defect to that file alone."""
+    filepath, _, _ = frenkel_pair_cu_file
+    monkeypatch.chdir(tmp_path)
+    options = ["--selection-image", str(selection_image)]
+    result = CliRunner().invoke(main, [*options, str(filepath)])
+    assert result.exit_code == 0, result.output
+    assert selection_image.read_bytes().startswith(PNG_SIGNATURE)
+    written = sorted(path.name for path in tmp_path.iterdir())
+    assert written == ["frenkel_pair.xyz", selection_image.name]
 
 
 def test_cli_structure_type_option(perfect_bcc_fe_file):
