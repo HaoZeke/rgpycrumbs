@@ -11,6 +11,10 @@ from ase.build import bulk
 from ase.io import write
 from ase.neighborlist import NeighborList
 from click.testing import CliRunner
+from matplotlib.image import imread
+from ovito import scene
+from ovito.io.ase import ase_to_ovito
+from ovito.pipeline import Pipeline, StaticSource
 
 pytestmark = pytest.mark.ptm
 
@@ -117,6 +121,24 @@ def selection_image(tmp_path):
     return tmp_path / "selected-atoms.png"
 
 
+@pytest.fixture
+def empty_scene():
+    """The OVITO scene of the process, without pipelines during the test."""
+    kept = list(scene.pipelines)
+    scene.pipelines.clear()
+    yield scene
+    scene.pipelines.clear()
+    scene.pipelines.extend(kept)
+
+
+def write_vacancy(filepath, element, lattice_constant):
+    """Writes the 3x3x3 FCC supercell of *element* without its atom 40 and returns the path."""
+    atoms = bulk(element, "fcc", a=lattice_constant, cubic=True) * (3, 3, 3)
+    del atoms[40]
+    write(filepath, atoms)
+    return filepath
+
+
 ### Unit Tests for the Core Logic ###
 
 
@@ -184,6 +206,44 @@ def test_view_selection_renders_to_selection_image(
     assert selection_image.read_bytes().startswith(PNG_SIGNATURE)
     written = sorted(path.name for path in tmp_path.iterdir())
     assert written == ["defect_fcc.xyz", selection_image.name]
+
+
+def test_view_selection_renders_the_same_image_again_in_one_process(
+    tmp_path, empty_scene
+):
+    """Each render removes its pipeline, so a structure renders alike after another one."""
+    nickel = write_vacancy(tmp_path / "vacancy-Ni.xyz", "Ni", 3.52)
+    copper = write_vacancy(tmp_path / "vacancy-Cu.xyz", "Cu", 3.6)
+    images = [
+        tmp_path / name for name in ("nickel.png", "copper.png", "nickel-again.png")
+    ]
+    for filepath, image in zip([nickel, copper, nickel], images, strict=True):
+        find_mismatch_indices(
+            filepath, CrystalStructure.FCC, view_selection=True, selection_image=image
+        )
+    first, again = imread(images[0]), imread(images[2])
+    differing = np.any(first != again, axis=-1).mean()
+    assert differing == 0, (
+        f"the second nickel image differs in {differing:.2%} of its pixels"
+    )
+    assert len(empty_scene.pipelines) == 0
+
+
+def test_view_selection_keeps_the_pipelines_of_the_scene(
+    defect_fcc_cu_file, selection_image, empty_scene
+):
+    """A render removes the pipeline that it added and no other."""
+    filepath, _ = defect_fcc_cu_file
+    data = ase_to_ovito(bulk("Cu", "fcc", a=3.6, cubic=True))
+    other = Pipeline(source=StaticSource(data=data))
+    other.add_to_scene()
+    find_mismatch_indices(
+        filepath,
+        CrystalStructure.FCC,
+        view_selection=True,
+        selection_image=selection_image,
+    )
+    assert list(empty_scene.pipelines) == [other]
 
 
 def test_find_indices_without_vacancy_filter_keeps_the_neighbors(defect_fcc_cu_file):

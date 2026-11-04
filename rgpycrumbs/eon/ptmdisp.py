@@ -141,6 +141,8 @@ def find_mismatch_indices(
     Otherwise every atom that does not match `target_structure` is a defect atom.
     With `view_selection` set, the atoms of the sphere are rendered to the PNG
     file `selection_image`.
+    The render then removes its pipeline from the OVITO scene, so the scene
+    keeps only the pipelines that it had before the call.
     With no defect atom, the result is empty and nothing is rendered.
 
     .. versionchanged:: 1.14.0
@@ -156,6 +158,8 @@ def find_mismatch_indices(
        `view_selection` defaults to False, and `selection_image` names the
        file. By default, every call used to render ``selection.png`` in the
        working directory.
+       Each render used to leave its pipeline in the OVITO scene, so every
+       later render in the process drew those atoms as well.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -223,14 +227,20 @@ def find_mismatch_indices(
         # Just to see what's being selected..
         pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[sphere_indices])))
         pviz.add_to_scene()
-        from ovito.vis import Viewport
+        try:
+            from ovito.vis import Viewport
 
-        vp = Viewport()
-        vp.type = Viewport.Type.Ortho
-        vp.zoom_all()
-        vp.render_image(
-            size=(800, 600), filename=str(selection_image), background=(0, 0, 0), frame=0
-        )
+            vp = Viewport()
+            vp.type = Viewport.Type.Ortho
+            vp.zoom_all()
+            vp.render_image(
+                size=(800, 600),
+                filename=str(selection_image),
+                background=(0, 0, 0),
+                frame=0,
+            )
+        finally:
+            pviz.remove_from_scene()
     return final_active_indices
 
 
