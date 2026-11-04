@@ -75,6 +75,9 @@ def run() -> None:
             if proc.returncode != 0:
                 print(proc.stdout + proc.stderr)
                 sys.exit(f"plt-neb for {name} exited with status {proc.returncode}")
+            if "Failed to process step" in " ".join((proc.stdout + proc.stderr).split()):
+                print(proc.stdout + proc.stderr)
+                sys.exit(f"plt-neb for {name} left out a step of the band")
             assert "--> Using active interpreter" in proc.stderr, proc.stderr
             assert target.read_bytes()[:8] == PNG_SIGNATURE, name
             print(f"{name}: {target.stat().st_size} bytes")

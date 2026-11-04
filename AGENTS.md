@@ -158,7 +158,10 @@ and ignored by git; edit the Org files.
   install `readcon-ops` from a fixed GitHub commit into
   `~/.cache/rgpycrumbs/deps` the first time they run. It brings
   `minimage`, a Rust extension built from git, so that run needs the
-  network and `cargo`.
+  network and `cargo`. The alignment runs on threads that each call the
+  installer, so a later run can install it again; when that fails, a
+  landscape loses the step with only a `Failed to process step` warning
+  and still exits 0.
 - `rgpycrumbs eon plt-neb --plot-type landscape` caches its data in
   `.neb_landscape.parquet` in the current directory and reuses the file
   for any later run there, even of another band. Pass a `--cache-file`

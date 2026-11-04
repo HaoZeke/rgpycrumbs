@@ -6319,7 +6319,10 @@ and ignored by git; edit the Org files.
   install `readcon-ops` from a fixed GitHub commit into
   `~/.cache/rgpycrumbs/deps` the first time they run. It brings
   `minimage`, a Rust extension built from git, so that run needs the
-  network and `cargo`.
+  network and `cargo`. The alignment runs on threads that each call the
+  installer, so a later run can install it again; when that fails, a
+  landscape loses the step with only a `Failed to process step` warning
+  and still exits 0.
 - `rgpycrumbs eon plt-neb --plot-type landscape` caches its data in
   `.neb_landscape.parquet` in the current directory and reuses the file
   for any later run there, even of another band. Pass a `--cache-file`
@@ -6709,6 +6712,9 @@ GitHub commit into `$XDG_CACHE_HOME/rgpycrumbs/deps` (by default
 `RGPYCRUMBS_AUTO_DEPS=1`. readcon-ops takes `minimage`, a Rust extension
 that is not on PyPI, from git, so that first plot needs the network and
 `cargo` (Cargo 1.83 is enough); uv caches the build for later runs.
+Images are aligned on several threads and each one installs it on that
+first plot, so the log can show `rgpycrumbs: installing readcon-ops`
+once per CPU.
 
 ### Pitfalls
 
@@ -6717,6 +6723,12 @@ that is not on PyPI, from git, so that first plot needs the network and
   at its columns, not at which run produced it, so a second run plotted
   from the same directory silently gets the first run's landscape. Give
   each run its own `--cache-file`, or pass `--force-recompute`.
+- A step that plt-neb cannot process is left out with a warning,
+  `Failed to process step N (neb_NNN.dat): ...`, and the plot still
+  exits 0. Look for that line in the output; `scripts/plot_neb.py`
+  fails on it. One cause is a race: now and then an alignment thread
+  misses the cached readcon-ops and installs it again, and when that
+  install fails, the thread's step is lost.
 - Without `--input-dat-pattern`, plt-neb reads `neb_*.dat` in the
   current directory, for landscapes too. The landscape commands in the
   NEB tutorial leave it out and, run from the tutorial directory, stop
@@ -6740,5 +6752,5 @@ tutorial run checks the step, the image and the barrier printed above.
 `scripts/plot_neb.py` needs route 2: it draws the profile and the
 landscape of the tutorial run into a temporary directory through the
 dispatcher, checks that the dispatcher stayed in the running
-environment and that both files are PNG images, and prints the versions
-of the plot stack it used.
+environment, that no step was left out and that both files are PNG
+images, and prints the versions of the plot stack it used.
