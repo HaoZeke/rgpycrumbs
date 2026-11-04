@@ -6165,8 +6165,9 @@ Working notes for changing or scripting against rgpycrumbs. The manual
 is Org under `docs/orgmode/`, published at
 <https://rgpycrumbs.rgoswami.me/>. `docs/source/llms.txt` is its
 hand-written map, served as <https://rgpycrumbs.rgoswami.me/llms.txt>,
-and `llms-full.txt` at the repository root holds the whole manual in one
-file. Task guides with scripts that CI runs are under `skills/`.
+and `llms-full.txt` at the repository root holds every page but the API
+reference in one file. Task guides with scripts that CI runs are under
+`skills/`.
 
 ### What rgpycrumbs is
 
