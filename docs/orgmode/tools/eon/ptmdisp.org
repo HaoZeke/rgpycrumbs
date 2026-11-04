@@ -32,6 +32,14 @@ The filter drops them as well, so pass ~--no-fcc-vacancy~ for such structures.
 In copper relaxed with effective medium theory, the neighbors of a ~<100>~ dumbbell stay below ~0.35~.
 The two dumbbell atoms stay above ~1~.
 
+** Periodic boundaries
+The structure analysis and the selection sphere take the periodic directions that the structure file declares.
+A slab in an extended ~.xyz~ file with ~pbc="T T F"~ stays free along z.
+A ~.con~ file keeps the flags of its metadata line.
+When that line names none, all three directions are periodic.
+The eon reader of the Atomic Simulation Environment (ASE) drops the flags of compressed ~.con~ files.
+The command takes those files as periodic along all three directions.
+
 ** Usage
 # TODO(rg): Actually use real examples here instead
 #+BEGIN_EXPORT rst

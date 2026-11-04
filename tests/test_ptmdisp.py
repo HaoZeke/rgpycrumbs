@@ -3,12 +3,14 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("ptm")
 
+import gzip
 import inspect
 import itertools
 import warnings
 
 import numpy as np
 import pytest
+import readcon
 from ase.build import bulk
 from ase.io import write
 from ase.neighborlist import NeighborList
@@ -166,6 +168,34 @@ def write_vacancy(filepath, element, lattice_constant):
     return filepath
 
 
+def copper_slab():
+    """The 3x3x3 copper supercell without atom 40, as a slab normal to z.
+
+    6 angstroms of vacuum lie above and below it, and the cell is periodic
+    along x and y alone.
+    """
+    atoms = bulk("Cu", "fcc", a=3.6, cubic=True) * (3, 3, 3)
+    del atoms[40]
+    atoms.center(vacuum=6.0, axis=2)
+    atoms.pbc = (True, True, False)
+    return atoms
+
+
+@pytest.fixture
+def sphere_pbc(monkeypatch):
+    """The periodic flags of the atoms that each call of _sphere_indices gets."""
+    from rgpycrumbs.eon.ptmdisp import _sphere_indices
+
+    seen = []
+
+    def record(atoms, defect, radius):
+        seen.append(atoms.pbc.tolist())
+        return _sphere_indices(atoms, defect, radius)
+
+    monkeypatch.setattr("rgpycrumbs.eon.ptmdisp._sphere_indices", record)
+    return seen
+
+
 ### Unit Tests for the Core Logic ###
 
 
@@ -308,6 +338,50 @@ def test_sphere_takes_images_along_the_periodic_axes_alone(pbc):
     sphere = _sphere_indices(atoms, corner, SELECTION_RADIUS)
     near = nearest_image_distances(atoms, atoms.positions[corner[0]]) < SELECTION_RADIUS
     assert sphere.tolist() == np.flatnonzero(near).tolist()
+
+
+@pytest.mark.parametrize("name", ["slab.xyz", "slab.con"])
+def test_slab_keeps_the_periodic_axes_of_its_file(name, sphere_pbc, tmp_path):
+    """A slab file periodic along x and y alone reaches the sphere with those flags.
+
+    The file goes through find_mismatch_indices and through the command.
+    """
+    filepath = tmp_path / name
+    atoms = copper_slab()
+    if filepath.suffix == ".con":
+        readcon.write_con(str(filepath), [readcon.ConFrame.from_ase(atoms)])
+    else:
+        write(filepath, atoms, format="extxyz")
+    find_mismatch_indices(filepath, CrystalStructure.FCC)
+    result = CliRunner().invoke(main, ["--no-fcc-vacancy", str(filepath)])
+    assert result.exit_code == 0, result.output
+    expected = [[True, True, False], [True, True, False]]
+    assert sphere_pbc == expected, f"the sphere got {sphere_pbc}"
+
+
+@pytest.mark.parametrize("name", ["slab.con", "slab.con.gz"])
+def test_con_file_without_flags_is_periodic_along_every_axis(name, sphere_pbc, tmp_path):
+    """A .con file without flags reaches the sphere periodic along x, y and z."""
+    plain = tmp_path / "slab.con"
+    write(plain, copper_slab(), format="eon")
+    filepath = tmp_path / name
+    if filepath != plain:
+        filepath.write_bytes(gzip.compress(plain.read_bytes()))
+    find_mismatch_indices(filepath, CrystalStructure.FCC)
+    assert sphere_pbc == [[True, True, True]], f"the sphere got {sphere_pbc}"
+
+
+def test_file_without_a_cell_reaches_the_sphere_without_periodic_axes(
+    sphere_pbc, tmp_path
+):
+    """A plain .xyz file has no cell, so the structure analysis runs on free atoms."""
+    filepath = tmp_path / "cluster.xyz"
+    atoms = bulk("Cu", "fcc", a=3.6, cubic=True) * (3, 3, 3)
+    del atoms[40]
+    write(filepath, atoms, format="xyz")
+    indices = find_mismatch_indices(filepath, CrystalStructure.FCC)
+    assert indices.size > 0
+    assert sphere_pbc == [[False, False, False]], f"the sphere got {sphere_pbc}"
 
 
 def test_find_indices_without_vacancy_filter_keeps_the_neighbors(defect_fcc_cu_file):

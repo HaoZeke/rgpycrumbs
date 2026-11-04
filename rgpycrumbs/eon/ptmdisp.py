@@ -51,6 +51,7 @@ import ase.io as aseio
 import click
 import numpy as np
 from ase.geometry import find_mic
+from ase.io.formats import filetype, parse_filename
 from ovito.io.ase import ase_to_ovito
 from ovito.modifiers import (
     CentroSymmetryModifier,
@@ -150,6 +151,11 @@ def find_mismatch_indices(
     The sphere is centered on the mean of the defect atoms. Along each
     periodic axis of the cell, the mean and the distances take the nearest
     periodic image of each atom.
+    The structure analysis and the sphere take the periodic axes that the
+    file declares. readcon reads a ``.con`` file with the flags of its
+    metadata line, and with all three axes periodic when that line has
+    none. The eon reader of ase, which takes compressed ``.con`` files,
+    drops the flags, so those files are periodic along all three axes.
 
     With `remove_fcc_vacancy` set, atoms whose centrosymmetry marks them as
     vacancy neighbors are dropped from the defect atoms.
@@ -183,6 +189,9 @@ def find_mismatch_indices(
        The center and the distances of the sphere used to ignore the
        periodic boundaries. So a defect on a face, an edge or a corner of
        the cell returned other atoms than the same defect inside it.
+       The atoms used to be periodic along all three axes after the read,
+       whatever the file declared. A file without a cell then failed in
+       the structure analysis.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -193,8 +202,10 @@ def find_mismatch_indices(
             atoms = read_first_atoms(path)
         else:
             atoms = aseio.read(filename)
-        # XXX(rg): con readers in ase somehow lose this information, seems like an ase bug
-        atoms.set_pbc([True] * 3)
+            # The eon reader of ase, which takes compressed .con files, drops
+            # the periodic flags. All three are the default of the format.
+            if filetype(parse_filename(str(filename))[0]) == "eon":
+                atoms.set_pbc(True)
     except FileNotFoundError:
         log.critical(f"Error: The file '{filename}' was not found.")
         sys.exit(1)
