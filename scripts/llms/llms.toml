@@ -10,8 +10,8 @@ full_note = "The pages follow in the order of the site's navigation."
 links = "raw"
 name = "rgpycrumbs"
 notes = [
-  "Every published page of https://rgpycrumbs.rgoswami.me/ follows, converted from its Org source to Markdown; each section names the address it was taken from. The map of the site is https://rgpycrumbs.rgoswami.me/llms.txt.",
-  "`rgpycrumbs GROUP TOOL ARGS` runs one self-contained script, `rgpycrumbs/GROUP/TOOL.py` with dashes for underscores, under `uv run --script`, which installs the dependencies listed in the script's PEP 723 header. The installed package itself needs only click, numpy and rich.",
+  "Every page of the manual at https://rgpycrumbs.rgoswami.me/ follows, converted from its Org source to Markdown; each section names the address it was taken from. The API reference that sphinx-autoapi builds from the docstrings, https://rgpycrumbs.rgoswami.me/autoapi/, is not included. The map of the site is https://rgpycrumbs.rgoswami.me/llms.txt.",
+  "`rgpycrumbs GROUP TOOL ARGS` runs one self-contained script, `rgpycrumbs/GROUP/TOOL.py` with dashes for underscores. By default it runs under `uv run --script`, which first installs the dependencies listed in the script's PEP 723 header. With `--dev`, without uv on PATH, or when readcon, matplotlib, polars, ase and chemparseplot all import, the current Python runs it with whatever is installed there. The installed package itself needs only click, numpy and rich.",
   "Build, test and documentation commands, and the mistakes that are easy to make, are in `AGENTS.md`; worked tasks with runnable scripts are under `skills/`. Both are reproduced at the end.",
 ]
 repo = "https://github.com/HaoZeke/rgpycrumbs"

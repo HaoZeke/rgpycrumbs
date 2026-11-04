@@ -2,9 +2,9 @@
 
 > rgpycrumbs is a dispatcher-based suite of command-line tools and library helpers for chemical physics: eOn NEB, minimization and saddle-search figures, gradient-enhanced surface models, structure alignment and fragments, ORCA and NWChem input, and UMA model packages.
 
-Every published page of https://rgpycrumbs.rgoswami.me/ follows, converted from its Org source to Markdown; each section names the address it was taken from. The map of the site is https://rgpycrumbs.rgoswami.me/llms.txt.
+Every page of the manual at https://rgpycrumbs.rgoswami.me/ follows, converted from its Org source to Markdown; each section names the address it was taken from. The API reference that sphinx-autoapi builds from the docstrings, https://rgpycrumbs.rgoswami.me/autoapi/, is not included. The map of the site is https://rgpycrumbs.rgoswami.me/llms.txt.
 
-`rgpycrumbs GROUP TOOL ARGS` runs one self-contained script, `rgpycrumbs/GROUP/TOOL.py` with dashes for underscores, under `uv run --script`, which installs the dependencies listed in the script's PEP 723 header. The installed package itself needs only click, numpy and rich.
+`rgpycrumbs GROUP TOOL ARGS` runs one self-contained script, `rgpycrumbs/GROUP/TOOL.py` with dashes for underscores. By default it runs under `uv run --script`, which first installs the dependencies listed in the script's PEP 723 header. With `--dev`, without uv on PATH, or when readcon, matplotlib, polars, ase and chemparseplot all import, the current Python runs it with whatever is installed there. The installed package itself needs only click, numpy and rich.
 
 Build, test and documentation commands, and the mistakes that are easy to make, are in `AGENTS.md`; worked tasks with runnable scripts are under `skills/`. Both are reproduced at the end.
 
@@ -6171,12 +6171,13 @@ file. Task guides with scripts that CI runs are under `skills/`.
 ### What rgpycrumbs is
 
 - A command dispatcher. `rgpycrumbs GROUP TOOL ARGS` runs the script
-  `rgpycrumbs/GROUP/TOOL.py` (dashes in `TOOL` read as underscores)
-  under `uv run --script`, so each tool installs what its PEP 723 header
-  names before it starts. The groups are `chemgp`, `eon`, `func`,
-  `geom`, `orca`, `parsers`, `plumed`, `prefix`, `run`, `surfaces`,
-  `surrogate` and `uma`; `rgpycrumbs config show` prints the merged
-  configuration.
+  `rgpycrumbs/GROUP/TOOL.py` (dashes in `TOOL` read as underscores),
+  by default under `uv run --script`, so the tool installs what its
+  PEP 723 header names before it starts; Pitfalls says when the
+  current Python runs it instead. The groups are `chemgp`, `eon`,
+  `func`, `geom`, `orca`, `parsers`, `plumed`, `prefix`, `run`,
+  `surfaces`, `surrogate` and `uma`; `rgpycrumbs config show` prints
+  the merged configuration.
 - A library. `docs/orgmode/explanation/public_api.org` lists what is
   public, mostly `rgpycrumbs.api`. `import rgpycrumbs` needs only click,
   numpy and rich. `rgpycrumbs.surfaces`, `.interpolation` and `.geom`

@@ -10,12 +10,13 @@ file. Task guides with scripts that CI runs are under `skills/`.
 ## What rgpycrumbs is
 
 - A command dispatcher. `rgpycrumbs GROUP TOOL ARGS` runs the script
-  `rgpycrumbs/GROUP/TOOL.py` (dashes in `TOOL` read as underscores)
-  under `uv run --script`, so each tool installs what its PEP 723 header
-  names before it starts. The groups are `chemgp`, `eon`, `func`,
-  `geom`, `orca`, `parsers`, `plumed`, `prefix`, `run`, `surfaces`,
-  `surrogate` and `uma`; `rgpycrumbs config show` prints the merged
-  configuration.
+  `rgpycrumbs/GROUP/TOOL.py` (dashes in `TOOL` read as underscores),
+  by default under `uv run --script`, so the tool installs what its
+  PEP 723 header names before it starts; Pitfalls says when the
+  current Python runs it instead. The groups are `chemgp`, `eon`,
+  `func`, `geom`, `orca`, `parsers`, `plumed`, `prefix`, `run`,
+  `surfaces`, `surrogate` and `uma`; `rgpycrumbs config show` prints
+  the merged configuration.
 - A library. `docs/orgmode/explanation/public_api.org` lists what is
   public, mostly `rgpycrumbs.api`. `import rgpycrumbs` needs only click,
   numpy and rich. `rgpycrumbs.surfaces`, `.interpolation` and `.geom`
