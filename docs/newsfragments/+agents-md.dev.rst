@@ -1,0 +1,1 @@
+``AGENTS.md`` lists the install, test, lint and documentation commands, the common tasks with the guide or page for each, and the pitfalls, among them that ``--help`` on a tool installs its dependencies, that git sources need Rust 1.85, that the active interpreter replaces uv when the plot stack imports, and that the landscape cache is reused across runs.
