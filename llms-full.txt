@@ -230,6 +230,9 @@ energy = np.array([0.0, -0.3, -0.8, -1.0, -0.5, 0.2, 0.8, 0.5, -0.1, 0.0])
 rc_fine, energy_fine = spline_interp(rc, energy, num=200)
 ```
 
+Leave out `num` to get a grid derived from the samples.
+For the default cubic spline it has `3 * (len(rc) - 1) + 1` points and passes through every sample of an evenly spaced `rc`.
+
 ### Data Types
 
 The `basetypes` module provides lightweight containers used across `rgpycrumbs`
@@ -277,13 +280,13 @@ rgpycrumbs eon plt-neb --start 280
 
 ```bash
 # Single convergence plot from an HDF5 file
-rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+rgpycrumbs chemgp plot-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
 
 # Batch generation from a TOML config
-rgpycrumbs chemgp plt-gp batch --config figures.toml
+rgpycrumbs chemgp plot-gp batch --config figures.toml
 ```
 
-See [`plt-gp`](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp) for the full CLI reference and
+See [`plot-gp`](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp) for the full CLI reference and
 [Batch tutorial](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_tutorial) for a tutorial on batch figure
 generation.
 
@@ -296,6 +299,281 @@ rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
 
 This creates `initial_images/ipath_000.con`, `ipath_001.con`, etc., suitable
 for initializing a new NEB calculation (e.g. with IDPP via ASE).
+
+## First Project - End-to-End Energy Landscape Analysis
+
+Source: https://rgpycrumbs.rgoswami.me/tutorials/first-project
+
+**First Project**
+
+This tutorial walks you through a complete workflow: from raw NEB calculation
+output to a publication-quality energy landscape figure. We'll use a surface
+diffusion problem as our example.
+
+### Prerequisites
+
+#### Installation
+
+```bash
+# Core package with all pip-available extras
+pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1
+
+# Or for development
+git clone https://github.com/HaoZeke/rgpycrumbs
+cd rgpycrumbs
+uv sync --all-extras
+```
+
+#### Sample Data
+
+For this tutorial, we assume you have:
+1. NEB calculation output files (`neb_*.dat`) from eOn
+2. A trajectory file (`path.con`) with image geometries
+
+Download sample data:
+
+```bash
+wget https://example.com/sample-neb-data.tar.gz
+tar xzf sample-neb-data.tar.gz
+cd sample-neb-data
+```
+
+### Step 1: Visualize the NEB Path
+
+First, let's see how the NEB optimization converged:
+
+```bash
+python -m rgpycrumbs.cli eon plt-neb --start 0 --end 50 -o neb_convergence.pdf
+```
+
+This produces a plot showing energy vs. iteration for each image. Look for:
+- Smooth convergence (lines should flatten)
+- Consistent spacing between images
+- No images crossing over each other
+
+**Troubleshooting:** If the plot is empty, check that your `neb_*.dat` files exist
+and contain energy data in column 2.
+
+### Step 2: Extract the Final Path
+
+Now extract the energy profile from the final iteration:
+
+```python
+# SKIP-DOCTEST -- requires sample NEB data files
+from rgpycrumbs.basetypes import nebpath
+from rgpycrumbs.eon.plt_neb import extract_neb_data
+import matplotlib.pyplot as plt
+
+# Load the final iteration data
+data = extract_neb_data("neb_49.dat")  # Last iteration
+
+# Access the path
+path = data.nebpath
+print(f"Number of images: {len(path.energy)}")
+print(f"Barrier: {max(path.energy) - min(path.energy):.4f} eV")
+```
+
+### Step 3: Fit a Smooth Surface
+
+For publication figures, we want a smooth curve through the data points:
+
+```python
+# SKIP-DOCTEST -- requires sample NEB data files
+from rgpycrumbs.surfaces import get_surface_model
+import numpy as np
+
+# Prepare 1D data for surface fitting
+x_obs = path.arc_dist.reshape(-1, 1)  # Arc distance as 2D array
+y_obs = path.energy.to("hartree").magnitude  # Convert to hartree
+
+# Fit a gradient-enhanced Matérn surface
+# (Use standard Matern if you don't have force data)
+model = get_surface_model("matern")(
+    x_obs, y_obs,
+    ls=0.5,  # Initial length scale guess
+    smoothing=1e-4  # Noise regularization
+)
+
+# Evaluate on a fine grid for smooth plotting
+x_fine = np.linspace(x_obs.min(), x_obs.max(), 300).reshape(-1, 1)
+y_fine = model(x_fine)
+
+# Get uncertainty estimates
+y_var = model.predict_var(x_fine)
+```
+
+**Troubleshooting:** If optimization fails, try:
+1. Different kernel: `get_surface_model("tps")` is more stable
+2. Better length scale: increase `ls` if data is smooth, decrease if rough
+3. More smoothing: increase `smoothing` to `1e-3`
+
+### Step 4: Create the Publication Figure
+
+Now combine everything into a publication-ready plot:
+
+```python
+# SKIP-DOCTEST -- requires sample NEB data files
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
+fig, ax = plt.subplots(figsize=(4, 3), dpi=300)
+
+# Plot raw data points
+ax.plot(
+    path.arc_dist.to("angstrom").magnitude,
+    path.energy.to("eV").magnitude,
+    'o',
+    color='#004D40',  # Teal
+    markersize=6,
+    label='NEB images',
+    zorder=10
+)
+
+# Plot fitted curve
+ax.plot(
+    x_fine.flatten(),
+    y_fine * 27.2114,  # Hartree to eV
+    '-',
+    color='#FF655D',  # Coral
+    linewidth=2,
+    label='Matérn fit',
+    zorder=5
+)
+
+# Add uncertainty band
+ax.fill_between(
+    x_fine.flatten(),
+    (y_fine - 2*np.sqrt(y_var)) * 27.2114,
+    (y_fine + 2*np.sqrt(y_var)) * 27.2114,
+    alpha=0.2,
+    color='#FF655D',
+    label='95% CI'
+)
+
+# Formatting
+ax.set_xlabel('Reaction Coordinate (Å)')
+ax.set_ylabel('Energy (eV)')
+ax.legend(frameon=False, loc='upper right')
+ax.xaxis.set_major_locator(MaxNLocator(5))
+ax.yaxis.set_major_locator(MaxNLocator(5))
+
+# Tight layout for publication
+fig.tight_layout()
+fig.savefig('energy_profile.pdf', bbox_inches='tight')
+print("Saved energy_profile.pdf")
+```
+
+### Step 5: Analyze the Transition State
+
+Find and characterize the saddle point:
+
+```python
+# SKIP-DOCTEST -- requires sample NEB data files
+# Find maximum (transition state)
+ts_idx = np.argmax(y_fine)
+ts_x = x_fine[ts_idx][0]
+ts_energy = y_fine[ts_idx] * 27.2114  # eV
+
+# Find reactant and product minima
+reactant_energy = y_fine[0] * 27.2114
+product_energy = y_fine[-1] * 27.2114
+
+# Calculate barriers
+forward_barrier = ts_energy - reactant_energy
+reverse_barrier = ts_energy - product_energy
+
+print(f"Transition state at: {ts_x:.2f} Å")
+print(f"Forward barrier: {forward_barrier:.3f} eV")
+print(f"Reverse barrier: {reverse_barrier:.3f} eV")
+print(f"Reaction energy: {product_energy - reactant_energy:.3f} eV")
+```
+
+### Next Steps
+
+Now that you have the basics, explore:
+
+1. ***2D Landscapes***: Use `plot_landscape_surface` for RMSD-based projections
+2. ***Gradient-Enhanced Fitting***: Include force data for better accuracy
+3. ***Batch Processing***: Process multiple NEB calculations automatically
+
+See also:
+- [`plt-neb`](https://rgpycrumbs.rgoswami.me/tools/eon/plt_neb) for nudged elastic band plotting options
+- Surface fitting details in [Surface Models](https://rgpycrumbs.rgoswami.me/tools/surfaces)
+- Trajectory processing with [`con-splitter`](https://rgpycrumbs.rgoswami.me/tools/eon/con_splitter)
+
+### Complete Script
+
+Here's the complete workflow as a single script:
+
+```python
+# SKIP-DOCTEST -- requires sample NEB data files
+#!/usr/bin/env python
+"""
+First Project: NEB Energy Landscape Analysis
+
+This script processes eOn NEB output and creates a publication-quality figure.
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
+from rgpycrumbs.basetypes import nebpath
+from rgpycrumbs.eon.plt_neb import extract_neb_data
+from rgpycrumbs.surfaces import get_surface_model
+
+# 1. Load data
+data = extract_neb_data("neb_49.dat")
+path = data.nebpath
+
+# 2. Fit surface
+x_obs = path.arc_dist.reshape(-1, 1)
+y_obs = path.energy.to("hartree").magnitude
+
+model = get_surface_model("matern")(x_obs, y_obs, ls=0.5, smoothing=1e-4)
+
+# 3. Evaluate
+x_fine = np.linspace(x_obs.min(), x_obs.max(), 300).reshape(-1, 1)
+y_fine = model(x_fine)
+y_var = model.predict_var(x_fine)
+
+# 4. Plot
+fig, ax = plt.subplots(figsize=(4, 3), dpi=300)
+
+ax.plot(
+    path.arc_dist.to("angstrom").magnitude,
+    path.energy.to("eV").magnitude,
+    'o', color='#004D40', markersize=6, label='NEB images', zorder=10
+)
+
+ax.plot(
+    x_fine.flatten(), y_fine * 27.2114,
+    '-', color='#FF655D', linewidth=2, label='Matérn fit', zorder=5
+)
+
+ax.fill_between(
+    x_fine.flatten(),
+    (y_fine - 2*np.sqrt(y_var)) * 27.2114,
+    (y_fine + 2*np.sqrt(y_var)) * 27.2114,
+    alpha=0.2, color='#FF655D', label='95% CI'
+)
+
+ax.set_xlabel('Reaction Coordinate (Å)')
+ax.set_ylabel('Energy (eV)')
+ax.legend(frameon=False, loc='upper right')
+fig.tight_layout()
+fig.savefig('energy_profile.pdf', bbox_inches='tight')
+
+# 5. Analyze
+ts_idx = np.argmax(y_fine)
+print(f"Barrier: {(y_fine[ts_idx] - y_fine[0]) * 27.2114:.3f} eV")
+```
+
+Run with:
+
+```bash
+python first_project.py
+```
 
 ## NEB Reaction Path Visualization
 
@@ -909,7 +1187,7 @@ unique features. Each backend has different strengths.
 | xyzrender | Ball-and-stick | Fast | Auto-orient, TS bonds, NCI, VdW | `ensure_import` / AUTO_DEPS (or `pip install xyzrender`) |
 | ASE | Space-filling | Fast | Built-in, no extra deps | Built-in |
 | solvis | Ball-and-stick | Medium | Transparent bg, PyVista 3D | `pip install solvis-tools` |
-| ovito | Configurable | Slow | Full MD viz, modifiers | conda-forge / separate heavy install |
+| ovito | Configurable | Slow | Full MD viz, modifiers | `ovito` from `https://conda.ovito.org` |
 
 ### xyzrender
 
@@ -1005,6 +1283,17 @@ blend seamlessly into plots without white rectangles.
 
 The [OVITO Python](https://www.ovito.org/python/) backend provides off-screen rendering with
 orthographic projection.
+
+The Python module of the Open Visualization Tool (OVITO) comes from OVITO's own conda channel.
+The [installation guide](https://docs.ovito.org/python/introduction/installation.html#using-conda) gives this command:
+
+```shell
+conda install --strict-channel-priority -c https://conda.ovito.org -c conda-forge ovito
+```
+
+The `ovito` package on conda-forge is a retired OVITO Basic desktop build without the Python module.
+Since 3.17.2, the desktop application is the separate `ovito-pro` package, which pulls in `ovito`.
+In a checkout of rgpycrumbs, `pixi install -e ptm` sets up an environment with the module.
 
 #### When to Use ovito
 
@@ -1147,11 +1436,11 @@ python -c "import rgpycrumbs; print(rgpycrumbs.__version__)"
 For Gaussian Process surface fitting and landscape visualization:
 
 ```bash
-# JAX for surface fitting
-pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
+# JAX for surface fitting, SciPy for its hyperparameter fits
+pip install jax scipy  # or: export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or with uv
-uv pip install jax  # or: export RGPYCRUMBS_AUTO_DEPS=1
+uv pip install jax scipy  # or: export RGPYCRUMBS_AUTO_DEPS=1
 
 # Or enable auto-install (installs on first use)
 export RGPYCRUMBS_AUTO_DEPS=1
@@ -1225,11 +1514,11 @@ When `RGPYCRUMBS_AUTO_DEPS=1` is set:
 
 #### Supported Optional Dependencies
 
-| Module | Extra | Auto-Installed | Use Case |
+| Module | Install spec | Auto-Installed | Use Case |
 |---|---|---|---|
-| jax | surfaces | ✓ | GP surface fitting, landscape plots |
-| scipy | interpolation | ✓ | Spline interpolation |
-| ase | analysis | ✓ | Structure analysis, RMSD |
+| jax | `jax>=0.4` | ✓ | GP surface fitting, landscape plots |
+| scipy | `scipy>=1.11` | ✓ | Spline interpolation, surface hyperparameter fits |
+| ase | `ase>=3.22` | ✓ | Structure analysis, root-mean-square deviation |
 
 #### Cache Location
 
@@ -1250,6 +1539,10 @@ export RGPYCRUMBS_AUTO_DEPS=0
 # Or unset
 unset RGPYCRUMBS_AUTO_DEPS
 ```
+
+`RGPKGS_AUTO_DEPS` and `RGPYCRUMBS_AUTO_DEPS` take `1`, `true`, `yes` or `on` to enable.
+They take `0`, `false`, `no` or `off` to disable.
+Letter case does not matter, and any other value counts as unset.
 
 #### Troubleshooting
 
@@ -1345,7 +1638,7 @@ export RGPYCRUMBS_AUTO_DEPS=1
 ##### How do I use the batch command?
 
 ```bash
-rgpycrumbs chemgp batch -c config.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c config.toml -j 4
 ```
 
 ##### How do I match atoms to target coordinates?
@@ -1377,7 +1670,7 @@ RGPYCRUMBS_AUTO_DEPS=1 rgpycrumbs chemgp ...
 Use parallel processing:
 
 ```bash
-rgpycrumbs chemgp batch -c config.toml -j 8
+rgpycrumbs chemgp plot-gp batch -c config.toml -j 8
 ```
 
 #### See Also
@@ -1485,7 +1778,7 @@ export RGPYCRUMBS_AUTO_DEPS=1  # ase/scipy via ensure_import
 
 ```bash
 # Reduce number of workers
-rgpycrumbs chemgp batch -c config.toml -j 2
+rgpycrumbs chemgp plot-gp batch -c config.toml -j 2
 ```
 
 ### Performance
@@ -1523,7 +1816,8 @@ max_surface_points = 64
 rgpycrumbs eon plt-min --config plot.toml --plot-type landscape
 ```
 
-Default remains `auto_thin = false`. Requires chemparseplot ≥ 1.9.10.
+Default remains `auto_thin = false`.
+The surface keys need `chemparseplot>=1.13.0`.
 See [eOn plot TOML config](https://rgpycrumbs.rgoswami.me/tools/eon/plot_config).
 
 ## How-to: Run Tests and Check Coverage
@@ -1561,8 +1855,11 @@ This runs:
 | test | numpy, scipy, ase, click | pure, eon | CLI, parsers, basetypes, interpolation |
 | surfaces | + jax | surfaces | Surface models, kernels, gradient-enhanced GP |
 | fragments | + IRA, tblite, pyvista | fragments, ira, align | Geometry analysis, IRA alignment, fragments |
+| eonmlflow | + eon, mlflow | eon | MLflow logging of eOn runs and configs |
+| ptm | + ovito | ptm | Polyhedral template matching, `ovito` rendering |
 
 Each env writes `COVERAGE_FILE=.coverage.<env>`, then `cov` combines them all.
+A failing test in any environment stops `cov` with the pytest exit status.
 
 #### Individual Environments
 
@@ -1570,7 +1867,15 @@ Each env writes `COVERAGE_FILE=.coverage.<env>`, then `cov` combines them all.
 pixi run -e test test-base          # base tests
 pixi run -e surfaces test-surfaces  # jax surface models
 pixi run -e fragments test-fragments # IRA + geometry
+pixi run -e eonmlflow test-eonmlflow # eon + mlflow
+pixi run -e ptm test-ptm            # ovito structure analysis
 ```
+
+The `ptm` environment installs the Python module of the Open Visualization Tool (OVITO) from `https://conda.ovito.org`.
+The version constraint in `pixi.toml` is `>=3.16.0, <4`, and `pixi.lock` pins 3.17.2 for Python 3.13.
+The comment above `ovito` in `pixi.toml` gives the basis for that constraint.
+The `ovito` package on conda-forge is a retired OVITO Basic desktop build without the Python module.
+With that package, every `ptm` test skips.
 
 ### How It Works
 
@@ -1584,12 +1889,16 @@ digraph coverage_flow {
     test [label="test-base\n(numpy, scipy, ase)"];
     surfaces [label="test-surfaces\n(+ jax)"];
     fragments [label="test-fragments\n(+ IRA, tblite)"];
-    combine [label="coverage combine\n.coverage.test + .coverage.surfaces + .coverage.fragments", fillcolor="#FF655D", fontcolor=white];
+    eonmlflow [label="test-eonmlflow\n(+ eon, mlflow)"];
+    ptm [label="test-ptm\n(+ ovito)"];
+    combine [label="coverage combine\none .coverage.<env> per env", fillcolor="#FF655D", fontcolor=white];
     report [label="coverage report", fillcolor="#004D40", fontcolor=white];
 
     clean -> test -> combine;
     clean -> surfaces -> combine;
     clean -> fragments -> combine;
+    clean -> eonmlflow -> combine;
+    clean -> ptm -> combine;
     combine -> report;
 }
 ```
@@ -2050,7 +2359,7 @@ When `auto_thin` is true, chemparseplot subsamples the GP **training** cloud
 still use the full trajectory. This avoids non-finite GradientIMQ grids on
 dense force-eval movies without silently changing default behaviour.
 
-Requires `chemparseplot>=1.9.10` (`SurfaceFitConfig`).
+Requires `chemparseplot>=1.13.0` (`SurfaceFitConfig`).
 
 #### See Also
 
@@ -2113,10 +2422,9 @@ ever-growing CLI flags. Shared style, strip rendering, and **surface-fit**
 knobs live under `[shared]`; job paths and plot type under `[min]`. Explicit
 CLI flags still override the file for one-off runs.
 
-Surface-fit keys (`auto_thin`, `max_surface_points`) are **TOML-only**
-(defaults: `auto_thin = false`, `max_surface_points = 64`). They forward to
-chemparseplot `SurfaceFitConfig` / `plot_landscape_surface` (requires
-chemparseplot ≥ 1.9.10).
+Surface-fit keys (`auto_thin`, `max_surface_points`) are **TOML-only**.
+Their defaults are `auto_thin = false` and `max_surface_points = 64`.
+They forward to chemparseplot `SurfaceFitConfig` / `plot_landscape_surface`, which need `chemparseplot>=1.13.0`.
 
 Example package path: `rgpycrumbs/eon/examples/plot_config.example.toml`.
 
@@ -2617,6 +2925,35 @@ filtering or setting up atom lists for the displacements used for eOn calculatio
    :nested: full
 ```
 
+#### Vacancy filter
+
+Unless `--no-fcc-vacancy` is given, the command drops the neighbors of a vacancy from the defect atoms.
+The selection then centers on the interstitial.
+The filter uses the centrosymmetry parameter of Kelchner, Plimpton and Hamilton (Physical Review B 58, 11085, 1998).
+It sums `|R_i + R_(i+6)|**2` over the six pairs of opposite nearest neighbors, so it is 0 in the perfect lattice.
+Next to a vacancy one atom of a pair is missing.
+The other sits at `a/sqrt(2)` for the lattice constant `a`, so a vacancy neighbor has `a**2/2`.
+The command divides the parameter by `a**2`.
+It takes `a` from the median nearest-neighbor distance of the face-centered cubic (FCC) atoms.
+It drops the mismatched atoms whose value lies from `--csp-vacancy-min` to `--csp-vacancy-max`.
+The defaults, `3/8` and `5/8`, reach `a**2/8` to either side of `a**2/2`.
+That is half the gap to the `a**2/4` of the atoms next to an unrelaxed octahedral interstitial.
+Without FCC atoms the filter drops nothing.
+
+The atoms of a stacking fault also have `a**2/2`, and so do the atoms around a relaxed octahedral interstitial.
+The filter drops them as well, so pass `--no-fcc-vacancy` for such structures.
+In copper relaxed with effective medium theory, the neighbors of a `<100>` dumbbell stay below `0.35`.
+The two dumbbell atoms stay above `1`.
+
+#### Periodic boundaries
+
+The structure analysis and the selection sphere take the periodic directions that the structure file declares.
+A slab in an extended `.xyz` file with `pbc="T T F"` stays free along z.
+A `.con` file keeps the flags of its metadata line.
+When that line names none, all three directions are periodic.
+The eon reader of the Atomic Simulation Environment (ASE) drops the flags of compressed `.con` files.
+The command takes those files as periodic along all three directions.
+
 #### Usage
 
 ```rst
@@ -2648,21 +2985,21 @@ For developer details, see the [ChemGP Helper Reference](https://rgpycrumbs.rgos
    - Caching with `@lru_cache` for repeated operations
    - Complete type hints and HDF5 validation
 
-## `plt-gp`
+## `plot-gp`
 
 Source: https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp
 
 ### CLI Reference
 
 ```rst
-.. click:: rgpycrumbs.chemgp.plt_gp:cli
-   :prog: rgpycrumbs chemgp plt-gp
+.. click:: rgpycrumbs.chemgp.plot_gp:cli
+   :prog: rgpycrumbs chemgp plot-gp
    :nested: full
 ```
 
 ### Overview
 
-`plt-gp` reads HDF5 files produced by ChemGP (the Rust crate `chemgp-core`) and
+`plot-gp` reads HDF5 files produced by ChemGP (the Rust crate `chemgp-core`) and
 generates publication-quality PDF figures via `chemparseplot`.
 
 | Subcommand | Plot type | Backend |
@@ -2677,7 +3014,6 @@ generates publication-quality PDF figures via `chemparseplot`.
 | variance | GP variance hatching on PES | matplotlib |
 | fps | FPS subset PCA scatter | plotnine |
 | profile | NEB energy profile across images | plotnine |
-| landscape | 2D NEB landscape (delegates to plt-neb) | matplotlib |
 | batch | TOML-driven batch figure generation | (all) |
 
 ### Common Options
@@ -2694,13 +3030,13 @@ All single-plot subcommands accept:
 
 ```bash
 # Convergence curve from a minimize run
-rgpycrumbs chemgp plt-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
+rgpycrumbs chemgp plot-gp convergence -i output/leps_minimize.h5 -o convergence.pdf
 
 # 2D surface with NEB path overlay
-rgpycrumbs chemgp plt-gp surface -i output/leps_neb.h5 -o surface.pdf
+rgpycrumbs chemgp plot-gp surface -i output/leps_neb.h5 -o surface.pdf
 
 # NLL landscape
-rgpycrumbs chemgp plt-gp nll -i output/leps_nll.h5 -o nll.pdf
+rgpycrumbs chemgp plot-gp nll -i output/leps_nll.h5 -o nll.pdf
 ```
 
 ### Batch Mode
@@ -2708,7 +3044,7 @@ rgpycrumbs chemgp plt-gp nll -i output/leps_nll.h5 -o nll.pdf
 Define a TOML config listing all plots, then generate them in one command:
 
 ```bash
-rgpycrumbs chemgp plt-gp batch --config figures.toml
+rgpycrumbs chemgp plot-gp batch --config figures.toml
 ```
 
 See the [batch tutorial](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_tutorial) for a worked example with
@@ -2727,7 +3063,7 @@ Override with `--clamp-lo` and `--clamp-hi` flags on the subcommand, or
 ### API Reference
 
 For developer details and source code see
-`rgpycrumbs.chemgp.plt_gp`.
+`rgpycrumbs.chemgp.plot_gp`.
 
 The plotting functions themselves live in
 [chemparseplot](https://chemparseplot.rgoswami.me) at
@@ -2748,13 +3084,13 @@ It supports parallel execution for improved performance when processing many fil
 
 ```bash
 # Sequential processing (default)
-rgpycrumbs chemgp batch --config plots.toml
+rgpycrumbs chemgp plot-gp batch --config plots.toml
 
 # Parallel processing with 4 workers
-rgpycrumbs chemgp batch --config plots.toml --parallel 4
+rgpycrumbs chemgp plot-gp batch --config plots.toml --parallel 4
 
 # Short form
-rgpycrumbs chemgp batch -c plots.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c plots.toml -j 4
 ```
 
 ### Configuration File Format
@@ -2827,10 +3163,10 @@ The `--parallel` (or `-j`) option enables concurrent plot generation:
 
 ```bash
 # Use 4 parallel workers
-rgpycrumbs chemgp batch -c plots.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c plots.toml -j 4
 
 # Use 8 workers for large batches
-rgpycrumbs chemgp batch -c plots.toml -j 8
+rgpycrumbs chemgp plot-gp batch -c plots.toml -j 8
 ```
 
 #### Performance
@@ -2850,7 +3186,7 @@ Note: Speedup depends on I/O bandwidth and CPU cores available.
 Generate all plots from configuration:
 
 ```bash
-rgpycrumbs chemgp batch -c my_plots.toml
+rgpycrumbs chemgp plot-gp batch -c my_plots.toml
 ```
 
 ### Parallel Processing
@@ -2858,7 +3194,7 @@ rgpycrumbs chemgp batch -c my_plots.toml
 Process 20 plots with 4 workers:
 
 ```bash
-rgpycrumbs chemgp batch -c large_batch.toml -j 4
+rgpycrumbs chemgp plot-gp batch -c large_batch.toml -j 4
 ```
 
 ### Custom Output Directory
@@ -2875,7 +3211,7 @@ output = "reaction1_surface.pdf"
 ```
 
 ```bash
-rgpycrumbs chemgp batch -c config.toml
+rgpycrumbs chemgp plot-gp batch -c config.toml
 ```
 
 ### Type-Specific Options
@@ -2909,6 +3245,7 @@ Batch complete: 2 ok, 1 failed
 ```
 
 Exit code is 1 if any plots failed, 0 if all succeeded.
+A plot that fails inside its subcommand shows the error message of that subcommand after `[FAIL]`.
 
 ### Performance Tips
 
@@ -2928,6 +3265,8 @@ Exit code is 1 if any plots failed, 0 if all succeeded.
 The batch command uses `concurrent.futures.ThreadPoolExecutor` for parallel
 processing. This pattern is adopted from the `nebmmf_repro` project's
 `scripts/parse_results.py` for consistent parallel file processing.
+Each worker calls the `main` of its plot subcommand in the same process.
+The workers share the console, so their log lines can interleave.
 
 Progress tracking uses `rich.progress` for user-friendly output during
 long-running batch operations.
@@ -2982,8 +3321,8 @@ output = "leps_rff_quality.pdf"
 type = "rff"
 ```
 
-Each `[[plots]]` entry maps one HDF5 input to one PDF output. The `type` field
-selects the plt-gp subcommand (convergence, surface, rff, etc.).
+Each `[[plots]]` entry maps one HDF5 input to one PDF output.
+The `type` field names the `plot-gp` subcommand, such as `convergence`, `surface` or `rff`.
 
 Paths in `input` and `output` resolve relative to `input_dir` and `output_dir`
 respectively. Both default to the directory containing the TOML file.
@@ -2991,7 +3330,7 @@ respectively. Both default to the directory containing the TOML file.
 ### Generate the Figures
 
 ```bash
-rgpycrumbs chemgp plt-gp batch --config my_figures.toml
+rgpycrumbs chemgp plot-gp batch --config my_figures.toml
 ```
 
 Output:
@@ -3022,25 +3361,11 @@ clamp_hi = 50
 Any key that matches a CLI option on the corresponding subcommand (with
 underscores replacing hyphens) works here.
 
-### Landscape Entries
-
-The `landscape` type uses `source_dir` instead of `input`, because it reads .con
-and .dat files rather than HDF5:
-
-```toml
-[[plots]]
-source_dir = "output"
-output = "leps_landscape.pdf"
-type = "landscape"
-```
-
-This delegates to `rgpycrumbs chemgp plt-neb` under the hood.
-
 ### Next Steps
 
-- [`plt-gp`](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp) -- full CLI reference for all 11 subcommands
-- [HDF5 schema](https://rgpycrumbs.rgoswami.me/tools/chemgp/hdf5_schema) -- HDF5 layout that plt-gp expects
-- [chemparseplot ChemGP tutorials](https://chemparseplot.rgoswami.me/tutorials/chemgp/index.html) -- using the plotting functions directly from Python
+- [`plot-gp`](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp): the CLI reference for all 11 subcommands
+- [HDF5 schema](https://rgpycrumbs.rgoswami.me/tools/chemgp/hdf5_schema): the HDF5 layout that `plot-gp` expects
+- [chemparseplot ChemGP tutorials](https://chemparseplot.rgoswami.me/tutorials/chemgp/index.html): plotting from Python
 
 ## HDF5 schema
 
@@ -3048,15 +3373,16 @@ Source: https://rgpycrumbs.rgoswami.me/tools/chemgp/hdf5_schema
 
 ### HDF5 Layout
 
-ChemGP Rust examples write HDF5 files with a fixed layout. The `plt-gp`
-subcommands each read specific groups and attributes from this schema.
+The ChemGP Rust examples write line-delimited records.
+ChemGP's `scripts/jsonl_to_h5.py` turns them into HDF5 files with a fixed layout.
+The `plot-gp` subcommands each read specific groups and attributes from this layout.
 
 #### Top-Level Groups
 
 | Group | Contents |
 |---|---|
 | `grids/<name>` | 2D arrays with attrs `x_range`, `y_range`, `x_length`, `y_length` |
-| `table/<name>` | Group of same-length 1D arrays (DataFrame columns) |
+| `<name>` | Table: a root-level group of same-length 1D arrays (DataFrame columns) |
 | `paths/<name>` | Ordered point sequences (`x`, `y` or `rAB`, `rBC`) |
 | `points/<name>` | Point sets (`x`, `y` or `pc1`, `pc2`) |
 | Root attrs | Metadata scalars (`conv_tol`, `gp_e_mae`, etc.) |
@@ -3072,13 +3398,20 @@ Each grid is a 2D `float64` dataset. Attributes store axis info:
 - **`x_length`**: Number of x grid points (int)
 - **`y_length`**: Number of y grid points (int)
 
-Named grids: `energy` (true PES), `gp_mean_N` (GP at N training points),
-`variance`, `nll`, `gradient_norm`.
+Named grids:
 
-##### `table`
+- **`energy`**: True potential energy surface
+- **`true_energy`**: True surface, as the `quality` subcommand reads it
+- **`gp_mean_N<n>`**: GP mean from *n* training points
+- **`variance`**: GP variance
+- **`nll`, `grad_norm`**: Negative log-likelihood and the norm of its gradient
 
-A group whose children are same-length 1D arrays, analogous to DataFrame
-columns. Common columns:
+##### Tables
+
+Each table is a group at the root of the file.
+Its children are same-length 1D arrays, like DataFrame columns.
+Three subcommands read the table named `table`: `convergence`, `rff` and `profile`.
+Tables often have these columns:
 
 - **`oracle_calls`**: Cumulative oracle evaluations
 - **`max_fatom`, `max_force`, `force_norm`, `ci_force`**: Force convergence metrics
@@ -3098,23 +3431,22 @@ Each point set is a group with coordinate arrays:
 - **`x`, `y`**: Cartesian coordinates
 - **`pc1`, `pc2`**: PCA projections (for FPS scatter)
 
-Named sets: `minima`, `saddles`, `endpoints`, `training`, `selected`, `pruned`.
+Named sets: `minima`, `saddles`, `endpoints`, `training`, `train_N<n>`, `selected`, `pruned`, `optimum`.
 
 ### Schema per Plot Type
 
 | Subcommand | Required groups/attrs |
 |---|---|
-| convergence | `table/convergence` (oracle_calls, force metric, method); root `conv_tol` |
-| surface | `grids/energy`; optional `paths/*`, `points/*` |
-| quality | `grids/gp_mean_N*` + `points/training_N*`; `grids/energy` |
-| rff | `table/rff` (d_rff, energy_mae, gradient_mae); root `gp_e_mae`, `gp_g_mae` |
-| nll | `grids/nll`; optional `grids/gradient_norm`; root `log_sigma2`, `log_theta` |
-| sensitivity | `table/slice` (x), `table/true_surface` (E); 9x `table/gp_ls{j}_sv{i}` (E_pred, E_std) |
-| trust | `table/slice` (x, E_true, E_pred, E_std, in_trust); optional `points/training` |
-| variance | `grids/energy`, `grids/variance`; optional `points/training`, stationary root attrs |
+| convergence | `table` (oracle_calls, force metric, method) and root `conv_tol` |
+| surface | `grids/energy`, optionally `paths/*` and `points/*` |
+| quality | `grids/true_energy` and one or more `grids/gp_mean_N<n>`, optionally `points/train_N<n>` |
+| rff | `table` (d_rff, energy_mae, gradient_mae) and root `gp_e_mae`, `gp_g_mae` |
+| nll | `grids/nll`, optionally `points/optimum` (log_sigma2, log_theta) and `grids/grad_norm` |
+| sensitivity | `slice` (x), `true_surface` (E_true) and one or more of the three-by-three `gp_ls{j}_sv{i}` panels with E_pred and E_std, blank where missing |
+| trust | `slice` (x, E_true, E_pred, E_std, in_trust) and `points/training`, optionally root `y_slice` |
+| variance | `grids/energy`, `grids/variance` and `points/training`, optionally `points/minima` and `points/saddles` |
 | fps | `points/selected` (pc1, pc2), `points/pruned` (pc1, pc2) |
-| profile | `table/profile` (image, energy, method) |
-| landscape | .con files in `source_dir` (not HDF5; delegates to plt-neb) |
+| profile | `table` (image, energy, method) |
 
 ### Filename Conventions
 
@@ -3818,7 +4150,9 @@ flowchart LR
 
    Every model in `surfaces.py` implements a `predict_var(x_query)` method. This calculates the posterior predictive variance, providing a measure of uncertainty:
    - **Interpretation**: The variance represents the model's confidence. At training points (and within the kernel's length scale), the variance is low. In data-sparse regions, it reverts toward the prior variance (e.g., $1/\epsilon$ for IMQ or $1.0$ for Matérn).
-   - **Optimization**: Parameters like length scales ($l$, $\epsilon$) and noise scalars are optimized via Maximum Likelihood Estimation (MLE) or Maximum A Posteriori (MAP) with physically-informed priors.
+   - **Optimization**: Fits choose length scales ($l$, $\epsilon$) and noise scalars by Maximum Likelihood Estimation (MLE).
+     The gradient inverse multiquadric fit is a Maximum A Posteriori (MAP) estimate.
+     Its prior is a gamma distribution on $\epsilon$.
 
 ### Variance Windowing and Chunking
 
@@ -3836,8 +4170,51 @@ flowchart LR
 ### Numerical Stability
 
    Gradient-enhanced models use auto-differentiation (via `jax.grad` and `jax.jacfwd`) to construct the full $(D+1)N \times (D+1)N$ covariance matrix.
-   - **Cholesky Fallback**: The `safe_cholesky_solve` utility attempts Cholesky decomposition with increasing jitter to handle near-singular matrices.
+   - **Cholesky Fallback**: The `safe_cholesky_solve` utility adds roundoff jitter scaled to the covariance.
+     It checks the factor for non-finite values, since `jax.numpy.linalg.cholesky` returns NaNs instead of raising.
    - **Float Precision**: By default, models use `float32` for performance and compatibility with visualization backends, but `jax_enable_x64` can be toggled if higher precision is required.
+
+#### Fit Defaults
+
+   The surface fits take these defaults from `rgpycrumbs.surfaces._hyperparameters`.
+   - **Length scales**: Fits start the length scale at the median distance between distinct inputs.
+     The inverse multiquadric models start $\epsilon$ the same way.
+     [Garreau, Jitkrittum and Kanagawa](https://doi.org/10.48550/arXiv.1707.07269) analyse this median heuristic.
+   - **Optimizer**: Fits with `optimize=True` run SciPy's `L-BFGS-B` on the log-parameters.
+     It keeps the last point that its line search accepted.
+   - **Priors**: Fits maximize the marginal likelihood.
+     The `GradientIMQ` fit adds a gamma prior of shape 2 on $\epsilon$.
+     [Chung et al.](https://doi.org/10.1007/s11336-013-9328-2) propose that shape because the prior vanishes at zero.
+     The prior peaks at the starting value of $\epsilon$.
+   - **Rational quadratic**: `GradientRQ` fits start the shape $\alpha$ at 1.
+     The kernel is a gamma mixture of squared-exponential kernels.
+     Shape 1 makes that gamma distribution exponential.
+   - **Smoothing**: A caller's `smoothing` is the noise variance of fixed fits and the start of optimized ones.
+     The `GradientIMQ` fit caps its fitted noise at that value.
+     Without a `smoothing`, or with zero, the fits treat the data as exact.
+     Fixed fits then use the roundoff jitter as the noise.
+     Optimized fits start the noise at the largest prior variance.
+     The first covariance matrix then has a condition number of at most $n + 1$.
+   - **Roundoff jitter**: The diagonal shift is $\gamma_{n+1} = (n+1)u/(1-(n+1)u)$ times the largest covariance entry.
+     Here $u$ is the unit roundoff of the working precision.
+     The shift bounds the entrywise backward error of a Cholesky factorization.
+     [Higham](https://doi.org/10.1137/1.9780898718027) states this bound as Theorem 10.3.
+   - **Kernel guards**: Three guards come from the float32 machine epsilon `eps = 2**-23`.
+     That is the spacing of float32 numbers at one, so inputs of order one resolve no shorter length.
+     The squared-exponential kernel clamps its length scale at `eps`.
+     The thin-plate and Matérn kernels use $r = \sqrt{d^2 + \mathrm{eps}^2}$.
+     So $r$ stays positive at coincident points.
+     In float32 that sum equals $d^2$ for every $d^2 \geq 2^{-21}$.
+     The `1e-12` used before was a no-op in float32 for every $d^2 \geq 2^{-15}$.
+     The rational-quadratic kernel adds `eps**2` to $2 \alpha l^2$.
+     It then stays defined at coincident points when that product underflows.
+     The `1e-6` used before changed that kernel by half a percent at $l = 0.01$ and by half at $l = 10^{-3}$.
+   - **Gradient noise**: With `noise_per_obs`, `GradientIMQ` spreads each energy noise over the gradients at that point.
+     Each gradient component keeps the energy's ratio of noise to prior variance.
+     Its noise then has the units of a gradient variance.
+   - **Nystrom fits**: With `optimize=True`, `NystromGradientIMQ` fits $\epsilon$ and the noise on its inducing points.
+     The fit uses the `GradientIMQ` prior and noise cap.
+     A `seed` argument picks the random inducing subset, and its default of 42 only makes that subset reproducible.
 
 ### Troubleshooting
 
@@ -3901,6 +4278,7 @@ flowchart LR
 1. This is expected - gradient models have $(D+1)N \times (D+1)N$ covariance
 2. Use Nystrom approximation for large datasets
 3. Consider using standard (non-gradient) models if gradients are noisy
+4. The first fit at each number of points compiles its `jax.jit` functions, and later fits of that size reuse them
 
 #### API Reference
 
@@ -3929,9 +4307,8 @@ Source: https://rgpycrumbs.rgoswami.me/tools/utils/jupyter
 
   > **Added in version 0.1.0:**
 
-  The `rgpycrumbs.run.jupyter` module provides clean abstractions for subprocess
-  management and configuration generation, designed specifically for tutorial
-  notebooks (like those in the Atomistic Cookbook).
+  The `rgpycrumbs.run.jupyter` module runs subprocesses for tutorial notebooks, like those in the Atomistic Cookbook.
+  The `rgpycrumbs.eon.helpers` module writes eOn `config.ini` files.
 
 #### Subprocess Management
 
@@ -3947,13 +4324,19 @@ Source: https://rgpycrumbs.rgoswami.me/tools/utils/jupyter
    run_command_or_exit(["eonclient"], timeout=300)
    ```
 
+   The `timeout` is in seconds and covers the whole command, including the processes it starts.
+   At the deadline the helper kills them all and exits with status 124.
+   The default, `timeout=None`, sets no deadline.
+   On POSIX the command runs in its own session.
+   Ctrl-C in a terminal then reaches only the helper, which kills the command.
+
 #### Configuration Generation
 
    Instead of writing `config.ini` files using fragile f-strings, use
    `write_eon_config` to generate them from Python dictionaries.
 
    ```python
-   from rgpycrumbs.run.jupyter import write_eon_config
+   from rgpycrumbs.eon.helpers import write_eon_config
 
    settings = {
        "Main": {"job": "nudged_elastic_band"},
@@ -3967,6 +4350,7 @@ Source: https://rgpycrumbs.rgoswami.me/tools/utils/jupyter
 #### API Reference
 
    For developer details see `rgpycrumbs.run.jupyter`.
+   `write_eon_config` is documented in `rgpycrumbs.eon.helpers`.
 
 ## Prefix Tools
 
@@ -4151,6 +4535,402 @@ Declarative eOn plot config for `plt-neb`, `plt-min`, and `plt-saddle`
 (`--config`). Shared style under `[shared]`; command inputs under
 `[neb]` / `[min]` / `[saddle]`.
 
+## rgpkgs stable public API
+
+Source: https://rgpycrumbs.rgoswami.me/explanation/public_api
+
+### Hub (`rgpycrumbs.api`)
+
+Prefer::
+
+```python
+from rgpycrumbs.api import (
+    load_config,
+    load_pypi_pins,
+    apply_pin_to_spec,
+    pins_from_env,
+    ensure_import,
+    suite_pins,
+    resolve_lock_path_layered,
+    user_config_path,
+)
+```
+
+| Symbol | Role |
+|---|---|
+| `load_config` | Merge `/~/.config/rgpkgs/` + project `rgpkgs.toml` |
+| `load_pypi_pins` | Parse uv.lock / pylock / CycloneDX → pin map |
+| `apply_pin_to_spec` | Apply pin map to a pip requirement string |
+| `pins_from_env` | Read `RGPKGS_LOCK_PINS` (set by CLI dispatch) |
+| `ensure_import` | On-demand optional import (+ AUTO_DEPS) |
+| `suite_pins` | Config pins merged with env pins, env winning, for consumers |
+| `resolve_lock_path_layered` | CLI > env > config lock path |
+| `user_config_path` | Path to global TOML |
+
+CLI debug: `rgpycrumbs config show`
+
+### chemparseplot (`chemparseplot.api`)
+
+Bare install; extras transitional. Prefer `chemparseplot.api` for new consumers.
+
+#### Representative library path: parse → typed result
+
+```python
+from chemparseplot.api import extract_orca_geomscan_energy
+
+dist_bohr, energy_Eh = extract_orca_geomscan_energy(orca_out_text, "Actual Energy")
+# pint Quantities: distance (bohr), energy (hartree); non-empty on real scan output
+assert dist_bohr.size > 0
+assert str(energy_Eh.units) == "hartree"
+```
+
+Also re-exported:
+
+| Symbol | Role |
+|---|---|
+| `extract_orca_geomscan_energy` | ORCA geomscan surface → `(Q_ bohr, Q_ hartree)` |
+| `convert_energy_magnitude` | eV ↔ kcal/mol ↔ kJ/mol |
+| `normalize_energy_unit` | Alias normalization |
+| `suite_pins` | Shared rgpkgs package pins via hub |
+
+Submodules (`chemparseplot.parse`, `chemparseplot.plot`) remain available for
+advanced use; plot stacks may need optional deps until fully on-demand.
+
+### Config files (suite-wide)
+
+- `/~/.config/rgpkgs/config.toml`
+- Project `rgpkgs.toml`
+- Env `RGPKGS_LOCK`, `RGPKGS_CONFIG`, `RGPKGS_FORCE_UV`, `RGPKGS_AUTO_DEPS`
+
+Hub has **no** runtime feature extras. Do not `pip install "rgpycrumbs[analysis]"`.
+
+### CON I/O (`readcon-core` / `chemparseplot.parse.con`)
+
+eOn CON/convel frames use [readcon-core](https://github.com/lode-org/readcon-core)
+(PyPI package name `readcon`). Prefer:
+
+```python
+from chemparseplot.api import load_trajectory, plot_con_overview
+
+traj = load_trajectory("movie.con")
+fig = plot_con_overview(traj, structures="endpoints")
+```
+
+CLI: `rgpycrumbs eon plt-con movie.con`
+
+## rgpkgs suite architecture
+
+Source: https://rgpycrumbs.rgoswami.me/explanation/suite_architecture
+
+### Roles
+
+| Package | Role |
+|---|---|
+| rgpycrumbs | Hub: CLI, ensure_import, locks, suite TOML |
+| chemparseplot | Parse + plot library (no second config tree) |
+| pychum | Input generators |
+| [readcon-core](https://github.com/lode-org/readcon-core) | CON/convel I/O (Rust; PyPI: [readcon](https://pypi.org/project/readcon/)) |
+
+### Config
+
+One tree: `/~/.config/rgpkgs/config.toml`, project `rgpkgs.toml`.
+See `docs/examples/rgpkgs.config.toml`.
+
+### Deps
+
+Hub: no runtime feature extras. CLI PEP 723 + uv; library AUTO_DEPS.
+chemparseplot: extras transitional; migrate to same uv/on-demand design.
+Cookbook: prefer library API when plot pipelines are exposed as stable
+functions; today full pipelines still go through `rgpycrumbs eon plt-*`.
+
+### Locks
+
+Consume (not produce): uv.lock, PEP 751 pylock, CycloneDX (eb-stack / uv export).
+
+### CON / structure I/O
+
+eOn movies and general CON trajectories use `readcon-core` (import name
+`readcon`) via `chemparseplot.parse.con`. See also `rgpycrumbs eon plt-con`.
+
+## `rgpycrumbs` Design & Architecture Notes
+
+Source: https://rgpycrumbs.rgoswami.me/devnotes
+
+### Documentation Pipeline
+
+We craft documents in `orgmode`, though downstream processing uses `sphinx`.
+Partially because of this, since `ox-rst` needs `emacs`, and because the
+documentation rarely needs to be built outside of the development workflow,
+instead of staying within the `pyproject` file as an optional dependency the
+documentation forms a new environment in the `pixi.toml` file.
+
+### Dependency management
+
+- **Library**: go in `pyproject.toml`.
+- **Doc/Dev**: go in `pixi.toml`.
+- **Script**: handled on-the-fly via the `uv` dispatching mechanism and [PEP 723](https://peps.python.org/pep-0723/) detailed in my [RealPython best practices post](https://realpython.com/python-script-structure/).
+
+### Core Architecture: The Dispatcher
+
+#### The Problem
+
+Research pipelines require conflicting environments and a monolithic CLI
+(e.g., standard `Typer` app) fails because importing the top-level module
+crashes due to conflicting dependencies in sub-modules.
+
+#### The Solution: Dynamic Subprocess Dispatch
+
+   Instead of directly importing modules, `rgpycrumbs/cli.py` controls execution flow:
+   - It scans directory structure at runtime.
+   - It invokes scripts via `uv run`.
+   - This leads to complete isolation for each script.
+
+   ```python
+   # Logic captured in rgpycrumbs/cli.py
+   subprocess.run(["uv", "run", script_path] + args)
+   ```
+
+#### Philosophy
+
+The library is designed with the following principles in mind:
+
+- **Dispatcher-Based Architecture**: The top-level `rgpycrumbs.cli` command acts as a
+  lightweight dispatcher. It does not contain the core logic of the tools
+  itself. Instead, it parses user commands to identify the target script and
+  then invokes it in an isolated subprocess using the `uv` runner. This provides
+  a unified command-line interface while keeping the tools decoupled.
+
+- **Isolated & Reproducible Execution**: Each script is a self-contained unit that
+  declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata. The `uv` runner uses this
+  information to resolve and install the exact required packages into a
+  temporary, cached environment on-demand. This design guarantees
+  reproducibility and completely eliminates the risk of dependency conflicts
+  between different tools in the collection.
+
+- **Lightweight Core, On-Demand Dependencies**: The installable `rgpycrumbs`
+  package has minimal core dependencies (`click`, `numpy`). Heavy scientific
+  there are no runtime feature extras. CLI tools fetch deps via PEP 723 + uv; library modules use ensure_import + AUTO_DEPS. Dependencies are fetched by
+  `uv` only when a script that needs them is executed. For library modules,
+  `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1`
+  is set, with CUDA-aware resolution. The base installation stays lightweight
+  either way.
+
+- **Modular & Extensible Tooling**: Each utility is an independent script. This
+  modularity simplifies development, testing, and maintenance, as changes to one
+  tool cannot inadvertently affect another. New tools can be added to the
+  collection without modifying the core dispatcher logic, making the system
+  easily extensible.
+
+### Dynamic Dependency Resolution
+
+The library extends the PEP 723 dispatcher philosophy to the import surface.
+CLI scripts resolve deps via `uv run`; library modules resolve deps via
+`ensure_import` at first use. Same principle (lightweight core, on-demand
+resolution), two execution modes.
+
+#### Priority Chain
+
+Every call to `ensure_import(module_name)` walks a 5-step chain:
+
+1. **Current environment** -- `importlib.import_module()`, zero overhead when installed.
+2. **Parent environment** -- `RGPYCRUMBS_PARENT_SITE_PACKAGES` path fallback.
+3. **uv cache** -- `sys.path` lookup in `$XDG_CACHE_HOME/rgpycrumbs/deps/`.
+4. **uv install** -- `uv pip install --target <cache_dir>` then retry import.
+   Gated by `RGPYCRUMBS_AUTO_DEPS=1` (opt-in).
+5. **Fallback** -- `ImportError` with an actionable message suggesting the right
+   extra or pixi.
+
+#### CUDA-aware Resolution
+
+When auto-installing packages with GPU backends (currently jax), the resolver
+probes for `nvidia-smi` to detect whether CUDA is available. On CPU-only
+machines it substitutes CPU-only install specs (e.g. `jax[cpu]>=0.4`) to avoid
+pulling hundreds of megabytes of unused CUDA libraries.
+
+#### Dependency Registry
+
+`_DEPENDENCY_MAP` in `rgpycrumbs/_aux.py` maps importable module names to their
+pip install spec (no feature extras):
+
+```python
+_DEPENDENCY_MAP = {
+    "jax":   "jax>=0.4",
+    "scipy": "scipy>=1.11",
+    "ase":   "ase>=3.22",
+}
+```
+
+Packages intentionally excluded from this map are NOT auto-installed by default.
+ira_mod and tblite fall through to step 5 with a pixi hint; heavy packages like ovito are left for explicit installation in the active environment.
+
+#### Cache Location
+
+`$XDG_CACHE_HOME/rgpycrumbs/deps/` (default `\~/.cache/rgpycrumbs/deps/`).
+uv installs with `--target` into this directory. It persists across sessions
+and can be cleared with `rm -rf`.
+
+### Library Modules
+
+In addition to the CLI dispatcher, `rgpycrumbs` provides importable library
+modules for computational tasks. These are used by downstream packages like
+`chemparseplot` and can be used directly in notebooks or custom scripts.
+
+#### Module Structure
+
+- **`rgpycrumbs.surfaces`**: JAX-based surface fitting with kernel methods (TPS,
+  RBF, Matern 5/2, SE, IMQ). Includes gradient-enhanced variants. Optional
+  dependency: `jax`.
+  Fits with `optimize=True`, the default, also need `scipy`.
+- **`rgpycrumbs.geom.analysis`**: Structure analysis using ASE: distance matrices,
+  bond matrices, and fragment detection via depth-first search on neighbor
+  lists. Optional dependencies: `ase`, `scipy`.
+- **`rgpycrumbs.geom.ira`**: Iterative Rotations and Assignments (IRA) for
+  RMSD-based structure comparison. Optional dependency: `ira_mod`.
+- **`rgpycrumbs.interpolation`**: Spline interpolation utilities built on SciPy.
+  Optional dependency: `scipy`.
+- **`rgpycrumbs.basetypes`**: Shared data structures (namedtuples and dataclasses)
+  for NEB iterations, NEB paths, saddle search measurements, dimer
+  optimization, molecular geometries, and spin identification. No extra
+  dependencies.
+
+#### Lazy Loading
+
+The top-level `rgpycrumbs/__init__.py` uses `__getattr__` for lazy imports, so
+modules with heavy optional dependencies (like JAX) are only loaded when
+accessed. This keeps `import rgpycrumbs` fast regardless of which extras are
+installed.
+
+### Benchmarks
+
+Performance benchmarks use [ASV (Airspeed Velocity)](https://asv.readthedocs.io) with results posted on PRs
+via [asv-perch](https://github.com/HaoZeke/asv-perch). The benchmark suite covers all three computational domains:
+
+- ****Surfaces** (`benchmarks/bench_surfaces.py`)**: JAX kernel matrix construction,
+  `GradientMatern` fit/predict cycles, and prediction-only scaling. Uses manual
+  JIT warmup in `setup()` and `block_until_ready()` for accurate timing.
+- ****Interpolation** (`benchmarks/bench_interpolation.py`)**: SciPy B-spline
+  interpolation via `spline_interp`, parameterized by input size.
+- ****Geometry** (`benchmarks/bench_geometry.py`)**: ASE `analyze_structure` on
+  water clusters, parameterized by molecule count.
+
+#### Running Locally
+
+The `bench` pixi environment composes the `surfaces` and `test` features,
+providing JAX, SciPy, ASE, and ASV:
+
+```bash
+# Validate that all benchmarks parse correctly
+pixi run -e bench asv check
+
+# Quick single-pass run (good for smoke testing)
+pixi run -e bench asv run \
+  -E "existing:$(pixi run -e bench which python)" \
+  --quick
+
+# Full run with sample recording
+pixi run -e bench asv run \
+  -E "existing:$(pixi run -e bench which python)" \
+  --record-samples
+```
+
+The `-E "existing:..."` flag tells ASV to use the pixi-managed Python
+rather than building its own virtualenv. Results land in `.asv/results/`
+(gitignored).
+
+#### CI Workflow
+
+Two workflows implement the [fork-safe split pattern](https://asv-perch.rgoswami.me/explanation/fork_security.html):
+
+1. **`ci_benchmark.yml` (`pull_request` trigger, read-only)**: Runs benchmarks
+   for the base and PR commits in a matrix. Stashes `benchmarks/`,
+   `asv.conf.json`, `pixi.toml`, and `pixi.lock` before each `git checkout`
+   so the PR's benchmark code and environment definition apply to both
+   commits. Uploads `.asv/results/` as artifacts.
+2. **`ci_bench_commenter.yml` (`workflow_run` trigger, write access)**: Downloads
+   the combined artifact and calls `HaoZeke/asv-perch@v1` with
+   `comparison-text-file` mode to post a formatted table on the PR.
+
+#### Writing New Benchmarks
+
+Follow the ASV class convention. Key JAX considerations:
+
+- Always call `block_until_ready()` in the timing body to force synchronous
+  completion of JAX async dispatch.
+- Warm up JIT-compiled code paths in `setup()` with a throwaway call, then set
+  `warmup_time = 0` so ASV does not double-count compilation.
+- Use `optimize=False` for surface-fitting benchmarks, so they time the kernel math and not the optimizer.
+
+### Performance Improvements [2026-03-13]
+
+#### Summary
+
+Completed performance optimization campaign for chemgp module:
+
+1. Parallel batch processing with ThreadPoolExecutor
+2. Caching with @lru_cache for repeated operations
+3. Complete type hints (90%+ coverage)
+4. Error handling and HDF5 validation
+
+#### Benchmarks
+
+| Operation | Before | After | Speedup |
+|---|---|---|---|
+| Batch (20 plots) | 60s | 15s | 4x |
+| Batch (50 plots) | 150s | 35s | 4.3x |
+| Repeated clamp detect | 10ms | 8ms | 1.25x |
+
+#### Implementation Details
+
+##### Parallel Processing
+
+Pattern adopted from `nebmmf_repro/scripts/parse_results.py`:
+
+```python
+with ThreadPoolExecutor(max_workers=parallel) as executor:
+    futures = {executor.submit(generate_plot, entry): entry for entry in plots}
+    for future in as_completed(futures):
+        future.result()
+```
+
+##### Caching
+
+```python
+@lru_cache(maxsize=128)
+def detect_clamp(filename: str):
+    """Detect energy clamping preset (cached)."""
+    ...
+```
+
+##### Type Hints
+
+Target: 90%+ coverage across chemgp modules.
+
+##### Error Handling
+
+```python
+@safe_plot
+def plot_surface(...):
+    """Plot with graceful error handling."""
+    ...
+```
+
+#### Files Changed
+
+- chemgp/plot_gp.py (+172 lines)
+- chemgp/plotting.py (+65 lines)
+- chemgp/hdf5_io.py (+35 lines)
+
+#### Towncrier Newsfragments
+
+- docs/newsfragments/5019393.dev.rst
+- docs/newsfragments/type_hints.dev.rst
+- docs/newsfragments/error_handling.dev.rst
+
+#### Related
+
+- [Batch Command Documentation](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_command)
+- [Individual Plot Commands](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp)
+
 ## Changelog
 
 Source: https://rgpycrumbs.rgoswami.me/changelog
@@ -4298,6 +5078,9 @@ authoring rules:
   intersphinx links (e.g., pointing to the eOn schema).
 - **Source Code Links**: Link to the internal API reference using
   ``@@rst::mod:`rgpycrumbs.path.to.module`@@``.
+- **Generated Text**: `mkrst` first runs `cog -r` on every org file with a cog block.
+  A block starts on a line of just `[[[cog` and computes its text from `pixi.toml` or `pixi.lock`.
+  Commit the regenerated file with the change that moves those values.
 
 ### Content Structure Template for Tools
 
@@ -4328,9 +5111,11 @@ comment with a link to a **live preview**.
 If you need to verify changes locally before pushing:
 
 ```shell
-pixi run r docbld
+pixi run docbld
 ```
 
+The build fails on any Sphinx warning.
+`sphinxbld` runs `sphinx-build -W --keep-going`, which lists every warning before it fails.
 Outputs to `docs/build/`, served with:
 
 ```bash
@@ -4341,7 +5126,7 @@ python -m http.server -d docs/build
 For a clean rebuild:
 
 ```bash
-pixi run r docdel
+pixi run docdel
 ```
 
 ### README and Branch Structure
@@ -4371,9 +5156,9 @@ The changelog entries stem from newsfragments handled by
 
 #### News fragments
 
-Every Pull Request must include a news fragment. These small text files in
-`markdown` format, within `docs/newsfragments/` describe the changes for the
-final user.
+Every Pull Request must include a news fragment.
+These small reStructuredText files in `docs/newsfragments/` describe the changes for the final user.
+Each file is named `NAME.TYPE.rst`, and towncrier copies it into `CHANGELOG.rst`.
 
 #### Creating a Fragment
 
@@ -4511,9 +5296,8 @@ The `pure` marker is reserved for tests that depend only on core packages
 `pure` since they mock all optional dependencies. Never place tests that import
 dispatcher scripts under the `pure` marker.
 
-Note that `[all]` is a best-effort convenience extra covering pip-installable
-optional dependencies only. Pixi-only packages (`tblite`, `ira_mod`) and
-heavier tools such as `ovito` still need explicit environment setup.
+There is no `[all]` extra, and `ensure_import` only installs the pip specs in its dependency map.
+Pixi-only packages (`tblite`, `ira_mod`) and heavier tools such as `ovito` need explicit environment setup.
 
 #### Available Markers & Environments
 
@@ -4697,77 +5481,6 @@ See [CLI Architecture](https://rgpycrumbs.rgoswami.me/dev/cli_architecture) for 
 - [Tools Documentation](https://rgpycrumbs.rgoswami.me/tools/)
 - [GitHub Repository](https://github.com/HaoZeke/rgpycrumbs)
 
-## How to Cite rgpycrumbs
-
-Source: https://rgpycrumbs.rgoswami.me/explanation/citation
-
-### How to Cite rgpycrumbs
-
-If you use rgpycrumbs in your research, please cite the relevant papers based on functionality used.
-
-#### Software Citation
-
-cite:[goswami2024rgpycrumbs]
-
-#### Visualization Methods
-
-When using 2D reaction valley projection (landscape visualization, `grad_imq`, `grad_matern`, Nystrom approximation):
-
-cite:[goswami2026valley]
-
-The method maps NEB trajectories onto a two-dimensional projection defined by
-permutation-corrected RMSD from reactant and product configurations, with a
-rotated coordinate frame decomposing into reaction progress (`s`) and orthogonal
-deviation (`d`).
-
-#### NEB Methods
-
-When using NEB orchestration or enhanced CI-NEB:
-
-cite:[goswami2026neb]
-
-Enhanced Climbing Image NEB method with Hessian eigenmode alignment.
-
-#### Gaussian Process Methods
-
-When using surface fitting, GP models, or saddle search acceleration:
-
-cite:[goswami2025gpr goswami2025pruning]
-
-- GPR-accelerated saddle point searches (JCTC 2025)
-- Adaptive pruning for robustness (ChemPhysChem 2025)
-
-#### Statistical Analysis
-
-When using Bayesian hierarchical models for performance analysis:
-
-cite:[goswami2025bayesian]
-
-#### Combined Citation
-
-cite:[goswami2024rgpycrumbs goswami2026valley goswami2026neb goswami2025gpr goswami2025pruning goswami2025bayesian]
-
-#### Acknowledgments
-
-```text
-Computational workflows used rgpycrumbs (https://github.com/HaoZeke/rgpycrumbs).
-Surface fitting employed the 2D reaction valley projection method [cite:@goswami2026valley].
-NEB calculations used enhanced CI-NEB [cite:@goswami2026neb]. Gaussian process
-acceleration followed [cite:@goswami2025gpr @goswami2025pruning].
-```
-
-#### Related Software
-
-##### metatensor/metatomic
-
-cite:[bigiMetatensorMetatomicFoundational2026]
-
-#### See Also
-
-- [Reference](https://rgpycrumbs.rgoswami.me/reference/)
-- [Tutorials](https://rgpycrumbs.rgoswami.me/tutorials/)
-- [Lazy Import Pattern](https://rgpycrumbs.rgoswami.me/explanation/dev/lazy_imports)
-
 ## Best Practices
 
 Source: https://rgpycrumbs.rgoswami.me/dev/best_practices
@@ -4853,15 +5566,21 @@ to these scripts at runtime, avoiding a monolithic CLI with heavy imports.
 
 ### Dispatcher Pattern
 
-The main `rgpycrumbs` command discovers scripts under `rgpycrumbs/*/cli_*.py`
-and maps subcommand names to script paths. When invoked, it calls `uv run` on
-the target script, letting uv resolve the per-script dependencies declared in
-the PEP 723 header.
+The main `rgpycrumbs` command maps each subpackage to a command group and each script in it to a command.
+When invoked, it runs the script with `uv run`, so uv resolves the dependencies in its PEP 723 header.
+It uses the active interpreter instead under `--dev` or `RGPYCRUMBS_DEV`, or when `uv` is not on the path.
+It does the same when that interpreter already has readcon, matplotlib, polars, ASE and chemparseplot.
+`RGPKGS_FORCE_UV`, `RGPYCRUMBS_FORCE_UV` or `force_uv` in the suite configuration forces `uv run`.
+Only `--dev` and `RGPYCRUMBS_DEV` override that.
+
+A public module is a script only when it carries the inline `script` metadata block of Python Enhancement Proposal (PEP) 723.
+Modules without that block stay library code, and so do modules whose names start with `_`.
+The command name is the module name with `-` for `_`, minus any `cli_` prefix.
 
 ```python
 # Simplified dispatcher logic (see rgpycrumbs/cli.py)
 def dispatch(cmd: str, args: list[str]):
-    script = SCRIPT_MAP[cmd]  # e.g. rgpycrumbs/neb/cli_plt_neb.py
+    script = SCRIPT_MAP[cmd]  # e.g. rgpycrumbs/eon/plt_neb.py
     subprocess.run(["uv", "run", "--script", str(script), *args])
 ```
 
@@ -4869,8 +5588,8 @@ def dispatch(cmd: str, args: list[str]):
 
 - Each script declares only its own dependencies (click, matplotlib, etc.)
 - No global import of JAX/scipy/ASE at startup
-- Scripts are runnable standalone: `uv run rgpycrumbs/neb/cli_plt_neb.py --help`
-- New commands added by dropping a `cli_*.py` file in the right subpackage
+- Scripts are runnable standalone: `uv run rgpycrumbs/eon/plt_neb.py --help`
+- A module with a PEP 723 `script` block in a subpackage is a new command
 
 ### Related
 
@@ -4914,6 +5633,15 @@ uv run pytest -m surfaces
 uv run ruff format .
 uv run ruff check .
 ```
+
+##### Type Checks
+
+```bash
+uv run --extra lint pyright
+```
+
+The lint workflow runs the same command.
+Pyright reads its settings from `[tool.pyright]` in `pyproject.toml`.
 
 ##### Type Hints
 
@@ -5388,7 +6116,7 @@ RGPYCRUMBS_AUTO_DEPS=1 uv run scripts/test_all_features.py
 | `ci_test.yml` | `pytest -m pure` on py3.10-3.12 | push, PR |
 | `ci_tutorials.yml` | Module compile checks, CLI help | push, PR |
 | `ci_doctest.yml` | Extract and run Python blocks from org tutorials | push, PR |
-| `ci_prek.yml` | ruff, codespell, lychee link checker | push, PR |
+| `ci_prek.yml` | ruff, pyright, codespell, lychee link checker | push, PR |
 | `ci_docs.yml` | Sphinx doc build (org -> RST -> HTML) | push to main, PR |
 
 ### Adding Tests
@@ -5489,676 +6217,76 @@ Apply the same pattern for pyvista, ovito, and any other optional dep.
 - [Test Requirements](https://rgpycrumbs.rgoswami.me/contributing/test_requirements) -- environment setup details
 - [Lazy Import Pattern](https://rgpycrumbs.rgoswami.me/dev/lazy_imports) -- why tests need separate environments
 
-## `rgpycrumbs` Design & Architecture Notes
+## How to Cite rgpycrumbs
 
-Source: https://rgpycrumbs.rgoswami.me/devnotes
+Source: https://rgpycrumbs.rgoswami.me/explanation/citation
 
-### Documentation Pipeline
+### How to Cite rgpycrumbs
 
-We craft documents in `orgmode`, though downstream processing uses `sphinx`.
-Partially because of this, since `ox-rst` needs `emacs`, and because the
-documentation rarely needs to be built outside of the development workflow,
-instead of staying within the `pyproject` file as an optional dependency the
-documentation forms a new environment in the `pixi.toml` file.
+If you use rgpycrumbs in your research, please cite the relevant papers based on functionality used.
 
-### Dependency management
+#### Software Citation
 
-- **Library**: go in `pyproject.toml`.
-- **Doc/Dev**: go in `pixi.toml`.
-- **Script**: handled on-the-fly via the `uv` dispatching mechanism and [PEP 723](https://peps.python.org/pep-0723/) detailed in my [RealPython best practices post](https://realpython.com/python-script-structure/).
+cite:[goswami2024rgpycrumbs]
 
-### Core Architecture: The Dispatcher
+#### Visualization Methods
 
-#### The Problem
+When using 2D reaction valley projection (landscape visualization, `grad_imq`, `grad_matern`, Nystrom approximation):
 
-Research pipelines require conflicting environments and a monolithic CLI
-(e.g., standard `Typer` app) fails because importing the top-level module
-crashes due to conflicting dependencies in sub-modules.
+cite:[goswami2026valley]
 
-#### The Solution: Dynamic Subprocess Dispatch
+The method maps NEB trajectories onto a two-dimensional projection defined by
+permutation-corrected RMSD from reactant and product configurations, with a
+rotated coordinate frame decomposing into reaction progress (`s`) and orthogonal
+deviation (`d`).
 
-   Instead of directly importing modules, `rgpycrumbs/cli.py` controls execution flow:
-   - It scans directory structure at runtime.
-   - It invokes scripts via `uv run`.
-   - This leads to complete isolation for each script.
+#### NEB Methods
 
-   ```python
-   # Logic captured in rgpycrumbs/cli.py
-   subprocess.run(["uv", "run", script_path] + args)
-   ```
+When using NEB orchestration or enhanced CI-NEB:
 
-#### Philosophy
+cite:[goswami2026neb]
 
-The library is designed with the following principles in mind:
+Enhanced Climbing Image NEB method with Hessian eigenmode alignment.
 
-- **Dispatcher-Based Architecture**: The top-level `rgpycrumbs.cli` command acts as a
-  lightweight dispatcher. It does not contain the core logic of the tools
-  itself. Instead, it parses user commands to identify the target script and
-  then invokes it in an isolated subprocess using the `uv` runner. This provides
-  a unified command-line interface while keeping the tools decoupled.
+#### Gaussian Process Methods
 
-- **Isolated & Reproducible Execution**: Each script is a self-contained unit that
-  declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata. The `uv` runner uses this
-  information to resolve and install the exact required packages into a
-  temporary, cached environment on-demand. This design guarantees
-  reproducibility and completely eliminates the risk of dependency conflicts
-  between different tools in the collection.
+When using surface fitting, GP models, or saddle search acceleration:
 
-- **Lightweight Core, On-Demand Dependencies**: The installable `rgpycrumbs`
-  package has minimal core dependencies (`click`, `numpy`). Heavy scientific
-  there are no runtime feature extras. CLI tools fetch deps via PEP 723 + uv; library modules use ensure_import + AUTO_DEPS. Dependencies are fetched by
-  `uv` only when a script that needs them is executed. For library modules,
-  `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1`
-  is set, with CUDA-aware resolution. The base installation stays lightweight
-  either way.
+cite:[goswami2025gpr goswami2025pruning]
 
-- **Modular & Extensible Tooling**: Each utility is an independent script. This
-  modularity simplifies development, testing, and maintenance, as changes to one
-  tool cannot inadvertently affect another. New tools can be added to the
-  collection without modifying the core dispatcher logic, making the system
-  easily extensible.
+- GPR-accelerated saddle point searches (JCTC 2025)
+- Adaptive pruning for robustness (ChemPhysChem 2025)
 
-### Dynamic Dependency Resolution
+#### Statistical Analysis
 
-The library extends the PEP 723 dispatcher philosophy to the import surface.
-CLI scripts resolve deps via `uv run`; library modules resolve deps via
-`ensure_import` at first use. Same principle (lightweight core, on-demand
-resolution), two execution modes.
+When using Bayesian hierarchical models for performance analysis:
 
-#### Priority Chain
+cite:[goswami2025bayesian]
 
-Every call to `ensure_import(module_name)` walks a 5-step chain:
+#### Combined Citation
 
-1. **Current environment** -- `importlib.import_module()`, zero overhead when installed.
-2. **Parent environment** -- `RGPYCRUMBS_PARENT_SITE_PACKAGES` path fallback.
-3. **uv cache** -- `sys.path` lookup in `$XDG_CACHE_HOME/rgpycrumbs/deps/`.
-4. **uv install** -- `uv pip install --target <cache_dir>` then retry import.
-   Gated by `RGPYCRUMBS_AUTO_DEPS=1` (opt-in).
-5. **Fallback** -- `ImportError` with an actionable message suggesting the right
-   extra or pixi.
+cite:[goswami2024rgpycrumbs goswami2026valley goswami2026neb goswami2025gpr goswami2025pruning goswami2025bayesian]
 
-#### CUDA-aware Resolution
+#### Acknowledgments
 
-When auto-installing packages with GPU backends (currently jax), the resolver
-probes for `nvidia-smi` to detect whether CUDA is available. On CPU-only
-machines it substitutes CPU-only install specs (e.g. `jax[cpu]>=0.4`) to avoid
-pulling hundreds of megabytes of unused CUDA libraries.
-
-#### Dependency Registry
-
-`_DEPENDENCY_MAP` in `rgpycrumbs/_aux.py` maps importable module names to their
-pip install spec (no feature extras):
-
-```python
-_DEPENDENCY_MAP = {
-    "jax":   "jax>=0.4",
-    "scipy": "scipy>=1.11",
-    "ase":   "ase>=3.22",
-}
+```text
+Computational workflows used rgpycrumbs (https://github.com/HaoZeke/rgpycrumbs).
+Surface fitting employed the 2D reaction valley projection method [cite:@goswami2026valley].
+NEB calculations used enhanced CI-NEB [cite:@goswami2026neb]. Gaussian process
+acceleration followed [cite:@goswami2025gpr @goswami2025pruning].
 ```
 
-Packages intentionally excluded from this map are NOT auto-installed by default.
-ira_mod and tblite fall through to step 5 with a pixi hint; heavy packages like ovito are left for explicit installation in the active environment.
+#### Related Software
 
-#### Cache Location
+##### metatensor/metatomic
 
-`$XDG_CACHE_HOME/rgpycrumbs/deps/` (default `\~/.cache/rgpycrumbs/deps/`).
-uv installs with `--target` into this directory. It persists across sessions
-and can be cleared with `rm -rf`.
+cite:[bigiMetatensorMetatomicFoundational2026]
 
-### Library Modules
+#### See Also
 
-In addition to the CLI dispatcher, `rgpycrumbs` provides importable library
-modules for computational tasks. These are used by downstream packages like
-`chemparseplot` and can be used directly in notebooks or custom scripts.
-
-#### Module Structure
-
-- **`rgpycrumbs.surfaces`**: JAX-based surface fitting with kernel methods (TPS,
-  RBF, Matern 5/2, SE, IMQ). Includes gradient-enhanced variants. Optional
-  dependency: `jax`.
-- **`rgpycrumbs.geom.analysis`**: Structure analysis using ASE: distance matrices,
-  bond matrices, and fragment detection via depth-first search on neighbor
-  lists. Optional dependencies: `ase`, `scipy`.
-- **`rgpycrumbs.geom.ira`**: Iterative Rotations and Assignments (IRA) for
-  RMSD-based structure comparison. Optional dependency: `ira_mod`.
-- **`rgpycrumbs.interpolation`**: Spline interpolation utilities built on SciPy.
-  Optional dependency: `scipy`.
-- **`rgpycrumbs.basetypes`**: Shared data structures (namedtuples and dataclasses)
-  for NEB iterations, NEB paths, saddle search measurements, dimer
-  optimization, molecular geometries, and spin identification. No extra
-  dependencies.
-
-#### Lazy Loading
-
-The top-level `rgpycrumbs/__init__.py` uses `__getattr__` for lazy imports, so
-modules with heavy optional dependencies (like JAX) are only loaded when
-accessed. This keeps `import rgpycrumbs` fast regardless of which extras are
-installed.
-
-### Benchmarks
-
-Performance benchmarks use [ASV (Airspeed Velocity)](https://asv.readthedocs.io) with results posted on PRs
-via [asv-perch](https://github.com/HaoZeke/asv-perch). The benchmark suite covers all three computational domains:
-
-- ****Surfaces** (`benchmarks/bench_surfaces.py`)**: JAX kernel matrix construction,
-  `GradientMatern` fit/predict cycles, and prediction-only scaling. Uses manual
-  JIT warmup in `setup()` and `block_until_ready()` for accurate timing.
-- ****Interpolation** (`benchmarks/bench_interpolation.py`)**: SciPy B-spline
-  interpolation via `spline_interp`, parameterized by input size.
-- ****Geometry** (`benchmarks/bench_geometry.py`)**: ASE `analyze_structure` on
-  water clusters, parameterized by molecule count.
-
-#### Running Locally
-
-The `bench` pixi environment composes the `surfaces` and `test` features,
-providing JAX, SciPy, ASE, and ASV:
-
-```bash
-# Validate that all benchmarks parse correctly
-pixi run -e bench asv check
-
-# Quick single-pass run (good for smoke testing)
-pixi run -e bench asv run \
-  -E "existing:$(pixi run -e bench which python)" \
-  --quick
-
-# Full run with sample recording
-pixi run -e bench asv run \
-  -E "existing:$(pixi run -e bench which python)" \
-  --record-samples
-```
-
-The `-E "existing:..."` flag tells ASV to use the pixi-managed Python
-rather than building its own virtualenv. Results land in `.asv/results/`
-(gitignored).
-
-#### CI Workflow
-
-Two workflows implement the [fork-safe split pattern](https://asv-perch.rgoswami.me/explanation/fork_security.html):
-
-1. **`ci_benchmark.yml` (`pull_request` trigger, read-only)**: Runs benchmarks
-   for the base and PR commits in a matrix. Stashes `benchmarks/`,
-   `asv.conf.json`, `pixi.toml`, and `pixi.lock` before each `git checkout`
-   so the PR's benchmark code and environment definition apply to both
-   commits. Uploads `.asv/results/` as artifacts.
-2. **`ci_bench_commenter.yml` (`workflow_run` trigger, write access)**: Downloads
-   the combined artifact and calls `HaoZeke/asv-perch@v1` with
-   `comparison-text-file` mode to post a formatted table on the PR.
-
-#### Writing New Benchmarks
-
-Follow the ASV class convention. Key JAX considerations:
-
-- Always call `block_until_ready()` in the timing body to force synchronous
-  completion of JAX async dispatch.
-- Warm up JIT-compiled code paths in `setup()` with a throwaway call, then set
-  `warmup_time = 0` so ASV does not double-count compilation.
-- Use `optimize=False` for surface-fitting benchmarks to measure kernel math
-  rather than BFGS optimizer convergence variance.
-
-### Performance Improvements [2026-03-13]
-
-#### Summary
-
-Completed performance optimization campaign for chemgp module:
-
-1. Parallel batch processing with ThreadPoolExecutor
-2. Caching with @lru_cache for repeated operations
-3. Complete type hints (90%+ coverage)
-4. Error handling and HDF5 validation
-
-#### Benchmarks
-
-| Operation | Before | After | Speedup |
-|---|---|---|---|
-| Batch (20 plots) | 60s | 15s | 4x |
-| Batch (50 plots) | 150s | 35s | 4.3x |
-| Repeated clamp detect | 10ms | 8ms | 1.25x |
-
-#### Implementation Details
-
-##### Parallel Processing
-
-Pattern adopted from `nebmmf_repro/scripts/parse_results.py`:
-
-```python
-with ThreadPoolExecutor(max_workers=parallel) as executor:
-    futures = {executor.submit(generate_plot, entry): entry for entry in plots}
-    for future in as_completed(futures):
-        future.result()
-```
-
-##### Caching
-
-```python
-@lru_cache(maxsize=128)
-def detect_clamp(filename: str):
-    """Detect energy clamping preset (cached)."""
-    ...
-```
-
-##### Type Hints
-
-Target: 90%+ coverage across chemgp modules.
-
-##### Error Handling
-
-```python
-@safe_plot
-def plot_surface(...):
-    """Plot with graceful error handling."""
-    ...
-```
-
-#### Files Changed
-
-- chemgp/plot_gp.py (+172 lines)
-- chemgp/plotting.py (+65 lines)
-- chemgp/hdf5_io.py (+35 lines)
-
-#### Towncrier Newsfragments
-
-- docs/newsfragments/5019393.dev.rst
-- docs/newsfragments/type_hints.dev.rst
-- docs/newsfragments/error_handling.dev.rst
-
-#### Related
-
-- [Batch Command Documentation](https://rgpycrumbs.rgoswami.me/tools/chemgp/batch_command)
-- [Individual Plot Commands](https://rgpycrumbs.rgoswami.me/tools/chemgp/plt_gp)
-
-## rgpkgs stable public API
-
-Source: https://rgpycrumbs.rgoswami.me/explanation/public_api
-
-### Hub (`rgpycrumbs.api`)
-
-Prefer::
-
-```python
-from rgpycrumbs.api import (
-    load_config,
-    load_pypi_pins,
-    apply_pin_to_spec,
-    pins_from_env,
-    ensure_import,
-    suite_pins,
-    resolve_lock_path_layered,
-    user_config_path,
-)
-```
-
-| Symbol | Role |
-|---|---|
-| `load_config` | Merge `/~/.config/rgpkgs/` + project `rgpkgs.toml` |
-| `load_pypi_pins` | Parse uv.lock / pylock / CycloneDX → pin map |
-| `apply_pin_to_spec` | Apply pin map to a pip requirement string |
-| `pins_from_env` | Read `RGPKGS_LOCK_PINS` (set by CLI dispatch) |
-| `ensure_import` | On-demand optional import (+ AUTO_DEPS) |
-| `suite_pins` | Env ∪ config pin merge for consumers |
-| `resolve_lock_path_layered` | CLI > env > config lock path |
-| `user_config_path` | Path to global TOML |
-
-CLI debug: `rgpycrumbs config show`
-
-### chemparseplot (`chemparseplot.api`)
-
-Bare install; extras transitional. Prefer `chemparseplot.api` for new consumers.
-
-#### Representative library path: parse → typed result
-
-```python
-from chemparseplot.api import extract_orca_geomscan_energy
-
-dist_bohr, energy_Eh = extract_orca_geomscan_energy(orca_out_text, "Actual Energy")
-# pint Quantities: distance (bohr), energy (hartree); non-empty on real scan output
-assert dist_bohr.size > 0
-assert str(energy_Eh.units) == "hartree"
-```
-
-Also re-exported:
-
-| Symbol | Role |
-|---|---|
-| `extract_orca_geomscan_energy` | ORCA geomscan surface → `(Q_ bohr, Q_ hartree)` |
-| `convert_energy_magnitude` | eV ↔ kcal/mol ↔ kJ/mol |
-| `normalize_energy_unit` | Alias normalization |
-| `suite_pins` | Shared rgpkgs package pins via hub |
-
-Submodules (`chemparseplot.parse`, `chemparseplot.plot`) remain available for
-advanced use; plot stacks may need optional deps until fully on-demand.
-
-### Config files (suite-wide)
-
-- `/~/.config/rgpkgs/config.toml`
-- Project `rgpkgs.toml`
-- Env `RGPKGS_LOCK`, `RGPKGS_CONFIG`, `RGPKGS_FORCE_UV`, `RGPKGS_AUTO_DEPS`
-
-Hub has **no** runtime feature extras. Do not `pip install "rgpycrumbs[analysis]"`.
-
-### CON I/O (`readcon-core` / `chemparseplot.parse.con`)
-
-eOn CON/convel frames use [readcon-core](https://github.com/lode-org/readcon-core)
-(PyPI package name `readcon`). Prefer:
-
-```python
-from chemparseplot.api import load_trajectory, plot_con_overview
-
-traj = load_trajectory("movie.con")
-fig = plot_con_overview(traj, structures="endpoints")
-```
-
-CLI: `rgpycrumbs eon plt-con movie.con`
-
-## rgpkgs suite architecture
-
-Source: https://rgpycrumbs.rgoswami.me/explanation/suite_architecture
-
-### Roles
-
-| Package | Role |
-|---|---|
-| rgpycrumbs | Hub: CLI, ensure_import, locks, suite TOML |
-| chemparseplot | Parse + plot library (no second config tree) |
-| pychum | Input generators |
-| [readcon-core](https://github.com/lode-org/readcon-core) | CON/convel I/O (Rust; PyPI: [readcon](https://pypi.org/project/readcon/)) |
-
-### Config
-
-One tree: `/~/.config/rgpkgs/config.toml`, project `rgpkgs.toml`.
-See `docs/examples/rgpkgs.config.toml`.
-
-### Deps
-
-Hub: no runtime feature extras. CLI PEP 723 + uv; library AUTO_DEPS.
-chemparseplot: extras transitional; migrate to same uv/on-demand design.
-Cookbook: prefer library API when plot pipelines are exposed as stable
-functions; today full pipelines still go through `rgpycrumbs eon plt-*`.
-
-### Locks
-
-Consume (not produce): uv.lock, PEP 751 pylock, CycloneDX (eb-stack / uv export).
-
-### CON / structure I/O
-
-eOn movies and general CON trajectories use `readcon-core` (import name
-`readcon`) via `chemparseplot.parse.con`. See also `rgpycrumbs eon plt-con`.
-
-## First Project - End-to-End Energy Landscape Analysis
-
-Source: https://rgpycrumbs.rgoswami.me/tutorials/first-project
-
-**First Project**
-
-This tutorial walks you through a complete workflow: from raw NEB calculation
-output to a publication-quality energy landscape figure. We'll use a surface
-diffusion problem as our example.
-
-### Prerequisites
-
-#### Installation
-
-```bash
-# Core package with all pip-available extras
-pip install rgpycrumbs  # + export RGPYCRUMBS_AUTO_DEPS=1
-
-# Or for development
-git clone https://github.com/HaoZeke/rgpycrumbs
-cd rgpycrumbs
-uv sync --all-extras
-```
-
-#### Sample Data
-
-For this tutorial, we assume you have:
-1. NEB calculation output files (`neb_*.dat`) from eOn
-2. A trajectory file (`path.con`) with image geometries
-
-Download sample data:
-
-```bash
-wget https://example.com/sample-neb-data.tar.gz
-tar xzf sample-neb-data.tar.gz
-cd sample-neb-data
-```
-
-### Step 1: Visualize the NEB Path
-
-First, let's see how the NEB optimization converged:
-
-```bash
-python -m rgpycrumbs.cli eon plt-neb --start 0 --end 50 -o neb_convergence.pdf
-```
-
-This produces a plot showing energy vs. iteration for each image. Look for:
-- Smooth convergence (lines should flatten)
-- Consistent spacing between images
-- No images crossing over each other
-
-**Troubleshooting:** If the plot is empty, check that your `neb_*.dat` files exist
-and contain energy data in column 2.
-
-### Step 2: Extract the Final Path
-
-Now extract the energy profile from the final iteration:
-
-```python
-# SKIP-DOCTEST -- requires sample NEB data files
-from rgpycrumbs.basetypes import nebpath
-from rgpycrumbs.eon.plt_neb import extract_neb_data
-import matplotlib.pyplot as plt
-
-# Load the final iteration data
-data = extract_neb_data("neb_49.dat")  # Last iteration
-
-# Access the path
-path = data.nebpath
-print(f"Number of images: {len(path.energy)}")
-print(f"Barrier: {max(path.energy) - min(path.energy):.4f} eV")
-```
-
-### Step 3: Fit a Smooth Surface
-
-For publication figures, we want a smooth curve through the data points:
-
-```python
-# SKIP-DOCTEST -- requires sample NEB data files
-from rgpycrumbs.surfaces import get_surface_model
-import numpy as np
-
-# Prepare 1D data for surface fitting
-x_obs = path.arc_dist.reshape(-1, 1)  # Arc distance as 2D array
-y_obs = path.energy.to("hartree").magnitude  # Convert to hartree
-
-# Fit a gradient-enhanced Matérn surface
-# (Use standard Matern if you don't have force data)
-model = get_surface_model("matern")(
-    x_obs, y_obs,
-    ls=0.5,  # Initial length scale guess
-    smoothing=1e-4  # Noise regularization
-)
-
-# Evaluate on a fine grid for smooth plotting
-x_fine = np.linspace(x_obs.min(), x_obs.max(), 300).reshape(-1, 1)
-y_fine = model(x_fine)
-
-# Get uncertainty estimates
-y_var = model.predict_var(x_fine)
-```
-
-**Troubleshooting:** If optimization fails, try:
-1. Different kernel: `get_surface_model("tps")` is more stable
-2. Better length scale: increase `ls` if data is smooth, decrease if rough
-3. More smoothing: increase `smoothing` to `1e-3`
-
-### Step 4: Create the Publication Figure
-
-Now combine everything into a publication-ready plot:
-
-```python
-# SKIP-DOCTEST -- requires sample NEB data files
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
-fig, ax = plt.subplots(figsize=(4, 3), dpi=300)
-
-# Plot raw data points
-ax.plot(
-    path.arc_dist.to("angstrom").magnitude,
-    path.energy.to("eV").magnitude,
-    'o',
-    color='#004D40',  # Teal
-    markersize=6,
-    label='NEB images',
-    zorder=10
-)
-
-# Plot fitted curve
-ax.plot(
-    x_fine.flatten(),
-    y_fine * 27.2114,  # Hartree to eV
-    '-',
-    color='#FF655D',  # Coral
-    linewidth=2,
-    label='Matérn fit',
-    zorder=5
-)
-
-# Add uncertainty band
-ax.fill_between(
-    x_fine.flatten(),
-    (y_fine - 2*np.sqrt(y_var)) * 27.2114,
-    (y_fine + 2*np.sqrt(y_var)) * 27.2114,
-    alpha=0.2,
-    color='#FF655D',
-    label='95% CI'
-)
-
-# Formatting
-ax.set_xlabel('Reaction Coordinate (Å)')
-ax.set_ylabel('Energy (eV)')
-ax.legend(frameon=False, loc='upper right')
-ax.xaxis.set_major_locator(MaxNLocator(5))
-ax.yaxis.set_major_locator(MaxNLocator(5))
-
-# Tight layout for publication
-fig.tight_layout()
-fig.savefig('energy_profile.pdf', bbox_inches='tight')
-print("Saved energy_profile.pdf")
-```
-
-### Step 5: Analyze the Transition State
-
-Find and characterize the saddle point:
-
-```python
-# SKIP-DOCTEST -- requires sample NEB data files
-# Find maximum (transition state)
-ts_idx = np.argmax(y_fine)
-ts_x = x_fine[ts_idx][0]
-ts_energy = y_fine[ts_idx] * 27.2114  # eV
-
-# Find reactant and product minima
-reactant_energy = y_fine[0] * 27.2114
-product_energy = y_fine[-1] * 27.2114
-
-# Calculate barriers
-forward_barrier = ts_energy - reactant_energy
-reverse_barrier = ts_energy - product_energy
-
-print(f"Transition state at: {ts_x:.2f} Å")
-print(f"Forward barrier: {forward_barrier:.3f} eV")
-print(f"Reverse barrier: {reverse_barrier:.3f} eV")
-print(f"Reaction energy: {product_energy - reactant_energy:.3f} eV")
-```
-
-### Next Steps
-
-Now that you have the basics, explore:
-
-1. ***2D Landscapes***: Use `plot_landscape_surface` for RMSD-based projections
-2. ***Gradient-Enhanced Fitting***: Include force data for better accuracy
-3. ***Batch Processing***: Process multiple NEB calculations automatically
-
-See also:
-- [tools/eon/plt_neb](https://rgpycrumbs.rgoswami.me/tutorials/tools/eon/plt_neb) for NEB plotting options
-- [tools/surfaces](https://rgpycrumbs.rgoswami.me/tutorials/tools/surfaces) for surface fitting details
-- [tools/eon/con_splitter](https://rgpycrumbs.rgoswami.me/tutorials/tools/eon/con_splitter) for trajectory processing
-
-### Complete Script
-
-Here's the complete workflow as a single script:
-
-```python
-# SKIP-DOCTEST -- requires sample NEB data files
-#!/usr/bin/env python
-"""
-First Project: NEB Energy Landscape Analysis
-
-This script processes eOn NEB output and creates a publication-quality figure.
-"""
-
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
-from rgpycrumbs.basetypes import nebpath
-from rgpycrumbs.eon.plt_neb import extract_neb_data
-from rgpycrumbs.surfaces import get_surface_model
-
-# 1. Load data
-data = extract_neb_data("neb_49.dat")
-path = data.nebpath
-
-# 2. Fit surface
-x_obs = path.arc_dist.reshape(-1, 1)
-y_obs = path.energy.to("hartree").magnitude
-
-model = get_surface_model("matern")(x_obs, y_obs, ls=0.5, smoothing=1e-4)
-
-# 3. Evaluate
-x_fine = np.linspace(x_obs.min(), x_obs.max(), 300).reshape(-1, 1)
-y_fine = model(x_fine)
-y_var = model.predict_var(x_fine)
-
-# 4. Plot
-fig, ax = plt.subplots(figsize=(4, 3), dpi=300)
-
-ax.plot(
-    path.arc_dist.to("angstrom").magnitude,
-    path.energy.to("eV").magnitude,
-    'o', color='#004D40', markersize=6, label='NEB images', zorder=10
-)
-
-ax.plot(
-    x_fine.flatten(), y_fine * 27.2114,
-    '-', color='#FF655D', linewidth=2, label='Matérn fit', zorder=5
-)
-
-ax.fill_between(
-    x_fine.flatten(),
-    (y_fine - 2*np.sqrt(y_var)) * 27.2114,
-    (y_fine + 2*np.sqrt(y_var)) * 27.2114,
-    alpha=0.2, color='#FF655D', label='95% CI'
-)
-
-ax.set_xlabel('Reaction Coordinate (Å)')
-ax.set_ylabel('Energy (eV)')
-ax.legend(frameon=False, loc='upper right')
-fig.tight_layout()
-fig.savefig('energy_profile.pdf', bbox_inches='tight')
-
-# 5. Analyze
-ts_idx = np.argmax(y_fine)
-print(f"Barrier: {(y_fine[ts_idx] - y_fine[0]) * 27.2114:.3f} eV")
-```
-
-Run with:
-
-```bash
-python first_project.py
-```
+- [Reference](https://rgpycrumbs.rgoswami.me/reference/)
+- [Tutorials](https://rgpycrumbs.rgoswami.me/tutorials/)
+- [Lazy Import Pattern](https://rgpycrumbs.rgoswami.me/explanation/dev/lazy_imports)
 
 ## AGENTS.md
 
@@ -6328,9 +6456,10 @@ The dispatcher builds its command list from the files, so there is no registry t
 A new directory under `rgpycrumbs/` becomes a group once it has a command.
 Give it an `__init__.py` so that tests can import the module.
 
-Every other `.py` file directly in a group directory is listed as a command too, although running a library module that way does no work: it exits 0 without output, or stops with `ModuleNotFoundError` when uv runs it without the packages it imports.
+A `.py` file directly in a group directory is a command only when it starts with a PEP 723 script block.
+A name that starts with `_` is never a command.
+A header-less module is not a command.
 Name helpers `_name.py`, or put them in a subpackage such as `rgpycrumbs/geom/api/`.
-Only `hdf5_io`, `plotting`, `utils`, `helpers` and `seed_dimers` are left out by name.
 
 ### The script
 
@@ -6377,13 +6506,13 @@ rgpycrumbs --dev geom count-atoms molecule.xyz
 python scripts/scaffold_check.py
 ```
 
-copies the installed package into a temporary directory, adds a `demo` group holding [assets/count_atoms.py](https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-add-tool/assets/count_atoms.py), a `_private.py`, a `plotting.py` and a header-less `analysis.py`, and checks that `rgpycrumbs demo --help` lists `count-atoms` and `analysis` but not the other two, that the template's PEP 723 block parses, and that `rgpycrumbs --dev demo count-atoms` counts the atoms of a water molecule.
+copies the installed package into a temporary directory, adds a `demo` group holding [assets/count_atoms.py](https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-add-tool/assets/count_atoms.py), a `_private.py`, a `plotting.py` and a header-less `analysis.py`, and checks that `rgpycrumbs demo --help` lists `count-atoms` but not the other three, that the template's PEP 723 block parses, and that `rgpycrumbs --dev demo count-atoms` counts the atoms of a water molecule.
 
 ## Skill: rgpycrumbs-cli
 
 Source: https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-cli/SKILL.md
 
-Find, inspect and run rgpycrumbs command-line tools. Covers the script behind each `rgpycrumbs GROUP TOOL` and the Python Enhancement Proposal (PEP) 723 header that decides what uv installs before the tool starts. It also covers the `--dev` and `--verbose` flags, when the dispatcher uses the active environment instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules, not tools. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
+Find, inspect and run rgpycrumbs command-line tools. Covers the script behind each `rgpycrumbs GROUP TOOL` and the Python Enhancement Proposal (PEP) 723 header that decides what uv installs before the tool starts. It also covers the `--dev` and `--verbose` flags, when the dispatcher uses the active environment instead of uv, pinning versions with rgpkgs.toml or a lock file, and that a module without a script metadata block is not a command. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
 
 ### From a command to a script
 
@@ -6398,8 +6527,10 @@ Find, inspect and run rgpycrumbs command-line tools. Covers the script behind ea
 
 `rgpycrumbs --help` lists the groups and `rgpycrumbs GROUP --help` the commands in one group.
 Neither installs anything.
-Every `.py` file directly in a subdirectory of the package is a command, unless its name starts with `_` or is `hdf5_io`, `plotting`, `utils`, `helpers` or `seed_dimers`, and a subdirectory with at least one command is a group.
-`search`, `time` and `xts` hold none, so they are not groups.
+A `.py` file directly in a subdirectory is a command only when it starts with a PEP 723 script block.
+A name that starts with `_` is never a command.
+A subdirectory with at least one command is a group.
+`func`, `parsers`, `run`, `search`, `surfaces`, `time` and `xts` hold none, so they are not groups.
 
 `python -m rgpycrumbs.uma.aoti_cache --help` runs one module directly with the current Python, skipping the dispatcher.
 Write the module name with `_`.
@@ -6515,18 +6646,11 @@ print(pins_to_constraint_lines(pins))
 
 ### Commands that are not tools
 
-These commands are library modules, with no PEP 723 block and no `__main__` section, so running one does no work.
-Under uv the script gets no packages, so a module that imports numpy, jax or any other package stops with `ModuleNotFoundError`.
-The rest exit 0 without output.
-With `--dev`, where the imports are installed, every one of them exits 0 without output.
-Import them from Python instead (`from rgpycrumbs.func.muller_brown import muller_brown`).
-
-- `eon plot-config`, `eon plot-dispatch`
-- `func muller-brown`
-- `geom analysis`, `geom fragment-visualization`, `geom fragments`, `geom ira`
-- `parsers bless`, `parsers common`
-- `run jupyter`
-- `surfaces gradient-imq`, `surfaces gradient-matern`, `surfaces gradient-nystrom`, `surfaces gradient-rq`, `surfaces gradient-se`, `surfaces standard`
+The dispatcher registers no command that lacks a PEP 723 script block.
+A module without that block is not a command.
+`rgpycrumbs` does not list it and does not run it.
+Import the function from the module, for example `from rgpycrumbs.func.muller_brown import muller_brown`.
+Other modules in that position include `rgpycrumbs.eon.plot_config` and `rgpycrumbs.surfaces.standard`.
 
 ### Check
 
@@ -6536,7 +6660,7 @@ python scripts/dispatch_demo.py
 ```
 
 `scripts/list_tools.py` prints every command with its script, Python requirement, dependency count and git sources.
-It fails when a command's script is missing, when the commands without a PEP 723 block differ from the list above, or when the package directories that are not groups differ from those named at the top.
+It fails when a command's script is missing, when the registered commands that lack a script block differ from the names under Commands that are not tools, or when the package directories that are not groups differ from those named at the top.
 `scripts/dispatch_demo.py` makes a scratch project with its own `rgpkgs.toml` and `pylock.toml`, runs `rgpycrumbs config show` and `rgpycrumbs --dev -v uma aoti-cache list` there (the one tool that needs nothing beyond click), and checks what they print.
 
 ## Skill: rgpycrumbs-neb-plots

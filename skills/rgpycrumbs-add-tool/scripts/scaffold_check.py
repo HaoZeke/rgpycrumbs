@@ -70,7 +70,7 @@ def run() -> None:
         listing = rgpycrumbs("demo", "--help", cwd=root, env=env)
         commands = listing.split("Commands:", 1)[1].split()
         assert "count-atoms" in commands, listing
-        assert "analysis" in commands, listing
+        assert "analysis" not in commands, listing
         assert "private" not in listing, listing
         assert "plotting" not in commands, listing
 

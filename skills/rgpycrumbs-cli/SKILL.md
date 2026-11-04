@@ -1,6 +1,6 @@
 ---
 name: rgpycrumbs-cli
-description: Find, inspect and run rgpycrumbs command-line tools. Covers the script behind each `rgpycrumbs GROUP TOOL` and the Python Enhancement Proposal (PEP) 723 header that decides what uv installs before the tool starts. It also covers the `--dev` and `--verbose` flags, when the dispatcher uses the active environment instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules, not tools. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
+description: Find, inspect and run rgpycrumbs command-line tools. Covers the script behind each `rgpycrumbs GROUP TOOL` and the Python Enhancement Proposal (PEP) 723 header that decides what uv installs before the tool starts. It also covers the `--dev` and `--verbose` flags, when the dispatcher uses the active environment instead of uv, pinning versions with rgpkgs.toml or a lock file, and that a module without a script metadata block is not a command. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
 license: See LICENSE in the rgpycrumbs repository
 compatibility: rgpycrumbs on Python 3.10 or newer (`pip install rgpycrumbs`, or `uv sync` in a checkout). Dispatched tools need Python 3.11 or newer, and uv on PATH unless `--dev` is given. The check scripts need Python 3.11 or newer and the core install only, and run offline.
 ---
@@ -20,8 +20,10 @@ compatibility: rgpycrumbs on Python 3.10 or newer (`pip install rgpycrumbs`, or 
 
 `rgpycrumbs --help` lists the groups and `rgpycrumbs GROUP --help` the commands in one group.
 Neither installs anything.
-Every `.py` file directly in a subdirectory of the package is a command, unless its name starts with `_` or is `hdf5_io`, `plotting`, `utils`, `helpers` or `seed_dimers`, and a subdirectory with at least one command is a group.
-`search`, `time` and `xts` hold none, so they are not groups.
+A `.py` file directly in a subdirectory is a command only when it starts with a PEP 723 script block.
+A name that starts with `_` is never a command.
+A subdirectory with at least one command is a group.
+`func`, `parsers`, `run`, `search`, `surfaces`, `time` and `xts` hold none, so they are not groups.
 
 `python -m rgpycrumbs.uma.aoti_cache --help` runs one module directly with the current Python, skipping the dispatcher.
 Write the module name with `_`.
@@ -137,18 +139,11 @@ print(pins_to_constraint_lines(pins))
 
 ## Commands that are not tools
 
-These commands are library modules, with no PEP 723 block and no `__main__` section, so running one does no work.
-Under uv the script gets no packages, so a module that imports numpy, jax or any other package stops with `ModuleNotFoundError`.
-The rest exit 0 without output.
-With `--dev`, where the imports are installed, every one of them exits 0 without output.
-Import them from Python instead (`from rgpycrumbs.func.muller_brown import muller_brown`).
-
-- `eon plot-config`, `eon plot-dispatch`
-- `func muller-brown`
-- `geom analysis`, `geom fragment-visualization`, `geom fragments`, `geom ira`
-- `parsers bless`, `parsers common`
-- `run jupyter`
-- `surfaces gradient-imq`, `surfaces gradient-matern`, `surfaces gradient-nystrom`, `surfaces gradient-rq`, `surfaces gradient-se`, `surfaces standard`
+The dispatcher registers no command that lacks a PEP 723 script block.
+A module without that block is not a command.
+`rgpycrumbs` does not list it and does not run it.
+Import the function from the module, for example `from rgpycrumbs.func.muller_brown import muller_brown`.
+Other modules in that position include `rgpycrumbs.eon.plot_config` and `rgpycrumbs.surfaces.standard`.
 
 ## Check
 
@@ -158,5 +153,5 @@ python scripts/dispatch_demo.py
 ```
 
 `scripts/list_tools.py` prints every command with its script, Python requirement, dependency count and git sources.
-It fails when a command's script is missing, when the commands without a PEP 723 block differ from the list above, or when the package directories that are not groups differ from those named at the top.
+It fails when a command's script is missing, when the registered commands that lack a script block differ from the names under Commands that are not tools, or when the package directories that are not groups differ from those named at the top.
 `scripts/dispatch_demo.py` makes a scratch project with its own `rgpkgs.toml` and `pylock.toml`, runs `rgpycrumbs config show` and `rgpycrumbs --dev -v uma aoti-cache list` there (the one tool that needs nothing beyond click), and checks what they print.

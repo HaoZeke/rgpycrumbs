@@ -14,9 +14,10 @@ The dispatcher builds its command list from the files, so there is no registry t
 A new directory under `rgpycrumbs/` becomes a group once it has a command.
 Give it an `__init__.py` so that tests can import the module.
 
-Every other `.py` file directly in a group directory is listed as a command too, although running a library module that way does no work: it exits 0 without output, or stops with `ModuleNotFoundError` when uv runs it without the packages it imports.
+A `.py` file directly in a group directory is a command only when it starts with a PEP 723 script block.
+A name that starts with `_` is never a command.
+A header-less module is not a command.
 Name helpers `_name.py`, or put them in a subpackage such as `rgpycrumbs/geom/api/`.
-Only `hdf5_io`, `plotting`, `utils`, `helpers` and `seed_dimers` are left out by name.
 
 ## The script
 
@@ -63,4 +64,4 @@ rgpycrumbs --dev geom count-atoms molecule.xyz
 python scripts/scaffold_check.py
 ```
 
-copies the installed package into a temporary directory, adds a `demo` group holding [assets/count_atoms.py](assets/count_atoms.py), a `_private.py`, a `plotting.py` and a header-less `analysis.py`, and checks that `rgpycrumbs demo --help` lists `count-atoms` and `analysis` but not the other two, that the template's PEP 723 block parses, and that `rgpycrumbs --dev demo count-atoms` counts the atoms of a water molecule.
+copies the installed package into a temporary directory, adds a `demo` group holding [assets/count_atoms.py](assets/count_atoms.py), a `_private.py`, a `plotting.py` and a header-less `analysis.py`, and checks that `rgpycrumbs demo --help` lists `count-atoms` but not the other three, that the template's PEP 723 block parses, and that `rgpycrumbs --dev demo count-atoms` counts the atoms of a water molecule.
