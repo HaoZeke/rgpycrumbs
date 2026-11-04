@@ -1,1 +1,0 @@
-The ``Skills`` workflow (``.github/workflows/ci_skills.yml``) fails when ``llms-full.txt`` is stale or ``docs/source/llms.txt`` links a page that does not exist, runs the generator's tests, and runs the scripts of every guide under ``skills/``, the NEB one with the plot stack from PyPI.

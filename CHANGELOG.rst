@@ -1,3 +1,323 @@
+rgpycrumbs 1.14.0 (2026-11-04)
+==============================
+
+Removed
+-------
+
+- ``rgpycrumbs.surfaces.safe_cholesky_solve`` no longer takes ``jitter_steps``.
+  ``equilibrated_inverse_solve`` no longer takes ``jitter``.
+  Both solvers now take their jitter from the covariance matrix. (cholesky-jitter-arguments)
+- ``rgpycrumbs.surfaces.gradient_rq.negative_mll_rq_map`` is now ``negative_mll_rq_grad``.
+  It no longer adds prior penalties, so it matches the other ``negative_mll_*_grad`` objectives. (rq-objective-name)
+
+
+Added
+-----
+
+- ``NystromGradientIMQ`` takes a ``seed`` for its random inducing subset.
+  The default stays at 42, which only makes the subset reproducible. (nystrom-seed)
+- ``llms-full.txt`` at the repository root is the manual in one Markdown file.
+  It keeps every page but the API reference, in the site navigation order.
+  ``python scripts/llms/build_llms.py`` generates the file from the Org sources.
+  The settings are in ``scripts/llms/llms.toml``.
+  ``--check`` exits 1 while the file is stale.
+  The same flag exits 2 when ``docs/source/llms.txt`` links a page outside the site. (llms-full)
+- ``skills/`` contains three task guides.
+  Each guide is a ``SKILL.md`` plus scripts that check the text against the code.
+  ``rgpycrumbs-cli`` shows how a command maps to a script.
+  The guide names the script's installs.
+  It also names where the active interpreter replaces uv.
+  Version pins are in that guide.
+  Library modules are listed among its commands.
+  ``rgpycrumbs-neb-plots`` reads barriers from an eOn nudged elastic band run.
+  The guide draws that run's profile and its landscape.
+  ``rgpycrumbs-add-tool`` shows how to add a command.
+  ``python scripts/skills/run_skills.py`` checks every guide and runs its scripts. (skills)
+
+
+Developer
+---------
+
+- The fake-dependency tests in ``tests/test_coverage_boost.py`` unbind each ``rgpycrumbs`` submodule they drop from ``sys.modules``.
+  Test files that run later import those submodules against the real dependencies (coverage-fake-modules).
+- Coverage runs the ``ptm`` tests and combines their data with the other environments. (coverage-ptm)
+- Mesa lavapipe is installed before the polyhedral template matching tests.
+  The Open Visualization Tool can then render without a graphics processor. (coverage-software-vulkan)
+- ``AGENTS.md`` lists the install commands and the test commands.
+  It also lists the lint commands and the documentation commands.
+  Common tasks point at a guide or a page.
+  The file records the pitfalls.
+  ``--help`` on a tool installs its dependencies.
+  Git sources need Rust 1.85.
+  The active interpreter replaces uv when the plot stack imports.
+  The landscape cache is reused across runs.
+  A landscape can drop a band step, print a warning, and still exit 0. (agents-md)
+- ``scripts/org_to_md.sh`` loads ``scripts/org_to_md.el``.
+  ``README.md`` then has one space after each bullet.
+  List items indent by two columns per level.
+  Code blocks sit between backtick fences.
+  Tables are pipe tables.
+  That layout is the one snapper accepts. (readme-layout)
+- The Skills workflow in ``.github/workflows/ci_skills.yml`` fails when ``llms-full.txt`` is stale.
+  A stale link in ``docs/source/llms.txt`` fails that workflow too.
+  The workflow runs the generator tests.
+  Every guide script under ``skills/`` runs there.
+  The nudged elastic band guide uses the plot stack from PyPI. (skills-ci)
+- The docs build runs ``cog -r`` on every org source with a ``[[[cog`` block before the export.
+  Text those blocks compute from ``pixi.toml`` and ``pixi.lock`` then matches the manifest and the lock. (docs-cog)
+- ``load_trajectories`` in ``rgpycrumbs.eon._single_ended_cli`` types its logger with the four arguments its call passes.
+  ``read_xyz`` in ``rgpycrumbs.eon.pimd_centroid`` raises its no-frames error when it parsed no symbols.
+  Pyright then sees that it returns a list of symbols. (eon-type-annotations)
+- ``rgpycrumbs.eon.plt_neb`` imports ``chemparseplot.parse.projection`` without falling back to ``None``.
+  Every chemparseplot release without that module also lacks other names that ``plt_neb`` imports.
+  So the fallback never ran.
+  The chemparseplot floor of 1.13.0 already covers every name that ``plt_neb`` imports. (neb-projection-import)
+- The pixi ``test-*`` tasks exit with the pytest status.
+  Each one ended in ``; true`` before, so ``pixi run cov`` reported coverage after failed tests. (pixi-test-status)
+- The lint workflow runs Pyright in basic mode with the ``[tool.pyright]`` settings in ``pyproject.toml``.
+  The ``lint`` extra installs Pyright, and its Ruff floor now matches the Ruff release of the prek hook. (pyright-ci)
+- The ``sphinxbld`` pixi task, and with it the documentation workflow, now fails on any Sphinx warning.
+  The ``uma`` command pages import their dispatched scripts to render the CLI reference.
+  The task sets ``RGPYCRUMBS_SUPPRESS_SCRIPT_IMPORT_WARNING=1``.
+  The setting silences the warning those imports print. (sphinx-warnings-fatal)
+- The ``eon`` tests keep their MLflow runs under the ``tmp_path`` of each test.
+  An autouse fixture in ``tests/conftest.py`` points ``MLFLOW_TRACKING_URI`` there and clears the active experiment.
+  Those tests used to leave ``mlflow.db`` and ``mlruns/`` in the working directory.
+  The ``ptm`` tests that render take the image path from a fixture under ``tmp_path``. (test-outputs-tmp-path)
+- Towncrier fragments under ``docs/newsfragments`` no longer match the ``*.rst`` ignore rule.
+  A plain ``git add`` now tracks them. (track-newsfragments)
+- A CI step, ``scripts/check_version.py``, fails when ``pixi.toml`` sets a version.
+  It also fails when the newest ``CHANGELOG.rst`` heading is not the git tag.
+  A release commit before its tag must name a version newer than that tag.
+  It must also equal the next version from ``cog bump --dry-run --auto``.
+  The check fails when cog is not on ``PATH`` or prints no version.
+- ``scripts/check_version.py`` runs on Python 3.10.
+  It falls back to ``tomli`` when the standard library has no ``tomllib``.
+
+
+Changed
+-------
+
+- Automatic installs, the pixi environments and the script headers take chemparseplot from PyPI.
+  Most of them used to follow its ``main`` branch.
+  The floor is 1.13.0, the oldest release with every chemparseplot name that rgpycrumbs imports.
+  The plotting docs name that floor instead of 1.9.10.
+  ``plot_comparison`` and the surrogate scripts still pin chemparseplot commits.
+  The script headers also take ``readcon`` from PyPI instead of its ``main`` branch. (chemparseplot-release)
+- ``rgpycrumbs.search.helpers.head_search`` is read until a match or the end of the file, unless ``n`` is given.
+  It used to stop after 60 lines, so pass ``n=60`` to keep that bound. (head-search-default)
+- The surface kernels take their guards from the float32 machine epsilon ``eps = 2**-23``.
+  ``rgpycrumbs.surfaces._hyperparameters`` names them.
+  ``LENGTH_SCALE_FLOOR`` is ``eps`` and replaces the ``1e-5`` floor of the squared-exponential length scale.
+  ``SQUARED_DISTANCE_GUARD`` is ``eps**2`` and replaces the ``1e-12`` under the thin-plate and Matern square roots.
+  In float32 the ``1e-12`` was a no-op for every squared distance from ``2**-15`` up.
+  ``RQ_DENOMINATOR_GUARD`` is ``eps**2`` and replaces the ``1e-6`` in the rational-quadratic denominator.
+  That ``1e-6`` changed the kernel by half a percent at length scale ``0.01`` and by half at ``1e-3``. (kernel-guards)
+- ``rgpycrumbs.eon.ptmdisp.find_mismatch_indices`` renders the selected atoms only when ``view_selection`` is set.
+  The new ``selection_image`` argument names the file, and ``selection.png`` stays the default name.
+  ``rgpycrumbs eon ptmdisp`` renders only with the new ``--selection-image`` option.
+  By default, the function and the command used to render ``selection.png``.
+  They wrote that file in the working directory on every call. (ptm-selection-image)
+- ``rgpycrumbs eon ptmdisp`` now sets its vacancy window in units of the squared lattice constant.
+  The new ``--csp-vacancy-min`` and ``--csp-vacancy-max`` options default to ``3/8`` and ``5/8``.
+  A vacancy neighbor has ``a**2/2``.
+  ``rgpycrumbs.eon.ptmdisp.find_mismatch_indices`` takes the window as ``csp_vacancy_min`` and ``csp_vacancy_max``.
+  The window used to be 70 to 95 square angstroms of a centrosymmetry parameter taken over the mismatched atoms alone.
+  The neighbors of a lone vacancy have ``11 a**2/2`` there, so the filter kept them in nickel and lead.
+  The parameter is now the usual one over all atoms.
+  The atoms of stacking faults and of relaxed octahedral interstitials sit near ``a**2/2`` too.
+  So the filter drops them as well. (ptm-vacancy-window)
+- ``rgpycrumbs.interpolation.spline_interp`` now derives its default grid from the samples.
+  Without ``num`` the grid has ``(len(x) - 1) * knots + 1`` points instead of a fixed 100.
+  It never has fewer points than the input, and it passes through every sample of an evenly spaced *x*.
+  The fixed 100 points dropped detail from inputs with more samples than that.
+  Pass ``num`` to keep a fixed grid. (spline-default-grid)
+- Surface models are exact when the caller gives no ``smoothing``.
+  The default had been ``1e-3`` for ``FastTPS``, ``FastMatern``, ``FastIMQ`` and ``NystromGradientIMQ``.
+  The other gradient models used ``1e-4``.
+  Fixed fits now take the roundoff jitter as the noise, and optimized fits start the noise at the largest prior variance.
+  Pass the old value as ``smoothing`` to keep the earlier fits. (surface-exact-default)
+- Surface models without a ``length_scale`` now start it at the median distance between distinct inputs.
+  The inverse multiquadric models start ``epsilon`` the same way.
+  Each model used to scale the mean extent of the inputs by its own factor.
+  ``FastMatern`` used 0.2, ``GradientSE`` 0.4 and ``GradientMatern`` 0.5.
+  ``FastIMQ`` and ``GradientIMQ`` used 0.8.
+  ``GradientRQ`` started at 1.5 and ``NystromGradientIMQ`` at 0.5, whatever the data.
+  No source gave those values.
+  Garreau, Jitkrittum and Kanagawa analyse the median heuristic.
+  Riabiz et al. use it for the inverse multiquadric kernel.
+  Repeated inputs are left out of the median, and fewer than two distinct inputs raise ``ValueError``. (surface-median-start)
+
+
+Fixed
+-----
+
+- ``llms-full.txt`` is written again from the current manual.
+  The command guide now says a module is a command only when it carries a script metadata block.
+  The add-tool guide and its check expect the same rule.
+  The old list named modules that are not commands. (guides-match-dispatcher)
+- The dispatcher and the library importer read ``RGPKGS_AUTO_DEPS`` and ``RGPYCRUMBS_AUTO_DEPS`` with the same spellings.
+  Both take ``true``, ``yes`` and ``on`` and their opposites in any letter case.
+  Before, the dispatcher passed ``true`` through verbatim and the importer then treated it as off. (auto-deps-flag-spellings)
+- ``rgpycrumbs.basetypes`` defines its records itself and no longer imports chemparseplot.
+  It used to try ``chemparseplot.basetypes`` first, which only the 0.x chemparseplot releases have.
+  chemparseplot imports these records from ``rgpycrumbs.basetypes``, as the module docstring now says. (basetypes-local-records)
+- ``rgpycrumbs.geom.fragments.find_fragments_bond_order`` now raises ``ImportError`` without tblite.
+  The message names ``pip install tblite`` and the pixi ``fragments`` environment.
+  It used to fail with an ``AttributeError`` on ``None``. (bond-order-tblite)
+- ``rgpycrumbs chemgp plot-gp batch`` now works with Click 8.2 and later, including the 8.3.1 in the pixi lock.
+  Every entry used to fail with ``unexpected keyword argument 'mix_stderr'``.
+  Entries now run through the ``main`` of their subcommand instead of Click's test runner.
+  The test runner rebinds ``sys.stdout`` and ``sys.stderr`` for the whole process.
+  Two ``--parallel`` workers could then leave ``sys.stdout`` bound to a closed stream.
+  A failed entry now reports the error message of its subcommand. (chemgp-batch-click)
+- The ChemGP pages now call ``rgpycrumbs chemgp plot-gp``.
+  They used to call ``plt-gp``, a command that existed only in 1.3.0.
+  Their batch examples now run ``plot-gp batch``, since ``chemgp`` has never had a ``batch`` command. (chemgp-command-name)
+- The ``quality`` subcommand of ``rgpycrumbs chemgp plot-gp`` now names the missing ``grids/gp_mean_N<n>`` grids.
+  It used to fail inside Matplotlib with ``Number of rows must be a positive integer, not 0``.
+  For a file without any ``gp_ls<j>_sv<i>`` panel, ``sensitivity`` now fails instead of saving an empty figure.
+  Without ``points/optimum``, ``nll`` now draws the landscape with no optimum marker.
+  It used to stop with a ``KeyError`` from h5py. (chemgp-incomplete-inputs)
+- The ChemGP pages no longer describe a ``landscape`` plot type for ``rgpycrumbs chemgp plot-gp``.
+  That subcommand existed only in 1.3.0, in the older ``plt-gp`` command.
+  Since 1.4.1, ``plot-gp batch`` has rejected ``landscape`` entries as an unknown type. (chemgp-landscape-entries)
+- The surface solvers now add the Cholesky roundoff bound of each covariance matrix to its diagonal.
+  That bound is Higham's ``gamma_(n+1)`` times the largest entry, so it follows the matrix order and the data scale.
+  The dense thin-plate, Matérn and inverse multiquadric solves used to add only the smoothing.
+  With zero smoothing, repeated inputs gave NaN weights.
+  The gradient and Nystrom solves added fixed shifts of ``1e-6`` and ``1e-4`` instead.
+  ``safe_cholesky_solve`` now spots a failed factorization from its non-finite entries.
+  ``jax.numpy.linalg.cholesky`` returns NaNs there instead of raising, so the old retry loop never retried. (cholesky-roundoff-jitter)
+- A module is a command only when it has an inline ``# /// script`` metadata block.
+  It used to list 16 library modules as commands that did nothing.
+  Two of them were ``rgpycrumbs run jupyter`` and ``rgpycrumbs surfaces standard``.
+  The ``func``, ``parsers``, ``run`` and ``surfaces`` groups held no scripts, so they are gone from ``rgpycrumbs --help``. (cli-script-discovery)
+- The gradient-enhanced rational quadratic surface now builds a positive semidefinite covariance matrix.
+  Its gradient-gradient blocks were transposed.
+  Row ``i`` and column ``j`` held the second derivative in ``x2[i]`` and ``x1[j]``.
+  The mirrored kernel makes that block asymmetric, so the transposed matrix had negative eigenvalues.
+  The inverse multiquadric and squared-exponential blocks are symmetric, so the same change leaves their values unchanged. (gradient-kernel-pair-order)
+- ``GradientIMQ`` with ``noise_per_obs`` gave every gradient component a tenth of the energy noise at its point.
+  That ratio drops the inverse squared length that a gradient variance carries.
+  Each gradient component now keeps the energy's ratio of noise to prior variance.
+  For the inverse multiquadric kernel, the gradient noise is the energy noise over ``epsilon**2``. (gradient-noise-units)
+- Optimized ``GradientIMQ`` fits no longer pull the noise toward ``1e-2``.
+  The objective had a quadratic penalty on the log noise, and no source gave its target or width.
+  On 40 Muller-Brown points the fitted noise drops from ``1.5e-3`` to ``1.2e-6``.
+  The negative log likelihood at the fit falls from ``38.9`` to ``24.6``.
+  The gamma prior on ``epsilon`` keeps shape 2, which Chung et al. propose so that the estimate stays off zero.
+  Its rate now puts the prior mode at the starting ``epsilon``, without the old ``1e-6`` offset. (imq-noise-likelihood)
+- ``rgpycrumbs.run.jupyter.run_command_or_exit`` now stops a command still running at its ``timeout``.
+  It also stops the processes that the command started.
+  The timeout used to start only after the command closed its output.
+  So it never stopped a command that kept its output open.
+  The default is now ``timeout=None``, so commands that ran past the old 300 seconds still finish.
+  On POSIX the command runs in its own session.
+  Ctrl-C in a terminal then reaches only the helper, which kills the command. (live-command-timeout)
+- The Muller-Brown plot script is explicit when a log has no ``Iteration`` line to plot.
+  It used to fail inside NumPy with ``need at least one array to concatenate``.
+  Lines with ``nan`` coordinates are still skipped. (muller-brown-empty-log)
+- ``NystromGradientIMQ`` ignored ``optimize=True`` and kept its starting ``epsilon`` and noise.
+  It now fits both on the inducing points, with the ``GradientIMQ`` prior and noise cap. (nystrom-optimize)
+- The ``nystrom_paths_needed`` docstring now describes its result as a count of complete input paths.
+  The old text named optimization steps and gave the floor division that ``NystromGradientIMQ`` uses.
+  The helper returns that division rounded up, plus one buffer path. (nystrom-paths-docstring)
+- The ``ptm`` pixi environment installs the Python module of the Open Visualization Tool (OVITO) from ``https://conda.ovito.org``.
+  The conda-forge ``ovito`` package is a retired desktop build without the Python module.
+  With it, every ``ptm`` test was skipped.
+  The environment takes OVITO 3.16.0 or later.
+  Without a display, the ``ptm`` tests pass with 3.16.0 and every later build, and fail with every earlier one.
+  The ``test`` feature no longer installs that desktop build. (ovito-channel)
+- ``rgpycrumbs.eon.ptmdisp.find_mismatch_indices`` now keeps the periodic flags that the structure file declares.
+  It used to set all three flags after every read.
+  So a slab periodic in x and y alone went through the analysis and the selection sphere as periodic in z too.
+  A ``.con`` file keeps the flags of its metadata line, and all three when that line names none.
+  The eon reader of ``ase`` drops the flags of compressed ``.con`` files, so those stay periodic in all three directions.
+  A file without a cell, such as a plain ``.xyz`` file, used to fail in the structure analysis and now goes through. (ptm-file-periodic-flags)
+- An empty array is returned at once when no defect atom is found.
+  It used to average an empty set of positions, which made NumPy warn ``Mean of empty slice``.
+  It also drew an empty ``selection.png``. (ptm-no-defect-atoms)
+- ``rgpycrumbs eon ptmdisp --no-fcc-vacancy`` is now a flag that turns the vacancy filter off.
+  Without it, the command runs the filter.
+  The option used to take a boolean value, which the command passed on inverted.
+  So the filter ran only with ``--no-fcc-vacancy true``. (ptm-no-fcc-vacancy-flag)
+- ``rgpycrumbs.eon.ptmdisp.find_mismatch_indices`` now removes the pipeline of its render from the scene of the Open Visualization Tool (OVITO).
+  Each render used to leave its pipeline there.
+  So every later render in the same process also drew the atoms of the earlier calls. (ptm-render-scene)
+- ``rgpycrumbs.eon.ptmdisp.find_mismatch_indices`` now takes the minimum image in each periodic direction of the cell for its sphere around the defect.
+  The sphere used to take the plain mean of the defect atoms as its center and plain distances from that center.
+  So a defect on a face, an edge or a corner of the cell returned other atoms than the same defect inside it.
+  One copper vacancy gave 42 atoms inside the cell, 46 on a face, 50 on an edge and 52 on a corner.
+  It now gives 42 at each of those sites. (ptm-sphere-minimum-image)
+- ``rgpycrumbs.eon.ptmdisp.find_mismatch_indices`` now keeps the atoms that do not match the target structure when ``remove_fcc_vacancy`` is off.
+  It used to drop all of them and return an empty array for every structure. (ptm-vacancy-filter-off)
+- ``rgpycrumbs eon ptmdisp --help`` no longer imports the Open Visualization Tool.
+  The documentation build can show that help without the viewer installed.
+  Analysis still imports the viewer when it reads a structure. (ptmdisp-help-without-viewer)
+- CycloneDX pins decode every percent escape in a package URL, in either letter case.
+  A version such as ``2.5.1%2Bcpu`` now pins ``2.5.1+cpu`` instead of the escaped text. (purl-percent-escapes)
+- Optimized ``GradientRQ`` fits now maximize the marginal likelihood alone.
+  The objective also had penalties toward a length scale of ``1.5``, an ``alpha`` of ``0.8`` and a noise of ``1e-2``.
+  No source gave those targets, and the other surface models fit the likelihood without them.
+  On 40 Muller-Brown points the old fit stopped at a length scale of ``0.349``.
+  The likelihood alone reaches ``0.297``, and the negative log likelihood there is ``116.8`` instead of ``120.6``. (rq-marginal-likelihood)
+- ``rgpycrumbs eon plt-saddle`` no longer overlays a lone trajectory on its own landscape.
+  chemparseplot used to compute the landscape coordinates of that path twice.
+  It also drew a second ``R`` start label over the first. (saddle-single-trajectory)
+- ``rgpycrumbs eon plt-saddle`` now passes ``auto_thin`` and ``max_surface_points`` to the landscape fit.
+  It used to fit the surface with the chemparseplot defaults, whatever ``--config`` said.
+  ``plt-min`` and ``plt-neb`` already passed these settings on. (saddle-surface-fit-settings)
+- ``rgpycrumbs.search.helpers.tail`` reads plain files instead of raising ``io.UnsupportedOperation``.
+  For gzip files it returns all requested lines, even long ones, without line endings.
+  ``head_search`` returns ``False`` for a file shorter than its line budget instead of raising ``StopIteration``. (search-line-readers)
+- The documentation builds without Sphinx warnings.
+  The API reference renders Google and NumPy docstring sections through ``sphinx.ext.napoleon`` instead of plain text.
+  The ChemGP plotting page takes its command reference from ``rgpycrumbs.chemgp.plot_gp``.
+  The developer pages, the first-project tutorial and the explanation pages now appear in a table of contents. (sphinx-strict-build)
+- ``rgpycrumbs.interpolation.spline_interp`` now raises ``ValueError`` for inputs it cannot fit.
+  It checks that *x* is strictly increasing and that *x* and *y* are one-dimensional and of equal length.
+  It also needs more samples than the spline degree and a ``num`` of at least one.
+  A repeated *x* used to return NaN values without an error.
+  The other cases failed inside SciPy with a ``TypeError`` or a message that named no argument.
+  Lists now work as well as arrays. (spline-input-validation)
+- ``rgpycrumbs.api.suite_pins`` now lets a pin from ``RGPKGS_LOCK_PINS`` override a configuration pin for the same package.
+  Configuration pins used to win, against the runtime precedence that ``rgpycrumbs.config`` documents. (suite-pins-precedence)
+- Surface fits with ``optimize=True`` now run SciPy's ``L-BFGS-B`` and keep the last point that its line search accepted.
+  They used ``jax.scipy.optimize.minimize``, whose ``BFGS`` loop moves to the trial point even when the line search fails.
+  On the five-point bowl in the tests, ``FastMatern`` stopped that way at a length scale of ``2.9e-6``.
+  The gradient there was ``0.13``.
+  That ``minimize`` also ignores ``tol``, so the ``tol=1e-3`` that every model passed had no effect.
+  Hyperparameter fits now need SciPy, which ``ensure_import`` installs when ``RGPYCRUMBS_AUTO_DEPS`` is set. (surface-fit-optimizer)
+- Surface models now keep a caller's ``smoothing`` as the noise variance.
+  Six models raised any value below ``1e-4`` to ``1e-4``.
+  Take ``FastMatern`` with ``smoothing=1e-6`` on the five-point bowl in the tests.
+  Its training residual was ``2.9e-4`` and is now ``3.6e-6``.
+  ``GradientRQ`` ignored ``smoothing`` and used ``1e-2``.
+  Optimized ``GradientIMQ`` fits capped the noise at ``1e-2`` or the caller's value, whichever was larger.
+  They now cap it at the caller's value.
+  A ``smoothing`` of zero marks exact data and gets the roundoff jitter, and a negative value raises ``ValueError``.
+  Optimized fits of exact data start the noise at the largest prior variance. (surface-smoothing-kept)
+- ``rgpycrumbs.chemgp.match_atoms.parse_target_coords`` now returns shape ``(0, 3)`` when no line has three numbers.
+  It used to return shape ``(0,)``, so column indexing such as ``coords[:, 0]`` failed.
+  Its docstring has always promised ``(n, 3)``. (target-coords-shape)
+- A checkout without the generated version module reads ``rgpycrumbs.__version__`` from the installed distribution metadata.
+  Before, it reported ``unknown``. (version-metadata-fallback)
+- ``rgpycrumbs.time.helpers.one_day_tdelta`` works on Python 3.10 again.
+  It used ``datetime.UTC``, which arrived in Python 3.11, and raised ``AttributeError`` on 3.10. (python-310-utc)
+- ``rgpycrumbs.__version__`` reports the installed version instead of ``unknown``.
+  hatch-vcs now writes ``rgpycrumbs/_version.py`` inside the package.
+
+
+Miscellaneous
+-------------
+
+- Surface models compute the median distance that starts their length scale with ``jax.jit``.
+  The gradient models compile the covariance that sets their exact-data jitter the same way.
+  The first fit at each number of points compiles these steps, and later fits of that size reuse them. (surface-fit-compiled)
+- The package metadata lists Python 3.13, the version the pixi test environments run. (python-313-classifier)
+
+
 1.13.0 (2026-10-31)
 ===================
 
