@@ -1,6 +1,6 @@
 ---
 name: rgpycrumbs-cli
-description: Find, inspect and run rgpycrumbs command-line tools. Covers how `rgpycrumbs GROUP TOOL` maps to a script, how that script's PEP 723 header decides what uv installs before the tool starts, the --dev and --verbose flags, when the active environment is used instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules and do nothing. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
+description: Find, inspect and run rgpycrumbs command-line tools. Covers how `rgpycrumbs GROUP TOOL` maps to a script, how that script's PEP 723 header decides what uv installs before the tool starts, the --dev and --verbose flags, when the active environment is used instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules rather than tools. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
 license: MIT
 compatibility: rgpycrumbs on Python 3.10 or newer (pip install rgpycrumbs, or uv sync in a checkout). Dispatched tools need Python 3.11 or newer, and uv on PATH unless --dev is given. The check scripts need Python 3.11 or newer and the core install only, and run offline.
 ---
@@ -154,9 +154,12 @@ print(pins_to_constraint_lines(pins))
 ## Commands that are not tools
 
 These commands are library modules, with no PEP 723 block and no
-`__main__` section. Running one exits 0 and does nothing; import them
-from Python instead (`from rgpycrumbs.func.muller_brown import
-muller_brown`).
+`__main__` section, so running one does no work. Under uv the script
+gets no packages, and those that import numpy, jax or any other
+package stop with `ModuleNotFoundError`; the others, and any of them
+run with `--dev` where its imports are installed, exit 0 without
+output. Import them from Python instead (`from
+rgpycrumbs.func.muller_brown import muller_brown`).
 
 - `eon plot-config`, `eon plot-dispatch`
 - `func muller-brown`

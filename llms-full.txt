@@ -6313,8 +6313,10 @@ and ignored by git; edit the Org files.
   those its header asks for; `RGPKGS_FORCE_UV=1` forces uv.
   `RGPYCRUMBS_DEV=1` acts as `--dev`, but `RGPKGS_DEV=1` does not.
 - Sixteen listed commands, such as `geom analysis` and `func
-  muller-brown`, are library modules: running one exits 0 and does
-  nothing. `skills/rgpycrumbs-cli/SKILL.md` lists them.
+  muller-brown`, are library modules and do no work when run. Under uv
+  the script gets no packages, so most stop with `ModuleNotFoundError`;
+  the rest exit 0 without output. `skills/rgpycrumbs-cli/SKILL.md`
+  lists them.
 - `eon plt-neb`, and other tools that align periodic structures,
   install `readcon-ops` from a fixed GitHub commit into
   `~/.cache/rgpycrumbs/deps` the first time they run. It brings
@@ -6351,7 +6353,9 @@ new directory under `rgpycrumbs/` becomes a group once it holds a
 command; give it an `__init__.py` so that tests can import the module.
 
 Every other `.py` file directly in a group directory is listed as a
-command too, and running a library module that way does nothing. Name
+command too, although running a library module that way does no work:
+it exits 0 without output, or stops with `ModuleNotFoundError` when uv
+runs it without the packages it imports. Name
 helpers `_name.py`, or put them in a subpackage such as
 `rgpycrumbs/geom/api/`. Only `hdf5_io`, `plotting`, `utils`, `helpers`
 and `seed_dimers` are left out by name.
@@ -6426,7 +6430,7 @@ of a water molecule.
 
 Source: https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-cli/SKILL.md
 
-Find, inspect and run rgpycrumbs command-line tools. Covers how `rgpycrumbs GROUP TOOL` maps to a script, how that script's PEP 723 header decides what uv installs before the tool starts, the --dev and --verbose flags, when the active environment is used instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules and do nothing. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
+Find, inspect and run rgpycrumbs command-line tools. Covers how `rgpycrumbs GROUP TOOL` maps to a script, how that script's PEP 723 header decides what uv installs before the tool starts, the --dev and --verbose flags, when the active environment is used instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules rather than tools. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
 
 ### From a command to a script
 
@@ -6575,9 +6579,12 @@ print(pins_to_constraint_lines(pins))
 ### Commands that are not tools
 
 These commands are library modules, with no PEP 723 block and no
-`__main__` section. Running one exits 0 and does nothing; import them
-from Python instead (`from rgpycrumbs.func.muller_brown import
-muller_brown`).
+`__main__` section, so running one does no work. Under uv the script
+gets no packages, and those that import numpy, jax or any other
+package stop with `ModuleNotFoundError`; the others, and any of them
+run with `--dev` where its imports are installed, exit 0 without
+output. Import them from Python instead (`from
+rgpycrumbs.func.muller_brown import muller_brown`).
 
 - `eon plot-config`, `eon plot-dispatch`
 - `func muller-brown`

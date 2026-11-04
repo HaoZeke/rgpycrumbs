@@ -17,7 +17,9 @@ new directory under `rgpycrumbs/` becomes a group once it holds a
 command; give it an `__init__.py` so that tests can import the module.
 
 Every other `.py` file directly in a group directory is listed as a
-command too, and running a library module that way does nothing. Name
+command too, although running a library module that way does no work:
+it exits 0 without output, or stops with `ModuleNotFoundError` when uv
+runs it without the packages it imports. Name
 helpers `_name.py`, or put them in a subpackage such as
 `rgpycrumbs/geom/api/`. Only `hdf5_io`, `plotting`, `utils`, `helpers`
 and `seed_dimers` are left out by name.

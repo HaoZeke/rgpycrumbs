@@ -152,8 +152,10 @@ and ignored by git; edit the Org files.
   those its header asks for; `RGPKGS_FORCE_UV=1` forces uv.
   `RGPYCRUMBS_DEV=1` acts as `--dev`, but `RGPKGS_DEV=1` does not.
 - Sixteen listed commands, such as `geom analysis` and `func
-  muller-brown`, are library modules: running one exits 0 and does
-  nothing. `skills/rgpycrumbs-cli/SKILL.md` lists them.
+  muller-brown`, are library modules and do no work when run. Under uv
+  the script gets no packages, so most stop with `ModuleNotFoundError`;
+  the rest exit 0 without output. `skills/rgpycrumbs-cli/SKILL.md`
+  lists them.
 - `eon plt-neb`, and other tools that align periodic structures,
   install `readcon-ops` from a fixed GitHub commit into
   `~/.cache/rgpycrumbs/deps` the first time they run. It brings
