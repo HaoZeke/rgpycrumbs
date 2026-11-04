@@ -38,9 +38,10 @@ else
     EXPORT_FILE="$ORG_FILE"
 fi
 
-# Emacs command to export Org file to Markdown
+# Emacs command to export Org file to Markdown, with the layout that
+# org_to_md.el sets up
 emacs --batch "$EXPORT_FILE" \
-    --eval "(require 'ox-md nil t)" \
+    -l "$(cd "$(dirname "$0")" && pwd)/org_to_md.el" \
     --eval "(org-md-export-to-markdown)" \
     --kill
 
