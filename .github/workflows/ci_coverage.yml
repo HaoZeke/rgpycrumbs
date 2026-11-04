@@ -35,6 +35,10 @@ jobs:
         shell: bash -el {0}
         run: |
           pixi r -e eonmlflow -- python -m coverage run --data-file=.coverage.eonmlflow --source=rgpycrumbs -m pytest tests/ -m eon -q
+      - name: Install a software Vulkan driver
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq mesa-vulkan-drivers
       - name: Run ptm env
         shell: bash -el {0}
         run: |
