@@ -74,6 +74,9 @@ pixi run docdel
 
 * README and Branch Structure
 The ~README.md~ is generated from ~readme_src.org~ via Emacs batch export.
+~scripts/org_to_md.sh~ runs the export and loads ~scripts/org_to_md.el~.
+That file writes each list with one space after the bullet, the layout [[https://github.com/TurtleTech-ehf/snapper][snapper]] accepts.
+It also writes code blocks between backtick fences and tables as pipe tables.
 
 - Pre-commit hook :: A ~prek~ hook (~gen-readme~) regenerates ~README.md~
   whenever ~readme_src.org~ is staged. Requires ~emacs~; skips silently if

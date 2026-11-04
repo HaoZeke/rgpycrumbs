@@ -1,0 +1,134 @@
+---
+name: rgpycrumbs-neb-plots
+description: Read and plot an eOn nudged elastic band (NEB) run with rgpycrumbs. Covers the files an eOn NEB writes, the barrier and reaction energy from the last `neb_NNN.dat`, energy profiles and 2D reaction-path plots with `rgpycrumbs eon plt-neb`, the two ways to install its plotting stack, and the cache of 2D plot data that later runs reuse. Use when asked for a barrier, an energy profile or a reaction-path figure from eOn NEB output, or when plt-neb fails while building readcon.
+license: See LICENSE in the rgpycrumbs repository
+compatibility: scripts/barrier.py needs Python 3.10 or newer and nothing else. Plotting needs Python 3.11 or newer and either uv with Rust 1.85 or newer, or the plot stack from PyPI installed in the running environment, plus network access and cargo on the first plot. Checked on Linux.
+---
+
+# eOn NEB runs with rgpycrumbs
+
+## The files
+
+An eOn NEB run writes these files.
+
+- `neb_NNN.dat`: the band at optimization step `NNN`, one row per image.
+  The columns are `img`, `rxn_coord` (path length from image 0, Å), `energy` (eV, relative to image 0) and `f_para` (force along the band).
+- `neb_path_NNN.con`: the band's structures at step `NNN`.
+- `neb.con`: the structures of the final band.
+- `sp.con`: the saddle-point structure.
+- `results.dat`: `value key` lines.
+  Among them, `energy_reference` is the absolute energy of image 0 in eV.
+  Each extremum `K` of the interpolated band has an `extremumK_position`, in image numbers, and an absolute `extremumK_energy`, in eV.
+
+eOn writes one `neb_NNN.dat` and one `neb_path_NNN.con` per step when its `write_movies` option is on.
+The highest `NNN` is the final band.
+The rgpycrumbs repository has a run in `docs/orgmode/tutorials/data/diels_alder/`: the Diels-Alder cycloaddition of butadiene and ethylene, a 22-image band, with steps 0, 5, 10 and 14 kept.
+
+## The barrier
+
+`python scripts/barrier.py RUN_DIR` reads the last `neb_NNN.dat` and, when present, `results.dat`.
+Without an argument it reads the tutorial run:
+
+```text
+last step: neb_014.dat (22 images)
+highest image: 14 at rxn_coord 3.719925 A, energy 0.787659 eV
+forward barrier 0.787659 eV, reverse barrier 2.736130 eV, reaction energy -1.948471 eV
+results.dat: highest extremum 0.787749 eV above image 0, at image position 14.009070
+```
+
+The forward barrier is the highest image energy, since energies are relative to image 0.
+The reverse barrier is measured from the last image.
+The extremum in `results.dat` comes from eOn's interpolation of the band, so it can lie between images and above the highest one.
+
+## Energy profile
+
+Run from `docs/orgmode/tutorials/`, as in the NEB tutorial:
+
+```bash
+rgpycrumbs eon plt-neb --plot-type profile \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o profile.png
+```
+
+One curve per `neb_NNN.dat`, the final step in black, with the saddle point starred and labelled.
+The suffix of `-o` picks the format (`png`, `pdf`, `svg`).
+Quote the patterns so that plt-neb, not the shell, expands them.
+
+## 2D `landscape` plot
+
+```bash
+rgpycrumbs eon plt-neb --plot-type landscape \
+  --landscape-mode path --no-project-path \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  --cache-file diels_alder.parquet \
+  -o landscape.png
+```
+
+Each image is plotted at its root-mean-square deviation (RMSD) from the reactant and from the product.
+The colour of each point gives its energy.
+`--project-path` draws the same path in projected (s, d) coordinates instead.
+
+## Install the plotting stack
+
+Either:
+
+1. Run plt-neb as above with `uv` on PATH.
+   uv installs what the script's Python Enhancement Proposal (PEP) 723 header lists.
+   That header takes readcon and chemparseplot from their `main` branches on GitHub.
+   Building readcon needs Rust 1.85 or newer (`rustup default stable`), and the result follows those branches.
+2. Put the plot stack from PyPI in the running environment:
+
+   ```bash
+   uv run --with "chemparseplot[neb,plot]>=1.13" --with "readcon>=0.17.1" \
+     --with matplotlib --with scipy --with jax --with "adjustText>=1.0" \
+     --with cmcrameri --with ase --with polars --with h5py \
+     --with "xyzrender>=0.1.3" \
+     rgpycrumbs eon plt-neb ...
+   ```
+
+   or `pip install` the same packages and run `rgpycrumbs eon plt-neb`.
+   With readcon, matplotlib, polars, ase and chemparseplot importable, the dispatcher runs plt-neb in place and prints `--> Using active interpreter`.
+   readcon comes as a wheel, so Rust 1.85 is not needed.
+
+Either way, the first plot also installs `readcon-ops` from a fixed GitHub commit into `$XDG_CACHE_HOME/rgpycrumbs/deps` (by default `~/.cache/rgpycrumbs/deps`), because the dispatcher sets `RGPYCRUMBS_AUTO_DEPS=1`.
+`readcon-ops` takes `minimage`, a Rust extension that is not on PyPI, from git, so that first plot needs the network and `cargo` (Cargo 1.83 is enough).
+Later runs reuse the build from the uv cache.
+Images are aligned in a pool of up to one thread per CPU, and on that first plot each thread installs `readcon-ops`, so the log can show `rgpycrumbs: installing readcon-ops` once per thread.
+
+## Pitfalls
+
+- A `landscape` plot caches its data in `.neb_landscape.parquet` in the current directory, and reuses that file whenever it exists.
+  The check looks at its columns, not at which run produced it, so a second run plotted from the same directory gets the first run's data without a warning.
+  Give each run its own `--cache-file`, or pass `--force-recompute`.
+- A step that plt-neb cannot process is left out with a warning, `Failed to process step N (neb_NNN.dat): ...`, and the plot still exits 0.
+  Look for that line in the output.
+  `scripts/plot_neb.py` fails on it.
+  One cause is a race: now and then an alignment thread misses the cached readcon-ops and installs it again, and when that install fails, the thread's step is lost.
+- Without `--input-dat-pattern`, plt-neb reads `neb_*.dat` in the current directory, for `landscape` plots too.
+  The `landscape` commands in the NEB tutorial leave it out.
+  Run from the tutorial directory, they stop with `No data files found for pattern: neb_*.dat`.
+- `rgpycrumbs eon plt-neb --help` installs the whole stack before it prints anything.
+  Under route 1 that includes building readcon.
+- The `energy` column is relative to image 0 of the same file.
+  Absolute energies are in `results.dat`.
+- "Font 'Atkinson Hyperlegible' not found" is a warning.
+  Matplotlib then falls back to a sans-serif font.
+
+## Check
+
+```bash
+python scripts/barrier.py
+python scripts/plot_neb.py
+```
+
+`scripts/barrier.py` uses the standard library only, and on the tutorial run checks the step, the image and the barrier printed above.
+`scripts/plot_neb.py` needs route 2.
+It draws the profile and the `landscape` plot of the tutorial run into a temporary directory through the dispatcher.
+It checks that no step was left out, that the dispatcher stayed in the running environment and that both files are Portable Network Graphics (PNG) images.
+It also prints the versions of the plot stack it used.
