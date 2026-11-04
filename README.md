@@ -17,9 +17,8 @@
     -   [Release Process](#release-notes)
 -   [License](#license)
 
-> Canonical source note: this Org file is authoritative for contributor-facing
-> documentation. Rendered Markdown files are derived artifacts and should not be
-> edited separately.
+> Canonical source note: this Org file is authoritative for contributor-facing documentation.
+> Rendered Markdown files are derived artifacts and should not be edited separately.
 
 
 <a id="about"></a>
@@ -39,16 +38,12 @@
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 [![DOI](https://zenodo.org/badge/795596895.svg)](https://doi.org/10.5281/zenodo.18529798)
 
-A **pure-python** computational library and CLI toolkit for chemical physics
-research. `rgpycrumbs` provides both importable library modules for
-computational tasks (surface fitting, structure analysis, interpolation) and a
-dispatcher-based CLI for running self-contained research scripts.
+A **pure-python** computational library and CLI toolkit for chemical physics research.
+`rgpycrumbs` provides both importable library modules for computational tasks (surface fitting, structure analysis, interpolation) and a dispatcher-based CLI for running self-contained research scripts.
 
 Heavy optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use.
-A bare `pip install rgpycrumbs` gives the full API surface; the actual backend
-libraries load on demand from the current environment, a shared cache, or (with
-`RGPYCRUMBS_AUTO_DEPS=1`) via automatic `uv` installation. CUDA-aware
-resolution avoids pulling GPU libraries on CPU-only machines.
+A bare `pip install rgpycrumbs` gives the full API surface; the actual backend libraries load on demand from the current environment, a shared cache, or (with `RGPYCRUMBS_AUTO_DEPS=1`) via automatic `uv` installation.
+CUDA-aware resolution avoids pulling GPU libraries on CPU-only machines.
 
 The library side offers:
 
@@ -76,47 +71,35 @@ The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`
 
 The library is designed with the following principles in mind:
 
--   **Dispatcher-Based Architecture:** The top-level `rgpycrumbs.cli` command acts as a
-    lightweight dispatcher. It does not contain the core logic of the tools
-    itself. Instead, it parses user commands to identify the target script and
-    then invokes it in an isolated subprocess using the `uv` runner. This provides
-    a unified command-line interface while keeping the tools decoupled.
+-   **Dispatcher-Based Architecture:** The top-level `rgpycrumbs.cli` command acts as a lightweight dispatcher.
+    It does not contain the core logic of the tools itself.
+    Instead, it parses user commands to identify the target script and then invokes it in an isolated subprocess using the `uv` runner.
+    This provides a unified command-line interface while keeping the tools decoupled.
 
--   **Isolated & Reproducible Execution:** Each script is a self-contained unit that
-    declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata. The `uv` runner uses this
-    information to resolve and install the exact required packages into a
-    temporary, cached environment on-demand. This design guarantees
-    reproducibility and completely eliminates the risk of dependency conflicts
-    between different tools in the collection.
+-   **Isolated & Reproducible Execution:** Each script is a self-contained unit that declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata.
+    The `uv` runner uses this information to resolve and install the exact required packages into a temporary, cached environment on-demand.
+    This design guarantees reproducibility and completely eliminates the risk of dependency conflicts between different tools in the collection.
 
--   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs`
-    package has minimal core dependencies (`click`, `numpy`). Heavy scientific
-    there are no runtime feature extras. CLI tools fetch deps via PEP 723 + uv; library modules use ensure<sub>import</sub> + AUTO<sub>DEPS</sub>. Dependencies are fetched by
-    `uv` only when a script that needs them is executed. For library modules,
-    `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1`
-    is set, with CUDA-aware resolution that avoids pulling GPU libraries on
-    CPU-only machines. The base installation stays lightweight either way.
+-   **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs` package has minimal core dependencies (`click`, `numpy`).
+    Heavy scientific there are no runtime feature extras.
+    CLI tools fetch deps via PEP 723 + uv; library modules use ensure<sub>import</sub> + AUTO<sub>DEPS</sub>.
+    Dependencies are fetched by `uv` only when a script that needs them is executed.
+    For library modules, `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1` is set, with CUDA-aware resolution that avoids pulling GPU libraries on CPU-only machines.
+    The base installation stays lightweight either way.
 
--   **Modular & Extensible Tooling:** Each utility is an independent script. This
-    modularity simplifies development, testing, and maintenance, as changes to one
-    tool cannot inadvertently affect another. New tools can be added to the
-    collection without modifying the core dispatcher logic, making the system
-    easily extensible.
+-   **Modular & Extensible Tooling:** Each utility is an independent script.
+    This modularity simplifies development, testing, and maintenance, as changes to one tool cannot inadvertently affect another.
+    New tools can be added to the collection without modifying the core dispatcher logic, making the system easily extensible.
 
 
 <a id="docs"></a>
 
 ## Documentation
 
-The manual is at <https://rgpycrumbs.rgoswami.me/>, built from the Org files
-under [docs/orgmode/](https://github.com/HaoZeke/rgpycrumbs/tree/main/docs/orgmode). Its map,
-[llms.txt](https://rgpycrumbs.rgoswami.me/llms.txt), lists the pages with a
-line on what each covers, and [llms-full.txt](https://github.com/HaoZeke/rgpycrumbs/blob/main/llms-full.txt) holds
-every page but the API reference in one Markdown file, generated by `scripts/llms/build_llms.py`.
-[AGENTS.md](https://github.com/HaoZeke/rgpycrumbs/blob/main/AGENTS.md) has the build, test and documentation commands
-and the mistakes that are easy to make. [skills/](https://github.com/HaoZeke/rgpycrumbs/tree/main/skills) has task
-guides with scripts that CI runs: running a tool and pinning what it installs,
-barriers and figures from an eOn NEB run, and adding a tool.
+The manual is at <https://rgpycrumbs.rgoswami.me/>, built from the Org files under [docs/orgmode/](https://github.com/HaoZeke/rgpycrumbs/tree/main/docs/orgmode).
+Its map, [llms.txt](https://rgpycrumbs.rgoswami.me/llms.txt), lists the pages with a line on what each covers, and [llms-full.txt](https://github.com/HaoZeke/rgpycrumbs/blob/main/llms-full.txt) holds every page but the API reference in one Markdown file, generated by `scripts/llms/build_llms.py`.
+[AGENTS.md](https://github.com/HaoZeke/rgpycrumbs/blob/main/AGENTS.md) has the build, test and documentation commands and the mistakes that are easy to make.
+[skills/](https://github.com/HaoZeke/rgpycrumbs/tree/main/skills) has task guides with scripts that CI runs: running a tool and pinning what it installs, barriers and figures from an eOn NEB run, and adding a tool.
 
 
 <a id="usage"></a>
@@ -128,9 +111,8 @@ barriers and figures from an eOn NEB run, and adding a tool.
 
 ## Library API
 
-The library modules can be imported directly. Dependencies resolve
-automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH),
-or install extras explicitly:
+The library modules can be imported directly.
+Dependencies resolve automatically when `RGPYCRUMBS_AUTO_DEPS=1` is set (requires `uv` on PATH), or install extras explicitly:
 
     # Surface fitting (requires jax: pip install jax  # or AUTO_DEPS)
     from rgpycrumbs.surfaces import get_surface_model
@@ -174,31 +156,24 @@ You can see the list of available command groups:
 
 -   Plotting NEB Paths (`plt-neb`), stitch (`plt-neb-stitch`), dimers (`gen-dimer`), KMC (`plt-kmc`)
 
-    Library (no CLI argv): `from rgpycrumbs.eon import plot_neb` then
-    `plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")`.
+    Library (no CLI argv): `from rgpycrumbs.eon import plot_neb` then `plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")`.
     
     NEB landscapes support energy-unit selection and xyzrender profile strips.
     `plt-neb-stitch` builds a continuous band from multi-segment minimizations (v1.8+).
     `gen-dimer` seeds saddle searches from NEB peaks; `plt-kmc` plots KMC timelines.
     `plt-min` accepts `--energy-cap` / `--energy-cap-window` for landscape scales.
     
-    eOn **job-config** authorship (`write_eon_config`, `seed_dimers`, MLflow
-    hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`). Plotting
-    still goes through `chemparseplot`; eon-akmc is **not** required for INI tooling.
+    eOn **job-config** authorship (`write_eon_config`, `seed_dimers`, MLflow hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`).
+    Plotting still goes through `chemparseplot`; eon-akmc is **not** required for INI tooling.
 
 -   Plotting NEB Paths (`plt-neb`) detail
 
-    This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations,
-    generating 2D surface plots with optional structure rendering.
+    This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations, generating 2D surface plots with optional structure rendering.
     
-    The default `grad_imq` method uses gradient-enhanced Inverse Multiquadric interpolation
-    on 2D RMSD projections [1]. The approach projects high-dimensional structures onto
-    2D coordinates (reactant distance `r` vs product distance `p`) and fits a smooth
-    surface using energy values and their gradients.
+    The default `grad_imq` method uses gradient-enhanced Inverse Multiquadric interpolation on 2D RMSD projections [1].
+    The approach projects high-dimensional structures onto 2D coordinates (reactant distance `r` vs product distance `p`) and fits a smooth surface using energy values and their gradients.
     
-    [1] R. Goswami, "Two-dimensional RMSD projections for reaction path visualization
-    and validation," *MethodsX*, p. 103851, Mar. 2026,
-    doi: [10.1016/j.mex.2026.103851](https://doi.org/10.1016/j.mex.2026.103851).
+    [1] R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," *MethodsX*, p. 103851, Mar. 2026, doi: [10.1016/j.mex.2026.103851](https://doi.org/10.1016/j.mex.2026.103851).
     generating 2D surface plots with optional structure rendering.
     
     -   Basic Usage
@@ -350,32 +325,27 @@ You can see the list of available command groups:
 
 -   Splitting CON files (`con-splitter`)
 
-    This script takes a multi-image trajectory file (e.g., from a finished NEB
-    calculation) and splits it into individual frame files, creating an input file
-    for a new calculation.
+    This script takes a multi-image trajectory file (e.g., from a finished NEB calculation) and splits it into individual frame files, creating an input file for a new calculation.
     
     To split a trajectory file:
     
         rgpycrumbs eon con-splitter neb_final_path.con -o initial_images
     
-    This will create a directory named `initial_images` containing `ipath_000.con`,
-    `ipath_001.con`, etc., along with an `ipath.dat` file listing their paths.
+    This will create a directory named `initial_images` containing `ipath_000.con`, `ipath_001.con`, etc., along with an `ipath.dat` file listing their paths.
 
 
 <a id="contributing"></a>
 
 # Contributing
 
-All contributions are welcome, but for the CLI tools please follow [established
-best practices](https://realpython.com/python-script-structure/).
+All contributions are welcome, but for the CLI tools please follow [established best practices](https://realpython.com/python-script-structure/).
 
 
 <a id="development"></a>
 
 ## Development
 
-This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development tool with
-[`hatchling`](https://hatch.pypa.io/) + [`hatch-vcs`](https://github.com/ofek/hatch-vcs) for building and versioning.
+This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development tool with [`hatchling`](https://hatch.pypa.io/) + [`hatch-vcs`](https://github.com/ofek/hatch-vcs) for building and versioning.
 
     # Clone and install in development mode with test dependencies
     uv sync --extra test
@@ -391,9 +361,8 @@ This project uses [`uv`](https://docs.astral.sh/uv/) as the primary development 
 
 ### Branch Structure
 
-Development happens on the `main` branch. The `readme` branch is an
-auto-generated orphan containing only the rendered `README.md` and branding
-assets; it is the GitHub default branch.
+Development happens on the `main` branch.
+The `readme` branch is an auto-generated orphan containing only the rendered `README.md` and branding assets; it is the GitHub default branch.
 
 
 <a id="dev:whypixi"></a>
@@ -412,10 +381,9 @@ For everything else, `uv` is sufficient.
 
 ### Versioning
 
-Versions are derived automatically from **git tags** via `hatch-vcs`
-(setuptools-scm). There is no manual version field; the version is the latest
-tag (e.g. `v1.0.0` → `1.0.0`). Between tags, dev versions are generated
-automatically (e.g. `1.0.1.dev3+gabcdef`).
+Versions are derived automatically from **git tags** via `hatch-vcs` (setuptools-scm).
+There is no manual version field; the version is the latest tag (e.g. `v1.0.0` → `1.0.0`).
+Between tags, dev versions are generated automatically (e.g. `1.0.1.dev3+gabcdef`).
 
 
 <a id="release-notes"></a>
@@ -452,16 +420,15 @@ automatically (e.g. `1.0.1.dev3+gabcdef`).
     # 6. Push main and tags; GitHub Actions handles build/publish/release
     git push origin main --tags
 
-The existing `.github/workflows/release.yml` publishes to PyPI and creates the
-GitHub release when a `v*` tag is pushed.
+The existing `.github/workflows/release.yml` publishes to PyPI and creates the GitHub release when a `v*` tag is pushed.
 
 
 <a id="license"></a>
 
 # License
 
-MIT. However, this is an academic resource, so **please cite** as much as possible
-via:
+MIT.
+However, this is an academic resource, so **please cite** as much as possible via:
 
 -   The [Zenodo DOI](https://doi.org/10.5281/zenodo.18529798) for general use.
 -   The `wailord` paper for ORCA usage
