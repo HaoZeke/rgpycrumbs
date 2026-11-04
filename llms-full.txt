@@ -6,6 +6,8 @@ Every published page of https://rgpycrumbs.rgoswami.me/ follows, converted from 
 
 `rgpycrumbs GROUP TOOL ARGS` runs one self-contained script, `rgpycrumbs/GROUP/TOOL.py` with dashes for underscores, under `uv run --script`, which installs the dependencies listed in the script's PEP 723 header. The installed package itself needs only click, numpy and rich.
 
+Worked tasks with runnable scripts are under `skills/` and are reproduced at the end.
+
 The pages follow in the order of the site's navigation.
 
 ## `rgpycrumbs`
@@ -6154,3 +6156,414 @@ Run with:
 ```bash
 python first_project.py
 ```
+
+## Skill: rgpycrumbs-add-tool
+
+Source: https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-add-tool/SKILL.md
+
+Add a command-line tool to rgpycrumbs. Covers where the script goes, how its file name becomes the command, the PEP 723 header the dispatcher installs from, keeping library modules out of the command list, tests with the pure and pep723 markers, the changelog fragment, and the docs pages to update. Use when asked to add or rename an rgpycrumbs subcommand, or when a new script is missing from `rgpycrumbs GROUP --help`.
+
+### Where it goes and what it is called
+
+The dispatcher builds its command list from the files, so there is no
+registry to edit. `rgpycrumbs/GROUP/NAME.py` becomes
+`rgpycrumbs GROUP NAME` with underscores turned into dashes:
+`rgpycrumbs/geom/count_atoms.py` is `rgpycrumbs geom count-atoms`. A
+new directory under `rgpycrumbs/` becomes a group once it holds a
+command; give it an `__init__.py` so that tests can import the module.
+
+Every other `.py` file directly in a group directory is listed as a
+command too, and running a library module that way does nothing. Name
+helpers `_name.py`, or put them in a subpackage such as
+`rgpycrumbs/geom/api/`. Only `hdf5_io`, `plotting`, `utils`, `helpers`
+and `seed_dimers` are left out by name.
+
+### The script
+
+[assets/count_atoms.py](https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-add-tool/assets/count_atoms.py) is a complete tool:
+
+- A PEP 723 block naming every third-party import, with
+  `requires-python = ">=3.11"` like the existing tools. The dispatcher
+  installs exactly this list under uv, so a missing entry is an
+  `ImportError` for users even when the tests pass in a full
+  environment.
+- The work in a function the tests can import (`count_elements`), and a
+  thin click command around it, as `docs/orgmode/dev/modular_design.org`
+  describes.
+- A module docstring; existing tools add `.. versionadded::` with the
+  release that first ships them.
+
+Try it without uv while writing it:
+
+```bash
+rgpycrumbs --dev geom count-atoms molecule.xyz
+```
+
+### Tests
+
+- `tests/test_NAME.py`, calling the functions directly and the command
+  through `click.testing.CliRunner`. Mark the tests that need only the
+  `test` extra with `pytestmark = pytest.mark.pure`; CI runs
+  `uv run --extra test pytest -m pure` on Python 3.10, 3.11 and 3.12.
+  The other markers (`interpolation`, `align`, `surfaces`,
+  `fragments`, `eon`, `ptm`, `ira`) select tests that need extra
+  packages; they are declared in `pyproject.toml`.
+- The header check, which fails when an import is not covered by the
+  PEP 723 dependencies:
+
+  ```bash
+  uv run --extra test pytest --pep723-check -m pep723 \
+    --override-ini="python_files=" --ignore=rgpycrumbs/chemgp rgpycrumbs/
+  ```
+
+### Changelog and docs
+
+- A towncrier fragment, `docs/newsfragments/NAME.added.rst`, one
+  paragraph in reStructuredText (double backticks for code). The types
+  are `security`, `removed`, `deprecated`, `added`, `dev`, `changed`,
+  `fixed` and `misc`. `.gitignore` has `*.rst`, so add the fragment
+  with `git add -f`.
+- A page `docs/orgmode/tools/GROUP/NAME.org`, added to the toctree in
+  the `#+BEGIN_EXPORT rst` block of `docs/orgmode/tools/GROUP/index.org`,
+  and a line in the site map `docs/source/llms.txt`.
+- `python scripts/llms/build_llms.py` to refresh `llms-full.txt`; CI
+  fails while it is stale or while `docs/source/llms.txt` links a page
+  that does not exist.
+
+### Check
+
+```bash
+python scripts/scaffold_check.py
+```
+
+copies the installed package into a temporary directory, adds a `demo`
+group holding [assets/count_atoms.py](https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-add-tool/assets/count_atoms.py), a
+`_private.py`, a `plotting.py` and a header-less `analysis.py`, and
+checks that `rgpycrumbs demo --help` lists `count-atoms` and
+`analysis` but not the other two, that the template's PEP 723 block
+parses, and that `rgpycrumbs --dev demo count-atoms` counts the atoms
+of a water molecule.
+
+## Skill: rgpycrumbs-cli
+
+Source: https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-cli/SKILL.md
+
+Find, inspect and run rgpycrumbs command-line tools. Covers how `rgpycrumbs GROUP TOOL` maps to a script, how that script's PEP 723 header decides what uv installs before the tool starts, the --dev and --verbose flags, when the active environment is used instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules and do nothing. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
+
+### From a command to a script
+
+`rgpycrumbs GROUP TOOL ARGS...` runs the file `rgpycrumbs/GROUP/TOOL.py`
+of the installed package, reading dashes in `TOOL` as underscores.
+`python -m rgpycrumbs.cli` is the same entry point.
+
+| Command | Script |
+|---|---|
+| `rgpycrumbs eon plt-neb` | `rgpycrumbs/eon/plt_neb.py` |
+| `rgpycrumbs uma aoti-cache` | `rgpycrumbs/uma/aoti_cache.py` |
+| `rgpycrumbs geom detect-fragments` | `rgpycrumbs/geom/detect_fragments.py` |
+
+`rgpycrumbs --help` lists the groups and `rgpycrumbs GROUP --help` the
+commands in one group; neither installs anything. Every `.py` file
+directly in a subdirectory of the package is a command, unless its name
+starts with `_` or is `hdf5_io`, `plotting`, `utils`, `helpers` or
+`seed_dimers`, and a subdirectory with at least one command is a group.
+`search`, `time` and `xts` hold none, so they are not groups.
+
+`python -m rgpycrumbs.uma.aoti_cache --help` runs one module directly
+with the current Python, skipping the dispatcher. Spell the module with
+underscores: the help text of the dispatcher's commands suggests
+`python -m rgpycrumbs.uma.aoti-cache`, which does not import.
+
+### What a tool installs
+
+A tool script starts with a PEP 723 block, for example:
+
+```text
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "click",
+#   "chemparseplot[neb,plot]>=1.9.17,<2",
+#   "readcon>=0.17.1",
+# ]
+#
+# [tool.uv.sources]
+# readcon = { git = "https://github.com/lode-org/readcon-core", branch = "main" }
+# ///
+```
+
+The dispatcher copies the script to a temporary directory and runs
+`uv run --no-project --script COPY ARGS`. uv builds an environment
+holding exactly those packages, caches it, and only then starts the
+tool. Two things follow:
+
+- `rgpycrumbs GROUP TOOL --help` hands `--help` to the script, so the
+  whole dependency list is installed first; for the eOn plots that
+  includes jax, matplotlib, polars and ase. The pages under
+  <https://rgpycrumbs.rgoswami.me/tools/> list the options without
+  installing anything.
+- Most eOn tools, and some in `chemgp`, `geom` and `uma`, take
+  `readcon` and `chemparseplot` from their `main` branches on GitHub
+  through `[tool.uv.sources]`, and the `surrogate` tools take
+  chemparseplot from fixed git commits; `scripts/list_tools.py` names
+  them all. Building readcon from git needs Rust 1.85 or newer
+  (edition 2024). With an older Cargo, uv stops with "feature
+  `edition2024` is required".
+
+### Running in the active environment
+
+- `rgpycrumbs --dev GROUP TOOL ...` runs the script with the current
+  Python, so its dependencies must already be installed there.
+- Without `--dev`, the dispatcher also uses the current Python when
+  `readcon`, `matplotlib`, `polars`, `ase` and `chemparseplot` all
+  import, or when `uv` is not on PATH, and says so with
+  `--> Using active interpreter`. `RGPKGS_FORCE_UV=1`, or
+  `force_uv = true` under `[rgpycrumbs.dispatch]` in a config file,
+  keeps uv in the first case. `RGPYCRUMBS_DEV=1` is the same as
+  `--dev`; `RGPKGS_DEV=1` is not, and the dispatcher still uses uv.
+- `-v` (`--verbose`) prints the script path and the full command before
+  running it. Options of `rgpycrumbs` itself go before the group:
+  `rgpycrumbs --dev -v uma aoti-cache list`.
+
+### Pinning versions
+
+Pins become uv constraints for every script the dispatcher runs, and
+are passed to library imports through `RGPKGS_LOCK_PINS`. They come
+from, highest first:
+
+1. `--lock PATH` (or `--sbom PATH`) on the command line;
+2. the `RGPKGS_LOCK` environment variable;
+3. a config file named by `RGPKGS_CONFIG`;
+4. the project file `rgpkgs.toml`, found by walking up from the current
+   directory (`rgpycrumbs.toml` is still read);
+5. the user file `$XDG_CONFIG_HOME/rgpkgs/config.toml`, by default
+   `~/.config/rgpkgs/config.toml`.
+
+A lock is a `uv.lock`, a PEP 751 `pylock.toml` or a CycloneDX JSON
+file. `[pins.packages]` entries win over versions from the lock:
+
+```toml
+[pins]
+lock = "pylock.toml"   # relative to this file
+
+[pins.packages]
+jax = "0.4.35"
+```
+
+`rgpycrumbs config show` prints the merged result (paths shortened):
+
+```text
+user_config:     .../xdg/rgpkgs/config.toml
+sources:         .../proj/rgpkgs.toml
+lock_path:       .../proj/pylock.toml
+force_uv:        False
+auto_deps_def:   1
+package_pins:    {'jax': '0.4.35'}
+```
+
+The same readers are public in `rgpycrumbs.api`:
+
+```python
+import tempfile
+from pathlib import Path
+
+from rgpycrumbs.api import apply_pin_to_spec, load_pypi_pins, pins_to_constraint_lines
+
+LOCK = """\
+lock-version = "1.0"
+created-by = "example"
+
+[[packages]]
+name = "numpy"
+version = "2.0.2"
+
+[[packages]]
+name = "jax"
+version = "0.4.31"
+"""
+
+with tempfile.TemporaryDirectory() as tmp:
+    path = Path(tmp) / "pylock.toml"
+    path.write_text(LOCK, encoding="utf-8")
+    pins = load_pypi_pins(path)
+
+assert pins == {"numpy": "2.0.2", "jax": "0.4.31"}
+assert pins_to_constraint_lines(pins) == ["jax==0.4.31", "numpy==2.0.2"]
+assert apply_pin_to_spec("jax>=0.4", pins) == "jax==0.4.31"
+assert apply_pin_to_spec("ase>=3.22", pins) == "ase>=3.22"
+print(pins_to_constraint_lines(pins))
+```
+
+### Commands that are not tools
+
+These commands are library modules, with no PEP 723 block and no
+`__main__` section. Running one exits 0 and does nothing; import them
+from Python instead (`from rgpycrumbs.func.muller_brown import
+muller_brown`).
+
+- `eon plot-config`, `eon plot-dispatch`
+- `func muller-brown`
+- `geom analysis`, `geom fragment-visualization`, `geom fragments`,
+  `geom ira`
+- `parsers bless`, `parsers common`
+- `run jupyter`
+- `surfaces gradient-imq`, `surfaces gradient-matern`,
+  `surfaces gradient-nystrom`, `surfaces gradient-rq`,
+  `surfaces gradient-se`, `surfaces standard`
+
+### Check
+
+```bash
+python scripts/list_tools.py
+python scripts/dispatch_demo.py
+```
+
+`scripts/list_tools.py` prints every command with its script, Python
+requirement, dependency count and git sources. It fails when a
+command's script is missing, when the commands without a PEP 723 block
+differ from the list above, or when the package directories that are
+not groups differ from those named at the top. `scripts/dispatch_demo.py` makes a
+scratch project with its own `rgpkgs.toml` and `pylock.toml`, runs
+`rgpycrumbs config show` and `rgpycrumbs --dev -v uma aoti-cache list`
+there (the one tool that needs nothing beyond click), and checks what
+they print.
+
+## Skill: rgpycrumbs-neb-plots
+
+Source: https://raw.githubusercontent.com/HaoZeke/rgpycrumbs/main/skills/rgpycrumbs-neb-plots/SKILL.md
+
+Read and plot an eOn nudged elastic band (NEB) run with rgpycrumbs. Covers the files an eOn NEB writes, the barrier and reaction energy from the last neb_NNN.dat, energy profiles and 2D landscapes with `rgpycrumbs eon plt-neb`, the two ways to install its plotting stack, and the landscape cache that is reused across runs. Use when asked for a barrier, an energy profile or a reaction-path figure from eOn NEB output, or when plt-neb fails while building readcon.
+
+### The files
+
+| File | Contents |
+|---|---|
+| `neb_NNN.dat` | the band at optimization step `NNN`, one row per image: `img`, `rxn_coord` (path length from image 0, Å), `energy` (eV, relative to image 0), `f_para` (force along the band) |
+| `neb_path_NNN.con` | the structures of the band at step `NNN` |
+| `neb.con` | the structures of the final band |
+| `sp.con` | the saddle-point structure |
+| `results.dat` | `value key` lines, among them `energy_reference` (absolute energy of image 0, eV) and `extremumK_position` (in image numbers) and `extremumK_energy` (absolute, eV) for the extrema of the interpolated band |
+
+One `neb_NNN.dat` and `neb_path_NNN.con` per step are written when
+eOn's `write_movies` option is on; the highest `NNN` is the final band.
+The rgpycrumbs repository ships a run in
+`docs/orgmode/tutorials/data/diels_alder/`: the Diels-Alder
+cycloaddition of butadiene and ethylene, a 22-image band, with steps 0,
+5, 10 and 14 kept.
+
+### The barrier
+
+`python scripts/barrier.py RUN_DIR` reads the last `neb_NNN.dat` and,
+when present, `results.dat`. Without an argument it reads the tutorial
+run:
+
+```text
+last step: neb_014.dat (22 images)
+highest image: 14 at rxn_coord 3.719925 A, energy 0.787659 eV
+forward barrier 0.787659 eV, reverse barrier 2.736130 eV, reaction energy -1.948471 eV
+results.dat: highest extremum 0.787749 eV above image 0, at image position 14.009070
+```
+
+The forward barrier is the highest image energy, since energies are
+relative to image 0; the reverse barrier is measured from the last
+image. The extremum in `results.dat` comes from eOn's interpolation of
+the band, so it can lie between images and above the highest one.
+
+### Energy profile
+
+Run from `docs/orgmode/tutorials/`, as in the NEB tutorial:
+
+```bash
+rgpycrumbs eon plt-neb --plot-type profile \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  -o profile.png
+```
+
+One curve per `neb_NNN.dat`, the final step in black, with the saddle
+point starred and labelled. The suffix of `-o` picks the format (`png`,
+`pdf`, `svg`). Quote the patterns so that plt-neb, not the shell,
+expands them.
+
+### 2D landscape
+
+```bash
+rgpycrumbs eon plt-neb --plot-type landscape \
+  --landscape-mode path --no-project-path \
+  --input-dat-pattern "data/diels_alder/neb_*.dat" \
+  --input-path-pattern "data/diels_alder/neb_path_*.con" \
+  --con-file data/diels_alder/neb.con \
+  --sp-file data/diels_alder/sp.con \
+  --cache-file diels_alder.parquet \
+  -o landscape.png
+```
+
+The axes are the RMSD of each image from the reactant and from the
+product, and the points are coloured by energy. `--project-path` draws
+the same path in projected (s, d) coordinates instead.
+
+### Install the plotting stack
+
+Either:
+
+1. Run plt-neb as above with `uv` on PATH. uv installs the script's
+   PEP 723 header, which takes readcon and chemparseplot from their
+   `main` branches on GitHub. Building readcon needs Rust 1.85 or newer
+   (`rustup default stable`), and the result follows those branches.
+2. Put the plot stack from PyPI in the running environment:
+
+   ```bash
+   uv run --with "chemparseplot[neb,plot]>=1.13" --with "readcon>=0.17.1" \
+     --with matplotlib --with scipy --with jax --with "adjustText>=1.0" \
+     --with cmcrameri --with ase --with polars --with h5py \
+     --with "xyzrender>=0.1.3" \
+     rgpycrumbs eon plt-neb ...
+   ```
+
+   or `pip install` the same packages and run `rgpycrumbs eon plt-neb`.
+   With readcon, matplotlib, polars, ase and chemparseplot importable,
+   the dispatcher runs plt-neb in place and prints
+   `--> Using active interpreter`. readcon comes as a wheel, so Rust
+   1.85 is not needed.
+
+Either way, the first plot also installs `readcon-ops` from a fixed
+GitHub commit into `$XDG_CACHE_HOME/rgpycrumbs/deps` (by default
+`~/.cache/rgpycrumbs/deps`), because the dispatcher sets
+`RGPYCRUMBS_AUTO_DEPS=1`. readcon-ops takes `minimage`, a Rust extension
+that is not on PyPI, from git, so that first plot needs the network and
+`cargo` (Cargo 1.83 is enough); uv caches the build for later runs.
+
+### Pitfalls
+
+- Landscape data is cached in `.neb_landscape.parquet` in the current
+  directory, and the file is reused whenever it exists. The check looks
+  at its columns, not at which run produced it, so a second run plotted
+  from the same directory silently gets the first run's landscape. Give
+  each run its own `--cache-file`, or pass `--force-recompute`.
+- Without `--input-dat-pattern`, plt-neb reads `neb_*.dat` in the
+  current directory, for landscapes too. The landscape commands in the
+  NEB tutorial leave it out and, run from the tutorial directory, stop
+  with "No data files found for pattern: neb_*.dat".
+- `rgpycrumbs eon plt-neb --help` installs the whole stack before it
+  prints anything; under route 1 that includes building readcon.
+- The `energy` column is relative to image 0 of the same file. Absolute
+  energies are in `results.dat`.
+- "Font 'Atkinson Hyperlegible' not found" is a warning; matplotlib
+  falls back to a sans-serif font.
+
+### Check
+
+```bash
+python scripts/barrier.py
+python scripts/plot_neb.py
+```
+
+`scripts/barrier.py` uses the standard library only, and on the
+tutorial run checks the step, the image and the barrier printed above.
+`scripts/plot_neb.py` needs route 2: it draws the profile and the
+landscape of the tutorial run into a temporary directory through the
+dispatcher, checks that the dispatcher stayed in the running
+environment and that both files are PNG images, and prints the versions
+of the plot stack it used.

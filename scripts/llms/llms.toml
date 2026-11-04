@@ -1,8 +1,8 @@
 # Input for scripts/llms/build_llms.py. It writes llms-full.txt at the
 # repository root: every page of the manual in toctree order, converted
-# from the Org sources under docs/orgmode/ to Markdown. The map of the
-# site, docs/source/llms.txt, is written by hand; [map] checks its links
-# against the manual.
+# from the Org sources under docs/orgmode/ to Markdown, then the skills.
+# The map of the site, docs/source/llms.txt, is written by hand; [map]
+# checks its links against the manual.
 
 [project]
 branch = "main"
@@ -12,6 +12,7 @@ name = "rgpycrumbs"
 notes = [
   "Every published page of https://rgpycrumbs.rgoswami.me/ follows, converted from its Org source to Markdown; each section names the address it was taken from. The map of the site is https://rgpycrumbs.rgoswami.me/llms.txt.",
   "`rgpycrumbs GROUP TOOL ARGS` runs one self-contained script, `rgpycrumbs/GROUP/TOOL.py` with dashes for underscores, under `uv run --script`, which installs the dependencies listed in the script's PEP 723 header. The installed package itself needs only click, numpy and rich.",
+  "Worked tasks with runnable scripts are under `skills/` and are reproduced at the end.",
 ]
 repo = "https://github.com/HaoZeke/rgpycrumbs"
 summary = """
@@ -35,3 +36,7 @@ root     = "docs/orgmode"
 generated = [ "autoapi/" ]
 path      = "docs/source/llms.txt"
 site      = "https://rgpycrumbs.rgoswami.me/"
+
+[skills]
+dir  = "skills"
+full = true
