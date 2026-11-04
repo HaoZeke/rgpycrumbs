@@ -17,8 +17,8 @@
   - [Release Process](#release-notes)
 - [License](#license)
 
-> Canonical source note: this Org file is authoritative for contributor-facing documentation.
-> Rendered Markdown files are derived artifacts and should not be edited separately.
+> This Org file is the canonical source for contributor-facing documentation.
+> Do not edit the Markdown files rendered from it.
 
 
 <a id="about"></a>
@@ -33,16 +33,18 @@ A **pure-python** computational library and CLI toolkit for chemical physics res
 `rgpycrumbs` provides both importable library modules for computational tasks (surface fitting, structure analysis, interpolation) and a dispatcher-based CLI for running self-contained research scripts.
 
 Heavy optional dependencies (JAX, SciPy, ASE) are resolved lazily at first use.
-A bare `pip install rgpycrumbs` gives the full API surface; the actual backend libraries load on demand from the current environment, a shared cache, or (with `RGPYCRUMBS_AUTO_DEPS=1`) via automatic `uv` installation.
+A bare `pip install rgpycrumbs` gives the full API surface.
+The actual backend libraries load on demand from the current environment, a shared cache, or (with `RGPYCRUMBS_AUTO_DEPS=1`) via automatic `uv` installation.
 CUDA-aware resolution avoids pulling GPU libraries on CPU-only machines.
 
 The library side offers:
 
-- **Surface fitting** (`rgpycrumbs.surfaces`) &#x2013; JAX-based kernel methods (TPS, RBF, Matern, SE, IMQ) with gradient-enhanced variants for energy landscape interpolation
-- **Structure analysis** (`rgpycrumbs.geom.analysis`) &#x2013; distance matrices, bond matrices, and fragment detection via ASE
-- **IRA matching** (`rgpycrumbs.geom.ira`) &#x2013; iterative rotations and assignments for RMSD-based structure comparison
-- **Interpolation** (`rgpycrumbs.interpolation`) &#x2013; spline interpolation utilities
-- **Data types** (`rgpycrumbs.basetypes`) &#x2013; shared data structures for NEB paths, saddle searches, and molecular geometries
+- Surface fitting in `rgpycrumbs.surfaces`, with JAX-based kernel methods and gradient-enhanced variants for interpolating energy surfaces.
+  Its kernels are thin plate splines (TPS), radial basis functions (RBF), Matérn, squared exponential and inverse multiquadric (IMQ).
+- Structure analysis in `rgpycrumbs.geom.analysis`, with distance matrices, bond matrices and fragment detection through ASE.
+- Structure matching in `rgpycrumbs.geom.ira` by iterative rotations and assignments (IRA), for comparing structures by RMSD.
+- Spline interpolation utilities in `rgpycrumbs.interpolation`.
+- Shared data structures for NEB paths, saddle searches and molecular geometries in `rgpycrumbs.basetypes`.
 
 The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`.
 
@@ -62,25 +64,34 @@ The CLI tools rely on optional dependencies fetched on-demand via PEP 723 + `uv`
 
 The library is designed with the following principles in mind:
 
-- **Dispatcher-Based Architecture:** The top-level `rgpycrumbs.cli` command acts as a lightweight dispatcher.
+- Dispatcher-Based Architecture
+  
+  The top-level `rgpycrumbs.cli` command is a lightweight dispatcher.
   It does not contain the core logic of the tools itself.
   Instead, it parses user commands to identify the target script and then invokes it in an isolated subprocess using the `uv` runner.
-  This provides a unified command-line interface while keeping the tools decoupled.
+  The tools share one command-line interface but stay decoupled.
 
-- **Isolated & Reproducible Execution:** Each script is a self-contained unit that declares its own dependencies via [PEP 723](https://peps.python.org/pep-0723/) metadata.
+- Isolated & Reproducible Execution
+  
+  Each script is a self-contained unit that declares its own dependencies via [Python Enhancement Proposal (PEP) 723](https://peps.python.org/pep-0723/) metadata.
   The `uv` runner uses this information to resolve and install the exact required packages into a temporary, cached environment on-demand.
-  This design guarantees reproducibility and completely eliminates the risk of dependency conflicts between different tools in the collection.
+  This design guarantees reproducibility and eliminates the risk of dependency conflicts between different tools in the collection.
 
-- **Lightweight Core, On-Demand Dependencies:** The installable `rgpycrumbs` package has minimal core dependencies (`click`, `numpy`).
-  Heavy scientific there are no runtime feature extras.
-  CLI tools fetch deps via PEP 723 + uv; library modules use ensure<sub>import</sub> + AUTO<sub>DEPS</sub>.
+- Lightweight Core, On-Demand Dependencies
+  
+  The installable `rgpycrumbs` package has minimal core dependencies (`click`, `numpy`).
+  Heavy scientific libraries are not available as optional extras.
+  CLI tools fetch deps via PEP 723 and `uv`.
+  Library modules use `ensure_import` and `RGPYCRUMBS_AUTO_DEPS`.
   Dependencies are fetched by `uv` only when a script that needs them is executed.
   For library modules, `ensure_import` resolves dependencies at first use when `RGPYCRUMBS_AUTO_DEPS=1` is set, with CUDA-aware resolution that avoids pulling GPU libraries on CPU-only machines.
   The base installation stays lightweight either way.
 
-- **Modular & Extensible Tooling:** Each utility is an independent script.
+- Modular & Extendable Tooling
+  
+  Each utility is an independent script.
   This modularity simplifies development, testing, and maintenance, as changes to one tool cannot inadvertently affect another.
-  New tools can be added to the collection without modifying the core dispatcher logic, making the system easily extensible.
+  New tools can be added to the collection without modifying the core dispatcher logic.
 
 
 <a id="docs"></a>
@@ -88,7 +99,7 @@ The library is designed with the following principles in mind:
 ## Documentation
 
 The manual is at <https://rgpycrumbs.rgoswami.me/>, built from the Org files under [docs/orgmode/](https://github.com/HaoZeke/rgpycrumbs/tree/main/docs/orgmode).
-Its map, [llms.txt](https://rgpycrumbs.rgoswami.me/llms.txt), lists the pages with a line on what each covers, and [llms-full.txt](https://github.com/HaoZeke/rgpycrumbs/blob/main/llms-full.txt) holds every page but the API reference in one Markdown file, generated by `scripts/llms/build_llms.py`.
+Its map, [llms.txt](https://rgpycrumbs.rgoswami.me/llms.txt), lists the pages with a line on what each covers, and [llms-full.txt](https://github.com/HaoZeke/rgpycrumbs/blob/main/llms-full.txt) has every page but the API reference in one Markdown file, generated by `scripts/llms/build_llms.py`.
 [AGENTS.md](https://github.com/HaoZeke/rgpycrumbs/blob/main/AGENTS.md) has the build, test and documentation commands and the mistakes that are easy to make.
 [skills/](https://github.com/HaoZeke/rgpycrumbs/tree/main/skills) has task guides with scripts that CI runs: running a tool and pinning what it installs, barriers and figures from an eOn NEB run, and adding a tool.
 
@@ -155,19 +166,21 @@ Commands:
 
   Library (no CLI argv): `from rgpycrumbs.eon import plot_neb` then `plot_neb(plot_type="profile", con_file="neb.con", output_file="1D.png")`.
   
-  NEB landscapes support energy-unit selection and xyzrender profile strips.
+  `plt-neb` can show energies in another unit and draw its structure strips with xyzrender.
   `plt-neb-stitch` builds a continuous band from multi-segment minimizations (v1.8+).
-  `gen-dimer` seeds saddle searches from NEB peaks; `plt-kmc` plots KMC timelines.
-  `plt-min` accepts `--energy-cap` / `--energy-cap-window` for landscape scales.
+  `gen-dimer` seeds saddle searches from NEB peaks.
+  `plt-kmc` plots kinetic Monte Carlo (KMC) timelines.
+  `plt-min` takes `--energy-cap` or `--energy-cap-window` to clip high energies before the surface fit and the color scale.
   
   eOn **job-config** authorship (`write_eon_config`, `seed_dimers`, MLflow hydrate) needs `eon-schema>=0.2` (`pip install 'rgpycrumbs[eon]'`).
-  Plotting still goes through `chemparseplot`; eon-akmc is **not** required for INI tooling.
+  Plotting still goes through `chemparseplot`.
+  The `config.ini` tooling does **not** need eon-akmc.
 
 - Plotting NEB Paths (`plt-neb`) detail
 
-  This script visualizes the energy landscape of Nudged Elastic Band (NEB) calculations, generating 2D surface plots with optional structure rendering.
+  This script plots the energy surface of Nudged Elastic Band (NEB) calculations in 2D, with optional structure rendering.
   
-  The default `grad_imq` method uses gradient-enhanced Inverse Multiquadric interpolation on 2D RMSD projections [1].
+  The default `grad_imq` method uses gradient-enhanced Inverse Multiquadric interpolation on 2D root-mean-square deviation (RMSD) projections [1].
   The approach projects high-dimensional structures onto 2D coordinates (reactant distance `r` vs product distance `p`) and fits a smooth surface using energy values and their gradients.
   
   [1] R. Goswami, "Two-dimensional RMSD projections for reaction path visualization and validation," *MethodsX*, p. 103851, Mar. 2026, doi: [10.1016/j.mex.2026.103851](https://doi.org/10.1016/j.mex.2026.103851).
@@ -175,13 +188,15 @@ Commands:
   
   - Basic Usage
   
+    This command writes the 2D surface plot of the path in `trajectory.con` to `neb_landscape.png`.
+    
     ```
     python -m rgpycrumbs.cli eon plt-neb --con-file trajectory.con --plot-type landscape -o neb_landscape.png
     ```
   
   - Key Options
   
-    | Option | Description | Default |
+    | Option | What it does | Default |
     | --- | --- | --- |
     | `--con-file PATH` | Trajectory file with NEB images | None |
     | `--plot-type` | `landscape` (2D surface) or `profile` | `profile` |
@@ -202,7 +217,7 @@ Commands:
   
   - Examples
   
-    Full landscape with gradient-enhanced IMQ surface and critical point structures:
+    This example draws the 2D surface from the gradient-enhanced Matérn kernel, with the reactant, saddle point and product structures.
     
     ```
     python -m rgpycrumbs.cli eon plt-neb \
@@ -217,7 +232,7 @@ Commands:
       -o neb_landscape.png
     ```
     
-    Surface-only plot without structure strip:
+    The next plot has the surface alone, without the structure strip.
     
     ```
     python -m rgpycrumbs.cli eon plt-neb \
@@ -227,7 +242,7 @@ Commands:
       -o surface.png
     ```
     
-    Convergence visualization with all optimization steps:
+    The last plot overlays every optimization step to show the convergence.
     
     ```
     python -m rgpycrumbs.cli eon plt-neb \
@@ -239,14 +254,14 @@ Commands:
       -o neb_convergence.png
     ```
   
-  - Surface Methods
+  - Surface Models
   
-    - **`grad_imq`:** Gradient-enhanced Inverse Multiquadric (recommended, uses energy + gradients)
-    - **`grad_matern`:** Gradient-enhanced Matérn 5/2 (uses energy + gradients)
-    - **`grad_imq_ny`:** Nystrom-approximated grad<sub>imq</sub> for large datasets (>1000 points)
-    - **`rbf`:** Radial Basis Function / Thin Plate Spline (fast, no gradients)
+    - `grad_imq`, the gradient-enhanced inverse multiquadric, uses energies and gradients and is the recommended choice.
+    - `grad_matern`, the gradient-enhanced Matérn 5/2, also uses energies and gradients.
+    - `grad_imq_ny` applies the Nyström approximation to `grad_imq` for large datasets of more than 1000 points.
+    - `rbf` fits a thin plate spline, which is fast and needs no gradients.
 
-- Splitting CON files (`con-splitter`)
+- Splitting `.con` files (`con-splitter`)
 
   This script takes a multi-image trajectory file (e.g., from a finished NEB calculation) and splits it into individual frame files, creating an input file for a new calculation.
   
@@ -263,7 +278,7 @@ Commands:
 
 # Contributing
 
-All contributions are welcome, but for the CLI tools please follow [established best practices](https://realpython.com/python-script-structure/).
+All contributions are welcome, but for the CLI tools please follow [the advice on Python script structure at realpython.com](https://realpython.com/python-script-structure/).
 
 
 <a id="development"></a>
@@ -289,7 +304,8 @@ uv run --extra interpolation pytest -m interpolation
 ### Branch Structure
 
 Development happens on the `main` branch.
-The `readme` branch is an auto-generated orphan containing only the rendered `README.md` and branding assets; it is the GitHub default branch.
+The `readme` branch is an auto-generated orphan containing only the rendered `README.md` and branding assets.
+It is the GitHub default branch.
 
 
 <a id="dev:whypixi"></a>
@@ -298,8 +314,8 @@ The `readme` branch is an auto-generated orphan containing only the rendered `RE
 
 [Pixi](https://prefix.dev/) is mainly needed for pixi-only or heavy optional packages that we do not auto-install by default:
 
-- `fragments` tests: need `tblite`, `ira_mod`, and `pyvista`
-- some heavy visualization workflows may still be easier to manage in pixi
+- The `fragments` tests need `tblite`, `ira_mod`, and `pyvista`.
+- Some heavy visualization workflows may still be easier to manage in pixi.
 
 For everything else, `uv` is sufficient.
 
@@ -309,7 +325,8 @@ For everything else, `uv` is sufficient.
 ### Versioning
 
 Versions are derived automatically from **git tags** via `hatch-vcs` (setuptools-scm).
-There is no manual version field; the version is the latest tag (e.g. `v1.0.0` → `1.0.0`).
+There is no manual version field.
+The version is the latest tag, so tag `v1.0.0` gives version `1.0.0`.
 Between tags, dev versions are generated automatically (e.g. `1.0.1.dev3+gabcdef`).
 
 
@@ -356,9 +373,9 @@ The existing `.github/workflows/release.yml` publishes to PyPI and creates the G
 
 # License
 
-MIT.
-However, this is an academic resource, so **please cite** as much as possible via:
+`rgpycrumbs` is under the Massachusetts Institute of Technology (MIT) License.
+This is an academic resource, so **please cite** it as much as possible via:
 
-- The [Zenodo DOI](https://doi.org/10.5281/zenodo.18529798) for general use.
-- The `wailord` paper for ORCA usage
+- The [Zenodo digital object identifier (DOI)](https://doi.org/10.5281/zenodo.18529798) for general use.
+- The `wailord` paper for work with the quantum chemistry program (ORCA).
 

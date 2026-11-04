@@ -1,15 +1,15 @@
 ---
 name: rgpycrumbs-cli
-description: Find, inspect and run rgpycrumbs command-line tools. Covers how `rgpycrumbs GROUP TOOL` maps to a script, how that script's PEP 723 header decides what uv installs before the tool starts, the --dev and --verbose flags, when the active environment is used instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules rather than tools. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
-license: MIT
-compatibility: rgpycrumbs on Python 3.10 or newer (pip install rgpycrumbs, or uv sync in a checkout). Dispatched tools need Python 3.11 or newer, and uv on PATH unless --dev is given. The check scripts need Python 3.11 or newer and the core install only, and run offline.
+description: Find, inspect and run rgpycrumbs command-line tools. Covers the script behind each `rgpycrumbs GROUP TOOL` and the Python Enhancement Proposal (PEP) 723 header that decides what uv installs before the tool starts. It also covers the `--dev` and `--verbose` flags, when the dispatcher uses the active environment instead of uv, pinning versions with rgpkgs.toml or a lock file, and the listed commands that are library modules, not tools. Use before running any rgpycrumbs tool, when a tool fails while installing its dependencies, or to find out what a command will download.
+license: See LICENSE in the rgpycrumbs repository
+compatibility: rgpycrumbs on Python 3.10 or newer (`pip install rgpycrumbs`, or `uv sync` in a checkout). Dispatched tools need Python 3.11 or newer, and uv on PATH unless `--dev` is given. The check scripts need Python 3.11 or newer and the core install only, and run offline.
 ---
 
 # Running rgpycrumbs tools
 
 ## From a command to a script
 
-`rgpycrumbs GROUP TOOL ARGS...` runs the file `rgpycrumbs/GROUP/TOOL.py` of the installed package, reading dashes in `TOOL` as underscores.
+`rgpycrumbs GROUP TOOL ARGS...` runs the file `rgpycrumbs/GROUP/TOOL.py` of the installed package, with `_` for each `-` in `TOOL`.
 `python -m rgpycrumbs.cli` is the same entry point.
 
 | Command | Script |
@@ -18,12 +18,14 @@ compatibility: rgpycrumbs on Python 3.10 or newer (pip install rgpycrumbs, or uv
 | `rgpycrumbs uma aoti-cache` | `rgpycrumbs/uma/aoti_cache.py` |
 | `rgpycrumbs geom detect-fragments` | `rgpycrumbs/geom/detect_fragments.py` |
 
-`rgpycrumbs --help` lists the groups and `rgpycrumbs GROUP --help` the commands in one group; neither installs anything.
+`rgpycrumbs --help` lists the groups and `rgpycrumbs GROUP --help` the commands in one group.
+Neither installs anything.
 Every `.py` file directly in a subdirectory of the package is a command, unless its name starts with `_` or is `hdf5_io`, `plotting`, `utils`, `helpers` or `seed_dimers`, and a subdirectory with at least one command is a group.
 `search`, `time` and `xts` hold none, so they are not groups.
 
 `python -m rgpycrumbs.uma.aoti_cache --help` runs one module directly with the current Python, skipping the dispatcher.
-Spell the module with underscores: the help text of the dispatcher's commands suggests `python -m rgpycrumbs.uma.aoti-cache`, which does not import.
+Write the module name with `_`.
+The dispatcher's help text suggests `python -m rgpycrumbs.uma.aoti-cache`, which does not import.
 
 ## What a tool installs
 
@@ -47,34 +49,39 @@ The dispatcher copies the script to a temporary directory and runs `uv run --no-
 uv builds an environment holding exactly those packages, caches it, and only then starts the tool.
 Two things follow:
 
-- `rgpycrumbs GROUP TOOL --help` hands `--help` to the script, so the whole dependency list is installed first; for the eOn plots that includes jax, matplotlib, polars and ase.
+- `rgpycrumbs GROUP TOOL --help` hands `--help` to the script, so the whole dependency list is installed first.
+  For the eOn plots that includes jax, matplotlib, polars and ase.
   The pages under <https://rgpycrumbs.rgoswami.me/tools/> list the options without installing anything.
-- Most eOn tools, and some in `chemgp`, `geom` and `uma`, take `readcon` and `chemparseplot` from their `main` branches on GitHub through `[tool.uv.sources]`, and the `surrogate` tools take chemparseplot from fixed git commits; `scripts/list_tools.py` names them all.
+- Most eOn tools, and some in `chemgp`, `geom` and `uma`, take `readcon` and `chemparseplot` from their `main` branches on GitHub through `[tool.uv.sources]`, and the `surrogate` tools take chemparseplot from fixed git commits.
+  `scripts/list_tools.py` names them all.
   Building readcon from git needs Rust 1.85 or newer (edition 2024).
   With an older Cargo, uv stops with "feature `edition2024` is required".
 
 ## Running in the active environment
 
-- `rgpycrumbs --dev GROUP TOOL ...` runs the script with the current Python, so its dependencies must already be installed there.
+- `rgpycrumbs --dev GROUP TOOL ...` runs the script with the current Python.
+  Its dependencies must already be installed there.
 - Without `--dev`, the dispatcher also uses the current Python when `readcon`, `matplotlib`, `polars`, `ase` and `chemparseplot` all import, or when `uv` is not on PATH, and says so with `--> Using active interpreter`.
   `RGPKGS_FORCE_UV=1`, or `force_uv = true` under `[rgpycrumbs.dispatch]` in a config file, keeps uv in the first case.
-  `RGPYCRUMBS_DEV=1` is the same as `--dev`; `RGPKGS_DEV=1` is not, and the dispatcher still uses uv.
+  `RGPYCRUMBS_DEV=1` is the same as `--dev`.
+  `RGPKGS_DEV=1` is not, and the dispatcher still uses uv.
 - `-v` (`--verbose`) prints the script path and the full command before running it.
   Options of `rgpycrumbs` itself go before the group: `rgpycrumbs --dev -v uma aoti-cache list`.
 
 ## Pinning versions
 
-Pins become uv constraints for every script the dispatcher runs, and are passed to library imports through `RGPKGS_LOCK_PINS`.
-They come from, highest first:
+Pins become uv constraints for every script the dispatcher runs.
+They also reach library imports through `RGPKGS_LOCK_PINS`.
+Pins come from a lock file or a config file, highest first:
 
-1. `--lock PATH` (or `--sbom PATH`) on the command line;
-2. the `RGPKGS_LOCK` environment variable;
-3. a config file named by `RGPKGS_CONFIG`;
-4. the project file `rgpkgs.toml`, found by walking up from the current directory (`rgpycrumbs.toml` is still read);
-5. the user file `$XDG_CONFIG_HOME/rgpkgs/config.toml`, by default `~/.config/rgpkgs/config.toml`.
+1. `--lock PATH` (or `--sbom PATH`) on the command line.
+2. The `RGPKGS_LOCK` environment variable.
+3. A config file named by `RGPKGS_CONFIG`.
+4. The project file `rgpkgs.toml`, found by walking up from the current directory (`rgpycrumbs.toml` is still read).
+5. The user file `$XDG_CONFIG_HOME/rgpkgs/config.toml`, by default `~/.config/rgpkgs/config.toml`.
 
 A lock is a `uv.lock`, a PEP 751 `pylock.toml` or a CycloneDX JSON file.
-`[pins.packages]` entries win over versions from the lock:
+`[pins.packages]` entries win over versions from the lock.
 
 ```toml
 [pins]
@@ -84,7 +91,7 @@ lock = "pylock.toml"   # relative to this file
 jax = "0.4.35"
 ```
 
-`rgpycrumbs config show` prints the merged result (paths shortened):
+`rgpycrumbs config show` prints the merged result (paths shortened).
 
 ```text
 user_config:     .../xdg/rgpkgs/config.toml
@@ -95,7 +102,7 @@ auto_deps_def:   1
 package_pins:    {'jax': '0.4.35'}
 ```
 
-The same readers are public in `rgpycrumbs.api`:
+The same readers are public in `rgpycrumbs.api`.
 
 ```python
 import tempfile
@@ -131,7 +138,9 @@ print(pins_to_constraint_lines(pins))
 ## Commands that are not tools
 
 These commands are library modules, with no PEP 723 block and no `__main__` section, so running one does no work.
-Under uv the script gets no packages, and those that import numpy, jax or any other package stop with `ModuleNotFoundError`; the others, and any of them run with `--dev` where its imports are installed, exit 0 without output.
+Under uv the script gets no packages, so a module that imports numpy, jax or any other package stops with `ModuleNotFoundError`.
+The rest exit 0 without output.
+With `--dev`, where the imports are installed, every one of them exits 0 without output.
 Import them from Python instead (`from rgpycrumbs.func.muller_brown import muller_brown`).
 
 - `eon plot-config`, `eon plot-dispatch`
