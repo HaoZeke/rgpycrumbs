@@ -3,6 +3,8 @@ from tests.conftest import skip_if_not_env
 
 skip_if_not_env("ptm")
 
+import inspect
+import itertools
 import warnings
 
 import numpy as np
@@ -26,6 +28,31 @@ from rgpycrumbs.eon.ptmdisp import (
 
 # The first eight bytes of every PNG file.
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+SELECTION_RADIUS = (
+    inspect.signature(find_mismatch_indices).parameters["selection_radius"].default
+)
+
+# Sites of the 3x3x3 copper supercell in units of the lattice constant: one
+# inside the cell, and one each on a face, an edge and a corner of it.
+VACANCY_SITES = {
+    "inside": (1, 1.5, 1.5),
+    "face": (1, 0, 1),
+    "edge": (0, 0, 1),
+    "corner": (0, 0, 0),
+}
+
+
+def nearest_image_distances(atoms, point):
+    """The distance from *point* to the nearest image of each atom.
+
+    The images lie in the cell and in its neighbors along the periodic axes,
+    so the distance is exact up to one cell edge.
+    """
+    steps = [(-1, 0, 1) if periodic else (0,) for periodic in atoms.pbc]
+    shifts = np.array(list(itertools.product(*steps))) @ atoms.cell.array
+    images = atoms.positions[:, None] + shifts
+    return np.linalg.norm(images - point, axis=-1).min(axis=1)
 
 
 @pytest.fixture
@@ -244,6 +271,43 @@ def test_view_selection_keeps_the_pipelines_of_the_scene(
         selection_image=selection_image,
     )
     assert list(empty_scene.pipelines) == [other]
+
+
+def test_find_indices_takes_the_same_sphere_wherever_the_vacancy_sits(tmp_path):
+    """The sphere takes the minimum image, so a vacancy selects alike at every site."""
+    a = 3.6
+    supercell = bulk("Cu", "fcc", a=a, cubic=True) * (3, 3, 3)
+    found, expected = {}, {}
+    for where, site in VACANCY_SITES.items():
+        position = a * np.array(site)
+        atoms = supercell[~np.isclose(supercell.positions, position).all(axis=1)]
+        filepath = tmp_path / f"vacancy-{where}.xyz"
+        write(filepath, atoms)
+        found[where] = set(find_mismatch_indices(filepath, CrystalStructure.FCC).tolist())
+        near = nearest_image_distances(atoms, position) < SELECTION_RADIUS
+        expected[where] = set(np.flatnonzero(near).tolist())
+    counts = {where: len(indices) for where, indices in found.items()}
+    assert counts == {where: len(indices) for where, indices in expected.items()}, (
+        f"atoms returned at each site: {counts}"
+    )
+    assert found == expected
+
+
+@pytest.mark.parametrize(
+    "pbc",
+    [(True, True, True), (True, True, False), (False, False, False)],
+    ids=["periodic-xyz", "periodic-xy", "not-periodic"],
+)
+def test_sphere_takes_images_along_the_periodic_axes_alone(pbc):
+    """Around the corner atom, the sphere reaches across the periodic faces alone."""
+    from rgpycrumbs.eon.ptmdisp import _sphere_indices
+
+    atoms = bulk("Cu", "fcc", a=3.6, cubic=True) * (3, 3, 3)
+    atoms.pbc = pbc
+    corner = np.flatnonzero(np.isclose(atoms.positions, 0).all(axis=1))
+    sphere = _sphere_indices(atoms, corner, SELECTION_RADIUS)
+    near = nearest_image_distances(atoms, atoms.positions[corner[0]]) < SELECTION_RADIUS
+    assert sphere.tolist() == np.flatnonzero(near).tolist()
 
 
 def test_find_indices_without_vacancy_filter_keeps_the_neighbors(defect_fcc_cu_file):

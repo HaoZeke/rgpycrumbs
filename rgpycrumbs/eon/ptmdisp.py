@@ -50,6 +50,7 @@ else:
 import ase.io as aseio
 import click
 import numpy as np
+from ase.geometry import find_mic
 from ovito.io.ase import ase_to_ovito
 from ovito.modifiers import (
     CentroSymmetryModifier,
@@ -116,6 +117,21 @@ def _vacancy_neighbors(
     return candidates[(csp >= csp_min_a2) & (csp <= csp_max_a2)]
 
 
+def _sphere_indices(atoms, defect: np.ndarray, radius: float) -> np.ndarray:
+    """The atoms closer than *radius* to the center of the *defect* atoms.
+
+    The center is the mean of the defect atoms, each taken at its image
+    nearest to the first of them. Each distance goes to the nearest image of
+    an atom. Both take images along the periodic axes of the cell alone.
+    """
+    positions = atoms.get_positions()
+    first = positions[defect[0]]
+    offsets, _ = find_mic(positions[defect] - first, atoms.cell, atoms.pbc)
+    center = first + offsets.mean(axis=0)
+    _, distances = find_mic(positions - center, atoms.cell, atoms.pbc)
+    return np.flatnonzero(distances < radius)
+
+
 def find_mismatch_indices(
     filename: str,
     target_structure: CrystalStructure,
@@ -130,6 +146,10 @@ def find_mismatch_indices(
     Analyzes a structure file with PTM, identifies the interstitial defect,
     and returns the indices of the interstitial atoms plus all atoms
     within a sphere of radius `selection_radius`.
+
+    The sphere is centered on the mean of the defect atoms. Along each
+    periodic axis of the cell, the mean and the distances take the nearest
+    periodic image of each atom.
 
     With `remove_fcc_vacancy` set, atoms whose centrosymmetry marks them as
     vacancy neighbors are dropped from the defect atoms.
@@ -160,6 +180,9 @@ def find_mismatch_indices(
        working directory.
        Each render used to leave its pipeline in the OVITO scene, so every
        later render in the process drew those atoms as well.
+       The center and the distances of the sphere used to ignore the
+       periodic boundaries. So a defect on a face, an edge or a corner of
+       the cell returned other atoms than the same defect inside it.
     """
     try:
         log.info(f"Reading structure from '{filename}'...")
@@ -208,19 +231,13 @@ def find_mismatch_indices(
         )
         interstitial = np.setdiff1d(mismatch_indices, vacancy)
     else:
-        data = non_fcc
         interstitial = mismatch_indices
     log.info(
         f"Found {len(mismatch_indices)} non-{target_structure.value}, returning {len(interstitial)} frenkel pair atoms."
     )
     if interstitial.size == 0:
         return interstitial
-    positions = data.particles.positions
-    center_interstitial = np.mean(positions[interstitial], axis=0)
-    selection_radius_sq = selection_radius**2
-
-    dist_sq_from_center = np.sum((positions - center_interstitial) ** 2, axis=1)
-    sphere_indices = np.where(dist_sq_from_center < selection_radius_sq)[0]
+    sphere_indices = _sphere_indices(atoms, interstitial, selection_radius)
     final_active_indices = np.unique(np.hstack([sphere_indices, interstitial]))
 
     if view_selection:
