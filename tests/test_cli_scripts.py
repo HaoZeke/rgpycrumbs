@@ -358,3 +358,32 @@ class TestPackageInit:
         from rgpycrumbs.eon.helpers import write_eon_config
 
         assert callable(write_eon_config)
+
+
+def test_ptmdisp_help_without_the_viewer():
+    """Command help loads when the Open Visualization Tool is absent."""
+    pytest.importorskip("ase")
+    blocker = """
+import sys
+
+class Block:
+    def find_spec(self, fullname, path, target=None):
+        if fullname == "ovito" or fullname.startswith("ovito."):
+            raise ModuleNotFoundError(fullname, name=fullname)
+        return None
+
+sys.meta_path.insert(0, Block())
+sys.argv = ["ptmdisp", "--help"]
+import runpy
+runpy.run_path("rgpycrumbs/eon/ptmdisp.py", run_name="__main__")
+"""
+    root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [sys.executable, "-c", blocker],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--structure-type" in result.stdout

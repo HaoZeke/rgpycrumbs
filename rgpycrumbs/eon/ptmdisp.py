@@ -52,14 +52,6 @@ import click
 import numpy as np
 from ase.geometry import find_mic
 from ase.io.formats import filetype, parse_filename
-from ovito.io.ase import ase_to_ovito
-from ovito.modifiers import (
-    CentroSymmetryModifier,
-    DeleteSelectedModifier,  # noqa: F401
-    PolyhedralTemplateMatchingModifier,
-    SelectTypeModifier,
-)
-from ovito.pipeline import Pipeline, StaticSource
 from rich.logging import RichHandler
 
 # 3. CONSTANTS and ENUMERATIONS
@@ -82,14 +74,51 @@ class CrystalStructure(StrEnum):
     ICO = "Icosahedral"
 
 
-# Map the string choice to the actual OVITO library constant.
-STRUCTURE_TYPE_MAP = {
-    CrystalStructure.FCC: PolyhedralTemplateMatchingModifier.Type.FCC,
-    CrystalStructure.HCP: PolyhedralTemplateMatchingModifier.Type.HCP,
-    CrystalStructure.BCC: PolyhedralTemplateMatchingModifier.Type.BCC,
-    CrystalStructure.ICO: PolyhedralTemplateMatchingModifier.Type.ICO,
-    CrystalStructure.OTHER: PolyhedralTemplateMatchingModifier.Type.OTHER,
-}
+def _load_ovito():
+    """Import the Open Visualization Tool and the structure type map.
+
+    Help and import succeed without the package. Analysis imports it.
+    """
+    from ovito.io.ase import ase_to_ovito
+    from ovito.modifiers import (  # noqa: F401
+        CentroSymmetryModifier,
+        DeleteSelectedModifier,
+        PolyhedralTemplateMatchingModifier,
+        SelectTypeModifier,
+    )
+    from ovito.pipeline import Pipeline, StaticSource
+
+    kind = PolyhedralTemplateMatchingModifier.Type
+    return {
+        "ase_to_ovito": ase_to_ovito,
+        "CentroSymmetryModifier": CentroSymmetryModifier,
+        "PolyhedralTemplateMatchingModifier": PolyhedralTemplateMatchingModifier,
+        "SelectTypeModifier": SelectTypeModifier,
+        "Pipeline": Pipeline,
+        "StaticSource": StaticSource,
+        "STRUCTURE_TYPE_MAP": {
+            CrystalStructure.FCC: kind.FCC,
+            CrystalStructure.HCP: kind.HCP,
+            CrystalStructure.BCC: kind.BCC,
+            CrystalStructure.ICO: kind.ICO,
+            CrystalStructure.OTHER: kind.OTHER,
+        },
+    }
+
+
+try:
+    globals().update(_load_ovito())
+except ModuleNotFoundError as exc:
+    missing = exc.name or ""
+    if missing != "ovito" and not missing.startswith("ovito."):
+        raise
+    ase_to_ovito = None
+    CentroSymmetryModifier = None
+    PolyhedralTemplateMatchingModifier = None
+    SelectTypeModifier = None
+    Pipeline = None
+    StaticSource = None
+    STRUCTURE_TYPE_MAP = None
 
 # Centrosymmetry window of the atoms the vacancy filter drops, in units of a**2
 # for the FCC lattice constant a. The parameter of Kelchner, Plimpton and
@@ -213,16 +242,36 @@ def find_mismatch_indices(
         log.critical(f"Failed to read or parse file '{filename}'. Error: {e}")
         sys.exit(1)
 
+    structure_map = STRUCTURE_TYPE_MAP
+    to_ovito = ase_to_ovito
+    pipeline_cls = Pipeline
+    source_cls = StaticSource
+    select_cls = SelectTypeModifier
+    ptm_cls = PolyhedralTemplateMatchingModifier
+    csp_cls = CentroSymmetryModifier
+    if (
+        structure_map is None
+        or to_ovito is None
+        or pipeline_cls is None
+        or source_cls is None
+        or select_cls is None
+        or ptm_cls is None
+        or csp_cls is None
+    ):
+        raise ImportError(
+            "ovito is required to analyze a structure with polyhedral template matching"
+        )
+
     # Set up the OVITO pipeline
     # NOTE(rg): Can't call delete anywhere else because it'll lose the index information
-    pipeline = Pipeline(source=StaticSource(data=ase_to_ovito(atoms)))
+    pipeline = pipeline_cls(source=source_cls(data=to_ovito(atoms)))
 
-    ptm = PolyhedralTemplateMatchingModifier(output_interatomic_distance=True)
+    ptm = ptm_cls(output_interatomic_distance=True)
     pipeline.modifiers.append(ptm)
 
     # Select atoms that DO match the target structure
-    ovito_type = STRUCTURE_TYPE_MAP[target_structure]
-    select_modifier = SelectTypeModifier(
+    ovito_type = structure_map[target_structure]
+    select_modifier = select_cls(
         operate_on="particles",
         property="Structure Type",
         types={ovito_type},
@@ -235,7 +284,7 @@ def find_mismatch_indices(
     log.info(f"Running PTM analysis to find non-{target_structure.value} atoms...")
     if remove_fcc_vacancy:
         # The default is the conventional parameter over 12 neighbors, as for FCC.
-        pipeline.modifiers.append(CentroSymmetryModifier())
+        pipeline.modifiers.append(csp_cls())
         data = pipeline.compute()
         vacancy = _vacancy_neighbors(
             data, mismatch_indices, csp_vacancy_min, csp_vacancy_max
@@ -253,7 +302,7 @@ def find_mismatch_indices(
 
     if view_selection:
         # Just to see what's being selected..
-        pviz = Pipeline(source=StaticSource(data=ase_to_ovito(atoms[sphere_indices])))
+        pviz = pipeline_cls(source=source_cls(data=to_ovito(atoms[sphere_indices])))
         pviz.add_to_scene()
         try:
             from ovito.vis import Viewport
