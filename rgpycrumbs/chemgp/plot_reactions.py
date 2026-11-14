@@ -50,6 +50,15 @@ def cli(config, output, xtb):
         msg = f"Unknown reaction layout {layout!r}; use atlas or gallery"
         raise ValueError(msg)
     expected, rendered = (4, (0, 1, 2, 3)) if layout == "atlas" else (3, (1,))
+    # The vector renderer draws atlas rows as discs and lines at one scale per
+    # reaction; xyzrender draws one image per state and the density surfaces.
+    renderer = settings.get("renderer", "xyzrender")
+    if renderer not in ("xyzrender", "vector"):
+        msg = f"Unknown reaction renderer {renderer!r}; use xyzrender or vector"
+        raise ValueError(msg)
+    if renderer == "vector" and layout != "atlas":
+        msg = "The vector renderer draws atlas rows; a gallery uses xyzrender"
+        raise ValueError(msg)
     cases, records, bonds = [], [], []
     for case in settings["cases"]:
         states = case["states"]
@@ -63,7 +72,7 @@ def cli(config, output, xtb):
         sources = [(config.parent / s["path"]).resolve() for s in states]
         atoms = [read_first_atoms(p) for p in sources]
         pairs = case.get("bonds") or changed_bonds(atoms[0], atoms[2])
-        aligned = align_reaction(atoms)
+        aligned = align_reaction(atoms, weights=settings.get("alignment"))
         row = {"title": case["title"], "subtitle": case.get("subtitle", ""), "states": []}
         for i, (spec, frame, source) in enumerate(
             zip(states, aligned, sources, strict=True)
@@ -120,14 +129,21 @@ def cli(config, output, xtb):
             labels = [
                 f"{index} {frame[index - 1].symbol}{index}" for index in atom_labels
             ]
-            render_reaction_state(
-                target / "geometry.xyz",
-                state["image"],
-                charge=case["charge"],
-                multiplicity=case["multiplicity"],
-                bond_orders=wbo,
-                labels=labels,
-            )
+            if renderer == "vector":
+                state.update(
+                    symbols=frame.get_chemical_symbols(),
+                    positions=frame.positions.copy(),
+                    bond_orders=wbo,
+                )
+            else:
+                render_reaction_state(
+                    target / "geometry.xyz",
+                    state["image"],
+                    charge=case["charge"],
+                    multiplicity=case["multiplicity"],
+                    bond_orders=wbo,
+                    labels=labels,
+                )
             if settings.get("density", True):
                 state["density_image"] = str(target / "density.png")
                 render_reaction_state(
@@ -166,7 +182,14 @@ def cli(config, output, xtb):
     )
     for density in [False, True] if settings.get("density", True) else [False]:
         if layout == "atlas":
-            fig = plot_reaction_atlas(cases, density=density)
+            if renderer == "vector" and not density:
+                from chemparseplot.plot.reaction import (  # noqa: PLC0415
+                    plot_bonding_atlas,
+                )
+
+                fig = plot_bonding_atlas(cases, width=settings.get("width", 7.0))
+            else:
+                fig = plot_reaction_atlas(cases, density=density)
             name = "reaction_density" if density else "reaction_geometries"
         else:
             tiles = [
@@ -210,6 +233,7 @@ def cli(config, output, xtb):
                     )
                 },
                 "interpretation": "GFN2-xTB single points at rigidly aligned benchmark geometries; no optimization. Density surfaces are qualitative. Saddle acceptance uses the original benchmark potential.",
+                "renderer": renderer,
                 "density_isovalue_e_per_bohr3": settings.get("iso", 0.02),
                 "artifacts": {
                     p.name: sha256(p)

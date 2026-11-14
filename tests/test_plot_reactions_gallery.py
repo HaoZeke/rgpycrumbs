@@ -142,3 +142,60 @@ def test_unknown_layout_is_refused(tmp_path, fake_tools):
     result = CliRunner().invoke(cli, ["--config", str(profile)])
     assert result.exit_code != 0
     assert "Unknown reaction layout" in str(result.exception)
+
+
+def test_vector_renderer_draws_the_atlas_without_state_images(tmp_path, fake_tools):
+    pytest.importorskip("chemparseplot.plot.molecule")
+    from rgpycrumbs.chemgp.plot_reactions import cli
+
+    calculations, rendered = fake_tools
+    _structures(tmp_path)
+    profile = _profile(
+        tmp_path,
+        "atlas",
+        [
+            ("Reactant", "reactant"),
+            ("GPRidge saddle", "saddle"),
+            ("Product", "product"),
+            ("Comparator", "saddle"),
+        ],
+    )
+    text = profile.read_text().replace(
+        'layout = "atlas"', 'layout = "atlas"\nrenderer = "vector"\nalignment = "mass"'
+    )
+    profile.write_text(text)
+    result = CliRunner().invoke(cli, ["--config", str(profile), "--xtb", "xtb"])
+    assert result.exit_code == 0, result.output
+    out = tmp_path / "out"
+    # every state still gets its single point, but no state image is rendered
+    assert len(calculations) == 12
+    assert rendered == []
+    assert (out / "reaction_geometries.pdf").is_file()
+    assert not list(out.glob("*/*/structure.png"))
+    manifest = json.loads((out / "manifest.json").read_text())
+    assert manifest["renderer"] == "vector"
+    rows = (out / "bonds.csv").read_text().splitlines()
+    assert len(rows) == 1 + 12
+
+
+def test_vector_renderer_is_refused_for_a_gallery(tmp_path, fake_tools):
+    from rgpycrumbs.chemgp.plot_reactions import cli
+
+    _structures(tmp_path)
+    profile = _profile(
+        tmp_path,
+        "gallery",
+        [("Reactant", "reactant"), ("GPRidge saddle", "saddle"), ("Product", "product")],
+    )
+    profile.write_text(
+        profile.read_text().replace(
+            'layout = "gallery"', 'layout = "gallery"\nrenderer = "vector"'
+        )
+    )
+    result = CliRunner().invoke(cli, ["--config", str(profile)])
+    assert result.exit_code != 0
+    assert "vector renderer draws atlas rows" in str(result.exception)
+    profile.write_text(profile.read_text().replace('"vector"', '"pencil"'))
+    result = CliRunner().invoke(cli, ["--config", str(profile)])
+    assert result.exit_code != 0
+    assert "Unknown reaction renderer" in str(result.exception)
