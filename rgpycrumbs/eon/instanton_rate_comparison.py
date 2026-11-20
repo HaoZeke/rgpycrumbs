@@ -2,7 +2,7 @@
 
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["ase", "click", "numpy", "scipy", "matplotlib", "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ce577ca547fe1ea3904c44e6ef2a277f18789715"]
+# dependencies = ["ase", "readcon", "click", "numpy", "scipy", "matplotlib", "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ce577ca547fe1ea3904c44e6ef2a277f18789715"]
 # ///
 
 import csv
@@ -13,7 +13,7 @@ import click
 import numpy as np
 
 
-def draw_thermal_orbit(ax, geometry, ring_file, level_file):
+def draw_thermal_orbit(ax, geometry, ring_file, level_file, label):
     """Overlay the equilibrium molecule and the closed paths of its atoms."""
     from ase.io import read
     from ase.neighborlist import natural_cutoffs, neighbor_list
@@ -22,8 +22,28 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file):
     atoms = read(geometry, format="extxyz")
     mass = atoms.get_masses()
     reactant = atoms.positions - atoms.get_center_of_mass()
-    ring = np.asarray(json.loads(ring_file.read_text())).reshape(-1, len(atoms), 3)
     level = json.loads(level_file.read_text())
+    if ring_file.suffix == ".con":
+        import readcon
+
+        frames = list(readcon.iter_con(str(ring_file)))
+        if not frames:
+            raise ValueError("empty readcon orbit")
+        half = frames[0].metadata.get("evaluation_counts", {}).get("mode") == "rate"
+        key = "neb_bead" if half else "tau_over_beta"
+        frames.sort(key=lambda f: f.metadata[key])
+        positions = []
+        for frame in frames:
+            order = np.argsort([atom.atom_id for atom in frame.atoms])
+            if ([frame.atoms[i].symbol for i in order] != atoms.get_chemical_symbols()
+                    or not np.isclose(frame.metadata["temperature_K"], level["temperature_K"])):
+                raise ValueError("orbit identity or temperature mismatch")
+            positions.append(np.asarray(frame.xyz)[order])
+        ring = np.stack(positions)
+        if half:
+            ring = np.concatenate((ring, ring[::-1]))
+    else:
+        ring = np.asarray(json.loads(ring_file.read_text()), dtype=float).reshape(-1, len(atoms), 3)
     if len(ring) != level["beads"]:
         raise ValueError("inset orbit and normalized level specify different bead counts")
     center = np.average(ring.mean(axis=0), axis=0, weights=mass)
@@ -42,7 +62,7 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file):
     ax.scatter(*reference.T, s=8 + 2 * atoms.numbers, color="#144a70", zorder=3)
     ax.set_aspect("equal")
     ax.axis("off")
-    ax.set_title(f"{level['temperature_K']:.1f} K", fontsize="small")
+    ax.set_title(f"{label} {level['temperature_K']:.1f} K".strip(), fontsize="small")
 
 
 @click.command()
@@ -56,8 +76,9 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file):
 @click.option("--inverse-range", nargs=2, type=float, help="Lower and upper 1000 K/T bounds.")
 @click.option("--orbit", type=(click.Path(exists=True, path_type=Path), click.Path(exists=True, path_type=Path),
                                click.Path(exists=True, path_type=Path)),
-              help="Equilibrium extxyz, full bead JSON and normalized level for the inset.")
-def main(reference, harmonic, series, plot, spectra, inverse_range, orbit):
+              help="Equilibrium extxyz, readcon orbit or full bead JSON and normalized level for the inset.")
+@click.option("--orbit-label", default="", help="Method used to calculate the displayed orbit.")
+def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit_label):
     """Plot absolute log10 rates in inverse seconds and write per-point discrepancies."""
     import matplotlib.pyplot as plt
     from chemparseplot.plot.kinetics import plot_arrhenius
@@ -85,7 +106,7 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit):
                                    saddle["electronic_energy_eV"] - minimum["electronic_energy_eV"], temperatures)
         harmonic_rates = dict(zip(("htst", "qq_htst"), np.asarray(rates) / np.log(10)))
     if orbit:
-        draw_thermal_orbit(ax.inset_axes([0.61, 0.63, 0.35, 0.33]), *orbit)
+        draw_thermal_orbit(ax.inset_axes([0.61, 0.63, 0.35, 0.33]), *orbit, orbit_label)
     for label, key in (("HTST", "htst"), ("qq-HTST", "qq_htst")):
         plot_arrhenius(ax, Q_(temperatures, "kelvin"), harmonic_rates[key],
                        label=label, linestyle="--" if key == "qq_htst" else "-")
