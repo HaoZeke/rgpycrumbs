@@ -1,0 +1,40 @@
+#+TITLE: Thermal orbit stationarity
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+The ~eon orbit-residual~ command evaluates the Euclidean equation of motion
+on the orbit written by an instanton solver. The residual in each mobile
+Cartesian coordinate is the physical force plus the mass times the second
+imaginary-time derivative of the position. Output includes both the largest
+absolute component and the root mean square across components and beads,
+in eV/Å.
+
+* Inputs
+
+Supply a readcon band containing a complete thermal period, with one
+~tau_over_beta~ fraction in each frame. Place the beads at uniform intervals
+and omit a repeated endpoint. Use continuous atomic coordinates across the
+period. The command reads masses, atom IDs, fixed masks and cell geometry
+from the band. If frames do not specify ~temperature_K~, supply
+~--temperature~ in kelvin.
+
+The independent force provider is a factory named by ~module:function~ or
+~/path/to/file.py:function~. It receives the band path and keyword arguments
+from ~--options~. Its ~cartesian_forces(frame)~ method returns an array of
+shape ~(atoms, 3)~ in eV/Å. ~result_counts()~ is optional and returns
+cumulative ~computed~ and ~served~ geometry counts. The report records the
+work of the independent check under ~evaluation_counts.scope = validation~.
+
+#+begin_src bash
+rgpycrumbs eon orbit-residual ring.con \
+    --provider potential.py:orbit_provider --temperature 150
+#+end_src
+
+The calculation differentiates the periodic Fourier interpolant on the bead
+grid. Repeating the check at higher bead resolution distinguishes a
+discretization residual from an error that persists in the path.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.orbit_residual:main
+   :prog: rgpycrumbs eon orbit-residual
+   :nested: full
+#+END_EXPORT
