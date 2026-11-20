@@ -28,6 +28,9 @@ def log_inertia_det(positions, masses):
 def molecular_rate(level, minimum, atoms, ring):
     """Return a single-channel rate in s⁻¹ for an unconstrained nonlinear molecule."""
     rate = level["rate"]
+    negative_modes = rate.get("negative_modes")
+    if negative_modes is not None and negative_modes != 1:
+        raise ValueError(f"instanton must have one retained unstable mode, found {negative_modes}")
     p = rate["beads"]
     temperature = rate["temperature"]
     masses = atoms.get_masses()
