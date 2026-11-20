@@ -100,9 +100,12 @@ def _factory(spec):
     type=click.FloatRange(min=0),
     help="Threshold for the largest residual in eV/Å.",
 )
-@click.option("--ipi-half-ring", is_flag=True,
-              help="Reflect a stored i-PI half-ring and use the finite-bead spring force.")
-def main(band, provider, options, temperature, tolerance, ipi_half_ring):
+@click.option(
+    "--ipi-half-ring",
+    is_flag=True,
+    help="Reflect a stored i-PI half-ring and use the finite-bead spring force.",
+)
+def main(band, *, provider, options, temperature, tolerance, ipi_half_ring):
     """Report stationarity and independent validation costs for a readcon BAND.
 
     Each frame supplies tau_over_beta, atom IDs, masses and fixed components.
@@ -118,9 +121,15 @@ def main(band, provider, options, temperature, tolerance, ipi_half_ring):
         frames.sort(key=lambda f: int(f.metadata["neb_bead"]))
         for i, frame in enumerate(frames):
             ledger = frame.metadata.get("evaluation_counts", {})
-            if (frame.metadata["neb_bead"] != i or ledger.get("mode") != "rate"
-                or ledger.get("stored_beads") != len(frames) or len(frames) < 2):
-                raise click.UsageError("expected the ordered beads of one i-PI rate half-ring")
+            if (
+                frame.metadata["neb_bead"] != i
+                or ledger.get("mode") != "rate"
+                or ledger.get("stored_beads") != len(frames)
+                or len(frames) < 2
+            ):
+                raise click.UsageError(
+                    "expected the ordered beads of one i-PI rate half-ring"
+                )
     else:
         if len(frames) < 3:
             raise click.UsageError("expected at least three beads spanning a full period")
@@ -132,7 +141,9 @@ def main(band, provider, options, temperature, tolerance, ipi_half_ring):
                 np.diff(np.r_[phase, phase[0] + 1]), 1 / len(frames), atol=1e-12, rtol=0
             )
         ):
-            raise click.UsageError("tau_over_beta must cover a full, evenly spaced period")
+            raise click.UsageError(
+                "tau_over_beta must cover a full, evenly spaced period"
+            )
     templ = frames[0]
     if temperature is None:
         temperature = templ.metadata.get("temperature_K")
