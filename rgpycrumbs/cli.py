@@ -385,7 +385,7 @@ def _dispatch(
         click.echo(f"VERBOSE: Resolved script path -> {script_path}", err=True)
         click.echo(f"VERBOSE: Constructed command -> {' '.join(command)}", err=True)
 
-    click.echo(f"--> Dispatching to: {' '.join(command)}")
+    click.echo(f"--> Dispatching to: {' '.join(command)}", err=True)
 
     try:
         subprocess.run(command, check=True, env=env)  # noqa: S603
