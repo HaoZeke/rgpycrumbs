@@ -18,7 +18,7 @@ import click
 import numpy as np
 
 
-def euclidean_force_residual(positions, forces, masses, temperature):
+def euclidean_force_residual(positions, forces, masses, temperature, ring_polymer=False):
     """Return F + M d²x/dτ² in eV/Å, with x in Å, masses in u, and T in K.
 
     Columns are mobile Cartesian degrees of freedom. Rows are uniformly
@@ -48,6 +48,9 @@ def euclidean_force_residual(positions, forces, masses, temperature):
         raise ValueError("expected finite inputs and positive masses and temperature")
     period = constants.hbar / (constants.Boltzmann * temperature)
     omega = 2 * np.pi * np.fft.rfftfreq(len(positions), d=period / len(positions))
+    if ring_polymer:
+        step = period / len(positions)
+        omega = 2 * np.sin(0.5 * omega * step) / step
     accel = np.fft.irfft(
         -(omega[:, None] ** 2) * np.fft.rfft(positions, axis=0), n=len(positions), axis=0
     )
@@ -97,7 +100,9 @@ def _factory(spec):
     type=click.FloatRange(min=0),
     help="Threshold for the largest residual in eV/Å.",
 )
-def main(band, provider, options, temperature, tolerance):
+@click.option("--ipi-half-ring", is_flag=True,
+              help="Reflect a stored i-PI half-ring and use the finite-bead spring force.")
+def main(band, provider, options, temperature, tolerance, ipi_half_ring):
     """Report stationarity and independent validation costs for a readcon BAND.
 
     Each frame supplies tau_over_beta, atom IDs, masses and fixed components.
@@ -109,17 +114,25 @@ def main(band, provider, options, temperature, tolerance):
     readcon = importlib.import_module("readcon")
 
     frames = list(readcon.iter_con(str(band)))
-    if len(frames) < 3:
-        raise click.UsageError("expected at least three beads spanning a full period")
-    frames.sort(key=lambda f: float(f.metadata["tau_over_beta"]))
-    phase = np.array([f.metadata["tau_over_beta"] for f in frames], dtype=float)
-    if not (
-        np.all((0 <= phase) & (phase < 1))
-        and np.allclose(
-            np.diff(np.r_[phase, phase[0] + 1]), 1 / len(frames), atol=1e-12, rtol=0
-        )
-    ):
-        raise click.UsageError("tau_over_beta must cover a full, evenly spaced period")
+    if ipi_half_ring:
+        frames.sort(key=lambda f: int(f.metadata["neb_bead"]))
+        for i, frame in enumerate(frames):
+            ledger = frame.metadata.get("evaluation_counts", {})
+            if (frame.metadata["neb_bead"] != i or ledger.get("mode") != "rate"
+                or ledger.get("stored_beads") != len(frames) or len(frames) < 2):
+                raise click.UsageError("expected the ordered beads of one i-PI rate half-ring")
+    else:
+        if len(frames) < 3:
+            raise click.UsageError("expected at least three beads spanning a full period")
+        frames.sort(key=lambda f: float(f.metadata["tau_over_beta"]))
+        phase = np.array([f.metadata["tau_over_beta"] for f in frames], dtype=float)
+        if not (
+            np.all((0 <= phase) & (phase < 1))
+            and np.allclose(
+                np.diff(np.r_[phase, phase[0] + 1]), 1 / len(frames), atol=1e-12, rtol=0
+            )
+        ):
+            raise click.UsageError("tau_over_beta must cover a full, evenly spaced period")
     templ = frames[0]
     if temperature is None:
         temperature = templ.metadata.get("temperature_K")
@@ -155,8 +168,11 @@ def main(band, provider, options, temperature, tolerance):
     forces = np.stack([evaluator.cartesian_forces(f) for f in frames])
     if forces.shape != xyz.shape:
         raise ValueError("provider must return one Cartesian force vector per atom")
+    if ipi_half_ring:
+        xyz = np.concatenate((xyz, xyz[::-1]))
+        forces = np.concatenate((forces, forces[::-1]))
     residual = euclidean_force_residual(
-        xyz[:, mobile], forces[:, mobile], masses, temperature
+        xyz[:, mobile], forces[:, mobile], masses, temperature, ring_polymer=ipi_half_ring
     )
     after = read_counts()
     counts = None
@@ -165,7 +181,8 @@ def main(band, provider, options, temperature, tolerance):
     largest = float(np.max(np.abs(residual)))
     result = {
         "temperature_K": temperature,
-        "beads": len(frames),
+        "beads": len(xyz),
+        "discretization": "ring_polymer" if ipi_half_ring else "spectral",
         "mobile_coordinates": int(mobile.sum()),
         "max_residual_eV_per_angstrom": largest,
         "rms_residual_eV_per_angstrom": float(np.sqrt(np.mean(residual**2))),
