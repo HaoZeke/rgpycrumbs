@@ -127,12 +127,12 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
         temperatures, rates = np.asarray(points, dtype=float).T
         if not np.all(np.isfinite(rates) & np.isfinite(temperatures) & (temperatures > 0)):
             raise ValueError(f"invalid absolute rate or temperature in {label}")
-        plot_arrhenius(ax, Q_(temperatures, "kelvin"), rates, marker="o", label=label)
+        plot_arrhenius(ax, Q_(temperatures, "kelvin"), rates, marker="o", linestyle="none", label=label)
         for t, rate in points:
             x = 1000 / t
             match = np.interp(x, xref, yref) if xref[0] <= x <= xref[-1] else None
             table.writerow((label, t, rate, match, rate - match if match is not None else None))
-    ax.legend()
+    ax.legend(loc="lower left")
     fig.savefig(plot)
     plt.close(fig)
 
