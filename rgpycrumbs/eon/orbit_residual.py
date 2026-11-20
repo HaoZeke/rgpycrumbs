@@ -134,7 +134,11 @@ def _factory(spec):
     "--atom-pair", type=(int, int), multiple=True,
     help="Report the minimum and maximum separation in Å for two readcon atom IDs.",
 )
-def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom_pair):
+@click.option(
+    "--compare-discretizations", is_flag=True,
+    help="Report the Fourier and nearest-neighbour spring residuals using the same physical forces.",
+)
+def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom_pair, compare_discretizations):
     """Report stationarity and independent validation costs for a readcon BAND.
 
     Each frame supplies tau_over_beta, atom IDs, masses and fixed components.
@@ -244,6 +248,17 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
             "provider_results": counts,
         },
     }
+    if compare_discretizations:
+        other = euclidean_force_residual(xyz[:, mobile], forces[:, mobile], masses, temperature,
+                                         ring_polymer=not ipi_half_ring)
+        result["discretization_comparison"] = {
+            result["discretization"]: {"max_eV_per_angstrom": largest,
+                                       "rms_eV_per_angstrom": result["rms_residual_eV_per_angstrom"]},
+            "spectral" if ipi_half_ring else "ring_polymer": {
+                "max_eV_per_angstrom": float(np.max(np.abs(other))),
+                "rms_eV_per_angstrom": float(np.sqrt(np.mean(other**2))),
+            },
+        }
     if tolerance is not None:
         result.update(
             tolerance_eV_per_angstrom=tolerance, within_tolerance=largest <= tolerance
