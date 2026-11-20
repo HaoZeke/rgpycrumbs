@@ -1,0 +1,32 @@
+#+TITLE: ~harmonic-diffusivity~
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+* Harmonic diffusivity
+Convert the same reactant and saddle vibration records used by
+~harmonic-rates~ into HTST and qq-HTST log10 diffusivities (cm²/s) and
+compare them with a user-supplied reference series. The geometric prefactor
+is ``D = n λ² Γ / (2 d)`` with an explicit positive hop length ``λ``
+(angstrom), path multiplicity ``n``, and lattice dimension ``d``.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.harmonic_diffusivity:main
+   :prog: rgpycrumbs eon harmonic-diffusivity
+   :nested: full
+#+END_EXPORT
+
+** Usage
+#+begin_src bash
+rgpycrumbs eon harmonic-diffusivity reactant.json saddle.json reference.csv \
+  --hop-length 2.5 --path-multiplicity 12 --lattice-dimension 3
+#+end_src
+
+JSON records carry ~electronic_energy_eV~ and ~signed_wavenumbers_cm-1~
+(project out rigid modes first). The CSV columns are
+~inverse_temperature_1000_per_K~ and ~log10_diffusivity_cm2_per_s~.
+Stdout repeats the inverse temperatures and reference values, then
+~htst_log10_diffusivity_cm2_per_s~, ~htst_difference~,
+~qq_htst_log10_diffusivity_cm2_per_s~, and ~qq_htst_difference~.
+
+** API Reference
+For developer details and source code see
+@@rst::mod:`rgpycrumbs.eon.harmonic_diffusivity`@@.

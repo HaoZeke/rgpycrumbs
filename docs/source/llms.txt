@@ -39,6 +39,7 @@ eOn configuration options are not listed here. The option schema is published wi
 - [eOn tools](https://rgpycrumbs.rgoswami.me/tools/eon/): eOn output, library plots, and CON I/O
 - [con-splitter](https://rgpycrumbs.rgoswami.me/tools/eon/con_splitter): split CON files
 - [generate-nwchem](https://rgpycrumbs.rgoswami.me/tools/eon/generate_nwchem_input): NWChem input from eOn
+- [harmonic-diffusivity](https://rgpycrumbs.rgoswami.me/tools/eon/harmonic_diffusivity): HTST and qq-HTST log10 diffusivity
 - [to-mlflow](https://rgpycrumbs.rgoswami.me/tools/eon/mlflow): log an eOn run to MLflow
 - [pimd-centroid](https://rgpycrumbs.rgoswami.me/tools/eon/pimd_centroid): PIMD centroid
 - [eOn plot TOML config](https://rgpycrumbs.rgoswami.me/tools/eon/plot_config): plot.toml knobs, not the eOn option schema
