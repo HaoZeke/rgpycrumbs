@@ -1,12 +1,13 @@
 import numpy as np
 import pytest
-from scipy.constants import Boltzmann, atomic_mass, electron_volt, hbar
 
 from rgpycrumbs.eon.orbit_residual import euclidean_force_residual
 
 
-@pytest.mark.pure
+@pytest.mark.interpolation
 def test_two_thermal_modes_balance_independent_of_constant_translation():
+    from scipy.constants import Boltzmann, atomic_mass, electron_volt, hbar
+
     temperature = 137.0
     masses = np.array([1.0, 16.0])
     phase = 2 * np.pi * np.arange(15)[:, None] / 15

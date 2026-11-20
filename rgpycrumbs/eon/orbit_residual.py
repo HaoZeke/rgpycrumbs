@@ -16,8 +16,6 @@ from pathlib import Path
 
 import click
 import numpy as np
-import readcon
-from scipy.constants import Boltzmann, atomic_mass, electron_volt, hbar
 
 
 def euclidean_force_residual(positions, forces, masses, temperature):
@@ -26,6 +24,8 @@ def euclidean_force_residual(positions, forces, masses, temperature):
     Columns are mobile Cartesian degrees of freedom. Rows are uniformly
     spaced through a full thermal period, excluding the repeated endpoint.
     """
+    from scipy.constants import Boltzmann, atomic_mass, electron_volt, hbar
+
     positions, forces, masses = (np.asarray(a, dtype=float) for a in (positions, forces, masses))
     if (positions.ndim != 2 or positions.shape != forces.shape or len(positions) < 3
             or masses.shape != (positions.shape[1],) or not masses.size):
@@ -71,6 +71,8 @@ def main(band, provider, options, temperature, tolerance):
     an (atoms, 3) array in eV/Å. Its optional result_counts() returns the
     provider's cumulative computed and served geometry counts.
     """
+    import readcon
+
     frames = list(readcon.iter_con(str(band)))
     if len(frames) < 3:
         raise click.UsageError("expected at least three beads spanning a full period")
