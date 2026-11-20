@@ -1,0 +1,53 @@
+#+TITLE: Molecular thermal instanton rates
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+The ~eon molecular-instanton-rate~ command converts the natural logarithm of a
+reactive flux from rgsaddle into the base-ten logarithm of a single-channel
+rate in inverse seconds. It applies to an isolated nonlinear molecule with
+three translations, three rotations and a single imaginary-time path mode
+removed from the full ring Hessian.
+
+Pass the LI-NEB level record, the equilibrium reactant spectrum and geometry,
+and the full closed orbit sampled at equal imaginary times. The spectrum
+contains the electronic energy in eV and all positive internal wavenumbers
+in inverse centimetres. The equilibrium geometry uses extended XYZ. The ring
+uses one Cartesian row in ångströms per bead in the same atom order. The
+masses in the equilibrium structure must match those in the calculation.
+
+#+begin_src sh
+rgpycrumbs eon molecular-instanton-rate levels.jsonl reactant_vibrations.json \
+    reactant.extxyz level_00/beads_cartesian.json --index 0 > rate.json
+#+end_src
+
+The command uses the finite-bead harmonic partition function on the same
+energy zero as the flux. For each rigid direction it keeps the non-centroid
+spring modes. Translation cancels between reactant and ring. Rotation
+contributes the square root of the ratio of their inertia determinants,
+with each bead assigned its fraction of the nuclear mass. The report lists
+these factors separately so the normalization can be compared across codes.
+The path multiplicity is one.
+
+The ~eon instanton-rate-comparison~ command places normalized rates on
+an inverse-temperature plot with harmonic curves and digitized reference
+points. The optional series files each contain a record, a JSON array or
+JSON lines with ~temperature_K~ and ~log10_rate_per_s~. Supply the same
+label to join multiple records into one calculation series. Each output
+table row gives the calculated rate and, within the reference interval, the
+difference from linear interpolation of the plotted reference in inverse
+temperature. A missing reference difference indicates a calculated
+temperature outside the digitized interval.
+
+#+begin_src sh
+rgpycrumbs eon instanton-rate-comparison markers.csv harmonic_rates.csv \
+    --series LI-NEB rate.json --plot rates.pdf > comparison.csv
+#+end_src
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.molecular_instanton_rate:main
+   :prog: rgpycrumbs eon molecular-instanton-rate
+   :nested: full
+
+.. click:: rgpycrumbs.eon.instanton_rate_comparison:main
+   :prog: rgpycrumbs eon instanton-rate-comparison
+   :nested: full
+#+END_EXPORT
