@@ -90,7 +90,8 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
     if not np.all(np.diff(xref) > 0):
         raise ValueError("reference inverse temperatures must increase")
     baseline = np.genfromtxt(harmonic, delimiter=",", names=True, ndmin=1)
-    fig, ax = plt.subplots(layout="constrained")
+    fig, (ax, difference) = plt.subplots(2, 1, sharex=True, layout="constrained", figsize=(7.2, 6.4),
+                                         height_ratios=(3, 1))
     temperatures = baseline["temperature_K"]
     harmonic_rates = {key: baseline[key] for key in ("htst", "qq_htst")}
     if spectra:
@@ -105,13 +106,22 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
         rates = harmonic_log_rates(minimum["signed_wavenumbers_cm-1"], saddle["signed_wavenumbers_cm-1"],
                                    saddle["electronic_energy_eV"] - minimum["electronic_energy_eV"], temperatures)
         harmonic_rates = dict(zip(("htst", "qq_htst"), np.asarray(rates) / np.log(10)))
+        unstable = [w for w in saddle["signed_wavenumbers_cm-1"] if w < 0]
+        if len(unstable) == 1:
+            # Harmonic crossover T_c = hbar |omega| / (2 pi k_B), with hc/k_B in cm K.
+            crossover = 1.4387768775 * abs(unstable[0]) / (2 * np.pi)
+            for axis in (ax, difference):
+                axis.axvline(1000 / crossover, color="0.5", linestyle=":", linewidth=0.8)
+            ax.annotate(rf"$T_c$ = {crossover:.0f} K", (1000 / crossover, 0.97), xycoords=("data", "axes fraction"),
+                        ha="right", va="top", rotation=90, fontsize="small", color="0.35")
     if orbit:
-        draw_thermal_orbit(ax.inset_axes([0.61, 0.63, 0.35, 0.33]), *orbit, orbit_label)
+        draw_thermal_orbit(ax.inset_axes([0.03, 0.04, 0.36, 0.40]), *orbit, orbit_label)
     for label, key in (("HTST", "htst"), ("qq-HTST", "qq_htst")):
         plot_arrhenius(ax, Q_(temperatures, "kelvin"), harmonic_rates[key],
                        label=label, linestyle="--" if key == "qq_htst" else "-")
     plot_arrhenius(ax, Q_(1000 / xref, "kelvin"), yref, label="Published HQTST",
-                   marker="D", color="black", fillstyle="none", linestyle="none")
+                   marker="D", color="black", fillstyle="none", linestyle="none", markersize=7)
+    shapes = ("o", "s", "^", "v", "x", "+", "<", ">")
     table = csv.writer(click.get_text_stream("stdout"))
     table.writerow(("method", "temperature_K", "log10_rate_per_s", "published_interpolated", "difference_decades"))
     by_method = {}
@@ -122,17 +132,31 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
         except json.JSONDecodeError:
             rows = [json.loads(line) for line in raw.splitlines() if line.strip()]
         by_method.setdefault(label, []).extend(rows if isinstance(rows, list) else [rows])
-    for label, rows in by_method.items():
+    for shape, (label, rows) in zip(shapes * len(by_method), by_method.items()):
         points = sorted((row["temperature_K"], row["log10_rate_per_s"]) for row in rows)
         temperatures, rates = np.asarray(points, dtype=float).T
         if not np.all(np.isfinite(rates) & np.isfinite(temperatures) & (temperatures > 0)):
             raise ValueError(f"invalid absolute rate or temperature in {label}")
-        plot_arrhenius(ax, Q_(temperatures, "kelvin"), rates, marker="o", linestyle="none", label=label)
+        curve = plot_arrhenius(ax, Q_(temperatures, "kelvin"), rates, marker=shape, linestyle="none",
+                               label=label, markersize=4, fillstyle="none")
+        inside = [(1000 / t, rate - np.interp(1000 / t, xref, yref)) for t, rate in points
+                  if xref[0] - 1e-9 <= 1000 / t <= xref[-1] + 1e-9]
+        if inside:
+            difference.plot(*np.asarray(inside).T, marker=shape, linestyle="none", markersize=4,
+                            fillstyle="none", color=curve.get_color())
         for t, rate in points:
             x = 1000 / t
-            match = np.interp(x, xref, yref) if xref[0] <= x <= xref[-1] else None
+            match = np.interp(x, xref, yref) if xref[0] - 1e-9 <= x <= xref[-1] + 1e-9 else None
             table.writerow((label, t, rate, match, rate - match if match is not None else None))
-    ax.legend(loc="lower left")
+    ax.set_xlabel("")
+    difference.axhline(0, color="black", linewidth=0.8)
+    difference.set_xlabel(r"$1000\,\mathrm{K}/T$")
+    difference.set_ylabel("Calculated − published\n(decades)")
+    kelvin = ax.secondary_xaxis("top", functions=(lambda x: 1000 / np.maximum(x, 1e-12),
+                                                  lambda t: 1000 / np.maximum(t, 1e-12)))
+    kelvin.set_xticks([1000, 500, 333, 250, 200])
+    kelvin.set_xlabel(r"$T$ (K)")
+    ax.legend(loc="upper right", fontsize="small")
     fig.savefig(plot)
     plt.close(fig)
 
