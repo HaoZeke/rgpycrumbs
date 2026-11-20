@@ -24,7 +24,7 @@ def euclidean_force_residual(positions, forces, masses, temperature):
     Columns are mobile Cartesian degrees of freedom. Rows are uniformly
     spaced through a full thermal period, excluding the repeated endpoint.
     """
-    from scipy.constants import Boltzmann, atomic_mass, electron_volt, hbar
+    constants = importlib.import_module("scipy.constants")
 
     positions, forces, masses = (
         np.asarray(a, dtype=float) for a in (positions, forces, masses)
@@ -46,13 +46,16 @@ def euclidean_force_residual(positions, forces, masses, temperature):
         or np.any(masses <= 0)
     ):
         raise ValueError("expected finite inputs and positive masses and temperature")
-    period = hbar / (Boltzmann * temperature)
+    period = constants.hbar / (constants.Boltzmann * temperature)
     omega = 2 * np.pi * np.fft.rfftfreq(len(positions), d=period / len(positions))
     accel = np.fft.irfft(
         -(omega[:, None] ** 2) * np.fft.rfft(positions, axis=0), n=len(positions), axis=0
     )
     # kg Å/s² to eV/Å introduces two angstrom-to-metre factors.
-    return forces + (atomic_mass * 1e-20 / electron_volt) * masses * accel
+    return (
+        forces
+        + (constants.atomic_mass * 1e-20 / constants.electron_volt) * masses * accel
+    )
 
 
 def _factory(spec):
@@ -103,7 +106,7 @@ def main(band, provider, options, temperature, tolerance):
     an (atoms, 3) array in eV/Å. Its optional result_counts() returns the
     provider's cumulative computed and served geometry counts.
     """
-    import readcon
+    readcon = importlib.import_module("readcon")
 
     frames = list(readcon.iter_con(str(band)))
     if len(frames) < 3:
