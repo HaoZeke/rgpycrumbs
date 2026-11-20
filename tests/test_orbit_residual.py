@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from rgpycrumbs.eon.orbit_residual import euclidean_force_residual
+from rgpycrumbs.eon.orbit_residual import euclidean_force_residual, orbit_extent
 
 
 @pytest.mark.interpolation
@@ -47,3 +47,19 @@ def test_finite_bead_spring_balances_the_discrete_force():
         0,
         atol=1e-10,
     )
+
+
+@pytest.mark.interpolation
+def test_orbit_extent_distinguishes_a_collapsed_ring_at_zero_force():
+    stationary = np.zeros((6, 2, 3))
+    assert orbit_extent(stationary, [1.0, 4.0]) == {
+        "distinct_geometries": 1,
+        "max_atom_excursion_angstrom": 0.0,
+        "mass_weighted_diameter_angstrom_sqrt_u": 0.0,
+    }
+    stationary[1, 0, 0] = 3.0
+    stationary[1, 1, 2] = 2.0
+    extent = orbit_extent(stationary + 19.0, [1.0, 4.0])
+    assert extent["distinct_geometries"] == 2
+    assert extent["max_atom_excursion_angstrom"] == pytest.approx(3.0)
+    assert extent["mass_weighted_diameter_angstrom_sqrt_u"] == pytest.approx(5.0)

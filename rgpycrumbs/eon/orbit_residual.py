@@ -61,6 +61,31 @@ def euclidean_force_residual(positions, forces, masses, temperature, ring_polyme
     )
 
 
+def orbit_extent(positions, masses):
+    """Measure the Cartesian diameter in the stored frame and mass metric."""
+    from scipy.spatial.distance import pdist
+
+    xyz = np.asarray(positions, dtype=float)
+    mass = np.asarray(masses, dtype=float)
+    if xyz.ndim != 3 or len(xyz) < 2 or xyz.shape[1:] != (len(mass), 3):
+        raise ValueError("expected at least two molecular geometries and one mass per atom")
+    if not np.all(np.isfinite(xyz)) or not np.all(np.isfinite(mass) & (mass > 0)):
+        raise ValueError("expected finite Cartesian positions and positive finite masses")
+    unique = np.unique(xyz.reshape(len(xyz), -1), axis=0)
+    if len(unique) == 1:
+        atom_diameter, weighted_diameter = 0.0, 0.0
+    else:
+        xyz = unique.reshape(-1, len(mass), 3)
+        atom_diameter = max(pdist(points).max() for points in np.moveaxis(xyz, 1, 0))
+        weighted = xyz * np.sqrt(mass)[:, None]
+        weighted_diameter = pdist(weighted.reshape(len(xyz), -1)).max()
+    return {
+        "distinct_geometries": len(unique),
+        "max_atom_excursion_angstrom": float(atom_diameter),
+        "mass_weighted_diameter_angstrom_sqrt_u": float(weighted_diameter),
+    }
+
+
 def _factory(spec):
     module_name, separator, name = spec.rpartition(":")
     if not separator or not name:
@@ -105,7 +130,11 @@ def _factory(spec):
     is_flag=True,
     help="Reflect a stored i-PI half-ring and use the finite-bead spring force.",
 )
-def main(band, *, provider, options, temperature, tolerance, ipi_half_ring):
+@click.option(
+    "--atom-pair", type=(int, int), multiple=True,
+    help="Report the minimum and maximum separation in Å for two readcon atom IDs.",
+)
+def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom_pair):
     """Report stationarity and independent validation costs for a readcon BAND.
 
     Each frame supplies tau_over_beta, atom IDs, masses and fixed components.
@@ -173,6 +202,15 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring):
     masses = np.broadcast_to(
         np.array([a.mass for a in templ.atoms])[:, None], mobile.shape
     )[mobile]
+    pair_distances = []
+    atom_ids = [a.atom_id for a in templ.atoms]
+    for first, second in atom_pair:
+        if first == second or atom_ids.count(first) != 1 or atom_ids.count(second) != 1:
+            raise click.UsageError("each pair requires two distinct, unique atom IDs in the band")
+        distances = np.linalg.norm(xyz[:, atom_ids.index(first)] - xyz[:, atom_ids.index(second)], axis=1)
+        pair_distances.append({"atom_ids": [first, second], "min_angstrom": float(distances.min()),
+                               "max_angstrom": float(distances.max())})
+    extent = orbit_extent(xyz, [a.mass for a in templ.atoms])
     evaluator = _factory(provider)(band, **json.loads(options))
     read_counts = getattr(evaluator, "result_counts", lambda: None)
     before = read_counts()
@@ -195,6 +233,8 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring):
         "beads": len(xyz),
         "discretization": "ring_polymer" if ipi_half_ring else "spectral",
         "mobile_coordinates": int(mobile.sum()),
+        "geometry_extent": extent,
+        "pair_distances": pair_distances,
         "max_residual_eV_per_angstrom": largest,
         "rms_residual_eV_per_angstrom": float(np.sqrt(np.mean(residual**2))),
         "evaluation_counts": {
