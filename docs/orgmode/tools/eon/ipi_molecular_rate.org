@@ -1,0 +1,25 @@
+#+title: i-PI molecular instanton rate
+
+The instanton and reactant calculators in i-PI report separate partition
+functions. This command combines their native postprocessing tables to
+give the absolute rate for one reaction path in a nonlinear gas-phase
+molecule. Report both states at the same temperature and full bead count,
+use the =poly= rigid-mode projection, and specify the reactant electronic
+energy as the instanton energy shift.
+
+#+begin_src shell
+rgpycrumbs eon ipi-molecular-rate reactant.out instanton.out
+#+end_src
+
+The JSON includes =log10_rate_per_s=, the rotational and translational
+ratios, the dimensionless Euclidean action and the vibrational partition
+terms. i-PI's instanton table includes the factor of bead count in the
+printed vibrational partition. The calculation combines that quantity
+with the reactant finite-bead partition and the orbit length factor,
+following the [[https://atomistic-cookbook.org/examples/ring-polymer-instanton/rpi-rates.html][i-PI rate tutorial]].
+The native tables print three decimal places. Equivalent reaction paths
+increase the total rate by their multiplicity.
+
+For a stored i-PI half-ring, =eon orbit-residual --ipi-half-ring= reflects
+the beads through the turning points and checks the discrete spring force.
+It requests independent forces only at the stored beads.
