@@ -29,6 +29,15 @@ rgpycrumbs eon orbit-residual ring.con \
     --provider potential.py:orbit_provider --temperature 150
 #+end_src
 
+A stationary saddle repeated at every bead can have a small force residual.
+The ~geometry_extent~ record gives the number of distinct coordinate arrays,
+the largest single-atom displacement between any two beads in Å, and the
+largest displacement in mass-weighted Cartesian space in Å √u. All three use
+the coordinates as stored. Independent rotations or translations of beads
+contribute to the measured span. To track an internal coordinate, add
+~--atom-pair 2 5~ with the two atom IDs from the band. The ~pair_distances~
+record reports their minimum and maximum separation in Å over the period.
+
 The calculation differentiates the periodic Fourier interpolant on the bead
 grid. Repeating the check at higher bead resolution distinguishes a
 discretization residual from an error that persists in the path.
