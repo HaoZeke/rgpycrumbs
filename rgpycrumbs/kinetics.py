@@ -1,48 +1,53 @@
 """Harmonic rate analysis from stationary-point vibrational spectra."""
 
-import math
-from collections.abc import Sequence
 from typing import NamedTuple
+
+import numpy as np
+from numpy.typing import ArrayLike
 
 
 class HarmonicLogRates(NamedTuple):
-    """Natural logarithms of vibrational transition-state rates in inverse seconds."""
+    """Natural logarithms of rates in inverse seconds, with the temperature shape."""
 
-    classical: float
-    quasi_quantum: float
+    classical: ArrayLike
+    quasi_quantum: ArrayLike
 
 
 def harmonic_log_rates(
-    reactant_cm: Sequence[float],
-    saddle_cm: Sequence[float],
+    reactant_cm: ArrayLike,
+    saddle_cm: ArrayLike,
     barrier_ev: float,
-    temperature_k: float,
+    temperature_k: ArrayLike,
 ) -> HarmonicLogRates:
-    """Compute classical and quasi-quantum rates for one reaction path.
+    """Compute vibrational HTST and qq-HTST rates for one reaction path.
 
-    Supply the electronic barrier in eV and the signed internal wavenumbers
-    in inverse centimetres, with one negative mode at the saddle. Remove
-    rigid modes before calling. Symmetry and rotational factors are external.
+    Spectra contain signed internal wavenumbers (cm⁻¹). Supply the electronic
+    barrier in eV and a scalar or array of temperatures in kelvin. Project
+    out rigid modes first. Symmetry and rotational factors are external.
     """
-    if not math.isfinite(temperature_k) or temperature_k <= 0 or not math.isfinite(barrier_ev):
+    from scipy.constants import Boltzmann, c, electron_volt, h
+
+    temperature = np.asarray(temperature_k, dtype=float)
+    reactant = np.asarray(reactant_cm, dtype=float)
+    saddle = np.asarray(saddle_cm, dtype=float)
+    if not np.all(np.isfinite(temperature) & (temperature > 0)) or not np.isfinite(barrier_ev):
         raise ValueError("expected positive finite temperature and finite electronic barrier")
-    if len(reactant_cm) != len(saddle_cm) or not len(reactant_cm):
-        raise ValueError("expected matching nonempty internal spectra")
-    if any(not math.isfinite(v) or v <= 0 for v in reactant_cm):
+    if reactant.ndim != 1 or reactant.size == 0 or reactant.shape != saddle.shape:
+        raise ValueError("expected matching nonempty one-dimensional internal spectra")
+    if not np.all(np.isfinite(reactant) & (reactant > 0)):
         raise ValueError("reactant wavenumbers must be positive and finite")
-    if any(not math.isfinite(v) or v == 0 for v in saddle_cm) or sum(v < 0 for v in saddle_cm) != 1:
+    if not np.all(np.isfinite(saddle) & (saddle != 0)) or np.count_nonzero(saddle < 0) != 1:
         raise ValueError("expected a finite saddle spectrum with exactly one unstable mode")
 
-    c_cm_s = 29979245800.0
-    h_ev_s = 4.135667696923859e-15
-    kt = 8.617333262145179e-5 * temperature_k
-    reactant = [c_cm_s * v for v in reactant_cm]
-    stable = [c_cm_s * v for v in saddle_cm if v > 0]
+    kt = Boltzmann * temperature
+    beta_barrier = barrier_ev * electron_volt / kt
+    reactant_hz = 100 * c * reactant
+    saddle_hz = 100 * c * saddle[saddle > 0]
 
-    def log_factor(frequency: float) -> float:
-        x = h_ev_s * frequency / kt
-        return x / 2 + math.log(-math.expm1(-x))
+    def log_partition_factors(frequencies):
+        x = h * frequencies / kt[..., None]
+        return (0.5 * x + np.log(-np.expm1(-x))).sum(axis=-1)
 
-    classical = math.fsum(map(math.log, reactant)) - math.fsum(map(math.log, stable))
-    quantum = math.log(kt / h_ev_s) + math.fsum(map(log_factor, reactant)) - math.fsum(map(log_factor, stable))
-    return HarmonicLogRates(classical - barrier_ev / kt, quantum - barrier_ev / kt)
+    classical = np.log(reactant_hz).sum() - np.log(saddle_hz).sum() - beta_barrier
+    quantum = np.log(kt / h) + log_partition_factors(reactant_hz) - log_partition_factors(saddle_hz) - beta_barrier
+    return HarmonicLogRates(classical, quantum)
