@@ -40,9 +40,10 @@ def test_finite_bead_spring_balances_the_discrete_force():
     x = np.array([0.3, 0.8, 1.4, 1.4, 0.8, 0.3])[:, None]
     masses = np.array([2.0])
     dt = hbar / (len(x) * Boltzmann * temperature)
-    spring = (np.roll(x, 1, axis=0) + np.roll(x, -1, axis=0) - 2 * x)
+    spring = np.roll(x, 1, axis=0) + np.roll(x, -1, axis=0) - 2 * x
     force = -spring * masses * atomic_mass * 1e-20 / electron_volt / dt**2
     np.testing.assert_allclose(
         euclidean_force_residual(x, force, masses, temperature, ring_polymer=True),
-        0, atol=1e-10,
+        0,
+        atol=1e-10,
     )
