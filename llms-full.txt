@@ -2156,6 +2156,91 @@ Stdout repeats the inverse temperatures and reference values, then
 For developer details and source code see
 `rgpycrumbs.eon.harmonic_diffusivity`.
 
+## i-PI molecular instanton rate
+
+Source: https://rgpycrumbs.rgoswami.me/tools/eon/ipi_molecular_rate
+
+The instanton and reactant calculators in i-PI report separate partition
+functions. This command combines their native postprocessing tables to
+give the absolute rate for one reaction path in a nonlinear gas-phase
+molecule. Report both states at the same temperature and full bead count,
+use the `poly` rigid-mode projection, and specify the reactant electronic
+energy as the instanton energy shift.
+
+```shell
+rgpycrumbs eon ipi-molecular-rate reactant.out instanton.out
+```
+
+The JSON includes `log10_rate_per_s`, the rotational and translational
+ratios, the dimensionless Euclidean action and the vibrational partition
+terms. i-PI's instanton table includes the factor of bead count in the
+printed vibrational partition. The calculation combines that quantity
+with the reactant finite-bead partition and the orbit length factor,
+following the [i-PI rate tutorial](https://atomistic-cookbook.org/examples/ring-polymer-instanton/rpi-rates.html).
+The native tables print three decimal places. Equivalent reaction paths
+increase the total rate by their multiplicity.
+
+For a stored i-PI half-ring, `eon orbit-residual --ipi-half-ring` reflects
+the beads through the turning points and checks the discrete spring force.
+It requests independent forces only at the stored beads.
+
+## Molecular thermal instanton rates
+
+Source: https://rgpycrumbs.rgoswami.me/tools/eon/molecular_rates
+
+The `eon molecular-instanton-rate` command converts the natural logarithm of a
+reactive flux from rgsaddle into the base-ten logarithm of a single-channel
+rate in inverse seconds. It applies to an isolated nonlinear molecule with
+three translations, three rotations and a single imaginary-time path mode
+removed from the full ring Hessian.
+
+Pass the LI-NEB level record, the equilibrium reactant spectrum and geometry,
+and the full closed orbit sampled at equal imaginary times. The spectrum
+contains the electronic energy in eV and all positive internal wavenumbers
+in inverse centimetres. The equilibrium geometry uses extended XYZ. The ring
+uses one Cartesian row in ångströms per bead in the same atom order. The
+masses in the equilibrium structure must match those in the calculation.
+
+```shell
+rgpycrumbs eon molecular-instanton-rate levels.jsonl reactant_vibrations.json \
+    reactant.extxyz level_00/beads_cartesian.json --index 0 > rate.json
+```
+
+The command uses the finite-bead harmonic partition function on the same
+energy zero as the flux. For each rigid direction it keeps the non-centroid
+spring modes. Translation cancels between reactant and ring. Rotation
+contributes the square root of the ratio of their inertia determinants,
+with each bead assigned its fraction of the nuclear mass. The report lists
+these factors separately so the normalization can be compared across codes.
+The path multiplicity is one.
+
+The `eon instanton-rate-comparison` command places normalized rates on
+an inverse-temperature plot with harmonic curves and digitized reference
+points. The optional series files each contain a record, a JSON array or
+JSON lines with `temperature_K` and `log10_rate_per_s`. Supply the same
+label to join multiple records into one calculation series. Each output
+table row gives the calculated rate and, within the reference interval, the
+difference from linear interpolation of the plotted reference in inverse
+temperature. A missing reference difference indicates a calculated
+temperature outside the digitized interval.
+
+```shell
+rgpycrumbs eon instanton-rate-comparison markers.csv harmonic_rates.csv \
+    --series LI-NEB rate.json --plot rates.pdf > comparison.csv
+```
+
+```rst
+.. click:: rgpycrumbs.eon.molecular_instanton_rate:main
+   :prog: rgpycrumbs eon molecular-instanton-rate
+   :nested: full
+```
+
+```rst
+.. click:: rgpycrumbs.eon.instanton_rate_comparison:main
+   :prog: rgpycrumbs eon instanton-rate-comparison
+   :nested: full
+```
+
 ## Thermal orbit stationarity
 
 Source: https://rgpycrumbs.rgoswami.me/tools/eon/orbit_residual

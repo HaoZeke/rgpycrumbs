@@ -13,6 +13,7 @@
    con_splitter
    generate_nwchem_input
    harmonic_diffusivity
+   ipi_molecular_rate
    molecular_rates
    orbit_residual
    mlflow
