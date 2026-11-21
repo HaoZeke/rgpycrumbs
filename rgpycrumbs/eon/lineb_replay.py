@@ -71,11 +71,14 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
             raise ValueError(f"incomplete pair for {filename}")
         return exists[0]
 
+    source_counts = None
     if available("source-level.jsonl", require_absolute):
         levels = [digest(run / "source-level.jsonl") for run in runs]
         if levels[0] != levels[1]:
             raise ValueError("frozen source level differs")
         inputs["source-level.jsonl"] = levels[0]
+        source = json.loads((cold / "source-level.jsonl").read_text())
+        source_counts = {"band_calls": source["calls"], "evaluation_counts": source["evaluation_counts"]}
 
     for filename in ("lineb.con", "lineb-orbit.con"):
         if not available(filename, require_absolute or filename == "lineb.con"):
@@ -135,7 +138,8 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
         if counts["cold"]["evaluation_counts"][key] != counts["warm"]["evaluation_counts"][key]:
             raise ValueError(f"{key}: number of requested evaluations differs")
     return {"identical_physics": all(d["max_abs"] == 0 for d in fields.values()),
-            "input_sha256": inputs, "trajectories": trajectories, "counts": counts, "differences": fields}
+            "input_sha256": inputs, "trajectories": trajectories, "source_level_counts": source_counts,
+            "counts": counts, "differences": fields}
 
 
 @click.command()
