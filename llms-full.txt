@@ -2230,6 +2230,42 @@ For a stored i-PI half-ring, `eon orbit-residual --ipi-half-ring` reflects
 the beads through the turning points and checks the discrete spring force.
 It requests independent forces only at the stored beads.
 
+#### Reconstructing the archived factors
+
+For a half-ring archive, pass its root directory to `--raw-case`. It
+contains `ring.con` and one independent energy observation per stored
+bead in `validation-gradients.jsonl`. The `native` subdirectory contains
+`minimum.xyz`, the masses in `reactant.xml`, the energy reference and
+temperature in `parameters.json`, the reactant Hessian eigenvalues in
+`reactant/eigenvalues_reactant.dat` and the signed ring frequencies in
+`instanton/freq.dat`. The two partition reports supply the rounded
+numbers against which the reconstruction is compared.
+
+```shell
+rgpycrumbs eon ipi-molecular-rate native/reactant.out native/instanton.out \
+  --raw-case . --check-native-rounding > native/raw-reconstruction.json
+```
+
+The `raw_reconstruction` object reports the mass-weighted spring norm,
+rotational inertia ratio, reactant and instanton fluctuation factors,
+potential and spring contributions to the action, and the rate in inverse
+seconds. It records the input hashes and the number of measured energies
+read. Reconstruction requires zero new potential evaluations.
+
+The full ring consists of the stored ordered half followed by its
+reverse. The frequency file uses the i-PI 3.3.1 writer convention of
+3×10¹⁰ Hz per cm⁻¹. Within the nonrigid spectrum the unstable mode is
+retained, and the next ordered mode supplies the imaginary-time
+translation. Six rigid zero modes are removed. The native temperature
+unit is 3.1668152×10⁻⁶ hartree per kelvin. The reported rates retain the
+SI Boltzmann and Planck constants for the conversion to inverse seconds.
+
+Each `native_rounding` entry gives the numerical interval allowed by the
+precision of the corresponding table entries. Ratios and the log rate
+propagate the rounding of their component factors. The optional
+`--check-native-rounding` flag returns a nonzero exit status if any
+reconstructed quantity lies outside its interval.
+
 ## Molecular thermal instanton rates
 
 Source: https://rgpycrumbs.rgoswami.me/tools/eon/molecular_rates
