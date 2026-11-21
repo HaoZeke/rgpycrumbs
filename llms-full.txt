@@ -2286,7 +2286,10 @@ The full ring consists of the stored ordered half followed by its
 reverse. The frequency file uses the i-PI 3.3.1 writer convention of
 3×10¹⁰ Hz per cm⁻¹. Within the nonrigid spectrum the unstable mode is
 retained, and the next ordered mode supplies the imaginary-time
-translation. Six rigid zero modes are removed. The native temperature
+translation. That projected phase frequency may be positive, negative or
+zero. Its signed value is checked against the native printed deletion.
+The remaining internal spectrum must contain one negative mode. The
+frequency file begins with six rigid zeros. The native temperature
 unit is 3.1668152×10⁻⁶ hartree per kelvin. The reported rates retain the
 SI Boltzmann and Planck constants for the conversion to inverse seconds.
 
