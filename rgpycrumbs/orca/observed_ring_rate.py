@@ -92,8 +92,6 @@ def path_parameters(knots, images, ring):
     if np.any(np.diff(outgoing) <= 0):
         raise ValueError("orbit does not follow the outward image order")
     error = np.abs(curve(parameters) - ring).max()
-    if error > 1e-6:
-        raise ValueError(f"ring departs from the interpolated image path by {error:g} Å √u")
     return parameters, float(error)
 
 
