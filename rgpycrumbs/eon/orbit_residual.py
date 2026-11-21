@@ -312,6 +312,8 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
         result.update(
             tolerance_eV_per_angstrom=tolerance, within_tolerance=largest <= tolerance
         )
+        for metrics in result.get("discretization_comparison", {}).values():
+            metrics["within_tolerance"] = metrics["max_eV_per_angstrom"] <= tolerance
     click.echo(json.dumps(result, allow_nan=False))
 
 
