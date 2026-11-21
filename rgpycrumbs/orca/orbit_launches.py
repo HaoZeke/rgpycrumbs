@@ -136,8 +136,12 @@ def main(band, orbit, native, launches, inherited_launches, deck_decimals):
     inherited_count = 0
     if inherited_launches:
         if summary.get("cache_state") != "seeded" or not summary.get("inherited_cache"):
-            raise ValueError("an inherited archive requires a native cache inheritance record")
-        inherited_names, inherited_decks = read_decks(inherited_launches, [s[1] for s in signature])
+            raise ValueError(
+                "an inherited archive requires a native cache inheritance record"
+            )
+        inherited_names, inherited_decks = read_decks(
+            inherited_launches, [s[1] for s in signature]
+        )
         inherited_count = len(inherited_names)
         available = np.concatenate((available, inherited_decks))
     k = start
