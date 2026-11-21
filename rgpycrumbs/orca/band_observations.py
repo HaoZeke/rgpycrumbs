@@ -7,6 +7,7 @@
 
 import hashlib
 import json
+import re
 import tarfile
 from io import StringIO
 from pathlib import Path
@@ -79,7 +80,10 @@ def main(
         if not index and len(records) != job["physical_launches"]:
             raise ValueError("primary archive differs from native launch count")
         for k, (key, record) in enumerate(records):
-            deck = read_geom_orcainp(StringIO(record["input.inp"].decode()))
+            deck_text = re.sub(
+                r"(?im)^\*\s+xyz\s+", "*xyz ", record["input.inp"].decode()
+            )
+            deck = read_geom_orcainp(StringIO(deck_text))
             if deck.get_chemical_symbols() != symbols:
                 raise ValueError(f"atomic order mismatch in {key}")
             distances = np.max(abs(xyz - deck.positions), axis=(1, 2))
