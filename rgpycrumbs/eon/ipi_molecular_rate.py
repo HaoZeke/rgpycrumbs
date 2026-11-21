@@ -91,13 +91,20 @@ IPI_UNITS = {
 def fluctuation_partition(frequencies, size, beads, beta):
     """Recover the native nonlinear-molecule fluctuation product from freq.dat."""
     modes = np.asarray(frequencies)
-    if modes.shape != (size,) or not np.isfinite(modes).all() or (modes == 0).sum() != 6:
+    if (
+        size < 9
+        or modes.shape != (size,)
+        or not np.isfinite(modes).all()
+        or np.any(modes[:6] != 0)
+    ):
         raise ValueError(
-            "expected six rigid zeros in the full instanton frequency spectrum"
+            "expected six leading rigid zeros in the full instanton frequency spectrum"
         )
-    active = modes[modes != 0]
-    if (active < 0).sum() != 1 or active[0] >= 0 or np.any(np.diff(active) < 0):
-        raise ValueError("expected one unstable mode followed by ordered positive modes")
+    active = modes[6:]
+    if active[0] >= 0 or np.any(np.diff(active) < 0) or np.any(active[2:] <= 0):
+        raise ValueError(
+            "expected one retained unstable mode and positive retained vibrations"
+        )
     # The native rate removes d[1], the imaginary-time translation, after rigid modes.
     retained = np.abs(np.delete(active, 1)) * IPI_UNITS["hertz"] * IPI_UNITS["hz_per_cm"]
     return (
@@ -256,11 +263,20 @@ def reconstruct(case, summary, reactant_report, instanton_report):
         - potential_action
         - spring_action
     )
+    printed = re.search(
+        r"(?im)^\s*Deleted frequency:\s*([+-]?[\d.]+)\s+cm\^-1", instanton_report
+    )
+    if printed and not np.isclose(float(printed[1]), removed, rtol=0, atol=0.000500001):
+        raise ValueError(
+            "native deleted frequency differs from the signed phase mode in freq.dat"
+        )
     raw = {
         "beads": p,
         "temperature_K": temperature,
         "negative_frequency_cm1": float(unstable),
         "time_translation_cm1": float(removed),
+        "retained_unstable_mode_count": 1,
+        "printed_deleted_frequency_cm1": float(printed[1]) if printed else None,
         "positive_reactant_modes": int((eig > 0).sum()),
         "BN_times_N_atomic_units": bn,
         "rotational_ratio": np.exp(rotation),

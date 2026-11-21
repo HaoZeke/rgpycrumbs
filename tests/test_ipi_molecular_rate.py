@@ -46,3 +46,16 @@ def test_raw_spectrum_retains_the_unstable_mode_and_removes_time_translation():
     )
     with pytest.raises(ValueError, match="unstable"):
         fluctuation_partition(-abs(exported), 12, 4, 1000.0)
+
+
+@pytest.mark.interpolation
+@pytest.mark.parametrize("phase", [-0.15, 0.0])
+def test_removed_signed_phase_leaves_one_unstable_mode(phase):
+    from rgpycrumbs.eon.ipi_molecular_rate import fluctuation_partition
+
+    frequencies = np.array([0.0] * 6 + [-2, phase, 3.5, 7.2])
+    partition, unstable, removed = fluctuation_partition(frequencies, 10, 4, 1000.0)
+    assert (unstable, removed) == (-2, phase)
+    positive_phase = frequencies.copy()
+    positive_phase[7] = 0.15
+    assert partition == fluctuation_partition(positive_phase, 10, 4, 1000.0)[0]
