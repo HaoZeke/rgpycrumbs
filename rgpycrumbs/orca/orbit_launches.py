@@ -66,10 +66,15 @@ def read_decks(archive, symbols):
 @click.argument("native", type=click.Path(exists=True, path_type=Path))
 @click.argument("launches", type=click.Path(exists=True, path_type=Path))
 @click.option(
+    "--inherited-launches",
+    type=click.Path(exists=True, path_type=Path),
+    help="ORCA launch archive for the path-only run that populated the inherited cache.",
+)
+@click.option(
     "--deck-decimals", type=click.IntRange(1, 16), default=10, show_default=True
 )
-def main(band, orbit, native, launches, deck_decimals):
-    """Audit a cold EnGrad archive with a full Cartesian finite-difference stencil."""
+def main(band, orbit, native, launches, inherited_launches, deck_decimals):
+    """Audit an EnGrad archive with a full Cartesian finite-difference stencil."""
     summary = json.loads(native.read_text())
     frames = list(readcon.iter_con(str(orbit)))
     images = list(readcon.iter_con(str(band)))
@@ -127,6 +132,14 @@ def main(band, orbit, native, launches, deck_decimals):
     first = {}
     for i, row in enumerate(ring):
         first.setdefault(row.tobytes(), i)
+    available = decks[:start]
+    inherited_count = 0
+    if inherited_launches:
+        if summary.get("cache_state") != "seeded" or not summary.get("inherited_cache"):
+            raise ValueError("an inherited archive requires a native cache inheritance record")
+        inherited_names, inherited_decks = read_decks(inherited_launches, [s[1] for s in signature])
+        inherited_count = len(inherited_names)
+        available = np.concatenate((available, inherited_decks))
     k = start
     preexisting = []
     for i in first.values():
@@ -134,7 +147,7 @@ def main(band, orbit, native, launches, deck_decimals):
             rows[k].update(bead=i, max_deck_rounding_angstrom=float(err))
             k += 1
         else:
-            if not np.any(np.max(abs(decks[:start] - ring[i]), axis=1) <= tol):
+            if not np.any(np.max(abs(available - ring[i]), axis=1) <= tol):
                 raise ValueError(f"missing launch and prior deck for bead {i}")
             preexisting.append(i)
     if k != stop:
@@ -182,6 +195,12 @@ def main(band, orbit, native, launches, deck_decimals):
         "additional_surface_requests": 0,
         "physical_launches_in_order": rows,
     }
+    if inherited_launches:
+        result["inherited_cache"] = {
+            "archive_sha256": hashlib.sha256(inherited_launches.read_bytes()).hexdigest(),
+            "archive_launches": inherited_count,
+            "native_inheritance": summary["inherited_cache"],
+        }
     click.echo(json.dumps(result, allow_nan=False))
 
 

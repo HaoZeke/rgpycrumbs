@@ -19,6 +19,11 @@ their printed decimal precision. The full-precision readcon coordinates
 identify repeated orbit requests. Each physical launch is assigned to the
 path, Hessian, central ring or output part of the job.
 
+For a rate job seeded from a path-only cache, pass the path-only ORCA
+archive with =--inherited-launches=. Its input decks can account for a
+ring geometry served from the inherited cache. The report records its
+checksum and counts the rate job's physical launches separately.
+
 The separate reflection estimate holds every outward bead and both turns
 fixed and uses the corresponding outward coordinates exactly on the
 return leg. The changed launch count is a prediction about a cold run
