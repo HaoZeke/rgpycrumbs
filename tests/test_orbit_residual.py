@@ -95,3 +95,47 @@ def test_force_covector_projection_respects_masses_and_turning_points():
     assert result["normal"]["max_eV_per_angstrom"] == pytest.approx(0.8)
     assert result["tangential"]["max_eV_per_angstrom"] == pytest.approx(0.8)
     assert result["normal_fraction_squared_inverse_mass_norm"] == pytest.approx(0.8)
+
+
+@pytest.mark.interpolation
+@pytest.mark.parametrize("half_ring", [False, True])
+def test_independent_forces_use_the_source_orbit_period(tmp_path, monkeypatch, half_ring):
+    import json
+    from types import SimpleNamespace
+
+    import readcon
+    from click.testing import CliRunner
+    from scipy import constants
+    from rgpycrumbs.eon import orbit_residual as orbit
+
+    positions = [0.0, 0.3, 0.6, 0.3]
+    frames = []
+    for i, x in enumerate(positions):
+        meta = {"temperature_K": 300.0, "tau_over_beta": i / len(positions)}
+        if half_ring:
+            meta.update(neb_bead=i, evaluation_counts={"mode": "rate", "stored_beads": len(positions)})
+        else:
+            meta["lineb"] = {"beads": len(positions), "half_period": 1.5}
+        atom = readcon.Atom("H", x, 0.0, 0.0, atom_id=0, mass=1.0)
+        frames.append(readcon.ConFrame(atoms=[atom], cell=[0.0]*3, angles=[90.0]*3, metadata=meta))
+    band = tmp_path / "orbit.con"
+    readcon.write_con(str(band), frames, precision=17)
+    provider = SimpleNamespace(cartesian_forces=lambda frame: np.zeros_like(frame.xyz))
+    monkeypatch.setattr(orbit, "_factory", lambda spec: lambda band: provider)
+    args = [str(band), "--provider", "test:force"]
+    if half_ring:
+        args.append("--ipi-half-ring")
+    result = CliRunner().invoke(orbit.main, args)
+    assert result.exit_code == 0, result.output
+    report = json.loads(result.output)
+    if half_ring:
+        positions += positions[::-1]
+        period = constants.hbar / (constants.Boltzmann * 300.0)
+    else:
+        period = 3e-10 * np.sqrt(constants.atomic_mass / constants.electron_volt)
+        assert report["period_seconds"] == pytest.approx(period, rel=1e-13, abs=0)
+    coordinates = np.array(positions)
+    spring = (np.roll(coordinates, 1) + np.roll(coordinates, -1) - 2 * coordinates)
+    spring *= constants.atomic_mass * 1e-20 / constants.electron_volt / (period / len(positions))**2
+    assert report["discretization"] == "ring_polymer"
+    assert report["max_residual_eV_per_angstrom"] == pytest.approx(np.abs(spring).max())
