@@ -116,15 +116,15 @@ def main(
             for i in np.flatnonzero(
                 (distances <= 5.1e-11) & (abs(energies - energy) <= 1e-10)
             ):
-                info = dict(
-                    archive_index=index,
-                    launch=key,
-                    output_phase=index == 0 and k >= len(records) - out,
-                    input_sha256=hashlib.sha256(record["input.inp"]).hexdigest(),
-                    engrad_sha256=hashlib.sha256(record["output.engrad"]).hexdigest(),
-                    energy_difference_eV=float(energy - energies[i]),
-                    deck_rounding_angstrom=float(distances[i]),
-                )
+                info = {
+                    "archive_index": index,
+                    "launch": key,
+                    "output_phase": index == 0 and k >= len(records) - out,
+                    "input_sha256": hashlib.sha256(record["input.inp"]).hexdigest(),
+                    "engrad_sha256": hashlib.sha256(record["output.engrad"]).hexdigest(),
+                    "energy_difference_eV": float(energy - energies[i]),
+                    "deck_rounding_angstrom": float(distances[i]),
+                }
                 matches[i].append((info, energy, gradient))
     rows = []
     evidence = []
@@ -140,40 +140,42 @@ def main(
             ),
         )
         rows.append(
-            dict(
-                request=i + 1,
-                positions_angstrom=xyz[i].ravel().tolist(),
-                energy_eV=energy,
-                gradient_eV_per_angstrom=gradient.ravel().tolist(),
-            )
+            {
+                "request": i + 1,
+                "positions_angstrom": xyz[i].ravel().tolist(),
+                "energy_eV": energy,
+                "gradient_eV_per_angstrom": gradient.ravel().tolist(),
+            }
         )
         evidence.append(
-            dict(
-                image=i,
-                selected=chosen,
-                candidates=[rec[0] for rec in choices],
-                max_gradient_difference_eV_per_angstrom=max(
+            {
+                "image": i,
+                "selected": chosen,
+                "candidates": [rec[0] for rec in choices],
+                "max_gradient_difference_eV_per_angstrom": max(
                     float(np.max(abs(g - gradient))) for _, _, g in choices
                 ),
-            )
+            }
         )
     write_observations.write_text(
         "".join(json.dumps(r, allow_nan=False) + "\n" for r in rows)
     )
     click.echo(
         json.dumps(
-            dict(
-                images=len(frames),
-                observations=evidence,
-                additional_surface_calls=0,
-                hartree_eV=hartree_ev,
-                bohr_angstrom=bohr_angstrom,
-                input_sha256=[
+            {
+                "images": len(frames),
+                "observations": evidence,
+                "additional_surface_calls": 0,
+                "hartree_eV": hartree_ev,
+                "bohr_angstrom": bohr_angstrom,
+                "input_sha256": [
                     {"file": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
                     for p in (band, native, launches, *inherited)
                 ],
-                output_sha256=hashlib.sha256(write_observations.read_bytes()).hexdigest(),
-            ),
+                "output_sha256": hashlib.sha256(
+                    write_observations.read_bytes()
+                ).hexdigest(),
+            },
             indent=2,
             allow_nan=False,
         )
