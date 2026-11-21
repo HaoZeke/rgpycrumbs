@@ -30,7 +30,7 @@ def digest(file):
     return hashlib.sha256(file.read_bytes()).hexdigest()
 
 
-def compare(cold, warm, require_absolute):
+def compare(cold, warm, require_absolute, rate_inputs=()):
     runs = (cold, warm)
     fields, inputs, counts = {}, {}, {}
 
@@ -63,12 +63,19 @@ def compare(cold, warm, require_absolute):
     if seed[0] != seed[1]:
         raise ValueError("initial path differs")
     inputs["initial_path"] = seed[0]
+    inputs["rate_inputs"] = [{"file": p.name, "sha256": digest(p)} for p in rate_inputs]
 
     def available(filename, required):
         exists = [(r / filename).is_file() for r in runs]
         if exists[0] != exists[1] or (required and not all(exists)):
             raise ValueError(f"incomplete pair for {filename}")
         return exists[0]
+
+    if available("source-level.jsonl", require_absolute):
+        levels = [digest(run / "source-level.jsonl") for run in runs]
+        if levels[0] != levels[1]:
+            raise ValueError("frozen source level differs")
+        inputs["source-level.jsonl"] = levels[0]
 
     for filename in ("lineb.con", "lineb-orbit.con"):
         if not available(filename, require_absolute or filename == "lineb.con"):
@@ -104,6 +111,14 @@ def compare(cold, warm, require_absolute):
         if native[0]["source"] != native[1]["source"]:
             raise ValueError("native input hashes differ")
         inputs["native_source"] = native[0]["source"]
+        if inputs["native_source"].get("level") != inputs.get("source-level.jsonl"):
+            raise ValueError("native source hash differs from the frozen level")
+        for tag in ("cold", "warm"):
+            ledger = counts[tag]
+            if ledger["physical_launches"] != ledger["evaluation_counts"]["rgpot_results"]["computed"]:
+                raise ValueError(f"{tag}: physical launches differ from computed results")
+        if counts["warm"]["physical_launches"]:
+            raise ValueError("warm replay launched physical evaluations")
         for key in ("source_level", "source_level_counts", "reference_energy_eV", "saddle_energy_eV"):
             record(f"native.{key}", native[0][key], native[1][key])
     if available("absolute_rate.json", require_absolute):
@@ -122,9 +137,11 @@ def compare(cold, warm, require_absolute):
 @click.argument("cold", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.argument("warm", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--require-absolute", is_flag=True, help="Require native counters, measured orbit gradients and molecular rate.")
-def main(cold, warm, require_absolute):
+@click.option("--rate-input", multiple=True, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Record a shared input used for absolute-rate normalization.")
+def main(cold, warm, require_absolute, rate_input):
     """Compare recorded cold and warm eOn jobs with identical physical inputs."""
-    report = compare(cold, warm, require_absolute)
+    report = compare(cold, warm, require_absolute, rate_input)
     click.echo(json.dumps(report, indent=2, allow_nan=False))
     if not report["identical_physics"]:
         raise click.ClickException("physical outputs differ")
