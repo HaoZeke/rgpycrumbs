@@ -70,6 +70,52 @@ def periodic_force_residual(positions, forces, masses, period, ring_polymer=Fals
     return forces + masses * accel
 
 
+def decompose_fourier_residual(positions, residual, masses):
+    """Project a Cartesian force covector onto the orbit tangent and its normal space."""
+    coordinates = np.asarray(positions, dtype=float)
+    force = np.asarray(residual, dtype=float)
+    mass = np.asarray(masses, dtype=float)
+    if (coordinates.ndim != 2 or coordinates.shape != force.shape
+            or len(coordinates) < 3 or mass.shape != (coordinates.shape[1],)
+            or not np.isfinite(coordinates).all() or not np.isfinite(force).all()
+            or not np.all(np.isfinite(mass) & (mass > 0))):
+        raise ValueError("expected matching finite orbit and force rows and positive masses")
+
+    # Differentiating with respect to phase gives the same unit tangent as time.
+    beads = len(coordinates)
+    harmonics = np.fft.rfftfreq(beads, d=1 / beads)
+    if beads % 2 == 0:
+        harmonics[-1] = 0  # The Nyquist cosine has zero slope at every sample.
+    spectrum = np.fft.rfft(coordinates - coordinates[0], axis=0)
+    velocity = np.fft.irfft(2j * np.pi * harmonics[:, None] * spectrum, n=beads, axis=0)
+    root_mass = np.sqrt(mass)
+    weighted_velocity = velocity * root_mass
+    speed = np.linalg.norm(weighted_velocity, axis=1)
+    active = speed > np.finfo(float).eps * beads * speed.max()
+    tangent = weighted_velocity[active] / speed[active, None]
+    weighted_force = force[active] / root_mass
+    parallel = np.sum(weighted_force * tangent, axis=1)[:, None] * tangent
+    normal = weighted_force - parallel
+
+    def components(weighted):
+        cartesian = weighted * root_mass
+        return {
+            "max_eV_per_angstrom": float(np.abs(cartesian).max()) if cartesian.size else None,
+            "rms_eV_per_angstrom": float(np.sqrt(np.mean(cartesian**2))) if cartesian.size else None,
+        }
+
+    squared_norm = np.sum(weighted_force**2)
+    return {
+        "nonzero_velocity_beads": int(active.sum()),
+        "zero_velocity_beads": np.flatnonzero(~active).tolist(),
+        "tangential": components(parallel),
+        "normal": components(normal),
+        "normal_fraction_squared_inverse_mass_norm": (
+            float(np.sum(normal**2) / squared_norm) if squared_norm > 0 else None
+        ),
+    }
+
+
 def orbit_extent(positions, masses):
     """Measure the Cartesian diameter in the stored frame and mass metric."""
     from scipy.spatial.distance import pdist
@@ -183,7 +229,11 @@ def observed_eon_forces(frames):
     "--compare-discretizations", is_flag=True,
     help="Report the Fourier and nearest-neighbour spring residuals using the same physical forces.",
 )
-def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom_pair, compare_discretizations):
+@click.option(
+    "--decompose-residual", is_flag=True,
+    help="Project the Fourier residual onto the mass-weighted orbit tangent and normal space.",
+)
+def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom_pair, compare_discretizations, decompose_residual):
     """Report stationarity and independent validation costs for a readcon BAND.
 
     Each frame supplies tau_over_beta, atom IDs, masses and fixed components.
@@ -315,6 +365,15 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
                 "rms_eV_per_angstrom": float(np.sqrt(np.mean(other**2))),
             },
         }
+    if decompose_residual:
+        spectral = residual
+        if finite_bead:
+            spectral = other if compare_discretizations else euclidean_force_residual(
+                xyz[:, mobile], forces[:, mobile], masses, temperature, period_seconds=period
+            )
+        result["fourier_residual_decomposition"] = decompose_fourier_residual(
+            xyz[:, mobile], spectral, masses
+        )
     if tolerance is not None:
         result.update(
             tolerance_eV_per_angstrom=tolerance, within_tolerance=largest <= tolerance

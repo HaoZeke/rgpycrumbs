@@ -80,3 +80,18 @@ def test_measured_orbit_maps_gradient_ids_and_uses_the_recorded_period():
     np.testing.assert_array_equal(forces, np.broadcast_to(-gradients[::-1], (4, 2, 3)))
     assert period == pytest.approx(3 * 1e-10 * np.sqrt(atomic_mass / electron_volt), rel=1e-14, abs=0)
     assert source == "twice the recorded eOn half-period"
+
+
+@pytest.mark.interpolation
+def test_force_covector_projection_respects_masses_and_turning_points():
+    from rgpycrumbs.eon.orbit_residual import decompose_fourier_residual
+
+    angle = 2 * np.pi * np.arange(12) / 12
+    positions = np.column_stack((np.cos(angle), np.cos(angle)))
+    residual = np.broadcast_to([1., 0.], positions.shape)
+    result = decompose_fourier_residual(positions, residual, np.array([1., 4.]))
+    assert result["zero_velocity_beads"] == [0, 6]
+    assert result["nonzero_velocity_beads"] == 10
+    assert result["normal"]["max_eV_per_angstrom"] == pytest.approx(0.8)
+    assert result["tangential"]["max_eV_per_angstrom"] == pytest.approx(0.8)
+    assert result["normal_fraction_squared_inverse_mass_norm"] == pytest.approx(0.8)
