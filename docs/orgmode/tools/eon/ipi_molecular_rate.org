@@ -39,3 +39,8 @@ The JSON reports the finite-bead and Fourier force residuals in eV/Å, the
 original solver request number for each bead, and the maximum force and
 coordinate differences from i-PI's printed step. Matching requires identical
 binary64 geometry coordinates. It performs zero new potential evaluations.
+
+Adding =--initial-xyz init.xyz= compares the first measured gradient batch
+with the converged orbit at the same temperature and bead count. The report
+includes the initial force residuals, the RMS change in interatomic distances
+over the stored half-ring and the bead and atom pair with the largest change.

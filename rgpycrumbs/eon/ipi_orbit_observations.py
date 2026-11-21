@@ -93,8 +93,9 @@ def main(band, ledger, write_observations, native_directory, initial_xyz):
     if write_observations and write_observations.resolve() in (
         band.resolve(),
         ledger.resolve(),
+        initial_xyz.resolve() if initial_xyz else None,
     ):
-        raise click.UsageError("the observation output must differ from both inputs")
+        raise click.UsageError("the observation output must differ from all inputs")
     frames = list(readcon.read_con(str(band)))
     if len(frames) < 2:
         raise ValueError("expected at least two half-ring geometries")
