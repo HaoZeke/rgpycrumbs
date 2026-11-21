@@ -67,7 +67,7 @@ def molecular_rate(level, minimum, atoms, ring):
 
 def export_observed_ring(path, level, atoms, ring, observations, end, inputs, run_counts=None, native_seed=None):
     """Write the last measured rate gradients of a Rust LI level as a readcon orbit."""
-    from collections import deque
+    from collections import Counter, deque
     import hashlib
     from itertools import islice
     import readcon
@@ -77,13 +77,28 @@ def export_observed_ring(path, level, atoms, ring, observations, end, inputs, ru
     total = phases["surface_calls"]["total"]
     if phases["surface_calls"]["rate"] < p or end < total:
         raise ValueError("expected the measured rate evaluations at the end of the energy level")
+    records = deque(maxlen=p)
+    origins = Counter()
+    properties = Counter()
+    counted = seen = 0
+    previous = None
     with observations.open() as stream:
-        records = deque(enumerate(islice(stream, end), 1), maxlen=p)
-    if len(records) != p or records[-1][0] != end:
+        for line in islice(stream, end-total, end):
+            row = json.loads(line)
+            if previous is not None and row["request"] != previous+1:
+                raise ValueError("level observations must be consecutive solver requests")
+            previous = row["request"]
+            seen += 1
+            if "measurement_source" in row:
+                origins[row["measurement_source"]] += 1
+            if "rgpot_callback_requests" in row:
+                native = row["rgpot_callback_requests"]
+                properties.update({k:native[k] for k in ("computed","served")})
+                counted += 1
+            records.append(row)
+    if seen != total or len(records) != p:
         raise ValueError("incomplete molecular rate observation ledger")
-    rows = [json.loads(line) for _, line in records]
-    if any(row["request"] != rows[0]["request"] + i for i, row in enumerate(rows)):
-        raise ValueError("rate observations must be consecutive solver requests")
+    rows = list(records)
     xyz = np.asarray([row["positions_angstrom"] for row in rows], dtype="<f8").reshape(p,-1)
     if xyz.tobytes() != np.asarray(ring, dtype="<f8").reshape(p,-1).tobytes():
         raise ValueError("observation coordinates differ from the native equal-time beads")
@@ -107,6 +122,14 @@ def export_observed_ring(path, level, atoms, ring, observations, end, inputs, ru
         provenance["mass_source"] = "verified against native seed"
         provenance["source_sha256"]["native_seed"] = digest(native_seed)
     counts = dict(phases)
+    if origins or counted:
+        provider = {"scope": "energy_level", "requests": total}
+        if origins:
+            provider["measurement_sources"] = dict(origins)
+        if counted:
+            provider["rgpot_callback_requests"] = {"boundary": "energy_or_gradient",
+                                                   "observed_rows": counted, **properties}
+        counts["provider_level"] = provider
     if run_counts is not None:
         meta = json.loads(run_counts.read_text())
         if meta["reference_energy"] != level["reference_energy"]:

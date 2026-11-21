@@ -109,3 +109,17 @@ def test_native_export_retains_measurements_and_scoped_counts(tmp_path):
         export_observed_ring(con,level,atoms,ring,trace,4,{"observations":trace},native_seed=seed)
     with pytest.raises(ValueError,match="coordinates differ"):
         export_observed_ring(con,level,atoms,ring[::-1],trace,4,{"observations":trace})
+
+    # A continued level can follow previous levels in the same request ledger.
+    prefix = dict(rows[0], request=0, measurement_source="calculator",
+                  rgpot_callback_requests={"computed": 99, "served": 0})
+    for i,row in enumerate(rows):
+        row["measurement_source"] = "calculator" if i%2 else "source_trace"
+        row["rgpot_callback_requests"] = {"computed":i%2, "served":i%2}
+    trace.write_text("".join(json.dumps(row)+"\n" for row in [prefix,*rows]))
+    export_observed_ring(con,level,atoms,ring,trace,5,{"observations":trace})
+    provider = next(iter(readcon.iter_con(str(con)))).metadata["evaluation_counts"]["provider_level"]
+    assert provider == {"scope":"energy_level", "requests":4,
+                        "measurement_sources":{"calculator":2,"source_trace":2},
+                        "rgpot_callback_requests":{"boundary":"energy_or_gradient",
+                                                   "observed_rows":4,"computed":2,"served":2}}
