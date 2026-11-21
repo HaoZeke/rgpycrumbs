@@ -102,5 +102,10 @@ def test_native_export_retains_measurements_and_scoped_counts(tmp_path):
     assert frames[-1].metadata["evaluation_counts"] == counts
     assert frames[-1].metadata["orbit_provenance"]["producer"] == "rgsaddle"
     assert frames[-1].metadata["lineb_orbit"]["gradients_eV_per_angstrom"] == gradients[-1].tolist()
+    seed = tmp_path/"mep.json"
+    seed.write_text(json.dumps({"symbols":atoms.get_chemical_symbols(), "masses":[16., 2., 2.],
+                                "reference_energy":level["reference_energy"]}))
+    with pytest.raises(ValueError,match="isotope masses"):
+        export_observed_ring(con,level,atoms,ring,trace,4,{"observations":trace},native_seed=seed)
     with pytest.raises(ValueError,match="coordinates differ"):
         export_observed_ring(con,level,atoms,ring[::-1],trace,4,{"observations":trace})
