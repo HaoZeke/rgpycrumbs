@@ -9,4 +9,5 @@ Tools for generating and managing ORCA calculations.
    :maxdepth: 1
 
    generate_orca_input
+   orbit_launches
 #+end_export

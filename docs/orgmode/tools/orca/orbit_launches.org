@@ -1,0 +1,32 @@
+#+title: Physical ORCA launches along an instanton orbit
+
+A native eOn run with persistent caching records every requested ring
+gradient in its readcon orbit and every ORCA subprocess in its launch
+directory. To determine how many of those requests reached ORCA, provide
+the optimized image band, the full orbit, the native job ledger and a tar
+archive of the launches. Each archive directory must preserve its original
+input timestamp and contain =input.inp= and =launch.json=.
+
+#+begin_src shell
+rgpycrumbs orca orbit-launches lineb.con lineb-orbit.con native.json \
+  engrad-launches.tgz > orbit-launches.json
+#+end_src
+
+The audit checks species order, one normally terminated SCF and EnGrad per
+launch, and the complete central Cartesian displacement stencil for the
+image Hessians. The ORCA input coordinates identify each launch within
+their printed decimal precision. The full-precision readcon coordinates
+identify repeated orbit requests. Each physical launch is assigned to the
+path, Hessian, central ring or output part of the job.
+
+The separate reflection estimate holds every outward bead and both turns
+fixed and uses the corresponding outward coordinates exactly on the
+return leg. The changed launch count is a prediction about a cold run
+under that assumption. Analysis of the archived data makes no additional
+surface requests.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.orca.orbit_launches:main
+   :prog: rgpycrumbs orca orbit-launches
+   :nested: full
+#+END_EXPORT
