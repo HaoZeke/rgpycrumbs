@@ -1,0 +1,32 @@
+#+title: Molecular LI action forces under rigid alignment
+
+A molecular line-integral calculation compares Cartesian image chords in
+mass-weighted coordinates. This command measures how the rigid alignment
+of those images changes the perpendicular action drive. Supply one or
+more complete consecutive optimizer bands as JSONL. Each row contains
+=request=, =positions_angstrom=, =energy_eV= and
+=gradient_eV_per_angstrom=. The coordinate and gradient arrays use the
+same atom order as the atomic masses on the command line.
+
+For example, for five images of a three-atom molecule, specify the
+target electronic energy and the absolute regularization width used by
+the optimizer.
+
+#+begin_src shell
+rgpycrumbs eon lineb-alignment measured-bands.jsonl --images 5 \
+  --mass 1.008 --mass 15.999 --mass 1.008 --target-energy -76.2 --width 0.001
+#+end_src
+
+The report gives the action and perpendicular drive at each internal
+image under alignment to the first image and successive alignment to
+the preceding image. The rotation component is the projection of the
+drive onto the infinitesimal rigid rotations about the image center of
+mass. The remainder lies orthogonal to those rotations. Values use the
+energy, length and mass units of the supplied measurements. Each
+snapshot uses the same electronic observations for both alignments.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.lineb_alignment:main
+   :prog: rgpycrumbs eon lineb-alignment
+   :nested: full
+#+END_EXPORT

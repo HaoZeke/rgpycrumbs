@@ -15,6 +15,7 @@
    harmonic_diffusivity
    image_curvature_holdout
    image_force_clock
+   lineb_alignment
    ipi_molecular_rate
    molecular_rates
    orbit_residual
