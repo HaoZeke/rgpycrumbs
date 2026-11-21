@@ -2,7 +2,7 @@
 
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["ase", "click", "numpy", "scipy"]
+# dependencies = ["ase", "click", "numpy", "readcon", "scipy"]
 # ///
 
 import json
@@ -65,21 +65,99 @@ def molecular_rate(level, minimum, atoms, ring):
                 time_unit_s=time_s, path_multiplicity=1)
 
 
+def eon_orbit_rate(path, minimum, atoms, confirm_same_energy_zero):
+    """Normalize the measured full orbit written by an eOn LI-NEB molecular job."""
+    import readcon
+
+    if not confirm_same_energy_zero:
+        raise ValueError("confirm that the spectrum and orbit use the same surface and electronic zero with --confirm-same-energy-zero")
+    frames = list(readcon.iter_con(str(path)))
+    if len(frames) < 3:
+        raise ValueError("expected at least three measured orbit frames")
+    lineb = frames[0].metadata.get("lineb", {})
+    if lineb.get("molecular") is not True or lineb.get("beads") != len(frames):
+        raise ValueError("expected a complete molecular eOn rate orbit")
+    spectrum = lineb.get("spectrum")
+    if not isinstance(spectrum, dict) or spectrum.get("negative_modes") != 1 or "modes" not in spectrum:
+        raise ValueError("expected the measured fluctuation index and retained mode count")
+    controls = {}
+    for name in ("hbar", "boltzmann"):
+        value = lineb.get(name)
+        if value is None or not np.isfinite(value) or value <= 0:
+            raise ValueError(f"expected explicit positive {name} in eOn metadata")
+        controls[name] = value
+    signature = [(a.atom_id, a.symbol, a.mass) for a in frames[0].atoms]
+    ids = [row[0] for row in signature]
+    masses = np.array([row[2] for row in signature])
+    if len(set(ids)) != len(ids) or not np.all(np.isfinite(masses) & (masses > 0)):
+        raise ValueError("expected distinct readcon atom IDs and positive isotope masses")
+    symbols = [row[1] for row in signature]
+    if len(atoms) != len(ids) or atoms.constraints or np.any(atoms.pbc):
+        raise ValueError("expected an unconstrained nonperiodic equilibrium molecule")
+    identity = "species and isotope masses"
+    if "atom_id" in atoms.arrays:
+        equilibrium_ids = list(atoms.arrays["atom_id"])
+        if set(equilibrium_ids) != set(ids):
+            raise ValueError("equilibrium atom IDs disagree with the orbit")
+        atoms = atoms[[equilibrium_ids.index(i) for i in ids]]
+        identity = "atom IDs, species and isotope masses"
+    else:
+        # The rotational inertia is invariant to permutations of identical isotopes.
+        order = sorted(range(len(ids)), key=lambda i: (symbols[i], masses[i]))
+        equilibrium = sorted(range(len(atoms)), key=lambda i: (atoms[i].symbol, atoms[i].mass))
+        atoms = atoms[[equilibrium[order.index(i)] for i in range(len(ids))]]
+    if atoms.get_chemical_symbols() != symbols or not np.allclose(atoms.get_masses(), masses, rtol=0, atol=1e-6):
+        raise ValueError("equilibrium species or isotope masses disagree with the orbit")
+    for i, frame in enumerate(frames):
+        meta = frame.metadata
+        if (meta.get("lineb") != lineb or meta.get("temperature_K") != lineb.get("temperature")
+                or not np.isclose(meta.get("tau_over_beta", np.nan), i / len(frames), rtol=0, atol=1e-12)):
+            raise ValueError("inconsistent job metadata or out-of-order imaginary-time phase")
+        observed = meta.get("lineb_orbit", {})
+        mobile = observed.get("mobile_atom_ids", [])
+        if ([(a.atom_id, a.symbol, a.mass) for a in frame.atoms] != signature
+                or any(any(a.fixed) for a in frame.atoms) or sorted(mobile) != sorted(ids)):
+            raise ValueError("expected consistent atom identities and a fully mobile molecular orbit")
+    rate = dict(temperature=lineb["temperature"], beads=len(frames), modes=spectrum["modes"],
+                negative_modes=spectrum["negative_modes"], log_k_times_Zr=lineb["log_rate_over_reactant"])
+    level = dict(controls=controls, reference_energy=minimum["electronic_energy_eV"], rate=rate)
+    result = molecular_rate(level, minimum, atoms, np.stack([frame.xyz for frame in frames]))
+    result["energy_reference"] = {"same_surface_and_zero_confirmed_by_caller": True,
+                                  "independent_orbit_reference_energy_eV": None,
+                                  "reactant_electronic_energy_eV": minimum["electronic_energy_eV"]}
+    result["equilibrium_identity_check"] = identity
+    result["controls"] = controls
+    return result
+
+
 @click.command()
 @click.argument("level_file", type=click.Path(exists=True, path_type=Path))
 @click.argument("reactant_spectrum", type=click.Path(exists=True, path_type=Path))
 @click.argument("reactant_extxyz", type=click.Path(exists=True, path_type=Path))
-@click.argument("beads_json", type=click.Path(exists=True, path_type=Path))
+@click.argument("beads_json", required=False, type=click.Path(exists=True, path_type=Path))
 @click.option("--index", type=click.IntRange(min=0), default=0, show_default=True)
-def main(level_file, reactant_spectrum, reactant_extxyz, beads_json, index):
-    """Normalize one LI-NEB JSONL level using its full ordered Cartesian ring."""
+@click.option("--confirm-same-energy-zero", is_flag=True,
+              help="Confirm the eOn orbit and reactant spectrum share the PES and electronic zero.")
+def main(level_file, reactant_spectrum, reactant_extxyz, beads_json, index, confirm_same_energy_zero):
+    """Normalize a JSONL level with BEADS_JSON or an eOn lineb-orbit.con."""
     from ase.io import read
 
-    level = json.loads(level_file.read_text().splitlines()[index])
     minimum = json.loads(reactant_spectrum.read_text())
     atoms = read(reactant_extxyz, format="extxyz")
-    ring = np.array(json.loads(beads_json.read_text()), dtype=float)
-    click.echo(json.dumps(molecular_rate(level, minimum, atoms, ring), indent=2, allow_nan=False))
+    try:
+        if level_file.suffix.lower() == ".con":
+            if beads_json is not None or index:
+                raise click.UsageError("an eOn orbit contains the complete ring of one rate level")
+            result = eon_orbit_rate(level_file, minimum, atoms, confirm_same_energy_zero)
+        else:
+            if beads_json is None:
+                raise click.UsageError("a JSONL level requires BEADS_JSON")
+            level = json.loads(level_file.read_text().splitlines()[index])
+            ring = np.array(json.loads(beads_json.read_text()), dtype=float)
+            result = molecular_rate(level, minimum, atoms, ring)
+    except (KeyError, ValueError, IndexError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(result, indent=2, allow_nan=False))
 
 
 if __name__ == "__main__":
