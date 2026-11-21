@@ -51,6 +51,25 @@ def final_tables(directory, symbols):
     return step, tables[0], tables[1] * factor
 
 
+def force_balance(xyz, gradient, masses, mobile, temp):
+    full_xyz = np.concatenate([xyz, xyz[::-1]]).reshape(2 * len(xyz), -1)
+    full_forces = -np.concatenate([gradient, gradient[::-1]]).reshape(2 * len(xyz), -1)
+    metrics = {}
+    for label, discrete in [("ring_polymer", True), ("spectral", False)]:
+        r = euclidean_force_residual(
+            full_xyz[:, mobile],
+            full_forces[:, mobile],
+            masses[mobile],
+            temp,
+            ring_polymer=discrete,
+        )
+        metrics[label] = {
+            "max_eV_per_angstrom": float(abs(r).max()),
+            "rms_eV_per_angstrom": float(np.sqrt(np.mean(r * r))),
+        }
+    return metrics
+
+
 @click.command()
 @click.argument("band", type=click.Path(exists=True, path_type=Path))
 @click.argument("ledger", type=click.Path(exists=True, path_type=Path))
@@ -64,7 +83,9 @@ def final_tables(directory, symbols):
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     help="Compare with the native FINAL coordinate and atomic-unit force tables.",
 )
-def main(band, ledger, write_observations, native_directory):
+@click.option("--initial-xyz", type=click.Path(exists=True, path_type=Path),
+              help="Compare the first solver gradient batch with the final orbit at fixed bead count and temperature.")
+def main(band, ledger, write_observations, native_directory, initial_xyz):
     """Check an i-PI readcon BAND against its original geometry-request LEDGER."""
     if write_observations and write_observations.resolve() in (
         band.resolve(),
@@ -101,6 +122,7 @@ def main(band, ledger, write_observations, native_directory):
     keys = [coordinate_key(pos) for pos in xyz]
     wanted = set(keys)
     selected = {}
+    initial_rows = []
     digest = hashlib.sha256()
 
     numbers = [atomic_numbers[s] for s in symbols]
@@ -109,7 +131,9 @@ def main(band, ledger, write_observations, native_directory):
             digest.update(raw)
             row = json.loads(raw)
             key = coordinate_key(row["positions_angstrom"])
-            if key not in wanted or key in selected:
+            take_initial = initial_xyz and len(initial_rows) < len(frames)
+            take_final = key in wanted and key not in selected
+            if not (take_initial or take_final):
                 continue
             if row.get("atomic_numbers", numbers) != numbers or (
                 sources.get("surface_sha256")
@@ -118,7 +142,10 @@ def main(band, ledger, write_observations, native_directory):
                 raise ValueError(
                     "matched observation has different surface or atom order"
                 )
-            selected[key] = row
+            if take_initial:
+                initial_rows.append(row)
+            if take_final:
+                selected[key] = row
     if wanted != selected.keys():
         raise ValueError(
             "the ledger lacks exact Cartesian coordinates for some orbit beads"
@@ -129,28 +156,41 @@ def main(band, ledger, write_observations, native_directory):
     )
     masses = np.repeat([a.mass for a in first.atoms], 3)
     mobile = np.array([a.fixed for a in first.atoms]).reshape(-1) == 0
-    full_xyz = np.concatenate([xyz, xyz[::-1]]).reshape(2 * len(frames), -1)
-    full_forces = -np.concatenate([gradient, gradient[::-1]]).reshape(2 * len(frames), -1)
     report = {
         "temperature_K": temp,
-        "beads": len(full_xyz),
+        "beads": 2 * len(frames),
         "additional_surface_requests": 0,
         "orbit_sha256": hashlib.sha256(band.read_bytes()).hexdigest(),
         "ledger_sha256": digest.hexdigest(),
         "actual_solver_rows_for_final_geometry": [r["request"] for r in rows],
     }
-    for label, discrete in [("ring_polymer", True), ("spectral", False)]:
-        r = euclidean_force_residual(
-            full_xyz[:, mobile],
-            full_forces[:, mobile],
-            masses[mobile],
-            temp,
-            ring_polymer=discrete,
-        )
-        report[label] = {
-            "max_eV_per_angstrom": float(abs(r).max()),
-            "rms_eV_per_angstrom": float(np.sqrt(np.mean(r * r))),
+    report.update(force_balance(xyz, gradient, masses, mobile, temp))
+    if initial_xyz:
+        initial_frames = read(initial_xyz, index=":", format="xyz")
+        if len(initial_frames) != len(frames) or any(list(f.symbols) != symbols for f in initial_frames):
+            raise ValueError("the initial XYZ and final ring require the same atoms and bead count")
+        start = np.asarray([r["positions_angstrom"] for r in initial_rows]).reshape(xyz.shape)
+        start_gradient = np.asarray([r["gradient_eV_per_angstrom"] for r in initial_rows]).reshape(xyz.shape)
+        coordinate_error = float(abs(start - np.asarray([f.positions for f in initial_frames])).max())
+        if coordinate_error >= 1e-9:
+            raise ValueError("first solver requests differ from the initial XYZ")
+        initial = {
+            "initial_xyz_sha256": hashlib.sha256(initial_xyz.read_bytes()).hexdigest(),
+            "solver_requests": [r["request"] for r in initial_rows],
+            "max_native_coordinate_difference_angstrom": coordinate_error,
+            **force_balance(start, start_gradient, masses, mobile, temp),
         }
+        i, j = np.triu_indices(len(symbols), 1)
+        if len(i):
+            distances = np.linalg.norm(xyz[:, i]-xyz[:, j], axis=2) - np.linalg.norm(start[:, i]-start[:, j], axis=2)
+            bead, pair = np.unravel_index(abs(distances).argmax(), distances.shape)
+            initial["pair_distance_changes"] = {
+                "pairs_per_bead": len(i), "stored_beads": len(frames),
+                "rms_angstrom": float(np.sqrt(np.mean(distances**2))),
+                "max_angstrom": float(abs(distances[bead, pair])),
+                "max_bead": int(bead), "max_atom_ids": [identity[i[pair]][0], identity[j[pair]][0]],
+            }
+        report["initial_geometry"] = initial
     if native_directory:
         step, pos, force = final_tables(native_directory, symbols)
         if pos.shape != xyz.shape or force.shape != xyz.shape:
