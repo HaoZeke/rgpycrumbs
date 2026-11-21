@@ -63,29 +63,29 @@ def main(blocks, seed, output, keep):
     error = np.linalg.norm(estimate, axis=(1, 2))
     norm = np.linalg.norm(hessians[missing], axis=(1, 2))
     errors = [
-        dict(
-            image=int(i),
-            frobenius_eV_per_angstrom2=float(e),
-            relative_frobenius=float(e / f) if f else None,
-            max_abs_eV_per_angstrom2=float(np.max(np.abs(diff))),
-        )
-        for i, e, f, diff in zip(missing, error, norm, estimate)
+        {
+            "image": int(i),
+            "frobenius_eV_per_angstrom2": float(e),
+            "relative_frobenius": float(e / f) if f else None,
+            "max_abs_eV_per_angstrom2": float(np.max(np.abs(diff))),
+        }
+        for i, e, f, diff in zip(missing, error, norm, estimate, strict=False)
     ]
-    report = dict(
-        source_sha256=hashlib.sha256(source).hexdigest(),
-        retained_images=kept,
-        knots_angstrom_sqrt_amu=knots.tolist(),
-        holdouts=errors,
-        evaluation_counts=dict(new_surface_requests=0),
-    )
+    report = {
+        "source_sha256": hashlib.sha256(source).hexdigest(),
+        "retained_images": kept,
+        "knots_angstrom_sqrt_amu": knots.tolist(),
+        "holdouts": errors,
+        "evaluation_counts": {"new_surface_requests": 0},
+    }
     output.write_text(
         json.dumps(
-            dict(
-                method="Not-a-knot cubic along cumulative mass-weighted chords",
-                settings=report,
-                positions_angstrom=points.tolist(),
-                hessians_eV_per_angstrom2=fitted.tolist(),
-            ),
+            {
+                "method": "Not-a-knot cubic along cumulative mass-weighted chords",
+                "settings": report,
+                "positions_angstrom": points.tolist(),
+                "hessians_eV_per_angstrom2": fitted.tolist(),
+            },
             allow_nan=False,
         )
         + "\n"
