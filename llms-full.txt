@@ -2156,6 +2156,36 @@ Stdout repeats the inverse temperatures and reference values, then
 For developer details and source code see
 `rgpycrumbs.eon.harmonic_diffusivity`.
 
+## Image Hessian interpolation on a fixed path
+
+Source: https://rgpycrumbs.rgoswami.me/tools/eon/image_curvature_holdout
+
+Use measured Cartesian Hessians to test the accuracy of the curvature
+interpolated between path images. The blocks file contains
+`positions_angstrom`, a sequence of flattened Cartesian positions, and
+`hessians_eV_per_angstrom2`, one square matrix per position. The seed file
+supplies the atomic `masses` in the same order. Supply the zero-based
+indices of the retained images, including the first and last.
+
+```shell
+rgpycrumbs eon image-curvature-holdout blocks.json seed.json fitted.json \
+  --keep 0 --keep 2 --keep 4 --keep 6 --keep 7 > errors.json
+```
+
+The command preserves the knots of the full path, using cumulative chord
+length in mass-weighted Cartesian coordinates. A not-a-knot cubic fits each
+matrix component across the retained images. The output contains the
+original coordinates and a matrix for each image, including the exact
+measured matrices at the retained knots. At each held-out image the report
+gives the largest component error, the Frobenius error and its ratio to the
+measured Frobenius norm. The calculation uses only archived data.
+
+```rst
+.. click:: rgpycrumbs.eon.image_curvature_holdout:main
+   :prog: rgpycrumbs eon image-curvature-holdout
+   :nested: full
+```
+
 ## Compare image force tangents
 
 Source: https://rgpycrumbs.rgoswami.me/tools/eon/image_force_clock
