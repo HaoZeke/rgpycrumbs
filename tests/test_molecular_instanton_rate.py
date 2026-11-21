@@ -74,3 +74,33 @@ def test_eon_full_orbit_matches_the_equivalent_flux_record(tmp_path):
     np.testing.assert_allclose(data["log10_rate_per_s"],json.loads(expected.output)["log10_rate_per_s"],atol=1e-8,rtol=0)
     readcon.write_con(str(con), frames[::-1])
     assert "phase" in runner.invoke(main,[*args,"--confirm-same-energy-zero"]).output
+
+
+def test_native_export_retains_measurements_and_scoped_counts(tmp_path):
+    import json
+    import readcon
+    import pytest
+    from rgpycrumbs.eon.molecular_instanton_rate import export_observed_ring
+
+    atoms = Atoms("OH2", positions=[[0.,0.,0.], [0.9763,0.,0.], [0.,0.9763,0.]])
+    ring = np.tile(atoms.positions,(4,1,1))
+    ring[:,0,0] += np.arange(4)*np.nextafter(0.00012345,1.)
+    gradients = np.arange(ring.size,dtype=float).reshape(ring.shape) / 83.
+    counts = {"scope":"energy_level", "surface_calls":{"total":4,"rate":4}}
+    level = {"level":0, "evaluation_counts":counts, "reference_energy":-2.,
+             "controls":{"hbar":0.06466,"boltzmann":8.6173e-5},
+             "rate":{"period":2., "temperature":323., "beads":4, "negative_modes":1,
+                     "modes":29, "log_k_times_Zr":-1., "replica_clock":"quadrature",
+                     "method":"hqtst_rate_interpolated_hessian"}}
+    rows = [{"request":i+1, "positions_angstrom":x.ravel().tolist(), "energy_eV":1.+i,
+             "gradient_eV_per_angstrom":g.ravel().tolist()} for i,(x,g) in enumerate(zip(ring,gradients))]
+    trace, con = tmp_path/"trace.jsonl", tmp_path/"orbit.con"
+    trace.write_text("".join(json.dumps(row)+"\n" for row in rows))
+    export_observed_ring(con,level,atoms,ring,trace,4,{"observations":trace})
+    frames = list(readcon.iter_con(str(con)))
+    assert np.stack([f.xyz for f in frames]).tobytes() == ring.tobytes()
+    assert frames[-1].metadata["evaluation_counts"] == counts
+    assert frames[-1].metadata["orbit_provenance"]["producer"] == "rgsaddle"
+    assert frames[-1].metadata["lineb_orbit"]["gradients_eV_per_angstrom"] == gradients[-1].tolist()
+    with pytest.raises(ValueError,match="coordinates differ"):
+        export_observed_ring(con,level,atoms,ring[::-1],trace,4,{"observations":trace})
