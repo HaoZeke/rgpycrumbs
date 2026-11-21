@@ -2,7 +2,7 @@
 
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["ase", "readcon", "click", "numpy", "scipy", "matplotlib", "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@ce577ca547fe1ea3904c44e6ef2a277f18789715"]
+# dependencies = ["ase", "readcon", "click", "numpy", "scipy", "matplotlib", "xyzrender>=0.3", "chemparseplot @ git+https://github.com/HaoZeke/chemparseplot@25e35124c335ce7446f3e4a29658a062142bdb1c"]
 # ///
 
 import csv
@@ -13,15 +13,11 @@ import click
 import numpy as np
 
 
-def draw_thermal_orbit(ax, geometry, ring_file, level_file, label):
-    """Overlay the equilibrium molecule and the closed paths of its atoms."""
+def draw_thermal_orbit(ax, geometry, ring_file, level_file, label, bounds=(0.02, 0.03, 0.36, 0.46), count=9):
+    """Inset the tunnelling orbit as an xyzrender ensemble of its replicas."""
     from ase.io import read
-    from ase.neighborlist import natural_cutoffs, neighbor_list
-    from scipy.spatial.transform import Rotation
 
     atoms = read(geometry, format="extxyz")
-    mass = atoms.get_masses()
-    reactant = atoms.positions - atoms.get_center_of_mass()
     level = json.loads(level_file.read_text())
     if ring_file.suffix == ".con":
         import readcon
@@ -46,23 +42,43 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file, label):
         ring = np.asarray(json.loads(ring_file.read_text()), dtype=float).reshape(-1, len(atoms), 3)
     if len(ring) != level["beads"]:
         raise ValueError("inset orbit and normalized level specify different bead counts")
-    center = np.average(ring.mean(axis=0), axis=0, weights=mass)
-    ring -= center
-    rotation, _ = Rotation.align_vectors(reactant, ring.mean(axis=0), weights=mass)
-    ring = rotation.apply(ring.reshape(-1, 3)).reshape(ring.shape)
-    # Show the projected molecular frame from the two directions with largest spatial extent.
-    _, _, axes = np.linalg.svd(np.vstack((ring.reshape(-1, 3), reactant)), full_matrices=False)
-    reference = reactant @ axes[:2].T
-    orbit = ring @ axes[:2].T
-    i, j = neighbor_list("ij", atoms, natural_cutoffs(atoms, mult=1.15))
-    for a, b in zip(i[i < j], j[i < j]):
-        ax.plot(*reference[[a, b]].T, color="#6095bb", lw=1)
-    for path in orbit.transpose(1, 0, 2):
-        ax.plot(*np.vstack((path, path[0])).T, color="#666666", lw=1.25)
-    ax.scatter(*reference.T, s=8 + 2 * atoms.numbers, color="#144a70", zorder=3)
-    ax.set_aspect("equal")
-    ax.axis("off")
-    ax.set_title(f"{label} {level['temperature_K']:.1f} K".strip(), fontsize="small")
+    # One opaque turning-point replica and translucent replicas along the
+    # outgoing half of the orbit, drawn by xyzrender.
+    from ase import Atoms
+    from chemparseplot.plot.kinetics import add_image_inset, render_path_ensemble
+
+    outgoing = ring[: len(ring) // 2 + 1]
+    chosen = outgoing[np.unique(np.linspace(0, len(outgoing) - 1, count).round().astype(int))]
+    image = render_path_ensemble([Atoms(atoms.get_chemical_symbols(), positions=x) for x in chosen])
+    add_image_inset(ax, image, bounds, f"{label} orbit, {level['temperature_K']:.0f} K".strip())
+
+
+def draw_cost(ax, cost_file, colors):
+    """Ranges of surface evaluations per temperature for each method."""
+    with cost_file.open() as handle:
+        rows = list(csv.DictReader(handle))
+    for i, row in enumerate(rows):
+        color = colors.get(row["method"], "0.3")
+        both = float(row["analytic_hessians_max"]) > 0
+        for offset, key, hatch in ((0.18, "gradients", None), (-0.18, "analytic_hessians", "////")):
+            low, high = float(row[f"{key}_min"]), float(row[f"{key}_max"])
+            if high <= 0:
+                continue
+            offset = offset if both else 0.0
+            ax.barh(i + offset, high - low if high > low else high * 0.04, left=low, height=0.3,
+                    color=color if hatch is None else "white", edgecolor=color, hatch=hatch, linewidth=1)
+            ax.annotate(f"{low:,.0f}–{high:,.0f}" if high > low else f"{high:,.0f}", (high, i + offset),
+                        xytext=(3, 0), textcoords="offset points", va="center", fontsize="x-small")
+    import textwrap
+
+    ax.set_yticks(range(len(rows)), [textwrap.fill(row["method"], 22) for row in rows], fontsize="small")
+    ax.invert_yaxis()
+    ax.set_xscale("log")
+    ax.set_xlim(100, 2e4)
+    ax.set_xlabel("Surface evaluations per temperature")
+    ax.barh(np.nan, 0, color="0.4", label="Gradients, with finite-difference Hessians")
+    ax.barh(np.nan, 0, color="white", edgecolor="0.4", hatch="////", label="Analytic Hessians")
+    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), fontsize="x-small", frameon=False)
 
 
 @click.command()
@@ -79,11 +95,20 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file, label):
                                click.Path(exists=True, path_type=Path)),
               help="Equilibrium extxyz, readcon orbit or full bead JSON and normalized level for the inset.")
 @click.option("--orbit-label", default="", help="Method used to calculate the displayed orbit.")
-def main(reference, harmonic, series, compare_series, plot, spectra, inverse_range, orbit, orbit_label):
+@click.option("--cost", type=click.Path(exists=True, path_type=Path),
+              help="CSV of method, gradients_min, gradients_max, analytic_hessians_min, analytic_hessians_max.")
+def main(reference, harmonic, series, compare_series, plot, spectra, inverse_range, orbit, orbit_label, cost):
     """Plot absolute log10 rates in inverse seconds and write per-point discrepancies."""
     import matplotlib.pyplot as plt
     from chemparseplot.plot.kinetics import plot_arrhenius
+    from chemparseplot.plot.palette import RUHI_COLORS
+    from chemparseplot.plot.theme import get_theme, setup_publication_theme
     from chemparseplot.units import Q_
+
+    setup_publication_theme(get_theme("ruhi", font_size=10))
+    # Colour and marker both change between series, so neither carries the
+    # distinction alone.
+    cycle = [RUHI_COLORS[name] for name in ("sky", "magenta", "teal", "coral")] + ["#6a4c93", "#8a6d00"]
 
     markers = np.genfromtxt(reference, delimiter=",", names=True, ndmin=1)
     xref = markers["inverse_temperature_1000_per_K"]
@@ -91,8 +116,11 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
     if not np.all(np.diff(xref) > 0):
         raise ValueError("reference inverse temperatures must increase")
     baseline = np.genfromtxt(harmonic, delimiter=",", names=True, ndmin=1)
-    fig, (ax, difference) = plt.subplots(2, 1, sharex=True, layout="constrained", figsize=(7.2, 6.4),
-                                         height_ratios=(3, 1))
+    fig = plt.figure(layout="constrained", figsize=(10.5, 6.6) if cost else (7.2, 6.6))
+    grid = fig.add_gridspec(2, 2 if cost else 1, height_ratios=(3, 1.25), width_ratios=(1.75, 1) if cost else None)
+    ax = fig.add_subplot(grid[0, 0])
+    difference = fig.add_subplot(grid[1, 0], sharex=ax)
+    ax.tick_params(labelbottom=False)
     temperatures = baseline["temperature_K"]
     harmonic_rates = {key: baseline[key] for key in ("htst", "qq_htst")}
     if spectra:
@@ -113,15 +141,15 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
             crossover = 1.4387768775 * abs(unstable[0]) / (2 * np.pi)
             for axis in (ax, difference):
                 axis.axvline(1000 / crossover, color="0.5", linestyle=":", linewidth=0.8)
-            ax.annotate(rf"$T_c$ = {crossover:.0f} K", (1000 / crossover, 0.97), xycoords=("data", "axes fraction"),
-                        ha="right", va="top", rotation=90, fontsize="small", color="0.35")
+            ax.annotate(rf"$T_c$ = {crossover:.0f} K", (1000 / crossover, 0.03), xycoords=("data", "axes fraction"),
+                        ha="right", va="bottom", rotation=90, fontsize="small", color="0.35")
     if orbit:
-        draw_thermal_orbit(ax.inset_axes([0.03, 0.04, 0.36, 0.40]), *orbit, orbit_label)
+        draw_thermal_orbit(ax, *orbit, orbit_label)
     for label, key in (("HTST", "htst"), ("qq-HTST", "qq_htst")):
         plot_arrhenius(ax, Q_(temperatures, "kelvin"), harmonic_rates[key],
-                       label=label, linestyle="--" if key == "qq_htst" else "-")
+                       label=label, linestyle="--" if key == "qq_htst" else "-", color="0.25", linewidth=1.4)
     plot_arrhenius(ax, Q_(1000 / xref, "kelvin"), yref, label="Published HQTST",
-                   marker="D", color="black", fillstyle="none", linestyle="none", markersize=7)
+                   marker="D", color="black", fillstyle="none", linestyle="none", markersize=8, markeredgewidth=1.1)
     shapes = ("o", "s", "^", "v", "x", "+", "<", ">")
     table = csv.writer(click.get_text_stream("stdout"))
     by_method = {}
@@ -145,18 +173,20 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
             raise ValueError("the comparison series requires distinct temperatures and finite rates")
         columns.extend(("comparison_method", "comparison_interpolated", "difference_from_comparison_decades"))
     table.writerow(columns)
-    for shape, (label, rows) in zip(shapes * len(by_method), by_method.items()):
+    colors = {}
+    for shape, shade, (label, rows) in zip(shapes * len(by_method), cycle * len(by_method), by_method.items()):
+        colors[label] = shade
         points = sorted((row["temperature_K"], row["log10_rate_per_s"]) for row in rows)
         temperatures, rates = np.asarray(points, dtype=float).T
         if not np.all(np.isfinite(rates) & np.isfinite(temperatures) & (temperatures > 0)):
             raise ValueError(f"invalid absolute rate or temperature in {label}")
         curve = plot_arrhenius(ax, Q_(temperatures, "kelvin"), rates, marker=shape, linestyle="none",
-                               label=label, markersize=4, fillstyle="none")
-        inside = [(1000 / t, rate - np.interp(1000 / t, xref, yref)) for t, rate in points
+                               label=label, markersize=4.5, fillstyle="none", color=shade, markeredgewidth=1.1)
+        inside = [(1000 / t, 10 ** (rate - np.interp(1000 / t, xref, yref))) for t, rate in points
                   if xref[0] - 1e-9 <= 1000 / t <= xref[-1] + 1e-9]
         if inside:
-            difference.plot(*np.asarray(inside).T, marker=shape, linestyle="none", markersize=4,
-                            fillstyle="none", color=curve.get_color())
+            difference.plot(*np.asarray(inside).T, marker=shape, linestyle="none", markersize=4.5,
+                            fillstyle="none", color=curve.get_color(), markeredgewidth=1.1)
         for t, rate in points:
             x = 1000 / t
             match = np.interp(x, xref, yref) if xref[0] - 1e-9 <= x <= xref[-1] + 1e-9 else None
@@ -168,14 +198,17 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
                                rate - reference_rate if supported else None))
             table.writerow(values)
     ax.set_xlabel("")
-    difference.axhline(0, color="black", linewidth=0.8)
+    difference.axhline(1, color="black", linewidth=0.8)
+    difference.set_ylim(0.9, None)
     difference.set_xlabel(r"$1000\,\mathrm{K}/T$")
-    difference.set_ylabel("Calculated − published\n(decades)")
+    difference.set_ylabel("Calculated rate /\npublished rate")
     kelvin = ax.secondary_xaxis("top", functions=(lambda x: 1000 / np.maximum(x, 1e-12),
                                                   lambda t: 1000 / np.maximum(t, 1e-12)))
     kelvin.set_xticks([1000, 500, 333, 250, 200])
     kelvin.set_xlabel(r"$T$ (K)")
-    ax.legend(loc="upper right", fontsize="small")
+    ax.legend(loc="upper right", fontsize="small", frameon=False)
+    if cost:
+        draw_cost(fig.add_subplot(grid[:, 1]), cost, colors)
     fig.savefig(plot)
     plt.close(fig)
 
