@@ -2173,7 +2173,7 @@ rgpycrumbs eon lattice-instanton-diffusivity levels.jsonl reactant.json seed.jso
 The JSON result gives `log10_hop_rate_per_s` and
 `log10_diffusivity_cm2_per_s`. A single retained negative mode and matching
 reactant electronic zeros are required. Each positive mode contributes
-the finite-bead factor ( [2\sinh(P\,\mathrm{asinh}(\beta\hbar\omega/(2P)))]^{-1} )
+the finite-bead factor $[2\sinh(P\,\mathrm{asinh}(\beta\hbar\omega/(2P)))]^{-1}$
 to the reactant partition. Rigid translations and rotations of the full cell
 are absent because the lattice contains fixed atoms.
 
