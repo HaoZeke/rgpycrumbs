@@ -18,7 +18,7 @@ import click
 import numpy as np
 
 
-def euclidean_force_residual(positions, forces, masses, temperature, ring_polymer=False):
+def euclidean_force_residual(positions, forces, masses, temperature, ring_polymer=False, *, period_seconds=None):
     """Return F + M d²x/dτ² in eV/Å, with x in Å, masses in u, and T in K.
 
     Columns are mobile Cartesian degrees of freedom. Rows are uniformly
@@ -46,7 +46,9 @@ def euclidean_force_residual(positions, forces, masses, temperature, ring_polyme
         or np.any(masses <= 0)
     ):
         raise ValueError("expected finite inputs and positive masses and temperature")
-    period = constants.hbar / (constants.Boltzmann * temperature)
+    period = constants.hbar / (constants.Boltzmann * temperature) if period_seconds is None else period_seconds
+    if not np.isfinite(period) or period <= 0:
+        raise ValueError("expected a positive finite orbit period in seconds")
     omega = 2 * np.pi * np.fft.rfftfreq(len(positions), d=period / len(positions))
     if ring_polymer:
         step = period / len(positions)
@@ -103,12 +105,39 @@ def _factory(spec):
     return getattr(module, name)
 
 
+def observed_eon_forces(frames):
+    """Read signed Cartesian forces from the native rate observation on each bead."""
+    from scipy import constants
+
+    lineb = frames[0].metadata.get("lineb")
+    if not isinstance(lineb, dict) or lineb.get("beads") != len(frames):
+        raise click.UsageError("a force provider is required for a band without a complete eOn rate observation")
+    hbar, kb, temperature = (lineb.get(key) for key in ("hbar", "boltzmann", "temperature"))
+    if not all(isinstance(value, (float, int)) and np.isfinite(value) and value > 0 for value in (hbar, kb, temperature)):
+        raise click.UsageError("eOn rate metadata must supply the measured temperature, hbar and boltzmann")
+    period = hbar / (kb * temperature) * 1e-10 * np.sqrt(constants.atomic_mass / constants.electron_volt)
+    rows = []
+    for frame in frames:
+        if frame.metadata.get("lineb") != lineb:
+            raise click.UsageError("all orbit frames must carry the same eOn rate metadata")
+        observation = frame.metadata.get("lineb_orbit", {})
+        ids = observation.get("mobile_atom_ids", [])
+        gradients = np.asarray(observation.get("gradients_eV_per_angstrom"), dtype=float)
+        mobile = {atom.atom_id: i for i, atom in enumerate(frame.atoms) if not all(atom.fixed)}
+        if (len(ids) != len(mobile) or set(ids) != set(mobile) or gradients.shape != (len(ids), 3)
+                or not np.isfinite(gradients).all()):
+            raise click.UsageError("eOn observations must supply one Cartesian gradient per mobile atom ID")
+        forces = np.zeros((len(frame.atoms), 3))
+        forces[[mobile[atom_id] for atom_id in ids]] = -gradients
+        rows.append(forces)
+    return np.stack(rows), period
+
+
 @click.command()
 @click.argument("band", type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--provider",
-    required=True,
-    help="Force provider factory as module:function or file.py:function.",
+    help="Force provider factory as module:function or file.py:function. Omit to use eOn rate gradients.",
 )
 @click.option(
     "--options",
@@ -215,46 +244,55 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
         pair_distances.append({"atom_ids": [first, second], "min_angstrom": float(distances.min()),
                                "max_angstrom": float(distances.max())})
     extent = orbit_extent(xyz, [a.mass for a in templ.atoms])
-    evaluator = _factory(provider)(band, **json.loads(options))
-    read_counts = getattr(evaluator, "result_counts", lambda: None)
-    before = read_counts()
-    forces = np.stack([evaluator.cartesian_forces(f) for f in frames])
+    period = None
+    if provider is None:
+        if ipi_half_ring or json.loads(options):
+            raise click.UsageError("a force provider is required for i-PI half-rings or provider options")
+        forces, period = observed_eon_forces(frames)
+        work = {"scope": "validation", "geometry_requests": 0, "observed_beads": len(frames),
+                "provider": "eOn lineb_orbit gradients", "provider_results": None}
+    else:
+        evaluator = _factory(provider)(band, **json.loads(options))
+        read_counts = getattr(evaluator, "result_counts", lambda: None)
+        before = read_counts()
+        forces = np.stack([evaluator.cartesian_forces(f) for f in frames])
+        after = read_counts()
+        counts = None
+        if before is not None and after is not None:
+            counts = {k: after[k] - before[k] for k in ("computed", "served")}
+        work = {"scope": "validation", "geometry_requests": len(frames),
+                "provider": getattr(evaluator, "provider_name", provider), "provider_results": counts}
     if forces.shape != xyz.shape:
         raise ValueError("provider must return one Cartesian force vector per atom")
     if ipi_half_ring:
         xyz = np.concatenate((xyz, xyz[::-1]))
         forces = np.concatenate((forces, forces[::-1]))
+    finite_bead = ipi_half_ring or provider is None
     residual = euclidean_force_residual(
-        xyz[:, mobile], forces[:, mobile], masses, temperature, ring_polymer=ipi_half_ring
+        xyz[:, mobile], forces[:, mobile], masses, temperature, ring_polymer=finite_bead, period_seconds=period
     )
-    after = read_counts()
-    counts = None
-    if before is not None and after is not None:
-        counts = {k: after[k] - before[k] for k in ("computed", "served")}
     largest = float(np.max(np.abs(residual)))
     result = {
         "temperature_K": temperature,
         "beads": len(xyz),
-        "discretization": "ring_polymer" if ipi_half_ring else "spectral",
+        "discretization": "ring_polymer" if finite_bead else "spectral",
         "mobile_coordinates": int(mobile.sum()),
         "geometry_extent": extent,
         "pair_distances": pair_distances,
         "max_residual_eV_per_angstrom": largest,
         "rms_residual_eV_per_angstrom": float(np.sqrt(np.mean(residual**2))),
-        "evaluation_counts": {
-            "scope": "validation",
-            "geometry_requests": len(frames),
-            "provider": getattr(evaluator, "provider_name", provider),
-            "provider_results": counts,
-        },
+        "evaluation_counts": work,
     }
+    if period is not None:
+        result["period_seconds"] = period
+        result["period_source"] = "eOn configured hbar, boltzmann and temperature"
     if compare_discretizations:
         other = euclidean_force_residual(xyz[:, mobile], forces[:, mobile], masses, temperature,
-                                         ring_polymer=not ipi_half_ring)
+                                         ring_polymer=not finite_bead, period_seconds=period)
         result["discretization_comparison"] = {
             result["discretization"]: {"max_eV_per_angstrom": largest,
                                        "rms_eV_per_angstrom": result["rms_residual_eV_per_angstrom"]},
-            "spectral" if ipi_half_ring else "ring_polymer": {
+            "spectral" if finite_bead else "ring_polymer": {
                 "max_eV_per_angstrom": float(np.max(np.abs(other))),
                 "rms_eV_per_angstrom": float(np.sqrt(np.mean(other**2))),
             },
