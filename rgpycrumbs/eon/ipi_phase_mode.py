@@ -9,6 +9,7 @@ import contextlib
 import hashlib
 import io
 import json
+import re
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
@@ -19,7 +20,7 @@ from ipi.engine.simulation import Simulation
 from ipi.utils.tools import instanton_postproc as native
 
 
-def phase_mode(checkpoint, frequencies):
+def phase_mode(checkpoint, frequencies, native_report):
     """Rebuild the molecular fluctuation modes with the native rate operators."""
     root = parse(checkpoint)
     for provider in root.iter("ffdirect"):
@@ -42,7 +43,15 @@ def phase_mode(checkpoint, frequencies):
         beads.q, beads.nbeads, beads.natoms, blocks
     )
     mass = np.tile(beads.m3, (2, 1))
-    temp = system.ensemble.temp
+    match = re.search(
+        r"^Temperature:\s+(\S+) K$", native_report.read_text(), re.MULTILINE
+    )
+    if not match:
+        raise ValueError("missing temperature in native instanton output")
+    temp = float(match[1]) * native.K2au
+    # The checkpoint stores internal temperature to fewer digits than the native rate invocation.
+    if not np.isclose(temp, system.ensemble.temp, rtol=1e-8, atol=0):
+        raise ValueError("native output and checkpoint temperatures differ")
     omega2 = (temp * count * native.kb / native.hbar) ** 2
     springs = native.SpringMapper.spring_hessian(
         beads.natoms, count, beads.m3[0], omega2, mode="full"
@@ -69,6 +78,7 @@ def phase_mode(checkpoint, frequencies):
         "beads": count,
         "additional_surface_requests": 0,
         "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+        "native_report_sha256": hashlib.sha256(native_report.read_bytes()).hexdigest(),
         "native_frequencies_sha256": hashlib.sha256(frequencies.read_bytes()).hexdigest(),
         "max_raw_spectrum_difference_cm_inverse": float(abs(modes - printed[6:]).max()),
         "native_deleted_index": 1,
@@ -87,10 +97,11 @@ def phase_mode(checkpoint, frequencies):
 @click.command()
 @click.argument("checkpoint", type=click.Path(exists=True, path_type=Path))
 @click.argument("frequencies", type=click.Path(exists=True, path_type=Path))
-def main(checkpoint, frequencies):
+@click.argument("native_report", type=click.Path(exists=True, path_type=Path))
+def main(checkpoint, frequencies, native_report):
     """Check the omitted rate mode using a native CHECKPOINT and molecular FREQUENCIES."""
     with contextlib.redirect_stdout(io.StringIO()):
-        result = phase_mode(checkpoint, frequencies)
+        result = phase_mode(checkpoint, frequencies, native_report)
     click.echo(json.dumps(result, indent=2))
 
 
