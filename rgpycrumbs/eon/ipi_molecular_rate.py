@@ -115,7 +115,9 @@ def fluctuation_partition(frequencies, size, beads, beta):
     )
 
 
-def reconstruct(case, summary, reactant_report, instanton_report, comparison_observations=None):
+def reconstruct(
+    case, summary, reactant_report, instanton_report, comparison_observations=None
+):
     """Rebuild rate factors from the measured half ring, energies and native spectra."""
     import readcon
     from ase.io import read
@@ -307,7 +309,9 @@ def reconstruct(case, summary, reactant_report, instanton_report, comparison_obs
         energy_changes = []
         for bead, (baseline, measured) in enumerate(zip(rows, other, strict=True)):
             shape = (len(baseline["atomic_numbers"]), 3)
-            if measured["atomic_numbers"] != baseline["atomic_numbers"] or not np.array_equal(
+            if measured["atomic_numbers"] != baseline[
+                "atomic_numbers"
+            ] or not np.array_equal(
                 np.asarray(baseline["positions_angstrom"]).reshape(shape),
                 np.asarray(measured["positions_angstrom"]).reshape(shape),
             ):
@@ -330,7 +334,9 @@ def reconstruct(case, summary, reactant_report, instanton_report, comparison_obs
             "comparison_minus_native_energy_eV_mean": de.mean(),
             "gradient_difference_max_eV_per_angstrom": np.abs(dg).max(),
             "gradient_difference_rms_eV_per_angstrom": np.sqrt(np.mean(dg**2)),
-            "finite_bead_tunneling_energy_eV": reference + tunneling_energy_shift + de.mean(),
+            "finite_bead_tunneling_energy_eV": reference
+            + tunneling_energy_shift
+            + de.mean(),
             "additional_surface_requests": 0,
         }
     raw["raw_minus_native"] = {
@@ -473,7 +479,14 @@ def attach_phase_evidence(raw, case, evidence_path):
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     help="Compare energies and gradients from another surface on the identical half ring.",
 )
-def main(reactant, instanton, raw_case, check_native_rounding, phase_evidence, comparison_observations):
+def main(
+    reactant,
+    instanton,
+    raw_case,
+    check_native_rounding,
+    phase_evidence,
+    comparison_observations,
+):
     """Read native i-PI REACTANT and INSTANTON postprocessor reports."""
     if comparison_observations and raw_case is None:
         raise click.UsageError("--comparison-observations requires --raw-case")
@@ -484,7 +497,9 @@ def main(reactant, instanton, raw_case, check_native_rounding, phase_evidence, c
     minimum, path = reactant.read_text(), instanton.read_text()
     result = molecular_rate(minimum, path)
     if raw_case is not None:
-        result["raw_reconstruction"] = reconstruct(raw_case, result, minimum, path, comparison_observations)
+        result["raw_reconstruction"] = reconstruct(
+            raw_case, result, minimum, path, comparison_observations
+        )
         if phase_evidence:
             attach_phase_evidence(result["raw_reconstruction"], raw_case, phase_evidence)
     click.echo(json.dumps(result, allow_nan=False))
