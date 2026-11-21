@@ -34,14 +34,21 @@ def phase_mode(checkpoint, frequencies):
     if system.motion.options["mode"] != "rate":
         raise ValueError("the checkpoint must contain a rate instanton")
     beads = system.motion.beads
-    blocks = native.red2comp(system.motion.optarrays["hessian"], beads.nbeads, beads.natoms)
-    path, count, curvature = native.get_double(beads.q, beads.nbeads, beads.natoms, blocks)
+    blocks = native.red2comp(
+        system.motion.optarrays["hessian"], beads.nbeads, beads.natoms
+    )
+    path, count, curvature = native.get_double(
+        beads.q, beads.nbeads, beads.natoms, blocks
+    )
     mass = np.tile(beads.m3, (2, 1))
     temp = system.ensemble.temp
     omega2 = (temp * count * native.kb / native.hbar) ** 2
-    springs = native.SpringMapper.spring_hessian(beads.natoms, count, beads.m3[0], omega2, mode="full")
-    values, vectors, _ = native.clean_hessian(curvature + springs, path, beads.natoms, count,
-                                              beads.m, mass, "poly", mofi=True)
+    springs = native.SpringMapper.spring_hessian(
+        beads.natoms, count, beads.m3[0], omega2, mode="full"
+    )
+    values, vectors, _ = native.clean_hessian(
+        curvature + springs, path, beads.natoms, count, beads.m, mass, "poly", mofi=True
+    )
     modes = np.sign(values) * np.sqrt(abs(values)) / native.cm2au
     printed = np.loadtxt(frequencies)
     if len(printed) != modes.size + 6 or np.any(printed[:6] != 0):
@@ -70,7 +77,9 @@ def phase_mode(checkpoint, frequencies):
         "largest_tangent_overlap": float(overlaps[strongest]),
         "reaction_mode_frequency_cm_inverse": float(printed[6]),
         "reaction_mode_tangent_overlap": float(overlaps[0]),
-        "negative_modes_after_native_deletion": int(np.count_nonzero(np.delete(modes, 1) < 0)),
+        "negative_modes_after_native_deletion": int(
+            np.count_nonzero(np.delete(modes, 1) < 0)
+        ),
     }
 
 
