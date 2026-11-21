@@ -118,6 +118,9 @@ def reconstruct(case, summary, reactant_report, instanton_report):
     frames = sorted(readcon.iter_con(str(files["orbit"])), key=lambda f: f.metadata["neb_bead"])
     if p < 4 or 2 * len(frames) != p or [f.metadata["neb_bead"] for f in frames] != list(range(len(frames))):
         raise ValueError("expected a complete numbered i-PI half ring")
+    if ("evaluation_counts" in params and
+            frames[0].metadata.get("evaluation_counts") != params["evaluation_counts"]):
+        raise ValueError("native partition input and half-ring evaluation ledgers differ")
     reference = params["energy_reference_eV"]
     signature = [(a.atom_id, a.symbol, a.mass) for a in frames[0].atoms]
     masses = np.asarray([a[2] for a in signature])
@@ -215,6 +218,9 @@ def reconstruct(case, summary, reactant_report, instanton_report):
     intervals["log10_rate_per_s"] = bounds
     raw["native_rounding"] = {k: {"lower": lo, "upper": hi, "within": bool(lo <= raw[k] <= hi)}
                               for k, (lo, hi) in intervals.items()}
+    raw["evaluation_counts"] = {"scope": "raw rate reconstruction", "additional_surface_requests": 0,
+                                "independently_observed_energies": len(energies)}
+    raw["surface_sha256"] = observed_sources.pop()
     raw["input_sha256"] = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()}
     raw["input_sha256"].update(reactant_table=hashlib.sha256(reactant_report.encode()).hexdigest(),
                                instanton_table=hashlib.sha256(instanton_report.encode()).hexdigest())
