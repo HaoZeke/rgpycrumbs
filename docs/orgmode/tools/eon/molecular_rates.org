@@ -19,6 +19,19 @@ rgpycrumbs eon molecular-instanton-rate levels.jsonl reactant_vibrations.json \
     reactant.extxyz level_00/beads_cartesian.json --index 0 > rate.json
 #+end_src
 
+For eOn, pass the measured ~lineb-orbit.con~ as the first argument. Each
+frame carries the molecular rate, spectrum index, thermal constants and
+imaginary-time phase. The equilibrium spectrum and geometry provide the
+electronic energy, vibrational partition and rotational inertia. Check that
+the potential and electronic energy origin match both inputs before supplying
+the confirmation flag. The output records that the orbit lacks an independent
+electronic reference.
+
+#+begin_src sh
+rgpycrumbs eon molecular-instanton-rate lineb-orbit.con reactant_vibrations.json \
+    reactant.extxyz --confirm-same-energy-zero > rate.json
+#+end_src
+
 The command uses the finite-bead harmonic partition function on the same
 energy zero as the flux. For each rigid direction it keeps the non-centroid
 spring modes. Translation cancels between reactant and ring. Rotation
