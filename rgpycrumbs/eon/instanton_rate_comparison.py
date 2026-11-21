@@ -70,6 +70,7 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file, label):
 @click.argument("harmonic", type=click.Path(exists=True, path_type=Path))
 @click.option("--series", multiple=True, type=(str, click.Path(exists=True, path_type=Path)),
               help="Method name and normalized JSON record or JSONL series. Repeat for each calculation.")
+@click.option("--compare-series", metavar="NAME", help="Also tabulate differences from this series, interpolated in inverse temperature within its measured range.")
 @click.option("--plot", required=True, type=click.Path(path_type=Path))
 @click.option("--spectra", type=(click.Path(exists=True, path_type=Path), click.Path(exists=True, path_type=Path)),
               help="Reactant and saddle frequency records for continuous harmonic curves.")
@@ -78,7 +79,7 @@ def draw_thermal_orbit(ax, geometry, ring_file, level_file, label):
                                click.Path(exists=True, path_type=Path)),
               help="Equilibrium extxyz, readcon orbit or full bead JSON and normalized level for the inset.")
 @click.option("--orbit-label", default="", help="Method used to calculate the displayed orbit.")
-def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit_label):
+def main(reference, harmonic, series, compare_series, plot, spectra, inverse_range, orbit, orbit_label):
     """Plot absolute log10 rates in inverse seconds and write per-point discrepancies."""
     import matplotlib.pyplot as plt
     from chemparseplot.plot.kinetics import plot_arrhenius
@@ -123,7 +124,6 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
                    marker="D", color="black", fillstyle="none", linestyle="none", markersize=7)
     shapes = ("o", "s", "^", "v", "x", "+", "<", ">")
     table = csv.writer(click.get_text_stream("stdout"))
-    table.writerow(("method", "temperature_K", "log10_rate_per_s", "published_interpolated", "difference_decades"))
     by_method = {}
     for label, path in series:
         raw = path.read_text()
@@ -132,6 +132,19 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
         except json.JSONDecodeError:
             rows = [json.loads(line) for line in raw.splitlines() if line.strip()]
         by_method.setdefault(label, []).extend(rows if isinstance(rows, list) else [rows])
+    columns = ["method", "temperature_K", "log10_rate_per_s", "published_interpolated", "difference_decades"]
+    if compare_series is not None:
+        if compare_series not in by_method:
+            raise click.BadParameter("must name a supplied --series", param_hint="--compare-series")
+        observations = sorted((1000 / row["temperature_K"], row["log10_rate_per_s"])
+                              for row in by_method[compare_series] if row["temperature_K"] > 0)
+        if len(observations) != len(by_method[compare_series]) or len(observations) < 2:
+            raise ValueError("the comparison series requires at least two positive temperatures")
+        xcompare, ycompare = np.asarray(observations, dtype=float).T
+        if not (np.all(np.isfinite(xcompare) & np.isfinite(ycompare)) and np.all(np.diff(xcompare) > 0)):
+            raise ValueError("the comparison series requires distinct temperatures and finite rates")
+        columns.extend(("comparison_method", "comparison_interpolated", "difference_from_comparison_decades"))
+    table.writerow(columns)
     for shape, (label, rows) in zip(shapes * len(by_method), by_method.items()):
         points = sorted((row["temperature_K"], row["log10_rate_per_s"]) for row in rows)
         temperatures, rates = np.asarray(points, dtype=float).T
@@ -147,7 +160,13 @@ def main(reference, harmonic, series, plot, spectra, inverse_range, orbit, orbit
         for t, rate in points:
             x = 1000 / t
             match = np.interp(x, xref, yref) if xref[0] - 1e-9 <= x <= xref[-1] + 1e-9 else None
-            table.writerow((label, t, rate, match, rate - match if match is not None else None))
+            values = [label, t, rate, match, rate - match if match is not None else None]
+            if compare_series is not None:
+                reference_rate = np.interp(x, xcompare, ycompare, left=np.nan, right=np.nan)
+                supported = np.isfinite(reference_rate)
+                values.extend((compare_series, reference_rate if supported else None,
+                               rate - reference_rate if supported else None))
+            table.writerow(values)
     ax.set_xlabel("")
     difference.axhline(0, color="black", linewidth=0.8)
     difference.set_xlabel(r"$1000\,\mathrm{K}/T$")

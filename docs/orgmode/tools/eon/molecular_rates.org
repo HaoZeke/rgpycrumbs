@@ -48,7 +48,10 @@ label to join multiple records into one calculation series. Each output
 table row gives the calculated rate and, within the reference interval, the
 difference from linear interpolation of the plotted reference in inverse
 temperature. A missing reference difference indicates a calculated
-temperature outside the digitized interval.
+temperature outside the digitized interval. To compare two calculations,
+pass ~--compare-series~ with one of the series labels. Its data must cover
+at least two distinct temperatures. The CSV adds its interpolated rate and
+the difference in decades wherever that series covers the temperature.
 
 #+begin_src sh
 rgpycrumbs eon instanton-rate-comparison markers.csv harmonic_rates.csv \
