@@ -20,34 +20,43 @@ from scipy.spatial import cKDTree
 
 
 def read_decks(archive, symbols):
-    with tarfile.open(archive) as files:
-        members = sorted(
-            (m for m in files if m.isfile() and m.name.endswith("/input.inp")),
-            key=lambda m: m.mtime,
+    decks, reports = {}, {}
+    with tarfile.open(archive, "r|*") as files:
+        for member in files:
+            if not member.isfile():
+                continue
+            name, leaf = member.name.rsplit("/", 1)
+            if leaf == "input.inp":
+                if name in decks:
+                    raise ValueError(f"duplicate input deck in {name}")
+                decks[name] = member.mtime, files.extractfile(member).read().decode()
+            elif leaf == "launch.json":
+                reports[name] = json.load(files.extractfile(member))
+    if not decks or set(decks) != set(reports):
+        raise ValueError("expected a matching status record for each input deck")
+    members = sorted(decks, key=lambda name: decks[name][0])
+    if len({decks[name][0] for name in members}) != len(members):
+        raise ValueError(
+            "launch archive timestamps cannot resolve physical execution order"
         )
-        if len({m.mtime for m in members}) != len(members):
-            raise ValueError(
-                "launch archive timestamps cannot resolve physical execution order"
-            )
-        coordinates, names = [], []
-        for member in members:
-            text = files.extractfile(member).read().decode()
-            geometry = read_geom_orcainp(
-                StringIO(re.sub(r"(?im)^\*\s+xyz\s+", "*xyz ", text))
-            )
-            if geometry.get_chemical_symbols() != symbols:
-                raise ValueError(f"atom identity differs in {member.name}")
-            name = member.name.rsplit("/", 1)[0]
-            launch = json.load(files.extractfile(name + "/launch.json"))
-            if not (
-                launch["returncode"] == 0
-                and launch["normal_termination"]
-                and launch["engrad_written"]
-                and launch["scf_convergence_reports"] == 1
-            ):
-                raise ValueError(f"expected one successful EnGrad and SCF in {name}")
-            names.append(name)
-            coordinates.append(geometry.positions.ravel())
+    coordinates, names = [], []
+    for name in members:
+        text = decks[name][1]
+        geometry = read_geom_orcainp(
+            StringIO(re.sub(r"(?im)^\*\s+xyz\s+", "*xyz ", text))
+        )
+        if geometry.get_chemical_symbols() != symbols:
+            raise ValueError(f"atom identity differs in {name}")
+        launch = reports[name]
+        if not (
+            launch["returncode"] == 0
+            and launch["normal_termination"]
+            and launch["engrad_written"]
+            and launch["scf_convergence_reports"] == 1
+        ):
+            raise ValueError(f"expected one successful EnGrad and SCF in {name}")
+        names.append(name)
+        coordinates.append(geometry.positions.ravel())
     return names, np.asarray(coordinates)
 
 
