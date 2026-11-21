@@ -23,7 +23,11 @@ def differences(left, right):
         raise ValueError("nonfinite numerical result")
     delta = np.abs(a - b)
     index = np.unravel_index(delta.argmax(), delta.shape) if delta.size else ()
-    return {"shape": list(a.shape), "max_abs": float(delta.max(initial=0)), "index": list(map(int, index))}
+    return {
+        "shape": list(a.shape),
+        "max_abs": float(delta.max(initial=0)),
+        "index": list(map(int, index)),
+    }
 
 
 def digest(file):
@@ -57,7 +61,9 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
     inputs["config.ini"] = [digest(run / "config.ini") for run in runs]
     for config in configs:
         config.remove_option("Lineb", "result_cache")
-    if {s: dict(configs[0][s]) for s in configs[0]} != {s: dict(configs[1][s]) for s in configs[1]}:
+    if {s: dict(configs[0][s]) for s in configs[0]} != {
+        s: dict(configs[1][s]) for s in configs[1]
+    }:
         raise ValueError("physical configuration differs")
     seed = [digest(run / cfg["Lineb"]["initial_path"]) for run, cfg in zip(runs, configs)]
     if seed[0] != seed[1]:
@@ -78,7 +84,10 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
             raise ValueError("frozen source level differs")
         inputs["source-level.jsonl"] = levels[0]
         source = json.loads((cold / "source-level.jsonl").read_text())
-        source_counts = {"band_calls": source["calls"], "evaluation_counts": source["evaluation_counts"]}
+        source_counts = {
+            "band_calls": source["calls"],
+            "evaluation_counts": source["evaluation_counts"],
+        }
 
     for filename in ("lineb.con", "lineb-orbit.con"):
         if not available(filename, require_absolute or filename == "lineb.con"):
@@ -86,15 +95,25 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
         frames = [readcon.read_con(str(r / filename)) for r in runs]
         if not frames[0] or len(frames[0]) != len(frames[1]):
             raise ValueError(f"{filename}: frame count differs or is zero")
+
         def identity(frame):
-            return [{"id": atom.atom_id, "symbol": atom.symbol, "mass_amu": atom.mass,
-                     "fixed": list(atom.fixed)} for atom in frame.atoms]
+            return [
+                {
+                    "id": atom.atom_id,
+                    "symbol": atom.symbol,
+                    "mass_amu": atom.mass,
+                    "fixed": list(atom.fixed),
+                }
+                for atom in frame.atoms
+            ]
 
         signature = identity(frames[0][0])
         trajectories[filename] = {"frames": len(frames[0]), "atoms": signature}
         for i, (a, b) in enumerate(zip(*frames)):
             if identity(a) != signature or identity(b) != signature:
-                raise ValueError(f"{filename} frame {i}: atom IDs, species, masses or fixed flags differ")
+                raise ValueError(
+                    f"{filename} frame {i}: atom IDs, species, masses or fixed flags differ"
+                )
             for name in ("xyz", "cell", "angles"):
                 record(f"{filename}.{name}", getattr(a, name), getattr(b, name), i)
             meta = [dict(f.metadata) for f in (a, b)]
@@ -106,7 +125,9 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
                 if filename == "lineb-orbit.con":
                     orbit = m["lineb_orbit"]
                     ids = orbit["mobile_atom_ids"]
-                    if len(set(ids)) != len(ids) or np.shape(orbit["gradients_eV_per_angstrom"]) != (len(ids), 3):
+                    if len(set(ids)) != len(ids) or np.shape(
+                        orbit["gradients_eV_per_angstrom"]
+                    ) != (len(ids), 3):
                         raise ValueError("invalid orbit gradient shape or mobile IDs")
             record(f"{filename}.metadata", *meta, i)
     if available("native.json", require_absolute):
@@ -123,11 +144,19 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
             raise ValueError("native source hash differs from the frozen level")
         for tag in ("cold", "warm"):
             ledger = counts[tag]
-            if ledger["physical_launches"] != ledger["evaluation_counts"]["rgpot_results"]["computed"]:
+            if (
+                ledger["physical_launches"]
+                != ledger["evaluation_counts"]["rgpot_results"]["computed"]
+            ):
                 raise ValueError(f"{tag}: physical launches differ from computed results")
         if counts["warm"]["physical_launches"]:
             raise ValueError("warm replay launched physical evaluations")
-        for key in ("source_level", "source_level_counts", "reference_energy_eV", "saddle_energy_eV"):
+        for key in (
+            "source_level",
+            "source_level_counts",
+            "reference_energy_eV",
+            "saddle_energy_eV",
+        ):
             record(f"native.{key}", native[0][key], native[1][key])
     if available("absolute_rate.json", require_absolute):
         rates = [json.loads((r / "absolute_rate.json").read_text()) for r in runs]
@@ -135,19 +164,35 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
             raise ValueError("absolute rate is missing")
         record("absolute_rate", *rates)
     for key in ("surface_calls", "potential_calls"):
-        if counts["cold"]["evaluation_counts"][key] != counts["warm"]["evaluation_counts"][key]:
+        if (
+            counts["cold"]["evaluation_counts"][key]
+            != counts["warm"]["evaluation_counts"][key]
+        ):
             raise ValueError(f"{key}: number of requested evaluations differs")
-    return {"identical_physics": all(d["max_abs"] == 0 for d in fields.values()),
-            "input_sha256": inputs, "trajectories": trajectories, "source_level_counts": source_counts,
-            "counts": counts, "differences": fields}
+    return {
+        "identical_physics": all(d["max_abs"] == 0 for d in fields.values()),
+        "input_sha256": inputs,
+        "trajectories": trajectories,
+        "source_level_counts": source_counts,
+        "counts": counts,
+        "differences": fields,
+    }
 
 
 @click.command()
 @click.argument("cold", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.argument("warm", type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--require-absolute", is_flag=True, help="Require native counters, measured orbit gradients and molecular rate.")
-@click.option("--rate-input", multiple=True, type=click.Path(exists=True, dir_okay=False, path_type=Path),
-              help="Record a shared input used for absolute-rate normalization.")
+@click.option(
+    "--require-absolute",
+    is_flag=True,
+    help="Require native counters, measured orbit gradients and molecular rate.",
+)
+@click.option(
+    "--rate-input",
+    multiple=True,
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Record a shared input used for absolute-rate normalization.",
+)
 def main(cold, warm, require_absolute, rate_input):
     """Compare recorded cold and warm eOn jobs with identical physical inputs."""
     report = compare(cold, warm, require_absolute, rate_input)

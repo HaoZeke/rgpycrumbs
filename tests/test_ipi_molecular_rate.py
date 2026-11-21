@@ -37,10 +37,12 @@ def test_raw_spectrum_retains_the_unstable_mode_and_removes_time_translation():
     from rgpycrumbs.eon.ipi_molecular_rate import fluctuation_partition
 
     # The unstable mode can be smaller in magnitude than the time-shift mode.
-    exported = np.array([0.] * 6 + [-0.25, 0.80, 3., 5., 7., 9.])
+    exported = np.array([0.0] * 6 + [-0.25, 0.80, 3.0, 5.0, 7.0, 9.0])
     logq, unstable, removed = fluctuation_partition(exported, 12, 4, 1000.0)
     assert (unstable, removed) == (-0.25, 0.80)
-    retained = np.array([0.25, 3., 5., 7., 9.])
-    np.testing.assert_allclose(logq, -np.log(250 * retained * 3e10 * 1.5198298e-16).sum() + 7 * np.log(4))
+    retained = np.array([0.25, 3.0, 5.0, 7.0, 9.0])
+    np.testing.assert_allclose(
+        logq, -np.log(250 * retained * 3e10 * 1.5198298e-16).sum() + 7 * np.log(4)
+    )
     with pytest.raises(ValueError, match="unstable"):
         fluctuation_partition(-abs(exported), 12, 4, 1000.0)
