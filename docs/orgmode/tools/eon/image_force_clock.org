@@ -1,0 +1,43 @@
+#+TITLE: Compare image force tangents
+
+The command ~rgpycrumbs eon image-force-clock~ takes prepared path images
+and gradients and compares two projections of the inverted potential
+gradient. One uses the derivative of the cubic coordinate spline. The
+other uses the improved energy-weighted image tangent and one-sided end
+chords. Both interpolate the signed force in mass-weighted arc length.
+
+For a model surface, supply a CSV with one column per coordinate, named
+gradient columns and an energy column. The optional surface command
+receives the Cartesian coordinates and writes an energy as its first
+comma-separated field.
+
+#+begin_src bash
+rgpycrumbs eon image-force-clock prepared.csv --target-energy -0.145 \
+  --surface-command './model surface'
+#+end_src
+
+For a molecular calculation, supply the prepared Cartesian image JSON,
+the matching energy-gradient JSONL, the seed containing atom masses and
+the energy-level record. The largest Cartesian image-to-ledger difference
+must be within the specified matching tolerance. The output includes
+the observed maximum and the hashes of its inputs.
+
+#+begin_src bash
+rgpycrumbs eon image-force-clock images.json --ledger evaluations.jsonl \
+  --molecular-seed seed.json --level levels.jsonl
+#+end_src
+
+For each projection the program integrates the force spline analytically
+in space. It locates the returning root of that primitive and integrates
+inverse speed with zero-speed turning endpoints. The half period is
+independent of a chosen Verlet step or ring bead count. Distances and
+periods use the supplied mass, length and energy units. When a surface
+command is supplied, the result includes the measured energy excess at the
+return turn, the maximum energy along the path, and the number of extra
+surface evaluations.
+
+#+BEGIN_EXPORT rst
+.. click:: rgpycrumbs.eon.image_force_clock:main
+   :prog: rgpycrumbs eon image-force-clock
+   :nested: full
+#+END_EXPORT
