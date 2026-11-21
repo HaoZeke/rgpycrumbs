@@ -27,6 +27,10 @@ lengths. The chord term uses their momentum-weighted unit vectors.
 Their projected rotational vectors add to the total. Values use the
 energy, length and mass units of the supplied measurements. Each
 snapshot uses the same electronic observations for both alignments.
+With =--spring= and =--endpoint-kappa= set to the native coefficients,
+the report also gives the spring component tangent to each turning
+surface, the signed energy-restraint component along its normal, and
+their combined norm.
 
 #+BEGIN_EXPORT rst
 .. click:: rgpycrumbs.eon.lineb_alignment:main
