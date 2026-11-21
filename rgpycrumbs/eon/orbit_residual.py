@@ -9,6 +9,7 @@ evaluates those same geometries independently of the instanton optimization.
 # dependencies = ["ase", "click", "numpy", "readcon", "scipy"]
 # ///
 
+import hashlib
 import importlib
 import importlib.util
 import json
@@ -371,9 +372,10 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
             spectral = other if compare_discretizations else euclidean_force_residual(
                 xyz[:, mobile], forces[:, mobile], masses, temperature, period_seconds=period
             )
-        result["fourier_residual_decomposition"] = decompose_fourier_residual(
-            xyz[:, mobile], spectral, masses
-        )
+        decomposition = decompose_fourier_residual(xyz[:, mobile], spectral, masses)
+        with band.open("rb") as orbit:
+            decomposition["orbit_sha256"] = hashlib.file_digest(orbit, "sha256").hexdigest()
+        result["fourier_residual_decomposition"] = decomposition
     if tolerance is not None:
         result.update(
             tolerance_eV_per_angstrom=tolerance, within_tolerance=largest <= tolerance
