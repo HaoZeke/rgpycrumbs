@@ -77,3 +77,21 @@ frequency hashes against the eigenvector report. The output gives the
 absolute overlap of the deleted eigenvector with the mass-weighted path
 tangent, its square, and whether that mode has the largest overlap. Use
 the measured overlaps to interpret a signed phase frequency.
+
+The raw report also gives the finite-bead thermodynamic tunneling energy.
+With bead coordinates fixed, the potential contribution to the discrete
+dimensionless action is proportional to inverse temperature β, while the
+spring contribution is proportional to 1/β. Taking the β derivative gives
+
+#+BEGIN_EXPORT rst
+.. math::
+
+   E_\mathrm{tun}-E_\mathrm{ref}
+     = k_\mathrm{B} T (S_\mathrm{pot}/\hbar-S_\mathrm{spring}/\hbar).
+#+END_EXPORT
+
+=finite_bead_tunneling_energy= reports that energy difference in eV,
+the native electronic reference, their sum and the i-PI thermal energy
+used in the conversion. A depth below a saddle requires a separately
+measured saddle energy on the same surface and electronic energy scale.
+The estimator uses the archived bead energies and coordinates.

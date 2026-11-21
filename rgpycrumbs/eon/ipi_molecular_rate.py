@@ -269,6 +269,8 @@ def reconstruct(case, summary, reactant_report, instanton_report):
         raise ValueError(
             "native deleted frequency differs from the signed phase mode in freq.dat"
         )
+    kbt_eV = 1 / (beta * IPI_UNITS["electronvolt"])
+    tunneling_energy_shift = kbt_eV * (potential_action - spring_action)
     raw = {
         "beads": p,
         "temperature_K": temperature,
@@ -285,6 +287,14 @@ def reconstruct(case, summary, reactant_report, instanton_report):
         "potential_action_over_hbar": potential_action,
         "spring_action_over_hbar": spring_action,
         "action_over_hbar": potential_action + spring_action,
+        "finite_bead_tunneling_energy": {
+            "estimator": "fixed-orbit beta derivative of the dimensionless discrete action",
+            "energy_reference_eV": reference,
+            "kBT_eV": kbt_eV,
+            "energy_minus_reference_eV": tunneling_energy_shift,
+            "energy_eV": reference + tunneling_energy_shift,
+            "additional_surface_requests": 0,
+        },
         "ln_rate_per_s": log_rate,
         "log10_rate_per_s": log_rate / np.log(10),
     }
