@@ -64,3 +64,30 @@ rgpycrumbs eon instanton-rate-comparison markers.csv harmonic_rates.csv \
    :prog: rgpycrumbs eon instanton-rate-comparison
    :nested: full
 #+END_EXPORT
+
+** Checking a result-cache replay
+
+~eon lineb-replay~ reads two eOn calculation directories, checks the seed
+and physical configuration, then compares the recorded path and orbit
+in their stored atom and image order. The result gives the maximum
+absolute difference in each numerical field, with its frame and component.
+The full cold and warm evaluation ledgers remain separate. Molecular
+runs can require their measured gradients, absolute rates, frozen energy
+record and native provider counters. The equilibrium spectrum and geometry
+can be included in the report by digest.
+
+#+begin_src sh
+rgpycrumbs eon lineb-replay cold warm --require-absolute \
+   --rate-input reactant_vibrations.json --rate-input reactant.xyz > replay.json
+#+end_src
+
+For a seed evaluated with ORCA, ~orca turning-endpoints~ matches observed
+EnGrad geometries to the first and last CON frames by species and Cartesian
+coordinates, with allowance for the printed precision. It reports both
+endpoint energies relative to the requested tunneling energy. Supply the
+same Hartree-to-eV conversion used by the potential that computed the level.
+
+#+begin_src sh
+rgpycrumbs orca turning-endpoints cold/seed.con cold/launches \
+   --level-record cold/source-level.jsonl --hartree-ev 27.211386245988
+#+end_src
