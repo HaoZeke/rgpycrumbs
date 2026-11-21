@@ -2,7 +2,7 @@
 
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["click", "ipi>=3", "numpy"]
+# dependencies = ["click", "defusedxml", "ipi>=3", "numpy"]
 # ///
 
 import contextlib
@@ -14,13 +14,14 @@ from xml.etree import ElementTree as ET
 
 import click
 import numpy as np
+from defusedxml.ElementTree import parse
 from ipi.engine.simulation import Simulation
 from ipi.utils.tools import instanton_postproc as native
 
 
 def phase_mode(checkpoint, frequencies):
     """Rebuild the molecular fluctuation modes with the native rate operators."""
-    root = ET.parse(checkpoint)
+    root = parse(checkpoint)
     for provider in root.iter("ffdirect"):
         for child in list(provider):
             provider.remove(child)
