@@ -3996,8 +3996,9 @@ rgpycrumbs orca orbit-launches lineb.con lineb-orbit.con native.json \
 The audit checks species order, one normally terminated SCF and EnGrad per
 launch, and the complete central Cartesian displacement stencil for the
 image Hessians. The ORCA input coordinates identify each launch within
-their printed decimal precision. The full-precision readcon coordinates
-identify repeated orbit requests. Each physical launch is assigned to the
+their printed decimal precision. The audit walks every saved bead in order because fixed-decimal readcon
+coordinates can round distinct callback inputs to the same value. The
+reported distinct count describes the coordinates read from the file. Each physical launch is assigned to the
 path, Hessian, central ring or output part of the job.
 
 For a rate job seeded from a path-only cache, pass the path-only ORCA
