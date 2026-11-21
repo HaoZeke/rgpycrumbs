@@ -258,8 +258,10 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
         if ipi_half_ring or json.loads(options):
             raise click.UsageError("a force provider is required for i-PI half-rings or provider options")
         forces, period, period_source = observed_eon_forces(frames)
+        producer = frames[0].metadata.get("orbit_provenance", {}).get("producer", "eOn")
         work = {"scope": "validation", "geometry_requests": 0, "observed_beads": len(frames),
-                "provider": "eOn lineb_orbit gradients", "provider_results": None}
+                "provider": f"{producer} lineb_orbit gradients", "provider_results": None}
+        period_source = period_source.replace("eOn", producer)
     else:
         evaluator = _factory(provider)(band, **json.loads(options))
         read_counts = getattr(evaluator, "result_counts", lambda: None)
