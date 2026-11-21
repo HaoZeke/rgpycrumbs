@@ -191,6 +191,30 @@ def reconstruct(case, summary, reactant_report, instanton_report):
     _, _, _, _, _, _, s1, s2 = fields(instanton_report.splitlines(), "log(Qvib*N)")
     raw["raw_minus_native"].update(potential_action_over_hbar=potential_action - s1,
                                    spring_action_over_hbar=spring_action - s2)
+    # Each factor in the native partition tables is rounded to three decimal places.
+    half_digit = 0.0005
+    qt_r, qr_r, _ = fields(reactant_report.splitlines(), "Qtras(bohr^-3)")
+    _, bn_tab, qt_i, qr_i, _, _, _, _ = fields(instanton_report.splitlines(), "log(Qvib*N)")
+    intervals = {}
+    for key in ("action_over_hbar", "BN_times_N_atomic_units", "log_Qvib_instanton_native",
+                "log_Qvib_reactant", "potential_action_over_hbar", "spring_action_over_hbar"):
+        rounded = {"potential_action_over_hbar": s1, "spring_action_over_hbar": s2}.get(key, summary.get(key))
+        intervals[key] = (rounded - half_digit, rounded + half_digit)
+    for key, numerator, denominator in (("rotational_ratio", qr_i, qr_r), ("translational_ratio", qt_i, qt_r)):
+        intervals[key] = ((numerator - half_digit) / (denominator + half_digit),
+                          (numerator + half_digit) / (denominator - half_digit))
+    # Bound the final log rate by propagating the monotonic dependence on each printed factor.
+    bounds = []
+    for direction in (0, 1):
+        log_bound = (np.log(kt / constants.h) + .5 * np.log(2 * np.pi * (bn_tab + (2*direction-1)*half_digit) * kelvin_au)
+                     + np.log(intervals["rotational_ratio"][direction])
+                     + np.log(intervals["translational_ratio"][direction])
+                     + intervals["log_Qvib_instanton_native"][direction]
+                     - intervals["log_Qvib_reactant"][1-direction] - intervals["action_over_hbar"][1-direction])
+        bounds.append(float(log_bound / np.log(10)))
+    intervals["log10_rate_per_s"] = bounds
+    raw["native_rounding"] = {k: {"lower": lo, "upper": hi, "within": bool(lo <= raw[k] <= hi)}
+                              for k, (lo, hi) in intervals.items()}
     raw["input_sha256"] = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()}
     raw["input_sha256"].update(reactant_table=hashlib.sha256(reactant_report.encode()).hexdigest(),
                                instanton_table=hashlib.sha256(instanton_report.encode()).hexdigest())
@@ -203,13 +227,20 @@ def reconstruct(case, summary, reactant_report, instanton_report):
 @click.argument("instanton", type=click.Path(exists=True, path_type=Path))
 @click.option("--raw-case", type=click.Path(exists=True, file_okay=False, path_type=Path),
               help="Reconstruct the prefactor and action from this half-ring archive.")
-def main(reactant, instanton, raw_case):
+@click.option("--check-native-rounding", is_flag=True, help="Require every reconstructed factor to agree with the precision of the native tables.")
+def main(reactant, instanton, raw_case, check_native_rounding):
     """Read native i-PI REACTANT and INSTANTON postprocessor reports."""
+    if check_native_rounding and raw_case is None:
+        raise click.UsageError("--check-native-rounding requires --raw-case")
     minimum, path = reactant.read_text(), instanton.read_text()
     result = molecular_rate(minimum, path)
     if raw_case is not None:
         result["raw_reconstruction"] = reconstruct(raw_case, result, minimum, path)
     click.echo(json.dumps(result, allow_nan=False))
+    if check_native_rounding:
+        failed = [k for k, v in result["raw_reconstruction"]["native_rounding"].items() if not v["within"]]
+        if failed:
+            raise click.ClickException("outside native rounding intervals: " + ", ".join(failed))
 
 
 if __name__ == "__main__":
