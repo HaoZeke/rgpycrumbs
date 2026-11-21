@@ -68,7 +68,7 @@ def read_decks(archive, symbols):
 @click.option(
     "--inherited-launches",
     type=click.Path(exists=True, path_type=Path),
-    help="ORCA launch archive for the path-only run that populated the inherited cache.",
+    help="ORCA launch archive for the measurement that populated the inherited cache.",
 )
 @click.option(
     "--deck-decimals", type=click.IntRange(1, 16), default=10, show_default=True
@@ -135,7 +135,9 @@ def main(band, orbit, native, launches, inherited_launches, deck_decimals):
     available = decks[:start]
     inherited_count = 0
     if inherited_launches:
-        if summary.get("cache_state") != "seeded" or not summary.get("inherited_cache"):
+        if summary.get("cache_state") not in {"seeded", "calibrated"} or not summary.get(
+            "inherited_cache"
+        ):
             raise ValueError(
                 "an inherited archive requires a native cache inheritance record"
             )
