@@ -159,8 +159,8 @@ def _factory(spec):
     return getattr(module, name)
 
 
-def observed_eon_forces(frames):
-    """Read signed Cartesian forces from the native rate observation on each bead."""
+def eon_orbit_period(frames):
+    """Read the common period of a native eOn rate orbit in seconds."""
     from scipy import constants
 
     lineb = frames[0].metadata.get("lineb")
@@ -179,10 +179,17 @@ def observed_eon_forces(frames):
             raise click.UsageError("eOn metadata must supply a half-period or configured hbar, boltzmann and temperature")
         period = hbar / (kb * temperature) * unit_seconds
         period_source = "eOn configured hbar, boltzmann and temperature"
+    if any(frame.metadata.get("lineb") != lineb for frame in frames):
+        raise click.UsageError("all orbit frames must carry the same eOn rate metadata")
+    producer = frames[0].metadata.get("orbit_provenance", {}).get("producer", "eOn")
+    return period, period_source.replace("eOn", producer)
+
+
+def observed_eon_forces(frames):
+    """Read signed Cartesian forces from the native rate observation on each bead."""
+    period, period_source = eon_orbit_period(frames)
     rows = []
     for frame in frames:
-        if frame.metadata.get("lineb") != lineb:
-            raise click.UsageError("all orbit frames must carry the same eOn rate metadata")
         observation = frame.metadata.get("lineb_orbit", {})
         ids = observation.get("mobile_atom_ids", [])
         gradients = np.asarray(observation.get("gradients_eV_per_angstrom"), dtype=float)
@@ -319,8 +326,9 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
         producer = frames[0].metadata.get("orbit_provenance", {}).get("producer", "eOn")
         work = {"scope": "validation", "geometry_requests": 0, "observed_beads": len(frames),
                 "provider": f"{producer} lineb_orbit gradients", "provider_results": None}
-        period_source = period_source.replace("eOn", producer)
     else:
+        if not ipi_half_ring and "lineb" in templ.metadata:
+            period, period_source = eon_orbit_period(frames)
         evaluator = _factory(provider)(band, **json.loads(options))
         read_counts = getattr(evaluator, "result_counts", lambda: None)
         before = read_counts()
@@ -336,7 +344,7 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
     if ipi_half_ring:
         xyz = np.concatenate((xyz, xyz[::-1]))
         forces = np.concatenate((forces, forces[::-1]))
-    finite_bead = ipi_half_ring or provider is None
+    finite_bead = ipi_half_ring or period is not None
     residual = euclidean_force_residual(
         xyz[:, mobile], forces[:, mobile], masses, temperature, ring_polymer=finite_bead, period_seconds=period
     )

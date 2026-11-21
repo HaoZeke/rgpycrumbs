@@ -58,8 +58,10 @@ in each rate bead. Omit the force provider to read these measurements, convert
 the gradient to a force and use twice the recorded half-period. The report
 gives the finite-bead force residual, its cost of zero additional potential
 calls and the number of observed beads. ~--compare-discretizations~ adds the
-Fourier residual from the same measured gradients. A separate force provider
-uses the thermal period from the physical constants and the reported temperature.
+Fourier residual from the same measured gradients. Independent provider evaluations on the same eOn orbit use the same
+recorded period. For an i-PI half-ring or a full trajectory without eOn
+timing metadata, the thermal period comes from the physical constants
+and the reported temperature.
 
 #+begin_src sh
 rgpycrumbs eon orbit-residual lineb-orbit.con --compare-discretizations
