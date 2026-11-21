@@ -51,7 +51,7 @@ def action_drive(rows, masses, target_energy, width, adjacent):
         + weights[1:, None] * unit[1:]
     )
     decomposed = []
-    for i, vector in enumerate(drive, start=1):
+    for i, full_drive in enumerate(drive, start=1):
         backward, forward = gap[i] - gap[i - 1], gap[i + 1] - gap[i]
         if backward > 0 and forward > 0:
             tangent = chords[i]
@@ -64,7 +64,7 @@ def action_drive(rows, masses, target_energy, width, adjacent):
         norm = np.linalg.norm(tangent)
         if not norm:
             raise ValueError("undefined interior energy-weighted tangent")
-        vector = vector - np.dot(vector, tangent) * tangent / norm**2
+        vector = full_drive - np.dot(full_drive, tangent) * tangent / norm**2
         rotations = np.array([np.cross(axis, q[i]).ravel() for axis in np.eye(3)])
         _, singular, basis = np.linalg.svd(rotations, full_matrices=False)
         basis = basis[singular > singular[0] * max(rotations.shape) * np.finfo(float).eps]
