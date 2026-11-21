@@ -7,12 +7,15 @@
 
 import hashlib
 import json
+import re
+from io import StringIO
 from pathlib import Path
 
 import click
 import numpy as np
 import readcon
 from ase.data import atomic_numbers
+from ase.io.orca import read_geom_orcainp
 from ase.units import Bohr
 
 
@@ -51,8 +54,17 @@ def main(band, launches, target_ev, level_record, hartree_ev, require_bracket):
             error = np.max(np.abs(geometry[:, 1:] * Bohr - np.asarray(frame.xyz)))
             if error > 5e-8:
                 continue
+            inp = file.with_name("input.inp")
+            # ASE accepts the compact *xyz spelling of the Cartesian block.
+            text = re.sub(r"(?im)^\*\s+xyz\s+", "*xyz ", inp.read_text())
+            atoms = read_geom_orcainp(StringIO(text))
+            input_error = np.max(np.abs(atoms.positions - np.asarray(frame.xyz)))
+            if atoms.numbers.tolist() != numbers or input_error > 5.1e-11:
+                continue
             matches[i] = {"frame": [0, len(frames) - 1][i], "launch": file.parent.name,
                           "engrad_sha256": hashlib.sha256(file.read_bytes()).hexdigest(),
+                          "input_sha256": hashlib.sha256(inp.read_bytes()).hexdigest(),
+                          "max_input_coordinate_difference_angstrom": float(input_error),
                           "energy_eV": energy, "energy_minus_target_eV": energy - target_ev,
                           "max_coordinate_rounding_angstrom": float(error)}
         if len(matches) == 2:
