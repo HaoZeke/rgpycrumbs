@@ -1,0 +1,22 @@
+#+title: Measured gradients on an LI image band
+
+An eOn LI image band records its energy and geometry for each image.
+To recover the corresponding gradient, supply the readcon band, the
+native job summary and an archive of the ORCA launches. Each launch
+contains =input.inp=, =output.engrad= and =launch.json=. An inherited
+cache can carry observations from another run. Use =--inherited= to
+supply its archive.
+
+#+begin_src shell
+rgpycrumbs orca band-observations lineb.con engrad-launches.tgz \
+  --native native.json --hartree-ev 27.211386245988 \
+  --bohr-angstrom 0.529177210903 \
+  --write-observations images.jsonl > matches.json
+#+end_src
+
+Use the unit conversions of the native electronic backend. Each JSONL
+record carries one matched energy and gradient in image order. The
+report identifies every candidate by input and EnGrad checksum, verifies
+the element order and output coordinates, and reports the spread among
+matching gradients. When available, the match from the native output
+phase identifies the physical observation for the saved image.
