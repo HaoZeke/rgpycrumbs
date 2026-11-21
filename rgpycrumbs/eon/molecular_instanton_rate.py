@@ -65,7 +65,7 @@ def molecular_rate(level, minimum, atoms, ring):
                 time_unit_s=time_s, path_multiplicity=1)
 
 
-def export_observed_ring(path, level, atoms, ring, observations, end, inputs, run_counts=None):
+def export_observed_ring(path, level, atoms, ring, observations, end, inputs, run_counts=None, native_seed=None):
     """Write the last measured rate gradients of a Rust LI level as a readcon orbit."""
     from collections import deque
     import hashlib
@@ -97,6 +97,15 @@ def export_observed_ring(path, level, atoms, ring, observations, end, inputs, ru
     provenance = {"producer": "rgsaddle", "representation": "exported measured rate orbit",
                   "source_sha256": {k:digest(v) for k,v in inputs.items()},
                   "reference_energy_eV": level["reference_energy"], "level": level["level"]}
+    provenance["mass_source"] = "equilibrium geometry"
+    if native_seed is not None:
+        seed = json.loads(native_seed.read_text())
+        if (seed["symbols"] != atoms.get_chemical_symbols()
+                or not np.array_equal(seed["masses"], atoms.get_masses())
+                or seed["reference_energy"] != level["reference_energy"]):
+            raise ValueError("native seed species, isotope masses or electronic reference disagree with the export")
+        provenance["mass_source"] = "verified against native seed"
+        provenance["source_sha256"]["native_seed"] = digest(native_seed)
     counts = dict(phases)
     if run_counts is not None:
         meta = json.loads(run_counts.read_text())
@@ -123,7 +132,7 @@ def export_observed_ring(path, level, atoms, ring, observations, end, inputs, ru
                 "lineb_orbit": {"mobile_atom_ids": ids, "energy_eV": float(energies[i]),
                                 "gradients_eV_per_angstrom": gradients[i].tolist()}}
             yield frame
-    sources = [*inputs.values(), *([run_counts] if run_counts is not None else [])]
+    sources = [*inputs.values(), *(source for source in (run_counts, native_seed) if source is not None)]
     if path.resolve() in {src.resolve() for src in sources}:
         raise ValueError("the exported ring must have its own output path")
     readcon.write_con(str(path), frames())
@@ -216,17 +225,18 @@ def eon_orbit_rate(path, minimum, atoms, confirm_same_energy_zero):
 @click.option("--index", type=click.IntRange(min=0), default=0, show_default=True)
 @click.option("--write-orbit", type=click.Path(path_type=Path), help="Export a Rust level and its measured gradients to readcon.")
 @click.option("--observations", type=click.Path(exists=True, path_type=Path), help="Native ordered geometry request ledger for --write-orbit.")
+@click.option("--native-seed", type=click.Path(exists=True, path_type=Path), help="Original Rust seed for checking masses, species and the electronic reference.")
 @click.option("--run-counts", type=click.Path(exists=True, path_type=Path), help="Native run_meta.json with provider counts for the export.")
 @click.option("--confirm-same-energy-zero", is_flag=True,
               help="Confirm the eOn orbit and reactant spectrum share the PES and electronic zero.")
-def main(level_file, reactant_spectrum, reactant_extxyz, beads_json, index, confirm_same_energy_zero, write_orbit, observations, run_counts):
+def main(level_file, reactant_spectrum, reactant_extxyz, beads_json, index, confirm_same_energy_zero, write_orbit, observations, run_counts, native_seed):
     """Normalize a JSONL level with BEADS_JSON or an eOn lineb-orbit.con."""
     from ase.io import read
 
     minimum = json.loads(reactant_spectrum.read_text())
     atoms = read(reactant_extxyz, format="extxyz")
     try:
-        if bool(write_orbit) != bool(observations) or (run_counts and not write_orbit):
+        if bool(write_orbit) != bool(observations) or ((run_counts or native_seed) and not write_orbit):
             raise click.UsageError("supply --write-orbit and --observations together for a Rust level")
         if level_file.suffix.lower() == ".con":
             if beads_json is not None or index or write_orbit:
@@ -243,7 +253,7 @@ def main(level_file, reactant_spectrum, reactant_extxyz, beads_json, index, conf
                 end = sum(json.loads(row)["evaluation_counts"]["surface_calls"]["total"] for row in levels[:index+1])
                 inputs = dict(levels=level_file, reactant_spectrum=reactant_spectrum,
                               reactant_geometry=reactant_extxyz, ring=beads_json, observations=observations)
-                export_observed_ring(write_orbit, level, atoms, ring, observations, end, inputs, run_counts)
+                export_observed_ring(write_orbit, level, atoms, ring, observations, end, inputs, run_counts, native_seed)
     except (KeyError, ValueError, IndexError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(json.dumps(result, indent=2, allow_nan=False))
