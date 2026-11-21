@@ -30,3 +30,24 @@ Stdout repeats the inverse temperatures and reference values, then
 ** API Reference
 For developer details and source code see
 @@rst::mod:`rgpycrumbs.eon.harmonic_diffusivity`@@.
+
+* Fixed-lattice instanton rates
+
+A fixed-lattice LI calculation samples a periodic cell with a subset of
+mobile atoms. The native solver level contains the absolute log flux, ring
+temperature, bead count and fluctuation index. The native seed specifies
+the ordered mobile indices, isotope masses and reactant energy. The minimum
+spectrum supplies one positive frequency per mobile Cartesian coordinate
+in that same fixed lattice.
+
+#+begin_src bash
+rgpycrumbs eon lattice-instanton-diffusivity levels.jsonl reactant.json seed.json \
+  --hop-length 1.17 --path-multiplicity 4 --lattice-dimension 3
+#+end_src
+
+The JSON result gives =log10_hop_rate_per_s= and
+=log10_diffusivity_cm2_per_s=. A single retained negative mode and matching
+reactant electronic zeros are required. Each positive mode contributes
+the finite-bead factor ( [2\sinh(P\,\mathrm{asinh}(\beta\hbar\omega/(2P)))]^{-1} )
+to the reactant partition. Rigid translations and rotations of the full cell
+are absent because the lattice contains fixed atoms.

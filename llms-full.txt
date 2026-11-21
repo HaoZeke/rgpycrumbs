@@ -2156,6 +2156,73 @@ Stdout repeats the inverse temperatures and reference values, then
 For developer details and source code see
 `rgpycrumbs.eon.harmonic_diffusivity`.
 
+### Fixed-lattice instanton rates
+
+A fixed-lattice LI calculation samples a periodic cell with a subset of
+mobile atoms. The native solver level contains the absolute log flux, ring
+temperature, bead count and fluctuation index. The native seed specifies
+the ordered mobile indices, isotope masses and reactant energy. The minimum
+spectrum supplies one positive frequency per mobile Cartesian coordinate
+in that same fixed lattice.
+
+```bash
+rgpycrumbs eon lattice-instanton-diffusivity levels.jsonl reactant.json seed.json \
+  --hop-length 1.17 --path-multiplicity 4 --lattice-dimension 3
+```
+
+The JSON result gives `log10_hop_rate_per_s` and
+`log10_diffusivity_cm2_per_s`. A single retained negative mode and matching
+reactant electronic zeros are required. Each positive mode contributes
+the finite-bead factor ( [2\sinh(P\,\mathrm{asinh}(\beta\hbar\omega/(2P)))]^{-1} )
+to the reactant partition. Rigid translations and rotations of the full cell
+are absent because the lattice contains fixed atoms.
+
+## Compare image force tangents
+
+Source: https://rgpycrumbs.rgoswami.me/tools/eon/image_force_clock
+
+The command `rgpycrumbs eon image-force-clock` takes prepared path images
+and gradients and compares two projections of the inverted potential
+gradient. One uses the derivative of the cubic coordinate spline. The
+other uses the improved energy-weighted image tangent and one-sided end
+chords. Both interpolate the signed force in mass-weighted arc length.
+
+For a model surface, supply a CSV with one column per coordinate, named
+gradient columns and an energy column. The optional surface command
+receives the Cartesian coordinates and writes an energy as its first
+comma-separated field.
+
+```bash
+rgpycrumbs eon image-force-clock prepared.csv --target-energy -0.145 \
+  --surface-command './model surface'
+```
+
+For a molecular calculation, supply the prepared Cartesian image JSON,
+the matching energy-gradient JSONL, the seed containing atom masses and
+the energy-level record. The largest Cartesian image-to-ledger difference
+must be within the specified matching tolerance. The output includes
+the observed maximum and the hashes of its inputs.
+
+```bash
+rgpycrumbs eon image-force-clock images.json --ledger evaluations.jsonl \
+  --molecular-seed seed.json --level levels.jsonl
+```
+
+For each projection the program integrates the force spline analytically
+in space. It locates the returning root of that primitive and integrates
+inverse speed with zero-speed turning endpoints. The half period is
+independent of a chosen Verlet step or ring bead count. Distances and
+periods use the supplied mass, length and energy units. When a surface
+command is supplied, the result includes the measured energy excess at the
+return turn, the maximum energy along the path, and the number of extra
+surface evaluations.
+
+```rst
+.. click:: rgpycrumbs.eon.image_force_clock:main
+   :prog: rgpycrumbs eon image-force-clock
+   :nested: full
+```
+
 ## i-PI molecular instanton rate
 
 Source: https://rgpycrumbs.rgoswami.me/tools/eon/ipi_molecular_rate
@@ -2206,6 +2273,34 @@ rgpycrumbs eon molecular-instanton-rate levels.jsonl reactant_vibrations.json \
     reactant.extxyz level_00/beads_cartesian.json --index 0 > rate.json
 ```
 
+For eOn, pass the measured `lineb-orbit.con` as the first argument. Each
+frame carries the molecular rate, spectrum index, thermal constants and
+imaginary-time phase. The equilibrium spectrum and geometry provide the
+electronic energy, vibrational partition and rotational inertia. Check that
+the potential and electronic energy origin match both inputs before supplying
+the confirmation flag. The output records that the orbit lacks an independent
+electronic reference.
+
+```shell
+rgpycrumbs eon molecular-instanton-rate lineb-orbit.con reactant_vibrations.json \
+    reactant.extxyz --confirm-same-energy-zero > rate.json
+```
+
+To exchange a Rust calculation, add `--write-orbit` and its ordered
+`--observations` ledger to the JSONL command. `--run-counts` includes the
+provider totals from `run_meta.json`. Pass `--native-seed` to verify all
+element symbols, isotope masses and the reference energy against the original solver input. The export verifies that the final rate
+requests match the full ring at binary64 precision. Each frame identifies
+rgsaddle as its producer and carries the source hashes, phase-resolved level
+counts, measured electronic energy, gradient and rate calibration. A reader
+can compare the stored reference energy to the equilibrium spectrum directly.
+
+```shell
+rgpycrumbs eon molecular-instanton-rate levels.jsonl reactant_vibrations.json \
+    reactant.extxyz level_00/beads_cartesian.json --observations evaluations.jsonl \
+    --run-counts run_meta.json --native-seed mep.json --write-orbit observed-rgsaddle.con
+```
+
 The command uses the finite-bead harmonic partition function on the same
 energy zero as the flux. For each rigid direction it keeps the non-centroid
 spring modes. Translation cancels between reactant and ring. Rotation
@@ -2222,7 +2317,10 @@ label to join multiple records into one calculation series. Each output
 table row gives the calculated rate and, within the reference interval, the
 difference from linear interpolation of the plotted reference in inverse
 temperature. A missing reference difference indicates a calculated
-temperature outside the digitized interval.
+temperature outside the digitized interval. To compare two calculations,
+pass `--compare-series` with one of the series labels. Its data must cover
+at least two distinct temperatures. The CSV adds its interpolated rate and
+the difference in decades wherever that series covers the temperature.
 
 ```shell
 rgpycrumbs eon instanton-rate-comparison markers.csv harmonic_rates.csv \
@@ -2252,6 +2350,17 @@ imaginary-time derivative of the position. Output includes both the largest
 absolute component and the root mean square across components and beads,
 in eV/Å.
 
+### Model orbits
+
+For a model with reduced units, `eon model-orbit-residual` reads an equal-time Cartesian CSV and takes the full orbit period in those units. Supply one mass for each named coordinate. The surface program receives the coordinates as positional arguments and writes one CSV row containing the energy followed by the Cartesian potential gradient. The command evaluates each bead separately and reports both finite-bead and Fourier force residuals, including the maximum component, its bead index, and the RMS over all components and beads.
+
+For an orbit with columns `x` and `y`, unit masses, and a measured half-period of 8.143223, the command is
+
+```shell
+rgpycrumbs eon model-orbit-residual ring.csv --coordinate x --coordinate y \
+  --mass 1 --mass 1 --period 16.286446 --surface-command './lineb_muller_brown surface'
+```
+
 ### Inputs
 
 Supply a readcon band containing a complete thermal period, with one
@@ -2273,9 +2382,30 @@ rgpycrumbs eon orbit-residual ring.con \
     --provider potential.py:orbit_provider --temperature 150
 ```
 
+A stationary saddle repeated at every bead can have a small force residual.
+The `geometry_extent` record gives the number of distinct coordinate arrays,
+the largest single-atom displacement between any two beads in Å, and the
+largest displacement in mass-weighted Cartesian space in Å √u. All three use
+the coordinates as stored. Independent rotations or translations of beads
+contribute to the measured span. To track an internal coordinate, add
+`--atom-pair 2 5` with the two atom IDs from the band. The `pair_distances`
+record reports their minimum and maximum separation in Å over the period.
+
 The calculation differentiates the periodic Fourier interpolant on the bead
 grid. Repeating the check at higher bead resolution distinguishes a
 discretization residual from an error that persists in the path.
+
+An eOn `lineb-orbit.con` carries the potential gradient for every mobile atom
+in each rate bead. Omit the force provider to read these measurements, convert
+the gradient to a force and use twice the recorded half-period. The report
+gives the finite-bead force residual, its cost of zero additional potential
+calls and the number of observed beads. `--compare-discretizations` adds the
+Fourier residual from the same measured gradients. A separate force provider
+uses the thermal period from the physical constants and the reported temperature.
+
+```shell
+rgpycrumbs eon orbit-residual lineb-orbit.con --compare-discretizations
+```
 
 ```rst
 .. click:: rgpycrumbs.eon.orbit_residual:main
