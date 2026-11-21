@@ -83,8 +83,11 @@ def force_balance(xyz, gradient, masses, mobile, temp):
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     help="Compare with the native FINAL coordinate and atomic-unit force tables.",
 )
-@click.option("--initial-xyz", type=click.Path(exists=True, path_type=Path),
-              help="Compare the first solver gradient batch with the final orbit at fixed bead count and temperature.")
+@click.option(
+    "--initial-xyz",
+    type=click.Path(exists=True, path_type=Path),
+    help="Compare the first solver gradient batch with the final orbit at fixed bead count and temperature.",
+)
 def main(band, ledger, write_observations, native_directory, initial_xyz):
     """Check an i-PI readcon BAND against its original geometry-request LEDGER."""
     if write_observations and write_observations.resolve() in (
@@ -167,11 +170,21 @@ def main(band, ledger, write_observations, native_directory, initial_xyz):
     report.update(force_balance(xyz, gradient, masses, mobile, temp))
     if initial_xyz:
         initial_frames = read(initial_xyz, index=":", format="xyz")
-        if len(initial_frames) != len(frames) or any(list(f.symbols) != symbols for f in initial_frames):
-            raise ValueError("the initial XYZ and final ring require the same atoms and bead count")
-        start = np.asarray([r["positions_angstrom"] for r in initial_rows]).reshape(xyz.shape)
-        start_gradient = np.asarray([r["gradient_eV_per_angstrom"] for r in initial_rows]).reshape(xyz.shape)
-        coordinate_error = float(abs(start - np.asarray([f.positions for f in initial_frames])).max())
+        if len(initial_frames) != len(frames) or any(
+            list(f.symbols) != symbols for f in initial_frames
+        ):
+            raise ValueError(
+                "the initial XYZ and final ring require the same atoms and bead count"
+            )
+        start = np.asarray([r["positions_angstrom"] for r in initial_rows]).reshape(
+            xyz.shape
+        )
+        start_gradient = np.asarray(
+            [r["gradient_eV_per_angstrom"] for r in initial_rows]
+        ).reshape(xyz.shape)
+        coordinate_error = float(
+            abs(start - np.asarray([f.positions for f in initial_frames])).max()
+        )
         if coordinate_error >= 1e-9:
             raise ValueError("first solver requests differ from the initial XYZ")
         initial = {
@@ -182,13 +195,17 @@ def main(band, ledger, write_observations, native_directory, initial_xyz):
         }
         i, j = np.triu_indices(len(symbols), 1)
         if len(i):
-            distances = np.linalg.norm(xyz[:, i]-xyz[:, j], axis=2) - np.linalg.norm(start[:, i]-start[:, j], axis=2)
+            distances = np.linalg.norm(xyz[:, i] - xyz[:, j], axis=2) - np.linalg.norm(
+                start[:, i] - start[:, j], axis=2
+            )
             bead, pair = np.unravel_index(abs(distances).argmax(), distances.shape)
             initial["pair_distance_changes"] = {
-                "pairs_per_bead": len(i), "stored_beads": len(frames),
+                "pairs_per_bead": len(i),
+                "stored_beads": len(frames),
                 "rms_angstrom": float(np.sqrt(np.mean(distances**2))),
                 "max_angstrom": float(abs(distances[bead, pair])),
-                "max_bead": int(bead), "max_atom_ids": [identity[i[pair]][0], identity[j[pair]][0]],
+                "max_bead": int(bead),
+                "max_atom_ids": [identity[i[pair]][0], identity[j[pair]][0]],
             }
         report["initial_geometry"] = initial
     if native_directory:
