@@ -78,10 +78,12 @@ def export_observed_ring(path, level, atoms, ring, observations, end, inputs, ru
     if phases["surface_calls"]["rate"] < p or end < total:
         raise ValueError("expected the measured rate evaluations at the end of the energy level")
     with observations.open() as stream:
-        records = deque(islice(stream, end), maxlen=p)
-    if len(records) != p:
+        records = deque(enumerate(islice(stream, end), 1), maxlen=p)
+    if len(records) != p or records[-1][0] != end:
         raise ValueError("incomplete molecular rate observation ledger")
-    rows = list(map(json.loads, records))
+    rows = [json.loads(line) for _, line in records]
+    if any(row["request"] != rows[0]["request"] + i for i, row in enumerate(rows)):
+        raise ValueError("rate observations must be consecutive solver requests")
     xyz = np.asarray([row["positions_angstrom"] for row in rows], dtype="<f8").reshape(p,-1)
     if xyz.tobytes() != np.asarray(ring, dtype="<f8").reshape(p,-1).tobytes():
         raise ValueError("observation coordinates differ from the native equal-time beads")
@@ -121,9 +123,10 @@ def export_observed_ring(path, level, atoms, ring, observations, end, inputs, ru
                 "lineb_orbit": {"mobile_atom_ids": ids, "energy_eV": float(energies[i]),
                                 "gradients_eV_per_angstrom": gradients[i].tolist()}}
             yield frame
-    if path.resolve() in {src.resolve() for src in inputs.values()}:
+    sources = [*inputs.values(), *([run_counts] if run_counts is not None else [])]
+    if path.resolve() in {src.resolve() for src in sources}:
         raise ValueError("the exported ring must have its own output path")
-    readcon.write_con(str(path), frames(), precision=17)
+    readcon.write_con(str(path), frames())
 
 
 def eon_orbit_rate(path, minimum, atoms, confirm_same_energy_zero):

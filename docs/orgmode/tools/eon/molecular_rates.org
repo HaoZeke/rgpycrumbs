@@ -32,6 +32,20 @@ rgpycrumbs eon molecular-instanton-rate lineb-orbit.con reactant_vibrations.json
     reactant.extxyz --confirm-same-energy-zero > rate.json
 #+end_src
 
+To exchange a Rust calculation, add ~--write-orbit~ and its ordered
+~--observations~ ledger to the JSONL command. ~--run-counts~ includes the
+provider totals from ~run_meta.json~. The export verifies that the final rate
+requests match the full ring at binary64 precision. Each frame identifies
+rgsaddle as its producer and carries the source hashes, phase-resolved level
+counts, measured electronic energy, gradient and rate calibration. A reader
+can compare the stored reference energy to the equilibrium spectrum directly.
+
+#+begin_src sh
+rgpycrumbs eon molecular-instanton-rate levels.jsonl reactant_vibrations.json \
+    reactant.extxyz level_00/beads_cartesian.json --observations evaluations.jsonl \
+    --run-counts run_meta.json --write-orbit observed-rgsaddle.con
+#+end_src
+
 The command uses the finite-bead harmonic partition function on the same
 energy zero as the flux. For each rigid direction it keeps the non-centroid
 spring modes. Translation cancels between reactant and ring. Rotation
