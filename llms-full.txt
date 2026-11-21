@@ -2329,6 +2329,15 @@ used in the conversion. A depth below a saddle requires a separately
 measured saddle energy on the same surface and electronic energy scale.
 The estimator uses the archived bead energies and coordinates.
 
+With `--comparison-observations FILE.jsonl`, supply energies and gradients
+from a second surface at the same ordered coordinates in angstrom. Each
+row contains `atomic_numbers`, `positions_angstrom`, `energy_eV` and
+`gradient_eV_per_angstrom`. The fixed-orbit spring term is common to both
+surfaces, so the shift in thermodynamic tunneling energy equals the mean
+of the electronic energy differences. The comparison reports the absolute
+energy on the second surface and the largest and RMS gradient differences.
+A saddle energy evaluated on that surface gives the corresponding depth.
+
 ## Molecular thermal instanton rates
 
 Source: https://rgpycrumbs.rgoswami.me/tools/eon/molecular_rates
