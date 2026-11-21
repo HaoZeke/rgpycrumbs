@@ -44,3 +44,21 @@ Adding =--initial-xyz init.xyz= compares the first measured gradient batch
 with the converged orbit at the same temperature and bead count. The report
 includes the initial force residuals, the RMS change in interatomic distances
 over the stored half-ring and the bead and atom pair with the largest change.
+
+The molecular rate omits the second nonrigid fluctuation mode to account
+for translation around the imaginary-time orbit. To identify the omitted
+mode, supply the converged checkpoint, native instanton frequencies
+and native instanton output from the same run.
+
+#+begin_src shell
+rgpycrumbs eon ipi-phase-mode RESTART native/instanton/freq.dat native/instanton.out
+#+end_src
+
+The command rebuilds the native mass-weighted fluctuation matrix from
+stored bead Hessians at the temperature printed in the native output.
+It compares the full spectrum and projects the mass-weighted Fourier
+derivative of the orbit onto the eigenvectors. The JSON identifies the
+largest absolute overlap, the signed frequency omitted from the native
+partition and the number of retained unstable modes. A near-unit overlap
+at the omitted index identifies the phase mode even when its finite-grid
+frequency is negative. The check requires no new force evaluations.
