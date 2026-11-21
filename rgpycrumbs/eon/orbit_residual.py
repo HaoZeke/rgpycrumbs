@@ -112,10 +112,19 @@ def observed_eon_forces(frames):
     lineb = frames[0].metadata.get("lineb")
     if not isinstance(lineb, dict) or lineb.get("beads") != len(frames):
         raise click.UsageError("a force provider is required for a band without a complete eOn rate observation")
-    hbar, kb, temperature = (lineb.get(key) for key in ("hbar", "boltzmann", "temperature"))
-    if not all(isinstance(value, (float, int)) and np.isfinite(value) and value > 0 for value in (hbar, kb, temperature)):
-        raise click.UsageError("eOn rate metadata must supply the measured temperature, hbar and boltzmann")
-    period = hbar / (kb * temperature) * 1e-10 * np.sqrt(constants.atomic_mass / constants.electron_volt)
+    unit_seconds = 1e-10 * np.sqrt(constants.atomic_mass / constants.electron_volt)
+    half = lineb.get("half_period")
+    if half is not None:
+        if not isinstance(half, (float, int)) or not np.isfinite(half) or half <= 0:
+            raise click.UsageError("expected a positive finite eOn half-period")
+        period = 2 * half * unit_seconds
+        period_source = "twice the recorded eOn half-period"
+    else:
+        hbar, kb, temperature = (lineb.get(key) for key in ("hbar", "boltzmann", "temperature"))
+        if not all(isinstance(value, (float, int)) and np.isfinite(value) and value > 0 for value in (hbar, kb, temperature)):
+            raise click.UsageError("eOn metadata must supply a half-period or configured hbar, boltzmann and temperature")
+        period = hbar / (kb * temperature) * unit_seconds
+        period_source = "eOn configured hbar, boltzmann and temperature"
     rows = []
     for frame in frames:
         if frame.metadata.get("lineb") != lineb:
@@ -130,7 +139,7 @@ def observed_eon_forces(frames):
         forces = np.zeros((len(frame.atoms), 3))
         forces[[mobile[atom_id] for atom_id in ids]] = -gradients
         rows.append(forces)
-    return np.stack(rows), period
+    return np.stack(rows), period, period_source
 
 
 @click.command()
@@ -248,7 +257,7 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
     if provider is None:
         if ipi_half_ring or json.loads(options):
             raise click.UsageError("a force provider is required for i-PI half-rings or provider options")
-        forces, period = observed_eon_forces(frames)
+        forces, period, period_source = observed_eon_forces(frames)
         work = {"scope": "validation", "geometry_requests": 0, "observed_beads": len(frames),
                 "provider": "eOn lineb_orbit gradients", "provider_results": None}
     else:
@@ -285,7 +294,7 @@ def main(band, *, provider, options, temperature, tolerance, ipi_half_ring, atom
     }
     if period is not None:
         result["period_seconds"] = period
-        result["period_source"] = "eOn configured hbar, boltzmann and temperature"
+        result["period_source"] = period_source
     if compare_discretizations:
         other = euclidean_force_residual(xyz[:, mobile], forces[:, mobile], masses, temperature,
                                          ring_polymer=not finite_bead, period_seconds=period)

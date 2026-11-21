@@ -42,6 +42,18 @@ The calculation differentiates the periodic Fourier interpolant on the bead
 grid. Repeating the check at higher bead resolution distinguishes a
 discretization residual from an error that persists in the path.
 
+An eOn ~lineb-orbit.con~ carries the potential gradient for every mobile atom
+in each rate bead. Omit the force provider to read these measurements, convert
+the gradient to a force and use twice the recorded half-period. The report
+gives the finite-bead force residual, its cost of zero additional potential
+calls and the number of observed beads. ~--compare-discretizations~ adds the
+Fourier residual from the same measured gradients. A separate force provider
+uses the thermal period from the physical constants and the reported temperature.
+
+#+begin_src sh
+rgpycrumbs eon orbit-residual lineb-orbit.con --compare-discretizations
+#+end_src
+
 #+BEGIN_EXPORT rst
 .. click:: rgpycrumbs.eon.orbit_residual:main
    :prog: rgpycrumbs eon orbit-residual
