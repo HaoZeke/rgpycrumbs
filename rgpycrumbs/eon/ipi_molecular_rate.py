@@ -2,7 +2,7 @@
 
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["ase", "click", "numpy", "readcon", "scipy"]
+# dependencies = ["ase", "click", "defusedxml", "numpy", "readcon", "scipy"]
 # ///
 
 import importlib
@@ -78,14 +78,14 @@ def molecular_rate(minimum, orbit):
 
 
 # i-PI 3.3.1 UnitMap (atomic units) and instanton_postproc.save_frequencies.
-IPI_UNITS = dict(
-    kelvin=3.1668152e-6,
-    hertz=1.5198298e-16,
-    hz_per_cm=3e10,
-    angstrom=1.8897261,
-    dalton=1822.8885,
-    electronvolt=0.036749326,
-)
+IPI_UNITS = {
+    "kelvin": 3.1668152e-6,
+    "hertz": 1.5198298e-16,
+    "hz_per_cm": 3e10,
+    "angstrom": 1.8897261,
+    "dalton": 1822.8885,
+    "electronvolt": 0.036749326,
+}
 
 
 def fluctuation_partition(frequencies, size, beads, beta):
@@ -110,10 +110,12 @@ def fluctuation_partition(frequencies, size, beads, beta):
 def reconstruct(case, summary, reactant_report, instanton_report):
     """Rebuild rate factors from the measured half ring, energies and native spectra."""
     import hashlib
-    import xml.etree.ElementTree as ET
+
     import readcon
     from ase.io import read
+    from defusedxml import ElementTree
     from scipy import constants
+
     from rgpycrumbs.eon.molecular_instanton_rate import log_inertia_det
 
     native = case / "native"
@@ -153,7 +155,7 @@ def reconstruct(case, summary, reactant_report, instanton_report):
     reference = params["energy_reference_eV"]
     signature = [(a.atom_id, a.symbol, a.mass) for a in frames[0].atoms]
     masses = np.asarray([a[2] for a in signature])
-    if len(set(a[0] for a in signature)) != len(signature) or not np.all(
+    if len({a[0] for a in signature}) != len(signature) or not np.all(
         np.isfinite(masses) & (masses > 0)
     ):
         raise ValueError("expected unique atom IDs and positive finite masses")
@@ -174,7 +176,7 @@ def reconstruct(case, summary, reactant_report, instanton_report):
                 "expected Cartesian coordinates in angstrom and masses in amu"
             )
     minimum = read(files["minimum"])
-    mass_input = ET.parse(files["reactant_input"]).find(".//initialize/masses")
+    mass_input = ElementTree.parse(files["reactant_input"]).find(".//initialize/masses")
     if (
         mass_input is None
         or mass_input.get("units") != "dalton"
@@ -254,23 +256,23 @@ def reconstruct(case, summary, reactant_report, instanton_report):
         - potential_action
         - spring_action
     )
-    raw = dict(
-        beads=p,
-        temperature_K=temperature,
-        negative_frequency_cm1=float(unstable),
-        time_translation_cm1=float(removed),
-        positive_reactant_modes=int((eig > 0).sum()),
-        BN_times_N_atomic_units=bn,
-        rotational_ratio=np.exp(rotation),
-        translational_ratio=1.0,
-        log_Qvib_instanton_native=q_orbit,
-        log_Qvib_reactant=q_reactant,
-        potential_action_over_hbar=potential_action,
-        spring_action_over_hbar=spring_action,
-        action_over_hbar=potential_action + spring_action,
-        ln_rate_per_s=log_rate,
-        log10_rate_per_s=log_rate / np.log(10),
-    )
+    raw = {
+        "beads": p,
+        "temperature_K": temperature,
+        "negative_frequency_cm1": float(unstable),
+        "time_translation_cm1": float(removed),
+        "positive_reactant_modes": int((eig > 0).sum()),
+        "BN_times_N_atomic_units": bn,
+        "rotational_ratio": np.exp(rotation),
+        "translational_ratio": 1.0,
+        "log_Qvib_instanton_native": q_orbit,
+        "log_Qvib_reactant": q_reactant,
+        "potential_action_over_hbar": potential_action,
+        "spring_action_over_hbar": spring_action,
+        "action_over_hbar": potential_action + spring_action,
+        "ln_rate_per_s": log_rate,
+        "log10_rate_per_s": log_rate / np.log(10),
+    }
     raw["raw_minus_native"] = {
         k: raw[k] - v
         for k, v in summary.items()

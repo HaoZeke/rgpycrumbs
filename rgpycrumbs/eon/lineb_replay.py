@@ -65,7 +65,10 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
         s: dict(configs[1][s]) for s in configs[1]
     }:
         raise ValueError("physical configuration differs")
-    seed = [digest(run / cfg["Lineb"]["initial_path"]) for run, cfg in zip(runs, configs)]
+    seed = [
+        digest(run / cfg["Lineb"]["initial_path"])
+        for run, cfg in zip(runs, configs, strict=True)
+    ]
     if seed[0] != seed[1]:
         raise ValueError("initial path differs")
     inputs["initial_path"] = seed[0]
@@ -109,7 +112,7 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
 
         signature = identity(frames[0][0])
         trajectories[filename] = {"frames": len(frames[0]), "atoms": signature}
-        for i, (a, b) in enumerate(zip(*frames)):
+        for i, (a, b) in enumerate(zip(*frames, strict=True)):
             if identity(a) != signature or identity(b) != signature:
                 raise ValueError(
                     f"{filename} frame {i}: atom IDs, species, masses or fixed flags differ"
@@ -117,7 +120,7 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
             for name in ("xyz", "cell", "angles"):
                 record(f"{filename}.{name}", getattr(a, name), getattr(b, name), i)
             meta = [dict(f.metadata) for f in (a, b)]
-            for tag, m in zip(("cold", "warm"), meta):
+            for tag, m in zip(("cold", "warm"), meta, strict=True):
                 counter = m.pop("evaluation_counts")
                 if tag in counts and counter != counts[tag]["evaluation_counts"]:
                     raise ValueError(f"{filename}: inconsistent {tag} evaluation counts")
@@ -132,7 +135,7 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
             record(f"{filename}.metadata", *meta, i)
     if available("native.json", require_absolute):
         native = [json.loads((r / "native.json").read_text()) for r in runs]
-        for tag, n in zip(("cold", "warm"), native):
+        for tag, n in zip(("cold", "warm"), native, strict=True):
             if n["evaluation_counts"] != counts[tag]["evaluation_counts"]:
                 raise ValueError(f"{tag}: native summary and CON counter mismatch")
             for key in ("physical_launches", "scf_convergence_reports"):
