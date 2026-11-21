@@ -128,7 +128,7 @@ def main(band, orbit, native, launches, inherited_launches, deck_decimals):
             indices[i], (len(centers), centers.shape[1], 2)
         )
         rows[i].update(image=int(center), coordinate=int(component), sign=(1, -1)[side])
-    # Only the first appearance of a binary64 geometry can launch ORCA in a cold job.
+    # readcon fixed-decimal coordinates can round distinct callback inputs together.
     first = {}
     for i, row in enumerate(ring):
         first.setdefault(row.tobytes(), i)
@@ -146,14 +146,17 @@ def main(band, orbit, native, launches, inherited_launches, deck_decimals):
         available = np.concatenate((available, inherited_decks))
     k = start
     preexisting = []
-    for i in first.values():
+    for i, bead in enumerate(ring):
         if k < stop and (err := abs(decks[k] - ring[i]).max()) <= tol:
             rows[k].update(bead=i, max_deck_rounding_angstrom=float(err))
             k += 1
         else:
-            if not np.any(np.max(abs(available - ring[i]), axis=1) <= tol):
+            if np.any(np.max(abs(decks[start:k] - bead), axis=1) <= tol):
+                continue
+            if not np.any(np.max(abs(available - bead), axis=1) <= tol):
                 raise ValueError(f"missing launch and prior deck for bead {i}")
-            preexisting.append(i)
+            if first[bead.tobytes()] == i:
+                preexisting.append(i)
     if k != stop:
         raise ValueError("central orbit deck order differs from the observed ring")
     half = n // 2
