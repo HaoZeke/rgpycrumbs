@@ -1,0 +1,29 @@
+#+TITLE: Reconstruct a molecular instanton rate from ORCA gradients
+#+OPTIONS: toc:nil todo:nil num:nil author:nil
+
+~rgpycrumbs orca observed-ring-rate~ recomputes the absolute rate for a reflected
+full molecular orbit using a native ORCA observation archive. The case directory
+contains the readcon band and orbit, the compressed native EnGrads, the
+launch-to-bead and finite-difference stencil assignments in ~orbit-launches.json~,
+and the run and rate summaries. The reactant spectrum supplies the electronic
+zero and its positive vibrational frequencies. The reactant XYZ supplies the
+atom order, masses and equilibrium inertia.
+
+#+begin_src sh
+rgpycrumbs orca observed-ring-rate seeded reactant_partition.json opt.xyz
+#+end_src
+
+The full Hessian stencil requires two gradient displacements per atom coordinate
+at every image. Each moving bead on the outbound half carries an archived
+energy. At either turning bead, both the Cartesian deck coordinates and the
+measured readcon gradients identify the corresponding EnGrad. A cubic spline
+in mass-weighted chord length transfers the symmetrized Hessian blocks to the
+observed coordinates. The return coordinate can lie short of or beyond the
+terminal image.
+
+The output includes input hashes, turning-point energy and gradient matches,
+the action, and two constrained determinants. The adjacent-bead phase direction
+gives the native rate convention. A centred difference provides a separate
+check on the discrete time-translation factor. The absolute rate uses the
+finite-bead harmonic reactant partition and the orbit-to-reactant inertia
+ratio. The comparison reads the native rate only after the reconstruction.
