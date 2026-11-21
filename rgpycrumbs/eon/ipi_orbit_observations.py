@@ -13,6 +13,7 @@ from pathlib import Path
 import click
 import numpy as np
 import readcon
+from ase.data import atomic_numbers
 from ase.io import read
 from ipi.utils.units import unit_to_user
 
@@ -101,7 +102,6 @@ def main(band, ledger, write_observations, native_directory):
     wanted = set(keys)
     selected = {}
     digest = hashlib.sha256()
-    from ase.data import atomic_numbers
 
     numbers = [atomic_numbers[s] for s in symbols]
     with ledger.open("rb") as stream:
