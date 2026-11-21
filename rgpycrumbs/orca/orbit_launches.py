@@ -147,7 +147,7 @@ def main(band, orbit, native, launches, inherited_launches, deck_decimals):
     k = start
     preexisting = []
     for i, bead in enumerate(ring):
-        if k < stop and (err := abs(decks[k] - ring[i]).max()) <= tol:
+        if k < stop and (err := abs(decks[k] - bead).max()) <= tol:
             rows[k].update(bead=i, max_deck_rounding_angstrom=float(err))
             k += 1
         else:
