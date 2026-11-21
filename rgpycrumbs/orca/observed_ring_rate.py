@@ -7,6 +7,8 @@
 
 import hashlib
 import json
+import re
+from io import StringIO
 import tarfile
 from pathlib import Path
 
@@ -38,14 +40,34 @@ def image_observations(archive, launches, band, orbit, step):
     d = band[0].xyz.size
     n = len(orbit)
     energies = np.full(n, np.nan)
-    energies[[0, n // 2]] = [band[0].metadata["energy"], band[-1].metadata["energy"]]
+    from ase.io.orca import read_geom_orcainp
+
+    turning = {}
+    for bead in (0, n // 2):
+        frame = orbit[bead]
+        observation = frame.metadata["lineb_orbit"]
+        gradients = dict(zip(observation["mobile_atom_ids"], observation["gradients_eV_per_angstrom"], strict=True))
+        turning[bead] = np.array([gradients[a.atom_id] for a in frame.atoms]).ravel()
+    matches = {}
     gradients = np.full((len(band), 2, d, d), np.nan)
-    eh = constants.physical_constants["Hartree energy in eV"][0]
-    bohr = constants.physical_constants["Bohr radius"][0] * 1e10
+    # Atomic-unit factors used by the native ORCA potential.
+    eh, bohr = 27.211386245988, 0.529177210903
     with tarfile.open(archive) as raw:
         for row in launches["physical_launches_in_order"]:
             phase = row["phase"]
-            if phase not in ("orbit", "image_hessian"):
+            matched_beads = []
+            if phase == "pre_rate":
+                text = raw.extractfile(row["launch"] + "/input.inp").read().decode()
+                geometry = read_geom_orcainp(StringIO(re.sub(r"(?im)^\*\s+xyz\s+", "*xyz ", text)))
+                if geometry.get_chemical_symbols() != [a.symbol for a in band[0].atoms]:
+                    raise ValueError("EnGrad input atom identities differ from band")
+                for bead in turning:
+                    distance = np.abs(geometry.positions - orbit[bead].xyz).max()
+                    if distance <= 5e-11 + 4*np.finfo(float).eps*max(1., abs(geometry.positions).max()):
+                        matched_beads.append((bead, float(distance)))
+                if not matched_beads:
+                    continue
+            elif phase not in ("orbit", "image_hessian"):
                 continue
             stream = raw.extractfile(row["launch"] + "/output.engrad")
             if stream is None:
@@ -54,7 +76,16 @@ def image_observations(archive, launches, band, orbit, step):
                       if line.strip() and not line.lstrip().startswith(b"#")]
             if int(values[0]) != d // 3 or len(values) < 2 + d:
                 raise ValueError("EnGrad atom or gradient count differs from band")
-            if phase == "orbit":
+            if phase == "pre_rate":
+                for bead, distance in matched_beads:
+                    gradient = np.asarray(values[2:2+d]) * eh / bohr
+                    mismatch = float(np.abs(gradient - turning[bead]).max())
+                    if bead not in matches or mismatch < matches[bead]["max_gradient_difference_eV_per_angstrom"]:
+                        energies[bead] = values[1] * eh
+                        matches[bead] = dict(launch=row["launch"], energy_eV=energies[bead],
+                            max_deck_coordinate_difference_angstrom=distance,
+                            max_gradient_difference_eV_per_angstrom=mismatch)
+            elif phase == "orbit":
                 bead = row["bead"]
                 if not 0 < bead < n // 2 or np.isfinite(energies[bead]):
                     raise ValueError("expected a single observed energy for each moving outbound bead")
@@ -69,8 +100,10 @@ def image_observations(archive, launches, band, orbit, step):
                 col[:] = np.asarray(values[2:2 + d]) * eh / bohr
     if not np.isfinite(gradients).all() or not np.isfinite(energies).all():
         raise ValueError("incomplete displaced-gradient or reflected-orbit energy observations")
+    if len(matches) != 2 or max(r["max_gradient_difference_eV_per_angstrom"] for r in matches.values()) > 1e-8:
+        raise ValueError("turning-point observations do not reproduce the stored Cartesian gradients")
     h = (gradients[:, 1] - gradients[:, 0]) / (2 * step)
-    return energies, (h + h.transpose(0, 2, 1)) / 2
+    return energies, (h + h.transpose(0, 2, 1)) / 2, matches
 
 
 def path_parameters(knots, images, ring):
@@ -87,7 +120,12 @@ def path_parameters(knots, images, ring):
         fit = minimize_scalar(lambda s: np.sum((curve(s) - target)**2),
                               bounds=(lower, upper), method="bounded", options={"xatol": 1e-15})
         outgoing.append(fit.x)
-    outgoing.append(knots[-1])
+    # A force-driven return can fall to either side of the terminal image.
+    end = knots[-1]
+    scale = knots[-1] - knots[-2]
+    fit = minimize_scalar(lambda shift: np.sum((curve(end + shift) - ring[half])**2),
+                          bounds=(-scale, scale), method="bounded", options={"xatol": 1e-15})
+    outgoing.append(end + fit.x)
     parameters = np.r_[outgoing, outgoing[-2:0:-1]]
     if np.any(np.diff(outgoing) <= 0):
         raise ValueError("orbit does not follow the outward image order")
@@ -153,7 +191,7 @@ def main(case, reactant_spectrum, reactant_geometry):
     images = (np.stack([f.xyz for f in band]) * root).reshape(len(band), d)
     knots = np.r_[0, np.cumsum(np.linalg.norm(np.diff(images, axis=0), axis=1))]
     parameters, fit_error = path_parameters(knots, images, weighted.reshape(n, d))
-    energies, h = image_observations(inputs["engrad-launches.tgz"], audit, band, orbit,
+    energies, h, turning = image_observations(inputs["engrad-launches.tgz"], audit, band, orbit,
                                      rate["image_hessian_step_angstrom"])
     mass_scale = np.repeat(root, 3)
     blocks = CubicSpline(knots, h / np.outer(mass_scale, mass_scale))(parameters)
@@ -162,7 +200,7 @@ def main(case, reactant_spectrum, reactant_geometry):
     beta_n, spring = period / (n * hbar), (n / period)**2
     index = np.arange(n)
     shift = coo_matrix((np.ones(n), (index, (index + 1) % n)), shape=(n, n)).tocsc()
-    hessian = block_diag(blocks) + spring * kron(2 * eye(n) - shift - shift.T, eye(d))
+    hessian = block_diag([csc_matrix(block) for block in blocks]) + spring * kron(2 * eye(n) - shift - shift.T, eye(d))
     center = xyz - np.average(xyz.mean(axis=0), axis=0, weights=masses)
     rigid = [np.broadcast_to(root * v, weighted.shape).ravel() for v in np.eye(3)]
     rigid += [(root * np.cross(v, center)).ravel() for v in np.eye(3)]
@@ -184,7 +222,9 @@ def main(case, reactant_spectrum, reactant_geometry):
     reference_rate = json.loads(inputs["absolute_rate.json"].read_bytes())["log10_rate_per_s"]
     click.echo(json.dumps(dict(temperature_K=rate["temperature"], beads=n, path_images=len(band),
         additional_surface_requests=0, displaced_gradients=2*len(band)*d, path_degeneracy=1,
-        input_sha256=hashes, max_path_fit_error_angstrom_sqrt_u=fit_error,
+        input_sha256=hashes, turning_observations=turning,
+        return_parameter_minus_image_angstrom_sqrt_u=parameters[n//2] - knots[-1],
+        max_path_fit_error_angstrom_sqrt_u=fit_error,
         adjacent_projected_log_abs_determinant=adjacent_det, centered_projected_log_abs_determinant=central_det,
         centered_minus_adjacent_log10_rate=(np.log(np.linalg.norm(central)/np.linalg.norm(previous))
             -(central_det-adjacent_det)/2)/np.log(10), action_over_hbar=action,
