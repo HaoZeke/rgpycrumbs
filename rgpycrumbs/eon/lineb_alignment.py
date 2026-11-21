@@ -13,7 +13,9 @@ import click
 import numpy as np
 
 
-def action_drive(rows, masses, target_energy, width, adjacent, spring=None, endpoint_kappa=None):
+def action_drive(
+    rows, masses, target_energy, width, adjacent, spring=None, endpoint_kappa=None
+):
     """Return the interior nudged action drive in centered mass-weighted coordinates."""
     mass = np.array(masses)
     if mass.ndim != 1 or np.any(mass <= 0):
@@ -94,15 +96,22 @@ def action_drive(rows, masses, target_energy, width, adjacent, spring=None, endp
             force = forces[end].ravel()
             magnitude = np.linalg.norm(force)
             if not magnitude:
-                raise ValueError("a zero endpoint force does not define an equipotential normal")
+                raise ValueError(
+                    "a zero endpoint force does not define an equipotential normal"
+                )
             normal = force / magnitude
             chord = spring * (q[neighbor] - q[end]).ravel()
             tangent_drive = chord - (normal @ chord) * normal
             normal_drive = endpoint_kappa * gap[end]
-            ends.append({"image": end, "energy_minus_target_eV": float(gap[end]),
-                         "equipotential_tangent": float(np.linalg.norm(tangent_drive)),
-                         "signed_equipotential_normal": float(normal_drive),
-                         "norm": float(np.linalg.norm(tangent_drive + normal_drive * normal))})
+            ends.append(
+                {
+                    "image": end,
+                    "energy_minus_target_eV": float(gap[end]),
+                    "equipotential_tangent": float(np.linalg.norm(tangent_drive)),
+                    "signed_equipotential_normal": float(normal_drive),
+                    "norm": float(np.linalg.norm(tangent_drive + normal_drive * normal)),
+                }
+            )
         result["endpoints"] = ends
         result["endpoint_max"] = max(end["norm"] for end in ends)
     return result
@@ -130,12 +139,22 @@ def action_drive(rows, masses, target_energy, width, adjacent, spring=None, endp
     type=click.FloatRange(min=0, min_open=True),
     help="Absolute momentum width in eV, frozen from the initial band.",
 )
-@click.option("--spring", type=click.FloatRange(min=0), help="Native spring coefficient for endpoint diagnostics.")
-@click.option("--endpoint-kappa", type=click.FloatRange(min=0), help="Fixed native endpoint restraint coefficient.")
+@click.option(
+    "--spring",
+    type=click.FloatRange(min=0),
+    help="Native spring coefficient for endpoint diagnostics.",
+)
+@click.option(
+    "--endpoint-kappa",
+    type=click.FloatRange(min=0),
+    help="Fixed native endpoint restraint coefficient.",
+)
 def main(ledger, mass, images, target_energy, width, spring, endpoint_kappa):
     """Compare measured image batches from an energy/gradient JSONL ledger."""
     if (spring is None) != (endpoint_kappa is None):
-        raise click.UsageError("supply both --spring and --endpoint-kappa for endpoint forces")
+        raise click.UsageError(
+            "supply both --spring and --endpoint-kappa for endpoint forces"
+        )
     rows = [json.loads(line) for line in ledger.read_text().splitlines()]
     if not rows or len(rows) % images:
         raise click.ClickException("each snapshot must contain one record per image")
@@ -150,8 +169,12 @@ def main(ledger, mass, images, target_energy, width, spring, endpoint_kappa):
         batches.append(
             {
                 "requests": [ids[0], ids[-1]],
-                "first_image": action_drive(band, mass, target_energy, width, False, spring, endpoint_kappa),
-                "adjacent_images": action_drive(band, mass, target_energy, width, True, spring, endpoint_kappa),
+                "first_image": action_drive(
+                    band, mass, target_energy, width, False, spring, endpoint_kappa
+                ),
+                "adjacent_images": action_drive(
+                    band, mass, target_energy, width, True, spring, endpoint_kappa
+                ),
             }
         )
     click.echo(
