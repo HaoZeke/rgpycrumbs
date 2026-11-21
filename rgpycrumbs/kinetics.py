@@ -51,3 +51,9 @@ def harmonic_log_rates(
     classical = np.log(reactant_hz).sum() - np.log(saddle_hz).sum() - beta_barrier
     quantum = np.log(kt / h) + log_partition_factors(reactant_hz) - log_partition_factors(saddle_hz) - beta_barrier
     return HarmonicLogRates(classical, quantum)
+
+
+def log_finite_bead_partition(beta_hbar_omega, beads):
+    """Log partition of positive harmonic modes on a primitive P-bead ring."""
+    arg = beads * np.arcsinh(np.asarray(beta_hbar_omega) / (2 * beads))
+    return float(-np.sum(arg + np.log(-np.expm1(-2 * arg))))

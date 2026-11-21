@@ -12,6 +12,8 @@ import click
 import numpy as np
 from scipy import constants
 
+from rgpycrumbs.kinetics import log_finite_bead_partition
+
 
 def log_inertia_det(positions, masses):
     """Inertia of a molecule or full ring, with each replica weighted by 1/P."""
@@ -49,8 +51,7 @@ def molecular_rate(level, minimum, atoms, ring):
         raise ValueError("expected positive thermal energy and Planck constant")
     # Each internal oscillator contributes [2 sinh(P asinh(beta hbar omega / 2P))]^-1.
     omega = 2 * np.pi * constants.c * 100 * freq * time_s
-    arg = p * np.arcsinh(beta * controls["hbar"] * omega / (2 * p))
-    log_q_vib = -np.sum(arg + np.log(-np.expm1(-2 * arg)))
+    log_q_vib = log_finite_bead_partition(beta * controls["hbar"] * omega, p)
     # For each rigid direction the non-centroid spring frequencies yield
     # product_{k=1}^{P-1} [2 sin(pi k/P)]^-1 = 1/P.
     log_q_rigid_springs = -6 * np.log(p)
