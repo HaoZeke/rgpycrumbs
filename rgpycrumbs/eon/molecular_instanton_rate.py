@@ -69,21 +69,27 @@ def eon_orbit_rate(path, minimum, atoms, confirm_same_energy_zero):
     """Normalize the measured full orbit written by an eOn LI-NEB molecular job."""
     import readcon
 
+    if minimum.get("unstable_modes", 0) != 0:
+        raise ValueError("the equilibrium spectrum must identify a minimum")
     if not confirm_same_energy_zero:
         raise ValueError("confirm that the spectrum and orbit use the same surface and electronic zero with --confirm-same-energy-zero")
     frames = list(readcon.iter_con(str(path)))
     if len(frames) < 3:
         raise ValueError("expected at least three measured orbit frames")
     lineb = frames[0].metadata.get("lineb", {})
-    if lineb.get("molecular") is not True or lineb.get("beads") != len(frames):
+    if not isinstance(lineb, dict) or lineb.get("molecular") is not True or lineb.get("beads") != len(frames):
         raise ValueError("expected a complete molecular eOn rate orbit")
     spectrum = lineb.get("spectrum")
     if not isinstance(spectrum, dict) or spectrum.get("negative_modes") != 1 or "modes" not in spectrum:
         raise ValueError("expected the measured fluctuation index and retained mode count")
+    for name in ("temperature", "log_rate_over_reactant"):
+        value = lineb.get(name)
+        if not isinstance(value, (int, float)) or not np.isfinite(value):
+            raise ValueError(f"expected a finite {name} in eOn rate metadata")
     controls = {}
     for name in ("hbar", "boltzmann"):
         value = lineb.get(name)
-        if value is None or not np.isfinite(value) or value <= 0:
+        if not isinstance(value, (int, float)) or not np.isfinite(value) or value <= 0:
             raise ValueError(f"expected explicit positive {name} in eOn metadata")
         controls[name] = value
     signature = [(a.atom_id, a.symbol, a.mass) for a in frames[0].atoms]
@@ -95,8 +101,9 @@ def eon_orbit_rate(path, minimum, atoms, confirm_same_energy_zero):
     if len(atoms) != len(ids) or atoms.constraints or np.any(atoms.pbc):
         raise ValueError("expected an unconstrained nonperiodic equilibrium molecule")
     identity = "species and isotope masses"
-    if "atom_id" in atoms.arrays:
-        equilibrium_ids = list(atoms.arrays["atom_id"])
+    id_array = next((name for name in ("atom_id", "id") if name in atoms.arrays), None)
+    if id_array is not None:
+        equilibrium_ids = list(atoms.arrays[id_array])
         if set(equilibrium_ids) != set(ids):
             raise ValueError("equilibrium atom IDs disagree with the orbit")
         atoms = atoms[[equilibrium_ids.index(i) for i in ids]]
@@ -113,6 +120,11 @@ def eon_orbit_rate(path, minimum, atoms, confirm_same_energy_zero):
         if (meta.get("lineb") != lineb or meta.get("temperature_K") != lineb.get("temperature")
                 or not np.isclose(meta.get("tau_over_beta", np.nan), i / len(frames), rtol=0, atol=1e-12)):
             raise ValueError("inconsistent job metadata or out-of-order imaginary-time phase")
+        units = meta.get("units", {})
+        if units.get("length", "angstrom").lower() not in {"angstrom", "ångström"} or units.get("mass", "amu").lower() not in {"amu", "u", "dalton"}:
+            raise ValueError("expected eOn Cartesian coordinates in angstrom and masses in atomic mass units")
+        if frame.cell != frames[0].cell or frame.angles != frames[0].angles:
+            raise ValueError("orbit frames must share one cell")
         observed = meta.get("lineb_orbit", {})
         mobile = observed.get("mobile_atom_ids", [])
         if ([(a.atom_id, a.symbol, a.mass) for a in frame.atoms] != signature
