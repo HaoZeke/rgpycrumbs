@@ -41,6 +41,7 @@ eOn configuration options are not listed here. The option schema is published wi
 - [generate-nwchem](https://rgpycrumbs.rgoswami.me/tools/eon/generate_nwchem_input): NWChem input from eOn
 - [harmonic-diffusivity](https://rgpycrumbs.rgoswami.me/tools/eon/harmonic_diffusivity): HTST and qq-HTST log10 diffusivity
 - [Molecular instanton rates](https://rgpycrumbs.rgoswami.me/tools/eon/molecular_rates): reactant normalization and absolute rate comparisons
+- [Image curvature holdouts](https://rgpycrumbs.rgoswami.me/tools/eon/image_curvature_holdout): measure interpolation error on a fixed molecular path
 - [i-PI molecular rates](https://rgpycrumbs.rgoswami.me/tools/eon/ipi_molecular_rate): combine native reactant and orbit partition functions
 - [orbit-residual](https://rgpycrumbs.rgoswami.me/tools/eon/orbit_residual): thermal-orbit force residual and independent validation counts
 - [to-mlflow](https://rgpycrumbs.rgoswami.me/tools/eon/mlflow): log an eOn run to MLflow
