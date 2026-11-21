@@ -115,7 +115,7 @@ def fluctuation_partition(frequencies, size, beads, beta):
     )
 
 
-def reconstruct(case, summary, reactant_report, instanton_report):
+def reconstruct(case, summary, reactant_report, instanton_report, comparison_observations=None):
     """Rebuild rate factors from the measured half ring, energies and native spectra."""
     import readcon
     from ase.io import read
@@ -298,6 +298,41 @@ def reconstruct(case, summary, reactant_report, instanton_report):
         "ln_rate_per_s": log_rate,
         "log10_rate_per_s": log_rate / np.log(10),
     }
+    if comparison_observations is not None:
+        data = comparison_observations.read_bytes()
+        other = [json.loads(line) for line in data.splitlines()]
+        if len(other) != len(rows):
+            raise ValueError("expected one comparison observation per half-ring bead")
+        gradient_changes = []
+        energy_changes = []
+        for bead, (baseline, measured) in enumerate(zip(rows, other, strict=True)):
+            shape = (len(baseline["atomic_numbers"]), 3)
+            if measured["atomic_numbers"] != baseline["atomic_numbers"] or not np.array_equal(
+                np.asarray(baseline["positions_angstrom"]).reshape(shape),
+                np.asarray(measured["positions_angstrom"]).reshape(shape),
+            ):
+                raise ValueError(f"comparison geometry or species differ at bead {bead}")
+            g = [
+                np.asarray(obs["gradient_eV_per_angstrom"], dtype=float).reshape(shape)
+                for obs in (baseline, measured)
+            ]
+            gradient_changes.append(g[1] - g[0])
+            energy_changes.append(measured["energy_eV"] - baseline["energy_eV"])
+        de = np.asarray(energy_changes)
+        dg = np.asarray(gradient_changes)
+        if not np.all(np.isfinite(de)) or not np.all(np.isfinite(dg)):
+            raise ValueError("nonfinite comparison energy or gradient")
+        raw["fixed_orbit_surface_comparison"] = {
+            "observations_sha256": hashlib.sha256(data).hexdigest(),
+            "half_ring_observations": len(other),
+            "comparison_minus_native_energy_eV_min": de.min(),
+            "comparison_minus_native_energy_eV_max": de.max(),
+            "comparison_minus_native_energy_eV_mean": de.mean(),
+            "gradient_difference_max_eV_per_angstrom": np.abs(dg).max(),
+            "gradient_difference_rms_eV_per_angstrom": np.sqrt(np.mean(dg**2)),
+            "finite_bead_tunneling_energy_eV": reference + tunneling_energy_shift + de.mean(),
+            "additional_surface_requests": 0,
+        }
     raw["raw_minus_native"] = {
         k: raw[k] - v
         for k, v in summary.items()
@@ -433,8 +468,15 @@ def attach_phase_evidence(raw, case, evidence_path):
     type=click.Path(exists=True, path_type=Path),
     help="Bind an independent ipi-phase-mode report for the raw case RESTART.",
 )
-def main(reactant, instanton, raw_case, check_native_rounding, phase_evidence):
+@click.option(
+    "--comparison-observations",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    help="Compare energies and gradients from another surface on the identical half ring.",
+)
+def main(reactant, instanton, raw_case, check_native_rounding, phase_evidence, comparison_observations):
     """Read native i-PI REACTANT and INSTANTON postprocessor reports."""
+    if comparison_observations and raw_case is None:
+        raise click.UsageError("--comparison-observations requires --raw-case")
     if phase_evidence and raw_case is None:
         raise click.UsageError("--phase-evidence requires --raw-case")
     if check_native_rounding and raw_case is None:
@@ -442,7 +484,7 @@ def main(reactant, instanton, raw_case, check_native_rounding, phase_evidence):
     minimum, path = reactant.read_text(), instanton.read_text()
     result = molecular_rate(minimum, path)
     if raw_case is not None:
-        result["raw_reconstruction"] = reconstruct(raw_case, result, minimum, path)
+        result["raw_reconstruction"] = reconstruct(raw_case, result, minimum, path, comparison_observations)
         if phase_evidence:
             attach_phase_evidence(result["raw_reconstruction"], raw_case, phase_evidence)
     click.echo(json.dumps(result, allow_nan=False))
