@@ -21,7 +21,10 @@ The report gives the action and perpendicular drive at each internal
 image under alignment to the first image and successive alignment to
 the preceding image. The rotation component is the projection of the
 drive onto the infinitesimal rigid rotations about the image center of
-mass. The remainder lies orthogonal to those rotations. Values use the
+mass. The remainder lies orthogonal to those rotations. The surface
+term uses the measured electronic gradient and the two adjacent chord
+lengths. The chord term uses their momentum-weighted unit vectors.
+Their projected rotational vectors add to the total. Values use the
 energy, length and mass units of the supplied measurements. Each
 snapshot uses the same electronic observations for both alignments.
 

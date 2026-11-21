@@ -44,12 +44,10 @@ def action_drive(rows, masses, target_energy, width, adjacent):
     sigma = np.sqrt(term)
     weights = 0.5 * (sigma[1:] + sigma[:-1])
     slope = sigma / (2 * root)
-    drive = (
-        (0.5 * (length[:-1] + length[1:]) * slope[1:-1])[:, None]
-        * forces.reshape(len(q), -1)[1:-1]
-        - weights[:-1, None] * unit[:-1]
-        + weights[1:, None] * unit[1:]
-    )
+    scale = 0.5 * (length[:-1] + length[1:]) * slope[1:-1]
+    surface_drive = scale[:, None] * forces.reshape(len(q), -1)[1:-1]
+    chord_drive = weights[1:, None] * unit[1:] - weights[:-1, None] * unit[:-1]
+    drive = surface_drive + chord_drive
     decomposed = []
     for i, full_drive in enumerate(drive, start=1):
         backward, forward = gap[i] - gap[i - 1], gap[i + 1] - gap[i]
@@ -69,12 +67,20 @@ def action_drive(rows, masses, target_energy, width, adjacent):
         _, singular, basis = np.linalg.svd(rotations, full_matrices=False)
         basis = basis[singular > singular[0] * max(rotations.shape) * np.finfo(float).eps]
         rigid = basis.T @ (basis @ vector)
+        surface = surface_drive[i - 1]
+        surface_perp = surface - np.dot(surface, tangent) * tangent / norm**2
+        surface_rigid = basis.T @ (basis @ surface_perp)
+        chord_rigid = rigid - surface_rigid
         decomposed.append(
             {
                 "image": i,
                 "perpendicular": float(np.linalg.norm(vector)),
                 "rotation": float(np.linalg.norm(rigid)),
                 "remainder": float(np.linalg.norm(vector - rigid)),
+                "surface_rotation_before_nudging": float(np.linalg.norm(basis @ surface)),
+                "surface_rotation_after_nudging": float(np.linalg.norm(surface_rigid)),
+                "chord_rotation_after_nudging": float(np.linalg.norm(chord_rigid)),
+                "surface_chord_rotation_dot": float(surface_rigid @ chord_rigid),
             }
         )
     return {
