@@ -8,6 +8,17 @@ imaginary-time derivative of the position. Output includes both the largest
 absolute component and the root mean square across components and beads,
 in eV/Å.
 
+* Model orbits
+
+For a model with reduced units, ~eon model-orbit-residual~ reads an equal-time Cartesian CSV and takes the full orbit period in those units. Supply one mass for each named coordinate. The surface program receives the coordinates as positional arguments and writes one CSV row containing the energy followed by the Cartesian potential gradient. The command evaluates each bead separately and reports both finite-bead and Fourier force residuals, including the maximum component, its bead index, and the RMS over all components and beads.
+
+For an orbit with columns ~x~ and ~y~, unit masses, and a measured half-period of 8.143223, the command is
+
+#+begin_src sh
+rgpycrumbs eon model-orbit-residual ring.csv --coordinate x --coordinate y \
+  --mass 1 --mass 1 --period 16.286446 --surface-command './lineb_muller_brown surface'
+#+end_src
+
 * Inputs
 
 Supply a readcon band containing a complete thermal period, with one
