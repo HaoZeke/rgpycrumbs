@@ -63,3 +63,20 @@ def test_orbit_extent_distinguishes_a_collapsed_ring_at_zero_force():
     assert extent["distinct_geometries"] == 2
     assert extent["max_atom_excursion_angstrom"] == pytest.approx(3.0)
     assert extent["mass_weighted_diameter_angstrom_sqrt_u"] == pytest.approx(5.0)
+
+
+@pytest.mark.interpolation
+def test_measured_orbit_maps_gradient_ids_and_uses_the_recorded_period():
+    from types import SimpleNamespace
+    from scipy.constants import atomic_mass, electron_volt
+    from rgpycrumbs.eon.orbit_residual import observed_eon_forces
+
+    atoms = [SimpleNamespace(atom_id=i, fixed=[False]*3) for i in (7, 2)]
+    lineb = {"beads": 4, "temperature": 32., "half_period": 1.5}
+    gradients = np.array([[1., 2., 3.], [-4., -5., -6.]])
+    observed = {"mobile_atom_ids": [2, 7], "gradients_eV_per_angstrom": gradients.tolist()}
+    frame = SimpleNamespace(atoms=atoms, metadata={"lineb": lineb, "lineb_orbit": observed})
+    forces, period, source = observed_eon_forces([frame] * 4)
+    np.testing.assert_array_equal(forces, np.broadcast_to(-gradients[::-1], (4, 2, 3)))
+    assert period == pytest.approx(3 * 1e-10 * np.sqrt(atomic_mass / electron_volt), rel=1e-14, abs=0)
+    assert source == "twice the recorded eOn half-period"
