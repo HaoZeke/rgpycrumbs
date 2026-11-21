@@ -5,6 +5,7 @@
 # dependencies = ["ase", "click", "defusedxml", "numpy", "readcon", "scipy"]
 # ///
 
+import hashlib
 import importlib
 import json
 import re
@@ -116,8 +117,6 @@ def fluctuation_partition(frequencies, size, beads, beta):
 
 def reconstruct(case, summary, reactant_report, instanton_report):
     """Rebuild rate factors from the measured half ring, energies and native spectra."""
-    import hashlib
-
     import readcon
     from ase.io import read
     from defusedxml import ElementTree
@@ -366,6 +365,45 @@ def reconstruct(case, summary, reactant_report, instanton_report):
     return raw
 
 
+def attach_phase_evidence(raw, case, evidence_path):
+    """Bind independent eigenvectors to the native rate inputs by content."""
+    data = evidence_path.read_bytes()
+    proof = json.loads(data)
+    checkpoint_hash = hashlib.sha256((case / "RESTART").read_bytes()).hexdigest()
+    if (
+        proof["checkpoint_sha256"] != checkpoint_hash
+        or proof["native_frequencies_sha256"]
+        != raw["input_sha256"]["instanton_frequencies"]
+        or proof["beads"] != raw["beads"]
+        or not np.isclose(
+            proof["temperature_K"], raw["temperature_K"], rtol=1e-12, atol=0
+        )
+        or proof["native_deleted_index"] != 1
+        or proof["native_deleted_frequency_cm_inverse"] != raw["time_translation_cm1"]
+        or proof["reaction_mode_frequency_cm_inverse"] != raw["negative_frequency_cm1"]
+        or proof["negative_modes_after_native_deletion"]
+        != raw["retained_unstable_mode_count"]
+    ):
+        raise ValueError("phase evidence disagrees with the raw checkpoint or spectrum")
+    for label in (
+        "native_deleted_tangent_overlap",
+        "largest_tangent_overlap",
+        "reaction_mode_tangent_overlap",
+    ):
+        overlap = proof[label]
+        if not 0 <= overlap <= 1.0 + 32 * np.finfo(float).eps:
+            raise ValueError(f"expected a finite absolute normalized overlap in {label}")
+    raw["phase_evidence"] = {
+        **proof,
+        "deleted_mode_has_largest_tangent_overlap": proof["native_deleted_index"]
+        == proof["largest_tangent_overlap_index"],
+        "deleted_tangent_overlap_squared": proof["native_deleted_tangent_overlap"] ** 2,
+    }
+    raw["input_sha256"].update(
+        checkpoint=checkpoint_hash, phase_evidence=hashlib.sha256(data).hexdigest()
+    )
+
+
 @click.command()
 @click.argument("reactant", type=click.Path(exists=True, path_type=Path))
 @click.argument("instanton", type=click.Path(exists=True, path_type=Path))
@@ -379,14 +417,23 @@ def reconstruct(case, summary, reactant_report, instanton_report):
     is_flag=True,
     help="Require every reconstructed factor to agree with the precision of the native tables.",
 )
-def main(reactant, instanton, raw_case, check_native_rounding):
+@click.option(
+    "--phase-evidence",
+    type=click.Path(exists=True, path_type=Path),
+    help="Bind an independent ipi-phase-mode report for the raw case RESTART.",
+)
+def main(reactant, instanton, raw_case, check_native_rounding, phase_evidence):
     """Read native i-PI REACTANT and INSTANTON postprocessor reports."""
+    if phase_evidence and raw_case is None:
+        raise click.UsageError("--phase-evidence requires --raw-case")
     if check_native_rounding and raw_case is None:
         raise click.UsageError("--check-native-rounding requires --raw-case")
     minimum, path = reactant.read_text(), instanton.read_text()
     result = molecular_rate(minimum, path)
     if raw_case is not None:
         result["raw_reconstruction"] = reconstruct(raw_case, result, minimum, path)
+        if phase_evidence:
+            attach_phase_evidence(result["raw_reconstruction"], raw_case, phase_evidence)
     click.echo(json.dumps(result, allow_nan=False))
     if check_native_rounding:
         failed = [
