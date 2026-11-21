@@ -372,6 +372,7 @@ def attach_phase_evidence(raw, case, evidence_path):
     checkpoint_hash = hashlib.sha256((case / "RESTART").read_bytes()).hexdigest()
     if (
         proof["checkpoint_sha256"] != checkpoint_hash
+        or proof["native_report_sha256"] != raw["input_sha256"]["instanton_table"]
         or proof["native_frequencies_sha256"]
         != raw["input_sha256"]["instanton_frequencies"]
         or proof["beads"] != raw["beads"]

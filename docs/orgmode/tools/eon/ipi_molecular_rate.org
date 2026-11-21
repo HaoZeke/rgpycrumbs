@@ -62,3 +62,18 @@ precision of the corresponding table entries. Ratios and the log rate
 propagate the rounding of their component factors. The optional
 =--check-native-rounding= flag returns a nonzero exit status if any
 reconstructed quantity lies outside its interval.
+
+
+When the native checkpoint is available, supply the independently
+computed phase-mode report alongside the raw inputs.
+
+#+begin_src shell
+rgpycrumbs eon ipi-molecular-rate case/native/reactant.out case/native/instanton.out \
+  --raw-case case --phase-evidence case/native/phase-mode.json --check-native-rounding
+#+end_src
+
+This checks the checkpoint, native partition report and exported
+frequency hashes against the eigenvector report. The output gives the
+absolute overlap of the deleted eigenvector with the mass-weighted path
+tangent, its square, and whether that mode has the largest overlap. Use
+the measured overlaps to interpret a signed phase frequency.
