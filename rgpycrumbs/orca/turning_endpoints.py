@@ -19,11 +19,17 @@ from ase.units import Bohr
 @click.command()
 @click.argument("band", type=click.Path(exists=True, path_type=Path))
 @click.argument("launches", type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--target-ev", required=True, type=float)
+@click.option("--target-ev", type=float, help="Tunneling energy in eV.")
+@click.option("--level-record", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Read the tunneling energy from one frozen LI level.")
 @click.option("--hartree-ev", required=True, type=float, help="Conversion factor used by the native potential.")
 @click.option("--require-bracket", is_flag=True, help="Require both observations to be below the tunneling energy.")
-def main(band, launches, target_ev, hartree_ev, require_bracket):
+def main(band, launches, target_ev, level_record, hartree_ev, require_bracket):
     """Find the two physical endpoint observations and report E(endpoint) minus E(target)."""
+    if (level_record is None) == (target_ev is None):
+        raise click.UsageError("give either --level-record or --target-ev")
+    if level_record is not None:
+        target_ev = json.loads(level_record.read_text())["energy"]
     frames = readcon.read_con(str(band))
     if len(frames) < 2 or not np.isfinite([target_ev, hartree_ev]).all() or hartree_ev <= 0:
         raise click.ClickException("expected two distinct frames, finite energy and a positive conversion factor")
