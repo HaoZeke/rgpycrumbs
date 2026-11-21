@@ -26,6 +26,20 @@ def euclidean_force_residual(positions, forces, masses, temperature, ring_polyme
     """
     constants = importlib.import_module("scipy.constants")
 
+    if not np.isfinite(temperature) or temperature <= 0:
+        raise ValueError("expected a positive finite temperature")
+    period = constants.hbar / (constants.Boltzmann * temperature) if period_seconds is None else period_seconds
+    # kg Å/s² to eV/Å introduces two angstrom-to-metre factors.
+    mass_scale = constants.atomic_mass * 1e-20 / constants.electron_volt
+    return periodic_force_residual(positions, forces, np.asarray(masses) * mass_scale, period, ring_polymer)
+
+
+def periodic_force_residual(positions, forces, masses, period, ring_polymer=False):
+    """Return F + M d²x/dτ² on a complete uniform periodic grid.
+
+    Length, time, force and each Cartesian mass must form a consistent
+    unit system. The period is the time around the full closed orbit.
+    """
     positions, forces, masses = (
         np.asarray(a, dtype=float) for a in (positions, forces, masses)
     )
@@ -41,14 +55,11 @@ def euclidean_force_residual(positions, forces, masses, temperature, ring_polyme
         )
     if (
         not all(np.isfinite(a).all() for a in (positions, forces, masses))
-        or not np.isfinite(temperature)
-        or temperature <= 0
         or np.any(masses <= 0)
     ):
-        raise ValueError("expected finite inputs and positive masses and temperature")
-    period = constants.hbar / (constants.Boltzmann * temperature) if period_seconds is None else period_seconds
+        raise ValueError("expected finite inputs and positive masses")
     if not np.isfinite(period) or period <= 0:
-        raise ValueError("expected a positive finite orbit period in seconds")
+        raise ValueError("expected a positive finite orbit period")
     omega = 2 * np.pi * np.fft.rfftfreq(len(positions), d=period / len(positions))
     if ring_polymer:
         step = period / len(positions)
@@ -56,11 +67,7 @@ def euclidean_force_residual(positions, forces, masses, temperature, ring_polyme
     accel = np.fft.irfft(
         -(omega[:, None] ** 2) * np.fft.rfft(positions, axis=0), n=len(positions), axis=0
     )
-    # kg Å/s² to eV/Å introduces two angstrom-to-metre factors.
-    return (
-        forces
-        + (constants.atomic_mass * 1e-20 / constants.electron_volt) * masses * accel
-    )
+    return forces + masses * accel
 
 
 def orbit_extent(positions, masses):
