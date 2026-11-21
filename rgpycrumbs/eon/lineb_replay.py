@@ -32,7 +32,7 @@ def digest(file):
 
 def compare(cold, warm, require_absolute, rate_inputs=()):
     runs = (cold, warm)
-    fields, inputs, counts = {}, {}, {}
+    fields, inputs, counts, trajectories = {}, {}, {}, {}
 
     def record(name, a, b, frame=None):
         if isinstance(a, dict):
@@ -83,9 +83,14 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
         frames = [readcon.read_con(str(r / filename)) for r in runs]
         if not frames[0] or len(frames[0]) != len(frames[1]):
             raise ValueError(f"{filename}: frame count differs or is zero")
+        def identity(frame):
+            return [{"id": atom.atom_id, "symbol": atom.symbol, "mass_amu": atom.mass,
+                     "fixed": list(atom.fixed)} for atom in frame.atoms]
+
+        signature = identity(frames[0][0])
+        trajectories[filename] = {"frames": len(frames[0]), "atoms": signature}
         for i, (a, b) in enumerate(zip(*frames)):
-            signature = lambda f: [(x.atom_id, x.symbol, x.mass, tuple(x.fixed)) for x in f.atoms]
-            if signature(a) != signature(b):
+            if identity(a) != signature or identity(b) != signature:
                 raise ValueError(f"{filename} frame {i}: atom IDs, species, masses or fixed flags differ")
             for name in ("xyz", "cell", "angles"):
                 record(f"{filename}.{name}", getattr(a, name), getattr(b, name), i)
@@ -130,7 +135,7 @@ def compare(cold, warm, require_absolute, rate_inputs=()):
         if counts["cold"]["evaluation_counts"][key] != counts["warm"]["evaluation_counts"][key]:
             raise ValueError(f"{key}: number of requested evaluations differs")
     return {"identical_physics": all(d["max_abs"] == 0 for d in fields.values()),
-            "input_sha256": inputs, "counts": counts, "differences": fields}
+            "input_sha256": inputs, "trajectories": trajectories, "counts": counts, "differences": fields}
 
 
 @click.command()
