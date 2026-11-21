@@ -265,6 +265,10 @@ def main(
         json.dumps(
             {
                 "images": len(frames),
+                "atoms": [
+                    {"id": i, "symbol": symbol, "mass_amu": mass}
+                    for i, symbol, mass in identities
+                ],
                 "observations": evidence,
                 **(
                     {
