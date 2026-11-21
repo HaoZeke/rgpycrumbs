@@ -4085,6 +4085,17 @@ the element order and output coordinates, and reports the spread among
 matching gradients. When available, the match from the native output
 phase identifies the physical observation for the saved image.
 
+For a two-sided seed with retained path images, also supply
+`--initial-band seed.con --width-fraction 0.001` using the fraction set
+in the native run. The command locates measured crossings on the two
+terminal chords, resamples the intervening seed in mass-weighted arc
+length, and identifies the uninterrupted sequence of physical launches
+for its interior images. It derives the absolute momentum width from
+their measured maximum energy above the tunneling target. The result
+includes the launch identities and distance between reconstructed and
+measured coordinates. A cache that already serves these initial
+interiors can leave too little evidence to identify that sequence.
+
 ## Geometry processing
 
 Source: https://rgpycrumbs.rgoswami.me/tools/geom/
