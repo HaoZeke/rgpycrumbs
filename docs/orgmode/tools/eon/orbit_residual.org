@@ -70,3 +70,25 @@ rgpycrumbs eon orbit-residual lineb-orbit.con --compare-discretizations
    :prog: rgpycrumbs eon orbit-residual
    :nested: full
 #+END_EXPORT
+
+* Tangential and normal forces
+
+For a full readcon period carrying measured gradients, run
+
+#+begin_src sh
+rgpycrumbs eon orbit-residual lineb-orbit.con --decompose-residual
+#+end_src
+
+At each moving bead the command differentiates the periodic Cartesian Fourier
+interpolant and normalizes the velocity in mass-weighted coordinates. It
+projects the Fourier residual divided by the square root of the masses onto
+this tangent and its orthogonal complement. Multiplication by the square root
+of the masses returns both projections to Cartesian force units. Their maxima
+and RMS values use the same moving beads. The normal fraction is the sum of
+squared normal components divided by the total, both in the inverse mass metric.
+
+The ~zero_velocity_beads~ list identifies samples where the tangent is
+undefined to Fourier roundoff, including turning points sampled exactly.
+The original residual still includes every bead. The projection cites the
+SHA-256 of the input orbit. With recorded gradients, it uses zero additional
+surface evaluations.
