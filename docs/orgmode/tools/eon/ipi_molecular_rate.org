@@ -23,3 +23,19 @@ increase the total rate by their multiplicity.
 For a stored i-PI half-ring, =eon orbit-residual --ipi-half-ring= reflects
 the beads through the turning points and checks the discrete spring force.
 It requests independent forces only at the stored beads.
+
+The solver's own gradient ledger provides a separate check. Supply its
+converged half-ring in readcon format and the JSON-lines trace containing
+the original Cartesian coordinates and gradients. The command below also
+checks the printed i-PI FINAL coordinate and atomic-unit force tables
+from the run directory and saves the selected requests in bead order.
+
+#+begin_src shell
+rgpycrumbs eon ipi-orbit-observations ring.con evaluations.jsonl \
+    --native-directory . --write-observations matched.jsonl
+#+end_src
+
+The JSON reports the finite-bead and Fourier force residuals in eV/Å, the
+original solver request number for each bead, and the maximum force and
+coordinate differences from i-PI's printed step. Matching requires identical
+binary64 geometry coordinates. It performs zero new potential evaluations.
