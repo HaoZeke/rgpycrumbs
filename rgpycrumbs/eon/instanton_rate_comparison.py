@@ -81,6 +81,37 @@ def draw_cost(ax, cost_file, colors):
     ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), fontsize="x-small", frameon=False)
 
 
+def draw_search_cost(ax, cost_file, cycle):
+    """Surface calls spent finding the orbit at each temperature, per method.
+
+    Reads the JSON rows of ``orbit_search_cost.py``: method, temperature_K,
+    search_gradients, search_hessians and force_calls, where a Hessian counts
+    as the gradients of its central differences. The rate stage is left out
+    because it costs the same for every method.
+    """
+    rows = json.loads(cost_file.read_text())
+    methods = list(dict.fromkeys(row["method"] for row in rows))
+    styles = ("o", "s", "^", "D", "v", "P", "X")
+    for i, method in enumerate(methods):
+        points = sorted((row["temperature_K"], row["force_calls"]) for row in rows
+                        if row["method"] == method and row.get("outcome") == "returned_rate")
+        if not points:
+            continue
+        temperature, calls = zip(*points)
+        ax.plot(temperature, calls, marker=styles[i % len(styles)], markersize=4, linewidth=1.2,
+                color=cycle[i % len(cycle)], label=method)
+    from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter
+
+    ax.set_yscale("log")
+    ax.yaxis.set_major_locator(LogLocator(subs=(1.0, 2.0, 5.0)))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:,.0f}"))
+    ax.yaxis.set_minor_formatter(NullFormatter())
+    ax.set_xlabel(r"$T$ (K)")
+    ax.set_ylabel("Force calls to find the orbit\n(gradients + 2d per Hessian)")
+    ax.invert_xaxis()
+    ax.legend(loc="upper left", bbox_to_anchor=(0, -0.12), fontsize="x-small", frameon=False, ncol=1)
+
+
 @click.command()
 @click.argument("reference", type=click.Path(exists=True, path_type=Path))
 @click.argument("harmonic", type=click.Path(exists=True, path_type=Path))
@@ -97,7 +128,10 @@ def draw_cost(ax, cost_file, colors):
 @click.option("--orbit-label", default="", help="Method used to calculate the displayed orbit.")
 @click.option("--cost", type=click.Path(exists=True, path_type=Path),
               help="CSV of method, gradients_min, gradients_max, analytic_hessians_min, analytic_hessians_max.")
-def main(reference, harmonic, series, compare_series, plot, spectra, inverse_range, orbit, orbit_label, cost):
+@click.option("--search-cost", type=click.Path(exists=True, path_type=Path),
+              help="JSON rows of orbit_search_cost.py: force calls to find the orbit per method and temperature.")
+def main(reference, harmonic, series, compare_series, plot, spectra, inverse_range, orbit, orbit_label, cost,
+         search_cost):
     """Plot absolute log10 rates in inverse seconds and write per-point discrepancies."""
     import matplotlib.pyplot as plt
     from chemparseplot.plot.kinetics import plot_arrhenius
@@ -116,8 +150,9 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
     if not np.all(np.diff(xref) > 0):
         raise ValueError("reference inverse temperatures must increase")
     baseline = np.genfromtxt(harmonic, delimiter=",", names=True, ndmin=1)
-    fig = plt.figure(layout="constrained", figsize=(10.5, 6.6) if cost else (7.2, 6.6))
-    grid = fig.add_gridspec(2, 2 if cost else 1, height_ratios=(3, 1.25), width_ratios=(1.75, 1) if cost else None)
+    side = cost or search_cost
+    fig = plt.figure(layout="constrained", figsize=(10.5, 6.6) if side else (7.2, 6.6))
+    grid = fig.add_gridspec(2, 2 if side else 1, height_ratios=(3, 1.25), width_ratios=(1.75, 1) if side else None)
     ax = fig.add_subplot(grid[0, 0])
     difference = fig.add_subplot(grid[1, 0], sharex=ax)
     ax.tick_params(labelbottom=False)
@@ -207,7 +242,9 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
     kelvin.set_xticks([1000, 500, 333, 250, 200])
     kelvin.set_xlabel(r"$T$ (K)")
     ax.legend(loc="upper right", fontsize="small", frameon=False)
-    if cost:
+    if search_cost:
+        draw_search_cost(fig.add_subplot(grid[:, 1]), search_cost, cycle)
+    elif cost:
         draw_cost(fig.add_subplot(grid[:, 1]), cost, colors)
     fig.savefig(plot)
     plt.close(fig)
