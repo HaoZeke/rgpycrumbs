@@ -64,10 +64,10 @@ def draw_cost(ax, cost_file, colors):
             low, high = float(row[f"{key}_min"]), float(row[f"{key}_max"])
             if high <= 0:
                 continue
-            offset = offset if both else 0.0
-            ax.barh(i + offset, high - low if high > low else high * 0.04, left=low, height=0.3,
+            shift = offset if both else 0.0
+            ax.barh(i + shift, high - low if high > low else high * 0.04, left=low, height=0.3,
                     color=color if hatch is None else "white", edgecolor=color, hatch=hatch, linewidth=1)
-            ax.annotate(f"{low:,.0f}–{high:,.0f}" if high > low else f"{high:,.0f}", (high, i + offset),
+            ax.annotate(f"{low:,.0f}\u2013{high:,.0f}" if high > low else f"{high:,.0f}", (high, i + shift),
                         xytext=(3, 0), textcoords="offset points", va="center", fontsize="x-small")
     import textwrap
 
@@ -169,7 +169,7 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
         minimum, saddle = (json.loads(path.read_text()) for path in spectra)
         rates = harmonic_log_rates(minimum["signed_wavenumbers_cm-1"], saddle["signed_wavenumbers_cm-1"],
                                    saddle["electronic_energy_eV"] - minimum["electronic_energy_eV"], temperatures)
-        harmonic_rates = dict(zip(("htst", "qq_htst"), np.asarray(rates) / np.log(10)))
+        harmonic_rates = dict(zip(("htst", "qq_htst"), np.asarray(rates) / np.log(10), strict=True))
         unstable = [w for w in saddle["signed_wavenumbers_cm-1"] if w < 0]
         if len(unstable) == 1:
             # Harmonic crossover T_c = hbar |omega| / (2 pi k_B), with hc/k_B in cm K.
@@ -209,7 +209,7 @@ def main(reference, harmonic, series, compare_series, plot, spectra, inverse_ran
         columns.extend(("comparison_method", "comparison_interpolated", "difference_from_comparison_decades"))
     table.writerow(columns)
     colors = {}
-    for shape, shade, (label, rows) in zip(shapes * len(by_method), cycle * len(by_method), by_method.items()):
+    for shape, shade, (label, rows) in zip(shapes * len(by_method), cycle * len(by_method), by_method.items(), strict=False):
         colors[label] = shade
         points = sorted((row["temperature_K"], row["log10_rate_per_s"]) for row in rows)
         temperatures, rates = np.asarray(points, dtype=float).T
