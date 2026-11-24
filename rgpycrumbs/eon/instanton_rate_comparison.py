@@ -441,7 +441,10 @@ def main(
     )
     kelvin.set_xticks([1000, 500, 333, 250, 200])
     kelvin.set_xlabel(r"$T$ (K)")
-    ax.legend(loc="upper right", fontsize="small", frameon=False)
+    # Headroom above the highest curve so the legend clears every marker.
+    bottom, top = ax.get_ylim()
+    ax.set_ylim(bottom, top + 0.55 * (top - bottom))
+    ax.legend(loc="upper right", fontsize="x-small", frameon=False)
     if search_cost:
         draw_search_cost(fig.add_subplot(grid[:, 1]), search_cost, cycle)
     elif cost:
