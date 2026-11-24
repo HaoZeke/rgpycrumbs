@@ -97,7 +97,7 @@ def draw_search_cost(ax, cost_file, cycle):
                         if row["method"] == method and row.get("outcome") == "returned_rate")
         if not points:
             continue
-        temperature, calls = zip(*points)
+        temperature, calls = zip(*points, strict=True)
         ax.plot(temperature, calls, marker=styles[i % len(styles)], markersize=4, linewidth=1.2,
                 color=cycle[i % len(cycle)], label=method)
     from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter
