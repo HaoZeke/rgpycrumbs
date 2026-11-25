@@ -240,6 +240,8 @@ def main(
     cycle = [RUHI_COLORS[name] for name in ("sky", "magenta", "teal", "coral")] + [
         "#6a4c93",
         "#8a6d00",
+        "#3a3a3a",
+        "#c05800",
     ]
 
     markers = np.genfromtxt(reference, delimiter=",", names=True, ndmin=1)
