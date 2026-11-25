@@ -1,9 +1,13 @@
-#+OPTIONS: num:nil
+#+OPTIONS: num:nil toc:nil
 
 #+begin_quote
 This Org file is the canonical source for contributor-facing documentation.
 Do not edit the Markdown files rendered from it.
 #+end_quote
+
+A dispatcher-based analysis and visualization suite for chemical physics: importable library modules plus a CLI for self-contained research scripts.
+
+#+TOC: headlines 2
 
 * About
 :PROPERTIES:

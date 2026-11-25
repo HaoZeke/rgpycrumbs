@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use rgpycrumbs, please cite it as below."
+type: software
+title: rgpycrumbs
+version: "1.14.0"
+date-released: "2026-11-05"
+authors:
+  - family-names: Goswami
+    given-names: Rohit
+    email: rgoswami@ieee.org
+    orcid: "https://orcid.org/0000-0002-2393-8056"
+    affiliation: "TurtleTech ehf"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.18529798"
+    description: "Zenodo concept DOI for all software versions"
+repository-code: "https://github.com/HaoZeke/rgpycrumbs"
+license: MIT
+keywords:
+  - computational chemistry
+  - surface fitting
+  - structure analysis
+  - interpolation
+  - Python
+abstract: >-
+  rgpycrumbs is a pure-Python library and CLI toolkit for chemical
+  physics research, with surface fitting, structure analysis,
+  interpolation and a dispatcher for self-contained research scripts.

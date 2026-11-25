@@ -1,3 +1,8 @@
+> This Org file is the canonical source for contributor-facing documentation.
+> Do not edit the Markdown files rendered from it.
+
+A dispatcher-based analysis and visualization suite for chemical physics: importable library modules plus a CLI for self-contained research scripts.
+
 
 # Table of Contents
 
@@ -8,17 +13,10 @@
 - [Usage](#usage)
   - [Library API](#library-api)
   - [CLI Tools](#cli-tools)
-    - [eOn](#cli-eon)
 - [Contributing](#contributing)
   - [Development](#development)
-    - [Branch Structure](#dev:branch)
-    - [When is pixi needed?](#dev:whypixi)
-    - [Versioning](#dev:versions)
   - [Release Process](#release-notes)
 - [License](#license)
-
-> This Org file is the canonical source for contributor-facing documentation.
-> Do not edit the Markdown files rendered from it.
 
 
 <a id="about"></a>
@@ -157,8 +155,6 @@ Commands:
   eon  Dispatches to a script within the 'eon' submodule.
 ```
 
-
-<a id="cli-eon"></a>
 
 ### eOn
 
@@ -299,16 +295,12 @@ uv run --extra interpolation pytest -m interpolation
 ```
 
 
-<a id="dev:branch"></a>
-
 ### Branch Structure
 
 Development happens on the `main` branch.
 The `readme` branch is an auto-generated orphan containing only the rendered `README.md` and branding assets.
 It is the GitHub default branch.
 
-
-<a id="dev:whypixi"></a>
 
 ### When is pixi needed?
 
@@ -319,8 +311,6 @@ It is the GitHub default branch.
 
 For everything else, `uv` is sufficient.
 
-
-<a id="dev:versions"></a>
 
 ### Versioning
 
