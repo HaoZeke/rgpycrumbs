@@ -73,6 +73,31 @@ if warn_on_direct_script_import is not None:
     warn_on_direct_script_import(__name__, "rgpycrumbs eon plt-neb")
 
 
+def square_landscape_viewport(s, d, marker_d=()):
+    """Data window of a projected landscape panel, as (s limits, d limits).
+
+    The panel is drawn square, one angstrom of s to one of d, so the s
+    window takes the width of the d window, centred on the data. The
+    surface is fitted over this whole window; fitting it over the s range
+    of the data alone left the sides of the panel blank. The d window is
+    symmetric about the path and clears every point and marker by 12
+    percent; s keeps a 4 percent pad.
+    """
+    s = np.asarray(s, dtype=float)
+    d = np.asarray(d, dtype=float)
+    s_pad = max((s.max() - s.min()) * 0.04, 0.02)
+    lo, hi = float(s.min() - s_pad), float(s.max() + s_pad)
+    half = max(
+        0.5 * (hi - lo),
+        abs(float(d.max())) * 1.12,
+        abs(float(d.min())) * 1.12,
+        0.02,
+        *(abs(float(m)) * 1.12 for m in marker_d),
+    )
+    mid = 0.5 * (lo + hi)
+    return (mid - half, mid + half), (-half, half)
+
+
 # Optional heavy: resolve at use site so library import does not require
 # adjustText / AUTO_DEPS until a plot actually needs label adjustment.
 def adjust_text(*args, **kwargs):
@@ -484,27 +509,18 @@ def plot_neb_from_settings(settings: dict[str, Any]) -> Path | None:
             vp_xlim = vp_ylim = None
             if project_path and global_basis is not None:
                 _s, _d = project_to_sd(r_full, p_full, global_basis)
-                # Modest s pad; d half-span matches s so Δs=Δd (true 1:1 Å).
-                _s_pad = max((_s.max() - _s.min()) * 0.04, 0.02)
-                vp_xlim = (float(_s.min() - _s_pad), float(_s.max() + _s_pad))
-                _s_half = 0.5 * (vp_xlim[1] - vp_xlim[0])
-                _half = max(
-                    _s_half,
-                    abs(float(_d.max())) * 1.12,
-                    abs(float(_d.min())) * 1.12,
-                    0.02,
-                )
+                _marks = []
                 if sp_data is not None:
                     _, _sd = project_to_sd(
                         np.array([sp_data.r]), np.array([sp_data.p]), global_basis
                     )
-                    _half = max(_half, abs(float(_sd[0])) * 1.12)
+                    _marks.append(float(_sd[0]))
                 for overlay in additional_atoms_data:
                     _, _ad = project_to_sd(
                         np.array([overlay.r]), np.array([overlay.p]), global_basis
                     )
-                    _half = max(_half, abs(float(_ad[0])) * 1.12)
-                vp_ylim = (-_half, _half)
+                    _marks.append(float(_ad[0]))
+                vp_xlim, vp_ylim = square_landscape_viewport(_s, _d, _marks)
 
             plot_landscape_surface(
                 ax,
